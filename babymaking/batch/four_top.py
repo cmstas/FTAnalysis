@@ -80,7 +80,7 @@ sweepRoot_scripts = [inputs_path+"sweeproot.sh", inputs_path+"sweeproot_macro.C"
 merging_scripts = [inputs_path+"merge_script.sh", inputs_path+"merge_macro.C"]
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 
-tag = "test_Apr23"
+tag = "v0.01"
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
 dashboard_name = "AutoTwopler_FTbabies"
