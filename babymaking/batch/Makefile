@@ -51,7 +51,7 @@ CORESOURCES=$(DIR)/$(COREDIR)/CMS3.cc \
  $(DIR)/$(COREDIR)/Tools/utils.cc \
  $(DIR)/$(COREDIR)/Tools/JetCorrector.cc \
  $(DIR)/$(COREDIR)/Tools/goodrun.cc \
- $(DIR)/$(COREDIR)/Tools/getDatasetInfo.cc \
+ $(DIR)/$(COREDIR)/Tools/datasetinfo/getDatasetInfo.cc \
  $(DIR)/$(COREDIR)/Tools/btagsf/BTagCalibrationStandalone.cc \
  $(DIR)/$(COREDIR)/SSSelections.cc
 COREOBJECTS=$(CORESOURCES:.cc=.o)

@@ -414,7 +414,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   }
 
   // Load scale1fbs/xsecs from file
-  df.loadFromFile("CORE/Tools/scale1fbs.txt");
+  df.loadFromFile("CORE/Tools/datasetinfo/scale1fbs.txt");
 
 }
 
@@ -807,12 +807,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //        (filename.find("W4Jet") == 0) ) is_wjets = true;
   // }
 
-  int higgs_scan = 0;
-  if (isFastsim == 101) {
-      if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
-      if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
-      if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
-  }
+  // int higgs_scan = 0;
+  // if (isFastsim == 101) {
+  //     if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
+  //     if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
+  //     if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
+  // }
 
 
 
@@ -879,17 +879,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
     }
 
-    if (higgs_scan > 0) {
-        for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
-            if (abs(tas::genps_id()[gp])==25) {
-                higgs_mass = floor(tas::genps_p4()[gp].M() + 0.5);
-                break;
-            }
-        }
-        xsec = xsec_higgs(higgs_scan, higgs_mass);
-        xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
-        scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
-    }
+    // if (higgs_scan > 0) {
+    //     for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
+    //         if (abs(tas::genps_id()[gp])==25) {
+    //             higgs_mass = floor(tas::genps_p4()[gp].M() + 0.5);
+    //             break;
+    //         }
+    //     }
+    //     xsec = xsec_higgs(higgs_scan, higgs_mass);
+    //     xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
+    //     scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
+    // }
+
   }
 
   //Fill data vs. mc variables
@@ -933,7 +934,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep1_ip3d_err = lep1.ip3dErr();
   lep2_ip3d_err = lep2.ip3dErr();
   hyp_type = tas::hyp_type().at(best_hyp);
-  pair <Lep, int> thirdLepton = getThirdLepton(best_hyp, /*minpt=*/10.);
+  pair <Lep, int> thirdLepton = getThirdLepton(best_hyp);
   lep3_id = thirdLepton.first.pdgId();
   lep3_idx = thirdLepton.first.idx();
   if (lep3_idx >= 0 && (abs(lep3_id) == 11 || abs(lep3_id) == 13)){
