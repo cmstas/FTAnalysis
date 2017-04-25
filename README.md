@@ -12,17 +12,17 @@ git clone https://github.com/aminnj/fourtop
 source install.sh
 ```
 
-### [Make babies](babymaking/batch/README.md) (more babies = more votes)
+### [Make babies](babymaking/batch/) (more babies = more votes)
 ```bash
 cd babymaking/batch/
 ```
 
-### [How to run the country](analysis/yields/README.md)
+### [How to run the country](analysis/yields/)
 ```bash
 cd analysis/yields/
 ```
 
-### [How to show we are the best](analysis/limits/README.md)
+### [How to show we are the best](analysis/limits/)
 ```bash
 cd analysis/limits/
 ```
