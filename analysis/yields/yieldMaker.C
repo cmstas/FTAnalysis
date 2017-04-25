@@ -20,6 +20,8 @@
 // #include "../../../../batch/points/isr_norm_TTWnlo.h"
 // #include "../../../../batch/points/isr_norm_TTZnlo.h"
 // #include "../../../../batch/points/isr_norm_TTZLOW.h"
+//
+#define WRITE(var) { p_data.var->Write(); p_ttw.var->Write(); p_ttz.var->Write(); p_tth.var->Write(); p_wz.var->Write(); p_ww.var->Write(); p_xg.var->Write(); p_rares.var->Write(); p_flips.var->Write(); p_fakes.var->Write(); p_tttt.var->Write(); }
 
 float lumiAG = getLumiUnblind();
 string tag = getTag().Data();  
@@ -137,51 +139,50 @@ void getyields(){
     //Fill chains
     tttt_chain   ->Add(Form("%s/TTTT.root"           , pfx.Data()));
 
-    // ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data())); 
-    // wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
-    // dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
-    // dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
-    // ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data())); 
-    // ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data())); 
-    // ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data())); 
-    // tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
-    // wz_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
-    // ww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    // qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    // xg_chain     ->Add(Form("%s/TG.root"             , pfx.Data()));
-    // xg_chain     ->Add(Form("%s/TTG.root"            , pfx.Data()));
-    // xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
-    // xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/WWG.root"            , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
-    // rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
-    // //data
-    // data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    // data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    // data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    // data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
-    // //flips
-    // flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
-    // flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
-    // //fakes
-    // fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    // fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    // fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    // fakes_chain  ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
-    // fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
-    // fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    // fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
-    // fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
-    // fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
-
+    ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data())); 
+    wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
+    dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
+    dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
+    ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data())); 
+    ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data())); 
+    ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data())); 
+    tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
+    wz_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
+    ww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+    qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+    xg_chain     ->Add(Form("%s/TG.root"             , pfx.Data()));
+    xg_chain     ->Add(Form("%s/TTG.root"            , pfx.Data()));
+    xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
+    xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
+    rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
+    rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
+    rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
+    rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
+    rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
+    rares_chain  ->Add(Form("%s/WWG.root"            , pfx.Data()));
+    rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
+    rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx.Data()));
+    rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
+    rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
+    rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
+    //data
+    data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    //flips
+    flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
+    flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
+    //fakes
+    fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    fakes_chain  ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
+    fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
+    fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
+    fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
+    fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
 
     pair<yields_t, plots_t> results_ttw      = run(ttw_chain);
     pair<yields_t, plots_t> results_ttz     = run(ttz_chain);
@@ -214,92 +215,33 @@ void getyields(){
 
     TFile *fout = new TFile("histos.root", "RECREATE");
 
-    p_data.h_ht.sr->Write(); p_ttw.h_ht.sr->Write(); p_ttz.h_ht.sr->Write(); p_tth.h_ht.sr->Write(); p_wz.h_ht.sr->Write(); p_ww.h_ht.sr->Write(); p_xg.h_ht.sr->Write(); p_rares.h_ht.sr->Write(); p_flips.h_ht.sr->Write(); p_fakes.h_ht.sr->Write(); p_tttt.h_ht.sr->Write();
-    p_data.h_met.sr->Write(); p_ttw.h_met.sr->Write(); p_ttz.h_met.sr->Write(); p_tth.h_met.sr->Write(); p_wz.h_met.sr->Write(); p_ww.h_met.sr->Write(); p_xg.h_met.sr->Write(); p_rares.h_met.sr->Write(); p_flips.h_met.sr->Write(); p_fakes.h_met.sr->Write(); p_tttt.h_met.sr->Write();
-    p_data.h_mll.sr->Write(); p_ttw.h_mll.sr->Write(); p_ttz.h_mll.sr->Write(); p_tth.h_mll.sr->Write(); p_wz.h_mll.sr->Write(); p_ww.h_mll.sr->Write(); p_xg.h_mll.sr->Write(); p_rares.h_mll.sr->Write(); p_flips.h_mll.sr->Write(); p_fakes.h_mll.sr->Write(); p_tttt.h_mll.sr->Write();
-    p_data.h_mtmin.sr->Write(); p_ttw.h_mtmin.sr->Write(); p_ttz.h_mtmin.sr->Write(); p_tth.h_mtmin.sr->Write(); p_wz.h_mtmin.sr->Write(); p_ww.h_mtmin.sr->Write(); p_xg.h_mtmin.sr->Write(); p_rares.h_mtmin.sr->Write(); p_flips.h_mtmin.sr->Write(); p_fakes.h_mtmin.sr->Write(); p_tttt.h_mtmin.sr->Write();
-    p_data.h_njets.sr->Write(); p_ttw.h_njets.sr->Write(); p_ttz.h_njets.sr->Write(); p_tth.h_njets.sr->Write(); p_wz.h_njets.sr->Write(); p_ww.h_njets.sr->Write(); p_xg.h_njets.sr->Write(); p_rares.h_njets.sr->Write(); p_flips.h_njets.sr->Write(); p_fakes.h_njets.sr->Write(); p_tttt.h_njets.sr->Write();
-    p_data.h_nleps.sr->Write(); p_ttw.h_nleps.sr->Write(); p_ttz.h_nleps.sr->Write(); p_tth.h_nleps.sr->Write(); p_wz.h_nleps.sr->Write(); p_ww.h_nleps.sr->Write(); p_xg.h_nleps.sr->Write(); p_rares.h_nleps.sr->Write(); p_flips.h_nleps.sr->Write(); p_fakes.h_nleps.sr->Write(); p_tttt.h_nleps.sr->Write();
-    p_data.h_wcands.sr->Write(); p_ttw.h_wcands.sr->Write(); p_ttz.h_wcands.sr->Write(); p_tth.h_wcands.sr->Write(); p_wz.h_wcands.sr->Write(); p_ww.h_wcands.sr->Write(); p_xg.h_wcands.sr->Write(); p_rares.h_wcands.sr->Write(); p_flips.h_wcands.sr->Write(); p_fakes.h_wcands.sr->Write(); p_tttt.h_wcands.sr->Write();
-    p_data.h_nbtags.sr->Write(); p_ttw.h_nbtags.sr->Write(); p_ttz.h_nbtags.sr->Write(); p_tth.h_nbtags.sr->Write(); p_wz.h_nbtags.sr->Write(); p_ww.h_nbtags.sr->Write(); p_xg.h_nbtags.sr->Write(); p_rares.h_nbtags.sr->Write(); p_flips.h_nbtags.sr->Write(); p_fakes.h_nbtags.sr->Write(); p_tttt.h_nbtags.sr->Write();
-    p_data.h_type.sr->Write(); p_ttw.h_type.sr->Write(); p_ttz.h_type.sr->Write(); p_tth.h_type.sr->Write(); p_wz.h_type.sr->Write(); p_ww.h_type.sr->Write(); p_xg.h_type.sr->Write(); p_rares.h_type.sr->Write(); p_flips.h_type.sr->Write(); p_fakes.h_type.sr->Write(); p_tttt.h_type.sr->Write();
-    p_data.h_charge.sr->Write(); p_ttw.h_charge.sr->Write(); p_ttz.h_charge.sr->Write(); p_tth.h_charge.sr->Write(); p_wz.h_charge.sr->Write(); p_ww.h_charge.sr->Write(); p_xg.h_charge.sr->Write(); p_rares.h_charge.sr->Write(); p_flips.h_charge.sr->Write(); p_fakes.h_charge.sr->Write(); p_tttt.h_charge.sr->Write();
-    p_data.h_l1pt.sr->Write(); p_ttw.h_l1pt.sr->Write(); p_ttz.h_l1pt.sr->Write(); p_tth.h_l1pt.sr->Write(); p_wz.h_l1pt.sr->Write(); p_ww.h_l1pt.sr->Write(); p_xg.h_l1pt.sr->Write(); p_rares.h_l1pt.sr->Write(); p_flips.h_l1pt.sr->Write(); p_fakes.h_l1pt.sr->Write(); p_tttt.h_l1pt.sr->Write();
-    p_data.h_l2pt.sr->Write(); p_ttw.h_l2pt.sr->Write(); p_ttz.h_l2pt.sr->Write(); p_tth.h_l2pt.sr->Write(); p_wz.h_l2pt.sr->Write(); p_ww.h_l2pt.sr->Write(); p_xg.h_l2pt.sr->Write(); p_rares.h_l2pt.sr->Write(); p_flips.h_l2pt.sr->Write(); p_fakes.h_l2pt.sr->Write(); p_tttt.h_l2pt.sr->Write();
-    p_data.h_l3pt.sr->Write(); p_ttw.h_l3pt.sr->Write(); p_ttz.h_l3pt.sr->Write(); p_tth.h_l3pt.sr->Write(); p_wz.h_l3pt.sr->Write(); p_ww.h_l3pt.sr->Write(); p_xg.h_l3pt.sr->Write(); p_rares.h_l3pt.sr->Write(); p_flips.h_l3pt.sr->Write(); p_fakes.h_l3pt.sr->Write(); p_tttt.h_l3pt.sr->Write();
-    p_data.h_el_l1pt.sr->Write(); p_ttw.h_el_l1pt.sr->Write(); p_ttz.h_el_l1pt.sr->Write(); p_tth.h_el_l1pt.sr->Write(); p_wz.h_el_l1pt.sr->Write(); p_ww.h_el_l1pt.sr->Write(); p_xg.h_el_l1pt.sr->Write(); p_rares.h_el_l1pt.sr->Write(); p_flips.h_el_l1pt.sr->Write(); p_fakes.h_el_l1pt.sr->Write(); p_tttt.h_el_l1pt.sr->Write();
-    p_data.h_el_l2pt.sr->Write(); p_ttw.h_el_l2pt.sr->Write(); p_ttz.h_el_l2pt.sr->Write(); p_tth.h_el_l2pt.sr->Write(); p_wz.h_el_l2pt.sr->Write(); p_ww.h_el_l2pt.sr->Write(); p_xg.h_el_l2pt.sr->Write(); p_rares.h_el_l2pt.sr->Write(); p_flips.h_el_l2pt.sr->Write(); p_fakes.h_el_l2pt.sr->Write(); p_tttt.h_el_l2pt.sr->Write();
-    p_data.h_el_l3pt.sr->Write(); p_ttw.h_el_l3pt.sr->Write(); p_ttz.h_el_l3pt.sr->Write(); p_tth.h_el_l3pt.sr->Write(); p_wz.h_el_l3pt.sr->Write(); p_ww.h_el_l3pt.sr->Write(); p_xg.h_el_l3pt.sr->Write(); p_rares.h_el_l3pt.sr->Write(); p_flips.h_el_l3pt.sr->Write(); p_fakes.h_el_l3pt.sr->Write(); p_tttt.h_el_l3pt.sr->Write();
-    p_data.h_mu_l1pt.sr->Write(); p_ttw.h_mu_l1pt.sr->Write(); p_ttz.h_mu_l1pt.sr->Write(); p_tth.h_mu_l1pt.sr->Write(); p_wz.h_mu_l1pt.sr->Write(); p_ww.h_mu_l1pt.sr->Write(); p_xg.h_mu_l1pt.sr->Write(); p_rares.h_mu_l1pt.sr->Write(); p_flips.h_mu_l1pt.sr->Write(); p_fakes.h_mu_l1pt.sr->Write(); p_tttt.h_mu_l1pt.sr->Write();
-    p_data.h_mu_l2pt.sr->Write(); p_ttw.h_mu_l2pt.sr->Write(); p_ttz.h_mu_l2pt.sr->Write(); p_tth.h_mu_l2pt.sr->Write(); p_wz.h_mu_l2pt.sr->Write(); p_ww.h_mu_l2pt.sr->Write(); p_xg.h_mu_l2pt.sr->Write(); p_rares.h_mu_l2pt.sr->Write(); p_flips.h_mu_l2pt.sr->Write(); p_fakes.h_mu_l2pt.sr->Write(); p_tttt.h_mu_l2pt.sr->Write();
-    p_data.h_mu_l3pt.sr->Write(); p_ttw.h_mu_l3pt.sr->Write(); p_ttz.h_mu_l3pt.sr->Write(); p_tth.h_mu_l3pt.sr->Write(); p_wz.h_mu_l3pt.sr->Write(); p_ww.h_mu_l3pt.sr->Write(); p_xg.h_mu_l3pt.sr->Write(); p_rares.h_mu_l3pt.sr->Write(); p_flips.h_mu_l3pt.sr->Write(); p_fakes.h_mu_l3pt.sr->Write(); p_tttt.h_mu_l3pt.sr->Write();
 
-    p_data.h_ht.ttzcr->Write(); p_ttw.h_ht.ttzcr->Write(); p_ttz.h_ht.ttzcr->Write(); p_tth.h_ht.ttzcr->Write(); p_wz.h_ht.ttzcr->Write(); p_ww.h_ht.ttzcr->Write(); p_xg.h_ht.ttzcr->Write(); p_rares.h_ht.ttzcr->Write(); p_flips.h_ht.ttzcr->Write(); p_fakes.h_ht.ttzcr->Write(); p_tttt.h_ht.ttzcr->Write();
-    p_data.h_met.ttzcr->Write(); p_ttw.h_met.ttzcr->Write(); p_ttz.h_met.ttzcr->Write(); p_tth.h_met.ttzcr->Write(); p_wz.h_met.ttzcr->Write(); p_ww.h_met.ttzcr->Write(); p_xg.h_met.ttzcr->Write(); p_rares.h_met.ttzcr->Write(); p_flips.h_met.ttzcr->Write(); p_fakes.h_met.ttzcr->Write(); p_tttt.h_met.ttzcr->Write();
-    p_data.h_mll.ttzcr->Write(); p_ttw.h_mll.ttzcr->Write(); p_ttz.h_mll.ttzcr->Write(); p_tth.h_mll.ttzcr->Write(); p_wz.h_mll.ttzcr->Write(); p_ww.h_mll.ttzcr->Write(); p_xg.h_mll.ttzcr->Write(); p_rares.h_mll.ttzcr->Write(); p_flips.h_mll.ttzcr->Write(); p_fakes.h_mll.ttzcr->Write(); p_tttt.h_mll.ttzcr->Write();
-    p_data.h_mtmin.ttzcr->Write(); p_ttw.h_mtmin.ttzcr->Write(); p_ttz.h_mtmin.ttzcr->Write(); p_tth.h_mtmin.ttzcr->Write(); p_wz.h_mtmin.ttzcr->Write(); p_ww.h_mtmin.ttzcr->Write(); p_xg.h_mtmin.ttzcr->Write(); p_rares.h_mtmin.ttzcr->Write(); p_flips.h_mtmin.ttzcr->Write(); p_fakes.h_mtmin.ttzcr->Write(); p_tttt.h_mtmin.ttzcr->Write();
-    p_data.h_njets.ttzcr->Write(); p_ttw.h_njets.ttzcr->Write(); p_ttz.h_njets.ttzcr->Write(); p_tth.h_njets.ttzcr->Write(); p_wz.h_njets.ttzcr->Write(); p_ww.h_njets.ttzcr->Write(); p_xg.h_njets.ttzcr->Write(); p_rares.h_njets.ttzcr->Write(); p_flips.h_njets.ttzcr->Write(); p_fakes.h_njets.ttzcr->Write(); p_tttt.h_njets.ttzcr->Write();
-    p_data.h_nleps.ttzcr->Write(); p_ttw.h_nleps.ttzcr->Write(); p_ttz.h_nleps.ttzcr->Write(); p_tth.h_nleps.ttzcr->Write(); p_wz.h_nleps.ttzcr->Write(); p_ww.h_nleps.ttzcr->Write(); p_xg.h_nleps.ttzcr->Write(); p_rares.h_nleps.ttzcr->Write(); p_flips.h_nleps.ttzcr->Write(); p_fakes.h_nleps.ttzcr->Write(); p_tttt.h_nleps.ttzcr->Write();
-    p_data.h_wcands.ttzcr->Write(); p_ttw.h_wcands.ttzcr->Write(); p_ttz.h_wcands.ttzcr->Write(); p_tth.h_wcands.ttzcr->Write(); p_wz.h_wcands.ttzcr->Write(); p_ww.h_wcands.ttzcr->Write(); p_xg.h_wcands.ttzcr->Write(); p_rares.h_wcands.ttzcr->Write(); p_flips.h_wcands.ttzcr->Write(); p_fakes.h_wcands.ttzcr->Write(); p_tttt.h_wcands.ttzcr->Write();
-    p_data.h_nbtags.ttzcr->Write(); p_ttw.h_nbtags.ttzcr->Write(); p_ttz.h_nbtags.ttzcr->Write(); p_tth.h_nbtags.ttzcr->Write(); p_wz.h_nbtags.ttzcr->Write(); p_ww.h_nbtags.ttzcr->Write(); p_xg.h_nbtags.ttzcr->Write(); p_rares.h_nbtags.ttzcr->Write(); p_flips.h_nbtags.ttzcr->Write(); p_fakes.h_nbtags.ttzcr->Write(); p_tttt.h_nbtags.ttzcr->Write();
-    p_data.h_type.ttzcr->Write(); p_ttw.h_type.ttzcr->Write(); p_ttz.h_type.ttzcr->Write(); p_tth.h_type.ttzcr->Write(); p_wz.h_type.ttzcr->Write(); p_ww.h_type.ttzcr->Write(); p_xg.h_type.ttzcr->Write(); p_rares.h_type.ttzcr->Write(); p_flips.h_type.ttzcr->Write(); p_fakes.h_type.ttzcr->Write(); p_tttt.h_type.ttzcr->Write();
-    p_data.h_charge.ttzcr->Write(); p_ttw.h_charge.ttzcr->Write(); p_ttz.h_charge.ttzcr->Write(); p_tth.h_charge.ttzcr->Write(); p_wz.h_charge.ttzcr->Write(); p_ww.h_charge.ttzcr->Write(); p_xg.h_charge.ttzcr->Write(); p_rares.h_charge.ttzcr->Write(); p_flips.h_charge.ttzcr->Write(); p_fakes.h_charge.ttzcr->Write(); p_tttt.h_charge.ttzcr->Write();
-    p_data.h_l1pt.ttzcr->Write(); p_ttw.h_l1pt.ttzcr->Write(); p_ttz.h_l1pt.ttzcr->Write(); p_tth.h_l1pt.ttzcr->Write(); p_wz.h_l1pt.ttzcr->Write(); p_ww.h_l1pt.ttzcr->Write(); p_xg.h_l1pt.ttzcr->Write(); p_rares.h_l1pt.ttzcr->Write(); p_flips.h_l1pt.ttzcr->Write(); p_fakes.h_l1pt.ttzcr->Write(); p_tttt.h_l1pt.ttzcr->Write();
-    p_data.h_l2pt.ttzcr->Write(); p_ttw.h_l2pt.ttzcr->Write(); p_ttz.h_l2pt.ttzcr->Write(); p_tth.h_l2pt.ttzcr->Write(); p_wz.h_l2pt.ttzcr->Write(); p_ww.h_l2pt.ttzcr->Write(); p_xg.h_l2pt.ttzcr->Write(); p_rares.h_l2pt.ttzcr->Write(); p_flips.h_l2pt.ttzcr->Write(); p_fakes.h_l2pt.ttzcr->Write(); p_tttt.h_l2pt.ttzcr->Write();
-    p_data.h_l3pt.ttzcr->Write(); p_ttw.h_l3pt.ttzcr->Write(); p_ttz.h_l3pt.ttzcr->Write(); p_tth.h_l3pt.ttzcr->Write(); p_wz.h_l3pt.ttzcr->Write(); p_ww.h_l3pt.ttzcr->Write(); p_xg.h_l3pt.ttzcr->Write(); p_rares.h_l3pt.ttzcr->Write(); p_flips.h_l3pt.ttzcr->Write(); p_fakes.h_l3pt.ttzcr->Write(); p_tttt.h_l3pt.ttzcr->Write();
-    p_data.h_el_l1pt.ttzcr->Write(); p_ttw.h_el_l1pt.ttzcr->Write(); p_ttz.h_el_l1pt.ttzcr->Write(); p_tth.h_el_l1pt.ttzcr->Write(); p_wz.h_el_l1pt.ttzcr->Write(); p_ww.h_el_l1pt.ttzcr->Write(); p_xg.h_el_l1pt.ttzcr->Write(); p_rares.h_el_l1pt.ttzcr->Write(); p_flips.h_el_l1pt.ttzcr->Write(); p_fakes.h_el_l1pt.ttzcr->Write(); p_tttt.h_el_l1pt.ttzcr->Write();
-    p_data.h_el_l2pt.ttzcr->Write(); p_ttw.h_el_l2pt.ttzcr->Write(); p_ttz.h_el_l2pt.ttzcr->Write(); p_tth.h_el_l2pt.ttzcr->Write(); p_wz.h_el_l2pt.ttzcr->Write(); p_ww.h_el_l2pt.ttzcr->Write(); p_xg.h_el_l2pt.ttzcr->Write(); p_rares.h_el_l2pt.ttzcr->Write(); p_flips.h_el_l2pt.ttzcr->Write(); p_fakes.h_el_l2pt.ttzcr->Write(); p_tttt.h_el_l2pt.ttzcr->Write();
-    p_data.h_el_l3pt.ttzcr->Write(); p_ttw.h_el_l3pt.ttzcr->Write(); p_ttz.h_el_l3pt.ttzcr->Write(); p_tth.h_el_l3pt.ttzcr->Write(); p_wz.h_el_l3pt.ttzcr->Write(); p_ww.h_el_l3pt.ttzcr->Write(); p_xg.h_el_l3pt.ttzcr->Write(); p_rares.h_el_l3pt.ttzcr->Write(); p_flips.h_el_l3pt.ttzcr->Write(); p_fakes.h_el_l3pt.ttzcr->Write(); p_tttt.h_el_l3pt.ttzcr->Write();
-    p_data.h_mu_l1pt.ttzcr->Write(); p_ttw.h_mu_l1pt.ttzcr->Write(); p_ttz.h_mu_l1pt.ttzcr->Write(); p_tth.h_mu_l1pt.ttzcr->Write(); p_wz.h_mu_l1pt.ttzcr->Write(); p_ww.h_mu_l1pt.ttzcr->Write(); p_xg.h_mu_l1pt.ttzcr->Write(); p_rares.h_mu_l1pt.ttzcr->Write(); p_flips.h_mu_l1pt.ttzcr->Write(); p_fakes.h_mu_l1pt.ttzcr->Write(); p_tttt.h_mu_l1pt.ttzcr->Write();
-    p_data.h_mu_l2pt.ttzcr->Write(); p_ttw.h_mu_l2pt.ttzcr->Write(); p_ttz.h_mu_l2pt.ttzcr->Write(); p_tth.h_mu_l2pt.ttzcr->Write(); p_wz.h_mu_l2pt.ttzcr->Write(); p_ww.h_mu_l2pt.ttzcr->Write(); p_xg.h_mu_l2pt.ttzcr->Write(); p_rares.h_mu_l2pt.ttzcr->Write(); p_flips.h_mu_l2pt.ttzcr->Write(); p_fakes.h_mu_l2pt.ttzcr->Write(); p_tttt.h_mu_l2pt.ttzcr->Write();
-    p_data.h_mu_l3pt.ttzcr->Write(); p_ttw.h_mu_l3pt.ttzcr->Write(); p_ttz.h_mu_l3pt.ttzcr->Write(); p_tth.h_mu_l3pt.ttzcr->Write(); p_wz.h_mu_l3pt.ttzcr->Write(); p_ww.h_mu_l3pt.ttzcr->Write(); p_xg.h_mu_l3pt.ttzcr->Write(); p_rares.h_mu_l3pt.ttzcr->Write(); p_flips.h_mu_l3pt.ttzcr->Write(); p_fakes.h_mu_l3pt.ttzcr->Write(); p_tttt.h_mu_l3pt.ttzcr->Write();
+    WRITE(h_ht.sr);          WRITE(h_ht.ttzcr);           WRITE(h_ht.ttwcr);        WRITE(h_ht.br);
+    WRITE(h_met.sr);         WRITE(h_met.ttzcr);          WRITE(h_met.ttwcr);       WRITE(h_met.br);
+    WRITE(h_mll.sr);         WRITE(h_mll.ttzcr);          WRITE(h_mll.ttwcr);       WRITE(h_mll.br);
+    WRITE(h_mtmin.sr);       WRITE(h_mtmin.ttzcr);        WRITE(h_mtmin.ttwcr);     WRITE(h_mtmin.br);
+    WRITE(h_njets.sr);       WRITE(h_njets.ttzcr);        WRITE(h_njets.ttwcr);     WRITE(h_njets.br);
+    WRITE(h_nleps.sr);       WRITE(h_nleps.ttzcr);        WRITE(h_nleps.ttwcr);     WRITE(h_nleps.br);
+    WRITE(h_wcands.sr);      WRITE(h_wcands.ttzcr);       WRITE(h_wcands.ttwcr);    WRITE(h_wcands.br);
+    WRITE(h_nbtags.sr);      WRITE(h_nbtags.ttzcr);       WRITE(h_nbtags.ttwcr);    WRITE(h_nbtags.br);
+    WRITE(h_type.sr);        WRITE(h_type.ttzcr);         WRITE(h_type.ttwcr);      WRITE(h_type.br);
+    WRITE(h_charge.sr);      WRITE(h_charge.ttzcr);       WRITE(h_charge.ttwcr);    WRITE(h_charge.br);
+    WRITE(h_l1pt.sr);        WRITE(h_l1pt.ttzcr);         WRITE(h_l1pt.ttwcr);      WRITE(h_l1pt.br);
+    WRITE(h_l2pt.sr);        WRITE(h_l2pt.ttzcr);         WRITE(h_l2pt.ttwcr);      WRITE(h_l2pt.br);
+    WRITE(h_l3pt.sr);        WRITE(h_l3pt.ttzcr);         WRITE(h_l3pt.ttwcr);      WRITE(h_l3pt.br);
+    WRITE(h_el_l1pt.sr);     WRITE(h_el_l1pt.ttzcr);      WRITE(h_el_l1pt.ttwcr);   WRITE(h_el_l1pt.br);
+    WRITE(h_el_l2pt.sr);     WRITE(h_el_l2pt.ttzcr);      WRITE(h_el_l2pt.ttwcr);   WRITE(h_el_l2pt.br);
+    WRITE(h_el_l3pt.sr);     WRITE(h_el_l3pt.ttzcr);      WRITE(h_el_l3pt.ttwcr);   WRITE(h_el_l3pt.br);
+    WRITE(h_mu_l1pt.sr);     WRITE(h_mu_l1pt.ttzcr);      WRITE(h_mu_l1pt.ttwcr);   WRITE(h_mu_l1pt.br);
+    WRITE(h_mu_l2pt.sr);     WRITE(h_mu_l2pt.ttzcr);      WRITE(h_mu_l2pt.ttwcr);   WRITE(h_mu_l2pt.br);
+    WRITE(h_mu_l3pt.sr);     WRITE(h_mu_l3pt.ttzcr);      WRITE(h_mu_l3pt.ttwcr);   WRITE(h_mu_l3pt.br);
 
-    p_data.h_ht.ttwcr->Write(); p_ttw.h_ht.ttwcr->Write(); p_ttz.h_ht.ttwcr->Write(); p_tth.h_ht.ttwcr->Write(); p_wz.h_ht.ttwcr->Write(); p_ww.h_ht.ttwcr->Write(); p_xg.h_ht.ttwcr->Write(); p_rares.h_ht.ttwcr->Write(); p_flips.h_ht.ttwcr->Write(); p_fakes.h_ht.ttwcr->Write(); p_tttt.h_ht.ttwcr->Write();
-    p_data.h_met.ttwcr->Write(); p_ttw.h_met.ttwcr->Write(); p_ttz.h_met.ttwcr->Write(); p_tth.h_met.ttwcr->Write(); p_wz.h_met.ttwcr->Write(); p_ww.h_met.ttwcr->Write(); p_xg.h_met.ttwcr->Write(); p_rares.h_met.ttwcr->Write(); p_flips.h_met.ttwcr->Write(); p_fakes.h_met.ttwcr->Write(); p_tttt.h_met.ttwcr->Write();
-    p_data.h_mll.ttwcr->Write(); p_ttw.h_mll.ttwcr->Write(); p_ttz.h_mll.ttwcr->Write(); p_tth.h_mll.ttwcr->Write(); p_wz.h_mll.ttwcr->Write(); p_ww.h_mll.ttwcr->Write(); p_xg.h_mll.ttwcr->Write(); p_rares.h_mll.ttwcr->Write(); p_flips.h_mll.ttwcr->Write(); p_fakes.h_mll.ttwcr->Write(); p_tttt.h_mll.ttwcr->Write();
-    p_data.h_mtmin.ttwcr->Write(); p_ttw.h_mtmin.ttwcr->Write(); p_ttz.h_mtmin.ttwcr->Write(); p_tth.h_mtmin.ttwcr->Write(); p_wz.h_mtmin.ttwcr->Write(); p_ww.h_mtmin.ttwcr->Write(); p_xg.h_mtmin.ttwcr->Write(); p_rares.h_mtmin.ttwcr->Write(); p_flips.h_mtmin.ttwcr->Write(); p_fakes.h_mtmin.ttwcr->Write(); p_tttt.h_mtmin.ttwcr->Write();
-    p_data.h_njets.ttwcr->Write(); p_ttw.h_njets.ttwcr->Write(); p_ttz.h_njets.ttwcr->Write(); p_tth.h_njets.ttwcr->Write(); p_wz.h_njets.ttwcr->Write(); p_ww.h_njets.ttwcr->Write(); p_xg.h_njets.ttwcr->Write(); p_rares.h_njets.ttwcr->Write(); p_flips.h_njets.ttwcr->Write(); p_fakes.h_njets.ttwcr->Write(); p_tttt.h_njets.ttwcr->Write();
-    p_data.h_nleps.ttwcr->Write(); p_ttw.h_nleps.ttwcr->Write(); p_ttz.h_nleps.ttwcr->Write(); p_tth.h_nleps.ttwcr->Write(); p_wz.h_nleps.ttwcr->Write(); p_ww.h_nleps.ttwcr->Write(); p_xg.h_nleps.ttwcr->Write(); p_rares.h_nleps.ttwcr->Write(); p_flips.h_nleps.ttwcr->Write(); p_fakes.h_nleps.ttwcr->Write(); p_tttt.h_nleps.ttwcr->Write();
-    p_data.h_wcands.ttwcr->Write(); p_ttw.h_wcands.ttwcr->Write(); p_ttz.h_wcands.ttwcr->Write(); p_tth.h_wcands.ttwcr->Write(); p_wz.h_wcands.ttwcr->Write(); p_ww.h_wcands.ttwcr->Write(); p_xg.h_wcands.ttwcr->Write(); p_rares.h_wcands.ttwcr->Write(); p_flips.h_wcands.ttwcr->Write(); p_fakes.h_wcands.ttwcr->Write(); p_tttt.h_wcands.ttwcr->Write();
-    p_data.h_nbtags.ttwcr->Write(); p_ttw.h_nbtags.ttwcr->Write(); p_ttz.h_nbtags.ttwcr->Write(); p_tth.h_nbtags.ttwcr->Write(); p_wz.h_nbtags.ttwcr->Write(); p_ww.h_nbtags.ttwcr->Write(); p_xg.h_nbtags.ttwcr->Write(); p_rares.h_nbtags.ttwcr->Write(); p_flips.h_nbtags.ttwcr->Write(); p_fakes.h_nbtags.ttwcr->Write(); p_tttt.h_nbtags.ttwcr->Write();
-    p_data.h_type.ttwcr->Write(); p_ttw.h_type.ttwcr->Write(); p_ttz.h_type.ttwcr->Write(); p_tth.h_type.ttwcr->Write(); p_wz.h_type.ttwcr->Write(); p_ww.h_type.ttwcr->Write(); p_xg.h_type.ttwcr->Write(); p_rares.h_type.ttwcr->Write(); p_flips.h_type.ttwcr->Write(); p_fakes.h_type.ttwcr->Write(); p_tttt.h_type.ttwcr->Write();
-    p_data.h_charge.ttwcr->Write(); p_ttw.h_charge.ttwcr->Write(); p_ttz.h_charge.ttwcr->Write(); p_tth.h_charge.ttwcr->Write(); p_wz.h_charge.ttwcr->Write(); p_ww.h_charge.ttwcr->Write(); p_xg.h_charge.ttwcr->Write(); p_rares.h_charge.ttwcr->Write(); p_flips.h_charge.ttwcr->Write(); p_fakes.h_charge.ttwcr->Write(); p_tttt.h_charge.ttwcr->Write();
-    p_data.h_l1pt.ttwcr->Write(); p_ttw.h_l1pt.ttwcr->Write(); p_ttz.h_l1pt.ttwcr->Write(); p_tth.h_l1pt.ttwcr->Write(); p_wz.h_l1pt.ttwcr->Write(); p_ww.h_l1pt.ttwcr->Write(); p_xg.h_l1pt.ttwcr->Write(); p_rares.h_l1pt.ttwcr->Write(); p_flips.h_l1pt.ttwcr->Write(); p_fakes.h_l1pt.ttwcr->Write(); p_tttt.h_l1pt.ttwcr->Write();
-    p_data.h_l2pt.ttwcr->Write(); p_ttw.h_l2pt.ttwcr->Write(); p_ttz.h_l2pt.ttwcr->Write(); p_tth.h_l2pt.ttwcr->Write(); p_wz.h_l2pt.ttwcr->Write(); p_ww.h_l2pt.ttwcr->Write(); p_xg.h_l2pt.ttwcr->Write(); p_rares.h_l2pt.ttwcr->Write(); p_flips.h_l2pt.ttwcr->Write(); p_fakes.h_l2pt.ttwcr->Write(); p_tttt.h_l2pt.ttwcr->Write();
-    p_data.h_l3pt.ttwcr->Write(); p_ttw.h_l3pt.ttwcr->Write(); p_ttz.h_l3pt.ttwcr->Write(); p_tth.h_l3pt.ttwcr->Write(); p_wz.h_l3pt.ttwcr->Write(); p_ww.h_l3pt.ttwcr->Write(); p_xg.h_l3pt.ttwcr->Write(); p_rares.h_l3pt.ttwcr->Write(); p_flips.h_l3pt.ttwcr->Write(); p_fakes.h_l3pt.ttwcr->Write(); p_tttt.h_l3pt.ttwcr->Write();
-    p_data.h_el_l1pt.ttwcr->Write(); p_ttw.h_el_l1pt.ttwcr->Write(); p_ttz.h_el_l1pt.ttwcr->Write(); p_tth.h_el_l1pt.ttwcr->Write(); p_wz.h_el_l1pt.ttwcr->Write(); p_ww.h_el_l1pt.ttwcr->Write(); p_xg.h_el_l1pt.ttwcr->Write(); p_rares.h_el_l1pt.ttwcr->Write(); p_flips.h_el_l1pt.ttwcr->Write(); p_fakes.h_el_l1pt.ttwcr->Write(); p_tttt.h_el_l1pt.ttwcr->Write();
-    p_data.h_el_l2pt.ttwcr->Write(); p_ttw.h_el_l2pt.ttwcr->Write(); p_ttz.h_el_l2pt.ttwcr->Write(); p_tth.h_el_l2pt.ttwcr->Write(); p_wz.h_el_l2pt.ttwcr->Write(); p_ww.h_el_l2pt.ttwcr->Write(); p_xg.h_el_l2pt.ttwcr->Write(); p_rares.h_el_l2pt.ttwcr->Write(); p_flips.h_el_l2pt.ttwcr->Write(); p_fakes.h_el_l2pt.ttwcr->Write(); p_tttt.h_el_l2pt.ttwcr->Write();
-    p_data.h_el_l3pt.ttwcr->Write(); p_ttw.h_el_l3pt.ttwcr->Write(); p_ttz.h_el_l3pt.ttwcr->Write(); p_tth.h_el_l3pt.ttwcr->Write(); p_wz.h_el_l3pt.ttwcr->Write(); p_ww.h_el_l3pt.ttwcr->Write(); p_xg.h_el_l3pt.ttwcr->Write(); p_rares.h_el_l3pt.ttwcr->Write(); p_flips.h_el_l3pt.ttwcr->Write(); p_fakes.h_el_l3pt.ttwcr->Write(); p_tttt.h_el_l3pt.ttwcr->Write();
-    p_data.h_mu_l1pt.ttwcr->Write(); p_ttw.h_mu_l1pt.ttwcr->Write(); p_ttz.h_mu_l1pt.ttwcr->Write(); p_tth.h_mu_l1pt.ttwcr->Write(); p_wz.h_mu_l1pt.ttwcr->Write(); p_ww.h_mu_l1pt.ttwcr->Write(); p_xg.h_mu_l1pt.ttwcr->Write(); p_rares.h_mu_l1pt.ttwcr->Write(); p_flips.h_mu_l1pt.ttwcr->Write(); p_fakes.h_mu_l1pt.ttwcr->Write(); p_tttt.h_mu_l1pt.ttwcr->Write();
-    p_data.h_mu_l2pt.ttwcr->Write(); p_ttw.h_mu_l2pt.ttwcr->Write(); p_ttz.h_mu_l2pt.ttwcr->Write(); p_tth.h_mu_l2pt.ttwcr->Write(); p_wz.h_mu_l2pt.ttwcr->Write(); p_ww.h_mu_l2pt.ttwcr->Write(); p_xg.h_mu_l2pt.ttwcr->Write(); p_rares.h_mu_l2pt.ttwcr->Write(); p_flips.h_mu_l2pt.ttwcr->Write(); p_fakes.h_mu_l2pt.ttwcr->Write(); p_tttt.h_mu_l2pt.ttwcr->Write();
-    p_data.h_mu_l3pt.ttwcr->Write(); p_ttw.h_mu_l3pt.ttwcr->Write(); p_ttz.h_mu_l3pt.ttwcr->Write(); p_tth.h_mu_l3pt.ttwcr->Write(); p_wz.h_mu_l3pt.ttwcr->Write(); p_ww.h_mu_l3pt.ttwcr->Write(); p_xg.h_mu_l3pt.ttwcr->Write(); p_rares.h_mu_l3pt.ttwcr->Write(); p_flips.h_mu_l3pt.ttwcr->Write(); p_fakes.h_mu_l3pt.ttwcr->Write(); p_tttt.h_mu_l3pt.ttwcr->Write();
+    WRITE(h_disc.br);
+    WRITE(SRCR.TOTAL);
+    WRITE(SR.TOTAL);
 
-    p_data.h_ht.br->Write(); p_ttw.h_ht.br->Write(); p_ttz.h_ht.br->Write(); p_tth.h_ht.br->Write(); p_wz.h_ht.br->Write(); p_ww.h_ht.br->Write(); p_xg.h_ht.br->Write(); p_rares.h_ht.br->Write(); p_flips.h_ht.br->Write(); p_fakes.h_ht.br->Write(); p_tttt.h_ht.br->Write();
-    p_data.h_met.br->Write(); p_ttw.h_met.br->Write(); p_ttz.h_met.br->Write(); p_tth.h_met.br->Write(); p_wz.h_met.br->Write(); p_ww.h_met.br->Write(); p_xg.h_met.br->Write(); p_rares.h_met.br->Write(); p_flips.h_met.br->Write(); p_fakes.h_met.br->Write(); p_tttt.h_met.br->Write();
-    p_data.h_mll.br->Write(); p_ttw.h_mll.br->Write(); p_ttz.h_mll.br->Write(); p_tth.h_mll.br->Write(); p_wz.h_mll.br->Write(); p_ww.h_mll.br->Write(); p_xg.h_mll.br->Write(); p_rares.h_mll.br->Write(); p_flips.h_mll.br->Write(); p_fakes.h_mll.br->Write(); p_tttt.h_mll.br->Write();
-    p_data.h_mtmin.br->Write(); p_ttw.h_mtmin.br->Write(); p_ttz.h_mtmin.br->Write(); p_tth.h_mtmin.br->Write(); p_wz.h_mtmin.br->Write(); p_ww.h_mtmin.br->Write(); p_xg.h_mtmin.br->Write(); p_rares.h_mtmin.br->Write(); p_flips.h_mtmin.br->Write(); p_fakes.h_mtmin.br->Write(); p_tttt.h_mtmin.br->Write();
-    p_data.h_njets.br->Write(); p_ttw.h_njets.br->Write(); p_ttz.h_njets.br->Write(); p_tth.h_njets.br->Write(); p_wz.h_njets.br->Write(); p_ww.h_njets.br->Write(); p_xg.h_njets.br->Write(); p_rares.h_njets.br->Write(); p_flips.h_njets.br->Write(); p_fakes.h_njets.br->Write(); p_tttt.h_njets.br->Write();
-    p_data.h_nleps.br->Write(); p_ttw.h_nleps.br->Write(); p_ttz.h_nleps.br->Write(); p_tth.h_nleps.br->Write(); p_wz.h_nleps.br->Write(); p_ww.h_nleps.br->Write(); p_xg.h_nleps.br->Write(); p_rares.h_nleps.br->Write(); p_flips.h_nleps.br->Write(); p_fakes.h_nleps.br->Write(); p_tttt.h_nleps.br->Write();
-    p_data.h_wcands.br->Write(); p_ttw.h_wcands.br->Write(); p_ttz.h_wcands.br->Write(); p_tth.h_wcands.br->Write(); p_wz.h_wcands.br->Write(); p_ww.h_wcands.br->Write(); p_xg.h_wcands.br->Write(); p_rares.h_wcands.br->Write(); p_flips.h_wcands.br->Write(); p_fakes.h_wcands.br->Write(); p_tttt.h_wcands.br->Write();
-    p_data.h_nbtags.br->Write(); p_ttw.h_nbtags.br->Write(); p_ttz.h_nbtags.br->Write(); p_tth.h_nbtags.br->Write(); p_wz.h_nbtags.br->Write(); p_ww.h_nbtags.br->Write(); p_xg.h_nbtags.br->Write(); p_rares.h_nbtags.br->Write(); p_flips.h_nbtags.br->Write(); p_fakes.h_nbtags.br->Write(); p_tttt.h_nbtags.br->Write();
-    p_data.h_type.br->Write(); p_ttw.h_type.br->Write(); p_ttz.h_type.br->Write(); p_tth.h_type.br->Write(); p_wz.h_type.br->Write(); p_ww.h_type.br->Write(); p_xg.h_type.br->Write(); p_rares.h_type.br->Write(); p_flips.h_type.br->Write(); p_fakes.h_type.br->Write(); p_tttt.h_type.br->Write();
-    p_data.h_charge.br->Write(); p_ttw.h_charge.br->Write(); p_ttz.h_charge.br->Write(); p_tth.h_charge.br->Write(); p_wz.h_charge.br->Write(); p_ww.h_charge.br->Write(); p_xg.h_charge.br->Write(); p_rares.h_charge.br->Write(); p_flips.h_charge.br->Write(); p_fakes.h_charge.br->Write(); p_tttt.h_charge.br->Write();
-    p_data.h_l1pt.br->Write(); p_ttw.h_l1pt.br->Write(); p_ttz.h_l1pt.br->Write(); p_tth.h_l1pt.br->Write(); p_wz.h_l1pt.br->Write(); p_ww.h_l1pt.br->Write(); p_xg.h_l1pt.br->Write(); p_rares.h_l1pt.br->Write(); p_flips.h_l1pt.br->Write(); p_fakes.h_l1pt.br->Write(); p_tttt.h_l1pt.br->Write();
-    p_data.h_l2pt.br->Write(); p_ttw.h_l2pt.br->Write(); p_ttz.h_l2pt.br->Write(); p_tth.h_l2pt.br->Write(); p_wz.h_l2pt.br->Write(); p_ww.h_l2pt.br->Write(); p_xg.h_l2pt.br->Write(); p_rares.h_l2pt.br->Write(); p_flips.h_l2pt.br->Write(); p_fakes.h_l2pt.br->Write(); p_tttt.h_l2pt.br->Write();
-    p_data.h_l3pt.br->Write(); p_ttw.h_l3pt.br->Write(); p_ttz.h_l3pt.br->Write(); p_tth.h_l3pt.br->Write(); p_wz.h_l3pt.br->Write(); p_ww.h_l3pt.br->Write(); p_xg.h_l3pt.br->Write(); p_rares.h_l3pt.br->Write(); p_flips.h_l3pt.br->Write(); p_fakes.h_l3pt.br->Write(); p_tttt.h_l3pt.br->Write();
-    p_data.h_el_l1pt.br->Write(); p_ttw.h_el_l1pt.br->Write(); p_ttz.h_el_l1pt.br->Write(); p_tth.h_el_l1pt.br->Write(); p_wz.h_el_l1pt.br->Write(); p_ww.h_el_l1pt.br->Write(); p_xg.h_el_l1pt.br->Write(); p_rares.h_el_l1pt.br->Write(); p_flips.h_el_l1pt.br->Write(); p_fakes.h_el_l1pt.br->Write(); p_tttt.h_el_l1pt.br->Write();
-    p_data.h_el_l2pt.br->Write(); p_ttw.h_el_l2pt.br->Write(); p_ttz.h_el_l2pt.br->Write(); p_tth.h_el_l2pt.br->Write(); p_wz.h_el_l2pt.br->Write(); p_ww.h_el_l2pt.br->Write(); p_xg.h_el_l2pt.br->Write(); p_rares.h_el_l2pt.br->Write(); p_flips.h_el_l2pt.br->Write(); p_fakes.h_el_l2pt.br->Write(); p_tttt.h_el_l2pt.br->Write();
-    p_data.h_el_l3pt.br->Write(); p_ttw.h_el_l3pt.br->Write(); p_ttz.h_el_l3pt.br->Write(); p_tth.h_el_l3pt.br->Write(); p_wz.h_el_l3pt.br->Write(); p_ww.h_el_l3pt.br->Write(); p_xg.h_el_l3pt.br->Write(); p_rares.h_el_l3pt.br->Write(); p_flips.h_el_l3pt.br->Write(); p_fakes.h_el_l3pt.br->Write(); p_tttt.h_el_l3pt.br->Write();
-    p_data.h_mu_l1pt.br->Write(); p_ttw.h_mu_l1pt.br->Write(); p_ttz.h_mu_l1pt.br->Write(); p_tth.h_mu_l1pt.br->Write(); p_wz.h_mu_l1pt.br->Write(); p_ww.h_mu_l1pt.br->Write(); p_xg.h_mu_l1pt.br->Write(); p_rares.h_mu_l1pt.br->Write(); p_flips.h_mu_l1pt.br->Write(); p_fakes.h_mu_l1pt.br->Write(); p_tttt.h_mu_l1pt.br->Write();
-    p_data.h_mu_l2pt.br->Write(); p_ttw.h_mu_l2pt.br->Write(); p_ttz.h_mu_l2pt.br->Write(); p_tth.h_mu_l2pt.br->Write(); p_wz.h_mu_l2pt.br->Write(); p_ww.h_mu_l2pt.br->Write(); p_xg.h_mu_l2pt.br->Write(); p_rares.h_mu_l2pt.br->Write(); p_flips.h_mu_l2pt.br->Write(); p_fakes.h_mu_l2pt.br->Write(); p_tttt.h_mu_l2pt.br->Write();
-    p_data.h_mu_l3pt.br->Write(); p_ttw.h_mu_l3pt.br->Write(); p_ttz.h_mu_l3pt.br->Write(); p_tth.h_mu_l3pt.br->Write(); p_wz.h_mu_l3pt.br->Write(); p_ww.h_mu_l3pt.br->Write(); p_xg.h_mu_l3pt.br->Write(); p_rares.h_mu_l3pt.br->Write(); p_flips.h_mu_l3pt.br->Write(); p_fakes.h_mu_l3pt.br->Write(); p_tttt.h_mu_l3pt.br->Write();
-
-    p_data.h_disc.br->Write(); p_ttw.h_disc.br->Write(); p_ttz.h_disc.br->Write(); p_tth.h_disc.br->Write(); p_wz.h_disc.br->Write(); p_ww.h_disc.br->Write(); p_xg.h_disc.br->Write(); p_rares.h_disc.br->Write(); p_flips.h_disc.br->Write(); p_fakes.h_disc.br->Write(); p_tttt.h_disc.br->Write();
-    p_data.SRCR.TOTAL->Write(); p_ttw.SRCR.TOTAL->Write(); p_ttz.SRCR.TOTAL->Write(); p_tth.SRCR.TOTAL->Write(); p_wz.SRCR.TOTAL->Write(); p_ww.SRCR.TOTAL->Write(); p_xg.SRCR.TOTAL->Write(); p_rares.SRCR.TOTAL->Write(); p_flips.SRCR.TOTAL->Write(); p_fakes.SRCR.TOTAL->Write(); p_tttt.SRCR.TOTAL->Write();
-    p_data.SR.TOTAL->Write(); p_ttw.SR.TOTAL->Write(); p_ttz.SR.TOTAL->Write(); p_tth.SR.TOTAL->Write(); p_wz.SR.TOTAL->Write(); p_ww.SR.TOTAL->Write(); p_xg.SR.TOTAL->Write(); p_rares.SR.TOTAL->Write(); p_flips.SR.TOTAL->Write(); p_fakes.SR.TOTAL->Write(); p_tttt.SR.TOTAL->Write();
-
-    fout->Write();
-    fout->Close();
+    // fout->Write();
+    // fout->Close();
 
     // // Write output tree
     // out_file->cd();
@@ -332,6 +274,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     y_result.EM    = 0;
     y_result.MM    = 0;
     y_result.TOTAL = 0;
+
 
     p_result.h_ht.sr       = new TH1F(Form("sr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.sr      = new TH1F(Form("sr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
@@ -420,81 +363,81 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
     bool doPoisson = isData && !doFlips && !doFakes;
 
-    initHistError(doPoisson, p_result.h_ht.sr         );
-    initHistError(doPoisson, p_result.h_met.sr        );
-    initHistError(doPoisson, p_result.h_mll.sr        );
-    initHistError(doPoisson, p_result.h_mtmin.sr      );
-    initHistError(doPoisson, p_result.h_njets.sr      );
-    initHistError(doPoisson, p_result.h_nleps.sr      );
-    initHistError(doPoisson, p_result.h_nbtags.sr     );
-    initHistError(doPoisson, p_result.h_type.sr       );
-    initHistError(doPoisson, p_result.h_charge.sr     );
-    initHistError(doPoisson, p_result.h_l1pt.sr);
-    initHistError(doPoisson, p_result.h_l2pt.sr);
-    initHistError(doPoisson, p_result.h_l3pt.sr);
-    initHistError(doPoisson, p_result.h_el_l1pt.sr);
-    initHistError(doPoisson, p_result.h_el_l2pt.sr);
-    initHistError(doPoisson, p_result.h_el_l3pt.sr);
-    initHistError(doPoisson, p_result.h_mu_l1pt.sr);
-    initHistError(doPoisson, p_result.h_mu_l2pt.sr);
-    initHistError(doPoisson, p_result.h_mu_l3pt.sr);
+    // initHistError(doPoisson, p_result.h_ht.sr         );
+    // initHistError(doPoisson, p_result.h_met.sr        );
+    // initHistError(doPoisson, p_result.h_mll.sr        );
+    // initHistError(doPoisson, p_result.h_mtmin.sr      );
+    // initHistError(doPoisson, p_result.h_njets.sr      );
+    // initHistError(doPoisson, p_result.h_nleps.sr      );
+    // initHistError(doPoisson, p_result.h_nbtags.sr     );
+    // initHistError(doPoisson, p_result.h_type.sr       );
+    // initHistError(doPoisson, p_result.h_charge.sr     );
+    // initHistError(doPoisson, p_result.h_l1pt.sr);
+    // initHistError(doPoisson, p_result.h_l2pt.sr);
+    // initHistError(doPoisson, p_result.h_l3pt.sr);
+    // initHistError(doPoisson, p_result.h_el_l1pt.sr);
+    // initHistError(doPoisson, p_result.h_el_l2pt.sr);
+    // initHistError(doPoisson, p_result.h_el_l3pt.sr);
+    // initHistError(doPoisson, p_result.h_mu_l1pt.sr);
+    // initHistError(doPoisson, p_result.h_mu_l2pt.sr);
+    // initHistError(doPoisson, p_result.h_mu_l3pt.sr);
 
-    initHistError(doPoisson, p_result.h_ht.ttzcr         );
-    initHistError(doPoisson, p_result.h_met.ttzcr        );
-    initHistError(doPoisson, p_result.h_mll.ttzcr        );
-    initHistError(doPoisson, p_result.h_mtmin.ttzcr      );
-    initHistError(doPoisson, p_result.h_njets.ttzcr      );
-    initHistError(doPoisson, p_result.h_nleps.ttzcr      );
-    initHistError(doPoisson, p_result.h_nbtags.ttzcr     );
-    initHistError(doPoisson, p_result.h_type.ttzcr       );
-    initHistError(doPoisson, p_result.h_charge.ttzcr     );
-    initHistError(doPoisson, p_result.h_l1pt.ttzcr);
-    initHistError(doPoisson, p_result.h_l2pt.ttzcr);
-    initHistError(doPoisson, p_result.h_l3pt.ttzcr);
-    initHistError(doPoisson, p_result.h_el_l1pt.ttzcr);
-    initHistError(doPoisson, p_result.h_el_l2pt.ttzcr);
-    initHistError(doPoisson, p_result.h_el_l3pt.ttzcr);
-    initHistError(doPoisson, p_result.h_mu_l1pt.ttzcr);
-    initHistError(doPoisson, p_result.h_mu_l2pt.ttzcr);
-    initHistError(doPoisson, p_result.h_mu_l3pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_ht.ttzcr         );
+    // initHistError(doPoisson, p_result.h_met.ttzcr        );
+    // initHistError(doPoisson, p_result.h_mll.ttzcr        );
+    // initHistError(doPoisson, p_result.h_mtmin.ttzcr      );
+    // initHistError(doPoisson, p_result.h_njets.ttzcr      );
+    // initHistError(doPoisson, p_result.h_nleps.ttzcr      );
+    // initHistError(doPoisson, p_result.h_nbtags.ttzcr     );
+    // initHistError(doPoisson, p_result.h_type.ttzcr       );
+    // initHistError(doPoisson, p_result.h_charge.ttzcr     );
+    // initHistError(doPoisson, p_result.h_l1pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_l2pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_l3pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_el_l1pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_el_l2pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_el_l3pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_mu_l1pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_mu_l2pt.ttzcr);
+    // initHistError(doPoisson, p_result.h_mu_l3pt.ttzcr);
 
-    initHistError(doPoisson, p_result.h_ht.ttwcr         );
-    initHistError(doPoisson, p_result.h_met.ttwcr        );
-    initHistError(doPoisson, p_result.h_mll.ttwcr        );
-    initHistError(doPoisson, p_result.h_mtmin.ttwcr      );
-    initHistError(doPoisson, p_result.h_njets.ttwcr      );
-    initHistError(doPoisson, p_result.h_nleps.ttwcr      );
-    initHistError(doPoisson, p_result.h_nbtags.ttwcr     );
-    initHistError(doPoisson, p_result.h_type.ttwcr       );
-    initHistError(doPoisson, p_result.h_charge.ttwcr     );
-    initHistError(doPoisson, p_result.h_l1pt.ttwcr);
-    initHistError(doPoisson, p_result.h_l2pt.ttwcr);
-    initHistError(doPoisson, p_result.h_l3pt.ttwcr);
-    initHistError(doPoisson, p_result.h_el_l1pt.ttwcr);
-    initHistError(doPoisson, p_result.h_el_l2pt.ttwcr);
-    initHistError(doPoisson, p_result.h_el_l3pt.ttwcr);
-    initHistError(doPoisson, p_result.h_mu_l1pt.ttwcr);
-    initHistError(doPoisson, p_result.h_mu_l2pt.ttwcr);
-    initHistError(doPoisson, p_result.h_mu_l3pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_ht.ttwcr         );
+    // initHistError(doPoisson, p_result.h_met.ttwcr        );
+    // initHistError(doPoisson, p_result.h_mll.ttwcr        );
+    // initHistError(doPoisson, p_result.h_mtmin.ttwcr      );
+    // initHistError(doPoisson, p_result.h_njets.ttwcr      );
+    // initHistError(doPoisson, p_result.h_nleps.ttwcr      );
+    // initHistError(doPoisson, p_result.h_nbtags.ttwcr     );
+    // initHistError(doPoisson, p_result.h_type.ttwcr       );
+    // initHistError(doPoisson, p_result.h_charge.ttwcr     );
+    // initHistError(doPoisson, p_result.h_l1pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_l2pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_l3pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_el_l1pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_el_l2pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_el_l3pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_mu_l1pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_mu_l2pt.ttwcr);
+    // initHistError(doPoisson, p_result.h_mu_l3pt.ttwcr);
 
-    initHistError(doPoisson, p_result.h_ht.br         );
-    initHistError(doPoisson, p_result.h_met.br        );
-    initHistError(doPoisson, p_result.h_mll.br        );
-    initHistError(doPoisson, p_result.h_mtmin.br      );
-    initHistError(doPoisson, p_result.h_njets.br      );
-    initHistError(doPoisson, p_result.h_nleps.br      );
-    initHistError(doPoisson, p_result.h_nbtags.br     );
-    initHistError(doPoisson, p_result.h_type.br       );
-    initHistError(doPoisson, p_result.h_charge.br     );
-    initHistError(doPoisson, p_result.h_l1pt.br);
-    initHistError(doPoisson, p_result.h_l2pt.br);
-    initHistError(doPoisson, p_result.h_l3pt.br);
-    initHistError(doPoisson, p_result.h_el_l1pt.br);
-    initHistError(doPoisson, p_result.h_el_l2pt.br);
-    initHistError(doPoisson, p_result.h_el_l3pt.br);
-    initHistError(doPoisson, p_result.h_mu_l1pt.br);
-    initHistError(doPoisson, p_result.h_mu_l2pt.br);
-    initHistError(doPoisson, p_result.h_mu_l3pt.br);
+    // initHistError(doPoisson, p_result.h_ht.br         );
+    // initHistError(doPoisson, p_result.h_met.br        );
+    // initHistError(doPoisson, p_result.h_mll.br        );
+    // initHistError(doPoisson, p_result.h_mtmin.br      );
+    // initHistError(doPoisson, p_result.h_njets.br      );
+    // initHistError(doPoisson, p_result.h_nleps.br      );
+    // initHistError(doPoisson, p_result.h_nbtags.br     );
+    // initHistError(doPoisson, p_result.h_type.br       );
+    // initHistError(doPoisson, p_result.h_charge.br     );
+    // initHistError(doPoisson, p_result.h_l1pt.br);
+    // initHistError(doPoisson, p_result.h_l2pt.br);
+    // initHistError(doPoisson, p_result.h_l3pt.br);
+    // initHistError(doPoisson, p_result.h_el_l1pt.br);
+    // initHistError(doPoisson, p_result.h_el_l2pt.br);
+    // initHistError(doPoisson, p_result.h_el_l3pt.br);
+    // initHistError(doPoisson, p_result.h_mu_l1pt.br);
+    // initHistError(doPoisson, p_result.h_mu_l2pt.br);
+    // initHistError(doPoisson, p_result.h_mu_l3pt.br);
 
     initHistError(doPoisson, p_result.h_disc.br);
     initHistError(doPoisson, p_result.SRCR.TOTAL   );
@@ -910,6 +853,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         }//event loop
         file->Close(); 
     }//file loop
+
 
     //Return yield
     return pair<yields_t, plots_t>(y_result,p_result); 
