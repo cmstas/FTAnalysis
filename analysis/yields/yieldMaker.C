@@ -29,22 +29,11 @@ float bloose = 0.5426;
 float bmed = 0.8484;
 float btight = 0.9535;
 
-
 int nsr = getNsrsTTTT();
 int nCR = 2;
-int nHHsr = 51;
-int nHLsr = 41;
-int nLLsr = 8;
 
 bool doCustomSelection = false; // use custom selection // FIXME
 bool applyttZSF = true; // true if we want to apply the data driven scale factor for ttZ in addition to WZ
-bool useBtagSF = true; // default true of cours
-bool doTTTTLimits = true; // turn on when doing TTTT limits  // FIXME
-bool doMoriondPUw = true; // test Moriond MC PUw 
-bool doPUrw = true; // do PU reweighting of MC
-bool useMCtriggers = true; // force usage of triggers in MC and disable trigger SFs
-bool doMoriondMC = true;
-bool makeTree = false; // make a root tree with SR events
 float scaleLumi = 1.;//3.0/1.264;//careful!!!
 
 bool DOWEIGHTS = false; // FIXME
@@ -73,14 +62,10 @@ struct plots_t  {
     SR_t SR;
     triple_t h_ht;
     triple_t h_met;
-    triple_t h_mllem;
-    triple_t h_mlle;
-    triple_t h_mllmu;
     triple_t h_mll;
     triple_t h_mtmin;
     triple_t h_mt1;
     triple_t h_mt2;
-    triple_t h_mt2real;
     triple_t h_njets;
     triple_t h_nbtags;
     triple_t h_l1pt;
@@ -90,7 +75,6 @@ struct plots_t  {
     triple_t h_charge;
     triple_t h_nleps;
     triple_t h_wcands;
-    // triple_t h_topcands;
     triple_t h_mu_l1pt;
     triple_t h_el_l1pt;
     triple_t h_mu_l2pt;
@@ -98,10 +82,6 @@ struct plots_t  {
     triple_t h_el_l2pt;
     triple_t h_el_l3pt;
     triple_t h_mbb;
-    // triple_t h_wmass;
-    // triple_t h_topmass;
-    // triple_t h_jetmass;
-    // triple_t h_m3lep;
     triple_t h_disc;
 };
 
@@ -127,24 +107,6 @@ static float roughSystFAKESXL = 0.30;
 
 void getyields(){
 
-    // out_file = new TFile("output.root", "RECREATE");
-    // out_file->cd();
-    // out_tree = new TTree("t", "From yieldMaker");
-    // out_tree->Branch("event" , &tree_event );
-    // out_tree->Branch("lumi" , &tree_lumi );
-    // out_tree->Branch("run" , &tree_run );
-    // out_tree->Branch("weight" , &tree_weight );
-    // out_tree->Branch("met" , &tree_met );
-    // out_tree->Branch("ht" , &tree_ht );
-    // out_tree->Branch("mtmin" , &tree_mtmin );
-    // out_tree->Branch("l1id" , &tree_l1id );
-    // out_tree->Branch("l2id" , &tree_l2id );
-    // out_tree->Branch("njets" , &tree_njets );
-    // out_tree->Branch("nbtags" , &tree_nbtags );
-    // out_tree->Branch("kine" , &tree_kine );
-    // out_tree->Branch("SR" , &tree_SR );
-    // out_tree->Branch("name" , &tree_name );
-
     cout << "Running with lumi=" << lumiAG*scaleLumi << endl;
 
     //Chains
@@ -169,80 +131,56 @@ void getyields(){
     TChain *fakes_chain   = new TChain("t","fakes");
     //signals full sim
 
-    TString pfx  = Form("/nfs-7/userdata/ss2015/ssBabies/%s/", tag.c_str());
+    TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/";
+    TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
 
-    TString pfx_moriond  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/";
-    // TString pfx_moriond  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.10/output/";
-    TString pfxData  = Form("/nfs-7/userdata/ss2015/ssBabies/%s/", tagData.c_str());
-
-    if (doMoriondMC) {
-        pfx = pfx_moriond;
-        pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
-    }
-
-    // // FIXME
-    //     pfx     = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/";
-    //     pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/";
-
-    // TString pfx  = "./skim_Dec1/";
-    // TString pfxData  = pfx;
-
-    // // //Fill chains
+    //Fill chains
     tttt_chain   ->Add(Form("%s/TTTT.root"           , pfx.Data()));
 
-    ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data())); 
-    wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
-    dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
-    dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
-
-    // FIXME
-    // std::cout << "USING DIFFERENT TTW sample" << std::endl;
-    // ttw_chain    ->Add("/home/users/namin/2016/ss/master/SSAnalysis/cms4/output_ttw.root"); 
-    ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data())); 
-    ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data())); 
-    ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data())); 
-    tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
-    wz_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
-    ww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TG.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TTG.root"            , pfx.Data()));
-    xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
-    xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
-    rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
-    rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
-    if (doMoriondMC) {
-        rares_chain  ->Add(Form("%s/WWG.root"            , pfx.Data()));
-        rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
-    }
-    rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx.Data()));
-    rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
-    if (!doTTTTLimits) {
-        rares_chain  ->Add(Form("%s/TTTT.root"           , pfx.Data()));
-    }
-    rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
-    //data
-    data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
-    //flips
-    flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
-    flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
-    //fakes
-    fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
+    // ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data())); 
+    // wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
+    // dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
+    // dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
+    // ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data())); 
+    // ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data())); 
+    // ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data())); 
+    // tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
+    // wz_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
+    // ww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+    // qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+    // xg_chain     ->Add(Form("%s/TG.root"             , pfx.Data()));
+    // xg_chain     ->Add(Form("%s/TTG.root"            , pfx.Data()));
+    // xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
+    // xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/WWG.root"            , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
+    // rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
+    // //data
+    // data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    // data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    // data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    // data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    // //flips
+    // flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
+    // flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
+    // //fakes
+    // fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    // fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    // fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    // fakes_chain  ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    // fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
+    // fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
+    // fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
+    // fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
+    // fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
 
 
     pair<yields_t, plots_t> results_ttw      = run(ttw_chain);
@@ -270,24 +208,16 @@ void getyields(){
     plots_t& p_ww       = results_ww.second;
     plots_t& p_xg       = results_xg.second;
     plots_t& p_rares    = results_rares.second;
-
     plots_t& p_data     = results_data.second;
     plots_t& p_flips    = results_flips.second;
     plots_t& p_fakes    = results_fakes.second;
 
-
-
     TFile *fout = new TFile("histos.root", "RECREATE");
-
 
     p_data.h_ht.sr->Write(); p_ttw.h_ht.sr->Write(); p_ttz.h_ht.sr->Write(); p_tth.h_ht.sr->Write(); p_wz.h_ht.sr->Write(); p_ww.h_ht.sr->Write(); p_xg.h_ht.sr->Write(); p_rares.h_ht.sr->Write(); p_flips.h_ht.sr->Write(); p_fakes.h_ht.sr->Write(); p_tttt.h_ht.sr->Write();
     p_data.h_met.sr->Write(); p_ttw.h_met.sr->Write(); p_ttz.h_met.sr->Write(); p_tth.h_met.sr->Write(); p_wz.h_met.sr->Write(); p_ww.h_met.sr->Write(); p_xg.h_met.sr->Write(); p_rares.h_met.sr->Write(); p_flips.h_met.sr->Write(); p_fakes.h_met.sr->Write(); p_tttt.h_met.sr->Write();
     p_data.h_mll.sr->Write(); p_ttw.h_mll.sr->Write(); p_ttz.h_mll.sr->Write(); p_tth.h_mll.sr->Write(); p_wz.h_mll.sr->Write(); p_ww.h_mll.sr->Write(); p_xg.h_mll.sr->Write(); p_rares.h_mll.sr->Write(); p_flips.h_mll.sr->Write(); p_fakes.h_mll.sr->Write(); p_tttt.h_mll.sr->Write();
-    p_data.h_mlle.sr->Write(); p_ttw.h_mlle.sr->Write(); p_ttz.h_mlle.sr->Write(); p_tth.h_mlle.sr->Write(); p_wz.h_mlle.sr->Write(); p_ww.h_mlle.sr->Write(); p_xg.h_mlle.sr->Write(); p_rares.h_mlle.sr->Write(); p_flips.h_mlle.sr->Write(); p_fakes.h_mlle.sr->Write(); p_tttt.h_mlle.sr->Write();
-    p_data.h_mllem.sr->Write(); p_ttw.h_mllem.sr->Write(); p_ttz.h_mllem.sr->Write(); p_tth.h_mllem.sr->Write(); p_wz.h_mllem.sr->Write(); p_ww.h_mllem.sr->Write(); p_xg.h_mllem.sr->Write(); p_rares.h_mllem.sr->Write(); p_flips.h_mllem.sr->Write(); p_fakes.h_mllem.sr->Write(); p_tttt.h_mllem.sr->Write();
-    p_data.h_mllmu.sr->Write(); p_ttw.h_mllmu.sr->Write(); p_ttz.h_mllmu.sr->Write(); p_tth.h_mllmu.sr->Write(); p_wz.h_mllmu.sr->Write(); p_ww.h_mllmu.sr->Write(); p_xg.h_mllmu.sr->Write(); p_rares.h_mllmu.sr->Write(); p_flips.h_mllmu.sr->Write(); p_fakes.h_mllmu.sr->Write(); p_tttt.h_mllmu.sr->Write();
     p_data.h_mtmin.sr->Write(); p_ttw.h_mtmin.sr->Write(); p_ttz.h_mtmin.sr->Write(); p_tth.h_mtmin.sr->Write(); p_wz.h_mtmin.sr->Write(); p_ww.h_mtmin.sr->Write(); p_xg.h_mtmin.sr->Write(); p_rares.h_mtmin.sr->Write(); p_flips.h_mtmin.sr->Write(); p_fakes.h_mtmin.sr->Write(); p_tttt.h_mtmin.sr->Write();
-    p_data.h_mt2real.sr->Write(); p_ttw.h_mt2real.sr->Write(); p_ttz.h_mt2real.sr->Write(); p_tth.h_mt2real.sr->Write(); p_wz.h_mt2real.sr->Write(); p_ww.h_mt2real.sr->Write(); p_xg.h_mt2real.sr->Write(); p_rares.h_mt2real.sr->Write(); p_flips.h_mt2real.sr->Write(); p_fakes.h_mt2real.sr->Write(); p_tttt.h_mt2real.sr->Write();
     p_data.h_njets.sr->Write(); p_ttw.h_njets.sr->Write(); p_ttz.h_njets.sr->Write(); p_tth.h_njets.sr->Write(); p_wz.h_njets.sr->Write(); p_ww.h_njets.sr->Write(); p_xg.h_njets.sr->Write(); p_rares.h_njets.sr->Write(); p_flips.h_njets.sr->Write(); p_fakes.h_njets.sr->Write(); p_tttt.h_njets.sr->Write();
     p_data.h_nleps.sr->Write(); p_ttw.h_nleps.sr->Write(); p_ttz.h_nleps.sr->Write(); p_tth.h_nleps.sr->Write(); p_wz.h_nleps.sr->Write(); p_ww.h_nleps.sr->Write(); p_xg.h_nleps.sr->Write(); p_rares.h_nleps.sr->Write(); p_flips.h_nleps.sr->Write(); p_fakes.h_nleps.sr->Write(); p_tttt.h_nleps.sr->Write();
     p_data.h_wcands.sr->Write(); p_ttw.h_wcands.sr->Write(); p_ttz.h_wcands.sr->Write(); p_tth.h_wcands.sr->Write(); p_wz.h_wcands.sr->Write(); p_ww.h_wcands.sr->Write(); p_xg.h_wcands.sr->Write(); p_rares.h_wcands.sr->Write(); p_flips.h_wcands.sr->Write(); p_fakes.h_wcands.sr->Write(); p_tttt.h_wcands.sr->Write();
@@ -307,11 +237,7 @@ void getyields(){
     p_data.h_ht.ttzcr->Write(); p_ttw.h_ht.ttzcr->Write(); p_ttz.h_ht.ttzcr->Write(); p_tth.h_ht.ttzcr->Write(); p_wz.h_ht.ttzcr->Write(); p_ww.h_ht.ttzcr->Write(); p_xg.h_ht.ttzcr->Write(); p_rares.h_ht.ttzcr->Write(); p_flips.h_ht.ttzcr->Write(); p_fakes.h_ht.ttzcr->Write(); p_tttt.h_ht.ttzcr->Write();
     p_data.h_met.ttzcr->Write(); p_ttw.h_met.ttzcr->Write(); p_ttz.h_met.ttzcr->Write(); p_tth.h_met.ttzcr->Write(); p_wz.h_met.ttzcr->Write(); p_ww.h_met.ttzcr->Write(); p_xg.h_met.ttzcr->Write(); p_rares.h_met.ttzcr->Write(); p_flips.h_met.ttzcr->Write(); p_fakes.h_met.ttzcr->Write(); p_tttt.h_met.ttzcr->Write();
     p_data.h_mll.ttzcr->Write(); p_ttw.h_mll.ttzcr->Write(); p_ttz.h_mll.ttzcr->Write(); p_tth.h_mll.ttzcr->Write(); p_wz.h_mll.ttzcr->Write(); p_ww.h_mll.ttzcr->Write(); p_xg.h_mll.ttzcr->Write(); p_rares.h_mll.ttzcr->Write(); p_flips.h_mll.ttzcr->Write(); p_fakes.h_mll.ttzcr->Write(); p_tttt.h_mll.ttzcr->Write();
-    p_data.h_mlle.ttzcr->Write(); p_ttw.h_mlle.ttzcr->Write(); p_ttz.h_mlle.ttzcr->Write(); p_tth.h_mlle.ttzcr->Write(); p_wz.h_mlle.ttzcr->Write(); p_ww.h_mlle.ttzcr->Write(); p_xg.h_mlle.ttzcr->Write(); p_rares.h_mlle.ttzcr->Write(); p_flips.h_mlle.ttzcr->Write(); p_fakes.h_mlle.ttzcr->Write(); p_tttt.h_mlle.ttzcr->Write();
-    p_data.h_mllem.ttzcr->Write(); p_ttw.h_mllem.ttzcr->Write(); p_ttz.h_mllem.ttzcr->Write(); p_tth.h_mllem.ttzcr->Write(); p_wz.h_mllem.ttzcr->Write(); p_ww.h_mllem.ttzcr->Write(); p_xg.h_mllem.ttzcr->Write(); p_rares.h_mllem.ttzcr->Write(); p_flips.h_mllem.ttzcr->Write(); p_fakes.h_mllem.ttzcr->Write(); p_tttt.h_mllem.ttzcr->Write();
-    p_data.h_mllmu.ttzcr->Write(); p_ttw.h_mllmu.ttzcr->Write(); p_ttz.h_mllmu.ttzcr->Write(); p_tth.h_mllmu.ttzcr->Write(); p_wz.h_mllmu.ttzcr->Write(); p_ww.h_mllmu.ttzcr->Write(); p_xg.h_mllmu.ttzcr->Write(); p_rares.h_mllmu.ttzcr->Write(); p_flips.h_mllmu.ttzcr->Write(); p_fakes.h_mllmu.ttzcr->Write(); p_tttt.h_mllmu.ttzcr->Write();
     p_data.h_mtmin.ttzcr->Write(); p_ttw.h_mtmin.ttzcr->Write(); p_ttz.h_mtmin.ttzcr->Write(); p_tth.h_mtmin.ttzcr->Write(); p_wz.h_mtmin.ttzcr->Write(); p_ww.h_mtmin.ttzcr->Write(); p_xg.h_mtmin.ttzcr->Write(); p_rares.h_mtmin.ttzcr->Write(); p_flips.h_mtmin.ttzcr->Write(); p_fakes.h_mtmin.ttzcr->Write(); p_tttt.h_mtmin.ttzcr->Write();
-    p_data.h_mt2real.ttzcr->Write(); p_ttw.h_mt2real.ttzcr->Write(); p_ttz.h_mt2real.ttzcr->Write(); p_tth.h_mt2real.ttzcr->Write(); p_wz.h_mt2real.ttzcr->Write(); p_ww.h_mt2real.ttzcr->Write(); p_xg.h_mt2real.ttzcr->Write(); p_rares.h_mt2real.ttzcr->Write(); p_flips.h_mt2real.ttzcr->Write(); p_fakes.h_mt2real.ttzcr->Write(); p_tttt.h_mt2real.ttzcr->Write();
     p_data.h_njets.ttzcr->Write(); p_ttw.h_njets.ttzcr->Write(); p_ttz.h_njets.ttzcr->Write(); p_tth.h_njets.ttzcr->Write(); p_wz.h_njets.ttzcr->Write(); p_ww.h_njets.ttzcr->Write(); p_xg.h_njets.ttzcr->Write(); p_rares.h_njets.ttzcr->Write(); p_flips.h_njets.ttzcr->Write(); p_fakes.h_njets.ttzcr->Write(); p_tttt.h_njets.ttzcr->Write();
     p_data.h_nleps.ttzcr->Write(); p_ttw.h_nleps.ttzcr->Write(); p_ttz.h_nleps.ttzcr->Write(); p_tth.h_nleps.ttzcr->Write(); p_wz.h_nleps.ttzcr->Write(); p_ww.h_nleps.ttzcr->Write(); p_xg.h_nleps.ttzcr->Write(); p_rares.h_nleps.ttzcr->Write(); p_flips.h_nleps.ttzcr->Write(); p_fakes.h_nleps.ttzcr->Write(); p_tttt.h_nleps.ttzcr->Write();
     p_data.h_wcands.ttzcr->Write(); p_ttw.h_wcands.ttzcr->Write(); p_ttz.h_wcands.ttzcr->Write(); p_tth.h_wcands.ttzcr->Write(); p_wz.h_wcands.ttzcr->Write(); p_ww.h_wcands.ttzcr->Write(); p_xg.h_wcands.ttzcr->Write(); p_rares.h_wcands.ttzcr->Write(); p_flips.h_wcands.ttzcr->Write(); p_fakes.h_wcands.ttzcr->Write(); p_tttt.h_wcands.ttzcr->Write();
@@ -331,11 +257,7 @@ void getyields(){
     p_data.h_ht.ttwcr->Write(); p_ttw.h_ht.ttwcr->Write(); p_ttz.h_ht.ttwcr->Write(); p_tth.h_ht.ttwcr->Write(); p_wz.h_ht.ttwcr->Write(); p_ww.h_ht.ttwcr->Write(); p_xg.h_ht.ttwcr->Write(); p_rares.h_ht.ttwcr->Write(); p_flips.h_ht.ttwcr->Write(); p_fakes.h_ht.ttwcr->Write(); p_tttt.h_ht.ttwcr->Write();
     p_data.h_met.ttwcr->Write(); p_ttw.h_met.ttwcr->Write(); p_ttz.h_met.ttwcr->Write(); p_tth.h_met.ttwcr->Write(); p_wz.h_met.ttwcr->Write(); p_ww.h_met.ttwcr->Write(); p_xg.h_met.ttwcr->Write(); p_rares.h_met.ttwcr->Write(); p_flips.h_met.ttwcr->Write(); p_fakes.h_met.ttwcr->Write(); p_tttt.h_met.ttwcr->Write();
     p_data.h_mll.ttwcr->Write(); p_ttw.h_mll.ttwcr->Write(); p_ttz.h_mll.ttwcr->Write(); p_tth.h_mll.ttwcr->Write(); p_wz.h_mll.ttwcr->Write(); p_ww.h_mll.ttwcr->Write(); p_xg.h_mll.ttwcr->Write(); p_rares.h_mll.ttwcr->Write(); p_flips.h_mll.ttwcr->Write(); p_fakes.h_mll.ttwcr->Write(); p_tttt.h_mll.ttwcr->Write();
-    p_data.h_mlle.ttwcr->Write(); p_ttw.h_mlle.ttwcr->Write(); p_ttz.h_mlle.ttwcr->Write(); p_tth.h_mlle.ttwcr->Write(); p_wz.h_mlle.ttwcr->Write(); p_ww.h_mlle.ttwcr->Write(); p_xg.h_mlle.ttwcr->Write(); p_rares.h_mlle.ttwcr->Write(); p_flips.h_mlle.ttwcr->Write(); p_fakes.h_mlle.ttwcr->Write(); p_tttt.h_mlle.ttwcr->Write();
-    p_data.h_mllem.ttwcr->Write(); p_ttw.h_mllem.ttwcr->Write(); p_ttz.h_mllem.ttwcr->Write(); p_tth.h_mllem.ttwcr->Write(); p_wz.h_mllem.ttwcr->Write(); p_ww.h_mllem.ttwcr->Write(); p_xg.h_mllem.ttwcr->Write(); p_rares.h_mllem.ttwcr->Write(); p_flips.h_mllem.ttwcr->Write(); p_fakes.h_mllem.ttwcr->Write(); p_tttt.h_mllem.ttwcr->Write();
-    p_data.h_mllmu.ttwcr->Write(); p_ttw.h_mllmu.ttwcr->Write(); p_ttz.h_mllmu.ttwcr->Write(); p_tth.h_mllmu.ttwcr->Write(); p_wz.h_mllmu.ttwcr->Write(); p_ww.h_mllmu.ttwcr->Write(); p_xg.h_mllmu.ttwcr->Write(); p_rares.h_mllmu.ttwcr->Write(); p_flips.h_mllmu.ttwcr->Write(); p_fakes.h_mllmu.ttwcr->Write(); p_tttt.h_mllmu.ttwcr->Write();
     p_data.h_mtmin.ttwcr->Write(); p_ttw.h_mtmin.ttwcr->Write(); p_ttz.h_mtmin.ttwcr->Write(); p_tth.h_mtmin.ttwcr->Write(); p_wz.h_mtmin.ttwcr->Write(); p_ww.h_mtmin.ttwcr->Write(); p_xg.h_mtmin.ttwcr->Write(); p_rares.h_mtmin.ttwcr->Write(); p_flips.h_mtmin.ttwcr->Write(); p_fakes.h_mtmin.ttwcr->Write(); p_tttt.h_mtmin.ttwcr->Write();
-    p_data.h_mt2real.ttwcr->Write(); p_ttw.h_mt2real.ttwcr->Write(); p_ttz.h_mt2real.ttwcr->Write(); p_tth.h_mt2real.ttwcr->Write(); p_wz.h_mt2real.ttwcr->Write(); p_ww.h_mt2real.ttwcr->Write(); p_xg.h_mt2real.ttwcr->Write(); p_rares.h_mt2real.ttwcr->Write(); p_flips.h_mt2real.ttwcr->Write(); p_fakes.h_mt2real.ttwcr->Write(); p_tttt.h_mt2real.ttwcr->Write();
     p_data.h_njets.ttwcr->Write(); p_ttw.h_njets.ttwcr->Write(); p_ttz.h_njets.ttwcr->Write(); p_tth.h_njets.ttwcr->Write(); p_wz.h_njets.ttwcr->Write(); p_ww.h_njets.ttwcr->Write(); p_xg.h_njets.ttwcr->Write(); p_rares.h_njets.ttwcr->Write(); p_flips.h_njets.ttwcr->Write(); p_fakes.h_njets.ttwcr->Write(); p_tttt.h_njets.ttwcr->Write();
     p_data.h_nleps.ttwcr->Write(); p_ttw.h_nleps.ttwcr->Write(); p_ttz.h_nleps.ttwcr->Write(); p_tth.h_nleps.ttwcr->Write(); p_wz.h_nleps.ttwcr->Write(); p_ww.h_nleps.ttwcr->Write(); p_xg.h_nleps.ttwcr->Write(); p_rares.h_nleps.ttwcr->Write(); p_flips.h_nleps.ttwcr->Write(); p_fakes.h_nleps.ttwcr->Write(); p_tttt.h_nleps.ttwcr->Write();
     p_data.h_wcands.ttwcr->Write(); p_ttw.h_wcands.ttwcr->Write(); p_ttz.h_wcands.ttwcr->Write(); p_tth.h_wcands.ttwcr->Write(); p_wz.h_wcands.ttwcr->Write(); p_ww.h_wcands.ttwcr->Write(); p_xg.h_wcands.ttwcr->Write(); p_rares.h_wcands.ttwcr->Write(); p_flips.h_wcands.ttwcr->Write(); p_fakes.h_wcands.ttwcr->Write(); p_tttt.h_wcands.ttwcr->Write();
@@ -355,11 +277,7 @@ void getyields(){
     p_data.h_ht.br->Write(); p_ttw.h_ht.br->Write(); p_ttz.h_ht.br->Write(); p_tth.h_ht.br->Write(); p_wz.h_ht.br->Write(); p_ww.h_ht.br->Write(); p_xg.h_ht.br->Write(); p_rares.h_ht.br->Write(); p_flips.h_ht.br->Write(); p_fakes.h_ht.br->Write(); p_tttt.h_ht.br->Write();
     p_data.h_met.br->Write(); p_ttw.h_met.br->Write(); p_ttz.h_met.br->Write(); p_tth.h_met.br->Write(); p_wz.h_met.br->Write(); p_ww.h_met.br->Write(); p_xg.h_met.br->Write(); p_rares.h_met.br->Write(); p_flips.h_met.br->Write(); p_fakes.h_met.br->Write(); p_tttt.h_met.br->Write();
     p_data.h_mll.br->Write(); p_ttw.h_mll.br->Write(); p_ttz.h_mll.br->Write(); p_tth.h_mll.br->Write(); p_wz.h_mll.br->Write(); p_ww.h_mll.br->Write(); p_xg.h_mll.br->Write(); p_rares.h_mll.br->Write(); p_flips.h_mll.br->Write(); p_fakes.h_mll.br->Write(); p_tttt.h_mll.br->Write();
-    p_data.h_mlle.br->Write(); p_ttw.h_mlle.br->Write(); p_ttz.h_mlle.br->Write(); p_tth.h_mlle.br->Write(); p_wz.h_mlle.br->Write(); p_ww.h_mlle.br->Write(); p_xg.h_mlle.br->Write(); p_rares.h_mlle.br->Write(); p_flips.h_mlle.br->Write(); p_fakes.h_mlle.br->Write(); p_tttt.h_mlle.br->Write();
-    p_data.h_mllem.br->Write(); p_ttw.h_mllem.br->Write(); p_ttz.h_mllem.br->Write(); p_tth.h_mllem.br->Write(); p_wz.h_mllem.br->Write(); p_ww.h_mllem.br->Write(); p_xg.h_mllem.br->Write(); p_rares.h_mllem.br->Write(); p_flips.h_mllem.br->Write(); p_fakes.h_mllem.br->Write(); p_tttt.h_mllem.br->Write();
-    p_data.h_mllmu.br->Write(); p_ttw.h_mllmu.br->Write(); p_ttz.h_mllmu.br->Write(); p_tth.h_mllmu.br->Write(); p_wz.h_mllmu.br->Write(); p_ww.h_mllmu.br->Write(); p_xg.h_mllmu.br->Write(); p_rares.h_mllmu.br->Write(); p_flips.h_mllmu.br->Write(); p_fakes.h_mllmu.br->Write(); p_tttt.h_mllmu.br->Write();
     p_data.h_mtmin.br->Write(); p_ttw.h_mtmin.br->Write(); p_ttz.h_mtmin.br->Write(); p_tth.h_mtmin.br->Write(); p_wz.h_mtmin.br->Write(); p_ww.h_mtmin.br->Write(); p_xg.h_mtmin.br->Write(); p_rares.h_mtmin.br->Write(); p_flips.h_mtmin.br->Write(); p_fakes.h_mtmin.br->Write(); p_tttt.h_mtmin.br->Write();
-    p_data.h_mt2real.br->Write(); p_ttw.h_mt2real.br->Write(); p_ttz.h_mt2real.br->Write(); p_tth.h_mt2real.br->Write(); p_wz.h_mt2real.br->Write(); p_ww.h_mt2real.br->Write(); p_xg.h_mt2real.br->Write(); p_rares.h_mt2real.br->Write(); p_flips.h_mt2real.br->Write(); p_fakes.h_mt2real.br->Write(); p_tttt.h_mt2real.br->Write();
     p_data.h_njets.br->Write(); p_ttw.h_njets.br->Write(); p_ttz.h_njets.br->Write(); p_tth.h_njets.br->Write(); p_wz.h_njets.br->Write(); p_ww.h_njets.br->Write(); p_xg.h_njets.br->Write(); p_rares.h_njets.br->Write(); p_flips.h_njets.br->Write(); p_fakes.h_njets.br->Write(); p_tttt.h_njets.br->Write();
     p_data.h_nleps.br->Write(); p_ttw.h_nleps.br->Write(); p_ttz.h_nleps.br->Write(); p_tth.h_nleps.br->Write(); p_wz.h_nleps.br->Write(); p_ww.h_nleps.br->Write(); p_xg.h_nleps.br->Write(); p_rares.h_nleps.br->Write(); p_flips.h_nleps.br->Write(); p_fakes.h_nleps.br->Write(); p_tttt.h_nleps.br->Write();
     p_data.h_wcands.br->Write(); p_ttw.h_wcands.br->Write(); p_ttz.h_wcands.br->Write(); p_tth.h_wcands.br->Write(); p_wz.h_wcands.br->Write(); p_ww.h_wcands.br->Write(); p_xg.h_wcands.br->Write(); p_rares.h_wcands.br->Write(); p_flips.h_wcands.br->Write(); p_fakes.h_wcands.br->Write(); p_tttt.h_wcands.br->Write();
@@ -418,11 +336,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_ht.sr       = new TH1F(Form("sr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.sr      = new TH1F(Form("sr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
     p_result.h_mll.sr      = new TH1F(Form("sr_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mlle.sr     = new TH1F(Form("sr_mlle_%s"       , chainTitleCh) , Form("mlle_%s"       , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllem.sr    = new TH1F(Form("sr_mllem_%s"      , chainTitleCh) , Form("mllem_%s"      , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllmu.sr    = new TH1F(Form("sr_mllmu_%s"      , chainTitleCh) , Form("mllmu_%s"      , chainTitleCh) , 20      , 0    , 200);
     p_result.h_mtmin.sr    = new TH1F(Form("sr_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_mt2real.sr  = new TH1F(Form("sr_mt2real_%s"    , chainTitleCh) , Form("mt2real_%s"    , chainTitleCh) , 20      , 0    , 200);
     p_result.h_njets.sr    = new TH1F(Form("sr_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
     p_result.h_nleps.sr    = new TH1F(Form("sr_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
     p_result.h_nbtags.sr   = new TH1F(Form("sr_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
@@ -442,11 +356,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_ht.ttzcr       = new TH1F(Form("ttzcr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.ttzcr      = new TH1F(Form("ttzcr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
     p_result.h_mll.ttzcr      = new TH1F(Form("ttzcr_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mlle.ttzcr     = new TH1F(Form("ttzcr_mlle_%s"       , chainTitleCh) , Form("mlle_%s"       , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllem.ttzcr    = new TH1F(Form("ttzcr_mllem_%s"      , chainTitleCh) , Form("mllem_%s"      , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllmu.ttzcr    = new TH1F(Form("ttzcr_mllmu_%s"      , chainTitleCh) , Form("mllmu_%s"      , chainTitleCh) , 20      , 0    , 200);
     p_result.h_mtmin.ttzcr    = new TH1F(Form("ttzcr_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_mt2real.ttzcr  = new TH1F(Form("ttzcr_mt2real_%s"    , chainTitleCh) , Form("mt2real_%s"    , chainTitleCh) , 20      , 0    , 200);
     p_result.h_njets.ttzcr    = new TH1F(Form("ttzcr_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
     p_result.h_nleps.ttzcr    = new TH1F(Form("ttzcr_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
     p_result.h_nbtags.ttzcr   = new TH1F(Form("ttzcr_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
@@ -466,11 +376,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_ht.ttwcr       = new TH1F(Form("ttwcr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.ttwcr      = new TH1F(Form("ttwcr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
     p_result.h_mll.ttwcr      = new TH1F(Form("ttwcr_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mlle.ttwcr     = new TH1F(Form("ttwcr_mlle_%s"       , chainTitleCh) , Form("mlle_%s"       , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllem.ttwcr    = new TH1F(Form("ttwcr_mllem_%s"      , chainTitleCh) , Form("mllem_%s"      , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllmu.ttwcr    = new TH1F(Form("ttwcr_mllmu_%s"      , chainTitleCh) , Form("mllmu_%s"      , chainTitleCh) , 20      , 0    , 200);
     p_result.h_mtmin.ttwcr    = new TH1F(Form("ttwcr_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_mt2real.ttwcr  = new TH1F(Form("ttwcr_mt2real_%s"    , chainTitleCh) , Form("mt2real_%s"    , chainTitleCh) , 20      , 0    , 200);
     p_result.h_njets.ttwcr    = new TH1F(Form("ttwcr_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
     p_result.h_nleps.ttwcr    = new TH1F(Form("ttwcr_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
     p_result.h_nbtags.ttwcr   = new TH1F(Form("ttwcr_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
@@ -490,11 +396,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_ht.br       = new TH1F(Form("br_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.br      = new TH1F(Form("br_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
     p_result.h_mll.br      = new TH1F(Form("br_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mlle.br     = new TH1F(Form("br_mlle_%s"       , chainTitleCh) , Form("mlle_%s"       , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllem.br    = new TH1F(Form("br_mllem_%s"      , chainTitleCh) , Form("mllem_%s"      , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllmu.br    = new TH1F(Form("br_mllmu_%s"      , chainTitleCh) , Form("mllmu_%s"      , chainTitleCh) , 20      , 0    , 200);
     p_result.h_mtmin.br    = new TH1F(Form("br_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_mt2real.br  = new TH1F(Form("br_mt2real_%s"    , chainTitleCh) , Form("mt2real_%s"    , chainTitleCh) , 20      , 0    , 200);
     p_result.h_njets.br    = new TH1F(Form("br_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
     p_result.h_nleps.br    = new TH1F(Form("br_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
     p_result.h_nbtags.br   = new TH1F(Form("br_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
@@ -521,11 +423,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     initHistError(doPoisson, p_result.h_ht.sr         );
     initHistError(doPoisson, p_result.h_met.sr        );
     initHistError(doPoisson, p_result.h_mll.sr        );
-    initHistError(doPoisson, p_result.h_mlle.sr        );
-    initHistError(doPoisson, p_result.h_mllem.sr        );
-    initHistError(doPoisson, p_result.h_mllmu.sr        );
     initHistError(doPoisson, p_result.h_mtmin.sr      );
-    initHistError(doPoisson, p_result.h_mt2real.sr    );
     initHistError(doPoisson, p_result.h_njets.sr      );
     initHistError(doPoisson, p_result.h_nleps.sr      );
     initHistError(doPoisson, p_result.h_nbtags.sr     );
@@ -544,11 +442,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     initHistError(doPoisson, p_result.h_ht.ttzcr         );
     initHistError(doPoisson, p_result.h_met.ttzcr        );
     initHistError(doPoisson, p_result.h_mll.ttzcr        );
-    initHistError(doPoisson, p_result.h_mlle.ttzcr        );
-    initHistError(doPoisson, p_result.h_mllem.ttzcr        );
-    initHistError(doPoisson, p_result.h_mllmu.ttzcr        );
     initHistError(doPoisson, p_result.h_mtmin.ttzcr      );
-    initHistError(doPoisson, p_result.h_mt2real.ttzcr    );
     initHistError(doPoisson, p_result.h_njets.ttzcr      );
     initHistError(doPoisson, p_result.h_nleps.ttzcr      );
     initHistError(doPoisson, p_result.h_nbtags.ttzcr     );
@@ -567,11 +461,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     initHistError(doPoisson, p_result.h_ht.ttwcr         );
     initHistError(doPoisson, p_result.h_met.ttwcr        );
     initHistError(doPoisson, p_result.h_mll.ttwcr        );
-    initHistError(doPoisson, p_result.h_mlle.ttwcr        );
-    initHistError(doPoisson, p_result.h_mllem.ttwcr        );
-    initHistError(doPoisson, p_result.h_mllmu.ttwcr        );
     initHistError(doPoisson, p_result.h_mtmin.ttwcr      );
-    initHistError(doPoisson, p_result.h_mt2real.ttwcr    );
     initHistError(doPoisson, p_result.h_njets.ttwcr      );
     initHistError(doPoisson, p_result.h_nleps.ttwcr      );
     initHistError(doPoisson, p_result.h_nbtags.ttwcr     );
@@ -590,11 +480,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     initHistError(doPoisson, p_result.h_ht.br         );
     initHistError(doPoisson, p_result.h_met.br        );
     initHistError(doPoisson, p_result.h_mll.br        );
-    initHistError(doPoisson, p_result.h_mlle.br        );
-    initHistError(doPoisson, p_result.h_mllem.br        );
-    initHistError(doPoisson, p_result.h_mllmu.br        );
     initHistError(doPoisson, p_result.h_mtmin.br      );
-    initHistError(doPoisson, p_result.h_mt2real.br    );
     initHistError(doPoisson, p_result.h_njets.br      );
     initHistError(doPoisson, p_result.h_nleps.br      );
     initHistError(doPoisson, p_result.h_nbtags.br     );
@@ -649,12 +535,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             //Reject not triggered
-            if (useMCtriggers) {
-                if (!ss::fired_trigger()) continue;
-            } else {
-                if (!ss::fired_trigger() && ss::is_real_data()) continue;
-            }
-            if (!ss::passedFilterList()) continue;
+            if (!ss::fired_trigger()) continue;
             if (!ss::passes_met_filters()) continue;
 
             if (doCustomSelection) {
@@ -665,17 +546,12 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             weight*=scaleLumi;
 
             if (DOWEIGHTS) {
-                if (doPUrw && !ss::is_real_data()) {
-                    if (doMoriondPUw) weight *= getTruePUw_Moriond(ss::trueNumInt()[0]);
-                    else weight *= getTruePUw(ss::trueNumInt()[0]);
+                if (!ss::is_real_data()) {
+                    weight *= getTruePUw_Moriond(ss::trueNumInt()[0]);
                 }
-                if (useBtagSF) weight*=ss::weight_btagsf();
+                weight*=ss::weight_btagsf();
                 // if (isWZ) weight*=getWZSF();
                 // if (isttZ && applyttZSF) weight*=getttZSF();
-                if(!ss::is_real_data()) {
-                    if (!useMCtriggers) {
-                    }
-                }
                 //apply lepton scale factors
                 if (ss::is_real_data()==0 && (!isWZ) && (!isttZ || !applyttZSF)) {
                     weight*=eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
@@ -954,11 +830,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_ht.br->Fill(ss::ht() , weight);
                 p_result.h_met.br->Fill(ss::met() , weight);
                 p_result.h_mll.br->Fill(mll , weight);
-                if (mytype == 3) p_result.h_mlle.br->Fill(mll , weight);
-                if (mytype == 1 || mytype == 2) p_result.h_mllem.br->Fill(mll , weight);
-                if (mytype == 0) p_result.h_mllmu.br->Fill(mll , weight);
                 p_result.h_mtmin.br->Fill(mtmin , weight);
-                p_result.h_mt2real.br->Fill(ss::mt2() , weight);
                 p_result.h_l1pt.br->Fill(pto1, weight);
                 p_result.h_l2pt.br->Fill(pto2, weight);
                 (abs(ss::lep1_id()) == 11) ? p_result.h_el_l1pt.br->Fill(pto1, weight) : p_result.h_mu_l1pt.br->Fill(pto1, weight);
@@ -979,11 +851,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_ht.ttzcr->Fill(ss::ht() , weight);
                 p_result.h_met.ttzcr->Fill(ss::met() , weight);
                 p_result.h_mll.ttzcr->Fill(mll , weight);
-                if (mytype == 3) p_result.h_mlle.ttzcr->Fill(mll , weight);
-                if (mytype == 1 || mytype == 2) p_result.h_mllem.ttzcr->Fill(mll , weight);
-                if (mytype == 0) p_result.h_mllmu.ttzcr->Fill(mll , weight);
                 p_result.h_mtmin.ttzcr->Fill(mtmin , weight);
-                p_result.h_mt2real.ttzcr->Fill(ss::mt2() , weight);
                 p_result.h_l1pt.ttzcr->Fill(pto1, weight);
                 p_result.h_l2pt.ttzcr->Fill(pto2, weight);
                 (abs(ss::lep1_id()) == 11) ? p_result.h_el_l1pt.ttzcr->Fill(pto1, weight) : p_result.h_mu_l1pt.ttzcr->Fill(pto1, weight);
@@ -1004,11 +872,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_ht.ttwcr->Fill(ss::ht() , weight);
                 p_result.h_met.ttwcr->Fill(ss::met() , weight);
                 p_result.h_mll.ttwcr->Fill(mll , weight);
-                if (mytype == 3) p_result.h_mlle.ttwcr->Fill(mll , weight);
-                if (mytype == 1 || mytype == 2) p_result.h_mllem.ttwcr->Fill(mll , weight);
-                if (mytype == 0) p_result.h_mllmu.ttwcr->Fill(mll , weight);
                 p_result.h_mtmin.ttwcr->Fill(mtmin , weight);
-                p_result.h_mt2real.ttwcr->Fill(ss::mt2() , weight);
                 p_result.h_l1pt.ttwcr->Fill(pto1, weight);
                 p_result.h_l2pt.ttwcr->Fill(pto2, weight);
                 (abs(ss::lep1_id()) == 11) ? p_result.h_el_l1pt.ttwcr->Fill(pto1, weight) : p_result.h_mu_l1pt.ttwcr->Fill(pto1, weight);
@@ -1029,11 +893,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_ht.sr->Fill(ss::ht() , weight);
                 p_result.h_met.sr->Fill(ss::met() , weight);
                 p_result.h_mll.sr->Fill(mll , weight);
-                if (mytype == 3) p_result.h_mlle.sr->Fill(mll , weight);
-                if (mytype == 1 || mytype == 2) p_result.h_mllem.sr->Fill(mll , weight);
-                if (mytype == 0) p_result.h_mllmu.sr->Fill(mll , weight);
                 p_result.h_mtmin.sr->Fill(mtmin , weight);
-                p_result.h_mt2real.sr->Fill(ss::mt2() , weight);
                 p_result.h_l1pt.sr->Fill(pto1, weight);
                 p_result.h_l2pt.sr->Fill(pto2, weight);
                 (abs(ss::lep1_id()) == 11) ? p_result.h_el_l1pt.sr->Fill(pto1, weight) : p_result.h_mu_l1pt.sr->Fill(pto1, weight);
