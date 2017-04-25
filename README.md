@@ -1,10 +1,10 @@
-## fourtop
+# fourtop
 Looking for four top in all the right places.
 
 ![Mascot](http://i.imgur.com/k2FvE22.png)
 
-### How to prepare to take over the country
-#### Prepare the campaign
+## How to prepare to take over the country
+### Prepare the campaign
 ```bash
 # winners use git
 git clone https://github.com/aminnj/fourtop
@@ -12,7 +12,7 @@ git clone https://github.com/aminnj/fourtop
 source install.sh
 ```
 
-#### [Make babies](babymaking/batch/README.md) (more babies = more votes)
+### [Make babies](babymaking/batch/README.md) (more babies = more votes)
 ```bash
 cd babymaking/batch/
 ```
