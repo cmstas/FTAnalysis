@@ -1,5 +1,5 @@
-therelease=CMSSW_8_0_26_patch2
-export SCRAM_ARCH=slc6_amd64_gcc530
+therelease=CMSSW_7_4_7_patch1
+# export SCRAM_ARCH=slc6_amd64_gcc530
 mkdir -p common
 if [ ! -d common/$therelease ]; then 
     cd common/ ;

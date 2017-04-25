@@ -17,12 +17,12 @@ source install.sh
 cd babymaking/batch/
 ```
 
-### [How to run the country](analysis/yields/)
+### [Count the votes](analysis/yields/)
 ```bash
 cd analysis/yields/
 ```
 
-### [How to show we are the best](analysis/limits/)
+### [Show we are the best](analysis/limits/)
 ```bash
 cd analysis/limits/
 ```
