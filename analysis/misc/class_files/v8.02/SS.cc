@@ -283,6 +283,11 @@ void SSAG::Init(TTree *tree) {
 		lep2_motherID_branch = tree->GetBranch("lep2_motherID");
 		if (lep2_motherID_branch) {lep2_motherID_branch->SetAddress(&lep2_motherID_);}
 	}
+	lep3_motherID_branch = 0;
+	if (tree->GetBranch("lep3_motherID") != 0) {
+		lep3_motherID_branch = tree->GetBranch("lep3_motherID");
+		if (lep3_motherID_branch) {lep3_motherID_branch->SetAddress(&lep3_motherID_);}
+	}
 	lep1_mc_id_branch = 0;
 	if (tree->GetBranch("lep1_mc_id") != 0) {
 		lep1_mc_id_branch = tree->GetBranch("lep1_mc_id");
@@ -1554,6 +1559,7 @@ void SSAG::GetEntry(unsigned int idx)
 		ht_isLoaded = false;
 		lep1_motherID_isLoaded = false;
 		lep2_motherID_isLoaded = false;
+		lep3_motherID_isLoaded = false;
 		lep1_mc_id_isLoaded = false;
 		lep2_mc_id_isLoaded = false;
 		lep1_id_isLoaded = false;
@@ -1860,6 +1866,7 @@ void SSAG::LoadAllBranches()
 	if (ht_branch != 0) ht();
 	if (lep1_motherID_branch != 0) lep1_motherID();
 	if (lep2_motherID_branch != 0) lep2_motherID();
+	if (lep3_motherID_branch != 0) lep3_motherID();
 	if (lep1_mc_id_branch != 0) lep1_mc_id();
 	if (lep2_mc_id_branch != 0) lep2_mc_id();
 	if (lep1_id_branch != 0) lep1_id();
@@ -2643,7 +2650,20 @@ void SSAG::LoadAllBranches()
 		}
 		return lep2_motherID_;
 	}
-	const int &SSAG::lep1_mc_id()
+  const int &SSAG::lep3_motherID()
+  {
+    if (not lep3_motherID_isLoaded) {
+      if (lep3_motherID_branch != 0) {
+        lep3_motherID_branch->GetEntry(index);
+      } else { 
+        printf("branch lep3_motherID_branch does not exist!\n");
+        exit(1);
+      }
+      lep3_motherID_isLoaded = true;
+    }
+    return lep3_motherID_;
+  }
+  const int &SSAG::lep1_mc_id()
 	{
 		if (not lep1_mc_id_isLoaded) {
 			if (lep1_mc_id_branch != 0) {
@@ -6101,6 +6121,7 @@ namespace ss {
 	const float &ht() { return samesign.ht(); }
 	const int &lep1_motherID() { return samesign.lep1_motherID(); }
 	const int &lep2_motherID() { return samesign.lep2_motherID(); }
+	const int &lep3_motherID() { return samesign.lep3_motherID(); }
 	const int &lep1_mc_id() { return samesign.lep1_mc_id(); }
 	const int &lep2_mc_id() { return samesign.lep2_mc_id(); }
 	const int &lep1_id() { return samesign.lep1_id(); }

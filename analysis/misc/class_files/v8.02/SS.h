@@ -145,6 +145,9 @@ protected:
 	int      lep2_motherID_;
 	TBranch *lep2_motherID_branch;
 	bool     lep2_motherID_isLoaded;
+	int      lep3_motherID_;
+	TBranch *lep3_motherID_branch;
+	bool     lep3_motherID_isLoaded;
 	int      lep1_mc_id_;
 	TBranch *lep1_mc_id_branch;
 	bool     lep1_mc_id_isLoaded;
@@ -972,6 +975,7 @@ void LoadAllBranches();
 	const float &ht();
 	const int &lep1_motherID();
 	const int &lep2_motherID();
+	const int &lep3_motherID();
 	const int &lep1_mc_id();
 	const int &lep2_mc_id();
 	const int &lep1_id();
@@ -1282,6 +1286,7 @@ namespace ss {
 	const float &ht();
 	const int &lep1_motherID();
 	const int &lep2_motherID();
+	const int &lep3_motherID();
 	const int &lep1_mc_id();
 	const int &lep2_mc_id();
 	const int &lep1_id();
