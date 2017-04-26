@@ -35,7 +35,6 @@ if __name__ == "__main__":
           "type"       : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel type --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "charge"     : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel charge --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "nleps"      : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel Nleps --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
-          "wcands"     : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel Wcands --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "l1pt"       : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered l1pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "l2pt"       : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered l2pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "l3pt"       : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered l3pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
@@ -82,27 +81,20 @@ if __name__ == "__main__":
                 "outputName": oname,
             }
 
-            # print oname
-            # continue
 
-            # opts_str = d_opts_br[name]
-
-
-            # bgs = map(lambda x: f1.Get("{0}_{1}".format(name,x)), ["data","tttt","ttw","ttzh","wz","ww","xg","rares","flips","fakes"])
             bgs = map(lambda x: f1.Get("{0}_{1}".format(name,x)), ["data","tttt","ttw","ttz","tth","wz","ww","xg","rares","flips","fakes"])
             h_data,h_tttt,bgs = bgs[0], bgs[1], bgs[2:]
-            # print h_data
-            # print h_tttt
             h_data_empty = h_data.Clone("empty")
             h_data_empty.Reset()
 
             print name
-            # print h_data, h_tttt, bgs
 
             h_tttt.Sumw2()
             h_tttt.Scale(10.0)
 
-            dataMCplot(h_data, bgs=bgs, sigs=[h_tttt], sigtitles=["t#bar{t}t#bar{t} x 10"], systs=systs, titles=titles, title=title, subtitle=subtitle, colors=colors, opts=d_newopts, opts_str=opts_str)
+            do_unblind = False
+            if do_unblind:
+                dataMCplot(h_data, bgs=bgs, sigs=[h_tttt], sigtitles=["t#bar{t}t#bar{t} x 10"], systs=systs, titles=titles, title=title, subtitle=subtitle, colors=colors, opts=d_newopts, opts_str=opts_str)
 
             d_newopts["outputName"] = d_newopts["outputName"].replace(".pdf","_blind.pdf")
             d_newopts["poissonErrorsNoZeros"] = False
@@ -112,7 +104,7 @@ if __name__ == "__main__":
 
 # os.system("ic plots/SRCR_blind.pdf")
 os.system("cp ../misc/signal_regions.h plots/SR.extra")
-os.system("niceplots plots plots_tttt_Apr24")
+os.system("niceplots plots plots_tttt_Apr26")
 
 # os.system("niceplots plots plots_tttt_Apr11_nonttwcr")
 # os.system("niceplots plots plots_tttt_Apr11_ttwcr")
