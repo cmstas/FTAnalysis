@@ -235,6 +235,8 @@ class babyMaker {
       //must be within 0.2
     int lep1_mc_id;
     int lep2_mc_id;
+    int lep1_mc_motherid;
+    int lep2_mc_motherid;
 
     //Electron-specific
     bool lep1_el_conv_vtx_flag;
@@ -304,7 +306,9 @@ class babyMaker {
     int lep3_id;
     int lep3_idx;
     int lep3_mcid;
-    int lep3_mcidx;
+    int lep3_mc_motherid;
+    int lep3_motherID;
+    int lep3_mc3idx;
     int lep3_quality;
     LorentzVector lep3_p4;
 

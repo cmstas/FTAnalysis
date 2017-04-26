@@ -60,6 +60,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_motherID"                                           , &lep2_motherID                                           );
   BabyTree->Branch("lep1_mc_id"                                              , &lep1_mc_id                                              );
   BabyTree->Branch("lep2_mc_id"                                              , &lep2_mc_id                                              );
+  BabyTree->Branch("lep1_mc_motherid"                                              , &lep1_mc_motherid                                              );
+  BabyTree->Branch("lep2_mc_motherid"                                              , &lep2_mc_motherid                                              );
   BabyTree->Branch("lep1_id"                                                 , &lep1_id                                                 );
   BabyTree->Branch("lep2_id"                                                 , &lep2_id                                                 );
   BabyTree->Branch("lep1_coneCorrPt"                                         , &lep1_coneCorrPt                                         );
@@ -221,7 +223,9 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("madeExtraZ"                                              , &madeExtraZ                                              );
   BabyTree->Branch("madeExtraG"                                              , &madeExtraG                                              );
   BabyTree->Branch("lep3_mcid"                                               , &lep3_mcid                                               );
-  BabyTree->Branch("lep3_mcidx"                                              , &lep3_mcidx                                              );
+  BabyTree->Branch("lep3_mc_motherid"                                               , &lep3_mc_motherid                                               );
+  BabyTree->Branch("lep3_mc3idx"                                              , &lep3_mc3idx                                              );
+  BabyTree->Branch("lep3_motherID"                                              , &lep3_motherID                                              );
   BabyTree->Branch("lep4_mcid"                                               , &lep4_mcid                                               );
   BabyTree->Branch("lep4_mcidx"                                              , &lep4_mcidx                                              );
   // BabyTree->Branch("mostJets"                                                , &mostJets                                                );
@@ -459,6 +463,8 @@ void babyMaker::InitBabyNtuple(){
     lep2_motherID = 0;
     lep1_mc_id = -1;
     lep2_mc_id = -1; 
+    lep1_mc_motherid = -1;
+    lep2_mc_motherid = -1; 
     lep1_id = -1;
     lep2_id = -1;
     lep1_coneCorrPt = -1;
@@ -507,7 +513,9 @@ void babyMaker::InitBabyNtuple(){
     lep4_idx = -1;
     lep3_quality = -1;
     lep3_mcid = -1; 
-    lep3_mcidx = -1;
+    lep3_mc_motherid = -1; 
+    lep3_mc3idx = -1;
+    lep3_motherID = -1;
     lep4_mcid = -1; 
     lep4_mcidx = -1;
     lep1_iso = -1;
@@ -941,8 +949,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep3_p4 = thirdLepton.first.p4();
     if (!is_real_data){
       pair <int, int> lep3_parentage = lepMotherID_v2(thirdLepton.first); 
-      lep3_mcidx = lep3_parentage.second;
-      lep3_mcid = lep3_mcidx >= 0 ? tas::genps_id().at(lep3_mcidx) : -9999; 
+      lep3_motherID = lep3_parentage.first;
+      lep3_mc3idx = lep3_parentage.second;
+      lep3_mcid = lep3_mc3idx >= 0 ? tas::genps_id().at(lep3_mc3idx) : -9999; 
+      lep3_mc_motherid                                              = (lep3_mc3idx < 0) ? 0 : tas::genps_id_mother().at(lep3_mc3idx); 
     }
   }
   lep3_quality = thirdLepton.second;
@@ -1115,6 +1125,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep2_mc3idx                                             = lep2_parentage.second;
     lep1_mc_id                                              = (lep1_mc3idx < 0) ? 0 : tas::genps_id().at(lep1_mc3idx); 
     lep2_mc_id                                              = (lep2_mc3idx < 0) ? 0 : tas::genps_id().at(lep2_mc3idx); 
+    lep1_mc_motherid                                              = (lep1_mc3idx < 0) ? 0 : tas::genps_id_mother().at(lep1_mc3idx); 
+    lep2_mc_motherid                                              = (lep2_mc3idx < 0) ? 0 : tas::genps_id_mother().at(lep2_mc3idx); 
     lep1_isPrompt                                           = (lep1_mc3idx < 0) ? 0 : tas::genps_isPromptFinalState().at(lep1_mc3idx);
     lep1_isStat3                                            = (lep1_mc3idx < 0) ? 0 : tas::genps_isMostlyLikePythia6Status3().at(lep1_mc3idx);
     lep1_isDirectPrompt                                     = (lep1_mc3idx < 0) ? 0 : tas::genps_isDirectPromptTauDecayProductFinalState().at(lep1_mc3idx);

@@ -20,6 +20,7 @@ This is what he does
 # Open up a screen before proceeding
 # Get environment
 cd NtupleTools/AutoTwopler/
+# edit `campaign` in `params.py` to be "SS_babymaker"
 . setup.sh
 cd ../../
 # Submit
