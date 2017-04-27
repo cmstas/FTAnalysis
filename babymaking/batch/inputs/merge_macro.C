@@ -5,7 +5,7 @@ void merge_macro(const TString& in, const TString& outpath) {
 
   //Set up chains and iterator
   TChain *chain = new TChain("t");
-  chain->SetMaxTreeSize(30000000000LL); //default is 100000000000LL
+  chain->SetMaxTreeSize(50000000000LL); //default is 100000000000LL
   if (verbose) std::cout << "Merging files from dir: " << in << std::endl << "Ouputting to: " << outpath << std::endl;
   chain->Add(in + "/*.root");
   TObjArray *listOfFiles = chain->GetListOfFiles();
@@ -16,12 +16,12 @@ void merge_macro(const TString& in, const TString& outpath) {
   currentFile = 0;
   fileIter.Reset(); 
   while ( (currentFile = (TFile*)fileIter.Next()) ){
-      std::cout << " currentFile->GetTitle(): " << currentFile->GetTitle() << std::endl;
-    TFile *file = TFile::Open(currentFile->GetTitle());
-    if (file->IsZombie()){
-      cout << "Error! " << currentFile->GetTitle() << " is corrupt" << endl;
-      return;  
-    }
+      std::cout << "File: " << currentFile->GetTitle() << std::endl;
+    // TFile *file = TFile::Open(currentFile->GetTitle());
+    // if (file->IsZombie()){
+    //   cout << "Error! " << currentFile->GetTitle() << " is corrupt" << endl;
+    //   return;  
+    // }
   }
   cout << "No corrupt files, all good."  << endl;
 
@@ -30,11 +30,13 @@ void merge_macro(const TString& in, const TString& outpath) {
   if (verbose) std::cout << "Total events merged: " << chain->GetEntries() << std::endl;
 
   //Then merge 1D hists
-  std::vector <TH1F*> ourHists; 
+  std::vector <TH1F> ourHists; 
   currentFile = 0;
   fileIter.Reset(); 
   //file loop
+  int ifile = 0;
   while ( (currentFile = (TFile*)fileIter.Next()) ){
+      ifile++;
     TFile *file = TFile::Open(currentFile->GetTitle());
     //Hist loop
     for (auto&& keyAsObj : *file->GetListOfKeys()){
@@ -44,16 +46,18 @@ void merge_macro(const TString& in, const TString& outpath) {
       //OurHist loop
       bool foundIt = false;
       for (unsigned int i = 0; i < ourHists.size(); i++){
-        if (strncmp(ourHists[i]->GetTitle(), hist->GetTitle(), 1000) == 0){ ourHists[i]->Add(hist); foundIt = true; }
+        if (strncmp(ourHists[i].GetTitle(), hist->GetTitle(), 1000) == 0){ ourHists[i].Add(hist); foundIt = true; }
       }
-      if (!foundIt) ourHists.push_back(hist); 
+      std::cout << " hist->GetTitle(): " << hist->GetTitle() << std::endl;
+      if (!foundIt) ourHists.push_back( *hist ); 
     }
+    // start closing files if we have a ton of them so we don't reach the max open file limit
+    if (ifile > 200) file->Close();
   }
   cout << ourHists.size() << endl;
-  cout << ourHists[0]->GetBinContent(0) << endl; 
   
   TFile *file = new TFile(outpath, "UPDATE"); 
-  for (unsigned int i = 0; i < ourHists.size(); i++) ourHists[i]->Write();  
+  for (unsigned int i = 0; i < ourHists.size(); i++) ourHists[i].Write();  
   delete file; 
 
   if (verbose) cout << "done!" << endl;
