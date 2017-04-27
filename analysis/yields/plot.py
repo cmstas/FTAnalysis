@@ -2,8 +2,9 @@ import os
 import sys
 import ROOT as r
 import sys
-sys.path.insert(0,'../../common/')
-from Software.dataMCplotMaker.dataMCplotMaker import dataMCplot
+sys.path.insert(0,'../../')
+from common.Software.dataMCplotMaker.dataMCplotMaker import dataMCplot
+from analysis.limits.runLimits import get_lims
 
 if __name__ == "__main__":
 
@@ -11,18 +12,12 @@ if __name__ == "__main__":
 
     r.gROOT.SetBatch(1)
 
-    # systs = [0.2, 0.2, 0.3, 0.3, 0.5, 0.5, 0.3, 0.35]
-    # colors = [r.kGreen+3, r.kGreen-6, r.kOrange, r.kOrange-3, r.kViolet+2, r.kMagenta-7, r.kGray+2, 18]
-    # titles = ["t#bar{t}W", "t#bar{t}Z/H", "WZ", "WW", "X+#gamma", "Rare SM", "Charge misid.", "Nonprompt lep."]
     systs = [0.2, 0.2, 0.2, 0.3, 0.3, 0.5, 0.5, 0.3, 0.35]
     colors = [r.kGreen+3, r.kGreen-6, r.kBlue-5, r.kOrange, r.kOrange-3, r.kViolet+2, r.kMagenta-7, r.kGray+2, 18]
     titles = ["t#bar{t}W", "t#bar{t}Z", "t#bar{t}H", "WZ", "WW", "X+#gamma", "Rare SM", "Charge misid.", "Nonprompt lep."]
-    # f1 = r.TFile("histos_Mar29.root")
     f1 = r.TFile("histos.root")
-    # f1 = r.TFile("histos_nonttwcr.root")
-    # f1 = r.TFile("histos_nominal.root")
-    # f1 = r.TFile("histos_ttwisr.root")
-    # f1 = r.TFile("histos_ttzisr.root")
+
+    cards_dir = "../limits/{0}".format(f1.Get("metadata").GetTitle())
 
     d_opts_br = {
 
@@ -38,17 +33,21 @@ if __name__ == "__main__":
           "l1pt"       : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered l1pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "l2pt"       : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered l2pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "l3pt"       : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered l3pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
-          "el_l1pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered el_l1pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
-          "el_l2pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered el_l2pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
-          "el_l3pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered el_l3pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
-          "mu_l1pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered mu_l1pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
-          "mu_l2pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered mu_l2pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
-          "mu_l3pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered mu_l3pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "el_l1pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered el_l1pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "el_l2pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered el_l2pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "el_l3pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered el_l3pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "mu_l1pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered mu_l1pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "mu_l2pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered mu_l2pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "mu_l3pt"    : [("ttzcr","ttwcr","sr","br"), "--lumi 35.9   --xAxisLabel ordered mu_l3pt --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           "disc"       : [("br",), "--lumi 35.9   --xAxisLabel disc  --legendUp .0 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable "],
 
-          "SRCR_TOTAL" : [("",), "--lumi 35.9   --xAxisLabel SR --isLinear --noOverflow --legendUp -.01 --legendRight -0.05 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
-          "SR_TOTAL"   : [("",), "--lumi 35.9   --xAxisLabel SR --isLinear --noOverflow --legendUp -.01 --legendRight -0.05 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
+          "SRCR_TOTAL" : [("",), "--lumi 35.9   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
+          "SR_TOTAL"   : [("",), "--lumi 35.9   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
+          "SRDISC_TOTAL"   : [("",), "--lumi 35.9   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable    --percentageInBox "],
 
+          # "mid1"       : [("br",), "--lumi 35.9   --xAxisLabel mid1 --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --mid1 Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "mid2"       : [("br",), "--lumi 35.9   --xAxisLabel mid2 --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --mid2 Preliminary --poissonErrorsNoZeros  --outOfFrame "],
+          # "mid3"       : [("br",), "--lumi 35.9   --xAxisLabel mid3 --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --mid3 Preliminary --poissonErrorsNoZeros  --outOfFrame "],
 
           }
     # for name in ["met", "ht", "mtmin", "njets", "nbtags","nleps","wcands", "topcands", \
@@ -82,15 +81,23 @@ if __name__ == "__main__":
             }
 
 
+            print name, typ
+
             bgs = map(lambda x: f1.Get("{0}_{1}".format(name,x)), ["data","tttt","ttw","ttz","tth","wz","ww","xg","rares","flips","fakes"])
+            # bgs = map(lambda x: f1.Get("{0}_{1}".format(name,x)), ["data","tttt","ttw","ttz","tth","wz","ww","xg","rares","flips","fakes_mc"])
             h_data,h_tttt,bgs = bgs[0], bgs[1], bgs[2:]
             h_data_empty = h_data.Clone("empty")
             h_data_empty.Reset()
 
-            print name
 
             h_tttt.Sumw2()
             h_tttt.Scale(10.0)
+
+
+            if key in ["SRCR_TOTAL"]:
+                d_lims = get_lims(card=cards_dir, regions="srcr", redocard=True, redolimits=True, domcfakes=False)
+                exp, expp1, expm1 = d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"]
+                subtitle = "#sigma^{UL}_{exp} = %.2f^{+%.1f}_{-%.1f} fb" % (exp, expp1, expm1)
 
             do_unblind = False
             if do_unblind:
@@ -104,6 +111,8 @@ if __name__ == "__main__":
 
 # os.system("ic plots/SRCR_blind.pdf")
 os.system("cp ../misc/signal_regions.h plots/SR.extra")
+os.system("cp ../misc/signal_regions.h plots/SR_blind.extra")
+os.system("cp ../misc/signal_regions.h plots/SRCR_blind.extra")
 os.system("niceplots plots plots_tttt_Apr26")
 
 # os.system("niceplots plots plots_tttt_Apr11_nonttwcr")
