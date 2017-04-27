@@ -1,5 +1,16 @@
+.tramp_history
 *.o
 *.d
 *.pcm
 *.root
-
+*.pyc
+.nfs*
+*.so
+*.pdf
+*.txt
+*.so
+*.json
+*.log
+*.db
+*.cxx
+CMSSW*
