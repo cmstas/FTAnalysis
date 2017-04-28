@@ -20,10 +20,10 @@ def parse_lims(lim_lines, fb=False):
         elif "Expected" in line: d["exp_"+line.split("%")[0].replace("Expected","").strip()] = float(line.split("<")[-1])
 
     mult = 1 if not fb else 1000.0
-    obs = d["obs"]*XSEC_TTTT*mult
-    exp = d["exp_50.0"]*XSEC_TTTT*mult
-    exp_sm1 = d["exp_16.0"]*XSEC_TTTT*mult
-    exp_sp1 = d["exp_84.0"]*XSEC_TTTT*mult
+    obs = d.get("obs",-1)*XSEC_TTTT*mult
+    exp = d.get("exp_50.0",-1)*XSEC_TTTT*mult
+    exp_sm1 = d.get("exp_16.0",-1)*XSEC_TTTT*mult
+    exp_sp1 = d.get("exp_84.0",-1)*XSEC_TTTT*mult
     return {
             "obs":obs, "exp":exp,
             "sp1":exp_sp1,"sm1":exp_sm1,
@@ -43,22 +43,29 @@ def get_lims(card, regions, redocard, redolimits, domcfakes):
     full_card_name = "{0}".format(card)
     full_log_name = full_card_name.replace(".txt",".log")
 
-    print ">>> Making card"
     if not os.path.isfile(full_card_name) or redocard:
+        print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
         createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes)
     else:
         print ">>> [!] Card already made, so reusing. Pass the --redocard flag to remake the card"
 
-    print ">>> Running combine"
     if not os.path.isfile(full_log_name) or (redolimits or redocard):
-        combine_cmd = "combine -M Asymptotic {0} --noFitAsimov | tee {1}".format(full_card_name, full_log_name)
+        combine_cmd = "combine -M Asymptotic {0} --noFitAsimov  2>&1 | tee {1}".format(full_card_name, full_log_name)
+        print ">>> Running combine [{0}]".format(combine_cmd)
         stat, out = commands.getstatusoutput(combine_cmd)
     else:
         print ">>> [!] Limits already run, so reusing. Pass the --redolimits flag to redo the limits"
         stat, out = 0, open(full_log_name,"r").read()
 
     d_lims = parse_lims(out.splitlines(), fb=True)
+
+    # now check to see if it's legit
+    if d_lims["exp"] < 0.:
+        print ">>> [!] Uh-oh, error with combine? Here's what the output of combine was:"
+        os.system("cat {0}".format(full_log_name))
+        raise Exception("Combine error!")
+
     return d_lims
 
 if __name__ == "__main__":
