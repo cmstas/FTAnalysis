@@ -7,7 +7,6 @@ main.exe
 liblooperBatch.so 
 CORE 
 LinkDef_out_rdict.pcm 
-btagsf
 goodRunList
 "
 mkdir -p $final_dir

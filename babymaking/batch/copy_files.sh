@@ -12,5 +12,4 @@ cp ../../common/CORE/data/*.xml CORE/data/
 mkdir -p CORE/Tools
 cp -r ../../common/CORE/Tools CORE/
 
-mkdir -p CORE/Tools/btagsf
-
+cp myCORE/* CORE/
