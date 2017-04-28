@@ -46,7 +46,7 @@ bool doBDT = false; // FIXME
 bool makeRootFiles = true;
 
 // TString dir = "v0.02_Apr27_test"; // tttt regions
-TString dir = "v0.03_Apr27_test"; // tttt regions
+TString dir = "v0.04_Apr28_test"; // tttt regions
 
 bool suppressWarns = true;
 
@@ -79,6 +79,7 @@ struct plots_t  {
     triple_t h_l3pt;
     triple_t h_type;
     triple_t h_charge;
+    triple_t h_charge3;
     triple_t h_nleps;
     triple_t h_mu_l1pt;
     triple_t h_el_l1pt;
@@ -137,20 +138,20 @@ void getyields(){
 
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/";
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.02/output/";
-    TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.03/output/";
+    TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.04/output/";
     TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
 
     //Fill chains
     tttt_chain   ->Add(Form("%s/TTTT.root"           , pfx.Data()));
 
-    ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data()));
-    wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
-    dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
-    dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
     ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
     tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
+    ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data()));
+    wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
+    dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
+    dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
     wz_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
     ww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
     qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
@@ -171,11 +172,11 @@ void getyields(){
     rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
     rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
     rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
-    //data
-    data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    // //data
+    // data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    // data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    // data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    // data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
     //flips
     flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
     flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
@@ -247,6 +248,8 @@ void getyields(){
     WRITE(h_mid2.br);
     WRITE(h_mid3.br);
 
+    WRITE(h_charge3.sr);
+
     WRITE(h_disc.br);
     WRITE(SRCR.TOTAL);
     WRITE(SRDISC.TOTAL);
@@ -281,6 +284,19 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     bool isWZ = (chainTitle=="wz");
     bool isttZ = (chainTitle=="ttz");
     bool isttW = (chainTitle=="ttw");
+
+        
+    // Calculate and store the normalization factors for the ISR reweighting
+    float isr_norm_dy = 1.;
+    float isr_norm_tt = 1.;
+    if (isttZ || isttW) {
+        TH1D* htemp = new TH1D("htemp","htemp",1,0,1);;
+        chain->Draw("0.5>>htemp","weight_isr_dy");
+        isr_norm_dy = chain->GetEntries()/htemp->GetBinContent(1);
+        htemp->Reset();
+        chain->Draw("0.5>>htemp","weight_isr_tt");
+        isr_norm_tt = chain->GetEntries()/htemp->GetBinContent(1);
+    }
 
     yields_t y_result;
     plots_t  p_result;
@@ -371,6 +387,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_mid1.br     = new TH1F(Form("br_mid1_%s"       , chainTitleCh) , Form("mid1_%s"       , chainTitleCh) , 5       , -2    , 3);
     p_result.h_mid2.br     = new TH1F(Form("br_mid2_%s"       , chainTitleCh) , Form("mid2_%s"       , chainTitleCh) , 5       , -2    , 3);
     p_result.h_mid3.br     = new TH1F(Form("br_mid3_%s"       , chainTitleCh) , Form("mid3_%s"       , chainTitleCh) , 5       , -2    , 3);
+    p_result.h_charge3.sr   = new TH1F(Form("sr_charge3_%s"     , chainTitleCh) , Form("charge3_%s"     , chainTitleCh) , 3       , 0   , 3);
 
     p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 8       , 0    , 1.0);
     p_result.SRCR.TOTAL = new TH1F(Form("SRCR_TOTAL_%s" , chainTitleCh) , Form("SRCR_TOTAL_%s" , chainTitleCh) , nsr     , 0.5  , nsr+0.5);
@@ -521,13 +538,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 weight_pu_dn_alt = getTruePUw_Moriond(ss::trueNumInt()[0])>0 ? weight*getTruePUwDn(ss::trueNumInt()[0])/getTruePUw_Moriond(ss::trueNumInt()[0]) : weight;
             }
 
-            // if (doTTZISR && isttZ) {
-            //     if (filename.Contains("TTZnlo")) weight *= ss::weight_isr()*isr_norm_TTZnlo(1,1,  0);
-            //     if (filename.Contains("TTZLOW")) weight *= ss::weight_isr()*isr_norm_TTZnlo(1,1,  0);
-            // }
-            // if (doTTWISR && isttW) {
-            //     if (filename.Contains("TTWnlo")) weight *= ss::weight_isr()*isr_norm_TTWnlo(1,1,  0);
-            // }
+            if (doTTZISR && isttZ) {
+                weight *= ss::weight_isr_tt()*isr_norm_tt;
+            }
+            if (doTTWISR && isttW) {
+                // weight *= ss::weight_isr_dy()*isr_norm_dy;
+                weight *= ss::weight_isr_tt()*isr_norm_tt;
+            }
 
 
 
@@ -664,11 +681,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (lep1_pt < 25.) continue;
             if (lep2_pt < 20.) continue;
 
-            // if (!doFlips && !doFakes && exclude == 0) {
-            //     if (nleps > 2) {
-            //     if (!isData && !isGamma && ss::lep3_motherID()==2) continue;
-            //     }
-            // }
+            if (!doFlips && !doFakes && exclude == 0) {
+                if (nleps > 2) {
+                if (!isData && !isGamma && ss::lep3_motherID()==2) continue;
+                }
+            }
 
             //Reject duplicates (after selection otherwise flips are ignored...)
             if (isData && ss::is_real_data()){
@@ -744,10 +761,17 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
               // p_result.h_disc.br->Fill(pred,weight);
             }
 
+            // truth match the third lepton
             if (!isData) {
               p_result.h_mid1.br->Fill(ss::lep1_motherID(), weight);
               p_result.h_mid2.br->Fill(ss::lep2_motherID(), weight);
               if (ss::lep3_passes_id()) p_result.h_mid3.br->Fill(ss::lep3_motherID(), weight);
+            }
+            // if all 3 charges are the same, throw the event away
+            if (nleps > 2) {
+              int q1 = 2*(ss::lep1_id() > 0) - 1;
+              int q3 = 2*(ss::lep3_id() > 0) - 1;
+              if (q3==q1) continue;
             }
 
 
@@ -883,6 +907,12 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 }
                 //Fill SR plot
                 p_result.SR.TOTAL->Fill(SR-nCR, weight);
+
+                if (nleps > 2) {
+                    int q1 = 2*(ss::lep1_id() > 0) - 1;
+                    int q3 = 2*(ss::lep3_id() > 0) - 1;
+                    p_result.h_charge3.sr->Fill(q3==q1 ? 1.5: 0.5 , weight);
+                }
             }
 
 

@@ -45,6 +45,8 @@ if __name__ == "__main__":
           "SR_TOTAL"   : [("",), "--lumi 35.9   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
           "SRDISC_TOTAL"   : [("",), "--lumi 35.9   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.05 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable    --percentageInBox "],
 
+          "charge3"     : [("sr",), "--lumi 35.9   --xAxisLabel q_{1}==q_{3} --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --type Preliminary --poissonErrorsNoZeros  --outOfFrame --makeTable "],
+
           # "mid1"       : [("br",), "--lumi 35.9   --xAxisLabel mid1 --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --mid1 Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           # "mid2"       : [("br",), "--lumi 35.9   --xAxisLabel mid2 --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --mid2 Preliminary --poissonErrorsNoZeros  --outOfFrame "],
           # "mid3"       : [("br",), "--lumi 35.9   --xAxisLabel mid3 --isLinear --legendUp -.15 --legendRight -0.08 --systInclStat --topYaxisTitle Data/Pred.  --legendTaller 0.15 --yTitleOffset -0.1 --dataName Data  --mid3 Preliminary --poissonErrorsNoZeros  --outOfFrame "],
@@ -113,7 +115,7 @@ if __name__ == "__main__":
 os.system("cp ../misc/signal_regions.h plots/SR.extra")
 os.system("cp ../misc/signal_regions.h plots/SR_blind.extra")
 os.system("cp ../misc/signal_regions.h plots/SRCR_blind.extra")
-os.system("niceplots plots plots_tttt_Apr27")
+os.system("niceplots plots plots_tttt_Apr28")
 
 # os.system("niceplots plots plots_tttt_Apr11_nonttwcr")
 # os.system("niceplots plots plots_tttt_Apr11_ttwcr")

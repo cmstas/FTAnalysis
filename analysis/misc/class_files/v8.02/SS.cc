@@ -1313,10 +1313,20 @@ void SSAG::Init(TTree *tree) {
 		weight_isr_branch = tree->GetBranch("weight_isr");
 		if (weight_isr_branch) {weight_isr_branch->SetAddress(&weight_isr_);}
 	}
+	weight_isr_dy_branch = 0;
+	if (tree->GetBranch("weight_isr_dy") != 0) {
+		weight_isr_dy_branch = tree->GetBranch("weight_isr_dy");
+		if (weight_isr_dy_branch) {weight_isr_dy_branch->SetAddress(&weight_isr_dy_);}
+	}
 	weight_isr_UP_branch = 0;
 	if (tree->GetBranch("weight_isr_UP") != 0) {
 		weight_isr_UP_branch = tree->GetBranch("weight_isr_UP");
 		if (weight_isr_UP_branch) {weight_isr_UP_branch->SetAddress(&weight_isr_UP_);}
+	}
+	weight_isr_tt_branch = 0;
+	if (tree->GetBranch("weight_isr_tt") != 0) {
+		weight_isr_tt_branch = tree->GetBranch("weight_isr_tt");
+		if (weight_isr_tt_branch) {weight_isr_tt_branch->SetAddress(&weight_isr_tt_);}
 	}
 	weight_isr_DN_branch = 0;
 	if (tree->GetBranch("weight_isr_DN") != 0) {
@@ -1782,6 +1792,8 @@ void SSAG::GetEntry(unsigned int idx)
 		nisrMatch_isLoaded = false;
 		weight_isr_isLoaded = false;
 		weight_isr_UP_isLoaded = false;
+		weight_isr_tt_isLoaded = false;
+		weight_isr_dy_isLoaded = false;
 		weight_isr_DN_isLoaded = false;
 		lep3_el_etaSC_isLoaded = false;
 		lep3_el_conv_vtx_flag_isLoaded = false;
@@ -2089,6 +2101,8 @@ void SSAG::LoadAllBranches()
 	if (nisrMatch_branch != 0) nisrMatch();
 	if (weight_isr_branch != 0) weight_isr();
 	if (weight_isr_UP_branch != 0) weight_isr_UP();
+	if (weight_isr_tt_branch != 0) weight_isr_tt();
+	if (weight_isr_dy_branch != 0) weight_isr_dy();
 	if (weight_isr_DN_branch != 0) weight_isr_DN();
 	if (lep3_el_etaSC_branch != 0) lep3_el_etaSC();
 	if (lep3_el_conv_vtx_flag_branch != 0) lep3_el_conv_vtx_flag();
@@ -5549,6 +5563,32 @@ void SSAG::LoadAllBranches()
 		}
 		return weight_isr_UP_;
 	}
+	const float &SSAG::weight_isr_tt()
+	{
+		if (not weight_isr_tt_isLoaded) {
+			if (weight_isr_tt_branch != 0) {
+				weight_isr_tt_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_isr_tt_branch does not exist!\n");
+				exit(1);
+			}
+			weight_isr_tt_isLoaded = true;
+		}
+		return weight_isr_tt_;
+	}
+	const float &SSAG::weight_isr_dy()
+	{
+		if (not weight_isr_dy_isLoaded) {
+			if (weight_isr_dy_branch != 0) {
+				weight_isr_dy_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_isr_dy_branch does not exist!\n");
+				exit(1);
+			}
+			weight_isr_dy_isLoaded = true;
+		}
+		return weight_isr_dy_;
+	}
 	const float &SSAG::weight_isr_DN()
 	{
 		if (not weight_isr_DN_isLoaded) {
@@ -6344,6 +6384,8 @@ namespace ss {
 	const int &nisrMatch() { return samesign.nisrMatch(); }
 	const float &weight_isr() { return samesign.weight_isr(); }
 	const float &weight_isr_UP() { return samesign.weight_isr_UP(); }
+	const float &weight_isr_tt() { return samesign.weight_isr_tt(); }
+	const float &weight_isr_dy() { return samesign.weight_isr_dy(); }
 	const float &weight_isr_DN() { return samesign.weight_isr_DN(); }
 	const bool &lep3_el_etaSC() { return samesign.lep3_el_etaSC(); }
 	const bool &lep3_el_conv_vtx_flag() { return samesign.lep3_el_conv_vtx_flag(); }
