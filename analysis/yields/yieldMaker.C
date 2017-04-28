@@ -27,9 +27,9 @@ float lumiAG = getLumiUnblind();
 string tag = getTag().Data();
 string tagData = getTagData().Data();
 
-float bloose = 0.5426;
-float bmed = 0.8484;
-float btight = 0.9535;
+float bloose = 0.5426; // FIXME
+float bmed = 0.8484; // FIXME
+float btight = 0.9535; // FIXME
 
 int nsr = getNsrsTTTT();
 // int nsrdisc = getNsrsTTTTBDT();
@@ -45,7 +45,8 @@ bool doBDT = false; // FIXME
 
 bool makeRootFiles = true;
 
-TString dir = "v0.02_Apr27_test"; // tttt regions
+// TString dir = "v0.02_Apr27_test"; // tttt regions
+TString dir = "v0.03_Apr27_test"; // tttt regions
 
 bool suppressWarns = true;
 
@@ -135,7 +136,8 @@ void getyields(){
     //signals full sim
 
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/";
-    TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.02/output/";
+    // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.02/output/";
+    TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.03/output/";
     TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
 
     //Fill chains

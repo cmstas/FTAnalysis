@@ -7,7 +7,7 @@
 #include "TRandom.h"
 #include "TF1.h"
 #include "TH2.h"
-#include "Math/VectorUtil.h" 
+#include "Math/VectorUtil.h"
 #include "CORE/CMS3.h"
 #include "CORE/Tools/utils.h"
 #include "CORE/Tools/JetCorrector.h"
@@ -17,29 +17,29 @@
 #include "CORE/IsolationTools.h"
 #include "CORE/JetSelections.h"
 #include "CORE/Tools/goodrun.h"
-#include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"  
+#include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
 #include "CORE/Tools/datasetinfo/getDatasetInfo.h"
 #include "TROOT.h"
 #include <vector>
-#include "Math/Vector4D.h" 
-#include "Math/LorentzVector.h" 
+#include "Math/Vector4D.h"
+#include "Math/LorentzVector.h"
 
 #ifdef __MAKECINT__
 #pragma link C++ class ROOT::Math::PxPyPzE4D<float>+;
 #pragma link C++ class ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >+;
 #pragma link C++ typedef ROOT::Math::XYZTVectorF;
 #endif
-#include "Math/Vector4D.h" 
-#include "Math/LorentzVector.h" 
+#include "Math/Vector4D.h"
+#include "Math/LorentzVector.h"
 
 #ifdef __MAKECINT__
 #pragma link C++ class ROOT::Math::PxPyPzE4D<float>+;
 #pragma link C++ class ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> >+;
 #pragma link C++ typedef ROOT::Math::XYZTVectorF;
 #endif
-#include "Math/Vector4D.h" 
-#include "Math/LorentzVector.h" 
+#include "Math/Vector4D.h"
+#include "Math/LorentzVector.h"
 
 #ifdef __MAKECINT__
 #pragma link C++ class ROOT::Math::PxPyPzE4D<float>+;
@@ -55,7 +55,7 @@ class BTagCalibrationReader;
 
 using namespace std;
 
-struct csErr_t { float cs_scale_no = 0; float cs_scale_up = 0; float cs_scale_dn = 0; float cs_pdf[102] = {0}; int SR = -1; bool isGood = 0; }; 
+struct csErr_t { float cs_scale_no = 0; float cs_scale_up = 0; float cs_scale_dn = 0; float cs_pdf[102] = {0}; int SR = -1; bool isGood = 0; };
 
 //Classes
 class babyMaker {
@@ -85,12 +85,16 @@ class babyMaker {
     // for btag SFs
     float getBtagEffFromFile(float pt, float eta, int mcFlavour);
     BTagCalibration* calib;
+    BTagCalibration* calib2;
     BTagCalibrationReader* reader_heavy;
     BTagCalibrationReader* reader_heavy_UP;
     BTagCalibrationReader* reader_heavy_DN;
     BTagCalibrationReader* reader_light;
     BTagCalibrationReader* reader_light_UP;
     BTagCalibrationReader* reader_light_DN;
+    BTagCalibrationReader* reader_light2;
+    BTagCalibrationReader* reader_light2_UP;
+    BTagCalibrationReader* reader_light2_DN;
     BTagCalibration* calib_fs;
     BTagCalibrationReader* reader_fastsim;
     BTagCalibrationReader* reader_fastsim_UP;
@@ -109,31 +113,31 @@ class babyMaker {
     float rawmetPhi;
     float calomet;
     float calometPhi;
- 
+
     //Meta Variables
     ULong64_t event;
     int lumi;
     int run;
     bool is_real_data;
-    bool is_fastsim; 
-    bool is_miniaodv1; 
-    bool is_miniaodv1_80X; 
-    float scale1fb;     
-    float xsec;         
-    float xsec_error;         
-    float xsec_ps;         
-    vector <TString> sparmNames; 
-    vector <float> sparms; 
-    float kfactor;      
+    bool is_fastsim;
+    bool is_miniaodv1;
+    bool is_miniaodv1_80X;
+    float scale1fb;
+    float xsec;
+    float xsec_error;
+    float xsec_ps;
+    vector <TString> sparmNames;
+    vector <float> sparms;
+    float kfactor;
     string filename;
     vector <float> genweights;
     vector <string> genweightsID;
-    bool passedFilterList; 
+    bool passedFilterList;
 
     //Pileup
     vector <float> trueNumInt;
     vector <int> nPUvertices;
-    int nGoodVertices; 
+    int nGoodVertices;
 
     //Filters
     bool filt_csc;
@@ -142,9 +146,9 @@ class babyMaker {
     bool filt_ecaltp;
     bool filt_trkfail;
 
-    //Gen MET 
-    float gen_met;      
-    float gen_met_phi;  
+    //Gen MET
+    float gen_met;
+    float gen_met_phi;
 
     //Jets
     int njets_raw;
@@ -156,9 +160,9 @@ class babyMaker {
     vector <float> jets_disc;
     vector <float> jets_disc_mva;
     vector <float> jets_disc_ivf;
-    vector <float> jets_JEC; 
-    vector <float> jets_unc; 
-    vector <float> jets_undoJEC; 
+    vector <float> jets_JEC;
+    vector <float> jets_unc;
+    vector <float> jets_undoJEC;
     vector <LorentzVector> mostJets; //this is all jets with pT > 5, |eta| < 2.4
     vector <LorentzVector> mostJets_rawp4; // this is all jets with pT > 5, |eta| < 2.4
     vector <float> mostJets_disc;          // this is all jets with pT > 5, |eta| < 2.4
@@ -172,14 +176,14 @@ class babyMaker {
     //Jets unc stuff
     int njets_unc_up;
     int njets_unc_dn;
-    float ht_unc_up;   
-    float ht_unc_dn;   
+    float ht_unc_up;
+    float ht_unc_dn;
     int nbtags_unc_up;
     int nbtags_unc_dn;
-    float met_unc_up; 
-    float met_unc_dn; 
-    float metPhi_unc_up; 
-    float metPhi_unc_dn; 
+    float met_unc_up;
+    float met_unc_dn;
+    float metPhi_unc_up;
+    float metPhi_unc_dn;
 
     //Hyp Class -- in this order
        //3 for num-num SS leptons
@@ -190,10 +194,10 @@ class babyMaker {
     int hyp_class;
 
     //Gen flags
-    bool lep1_isPrompt; 
+    bool lep1_isPrompt;
     bool lep1_isDirectPrompt;
     bool lep1_isStat3;
-    bool lep2_isPrompt;      
+    bool lep2_isPrompt;
     bool lep2_isDirectPrompt;
     bool lep2_isStat3;
     bool lep2_genps_isHardProcess;
@@ -202,16 +206,16 @@ class babyMaker {
     bool lep2_genps_isDirectHardProcessTauDecayProductFinalState;
     bool lep2_genps_fromHardProcessBeforeFSR;
     bool lep2_genps_isLastCopy;
-    bool lep2_genps_isLastCopyBeforeFSR; 
+    bool lep2_genps_isLastCopyBeforeFSR;
     bool lep1_genps_isHardProcess;
     bool lep1_genps_fromHardProcessFinalState;
     bool lep1_genps_fromHardProcessDecayed;
     bool lep1_genps_isDirectHardProcessTauDecayProductFinalState;
     bool lep1_genps_fromHardProcessBeforeFSR;
     bool lep1_genps_isLastCopy;
-    bool lep1_genps_isLastCopyBeforeFSR; 
+    bool lep1_genps_isLastCopyBeforeFSR;
     int lep1_mc3idx = -1;
-    int lep2_mc3idx = -1; 
+    int lep2_mc3idx = -1;
 
     //Leptons
     LorentzVector lep1_p4;
@@ -221,9 +225,10 @@ class babyMaker {
     int lep2_id;
     int lep1_idx;
     int lep2_idx;
-    int hyp_type; 
+    int hyp_type;
     float lep1_coneCorrPt;
     float lep2_coneCorrPt;
+    float lep3_coneCorrPt;
 
     //Lepton Mother (old isFromW function)
     int lep1_motherID;
@@ -275,18 +280,18 @@ class babyMaker {
     vector <float> btags_disc;
     vector <float> btags_disc_mva;
     vector <float> btags_disc_ivf;
-    vector <float> btags_JEC; 
-    vector <float> btags_unc; 
-    vector <float> btags_eff; 
-    vector <float> btags_effpt; 
-    vector <float> btags_sf; 
-    vector <float> btags_undoJEC; 
+    vector <float> btags_JEC;
+    vector <float> btags_unc;
+    vector <float> btags_eff;
+    vector <float> btags_effpt;
+    vector <float> btags_sf;
+    vector <float> btags_undoJEC;
     int nbtags;
 
     //Scale factors (from 8 TeV, outdated)
-    float sf_dilepTrig_hpt; 
-    float sf_dilepTrig_lpt; 
-    float sf_dilepTrig_vlpt; 
+    float sf_dilepTrig_hpt;
+    float sf_dilepTrig_lpt;
+    float sf_dilepTrig_vlpt;
     float sf_dilep_eff;
 
     //mT for both leptons, mt2
@@ -430,12 +435,12 @@ class babyMaker {
     vector <float> eleID_scl_eta;
 
     //Muon ID variables
-    vector <float> muID_dzPV;      
-    vector <float> muID_ptSig;     
-    vector <float> muID_ip3dSig;   
+    vector <float> muID_dzPV;
+    vector <float> muID_ptSig;
+    vector <float> muID_ip3dSig;
     vector <float> muID_medMuonPOG;
-    vector <float> muID_pt;        
-    vector <float> muID_eta;       
+    vector <float> muID_pt;
+    vector <float> muID_eta;
 
     //InSituFR
     bool lep1_isGoodLeg;
@@ -445,8 +450,8 @@ class babyMaker {
     bool truth_inSituFR;
     bool lep1_multiIso;
     bool lep2_multiIso;
-    float lep1_sip; 
-    float lep2_sip; 
+    float lep1_sip;
+    float lep2_sip;
     LorentzVector lep1_closeJet;
     LorentzVector lep2_closeJet;
     bool passed_id_inSituFR_lep1;
@@ -456,9 +461,9 @@ class babyMaker {
     bool fired_trigger;
     unsigned int triggers;
     bool lep1_trigMatch_noIsoReq;
-    bool lep1_trigMatch_isoReq; 
+    bool lep1_trigMatch_isoReq;
     bool lep2_trigMatch_noIsoReq;
-    bool lep2_trigMatch_isoReq; 
+    bool lep2_trigMatch_isoReq;
 
     //FKW MET
     float met3p0;
@@ -485,16 +490,24 @@ class babyMaker {
     float weight_btagsf;
     float weight_btagsf_UP;
     float weight_btagsf_DN;
+    float weight_btagsf1;
+    float weight_btagsf1_UP;
+    float weight_btagsf1_DN;
+    float weight_btagsf2;
+    float weight_btagsf2_UP;
+    float weight_btagsf2_DN;
 
     //ISR unc #s - 2015
     LorentzVector gl1_p4;
-    LorentzVector gl2_p4; 
-    float glglpt; 
+    LorentzVector gl2_p4;
+    float glglpt;
     float isr_unc;
 
     //ISR unc #s - 2016
     int nisrMatch;
     float weight_isr;
+    float weight_isr_dy;
+    float weight_isr_tt;
     float weight_isr_UP;
     float weight_isr_DN;
 
@@ -512,6 +525,7 @@ class babyMaker {
     bool lep3_iso_RA7;
     bool lep3_passes_RA5;
     bool lep3_passes_RA7;
+    bool lep3_passes_RA7v2;
     bool lep3_mu_dxyPV;
     bool lep3_mu_ip3d;
     bool lep3_mu_dzPV;
