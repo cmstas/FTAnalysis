@@ -862,6 +862,9 @@ protected:
 	bool     lep3_passes_RA7_;
 	TBranch *lep3_passes_RA7_branch;
 	bool     lep3_passes_RA7_isLoaded;
+	bool     lep3_passes_RA7v2_;
+	TBranch *lep3_passes_RA7v2_branch;
+	bool     lep3_passes_RA7v2_isLoaded;
 	bool     lep3_mu_dxyPV_;
 	TBranch *lep3_mu_dxyPV_branch;
 	bool     lep3_mu_dxyPV_isLoaded;
@@ -1220,6 +1223,7 @@ void LoadAllBranches();
 	const bool &lep3_iso_RA7();
 	const bool &lep3_passes_RA5();
 	const bool &lep3_passes_RA7();
+	const bool &lep3_passes_RA7v2();
 	const bool &lep3_mu_dxyPV();
 	const bool &lep3_mu_ip3d();
 	const bool &lep3_mu_dzPV();
@@ -1533,6 +1537,7 @@ namespace ss {
 	const bool &lep3_iso_RA7();
 	const bool &lep3_passes_RA5();
 	const bool &lep3_passes_RA7();
+	const bool &lep3_passes_RA7v2();
 	const bool &lep3_mu_dxyPV();
 	const bool &lep3_mu_ip3d();
 	const bool &lep3_mu_dzPV();

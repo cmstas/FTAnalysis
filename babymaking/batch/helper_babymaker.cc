@@ -377,7 +377,20 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   if (applyBtagSFs) {
     // setup btag calibration readers
     // calib = new BTagCalibration("csvv2", "CORE/Tools/btagsf/data/run2_25ns/CSVv2_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco 
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME also below
+    // calib = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     calib = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
     calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     reader_heavy    = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central"); // central
     reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");      // sys up
@@ -827,7 +840,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
 
   //Fill lepton variables
-  hyp_result_t best_hyp_info = chooseBestHyp(verbose);
+  std::pair<hyp_result_t,Lep> best_hyp_info_withlep3 = chooseBestHyp(verbose, /*doclass8=*/ false);
+  hyp_result_t best_hyp_info = best_hyp_info_withlep3.first;
+  Lep best_lep3 = best_hyp_info_withlep3.second;
   hyp_class = best_hyp_info.hyp_class;
   int best_hyp = best_hyp_info.best_hyp;
 
@@ -898,7 +913,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep1_ip3d_err = lep1.ip3dErr();
   lep2_ip3d_err = lep2.ip3dErr();
   hyp_type = tas::hyp_type().at(best_hyp);
-  pair <Lep, int> thirdLepton = getThirdLepton(best_hyp);
+  pair <Lep, int> thirdLepton = make_pair(Lep(0,-1), -1);
+  if (hyp_class == 8) {
+      thirdLepton =  make_pair(best_lep3,2);
+  } else {
+      thirdLepton = getThirdLepton(best_hyp);
+  }
   lep3_id = thirdLepton.first.pdgId();
   lep3_idx = thirdLepton.first.idx();
   if (lep3_idx >= 0 && (abs(lep3_id) == 11 || abs(lep3_id) == 13)){
@@ -993,7 +1013,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep3_tight = abs(lep3_id) == 11 ? isGoodElectron(lep3_idx) : isGoodMuon(lep3_idx);
     lep3_veto = abs(lep3_id) == 11 ? isGoodVetoElectron(lep3_idx) : isGoodVetoMuon(lep3_idx);
     lep3_fo = abs(lep3_id) == 11 ? isFakableElectron(lep3_idx) : isFakableMuon(lep3_idx);
-    if (lep3_veto){
+    if (lep3_veto || hyp_class==8){
       if (abs(lep3_id) == 11){
 
           float ptmin = 15;
@@ -1404,6 +1424,15 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // deciding which era the MC "belongs to", to assign the proper btag weight
   // Seed by event number to keep deterministic
   TRandom *tr1 = new TRandom(tas::evt_event());
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+    // weight_btagsf =    weight_btagsf1;
+    // weight_btagsf_UP = weight_btagsf1_UP;
+    // weight_btagsf_DN = weight_btagsf1_DN;
   if (tr1->Rndm() < 0.55) {
     // B-F is 55% of the lumi
     weight_btagsf =    weight_btagsf1;
@@ -1414,6 +1443,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     weight_btagsf_UP = weight_btagsf2_UP;
     weight_btagsf_DN = weight_btagsf2_DN;
   }
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
+      // FIXME FIXME FIXME
 
   // // ISR stuff for 2015
   // if (isFastsim > 0){

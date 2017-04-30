@@ -1398,6 +1398,11 @@ void SSAG::Init(TTree *tree) {
 		lep3_passes_RA7_branch = tree->GetBranch("lep3_passes_RA7");
 		if (lep3_passes_RA7_branch) {lep3_passes_RA7_branch->SetAddress(&lep3_passes_RA7_);}
 	}
+	lep3_passes_RA7v2_branch = 0;
+	if (tree->GetBranch("lep3_passes_RA7v2") != 0) {
+		lep3_passes_RA7v2_branch = tree->GetBranch("lep3_passes_RA7v2");
+		if (lep3_passes_RA7v2_branch) {lep3_passes_RA7v2_branch->SetAddress(&lep3_passes_RA7v2_);}
+	}
 	lep3_mu_dxyPV_branch = 0;
 	if (tree->GetBranch("lep3_mu_dxyPV") != 0) {
 		lep3_mu_dxyPV_branch = tree->GetBranch("lep3_mu_dxyPV");
@@ -1808,6 +1813,7 @@ void SSAG::GetEntry(unsigned int idx)
 		lep3_iso_RA7_isLoaded = false;
 		lep3_passes_RA5_isLoaded = false;
 		lep3_passes_RA7_isLoaded = false;
+		lep3_passes_RA7v2_isLoaded = false;
 		lep3_mu_dxyPV_isLoaded = false;
 		lep3_mu_ip3d_isLoaded = false;
 		lep3_mu_dzPV_isLoaded = false;
@@ -2117,6 +2123,7 @@ void SSAG::LoadAllBranches()
 	if (lep3_iso_RA7_branch != 0) lep3_iso_RA7();
 	if (lep3_passes_RA5_branch != 0) lep3_passes_RA5();
 	if (lep3_passes_RA7_branch != 0) lep3_passes_RA7();
+	if (lep3_passes_RA7v2_branch != 0) lep3_passes_RA7v2();
 	if (lep3_mu_dxyPV_branch != 0) lep3_mu_dxyPV();
 	if (lep3_mu_ip3d_branch != 0) lep3_mu_ip3d();
 	if (lep3_mu_dzPV_branch != 0) lep3_mu_dzPV();
@@ -5771,6 +5778,19 @@ void SSAG::LoadAllBranches()
 		}
 		return lep3_passes_RA7_;
 	}
+	const bool &SSAG::lep3_passes_RA7v2()
+	{
+		if (not lep3_passes_RA7v2_isLoaded) {
+			if (lep3_passes_RA7v2_branch != 0) {
+				lep3_passes_RA7v2_branch->GetEntry(index);
+			} else { 
+				printf("branch lep3_passes_RA7v2_branch does not exist!\n");
+				exit(1);
+			}
+			lep3_passes_RA7v2_isLoaded = true;
+		}
+		return lep3_passes_RA7v2_;
+	}
 	const bool &SSAG::lep3_mu_dxyPV()
 	{
 		if (not lep3_mu_dxyPV_isLoaded) {
@@ -6400,6 +6420,7 @@ namespace ss {
 	const bool &lep3_iso_RA7() { return samesign.lep3_iso_RA7(); }
 	const bool &lep3_passes_RA5() { return samesign.lep3_passes_RA5(); }
 	const bool &lep3_passes_RA7() { return samesign.lep3_passes_RA7(); }
+	const bool &lep3_passes_RA7v2() { return samesign.lep3_passes_RA7v2(); }
 	const bool &lep3_mu_dxyPV() { return samesign.lep3_mu_dxyPV(); }
 	const bool &lep3_mu_ip3d() { return samesign.lep3_mu_ip3d(); }
 	const bool &lep3_mu_dzPV() { return samesign.lep3_mu_dzPV(); }

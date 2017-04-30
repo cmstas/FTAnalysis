@@ -140,7 +140,7 @@ bool makesExtraGammaStar(int iHyp){
   return false;
 }
 
-Z_result_t makesExtraZ(int iHyp){
+Z_result_t makesExtraZ(int iHyp, bool RA7vetoID){
 
   Z_result_t result;
   result.result = false;
@@ -174,7 +174,11 @@ Z_result_t makesExtraZ(int iHyp){
       if (fabs(tas::els_p4().at(eidx).eta()) > 2.4) continue;
       if (tas::els_p4().at(eidx).pt() < 7) continue;
 
-      if (!isGoodVetoElectron(eidx)) continue;
+      if (RA7vetoID) {
+          if (!isGoodVetoElectronRA7(eidx)) continue;
+      } else {
+          if (!isGoodVetoElectron(eidx)) continue;
+      }
 
       for (unsigned int vidx = 0; vidx < ele_idx.size(); vidx++) {
         if (tas::els_charge().at(eidx) * tas::els_charge().at(ele_idx.at(vidx)) > 0) continue;
@@ -201,7 +205,11 @@ Z_result_t makesExtraZ(int iHyp){
       if (fabs(tas::mus_p4().at(midx).eta()) > 2.4) continue;
       if (tas::mus_p4().at(midx).pt() < 5.) continue;
 
-      if (!isGoodVetoMuon(midx)) continue;
+      if (RA7vetoID) {
+          if (!isGoodVetoMuonRA7(midx)) continue;
+      } else {
+          if (!isGoodVetoMuon(midx)) continue;
+      }
 
       for (unsigned int vidx = 0; vidx < mu_idx.size(); vidx++) {
         if (tas::mus_charge().at(midx) * tas::mus_charge().at(mu_idx.at(vidx)) > 0) continue;
@@ -354,6 +362,12 @@ bool isIsolatedLepton(int id, int idx){
 }
 
 bool isGoodLepton(int id, int idx){
+  if (abs(id) == 11) return isGoodElectron(idx);
+  else if (abs(id) == 13) return isGoodMuon(idx);
+  return false;
+}
+
+bool isGoodLeptonRA7(int id, int idx){
   if (abs(id) == 11) return isGoodElectron(idx);
   else if (abs(id) == 13) return isGoodMuon(idx);
   return false;
@@ -1061,6 +1075,13 @@ bool isGoodVetoElectron(unsigned int elidx){
   return true;
 }
 
+bool isGoodVetoElectronRA7(unsigned int elidx){
+  if (els_p4().at(elidx).pt() < 7.) return false;
+  if (!electronID(elidx, RA7_el_loose)) return false;
+  return true;
+}
+
+
 bool isFakableElectronNoIso(unsigned int elidx){
   if (els_p4().at(elidx).pt() < 10.) return false;
   if (!electronID(elidx, SS_fo_looseMVA_noiso_v5)) return false;
@@ -1091,6 +1112,13 @@ bool isGoodElectron(unsigned int elidx){
   return true;
 }
 
+bool isGoodElectronRA7(unsigned int elidx){
+  if (els_p4().at(elidx).pt() < 15.) return false;
+  if (!electronID(elidx, RA7_el_tight)) return false;
+  return true;
+}
+
+
 bool isGoodElectron_no3chg(unsigned int elidx){
   if (els_p4().at(elidx).pt() < 10.) return false;
   if (!electronID(elidx, SS_medium_no3chg_v5)) return false;
@@ -1106,6 +1134,12 @@ bool isGoodVetoMuonNoIso(unsigned int muidx){
 bool isGoodVetoMuon(unsigned int muidx){
   if (mus_p4().at(muidx).pt() < 5.)         return false;
   if (!muonID(muidx, SS_veto_v5))           return false;
+  return true;
+}
+
+bool isGoodVetoMuonRA7(unsigned int muidx){
+  if (mus_p4().at(muidx).pt() < 5.)         return false;
+  if (!muonID(muidx, RA7_loose))           return false;
   return true;
 }
 
@@ -1130,6 +1164,12 @@ bool isGoodMuonNoIso(unsigned int muidx){
 bool isGoodMuon(unsigned int muidx){
   if (mus_p4().at(muidx).pt() < 10.)        return false;
   if (!muonID(muidx, SS_tight_v5))          return false;
+  return true;
+}
+
+bool isGoodMuonRA7(unsigned int muidx){
+  if (mus_p4().at(muidx).pt() < 10.)        return false;
+  if (!muonID(muidx, RA7_tight))          return false;
   return true;
 }
 
@@ -1219,6 +1259,166 @@ pair <int, int> lepMotherID_v2(Lep lep){
 
 }
 
+std::pair <int, Lep>  isGoodHypTripleRA7(int iHyp, bool verbose){
+    // find SS pair satisfying RA7 selection, only if there
+    // is a third lep passing RA7 that doesn't make any Zs
+    //
+   std::pair<int,Lep> toreturn = {0, Lep(0,-1)};
+   // toreturn.first = 0; // bad pair
+   // toreturn.second = Lep(0,-1); // third lepton Lep object
+
+  //Bunch o' variables
+  float pt_ll = tas::hyp_ll_p4().at(iHyp).pt(); 
+  float pt_lt = tas::hyp_lt_p4().at(iHyp).pt(); 
+  float eta_ll = tas::hyp_ll_p4().at(iHyp).eta();
+  float eta_lt = tas::hyp_lt_p4().at(iHyp).eta();
+  int idx_ll = tas::hyp_ll_index().at(iHyp);
+  int idx_lt = tas::hyp_lt_index().at(iHyp);
+  int id_ll = tas::hyp_ll_id().at(iHyp);
+  int id_lt = tas::hyp_lt_id().at(iHyp);
+  bool isss = false;
+  if (sgn(id_ll) == sgn(id_lt)) isss = true;  
+  if (!isss) return toreturn;
+
+  bool passed_id_numer_ll = isGoodLeptonRA7(id_ll, idx_ll);
+  bool passed_id_numer_lt = isGoodLeptonRA7(id_lt, idx_lt);
+  if (!passed_id_numer_ll || !passed_id_numer_lt) return toreturn;
+
+  //Kinematic Cuts
+  
+  if (pt_ll < ptCutLowAG(id_ll)) return toreturn;
+  if (pt_lt < ptCutLowAG(id_lt)) return toreturn;
+  if (abs(id_ll) == 11 && fabs(eta_ll) > 2.5) return toreturn;
+  if (abs(id_lt) == 11 && fabs(eta_lt) > 2.5) return toreturn;
+  if (abs(id_ll) == 13 && fabs(eta_ll) > 2.4) return toreturn;
+  if (abs(id_lt) == 13 && fabs(eta_lt) > 2.4) return toreturn;
+
+  //Other cuts
+  if ((tas::hyp_ll_p4().at(iHyp) + tas::hyp_lt_p4().at(iHyp)).M() < 8) return toreturn;
+  if (!hypsFromFirstGoodVertex(iHyp)) return toreturn;
+
+  // Now look to see if there's a Z using RA7 veto, and reject if there is
+  bool extraZ = makesExtraZ(iHyp, true).result;
+  if (extraZ) return toreturn;
+
+  // Now look for a 3rd RA7 tight lepton that doesn't make a Z with
+  // any other RA7 veto leps
+  Lep thirdLepRA7 = getThirdLepton_RA7_noZ(iHyp);
+  if (thirdLepRA7.idx() < 0) return toreturn;
+
+  // Don't want +++ or ---
+  if ((thirdLepRA7.pdgId() > 0) == (id_ll > 0)) return toreturn;
+
+  toreturn.first = 1;
+  toreturn.second = thirdLepRA7;
+
+  return toreturn;
+
+}
+
+Lep getThirdLepton_RA7_noZ(int hyp){
+
+  //Selected Lepton Information
+  int ll_id = tas::hyp_ll_id().at(hyp);
+  int lt_id = tas::hyp_lt_id().at(hyp);
+  unsigned int ll_idx = tas::hyp_ll_index().at(hyp);
+  unsigned int lt_idx = tas::hyp_lt_index().at(hyp);
+
+
+  vector<Lep> bestleps;
+
+  //Electron Loop 
+  for (unsigned int i = 0; i < tas::els_p4().size(); i++){
+
+    //Remove electrons already selected
+    if (abs(ll_id) == 11 && ll_idx == i) continue; 
+    if (abs(lt_id) == 11 && lt_idx == i) continue; 
+
+    //Remove electrons that fail kinematically
+    if (tas::els_p4().at(i).pt() < 15) continue;
+    if (fabs(tas::els_p4().at(i).eta()) > 2.5) continue;
+
+    // Need 3rd tight lepton
+    if (!isGoodElectronRA7(i)) continue;
+
+    // Now check to see that this lepton doesn't make a Z
+    bool makesZ = false;
+    for (unsigned int eidx = 0; eidx < tas::els_p4().size(); eidx++) {
+        if (eidx == i) continue;
+        if (eidx == ll_idx) continue;
+        if (eidx == lt_idx) continue;
+
+        if (fabs(tas::els_p4().at(eidx).eta()) > 2.5) continue;
+        if (tas::els_p4().at(eidx).pt() < 7) continue;
+        if (!isGoodVetoElectronRA7(eidx)) continue;
+        if (tas::els_charge().at(eidx) * tas::els_charge().at(i) > 0) continue;
+
+        LorentzVector zp4 = tas::els_p4().at(eidx) + tas::els_p4().at(i);
+        float zcandmass = sqrt(fabs(zp4.mass2()));
+        if (fabs(zcandmass-91.) < 15.) {
+            makesZ = true;
+            break;
+        }
+
+    }
+    if (!makesZ) bestleps.push_back(Lep(-11*els_charge().at(i), i));
+
+  }
+  
+  //Muon Loop
+  for (unsigned int i = 0; i < tas::mus_p4().size(); i++){
+
+    //Remove electrons already selected
+    if (abs(ll_id) == 13 && ll_idx == i) continue; 
+    if (abs(lt_id) == 13 && lt_idx == i) continue; 
+   
+    //Remove electrons that fail kinematically
+    if (tas::mus_p4().at(i).pt() < 10) continue;
+    if (fabs(tas::mus_p4().at(i).eta()) > 2.4) continue;
+
+    // Need 3rd tight lepton
+    if (!isGoodMuonRA7(i)) continue;
+
+    // Now check to see that this lepton doesn't make a Z
+    bool makesZ = false;
+    for (unsigned int midx = 0; midx < tas::mus_p4().size(); midx++) {
+        if (midx == i) continue;
+        if (midx == ll_idx) continue;
+        if (midx == lt_idx) continue;
+
+        if (fabs(tas::mus_p4().at(midx).eta()) > 2.5) continue;
+        if (tas::mus_p4().at(midx).pt() < 7) continue;
+        if (!isGoodVetoMuonRA7(midx)) continue;
+        if (tas::mus_charge().at(midx) * tas::mus_charge().at(i) > 0) continue;
+
+        LorentzVector zp4 = tas::mus_p4().at(midx) + tas::mus_p4().at(i);
+        float zcandmass = sqrt(fabs(zp4.mass2()));
+        if (fabs(zcandmass-91.) < 15.) {
+            makesZ = true;
+            break;
+        }
+
+
+    }
+    if (!makesZ) bestleps.push_back(Lep(-13*mus_charge().at(i), i));
+
+  }//Muon loop
+
+  Lep result = Lep(0,-1);
+  // pick highest pt
+  float bestpt = -1.;
+  for (unsigned int ib = 0; ib < bestleps.size(); ib++) {
+      float pt = bestleps[ib].pt();
+      if (pt > bestpt) {
+          result = bestleps[ib];
+          bestpt = pt;
+      }
+  }
+
+  return result;
+
+}
+
 int isGoodHyp(int iHyp, bool verbose){
 
   //Bunch o' variables
@@ -1290,7 +1490,7 @@ int isGoodHyp(int iHyp, bool verbose){
   return 0; //non-highpass OS
 }
 
-hyp_result_t chooseBestHyp(bool verbose){
+pair<hyp_result_t,Lep> chooseBestHyp(bool verbose, bool doclass8){
 
   //List of good hyps
   vector <int> good_hyps_ss; //same sign, tight tight
@@ -1300,16 +1500,32 @@ hyp_result_t chooseBestHyp(bool verbose){
   vector <int> good_hyps_os; //opposite sign, tight tight
   vector <int> good_hyps_zv; //same sign, tight tight, fail Z veto
   vector <int> good_hyps_osis; // opposite sign, loose insitu denom
+  vector <int> good_hyps_triplera7; // three lepton tight RA7 no Z
+  vector <Lep> good_hyps_triplera7_lep3; // three lepton tight RA7 no Z
   for (unsigned int i = 0; i < tas::hyp_type().size(); i++){
-    int good_hyp_result = isGoodHyp(i, verbose);
+    int good_hyp_result = -1;
+    // toggle comments on below 2 lines if we don't want to do the 3lep RA7 selection at all
+    // std::pair<int,Lep> good_hyp_result_tripleRA7 = isGoodHypTripleRA7(i, verbose);
+    // std::pair<int,Lep> good_hyp_result_tripleRA7 = {0, Lep(0,-1)};
+    std::pair<int,Lep> good_hyp_result_tripleRA7 = {0, Lep(0,-1)};
+    if (doclass8) good_hyp_result_tripleRA7 = isGoodHypTripleRA7(i, verbose);
+    if (good_hyp_result_tripleRA7.first) {
+        good_hyp_result = 8;
+    } else {
+        good_hyp_result = isGoodHyp(i, verbose);
+    }
     if(verbose) std::cout << "hyp #" << i << " hyp_class: " << good_hyp_result << std::endl;
-    if (good_hyp_result == 3) good_hyps_ss.push_back(i); 
-    else if (good_hyp_result == 2) good_hyps_sf.push_back(i); 
-    else if (good_hyp_result == 1) good_hyps_df.push_back(i); 
-    else if (good_hyp_result == 4) good_hyps_os.push_back(i); 
-    else if (good_hyp_result == 5) good_hyps_fr.push_back(i); 
-    else if (good_hyp_result == 6) good_hyps_zv.push_back(i); 
+    if (good_hyp_result == 3)        good_hyps_ss.push_back(i); 
+    else if (good_hyp_result == 2)   good_hyps_sf.push_back(i); 
+    else if (good_hyp_result == 1)   good_hyps_df.push_back(i); 
+    else if (good_hyp_result == 4)   good_hyps_os.push_back(i); 
+    else if (good_hyp_result == 5)   good_hyps_fr.push_back(i); 
+    else if (good_hyp_result == 6)   good_hyps_zv.push_back(i); 
     else if (good_hyp_result == 7) good_hyps_osis.push_back(i); 
+    else if (good_hyp_result == 8) {
+        good_hyps_triplera7.push_back(i); 
+        good_hyps_triplera7_lep3.push_back(good_hyp_result_tripleRA7.second); 
+    }
   }
 
   //hyp_class_ to track SS(3), SF(2), DF(1), OS(4), or none(0)
@@ -1317,7 +1533,13 @@ hyp_result_t chooseBestHyp(bool verbose){
 
   //Load good hyps in, SS then SF then DF then OS
   vector <int> good_hyps;
-  if (good_hyps_ss.size() != 0){
+  vector <Lep> good_hyps_lep3;
+  if (good_hyps_triplera7.size() != 0){
+     good_hyps = good_hyps_triplera7;
+     good_hyps_lep3 = good_hyps_triplera7_lep3;
+     hyp_class_ = 8;
+  }
+  else if (good_hyps_ss.size() != 0){
      good_hyps = good_hyps_ss;
      hyp_class_ = 3;
   }
@@ -1349,28 +1571,37 @@ hyp_result_t chooseBestHyp(bool verbose){
 
   //If no hyps or one hyps, know what to do
   int best_hyp_ = -1;
-  if (good_hyps.size() == 1) best_hyp_ = good_hyps.at(0);
+  Lep best_lep3_(0,-1);
+  if (good_hyps.size() == 1) {
+      best_hyp_ = good_hyps.at(0);
+    if (hyp_class_ == 8) best_lep3_ = good_hyps_lep3.at(0);
+  }
 
   //Otherwise, pick ones with more muons, then highest pT  
   if (good_hyps.size() > 1){
-    best_hyp_ = good_hyps.at(0); 
+    best_hyp_ = good_hyps.at(0);
+    if (hyp_class_ == 8) best_lep3_ = good_hyps_lep3.at(0);
     for (unsigned int i = 1; i < good_hyps.size(); i++){
       int hyp = good_hyps.at(i);
-      if (tas::hyp_type().at(hyp) < tas::hyp_type().at(best_hyp_)) best_hyp_ = hyp;
-      else if (tas::hyp_type().at(hyp) == tas::hyp_type().at(best_hyp_) && (tas::hyp_ll_p4().at(hyp).pt()+tas::hyp_lt_p4().at(hyp).pt()) > (tas::hyp_ll_p4().at(best_hyp_).pt() + tas::hyp_lt_p4().at(best_hyp_).pt())) best_hyp_ = hyp;
+      if (tas::hyp_type().at(hyp) < tas::hyp_type().at(best_hyp_)) {
+          best_hyp_ = hyp;
+          if (hyp_class_ == 8) best_lep3_ = good_hyps_lep3.at(i);
+      } else if (tas::hyp_type().at(hyp) == tas::hyp_type().at(best_hyp_) && (tas::hyp_ll_p4().at(hyp).pt()+tas::hyp_lt_p4().at(hyp).pt()) > (tas::hyp_ll_p4().at(best_hyp_).pt() + tas::hyp_lt_p4().at(best_hyp_).pt())) {
+          best_hyp_ = hyp;
+          if (hyp_class_ == 8) best_lep3_ = good_hyps_lep3.at(i);
+      }
     }
   }
 
   if (best_hyp_ < 0){
     hyp_result_t null = { -1, -1 };
-    return null;
+    return make_pair(null,Lep(0,-1));
   }
 
   hyp_result_t temp;
   temp.best_hyp = best_hyp_;
   temp.hyp_class = hyp_class_; 
-  temp.third_lep = -1;
-  return temp;
+  return make_pair(temp,best_lep3_);
 }
 
 vector <particle_t> getGenPair(bool verbose){

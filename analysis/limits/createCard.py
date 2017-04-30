@@ -30,6 +30,7 @@ class Process(object):
         self.TTWSF = "-"
         self.TTZSF = "-"
         self.WZSF = "-"
+        self.TTH = "-"
         self.WW = "-"
         self.XG = "-"
         self.rares = "-"
@@ -39,6 +40,7 @@ class Process(object):
         self.stat = "x"
         self.statshape = "-"
         self.ratecache = None
+        self.binscache = []
     def rate(self):
         if self.ratecache is not None:
             return self.ratecache
@@ -50,6 +52,18 @@ class Process(object):
             else:
                 print self.plot+" not found in "+self.rootf
                 return 0
+
+    def bins(self):
+        if self.binscache:
+            return self.binscache
+        else:
+            f = ROOT.TFile(self.rootf)
+            if f.Get(self.plot):
+                self.binscache = list(f.Get(self.plot))[1:-1]
+                return self.binscache
+            else:
+                print self.plot+" not found in "+self.rootf
+                return []
 
 def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
     if process.name=="sig": return #fake signal for MI limits does not need stat unc.
@@ -116,6 +130,7 @@ def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
 
 #write card regardless of number of processes (but make sure signal is first in list)
 def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
+
     line = "---------------------------------------------------------------"
     binname = "SS"
     card = open(str(thedir)+'/'+str(output), 'w')
@@ -206,6 +221,11 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     for process in processes: card.write("%-15s " % (process.TTZSF))
     card.write("\n")
 
+    #nuisance TTH
+    card.write("%-40s %-5s " % ("TTH","lnN"))
+    for process in processes: card.write("%-15s " % (process.TTH))
+    card.write("\n")
+
 
     #nuisance WZ
     card.write("%-40s %-5s " % ("WZSF","lnN"))
@@ -253,7 +273,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
 
     return
 
-def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False):
+def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False):
     #define processes (signal first)
     # if pseudoData:
     #     print "Using pseudo data!"
@@ -305,7 +325,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # TTZ.hthlt  = "1"
     TTZ.btag = "1"
     TTZ.pu = "1"
-    TTH.TTH          = "1.0"
+    # TTH.TTH          = "1.0"
+    TTH.TTH          = "1.5"
     TTH.lumi          = lumiunc
     TTH.jes  = "1"
     if kine is "srcr": TTH.lepeff  = "1.04"
@@ -366,6 +387,21 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     processes.append(fakes)
     processes.append(flips)
 
+    if do_expected_data:
+        for proc in processes:
+            print proc.name, proc.rate(), proc.bins()
+        # print map(sum,zip(proc.bins() for proc in processes))
+        tot_bins = map(sum,zip(*[proc.bins() for proc in processes]))
+        print tot_bins, sum(tot_bins)
+        print data.rootf, data.name, data.rate()
+        newdatafile = data.rootf.replace("data_","dataasimov_")
+        fnew = ROOT.TFile(newdatafile,"RECREATE")
+        newsr = ROOT.TH1F(plot,plot,len(tot_bins),0,len(tot_bins))
+        for ibc,bc in enumerate(tot_bins): newsr.SetBinContent(ibc+1,bc)
+        newsr.Write()
+        fnew.Close()
+        newdata = Process(-1,"data",newdatafile.rsplit("/",1)[-1],plot,thedir)
+        data = newdata
 
     #create it
     writeOneCardFromProcesses(thedir, kine, plot, output, data, processes )

@@ -32,9 +32,12 @@ enum LeptonCategories { Prompt = 0, PromptWS = 1, PromptWF = 2, PromptFSR = 2,
 			Other = 11, End = 12};
 
 //Structs
-struct hyp_result_t { int best_hyp; int hyp_class; int third_lep; };
-struct particle_t { int id; LorentzVector p4; int idx; };
 struct Lep;
+
+
+// struct hyp_result_t { int best_hyp; int hyp_class; Lep third_lep = {0,-1}; };
+struct hyp_result_t { int best_hyp; int hyp_class; };
+struct particle_t { int id; LorentzVector p4; int idx; };
 struct DilepHyp;
 struct Jet;
 struct Z_result_t { bool result; int id; int idx; }; 
@@ -52,13 +55,15 @@ bool isDenominatorLepton(int id, int idx);
 bool isVetoLepton(int id, int idx);
 
 //Hyp selections
-hyp_result_t chooseBestHyp(bool verbose=false);
+pair<hyp_result_t,Lep> chooseBestHyp(bool verbose=false, bool doclass8=false);
 int isGoodHyp(int iHyp, bool verbose=false);
+std::pair<int, Lep> isGoodHypTripleRA7(int iHyp, bool verbose=false);
 bool makesExtraGammaStar(int iHyp);
-Z_result_t makesExtraZ(int iHyp);
+Z_result_t makesExtraZ(int iHyp, bool RA7vetoID=false);
 bool hypsFromFirstGoodVertex(size_t hypIdx, float dz_cut = 1.0);
 std::pair<Lep, int> getThirdLepton(int hyp);
 std::pair<Lep, int> getThirdLepton_RA7(int hyp);
+Lep getThirdLepton_RA7_noZ(int hyp);
 Lep getFourthLepton(int hyp);
 std::vector<particle_t> getGenPair(bool verbose=false);
 
@@ -78,17 +83,21 @@ bool isDenominatorLeptonNoIso(int id, int idx);
 bool isVetoLeptonNoIso(int id, int idx);
 bool isGoodVetoElectronNoIso(unsigned int elidx);
 bool isGoodVetoElectron(unsigned int elidx);
+bool isGoodVetoElectronRA7(unsigned int elidx);
 bool isFakableElectronNoIso(unsigned int elidx);
 bool isFakableElectron(unsigned int elidx);
 bool isFakableElectron_no3chg(unsigned int elidx);
 bool isGoodElectronNoIso(unsigned int elidx);
 bool isGoodElectron(unsigned int elidx);
+bool isGoodElectronRA7(unsigned int elidx);
 bool isGoodVetoMuonNoIso(unsigned int muidx);
 bool isGoodVetoMuon(unsigned int muidx);
+bool isGoodVetoMuonRA7(unsigned int muidx);
 bool isFakableMuonNoIso(unsigned int muidx);
 bool isFakableMuon(unsigned int muidx);
 bool isGoodMuonNoIso(unsigned int muidx);
 bool isGoodMuon(unsigned int muidx);
+bool isGoodMuonRA7(unsigned int muidx);
 bool isIsolatedLepton(int id, int idx);
 bool isLooseIsolatedLepton(int id, int idx);
 bool isInSituFRLepton(int lep_id, int lep_idx);

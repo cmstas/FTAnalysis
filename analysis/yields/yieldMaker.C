@@ -24,8 +24,6 @@
 #define WRITE(var) { p_data.var->Write(); p_ttw.var->Write(); p_ttz.var->Write(); p_tth.var->Write(); p_wz.var->Write(); p_ww.var->Write(); p_xg.var->Write(); p_rares.var->Write(); p_flips.var->Write(); p_fakes.var->Write(); p_tttt.var->Write(); p_fakes_mc.var->Write(); }
 
 float lumiAG = getLumiUnblind();
-string tag = getTag().Data();
-string tagData = getTagData().Data();
 
 float bloose = 0.5426; // FIXME
 float bmed = 0.8484; // FIXME
@@ -46,7 +44,11 @@ bool doBDT = false; // FIXME
 bool makeRootFiles = true;
 
 // TString dir = "v0.02_Apr27_test"; // tttt regions
-TString dir = "v0.04_Apr28_test"; // tttt regions
+// TString dir = "v0.04_Apr29_norundep"; // tttt regions
+// TString dir = "v0.05_Apr29_test"; // tttt regions
+// TString tag = "v0.05";
+TString dir = "v0.04_Apr30_combrares"; // tttt regions
+TString tag = "v0.04";
 
 bool suppressWarns = true;
 
@@ -138,7 +140,8 @@ void getyields(){
 
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/";
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.02/output/";
-    TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.04/output/";
+    // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.04/output/";
+    TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
     TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
 
     //Fill chains
@@ -566,29 +569,28 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             int ssclass = 3;
             bool isClass6 = ss::hyp_class() == 6;
             if (!doFlips && !doFakes && exclude == 0) {
-                if (ss::hyp_class() != ssclass && !isClass6) continue;
-                //first check the charge (since isPrompt does not know about it)
+                // if (ss::hyp_class() != ssclass && !isClass6) continue;
+                if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !isGamma && ss::lep1_motherID()==2) continue;
                 if (!isData && !isGamma && ss::lep2_motherID()==2) continue;
-                //then allow events with two prompt leptons or with prompt photons
-                //photons can give fakes from conversions (not accounted by data-driven method)
                 if (!isData && !( (ss::lep1_motherID()==1 && ss::lep2_motherID()==1) || (ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3)) ) continue;
-                //if (!isData && !isGamma && (ss::lep1_motherID()!=1 || ss::lep2_motherID()!=1)) continue;
-                //if (isGamma && (ss::lep1_motherID()!=-3 && ss::lep2_motherID()!=-3)) continue;
             }
 
             if (!doFlips && !doFakes && exclude == 1){
-                if (ss::hyp_class() != 3 && !isClass6) continue;
+                // if (ss::hyp_class() != ssclass && !isClass6) continue;
+                if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !((ss::lep1_motherID() == 1 && ss::lep2_motherID() < 0) || (ss::lep1_motherID() < 0 && ss::lep2_motherID() == 1))) continue;
             }
 
             if (!doFlips && !doFakes && exclude == 2){
-                if (ss::hyp_class() != 3 && !isClass6) continue;
+                // if (ss::hyp_class() != ssclass && !isClass6) continue;
+                if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !((ss::lep1_motherID() == 1 && ss::lep2_motherID() == 2) || (ss::lep1_motherID() == 2 && ss::lep2_motherID() == 1))) continue;
             }
 
             if (!doFlips && !doFakes && exclude == 3){
-                if (ss::hyp_class() != 3 && !isClass6) continue;
+                // if (ss::hyp_class() != ssclass && !isClass6) continue;
+                if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !((ss::lep1_motherID() == 1 || ss::lep2_motherID() == 1))) continue;
             }
 
@@ -667,6 +669,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
             int nleps = 2;
             if (ss::lep3_passes_id()) nleps++;
+            // if (ss::is_real_data()) {
+            //     if (ss::lep3_passes_id()) nleps++;
+            // } else {
+            //     if (ss::lep3_passes_RA7v2() && ss::lep3_p4().pt() > 20.) nleps++;
+            // }
             if (ss::lep4_passes_id()) nleps++;
 
             //Require nominal baseline selections
