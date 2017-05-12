@@ -12,8 +12,10 @@ Standard disclaimer
 ```bash
 # winners use git
 git clone https://github.com/aminnj/fourtop
-# winners use bash
+# winners use bash (but mainly python)
 source install.sh
+# execute from this directory and only this directory,
+# every time you want to work in this repository
 ```
 
 ### [Make babies](babymaking/batch/) (more babies = more votes)
