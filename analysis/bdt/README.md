@@ -3,6 +3,7 @@
 
 #### Making a BDT is like making a wall...
 ![Wall](http://i.imgur.com/iZzFTzp.png)
+<img src="http://i.imgur.com/iZzFTzp.png" width="400">
 
 #### Install xgboost
 ```bash
