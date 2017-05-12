@@ -21,8 +21,6 @@ class Process(object):
         self.isr  = "-"
         self.met  = "-"
         self.scale  = "-"
-        self.fs_lep  = "-"
-        self.fs_hlt  = "-"
         self.lepeff  = "-"
         self.hlt  = "-"
         self.lephlt  = "-"
@@ -181,16 +179,8 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     card.write("%-40s %-5s " % ("isr","shape"))
     for process in processes: card.write("%-15s " % (process.isr))
     card.write("\n")
-    #nuisance fs_lep
-    card.write("%-40s %-5s " % ("fs_lep","lnN"))
-    for process in processes: card.write("%-15s " % (process.fs_lep))
-    card.write("\n")
-    #nuisance fs_hlt
-    card.write("%-40s %-5s " % ("fs_hlt","lnN"))
-    for process in processes: card.write("%-15s " % (process.fs_hlt))
-    card.write("\n")
     #nuisance lepeff
-    card.write("%-40s %-5s " % ("lepeff","lnN"))
+    card.write("%-40s %-5s " % ("lep","shape"))
     for process in processes: card.write("%-15s " % (process.lepeff))
     card.write("\n")
     #nuisance lephlt
@@ -313,10 +303,10 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     #overwrite nuisances
     lumiunc = "1.026"
     signal.lumi  = lumiunc
-    signal.lephlt  = "1.02"
+    signal.lephlt  = "1.04"
     signal.hlt  = "1.03"
     signal.jes  = "1"
-    signal.lepeff  = "1.04"
+    signal.lepeff  = "1.0"
     signal.hthlt  = "1"
     signal.btag = "1"
     signal.pu = "1"
@@ -329,8 +319,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTW.lumi         = lumiunc
     TTW.isr         = "1"
     TTW.jes  = "1"
-    if kine is "srcr": TTW.lepeff  = "1.04"
-    TTW.lephlt  = "1.02"
+    # TTW.lepeff  = "1.0"
+    TTW.lephlt  = "1.04"
     TTW.hlt  = "1.03"
     # TTW.hthlt  = "1"
     TTW.btag = "1"
@@ -339,8 +329,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.lumi          = lumiunc
     TTZ.isr  = "1"
     TTZ.jes  = "1"
-    if kine is "srcr": TTZ.lepeff  = "1.04"
-    TTZ.lephlt  = "1.02"
+    # TTZ.lepeff  = "1.0"
+    TTZ.lephlt  = "1.04"
     TTZ.hlt  = "1.03"
     # TTZ.hthlt  = "1"
     TTZ.btag = "1"
@@ -349,8 +339,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTH.TTH          = "1.5"
     TTH.lumi          = lumiunc
     TTH.jes  = "1"
-    if kine is "srcr": TTH.lepeff  = "1.04"
-    TTH.lephlt  = "1.02"
+    TTH.lepeff  = "1.0"
+    TTH.lephlt  = "1.04"
     TTH.hlt  = "1.03"
     TTH.hthlt  = "1"
     TTH.btag = "1"
@@ -358,8 +348,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTWW.TTWW          = "2.0"
     TTWW.lumi          = lumiunc
     TTWW.jes  = "1"
-    if kine is "srcr": TTWW.lepeff  = "1.04"
-    TTWW.lephlt  = "1.02"
+    TTWW.lepeff  = "1.0"
+    TTWW.lephlt  = "1.04"
     TTWW.hlt  = "1.03"
     TTWW.hthlt  = "1"
     TTWW.btag = "1"
@@ -372,7 +362,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # WW.lumi = lumiunc
     # WW.jes  = "1"
     # if kine is "srcr": WW.lepeff  = "1.04"
-    # WW.lephlt  = "1.02"
+    # WW.lephlt  = "1.04"
     # WW.hlt  = "1.03"
     # WW.hthlt  = "1"
     # WW.btag = "1"
@@ -380,8 +370,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     XG.XG = "1.50"
     XG.lumi = lumiunc
     XG.jes  = "1"
-    if kine is "srcr": XG.lepeff  = "1.04"
-    XG.lephlt  = "1.02"
+    XG.lepeff  = "1.0"
+    XG.lephlt  = "1.04"
     XG.hlt  = "1.03"
     XG.hthlt  = "1"
     XG.btag = "1"
@@ -389,8 +379,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     rares.rares = "1.50"
     rares.lumi = lumiunc
     rares.jes  = "1"
-    if kine is "srcr": rares.lepeff  = "1.04"
-    rares.lephlt  = "1.02"
+    rares.lepeff  = "1.0"
+    rares.lephlt  = "1.04"
     rares.hlt  = "1.03"
     rares.hthlt  = "1"
     rares.btag = "1"
