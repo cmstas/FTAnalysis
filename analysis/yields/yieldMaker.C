@@ -443,8 +443,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     reader->AddVariable("q1",&tree_f_q1);
     reader->AddVariable("q2",&tree_f_q2);
     reader->AddVariable("ht4ratio",&tree_ht4ratio);
-    // reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
-    reader->BookMVA("BDT","/home/users/namin/2017/fourtop/analysis/bdt/weights_bck/TMVAClassification_BDT.weights.xml");
+    reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
 
     // out_file->cd();
 
