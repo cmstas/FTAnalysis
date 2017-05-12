@@ -23,3 +23,14 @@ export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages
     cd common/CORE; make -j10 >&/dev/null &
     cd -;
 }
+[[ -d common/${therelease}/src/HiggsAnalysis/CombinedLimit/ ]] || {
+    pushd
+    cd $CMSSW_BASE/src
+    cmsenv
+    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+    cd HiggsAnalysis/CombinedLimit
+    git checkout 74x-root6
+    scramv1 b vclean
+    scramv1 b -j 15
+    popd
+}
