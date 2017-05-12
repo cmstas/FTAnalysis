@@ -32,7 +32,7 @@ popd
 # makes NLL scan with asimov dataset
 ./makeScan.py -h
 
-# clean up stupid root files and runaway kill combine processes
+# clean up stupid root files and kill runaway combine processes
 ./drainTheSwamp.py
 ```
 
