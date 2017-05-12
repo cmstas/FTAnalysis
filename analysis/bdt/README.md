@@ -1,4 +1,9 @@
 ### So you want to outsmart those hackers? Use machine learning!
+
+
+#### Making a BDT is like making a wall...
+![Wall](http://i.imgur.com/iZzFTzp.png)
+
 #### Install xgboost
 ```bash
 git clone --recursive https://github.com/dmlc/xgboost
