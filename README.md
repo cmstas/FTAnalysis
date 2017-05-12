@@ -3,6 +3,10 @@ Looking for four top in all the right places.
 
 ![Mascot](http://i.imgur.com/k2FvE22.png)
 
+Standard disclaimer
+> No identification with actual persons (living or deceased),
+> places, buildings, and products is intended or should be inferred.
+
 ## How to take over the country
 ### Prepare the campaign
 ```bash
