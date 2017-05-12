@@ -1,3 +1,6 @@
+## Making babies
+<img src="http://i.imgur.com/6BFuXOh.png" width="400">
+
 ### So you want to develop the babymaker?
 ```bash
 # Copy over CORE and stuff
