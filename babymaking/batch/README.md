@@ -1,5 +1,5 @@
 ## Making babies
-<img src="http://i.imgur.com/6BFuXOh.png" width="400">
+<img src="http://i.imgur.com/6BFuXOh.png" width="500">
 
 ### So you want to develop the babymaker?
 ```bash
