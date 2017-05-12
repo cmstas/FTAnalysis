@@ -6,6 +6,7 @@ cd xgboost/
 make -j10
 cd python-package/
 # numpy and scipy already come with CMSSW, so kick 'em out!
+# we call this "building the wall"
 sed -i "s/'numpy',/# the wall/" setup.py
 sed -i "s/'scipy',/# the wall/" setup.py
 # path magic

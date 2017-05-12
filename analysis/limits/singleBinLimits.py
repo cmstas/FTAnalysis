@@ -4,6 +4,7 @@ import ROOT as r
 import os
 import glob
 import runLimits
+import argparse
 from multiprocessing.dummy import Pool as ThreadPool
 
 def reduce_bins(fname, outdir, outbins):
@@ -68,6 +69,10 @@ def get_singlebin_limits(thedir, redo=False):
 
 if __name__ == "__main__":
 
-    thedir = "v0.04_May10_singlebins"
-    print get_singlebin_limits(thedir, redo=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dir", help="directory")
+    args = parser.parse_args()
+
+    # thedir = "v0.04_May10_singlebins"
+    print get_singlebin_limits(args.dir, redo=True)
 

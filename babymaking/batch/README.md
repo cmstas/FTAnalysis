@@ -5,7 +5,7 @@
 # Edit the babymaker source files or whatever
 # Compile
 ./make -j10
-# Test?
+# Test? Or don't, actually. We don't make mistakes.
 ./test_babymaker.sh
 # Make a tar file to ship to the worker nodes
 ./make_tar.sh
@@ -20,7 +20,7 @@ This is what he does
 # Open up a screen before proceeding
 # Get environment
 cd NtupleTools/AutoTwopler/
-# edit `campaign` in `params.py` to be "SS_babymaker"
+# edit `campaign` in `params.py` to be "FT_babymaker"
 . setup.sh
 cd ../../
 # Submit
