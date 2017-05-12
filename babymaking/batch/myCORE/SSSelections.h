@@ -64,7 +64,7 @@ bool hypsFromFirstGoodVertex(size_t hypIdx, float dz_cut = 1.0);
 std::pair<Lep, int> getThirdLepton(int hyp);
 std::pair<Lep, int> getThirdLepton_RA7(int hyp);
 Lep getThirdLepton_RA7_noZ(int hyp);
-Lep getFourthLepton(int hyp);
+Lep getFourthLepton(int hyp, int lep3id=-1, int lep3idx=-1);
 std::vector<particle_t> getGenPair(bool verbose=false);
 
 //Signal region selections
@@ -76,6 +76,8 @@ int signalRegionChargeSplit(int njets, int nbtags, float met, float ht, float mt
 int signalRegionChargeSplit_old(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt);
 int signalRegionRed(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt);
 std::vector<int> signalRegionAggOverlap(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt);
+int getNsrsTTTT();
+int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, int nleps, int isClass6);
 
 //More Lepton selections
 bool isGoodLeptonNoIso(int id, int idx);

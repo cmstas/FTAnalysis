@@ -7,13 +7,15 @@
 #include "TTree.h"
 #include "TKey.h"
 #include "TSystem.h"
+#include "TMVA/Reader.h"
 #include "../misc/class_files/v8.02/SS.h"
 #include "../../common/CORE/SSSelections.h"
 #include "../../common/CORE/Tools/dorky/dorky.h"
 #include "../../common/CORE/Tools/utils.h"
 #include "../misc/common_utils.h"
 #include "../misc/signal_regions.h"
-// #include "bdt/function.h"
+#include "xgbheader.h"
+#include "c2numpy.h"
 // #include "bdt/function_Apr18.h"
 // #include "bdt/function_Apr22.h"
 
@@ -21,45 +23,107 @@
 // #include "../../../../batch/points/isr_norm_TTZnlo.h"
 // #include "../../../../batch/points/isr_norm_TTZLOW.h"
 //
-#define WRITE(var) { p_data.var->Write(); p_ttw.var->Write(); p_ttz.var->Write(); p_tth.var->Write(); p_wz.var->Write(); p_ww.var->Write(); p_xg.var->Write(); p_rares.var->Write(); p_flips.var->Write(); p_fakes.var->Write(); p_tttt.var->Write(); p_fakes_mc.var->Write(); }
+// #define WRITE(var) { p_data.var->Write(); p_ttw.var->Write(); p_ttz.var->Write(); p_tth.var->Write(); p_wz.var->Write(); p_ww.var->Write(); p_xg.var->Write(); p_rares.var->Write(); p_flips.var->Write(); p_fakes.var->Write(); p_tttt.var->Write(); p_fakes_mc.var->Write(); }
+#define WRITE(var) { p_data.var->Write(); p_ttw.var->Write(); p_ttz.var->Write(); p_tth.var->Write(); p_xg.var->Write(); p_rares.var->Write(); p_flips.var->Write(); p_fakes.var->Write(); p_tttt.var->Write(); p_ttww.var->Write(); p_fakes_mc.var->Write(); }
 
 float lumiAG = getLumiUnblind();
 
-float bloose = 0.5426; // FIXME
-float bmed = 0.8484; // FIXME
-float btight = 0.9535; // FIXME
+float bloose = 	0.2219;
+float bmed = 0.6324;
+float btight = 0.8958;
 
 int nsr = getNsrsTTTT();
 // int nsrdisc = getNsrsTTTTBDT();
-int nsrdisc = getNsrsTTTT(); // FIXME
+int nsrdisc = 10; //getNsrsTTTT();
 int nCR = 2;
 
 bool doCustomSelection = false;
 float scaleLumi = 1.;
 
-bool doTTWISR = false; // FIXME
-bool doTTZISR = false; // FIXME
-bool doBDT = false; // FIXME
+bool doTTWISR = true; // FIXME
+bool doTTZISR = true; // FIXME
+bool doBDT = true; // FIXME
+bool outputTrainingBDT = false; // FIXME
 
 bool makeRootFiles = true;
+bool makeGenVariationsMC = true; // FIXME
 
 // TString dir = "v0.02_Apr27_test"; // tttt regions
 // TString dir = "v0.04_Apr29_norundep"; // tttt regions
-// TString dir = "v0.05_Apr29_test"; // tttt regions
-// TString tag = "v0.05";
-TString dir = "v0.04_Apr30_combrares"; // tttt regions
+TString dir = "v0.04_May10_test"; // tttt regions
 TString tag = "v0.04";
+// TString dir = "v0.04_May1_test"; // tttt regions
+// TString tag = "v0.04_scalepdf";
 
 bool suppressWarns = true;
 
+c2numpy_writer writer;
+
 
 // For output tree
-float tree_met = -1, tree_ht = -1, tree_mtmin = -1, tree_weight = -1;
-int tree_l1id = -1, tree_l2id = -1, tree_njets = -1, tree_nbtags = -1, tree_kine = -1, tree_SR = -1;
+float tree_weight = -1;
 int tree_event = -1, tree_lumi = -1, tree_run = -1;
+int tree_l1id = -1;
+int tree_l2id = -1;
+int tree_nbtags = -1;
+int tree_njets = -1;
+int tree_nleps = -1;
+int tree_wcands = -1;
+float tree_met = -1;
+float tree_ht = -1;
+float tree_htb = -1;
+float tree_mt1 = -1;
+float tree_mt2 = -1;
+float tree_dphil1j1 = -1;
+float tree_dphil2j2 = -1;
+float tree_dphil1j2 = -1;
+float tree_dphil2j1 = -1;
+float tree_dphil1l2 = -1;
+float tree_dphij1j2 = -1;
+float tree_dphil1met = -1;
+float tree_dphil2met = -1;
+float tree_dphij1met = -1;
+float tree_dphij2met = -1;
+float tree_detal1j1 = -1;
+float tree_detal2j2 = -1;
+float tree_detal1j2 = -1;
+float tree_detal2j1 = -1;
+float tree_detal1l2 = -1;
+float tree_detaj1j2 = -1;
+float tree_ml1j1 = -1;
+float tree_ml2j2 = -1;
+float tree_ml1j2 = -1;
+float tree_ml2j1 = -1;
+float tree_ml1l2 = -1;
+float tree_mj1j2 = -1;
+float tree_ptl1 = -1;
+float tree_ptl2 = -1;
+float tree_ptj1 = -1;
+float tree_ptj2 = -1;
+// float tree_stb = -1;
+int tree_nlb40 = -1;
+int tree_nmb40 = -1;
+int tree_ntb40 = -1;
+int tree_q1 = 0;
+int tree_q2 = 0;
+int tree_q3 = 0;
+float tree_ht4ratio = 0;
+int tree_SR = -1;
+float tree_disc = -1;
+
+float tree_f_njets = -1.;
+float tree_f_nbtags = -1.;
+float tree_f_nleps = -1.;
+float tree_f_wcands = -1.;
+float tree_f_nlb40 = -1.;
+float tree_f_nmb40 = -1.;
+float tree_f_ntb40 = -1.;
+float tree_f_q1 = -1.;
+float tree_f_q2 = -1.;
+
 TString tree_name = "";
-// TFile *out_file;
-// TTree *out_tree;
+TFile *out_file;
+TTree *out_tree;
 
 struct yields_t { float EE; float EM; float MM; float TOTAL; };
 struct SR_t     { TH1F* EE; TH1F* EM; TH1F* MM; TH1F* TOTAL; };
@@ -91,6 +155,7 @@ struct plots_t  {
     triple_t h_el_l3pt;
     triple_t h_mbb;
     triple_t h_disc;
+    triple_t h_disc2;
     triple_t h_mid1;
     triple_t h_mid2;
     triple_t h_mid3;
@@ -112,6 +177,70 @@ void initHistError(bool usePoisson, TH1F* plot);
 
 void getyields(){
 
+    c2numpy_init(&writer, "testout", 10000000);
+    c2numpy_addcolumn(&writer, "one", C2NUMPY_INTC);
+    c2numpy_addcolumn(&writer, "two", C2NUMPY_FLOAT64);
+    c2numpy_addcolumn(&writer, "three", (c2numpy_type)((int)C2NUMPY_STRING + 5));
+    c2numpy_open(&writer);
+
+    if (outputTrainingBDT) {
+        out_file = new TFile("output.root", "RECREATE");
+        out_file->cd();
+        out_tree = new TTree("t", "From yieldMaker");
+        out_tree->Branch("event" , &tree_event );
+        out_tree->Branch("lumi" , &tree_lumi );
+        out_tree->Branch("run" , &tree_run );
+        out_tree->Branch("weight" , &tree_weight );
+        out_tree->Branch("name" , &tree_name );
+        out_tree->Branch("SR" , &tree_SR );
+        out_tree->Branch("l1id", &tree_l1id );
+        out_tree->Branch("l2id", &tree_l2id );
+        out_tree->Branch("nbtags", &tree_nbtags );
+        out_tree->Branch("njets", &tree_njets );
+        out_tree->Branch("nleps", &tree_nleps );
+        out_tree->Branch("wcands", &tree_wcands );
+        out_tree->Branch("met", &tree_met );
+        out_tree->Branch("ht", &tree_ht );
+        out_tree->Branch("htb", &tree_htb );
+        out_tree->Branch("mt1", &tree_mt1 );
+        out_tree->Branch("mt2", &tree_mt2 );
+        out_tree->Branch("dphil1j1", &tree_dphil1j1 );
+        out_tree->Branch("dphil2j2", &tree_dphil2j2 );
+        out_tree->Branch("dphil1j2", &tree_dphil1j2 );
+        out_tree->Branch("dphil2j1", &tree_dphil2j1 );
+        out_tree->Branch("dphil1l2", &tree_dphil1l2 );
+        out_tree->Branch("dphij1j2", &tree_dphij1j2 );
+        out_tree->Branch("dphil1met", &tree_dphil1met );
+        out_tree->Branch("dphil2met", &tree_dphil2met );
+        out_tree->Branch("dphij1met", &tree_dphij1met );
+        out_tree->Branch("dphij2met", &tree_dphij2met );
+        out_tree->Branch("detal1j1", &tree_detal1j1 );
+        out_tree->Branch("detal2j2", &tree_detal2j2 );
+        out_tree->Branch("detal1j2", &tree_detal1j2 );
+        out_tree->Branch("detal2j1", &tree_detal2j1 );
+        out_tree->Branch("detal1l2", &tree_detal1l2 );
+        out_tree->Branch("detaj1j2", &tree_detaj1j2 );
+        out_tree->Branch("ml1j1", &tree_ml1j1 );
+        out_tree->Branch("ml2j2", &tree_ml2j2 );
+        out_tree->Branch("ml1j2", &tree_ml1j2 );
+        out_tree->Branch("ml2j1", &tree_ml2j1 );
+        out_tree->Branch("ml1l2", &tree_ml1l2 );
+        out_tree->Branch("mj1j2", &tree_mj1j2 );
+        out_tree->Branch("ptl1", &tree_ptl1 );
+        out_tree->Branch("ptl2", &tree_ptl2 );
+        out_tree->Branch("ptj1", &tree_ptj1 );
+        out_tree->Branch("ptj2", &tree_ptj2 );
+        out_tree->Branch("nlb40", &tree_nlb40 );
+        out_tree->Branch("nmb40", &tree_nmb40 );
+        out_tree->Branch("ntb40", &tree_ntb40 );
+        out_tree->Branch("q1", &tree_q1 );
+        out_tree->Branch("q2", &tree_q2 );
+        out_tree->Branch("q3", &tree_q3 );
+        out_tree->Branch("ht4ratio", &tree_ht4ratio );
+        out_tree->Branch("disc", &tree_disc );
+    }
+
+
     gSystem->Exec(Form("mkdir -p ../limits/%s/", dir.Data()));
 
     cout << "Running with lumi=" << lumiAG*scaleLumi << endl;
@@ -120,18 +249,17 @@ void getyields(){
     //fakes&flips in mc
     TChain *ttbar_chain   = new TChain("t","ttbar");
     TChain *st_chain      = new TChain("t","st");
-    TChain *wjets_chain   = new TChain("t","wjets");
-    TChain *dy_chain      = new TChain("t","dy");
+    // TChain *wjets_chain   = new TChain("t","wjets");
+    // TChain *dy_chain      = new TChain("t","dy");
     //rares
     TChain *ttw_chain     = new TChain("t","ttw");
     TChain *ttz_chain    = new TChain("t","ttz");
     TChain *tth_chain    = new TChain("t","tth");
-    TChain *wz_chain      = new TChain("t","wz");
-    TChain *ww_chain      = new TChain("t","ww");
     TChain *xg_chain      = new TChain("t","xg");
     TChain *rares_chain   = new TChain("t","rares");
     TChain *tttt_chain    = new TChain("t","tttt");
-    TChain *qqww_chain    = new TChain("t","qqww"); // separate this out to check shape uncertainties
+    TChain *ttww_chain    = new TChain("t","ttww");
+    // TChain *qqww_chain    = new TChain("t","qqww"); // separate this out to check shape uncertainties
     //data
     TChain *data_chain    = new TChain("t","data");
     TChain *flips_chain   = new TChain("t","flips");
@@ -142,22 +270,25 @@ void getyields(){
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.02/output/";
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.04/output/";
     TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
-    TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
+    // TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
+    // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
+    // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/";
+    TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/skim/";
 
     //Fill chains
-    tttt_chain   ->Add(Form("%s/TTTT.root"           , pfx.Data()));
+    tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
 
+    ttww_chain   ->Add(Form("%s/TTWW.root"           , pfx.Data()));
     ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
     tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
+
     ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data()));
-    wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
-    dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
-    dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
-    wz_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
-    ww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+    // wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
+    // dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
+    // dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
+    // qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
     // xg_chain     ->Add(Form("%s/TG.root"             , pfx.Data()));
     // xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
     xg_chain     ->Add(Form("%s/TGext.root"             , pfx.Data()));
@@ -175,11 +306,13 @@ void getyields(){
     rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
     rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
     rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
-    // //data
-    // data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    // data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    // data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    // data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
+    rares_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+    //data
+    data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
     //flips
     flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
     flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
@@ -197,12 +330,11 @@ void getyields(){
     pair<yields_t, plots_t> results_ttw      = run(ttw_chain);
     pair<yields_t, plots_t> results_ttz     = run(ttz_chain);
     pair<yields_t, plots_t> results_tth     = run(tth_chain);
-    pair<yields_t, plots_t> results_qqww     = run(qqww_chain);
-    pair<yields_t, plots_t> results_wz       = run(wz_chain);
-    pair<yields_t, plots_t> results_ww       = run(ww_chain);
+    // pair<yields_t, plots_t> results_qqww     = run(qqww_chain);
     pair<yields_t, plots_t> results_xg       = run(xg_chain, 0, 0, 0, 0, 0, 1);
     pair<yields_t, plots_t> results_rares    = run(rares_chain);
     pair<yields_t, plots_t> results_tttt     = run(tttt_chain);
+    pair<yields_t, plots_t> results_ttww     = run(ttww_chain);
     pair<yields_t, plots_t> results_data     = run(data_chain, 1);
     duplicate_removal::clear_list();
     pair<yields_t, plots_t> results_flips    = run(flips_chain, 1, 1);
@@ -212,13 +344,19 @@ void getyields(){
     pair<yields_t, plots_t> results_fakes    = run(fakes_chain, 1, 0, 1);
     duplicate_removal::clear_list();
 
+    if (outputTrainingBDT) {
+        // Write output tree
+        out_file->cd();
+        out_tree->Write();
+        out_file->Close();
+    }
+
     plots_t& p_tttt       = results_tttt.second;
+    plots_t& p_ttww       = results_ttww.second;
 
     plots_t& p_ttw      = results_ttw.second;
     plots_t& p_ttz     = results_ttz.second;
     plots_t& p_tth     = results_tth.second;
-    plots_t& p_wz       = results_wz.second;
-    plots_t& p_ww       = results_ww.second;
     plots_t& p_xg       = results_xg.second;
     plots_t& p_rares    = results_rares.second;
     plots_t& p_data     = results_data.second;
@@ -226,6 +364,7 @@ void getyields(){
     plots_t& p_fakes    = results_fakes.second;
     plots_t& p_fakes_mc = results_fakes_mc.second;
 
+    std::cout << "Writing out histos.root" << std::endl;
     TFile *fout = new TFile("histos.root", "RECREATE");
 
     WRITE(h_ht.sr);          WRITE(h_ht.ttzcr);           WRITE(h_ht.ttwcr);        WRITE(h_ht.br);
@@ -254,6 +393,7 @@ void getyields(){
     WRITE(h_charge3.sr);
 
     WRITE(h_disc.br);
+    WRITE(h_disc2.br);
     WRITE(SRCR.TOTAL);
     WRITE(SRDISC.TOTAL);
     WRITE(SR.TOTAL);
@@ -261,21 +401,50 @@ void getyields(){
     TNamed metadata(TString("metadata"),dir);
     metadata.Write();
 
+    c2numpy_close(&writer);
+
     // fout->Write();
     fout->Close();
+    std::cout << "Done writing out histos.root" << std::endl;
 
-    // // Write output tree
-    // out_file->cd();
-    // out_tree->Write();
-    // out_file->Close();
 
     // copy the root file with kinematic plots to live with the cards
     gSystem->Exec(Form("cp histos.root ../limits/%s/", dir.Data()));
+
 
 }
 
 //doFakes = 1 for QCD, 2 for inSitu
 pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFakes, int exclude, bool isSignal, bool isGamma){
+
+
+    TMVA::Reader* reader = new TMVA::Reader("Silent");
+    reader->AddVariable("njets",&tree_f_njets);
+    reader->AddVariable("nbtags",&tree_f_nbtags);
+    reader->AddVariable("mt1",&tree_mt1);
+    reader->AddVariable("mt2",&tree_mt2);
+    reader->AddVariable("met",&tree_met);
+    reader->AddVariable("ml1l2",&tree_ml1l2);
+    reader->AddVariable("htb",&tree_htb);
+    reader->AddVariable("nleps",&tree_f_nleps);
+    reader->AddVariable("ht",&tree_ht);
+    reader->AddVariable("mj1j2",&tree_mj1j2);
+    reader->AddVariable("dphij1j2",&tree_dphij1j2);
+    reader->AddVariable("ptj1",&tree_ptj1);
+    reader->AddVariable("ptj2",&tree_ptj2);
+    reader->AddVariable("ml1j2",&tree_ml1j2);
+    reader->AddVariable("ml1j1",&tree_ml1j1);
+    reader->AddVariable("wcands",&tree_f_wcands);
+    reader->AddVariable("dphil1j1",&tree_dphil1j1);
+    reader->AddVariable("detal1l2",&tree_detal1l2);
+    reader->AddVariable("nlb40",&tree_f_nlb40);
+    reader->AddVariable("nmb40",&tree_f_nmb40);
+    reader->AddVariable("ntb40",&tree_f_ntb40);
+    reader->AddVariable("q1",&tree_f_q1);
+    reader->AddVariable("q2",&tree_f_q2);
+    reader->AddVariable("ht4ratio",&tree_ht4ratio);
+    // reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
+    reader->BookMVA("BDT","/home/users/namin/2017/fourtop/analysis/bdt/weights_bck/TMVAClassification_BDT.weights.xml");
 
     // out_file->cd();
 
@@ -284,7 +453,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     const char* chainTitleCh = chainTitle.Data();
     std::cout << "Working on " << chainTitle << std::endl;
 
-    bool isWZ = (chainTitle=="wz");
+    // bool isWZ = (chainTitle=="wz");
+    bool istttt = (chainTitle=="tttt");
     bool isttZ = (chainTitle=="ttz");
     bool isttW = (chainTitle=="ttw");
 
@@ -292,7 +462,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     // Calculate and store the normalization factors for the ISR reweighting
     float isr_norm_dy = 1.;
     float isr_norm_tt = 1.;
-    if (isttZ || isttW) {
+    if ((isttZ || isttW) && (doTTWISR || doTTZISR)) {
         TH1D* htemp = new TH1D("htemp","htemp",1,0,1);;
         chain->Draw("0.5>>htemp","weight_isr_dy");
         isr_norm_dy = chain->GetEntries()/htemp->GetBinContent(1);
@@ -392,7 +562,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_mid3.br     = new TH1F(Form("br_mid3_%s"       , chainTitleCh) , Form("mid3_%s"       , chainTitleCh) , 5       , -2    , 3);
     p_result.h_charge3.sr   = new TH1F(Form("sr_charge3_%s"     , chainTitleCh) , Form("charge3_%s"     , chainTitleCh) , 3       , 0   , 3);
 
-    p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 8       , 0    , 1.0);
+    // p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 16       , -1.0    , 1.0);
+    p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 20       , 0.    , 1.0);
+    // p_result.h_disc2.br     = new TH1F(Form("br_disc2_%s"       , chainTitleCh) , Form("disc2_%s"       , chainTitleCh) , 16       ,0., 1.0);
+    p_result.h_disc2.br     = new TH1F(Form("br_disc2_%s"       , chainTitleCh) , Form("disc2_%s"       , chainTitleCh) , 4       ,0., 0.8);
     p_result.SRCR.TOTAL = new TH1F(Form("SRCR_TOTAL_%s" , chainTitleCh) , Form("SRCR_TOTAL_%s" , chainTitleCh) , nsr     , 0.5  , nsr+0.5);
     p_result.SRDISC.TOTAL = new TH1F(Form("SRDISC_TOTAL_%s" , chainTitleCh) , Form("SRDISC_TOTAL_%s" , chainTitleCh) , nsrdisc     , 0.5  , nsrdisc+0.5);
     p_result.SR.TOTAL   = new TH1F(Form("SR_TOTAL_%s"   , chainTitleCh) , Form("SR_TOTAL_%s"   , chainTitleCh) , nsr-nCR , 0.5  , nsr-nCR+0.5);
@@ -451,9 +624,49 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         p_pu_alt_up.SRDISC.TOTAL     = 0;
         p_pu_alt_dn.SRDISC.TOTAL     = 0;
     }
+    //For PU variations
+    plots_t p_isr_alt_up;
+    plots_t p_isr_alt_dn;
+    if (doFakes == 1 || isData==0) {
+        p_isr_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_isr_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_isr_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_isr_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+    } else {
+        p_isr_alt_up.SRCR.TOTAL     = 0;
+        p_isr_alt_dn.SRCR.TOTAL     = 0;
+        p_isr_alt_up.SRDISC.TOTAL     = 0;
+        p_isr_alt_dn.SRDISC.TOTAL     = 0;
+    }
+    //For PU variations
+    plots_t p_pdf_alt_up;
+    plots_t p_pdf_alt_dn;
+    plots_t p_scale_alt_up;
+    plots_t p_scale_alt_dn;
+    if (isData==0) {
+        p_pdf_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_pdf_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_pdf_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_pdf_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_scale_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_scale_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_scale_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_scale_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+    } else {
+        p_pdf_alt_up.SRCR.TOTAL     = 0;
+        p_pdf_alt_dn.SRCR.TOTAL     = 0;
+        p_pdf_alt_up.SRDISC.TOTAL     = 0;
+        p_pdf_alt_dn.SRDISC.TOTAL     = 0;
+        p_scale_alt_up.SRCR.TOTAL     = 0;
+        p_scale_alt_dn.SRCR.TOTAL     = 0;
+        p_scale_alt_up.SRDISC.TOTAL     = 0;
+        p_scale_alt_dn.SRDISC.TOTAL     = 0;
+    }
+
 
     bool doPoisson = isData && !doFlips && !doFakes;
     initHistError(doPoisson, p_result.h_disc.br);
+    initHistError(doPoisson, p_result.h_disc2.br);
     initHistError(doPoisson, p_result.SRCR.TOTAL   );
     initHistError(doPoisson, p_result.SRDISC.TOTAL   );
     initHistError(doPoisson, p_result.SR.TOTAL   );
@@ -467,10 +680,20 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     initHistError(doPoisson, p_btagSF_alt_dn.SRDISC.TOTAL);
     initHistError(doPoisson, p_pu_alt_up.SRCR.TOTAL    );
     initHistError(doPoisson, p_pu_alt_up.SRDISC.TOTAL    );
+    initHistError(doPoisson, p_isr_alt_up.SRCR.TOTAL    );
+    initHistError(doPoisson, p_isr_alt_up.SRDISC.TOTAL    );
     initHistError(doPoisson, p_pu_alt_dn.SRCR.TOTAL    );
     initHistError(doPoisson, p_pu_alt_dn.SRDISC.TOTAL    );
     initHistError(doPoisson, p_fake_alt_up.SRCR.TOTAL    );
     initHistError(doPoisson, p_fake_alt_up.SRDISC.TOTAL    );
+    initHistError(doPoisson, p_pdf_alt_up.SRCR.TOTAL    );
+    initHistError(doPoisson, p_pdf_alt_up.SRDISC.TOTAL    );
+    initHistError(doPoisson, p_pdf_alt_dn.SRCR.TOTAL    );
+    initHistError(doPoisson, p_pdf_alt_dn.SRDISC.TOTAL    );
+    initHistError(doPoisson, p_scale_alt_up.SRCR.TOTAL    );
+    initHistError(doPoisson, p_scale_alt_up.SRDISC.TOTAL    );
+    initHistError(doPoisson, p_scale_alt_dn.SRCR.TOTAL    );
+    initHistError(doPoisson, p_scale_alt_dn.SRDISC.TOTAL    );
 
 
     //nEvents in chain
@@ -493,6 +716,39 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         TString filename = currentFile->GetTitle();
         TTree *tree = (TTree*)file->Get("t");
         samesign.Init(tree);
+
+
+        if (istttt && makeGenVariationsMC) {
+            TH1F *cs_hist = 0;
+            for (auto&& keyAsObj : *file->GetListOfKeys()){
+                auto key = (TKey*) keyAsObj;
+                TH1F *hist = (TH1F*)key->ReadObj();
+                string title = hist->GetTitle();
+                if (title == "SS2015 Baby Ntuple") continue;
+                cs_hist = (TH1F*)hist->Clone("cs_hist");
+            }
+            //Next figure out scale, PDF, and alpha_s variations and fill the histograms
+            for (int i = 1; i < nsr+1; i++){
+                float nominal  = std::max(cs_hist->GetBinContent(200+i),0.); // NJA must match main.cc.norun
+                float scale_up = nominal > 0 ? fabs(1-std::max(cs_hist->GetBinContent(400+i),0.)/nominal)  : 0;  // NJA must match main.cc.norun
+                float scale_dn = nominal > 0 ? fabs(1-std::max(cs_hist->GetBinContent(600+i),0.)/nominal)  : 0;  // NJA must match main.cc.norun
+                if (scale_up >= 1.0 && scale_dn >= 1.0) { // sometimes have crazy values
+                    scale_up = 0.1;
+                    scale_dn = 0.1;
+                }
+                TH1F *h_pdf = new TH1F("pdf", "pdf", 10000, 0, 1000);
+                for (int j = 0; j < 100; j++){
+                    h_pdf->Fill(cs_hist->GetBinContent(1000+100*(i-1)+j));
+                }
+                float pdf = h_pdf->GetMean() > 0 ? h_pdf->GetRMS()/nominal : 0;
+                delete h_pdf;
+                // std::cout << " i: " << i << " nominal: " << nominal << " scale_up: " << scale_up << " scale_dn: " << scale_dn << " pdf: " << pdf << std::endl;
+                // p_scale_alt_up.SRCR.TOTAL->Fill(i,    scale_up);
+                // p_scale_alt_dn.SRCR.TOTAL->Fill(i,    scale_dn);
+                p_pdf_alt_up.SRCR.TOTAL->Fill(i,    pdf);
+            }
+        }
+    
 
         // Loop over Events in current file
         for(unsigned int event = 0; event < tree->GetEntriesFast(); event++){
@@ -534,6 +790,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             float weight_btag_dn_alt = weight;
             float weight_pu_up_alt = weight;
             float weight_pu_dn_alt = weight;
+            float weight_isr_up_alt = weight;
             if (ss::is_real_data()==0) {
                 weight_btag_up_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_UP()/ss::weight_btagsf() : weight;
                 weight_btag_dn_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_DN()/ss::weight_btagsf() : weight;
@@ -542,9 +799,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             if (doTTZISR && isttZ) {
+                // want to take 50% of the effect as unc, and since we scale
+                // nominal weight, scale up twice
+                weight_isr_up_alt *= pow(ss::weight_isr_tt()*isr_norm_tt,2);
                 weight *= ss::weight_isr_tt()*isr_norm_tt;
             }
             if (doTTWISR && isttW) {
+                weight_isr_up_alt *= pow(ss::weight_isr_tt()*isr_norm_tt,2);
                 // weight *= ss::weight_isr_dy()*isr_norm_dy;
                 weight *= ss::weight_isr_tt()*isr_norm_tt;
             }
@@ -680,13 +941,23 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             int BR = baselineRegion(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, true);
             if (BR < 0) continue;
 
-            // tttt baseline selections
-            if (ss::njets() < 2) continue;
-            if (ss::nbtags() < 2) continue;
-            if (ss::met() < 50) continue;
-            if (ss::ht() < 300) continue;
-            if (lep1_pt < 25.) continue;
-            if (lep2_pt < 20.) continue;
+            if (!outputTrainingBDT) {
+                // tttt baseline selections
+                if (ss::njets() < 2) continue;
+                if (ss::nbtags() < 2) continue;
+                if (ss::met() < 50) continue;
+                if (ss::ht() < 300) continue;
+                if (lep1_pt < 25.) continue;
+                if (lep2_pt < 20.) continue;
+            } else {
+                // looser selections when training BDT
+                if (lep1_pt < 15.) continue;
+                if (lep2_pt < 15.) continue;
+                if (ss::ht() < 250) continue;
+                if (ss::met() < 30) continue;
+                if (ss::njets() < 2) continue;
+                if (ss::nbtags() < 1) continue;
+            }
 
             if (!doFlips && !doFakes && exclude == 0) {
                 if (nleps > 2) {
@@ -700,73 +971,171 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (duplicate_removal::is_duplicate(id)){ continue; }
             }
 
+        // c2numpy_intc(&writer, 3);
+        // c2numpy_float64(&writer, 3.3);
+        // c2numpy_string(&writer, "THREE");
 
-            if (doBDT) {
-              // for ttW
-              int ngenb = 0;
-              int ngenc = 0;
-              int ngenlight = 0;
-              std::vector<LorentzVector> bjets;
-              std::vector<LorentzVector> jets;
-              float htb = -1.;
-              for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-                htb += ss::btags()[ijet].pt();
-                bjets.push_back(ss::btags()[ijet]);
-              }
-              int nlb40 = 0;
-              int nmb40 = 0;
-              int ntb40 = 0;
-              float ht_first4 = 0.;
-              float ht_rest = 0.;
-              for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                if (ss::jets_disc_ivf().at(ijet) > bloose) nlb40++;
-                if (ss::jets_disc_ivf().at(ijet) > bmed)   nmb40++;
-                if (ss::jets_disc_ivf().at(ijet) > btight) ntb40++;
-                if (ijet < 4) ht_first4 += ss::jets()[ijet].pt();
-                else ht_rest += ss::jets()[ijet].pt();
-                // skip b-tagged jets
-                if (ss::jets_disc_ivf().at(ijet) > 0.8484) continue;
-                jets.push_back(ss::jets()[ijet]);
-              }
-              int wcands = 0;
-              // int topcands = 0;
-              for (unsigned int i = 0; i < jets.size(); i++) {
-                for (unsigned int j = i+1; j < jets.size(); j++) {
-                  float wmass = (jets[i]+jets[j]).M();
-                  if (fabs(wmass-80.4) < 20.0) {
-                    wcands++;
-                  }
+            float pt1 = lep1_pt;
+            float pt2 = lep2_pt;
+            float pt3 = ss::lep3_p4().pt();
+            float pto1 = max(max(pt1,pt2),pt3);
+            float pto3 = min(min(pt1,pt2),pt3);
+            float pto2 = pt1+pt2+pt3-pto1-pto3;
+            int mytype = ss::hyp_type();
+            if (mytype==2 && abs(ss::lep1_id())==13) mytype = 1;
+            float mll = (ss::lep1_p4()*lep1_pt/ss::lep1_p4().pt()+ss::lep2_p4()*lep2_pt/ss::lep2_p4().pt()).M();
+            float mtl1_unc_up = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
+            float mtl2_unc_up = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
+            float mtmin_unc_up = mtl1_unc_up > mtl2_unc_up ? mtl2_unc_up : mtl1_unc_up;
+            float mtl1_unc_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
+            float mtl2_unc_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
+            float mtmin_unc_dn = mtl1_unc_dn > mtl2_unc_dn ? mtl2_unc_dn : mtl1_unc_dn;
+            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
+            int SR_unc_up = signalRegionTest(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
+            int SR_unc_dn = signalRegionTest(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
+
+
+            float mvavalue = -2.;
+            float pred = -1.;
+            // if ((doBDT || outputTrainingBDT) && (!isData)) {
+            if (doBDT || outputTrainingBDT) {
+                // for ttW
+                int ngenb = 0;
+                int ngenc = 0;
+                int ngenlight = 0;
+                std::vector<LorentzVector> bjets;
+                std::vector<LorentzVector> jets;
+                float htb = -1.;
+                for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
+                    htb += ss::btags()[ijet].pt();
+                    bjets.push_back(ss::btags()[ijet]);
                 }
-              }
-              float tree_nbtags = ss::nbtags();
-              float tree_njets = ss::njets();
-              float tree_mt1 = mtl1;
-              float tree_mt2 = mtl2;
-              float tree_met = ss::met();
-              float tree_ml1l2 = (ss::lep1_p4()+ss::lep2_p4()).M();
-              float tree_htb = htb;
-              float tree_nleps = nleps;
-              float tree_ht = ss::ht();
-              float tree_mj1j2 = (ss::jets().at(0)+ss::jets().at(1)).M();
-              float tree_dphij1j2 = DeltaPhi(ss::jets().at(0).phi(),ss::jets().at(1).phi());
-              float tree_ptj1 = ss::jets().at(0).pt();
-              float tree_ptj2 = ss::jets().at(1).pt();
-              float tree_ml1j2 = (ss::lep1_p4()+ss::jets().at(1)).M();
-              float tree_ml1j1 = (ss::lep1_p4()+ss::jets().at(0)).M();
-              float tree_wcands = wcands;
-              float tree_dphil1j1 = DeltaPhi(ss::lep1_p4().phi(),ss::jets().at(0).phi());
-              float tree_detal1l2 = fabs(ss::lep1_p4().eta()-ss::lep2_p4().eta());
-              int tree_q1 = (ss::lep1_id()<0)-(ss::lep1_id()>0);
-              int tree_q2 = (ss::lep2_id()<0)-(ss::lep2_id()>0);
-              int tree_q3 = nleps >= 3 ? ((ss::lep3_id()<0)-(ss::lep3_id()>0)) : 0;
-              float tree_ht4ratio = ss::njets()>4 ? ht_first4/ht_rest : 0;
-              int tree_nlb40 = nlb40;
-              int tree_nmb40 = nmb40;
-              int tree_ntb40 = ntb40;
-              // // fill discriminant before requiring SR
-              // float pred = get_prediction((float)tree_njets,(float)tree_nbtags,(float)tree_mt1,(float)tree_mt2,(float)tree_met,(float)tree_ml1l2,(float)tree_htb,(float)tree_nleps,(float)tree_ht,(float)tree_mj1j2,(float)tree_dphij1j2,(float)tree_ptj1,(float)tree_ptj2,(float)tree_ml1j2,(float)tree_ml1j1,(float)tree_wcands,(float)tree_dphil1j1,(float)tree_detal1l2,(float)tree_nlb40,(float)tree_nmb40,(float)tree_ntb40,(float)tree_q1,(float)tree_q2,(float)tree_ht4ratio);
-              // p_result.h_disc.br->Fill(pred,weight);
+                int nlb40 = 0;
+                int nmb40 = 0;
+                int ntb40 = 0;
+                float ht_first4 = 0.;
+                float ht_rest = 0.;
+                for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
+                    if (ss::jets_disc().at(ijet) > bloose) nlb40++;
+                    if (ss::jets_disc().at(ijet) > bmed)   nmb40++;
+                    if (ss::jets_disc().at(ijet) > btight) ntb40++;
+                    if (ijet < 4) ht_first4 += ss::jets()[ijet].pt();
+                    else ht_rest += ss::jets()[ijet].pt();
+                    // skip b-tagged jets
+                    if (ss::jets_disc().at(ijet) > bmed) continue;
+                    jets.push_back(ss::jets()[ijet]);
+                }
+                int wcands = 0;
+                // int topcands = 0;
+                for (unsigned int i = 0; i < jets.size(); i++) {
+                    for (unsigned int j = i+1; j < jets.size(); j++) {
+                        float wmass = (jets[i]+jets[j]).M();
+                        if (fabs(wmass-80.4) < 20.0) {
+                            wcands++;
+                        }
+                    }
+                }
+                tree_event = ss::event();
+                tree_run = ss::run();
+                tree_lumi = ss::lumi();
+                tree_name = chainTitle;
+                tree_weight = weight;
+                tree_SR = SR;
+                tree_l1id = ss::lep1_id();
+                tree_l2id = ss::lep2_id();
+                tree_nbtags = ss::nbtags();
+                tree_njets = ss::njets();
+                tree_nleps = nleps;
+                tree_wcands = wcands;
+                tree_met = ss::met();
+                tree_ht = ss::ht();
+                tree_htb = htb;
+                tree_mt1 = mtl1;
+                tree_mt2 = mtl2;
+                tree_dphil1j1 = DeltaPhi(ss::lep1_p4().phi(),ss::jets().at(0).phi());
+                tree_dphil2j2 = DeltaPhi(ss::lep2_p4().phi(),ss::jets().at(1).phi());
+                tree_dphil1j2 = DeltaPhi(ss::lep1_p4().phi(),ss::jets().at(1).phi());
+                tree_dphil2j1 = DeltaPhi(ss::lep2_p4().phi(),ss::jets().at(0).phi());
+                tree_dphil1l2 = DeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi());
+                tree_dphij1j2 = DeltaPhi(ss::jets().at(0).phi(),ss::jets().at(1).phi());
+                tree_dphil1met = DeltaPhi(ss::lep1_p4().phi(),ss::metPhi());
+                tree_dphil2met = DeltaPhi(ss::lep2_p4().phi(),ss::metPhi());
+                tree_dphij1met = DeltaPhi(ss::jets().at(0).phi(),ss::metPhi());
+                tree_dphij2met = DeltaPhi(ss::jets().at(1).phi(),ss::metPhi());
+                tree_detal1j1 = fabs(ss::lep1_p4().eta()-ss::jets().at(0).eta());
+                tree_detal2j2 = fabs(ss::lep2_p4().eta()-ss::jets().at(1).eta());
+                tree_detal1j2 = fabs(ss::lep1_p4().eta()-ss::jets().at(1).eta());
+                tree_detal2j1 = fabs(ss::lep2_p4().eta()-ss::jets().at(0).eta());
+                tree_detal1l2 = fabs(ss::lep1_p4().eta()-ss::lep2_p4().eta());
+                tree_detaj1j2 = fabs(ss::jets().at(0).eta()-ss::jets().at(1).eta());
+                tree_ml1j1 = (ss::lep1_p4()+ss::jets().at(0)).M();
+                tree_ml2j2 = (ss::lep2_p4()+ss::jets().at(1)).M();
+                tree_ml1j2 = (ss::lep1_p4()+ss::jets().at(1)).M();
+                tree_ml2j1 = (ss::lep2_p4()+ss::jets().at(0)).M();
+                tree_ml1l2 = (ss::lep1_p4()+ss::lep2_p4()).M();
+                tree_mj1j2 = (ss::jets().at(0)+ss::jets().at(1)).M();
+                tree_ptl1 = ss::lep1_p4().pt();
+                tree_ptl2 = ss::lep1_p4().pt();
+                tree_ptj1 = ss::jets().at(0).pt();
+                tree_ptj2 = ss::jets().at(1).pt();
+                // tree_stb = stb;
+                tree_q1 = (ss::lep1_id()<0)-(ss::lep1_id()>0);
+                tree_q2 = (ss::lep2_id()<0)-(ss::lep2_id()>0);
+                tree_q3 = nleps >= 3 ? ((ss::lep3_id()<0)-(ss::lep3_id()>0)) : 0;
+                tree_ht4ratio = ss::njets()>4 ? ht_first4/ht_rest : 0;
+                tree_nlb40 = nlb40;
+                tree_nmb40 = nmb40;
+                tree_ntb40 = ntb40;
+                // float variants for MVA
+                tree_f_njets = tree_njets;
+                tree_f_nbtags = tree_nbtags;
+                tree_f_nleps = tree_nleps;
+                tree_f_wcands = tree_wcands;
+                tree_f_nlb40 = tree_nlb40;
+                tree_f_nmb40 = tree_nmb40;
+                tree_f_ntb40 = tree_ntb40;
+                tree_f_q1 = tree_q1;
+                tree_f_q2 = tree_q2;
+                // // fill discriminant before requiring SR
+                pred = get_prediction((float)tree_njets,(float)tree_nbtags,(float)tree_mt1,(float)tree_mt2,(float)tree_met,(float)tree_ml1l2,(float)tree_htb,(float)tree_nleps,(float)tree_ht,(float)tree_mj1j2,(float)tree_dphij1j2,(float)tree_ptj1,(float)tree_ptj2,(float)tree_ml1j2,(float)tree_ml1j1,(float)tree_wcands,(float)tree_dphil1j1,(float)tree_detal1l2,(float)tree_nlb40,(float)tree_nmb40,(float)tree_ntb40,(float)tree_q1,(float)tree_q2,(float)tree_ht4ratio);
+                if (outputTrainingBDT) out_tree->Fill();
+                mvavalue = reader->EvaluateMVA("BDT");
+                // transform preds
+                pred = min(pred,0.79F);
+                p_result.h_disc2.br->Fill(pred,weight); //  0. 0.25 0.35 0.65
+                float upper = 0.8F;
+                float lower = -0.4F;
+                mvavalue = ((max(min((float)mvavalue,upper-0.01F),lower)-lower)/(upper-lower));
+                p_result.h_disc.br->Fill(mvavalue,weight);
             }
+
+            // int SRdisc = mvavalue*10+1;
+            int SRdisc = 1;
+            // if (mvavalue > 0.35) SRdisc = 2;
+            // if (mvavalue > 0.57) SRdisc = 3;
+            // if (mvavalue > 0.65) SRdisc = 4;
+            if (mvavalue > 0.40) SRdisc = 2;
+            if (mvavalue > 0.45) SRdisc = 3;
+            if (mvavalue > 0.50) SRdisc = 4;
+            if (mvavalue > 0.55) SRdisc = 5;
+            if (mvavalue > 0.60) SRdisc = 6;
+            if (mvavalue > 0.65) SRdisc = 7;
+            if (mvavalue > 0.70) SRdisc = 8;
+            if (mvavalue > 0.75) SRdisc = 9;
+            if (mvavalue > 0.80) SRdisc = 10;
+            int SRdisc_unc_up = SRdisc;
+            int SRdisc_unc_dn = SRdisc;
+
+            if (isData  == 0 && SR_unc_up > 0)            p_jes_alt_up.SRCR.TOTAL->Fill(SR_unc_up, weight);
+            if (isData  == 0 && SR_unc_dn > 0)            p_jes_alt_dn.SRCR.TOTAL->Fill(SR_unc_dn, weight);
+            if (isData  == 0 && SRdisc_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
+            if (isData  == 0 && SRdisc_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
+
+            // require SRs+CR (= ttZ CR + ttW CR + SRs)
+            if (!outputTrainingBDT) {
+                if (SR < 0) continue;
+            }
+
 
             // truth match the third lepton
             if (!isData) {
@@ -782,44 +1151,29 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
 
-            float pt1 = lep1_pt;
-            float pt2 = lep2_pt;
-            float pt3 = ss::lep3_p4().pt();
-            float pto1 = max(max(pt1,pt2),pt3);
-            float pto3 = min(min(pt1,pt2),pt3);
-            float pto2 = pt1+pt2+pt3-pto1-pto3;
-            int mytype = ss::hyp_type();
-            if (mytype==2 && abs(ss::lep1_id())==13) mytype = 1;
-            float mll = (ss::lep1_p4()*lep1_pt/ss::lep1_p4().pt()+ss::lep2_p4()*lep2_pt/ss::lep2_p4().pt()).M();
-
-
-            float mtl1_unc_up = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
-            float mtl2_unc_up = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
-            float mtmin_unc_up = mtl1_unc_up > mtl2_unc_up ? mtl2_unc_up : mtl1_unc_up;
-            float mtl1_unc_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
-            float mtl2_unc_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
-            float mtmin_unc_dn = mtl1_unc_dn > mtl2_unc_dn ? mtl2_unc_dn : mtl1_unc_dn;
-            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
-            int SR_unc_up = signalRegionTest(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
-            int SR_unc_dn = signalRegionTest(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
-
-            // FIXME
-            int SRdisc = SR;
-            int SRdisc_unc_up = SR_unc_up;
-            int SRdisc_unc_dn = SR_unc_dn;
-
-            if (isData  == 0 && SR_unc_up > 0)            p_jes_alt_up.SRCR.TOTAL->Fill(SR_unc_up, weight);
-            if (isData  == 0 && SR_unc_dn > 0)            p_jes_alt_dn.SRCR.TOTAL->Fill(SR_unc_dn, weight);
-
-            if (isData  == 0 && SR_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
-            if (isData  == 0 && SR_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
-
-            // require SRs+CR (= ttZ CR + ttW CR + SRs)
-            if (SR < 0) continue;
+            //These c-s errors
+            if (istttt && makeGenVariationsMC && ss::genweights().size()>110) {
+                float nom = ss::genweights().at(0);
+                float pdfrms = 0.;
+                float scale_up = ss::genweights().at(4)/nom;
+                float scale_dn = ss::genweights().at(8)/nom;
+                TH1F *h_pdf = new TH1F("pdf", "pdf", 1000, 0, 10);
+                // for (int i = 0; i < 100; i++) pdf += ss::genweights().at(i+10);
+                // pdf /= (100*nom);
+                // for (int i = 0; i < 100; i++) h_pdf->Fill(ss::genweights().at(i+10)*weight);
+                for (int i = 0; i < 100; i++) h_pdf->Fill(ss::genweights().at(i+10)*weight);
+                pdfrms = h_pdf->GetRMS()*sqrt(h_pdf->GetEntries()); // multiply by sqrt(N) to undo central limit theorem
+                delete h_pdf;
+                p_scale_alt_up.SRCR.TOTAL->Fill(SR,    scale_up*weight);
+                p_scale_alt_dn.SRCR.TOTAL->Fill(SR,    scale_dn*weight);
+                p_scale_alt_up.SRDISC.TOTAL->Fill(SRdisc,    scale_up*weight);
+                p_scale_alt_dn.SRDISC.TOTAL->Fill(SRdisc,    scale_dn*weight);
+                // p_pdf_alt_up.SRCR.TOTAL->Fill(SR,      pdfrms);
+            }
 
             p_result.SRCR.TOTAL->Fill(SR, weight);
 
-            p_result.SRDISC.TOTAL->Fill(SR, weight);
+            p_result.SRDISC.TOTAL->Fill(SRdisc, weight);
 
             // fill systematics hists
             if (doFakes == 1 )            p_fake_alt_up.SRCR.TOTAL->Fill(SR, weight_alt_FR);
@@ -827,12 +1181,14 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (isData  == 0 )            p_btagSF_alt_dn.SRCR.TOTAL->Fill(SR, weight_btag_dn_alt);
             if (isData  == 0 )            p_pu_alt_up.SRCR.TOTAL->Fill(SR, weight_pu_up_alt);
             if (isData  == 0 )            p_pu_alt_dn.SRCR.TOTAL->Fill(SR, weight_pu_dn_alt);
+            if (isData  == 0 )            p_isr_alt_up.SRCR.TOTAL->Fill(SR, weight_isr_up_alt);
 
             if (doFakes == 1 )            p_fake_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_alt_FR);
             if (isData  == 0 )            p_btagSF_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_btag_up_alt);
             if (isData  == 0 )            p_btagSF_alt_dn.SRDISC.TOTAL->Fill(SRdisc, weight_btag_dn_alt);
             if (isData  == 0 )            p_pu_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_pu_up_alt);
             if (isData  == 0 )            p_pu_alt_dn.SRDISC.TOTAL->Fill(SRdisc, weight_pu_dn_alt);
+            if (isData  == 0 )            p_isr_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_isr_up_alt);
 
             if (SR > 1) { // non ttZ CR
                 p_result.h_njets.br->Fill(ss::njets() , weight);
@@ -927,6 +1283,28 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         file->Close();
     }//file loop
 
+        if (!isData) {
+            avoidNegativeYields(p_btagSF_alt_up.SRCR.TOTAL);
+            avoidNegativeYields(p_btagSF_alt_dn.SRCR.TOTAL);
+            avoidNegativeYields(p_btagSF_alt_up.SRDISC.TOTAL);
+            avoidNegativeYields(p_btagSF_alt_dn.SRDISC.TOTAL);
+            avoidNegativeYields(p_pu_alt_up.SRCR.TOTAL);
+            avoidNegativeYields(p_pu_alt_dn.SRCR.TOTAL);
+            avoidNegativeYields(p_pu_alt_up.SRDISC.TOTAL);
+            avoidNegativeYields(p_pu_alt_dn.SRDISC.TOTAL);
+            avoidNegativeYields(p_isr_alt_up.SRCR.TOTAL);
+            avoidNegativeYields(p_isr_alt_dn.SRCR.TOTAL);
+            avoidNegativeYields(p_isr_alt_up.SRDISC.TOTAL);
+            avoidNegativeYields(p_isr_alt_dn.SRDISC.TOTAL);
+            avoidNegativeYields(p_result.SRCR.TOTAL);
+            avoidNegativeYields(p_result.SRDISC.TOTAL);
+            avoidNegativeYields(p_result.SR.TOTAL);
+            avoidNegativeYields(p_jes_alt_up.SRCR.TOTAL);
+            avoidNegativeYields(p_jes_alt_dn.SRCR.TOTAL);
+            avoidNegativeYields(p_jes_alt_up.SRDISC.TOTAL);
+            avoidNegativeYields(p_jes_alt_dn.SRDISC.TOTAL);
+        }
+
     if (makeRootFiles) {
 
         TString kinRegs[] = {"srcr", "srdisc"};
@@ -985,6 +1363,58 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 fakes_EWKDown->Write();
             }
 
+            // signal scale
+            if (istttt && makeGenVariationsMC) {
+                TH1F* plot_alt = 0;
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_scale_alt_up.SRCR.TOTAL;
+                else if (kinRegs[kr] == "srdisc")  plot_alt = p_scale_alt_up.SRDISC.TOTAL;
+                else exit(1);
+                for (int bin = 0; bin < plot_alt->GetNbinsX(); bin++){
+                    float vnom = h_sr->GetBinContent(bin);
+                    float vup = plot_alt->GetBinContent(bin);
+                    // std::cout << " kinRegs[kr]: " << kinRegs[kr] << " bin: " << bin << " vnom: " << vnom << " vup: " << vup << std::endl;
+                    // plot_alt->SetBinContent(bin, h_sr->GetBinContent(bin)*(1+plot_alt->GetBinContent(bin)));
+                    // plot_alt->SetBinContent(bin, h_sr->GetBinContent(bin)*(plot_alt->GetBinContent(bin)));
+                }
+                TH1F* scaleUp = (TH1F*) plot_alt->Clone("scaleUp");
+                avoidNegativeYields(scaleUp);
+                // std::cout << " h_sr->Integral(): " << h_sr->Integral() << " scaleUp->Integral(): " << scaleUp->Integral() << std::endl;
+                scaleUp->Scale(h_sr->Integral()/scaleUp->Integral());
+                scaleUp->Write();
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_scale_alt_dn.SRCR.TOTAL;
+                else if      (kinRegs[kr] == "srdisc")   plot_alt = p_scale_alt_dn.SRDISC.TOTAL;
+                else exit(1);
+                for (int bin = 0; bin < plot_alt->GetNbinsX(); bin++){
+                    // plot_alt->SetBinContent(bin, h_sr->GetBinContent(bin)*(1-plot_alt->GetBinContent(bin)));
+                    // plot_alt->SetBinContent(bin, h_sr->GetBinContent(bin)*(plot_alt->GetBinContent(bin)));
+                }
+                TH1F* scaleDn = (TH1F*) plot_alt->Clone("scaleDown");
+                avoidNegativeYields(scaleDn);
+                // std::cout << " h_sr->Integral(): " << h_sr->Integral() << " scaleDn->Integral(): " << scaleDn->Integral() << std::endl;
+                scaleDn->Scale(h_sr->Integral()/scaleDn->Integral());
+                scaleDn->Write();
+                // signal pdf
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_pdf_alt_up.SRCR.TOTAL;
+                else if (kinRegs[kr] == "srdisc")  plot_alt = p_pdf_alt_up.SRDISC.TOTAL;
+                else exit(1);
+                for (int bin = 1; bin <= plot_alt->GetNbinsX(); bin++){
+                    // std::cout << " plot_alt->GetBinContent(bin): " << plot_alt->GetBinContent(bin) << std::endl;
+                    // std::cout << " h_sr->GetBinContent(bin): " << h_sr->GetBinContent(bin) << " (1+plot_alt->GetBinContent(bin)): " << (1+plot_alt->GetBinContent(bin)) << std::endl;
+                    plot_alt->SetBinContent(bin, h_sr->GetBinContent(bin)*(1+plot_alt->GetBinContent(bin)));
+                    // plot_alt->SetBinContent(bin, h_sr->GetBinContent(bin)*(plot_alt->GetBinContent(bin)));
+                }
+                TH1F* pdfUp = (TH1F*) plot_alt->Clone("pdfUp");
+                avoidNegativeYields(pdfUp);
+                // std::cout << " pdfUp->Integral(): " << pdfUp->Integral() << std::endl;
+                pdfUp->Scale(h_sr->Integral()/pdfUp->Integral());
+                pdfUp->Write();
+                TH1F* pdfDn = (TH1F*) plot_alt->Clone("pdfDown");
+                fillDownMirrorUp(h_sr,pdfUp,pdfDn);
+                avoidNegativeYields(pdfDn);
+                pdfDn->Write();
+                // pdfUp->Integral() pdfDn->Integral()
+            }
+
             if (!isData && !doFlips && !doFakes) {
                 //btag: init
                 TH1F* plot_btagSF_up_alt = 0;
@@ -1002,6 +1432,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //btag: normalize (be careful with bins inclusive in btags, they are not affected by this syst)
                 int nBins = plot_btagSF_ct_alt->GetNbinsX();
                 int nInclBins = 0;
+
                 if (plot_btagSF_up_alt->Integral(1,nBins-nInclBins)>0) {
                     float scaleBtag_up = plot_btagSF_ct_alt->Integral(1,nBins-nInclBins)/plot_btagSF_up_alt->Integral(1,nBins-nInclBins);
                     plot_btagSF_up_alt->Scale(scaleBtag_up);
@@ -1014,6 +1445,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     plot_btagSF_up_alt->SetBinContent(nBins-nInclBins+ibin,plot_btagSF_ct_alt->GetBinContent(nBins-nInclBins+ibin));
                     plot_btagSF_dn_alt->SetBinContent(nBins-nInclBins+ibin,plot_btagSF_ct_alt->GetBinContent(nBins-nInclBins+ibin));
                 }
+
                 //btag: now save the plot
                 TH1F* btagSFUp   = (TH1F*)plot_btagSF_up_alt->Clone("btagUp");
                 TH1F* btagSFDown = (TH1F*)plot_btagSF_dn_alt->Clone("btagDown");
@@ -1041,6 +1473,31 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 avoidZeroIntegrals(h_sr,jesUp,jesDown);
                 jesUp->Write();
                 jesDown->Write();
+
+                //isr
+                TH1F* plot_alt_isr_up = 0;
+                TH1F* plot_alt_isr_dn = 0;
+                if      (kinRegs[kr]=="srcr")   plot_alt_isr_up=p_isr_alt_up.SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_isr_up=p_isr_alt_up.SRDISC.TOTAL;
+                else exit(1);
+                if      (kinRegs[kr]=="srcr")   plot_alt_isr_dn=p_isr_alt_dn.SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_isr_dn=p_isr_alt_dn.SRDISC.TOTAL;
+                else exit(1);
+                TH1F* isrUp   = (TH1F*) plot_alt_isr_up->Clone("isrUp");
+                TH1F* isrDown = (TH1F*) plot_alt_isr_dn->Clone("isrDown");
+                for (int bin=1;bin<=isrUp->GetNbinsX();++bin) {
+                    float nomval = h_sr->GetBinContent(bin);
+                    float upval = isrUp->GetBinContent(bin);
+                    isrUp->SetBinContent(bin,0.5*(nomval+upval));
+                }
+                fillDownMirrorUp(h_sr,isrUp,isrDown);
+                // if (name=="ttw" || name=="ttz") {
+                //     //wz is normalized in data, so we want only the sr migration
+                //     isrUp->Scale(h_sr->Integral()/isrUp->Integral());
+                //     isrDown->Scale(h_sr->Integral()/isrDown->Integral());
+                // }
+                isrUp->Write();
+                isrDown->Write();
 
                 //pu
                 TH1F* plot_alt_pu_up = 0;

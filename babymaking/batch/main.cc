@@ -15,6 +15,9 @@ int main(int argc, char *argv[]){
     TString filename;
     TString outname = "output.root";
     unsigned int nevents_max = 0;
+    // bool useXrootd = false;
+    TString hostname(getenv("HOSTNAME"));
+    // bool useXrootd = !(hostname.Contains("t2.ucsd.edu"));
     bool useXrootd = false;
     string good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
     string jecEra = "Summer16_23Sep2016BCDV3";
@@ -93,7 +96,8 @@ int main(int argc, char *argv[]){
 
     //Init MVA
     // createAndInitMVA("./CORE", true, true); // ICHEP
-    createAndInitMVA("./CORE", true, false, 80); // Moriond
+    // createAndInitMVA("./CORE", true, false, 80); // Moriond
+    createAndInitMVA("./CORE", true, true, 80); // Moriond // FIXME
 
 
     //JEC files -- 25 ns MC
@@ -163,28 +167,7 @@ int main(int argc, char *argv[]){
 
         //See if mass point exists already
         int idx = -1;
-        if (isSignal > 0 && isSignal <= 100){
-            int mGluino = tas::sparm_values().at(0);
-            int mLSP = tas::sparm_values().at(1);
-            for (unsigned int i = 0; i < csErr_info_v.size(); i++){
-                if (mGluino == csErr_info_v[i].mGluino && mLSP == csErr_info_v[i].mLSP){ idx = i; break; }
-            }
-            if (idx < 0){
-                csErr_info_t csErr; 
-                csErr.cs = new TH1F(Form("cs_%i_%i", mGluino, mLSP), Form("cs_%i_%i", mGluino, mLSP), 1, 0, 1);
-                csErr.cs->Sumw2(); 
-                csErr.cs_scale_up = 0;
-                csErr.cs_scale_dn = 0;
-                for (int i = 0; i < 102; i++) csErr.cs_pdf[i] = 0; 
-                csErr.results = new TH1F(Form("csErr_%i_%i", mGluino, mLSP), Form("csErr_%i_%i", mGluino, mLSP), 16000, 0, 16000); 
-                csErr.results->Sumw2(); 
-                csErr.nEntries = 0; 
-                csErr.mGluino = mGluino; 
-                csErr.mLSP = mLSP; 
-                idx = csErr_info_v.size(); 
-                csErr_info_v.push_back(csErr); 
-            } 
-        } else if (!(tas::evt_isRealData())) {
+        if (!(tas::evt_isRealData())) {
             if (!haveMadeErrStruct) {
                 csErr_info_t csErr; 
                 csErr.cs = new TH1F("cs","cs", 1, 0, 1);
@@ -213,6 +196,11 @@ int main(int argc, char *argv[]){
         csErr_t csErr = mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
         int SR = csErr.SR; 
         bool isGood = csErr.isGood; 
+        
+        // if (SR == 1 || SR == 10) {
+        //     // SR isGood 
+        //     std::cout << " SR: " << SR << " isGood: " << isGood  << std::endl;
+        // }
 
         //c-s error variables
         if (isSignal > 0 || haveMadeErrStruct){

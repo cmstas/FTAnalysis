@@ -3,7 +3,7 @@ Looking for four top in all the right places.
 
 ![Mascot](http://i.imgur.com/k2FvE22.png)
 
-## How to prepare to take over the country
+## How to take over the country
 ### Prepare the campaign
 ```bash
 # winners use git

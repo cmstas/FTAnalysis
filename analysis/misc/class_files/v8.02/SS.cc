@@ -353,10 +353,10 @@ void SSAG::Init(TTree *tree) {
 		jets_disc_mva_branch = tree->GetBranch("jets_disc_mva");
 		if (jets_disc_mva_branch) {jets_disc_mva_branch->SetAddress(&jets_disc_mva_);}
 	}
-	jets_disc_ivf_branch = 0;
-	if (tree->GetBranch("jets_disc_ivf") != 0) {
-		jets_disc_ivf_branch = tree->GetBranch("jets_disc_ivf");
-		if (jets_disc_ivf_branch) {jets_disc_ivf_branch->SetAddress(&jets_disc_ivf_);}
+	jets_disc_csv_branch = 0;
+	if (tree->GetBranch("jets_disc_csv") != 0) {
+		jets_disc_csv_branch = tree->GetBranch("jets_disc_csv");
+		if (jets_disc_csv_branch) {jets_disc_csv_branch->SetAddress(&jets_disc_csv_);}
 	}
 	jets_JEC_branch = 0;
 	if (tree->GetBranch("jets_JEC") != 0) {
@@ -1589,7 +1589,7 @@ void SSAG::GetEntry(unsigned int idx)
 		btags_disc_ivf_isLoaded = false;
 		jets_disc_isLoaded = false;
 		jets_disc_mva_isLoaded = false;
-		jets_disc_ivf_isLoaded = false;
+		jets_disc_csv_isLoaded = false;
 		jets_JEC_isLoaded = false;
 		btags_JEC_isLoaded = false;
 		jets_undoJEC_isLoaded = false;
@@ -1899,7 +1899,7 @@ void SSAG::LoadAllBranches()
 	if (btags_disc_ivf_branch != 0) btags_disc_ivf();
 	if (jets_disc_branch != 0) jets_disc();
 	if (jets_disc_mva_branch != 0) jets_disc_mva();
-	if (jets_disc_ivf_branch != 0) jets_disc_ivf();
+	if (jets_disc_csv_branch != 0) jets_disc_csv();
 	if (jets_JEC_branch != 0) jets_JEC();
 	if (btags_JEC_branch != 0) btags_JEC();
 	if (jets_undoJEC_branch != 0) jets_undoJEC();
@@ -2866,18 +2866,18 @@ void SSAG::LoadAllBranches()
 		}
 		return *jets_disc_mva_;
 	}
-	const vector<float> &SSAG::jets_disc_ivf()
+	const vector<float> &SSAG::jets_disc_csv()
 	{
-		if (not jets_disc_ivf_isLoaded) {
-			if (jets_disc_ivf_branch != 0) {
-				jets_disc_ivf_branch->GetEntry(index);
+		if (not jets_disc_csv_isLoaded) {
+			if (jets_disc_csv_branch != 0) {
+				jets_disc_csv_branch->GetEntry(index);
 			} else { 
-				printf("branch jets_disc_ivf_branch does not exist!\n");
+				printf("branch jets_disc_csv_branch does not exist!\n");
 				exit(1);
 			}
-			jets_disc_ivf_isLoaded = true;
+			jets_disc_csv_isLoaded = true;
 		}
-		return *jets_disc_ivf_;
+		return *jets_disc_csv_;
 	}
 	const vector<float> &SSAG::jets_JEC()
 	{
@@ -6196,7 +6196,7 @@ namespace ss {
 	const vector<float> &btags_disc_ivf() { return samesign.btags_disc_ivf(); }
 	const vector<float> &jets_disc() { return samesign.jets_disc(); }
 	const vector<float> &jets_disc_mva() { return samesign.jets_disc_mva(); }
-	const vector<float> &jets_disc_ivf() { return samesign.jets_disc_ivf(); }
+	const vector<float> &jets_disc_csv() { return samesign.jets_disc_csv(); }
 	const vector<float> &jets_JEC() { return samesign.jets_JEC(); }
 	const vector<float> &btags_JEC() { return samesign.btags_JEC(); }
 	const vector<float> &jets_undoJEC() { return samesign.jets_undoJEC(); }

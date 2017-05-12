@@ -1,3 +1,5 @@
+#ifndef SIGNALREGIONS_H
+#define SIGNALREGIONS_H
 int getNsrsTTTTBDT() { return 7; }
 int signalRegionBDT(float disc){
     return 1+(int)(disc*getNsrsTTTTBDT());
@@ -49,3 +51,4 @@ int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, i
     return -1;
 }
 
+#endif

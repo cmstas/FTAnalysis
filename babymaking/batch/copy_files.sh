@@ -13,3 +13,4 @@ mkdir -p CORE/Tools
 cp -r ../../common/CORE/Tools CORE/
 
 cp myCORE/* CORE/
+

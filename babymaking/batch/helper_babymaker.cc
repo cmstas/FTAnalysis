@@ -882,8 +882,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     nPUvertices = puInfo_nPUvertices();
     gen_met = tas::gen_met();
     gen_met_phi = tas::gen_metPhi();
-    // genweights = tas::genweights();  // These two are 20% of the ntuple size
-    // genweightsID = tas::genweightsID();
+    genweights = tas::genweights();  // These two are 20% of the ntuple size
+    genweightsID = tas::genweightsID();
     // scale1fb = tas::evt_scale1fb();
     scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
@@ -933,7 +933,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     }
   }
   lep3_quality = thirdLepton.second;
-  Lep fourthLepton = getFourthLepton(best_hyp);
+  Lep fourthLepton = getFourthLepton(best_hyp, lep3_id, lep3_idx);
   lep4_id = fourthLepton.pdgId();
   lep4_idx = fourthLepton.idx();
   if (lep4_idx >= 0 && (abs(lep4_id) == 11 || abs(lep4_id) == 13)){
@@ -1060,10 +1060,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   //More fourth lepton stuff
   if (abs(lep4_id) == 11 || abs(lep4_id) == 13){
+    lep4_veto = abs(lep4_id) == 11 ? isGoodVetoElectron(lep4_idx) : isGoodVetoMuon(lep4_idx);
     if (lep4_veto){
       lep4_passes_id = isGoodLepton(lep4_id, lep4_idx);
       lep4_tight = abs(lep4_id) == 11 ? isGoodElectron(lep4_idx) : isGoodMuon(lep4_idx);
-      lep4_veto = abs(lep4_id) == 11 ? isGoodVetoElectron(lep4_idx) : isGoodVetoMuon(lep4_idx);
       lep4_fo = abs(lep4_id) == 11 ? isFakableElectron(lep4_idx) : isFakableMuon(lep4_idx);
       if (abs(lep4_id) == 11){
         float etaSC              = fabs(els_etaSC().at(lep4_idx));
@@ -1773,13 +1773,13 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   BabyTree->Fill();
 
   // int SR = signalRegion2016(njets, nbtags, met, ht, mtmin, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
-  int SR = signalRegionChargeSplit(njets, nbtags, met, ht, mtmin, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
-  anal_type_t categ = analysisCategory(lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
-  if (categ > 0) SR += nHHsr;
-  if (categ > 1) SR += nHLsr;
-
+  // int SR = signalRegionChargeSplit(njets, nbtags, met, ht, mtmin, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
+  int nleps = 2;
+  int isClass6 = hyp_class == 6;
+  if (lep3_passes_id) nleps++;
+  int SR = signalRegionTest(njets, nbtags, met, ht, mtmin, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, nleps, isClass6);
   babyErrorStruct.SR = SR;
-  if (hyp_class == 3) babyErrorStruct.isGood = true;
+  if (hyp_class == 3 || (hyp_class == 6 && lep3_passes_id)) babyErrorStruct.isGood = true;
 
   return babyErrorStruct;
 

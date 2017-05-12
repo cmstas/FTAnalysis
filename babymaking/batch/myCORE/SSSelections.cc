@@ -7,7 +7,7 @@ using namespace tas;
   //Note: these functions are currently only for the SS analysis!
   //Be careful that IDs, etc. are OK before stealing for other analyses
 
-Lep getFourthLepton(int iHyp){
+Lep getFourthLepton(int iHyp, int lep3id, int lep3idx){
 
   std::vector<unsigned int> ele_idx;
   std::vector<unsigned int> mu_idx;
@@ -33,6 +33,7 @@ Lep getFourthLepton(int iHyp){
       bool is_hyp_lep = false;
       for (unsigned int vidx = 0; vidx < ele_idx.size(); vidx++){
           if (eidx == ele_idx.at(vidx)) is_hyp_lep = true;
+          if (abs(lep3id) == 11 && eidx == lep3idx) is_hyp_lep = true;
       }
       if (is_hyp_lep) continue;
       if (fabs(tas::els_p4().at(eidx).eta()) > 2.4) continue;
@@ -56,6 +57,7 @@ Lep getFourthLepton(int iHyp){
       bool is_hyp_lep = false;
       for (unsigned int vidx = 0; vidx < mu_idx.size(); vidx++) {
         if (midx == mu_idx.at(vidx)) is_hyp_lep = true; 
+          if (abs(lep3id) == 13 && midx == lep3idx) is_hyp_lep = true;
       }
 
       if (is_hyp_lep) continue;
@@ -458,6 +460,53 @@ int baselineRegion(int njets, int nbtags, float met, float ht, int id1, int id2,
   else if (nbtags == 2) return 2;
   else                  return 3;
 }
+
+int getNsrsTTTT() { return 10; }
+int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, int nleps, int isClass6){
+    if (lep1pt < 25.) return -1;
+    if (lep2pt < 20.) return -1;
+    if (njets < 2) return -1;
+    if (nbtags < 2) return -1;
+    if (ht < 300) return -1;
+    if (isClass6) return 1;
+    if (nleps == 2) {
+        if (nbtags == 2) {
+            if (njets == 2) return 2;
+            if (njets == 3) return 2;
+            if (njets == 4) return 2;
+            if (njets == 5) return 2;
+            if (njets == 6) return 3;
+            if (njets == 7) return 4;
+            if (njets >= 8) return 5;
+        } else if (nbtags == 3) {
+            if (njets == 3) return -1;
+            if (njets == 4) return -1;
+            if (njets == 5) return 6;
+            if (njets == 6) return 6;
+            if (njets >= 7) return 7;
+        } else if (nbtags >= 4) {
+            if (njets == 4) return -1;
+            if (njets == 5) return 8;
+            if (njets == 6) return 8;
+            if (njets >= 7) return 8;
+        }
+    } else {
+        if (nbtags == 2) {
+            if (njets == 3) return -1;
+            if (njets == 4) return -1;
+            if (njets == 5) return 9;
+            if (njets == 6) return 9;
+            if (njets >= 7) return 9;
+        } else if (nbtags == 3) {
+            if (njets == 4) return 10;
+            if (njets >= 5) return 10;
+        } else if (nbtags >= 4) {
+            if (njets > 3) return 10;
+        }
+    }
+    return -1;
+}
+
 
 int signalRegion2016(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt){
 
