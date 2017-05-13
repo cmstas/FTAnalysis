@@ -1,7 +1,7 @@
 # fourtop
 Looking for four top in all the right places.
 
-![Mascot](http://i.imgur.com/k2FvE22.png)
+<img src="http://i.imgur.com/k2FvE22.png" width="400">
 
 Standard disclaimer
 > No identification with actual persons (living or deceased),
@@ -11,11 +11,11 @@ Standard disclaimer
 ### Prepare the campaign
 ```bash
 # winners use git
-git clone https://github.com/aminnj/fourtop
+git clone https://github.com/cmstas/FTAnalysis
 # winners use bash (but mainly python)
-source install.sh
 # execute from this directory and only this directory,
 # every time you want to work in this repository
+source setup.sh
 ```
 
 ### [Make babies](babymaking/batch/) (more babies = more votes)

@@ -1,6 +1,3 @@
-float triggerScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) {
-    return TotalTriggerSF(pdgId1, pt1, eta1, pdgId2, pt2, eta2, ht);
-}
 
 float electronScaleFactorHighHT(float pt, float eta) {
   if (pt >= 10 && pt < 20 && eta >= -2.500 && eta < -2.000) return 0.8169;
@@ -215,11 +212,184 @@ if (eta >= 2.100 && eta < 2.400) return 0.987334;
 return 1.0;
 }
 
+float electronScaleFactorHighHT_error(float pt, float eta) {
+  if (pt >= 10 && pt < 20 && eta >= -2.500 && eta < -2.000) return 0.0316;
+  if (pt >= 10 && pt < 20 && eta >= -2.000 && eta < -1.566) return 0.0284;
+  if (pt >= 10 && pt < 20 && eta >= -1.566 && eta < -1.442) return 0.0639;
+  if (pt >= 10 && pt < 20 && eta >= -1.442 && eta < -0.800) return 0.0119;
+  if (pt >= 10 && pt < 20 && eta >= -0.800 && eta < -0.000) return 0.0355;
+  if (pt >= 10 && pt < 20 && eta >= -0.000 && eta < 0.800) return 0.0355;
+  if (pt >= 10 && pt < 20 && eta >= 0.800 && eta < 1.442) return 0.0119;
+  if (pt >= 10 && pt < 20 && eta >= 1.442 && eta < 1.566) return 0.0639;
+  if (pt >= 10 && pt < 20 && eta >= 1.566 && eta < 2.000) return 0.0284;
+  if (pt >= 10 && pt < 20 && eta >= 2.000 && eta < 2.500) return 0.0316;
+  if (pt >= 20 && pt < 30 && eta >= -2.500 && eta < -2.000) return 0.0177;
+  if (pt >= 20 && pt < 30 && eta >= -2.000 && eta < -1.566) return 0.0173;
+  if (pt >= 20 && pt < 30 && eta >= -1.566 && eta < -1.442) return 0.1184;
+  if (pt >= 20 && pt < 30 && eta >= -1.442 && eta < -0.800) return 0.0258;
+  if (pt >= 20 && pt < 30 && eta >= -0.800 && eta < -0.000) return 0.0169;
+  if (pt >= 20 && pt < 30 && eta >= -0.000 && eta < 0.800) return 0.0169;
+  if (pt >= 20 && pt < 30 && eta >= 0.800 && eta < 1.442) return 0.0258;
+  if (pt >= 20 && pt < 30 && eta >= 1.442 && eta < 1.566) return 0.1184;
+  if (pt >= 20 && pt < 30 && eta >= 1.566 && eta < 2.000) return 0.0173;
+  if (pt >= 20 && pt < 30 && eta >= 2.000 && eta < 2.500) return 0.0177;
+  if (pt >= 30 && pt < 40 && eta >= -2.500 && eta < -2.000) return 0.0090;
+  if (pt >= 30 && pt < 40 && eta >= -2.000 && eta < -1.566) return 0.0068;
+  if (pt >= 30 && pt < 40 && eta >= -1.566 && eta < -1.442) return 0.0089;
+  if (pt >= 30 && pt < 40 && eta >= -1.442 && eta < -0.800) return 0.0084;
+  if (pt >= 30 && pt < 40 && eta >= -0.800 && eta < -0.000) return 0.0070;
+  if (pt >= 30 && pt < 40 && eta >= -0.000 && eta < 0.800) return 0.0070;
+  if (pt >= 30 && pt < 40 && eta >= 0.800 && eta < 1.442) return 0.0084;
+  if (pt >= 30 && pt < 40 && eta >= 1.442 && eta < 1.566) return 0.0089;
+  if (pt >= 30 && pt < 40 && eta >= 1.566 && eta < 2.000) return 0.0068;
+  if (pt >= 30 && pt < 40 && eta >= 2.000 && eta < 2.500) return 0.0090;
+  if (pt >= 40 && pt < 50 && eta >= -2.500 && eta < -2.000) return 0.0146;
+  if (pt >= 40 && pt < 50 && eta >= -2.000 && eta < -1.566) return 0.0066;
+  if (pt >= 40 && pt < 50 && eta >= -1.566 && eta < -1.442) return 0.0168;
+  if (pt >= 40 && pt < 50 && eta >= -1.442 && eta < -0.800) return 0.0040;
+  if (pt >= 40 && pt < 50 && eta >= -0.800 && eta < -0.000) return 0.0036;
+  if (pt >= 40 && pt < 50 && eta >= -0.000 && eta < 0.800) return 0.0036;
+  if (pt >= 40 && pt < 50 && eta >= 0.800 && eta < 1.442) return 0.0040;
+  if (pt >= 40 && pt < 50 && eta >= 1.442 && eta < 1.566) return 0.0168;
+  if (pt >= 40 && pt < 50 && eta >= 1.566 && eta < 2.000) return 0.0066;
+  if (pt >= 40 && pt < 50 && eta >= 2.000 && eta < 2.500) return 0.0146;
+  if (pt >= 50 && pt < 100 && eta >= -2.500 && eta < -2.000) return 0.0197;
+  if (pt >= 50 && pt < 100 && eta >= -2.000 && eta < -1.566) return 0.0110;
+  if (pt >= 50 && pt < 100 && eta >= -1.566 && eta < -1.442) return 0.0171;
+  if (pt >= 50 && pt < 100 && eta >= -1.442 && eta < -0.800) return 0.0056;
+  if (pt >= 50 && pt < 100 && eta >= -0.800 && eta < -0.000) return 0.0084;
+  if (pt >= 50 && pt < 100 && eta >= -0.000 && eta < 0.800) return 0.0084;
+  if (pt >= 50 && pt < 100 && eta >= 0.800 && eta < 1.442) return 0.0056;
+  if (pt >= 50 && pt < 100 && eta >= 1.442 && eta < 1.566) return 0.0171;
+  if (pt >= 50 && pt < 100 && eta >= 1.566 && eta < 2.000) return 0.0110;
+  if (pt >= 50 && pt < 100 && eta >= 2.000 && eta < 2.500) return 0.0197;
+  if (pt >= 100  && eta >= -2.500 && eta < -2.000) return 0.0605;
+  if (pt >= 100  && eta >= -2.000 && eta < -1.566) return 0.0145;
+  if (pt >= 100  && eta >= -1.566 && eta < -1.442) return 0.0655;
+  if (pt >= 100  && eta >= -1.442 && eta < -0.800) return 0.0081;
+  if (pt >= 100  && eta >= -0.800 && eta < -0.000) return 0.0060;
+  if (pt >= 100  && eta >= -0.000 && eta < 0.800) return 0.0060;
+  if (pt >= 100  && eta >= 0.800 && eta < 1.442) return 0.0081;
+  if (pt >= 100  && eta >= 1.442 && eta < 1.566) return 0.0655;
+  if (pt >= 100  && eta >= 1.566 && eta < 2.000) return 0.0145;
+  if (pt >= 100  && eta >= 2.000 && eta < 2.500) return 0.0605;
+  return 1.;
+}
+
+float electronScaleFactorLowHT_error(float pt, float eta) {
+  if (pt >= 10 && pt < 20 && eta >= -2.500 && eta < -2.000) return 0.0325;
+  if (pt >= 10 && pt < 20 && eta >= -2.000 && eta < -1.566) return 0.0288;
+  if (pt >= 10 && pt < 20 && eta >= -1.566 && eta < -1.442) return 0.0645;
+  if (pt >= 10 && pt < 20 && eta >= -1.442 && eta < -0.800) return 0.0108;
+  if (pt >= 10 && pt < 20 && eta >= -0.800 && eta < -0.000) return 0.0355;
+  if (pt >= 10 && pt < 20 && eta >= -0.000 && eta < 0.800) return 0.0355;
+  if (pt >= 10 && pt < 20 && eta >= 0.800 && eta < 1.442) return 0.0108;
+  if (pt >= 10 && pt < 20 && eta >= 1.442 && eta < 1.566) return 0.0645;
+  if (pt >= 10 && pt < 20 && eta >= 1.566 && eta < 2.000) return 0.0288;
+  if (pt >= 10 && pt < 20 && eta >= 2.000 && eta < 2.500) return 0.0325;
+  if (pt >= 20 && pt < 30 && eta >= -2.500 && eta < -2.000) return 0.0172;
+  if (pt >= 20 && pt < 30 && eta >= -2.000 && eta < -1.566) return 0.0170;
+  if (pt >= 20 && pt < 30 && eta >= -1.566 && eta < -1.442) return 0.1187;
+  if (pt >= 20 && pt < 30 && eta >= -1.442 && eta < -0.800) return 0.0259;
+  if (pt >= 20 && pt < 30 && eta >= -0.800 && eta < -0.000) return 0.0176;
+  if (pt >= 20 && pt < 30 && eta >= -0.000 && eta < 0.800) return 0.0176;
+  if (pt >= 20 && pt < 30 && eta >= 0.800 && eta < 1.442) return 0.0259;
+  if (pt >= 20 && pt < 30 && eta >= 1.442 && eta < 1.566) return 0.1187;
+  if (pt >= 20 && pt < 30 && eta >= 1.566 && eta < 2.000) return 0.0170;
+  if (pt >= 20 && pt < 30 && eta >= 2.000 && eta < 2.500) return 0.0172;
+  if (pt >= 30 && pt < 40 && eta >= -2.500 && eta < -2.000) return 0.0090;
+  if (pt >= 30 && pt < 40 && eta >= -2.000 && eta < -1.566) return 0.0068;
+  if (pt >= 30 && pt < 40 && eta >= -1.566 && eta < -1.442) return 0.0090;
+  if (pt >= 30 && pt < 40 && eta >= -1.442 && eta < -0.800) return 0.0085;
+  if (pt >= 30 && pt < 40 && eta >= -0.800 && eta < -0.000) return 0.0070;
+  if (pt >= 30 && pt < 40 && eta >= -0.000 && eta < 0.800) return 0.0070;
+  if (pt >= 30 && pt < 40 && eta >= 0.800 && eta < 1.442) return 0.0085;
+  if (pt >= 30 && pt < 40 && eta >= 1.442 && eta < 1.566) return 0.0090;
+  if (pt >= 30 && pt < 40 && eta >= 1.566 && eta < 2.000) return 0.0068;
+  if (pt >= 30 && pt < 40 && eta >= 2.000 && eta < 2.500) return 0.0090;
+  if (pt >= 40 && pt < 50 && eta >= -2.500 && eta < -2.000) return 0.0146;
+  if (pt >= 40 && pt < 50 && eta >= -2.000 && eta < -1.566) return 0.0065;
+  if (pt >= 40 && pt < 50 && eta >= -1.566 && eta < -1.442) return 0.0168;
+  if (pt >= 40 && pt < 50 && eta >= -1.442 && eta < -0.800) return 0.0040;
+  if (pt >= 40 && pt < 50 && eta >= -0.800 && eta < -0.000) return 0.0036;
+  if (pt >= 40 && pt < 50 && eta >= -0.000 && eta < 0.800) return 0.0036;
+  if (pt >= 40 && pt < 50 && eta >= 0.800 && eta < 1.442) return 0.0040;
+  if (pt >= 40 && pt < 50 && eta >= 1.442 && eta < 1.566) return 0.0168;
+  if (pt >= 40 && pt < 50 && eta >= 1.566 && eta < 2.000) return 0.0065;
+  if (pt >= 40 && pt < 50 && eta >= 2.000 && eta < 2.500) return 0.0146;
+  if (pt >= 50 && pt < 100 && eta >= -2.500 && eta < -2.000) return 0.0195;
+  if (pt >= 50 && pt < 100 && eta >= -2.000 && eta < -1.566) return 0.0111;
+  if (pt >= 50 && pt < 100 && eta >= -1.566 && eta < -1.442) return 0.0171;
+  if (pt >= 50 && pt < 100 && eta >= -1.442 && eta < -0.800) return 0.0057;
+  if (pt >= 50 && pt < 100 && eta >= -0.800 && eta < -0.000) return 0.0085;
+  if (pt >= 50 && pt < 100 && eta >= -0.000 && eta < 0.800) return 0.0085;
+  if (pt >= 50 && pt < 100 && eta >= 0.800 && eta < 1.442) return 0.0057;
+  if (pt >= 50 && pt < 100 && eta >= 1.442 && eta < 1.566) return 0.0171;
+  if (pt >= 50 && pt < 100 && eta >= 1.566 && eta < 2.000) return 0.0111;
+  if (pt >= 50 && pt < 100 && eta >= 2.000 && eta < 2.500) return 0.0195;
+  if (pt >= 100  && eta >= -2.500 && eta < -2.000) return 0.0417;
+  if (pt >= 100  && eta >= -2.000 && eta < -1.566) return 0.0146;
+  if (pt >= 100  && eta >= -1.566 && eta < -1.442) return 0.0636;
+  if (pt >= 100  && eta >= -1.442 && eta < -0.800) return 0.0084;
+  if (pt >= 100  && eta >= -0.800 && eta < -0.000) return 0.0062;
+  if (pt >= 100  && eta >= -0.000 && eta < 0.800) return 0.0062;
+  if (pt >= 100  && eta >= 0.800 && eta < 1.442) return 0.0084;
+  if (pt >= 100  && eta >= 1.442 && eta < 1.566) return 0.0636;
+  if (pt >= 100  && eta >= 1.566 && eta < 2.000) return 0.0146;
+  if (pt >= 100  && eta >= 2.000 && eta < 2.500) return 0.0417;
+  return 1.;
+}
+
+float muonScaleFactor_error(float pt, float eta) {
+  if (pt >= 10 && pt < 20 && fabs(eta) >= 0.000 && fabs(eta) < 0.900) return 0.0048;
+  if (pt >= 10 && pt < 20 && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.0058;
+  if (pt >= 10 && pt < 20 && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.0033;
+  if (pt >= 10 && pt < 20 && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.0049;
+  if (pt >= 20 && pt < 25 && fabs(eta) >= 0.000 && fabs(eta) < 0.900) return 0.0018;
+  if (pt >= 20 && pt < 25 && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.0027;
+  if (pt >= 20 && pt < 25 && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.0015;
+  if (pt >= 20 && pt < 25 && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.0026;
+  if (pt >= 25 && pt < 30 && fabs(eta) >= 0.000 && fabs(eta) < 0.900) return 0.0009;
+  if (pt >= 25 && pt < 30 && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.0015;
+  if (pt >= 25 && pt < 30 && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.0009;
+  if (pt >= 25 && pt < 30 && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.0017;
+  if (pt >= 30 && pt < 40 && fabs(eta) >= 0.000 && fabs(eta) < 0.900) return 0.0003;
+  if (pt >= 30 && pt < 40 && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.0005;
+  if (pt >= 30 && pt < 40 && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.0004;
+  if (pt >= 30 && pt < 40 && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.0008;
+  if (pt >= 40 && pt < 50 && fabs(eta) >= 0.000 && fabs(eta) < 0.900) return 0.0002;
+  if (pt >= 40 && pt < 50 && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.0003;
+  if (pt >= 40 && pt < 50 && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.0002;
+  if (pt >= 40 && pt < 50 && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.0008;
+  if (pt >= 50 && pt < 60 && fabs(eta) >= 0.000 && fabs(eta) < 0.900) return 0.0005;
+  if (pt >= 50 && pt < 60 && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.0008;
+  if (pt >= 50 && pt < 60 && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.0006;
+  if (pt >= 50 && pt < 60 && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.0019;
+  if (pt >= 60  && fabs(eta) >= 0.000 && fabs(eta) < 0.900) return 0.0103;
+  if (pt >= 60  && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.0089;
+  if (pt >= 60  && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.0016;
+  if (pt >= 60  && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.0441;
+  return 1.;
+}
+
+float triggerScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) {
+    return TotalTriggerSF(pdgId1, pt1, eta1, pdgId2, pt2, eta2, ht);
+}
+
 float leptonScaleFactor(int pdgId, float pt, float eta, float ht) {
   if (abs(pdgId)==13) return muonScaleFactor(pt, eta)*trackingSF(eta);
   else if (abs(pdgId)==11){
     if (ht>300) return electronScaleFactorHighHT(pt, eta)*electronGSF(pt, eta);
       else return electronScaleFactorLowHT(pt, eta)*electronGSF(pt, eta);
+  }
+  return 0.;
+}
+
+float leptonScaleFactor_err(int pdgId, float pt, float eta, float ht) {
+  if (abs(pdgId)==13) return muonScaleFactor_error(pt, eta);
+  else if (abs(pdgId)==11){
+    if (ht>300) return electronScaleFactorHighHT_error(pt, eta);
+      else return electronScaleFactorLowHT_error(pt, eta);
   }
   return 0.;
 }

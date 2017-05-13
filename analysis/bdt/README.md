@@ -1,4 +1,9 @@
 ### So you want to outsmart those hackers? Use machine learning!
+
+
+#### Making a BDT is like making a wall...
+<img src="http://i.imgur.com/iZzFTzp.png" width="400">
+
 #### Install xgboost
 ```bash
 git clone --recursive https://github.com/dmlc/xgboost
@@ -6,7 +11,7 @@ cd xgboost/
 make -j10
 cd python-package/
 # numpy and scipy already come with CMSSW, so kick 'em out!
-# we call this "building the wall"
+# we also call this "building the wall"
 sed -i "s/'numpy',/# the wall/" setup.py
 sed -i "s/'scipy',/# the wall/" setup.py
 # path magic
