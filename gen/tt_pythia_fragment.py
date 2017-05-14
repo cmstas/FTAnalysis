@@ -19,6 +19,12 @@ generator = cms.EDFilter("Pythia8GeneratorFilter",
                         'Top:gg2ttbar    = on',
                         'Top:qqbar2ttbar = on',
                         '6:m0 = 172.5',    # top mass',
+                        'ResonanceDecayFilter:filter = on', 
+                        'ResonanceDecayFilter:exclusive = off', #off: require at least the specified number of daughters, on: require exactly the specified number of daughters
+                        'ResonanceDecayFilter:eMuAsEquivalent = off', #on: treat electrons and muons as equivalent
+                        'ResonanceDecayFilter:eMuTauAsEquivalent = on', #on: treat electrons, muons , and taus as equivalent
+                        'ResonanceDecayFilter:allNuAsEquivalent = on', #on: treat all three neutrino flavours as equivalent
+                        'ResonanceDecayFilter:daughters = 11',
 	    ),
             parameterSets = cms.vstring('pythia8CommonSettings',
                                         'pythia8CUEP8M1Settings',
