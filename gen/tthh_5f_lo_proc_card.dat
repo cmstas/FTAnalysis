@@ -31,5 +31,5 @@ define p = g u c d s u~ c~ d~ s~
 define j = g u c d s u~ c~ d~ s~
 define p = p b b~
 define j = j b b~
-generate p p > t t~ z z / h
-output TTZZ_5f_LO -nojpeg
+generate p p > t t~ h h
+output TTHH_5f_LO -nojpeg
