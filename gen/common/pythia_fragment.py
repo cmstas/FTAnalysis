@@ -10,14 +10,9 @@ generator = cms.EDFilter("Pythia8HadronizerFilter",
                          PythiaParameters = cms.PSet(
                              pythia8CommonSettingsBlock,
                              pythia8CUEP8M1SettingsBlock,
-                             processParameters = cms.vstring(
-                                 'TimeShower:mMaxGamma = 1.0',#cutting off lepton-pair production 
-                                 ##in the electromagnetic shower to not overlap with ttZ/gamma* samples
-                             ),                                
                              parameterSets = cms.vstring('pythia8CommonSettings',
                                                          'pythia8CUEP8M1Settings',
-                                                         'JetMatchingParameters','processParameters'
                              )
                          )
 )
-ProductionFilterSequence = cms.Sequence(generator)
+
