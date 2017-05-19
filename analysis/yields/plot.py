@@ -21,7 +21,8 @@ if __name__ == "__main__":
                ("rares", "Rare SM",             r.kMagenta-7,  0.5),
                ("flips", "Charge misid.",       r.kGray+2,     0.3),
                ("fakes", "Nonprompt lep.",      18,            0.35),
-               ("ttww",  "t#bar{t}W^{+}W^{-}",  r.kOrange,     0.2),
+               # ("ttww",  "t#bar{t}W^{+}W^{-}",  r.kOrange,     0.2),
+               ("ttww",  "t#bar{t}W^{+}W^{-}",  r.kAzure-4,     0.2),
                ]
     bgnames, titles, colors, systs = map(list,zip(*bginfo))
 
@@ -84,6 +85,7 @@ if __name__ == "__main__":
                 d_newopts["xAxisBinLabels"] = ",".join(buff)
 
             if key in ["SRCR_TOTAL", "SRDISC_TOTAL"]:
+            # if key in ["SRCR_TOTAL"]: #, "SRDISC_TOTAL"]:
                 regions="srcr"
                 if "DISC" in key: regions="srdisc"
                 d_lims = get_lims(card=cards_dir, regions=regions, redocard=True, redolimits=True, domcfakes=False)

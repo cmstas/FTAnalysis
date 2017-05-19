@@ -3,8 +3,11 @@
 # tag="v0.04"
 # basedir="/nfs-7/userdata/namin/tupler_babies/merged/FT/${tag}/output/"
 
-tag="v9.11"
-basedir="/nfs-7/userdata/namin/tupler_babies/merged/SS/${tag}/output/"
+# tag="v9.11"
+# basedir="/nfs-7/userdata/namin/tupler_babies/merged/SS/${tag}/output/"
+
+tag="v0.07"
+basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
 
 cut="njets>=2"
 

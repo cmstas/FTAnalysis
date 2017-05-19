@@ -432,8 +432,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     reader->AddVariable("nmb40",&tree_f_nmb40);
     reader->AddVariable("ntb40",&tree_f_ntb40);
     reader->AddVariable("q1",&tree_f_q1);
-    reader->AddVariable("q2",&tree_f_q2);
+    // reader->AddVariable("q2",&tree_f_q2);
     reader->AddVariable("ht4ratio",&tree_ht4ratio);
+    reader->AddSpectator("weight",&tree_weight);
+    reader->AddSpectator("ptl1",&tree_ptl1);
+    reader->AddSpectator("ptl2",&tree_ptl2);
+    reader->AddSpectator("SR",&tree_SR);
+
     reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
 
     // out_file->cd();
@@ -943,7 +948,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             // } else {
             //     if (ss::lep3_passes_RA7v2() && ss::lep3_p4().pt() > 20.) nleps++;
             // }
-            if (ss::lep4_passes_id()) nleps++;
+            if (ss::lep4_passes_id() && (ss::lep4_p4().pt() > 20.) ) nleps++;
 
             //Require nominal baseline selections
             int BR = baselineRegion(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, true);
@@ -1106,31 +1111,28 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 tree_f_q2 = tree_q2;
                 // // fill discriminant before requiring SR
                 pred = get_prediction((float)tree_njets,(float)tree_nbtags,(float)tree_mt1,(float)tree_mt2,(float)tree_met,(float)tree_ml1l2,(float)tree_htb,(float)tree_nleps,(float)tree_ht,(float)tree_mj1j2,(float)tree_dphij1j2,(float)tree_ptj1,(float)tree_ptj2,(float)tree_ml1j2,(float)tree_ml1j1,(float)tree_wcands,(float)tree_dphil1j1,(float)tree_detal1l2,(float)tree_nlb40,(float)tree_nmb40,(float)tree_ntb40,(float)tree_q1,(float)tree_q2,(float)tree_ht4ratio);
-                if (outputTrainingBDT) out_tree->Fill();
+                if (outputTrainingBDT && !isData) out_tree->Fill();
                 mvavalue = reader->EvaluateMVA("BDT");
                 // transform preds
                 pred = min(pred,0.79F);
                 p_result.h_disc2.br->Fill(pred,weight); //  0. 0.25 0.35 0.65
-                float upper = 0.8F;
-                float lower = -0.4F;
-                mvavalue = ((max(min((float)mvavalue,upper-0.01F),lower)-lower)/(upper-lower));
+                // float upper = 0.8F;
+                // float lower = -0.4F;
+                // mvavalue = ((max(min((float)mvavalue,upper-0.01F),lower)-lower)/(upper-lower));
                 p_result.h_disc.br->Fill(mvavalue,weight);
             }
 
             // int SRdisc = mvavalue*10+1;
             int SRdisc = 1;
-            // if (mvavalue > 0.35) SRdisc = 2;
-            // if (mvavalue > 0.57) SRdisc = 3;
-            // if (mvavalue > 0.65) SRdisc = 4;
-            if (mvavalue > 0.40) SRdisc = 2;
-            if (mvavalue > 0.45) SRdisc = 3;
-            if (mvavalue > 0.50) SRdisc = 4;
-            if (mvavalue > 0.55) SRdisc = 5;
-            if (mvavalue > 0.60) SRdisc = 6;
-            if (mvavalue > 0.65) SRdisc = 7;
-            if (mvavalue > 0.70) SRdisc = 8;
-            if (mvavalue > 0.75) SRdisc = 9;
-            if (mvavalue > 0.80) SRdisc = 10;
+            if (mvavalue > -0.217) SRdisc = 2;
+            if (mvavalue > -0.164) SRdisc = 3;
+            if (mvavalue > -0.044) SRdisc = 4;
+            if (mvavalue >  0.055) SRdisc = 5;
+            if (mvavalue >  0.135) SRdisc = 6;
+            if (mvavalue >  0.205) SRdisc = 7;
+            if (mvavalue >  0.283) SRdisc = 8;
+            if (mvavalue >  0.368) SRdisc = 9;
+            if (mvavalue >  0.456) SRdisc = 10;
             int SRdisc_unc_up = SRdisc;
             int SRdisc_unc_dn = SRdisc;
 
@@ -1198,6 +1200,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (isData  == 0 )            p_pu_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_pu_up_alt);
             if (isData  == 0 )            p_pu_alt_dn.SRDISC.TOTAL->Fill(SRdisc, weight_pu_dn_alt);
             if (isData  == 0 )            p_isr_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_isr_up_alt);
+            if (isData  == 0 )            p_lep_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_lep_up_alt);
 
             if (SR > 1) { // non ttZ CR
                 p_result.h_njets.br->Fill(ss::njets() , weight);
