@@ -87,7 +87,8 @@ merging_scripts = [inputs_path+"merge_script.sh", inputs_path+"merge_macro.C"]
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 
 # tag = "v0.04" # deepCSV, era SFs
-tag = "v0.06" # deepCSV, era SFs, fourth lepton
+# tag = "v0.06" # deepCSV, era SFs, fourth lepton - bugged?
+tag = "v0.07" # deepCSV, era SFs, fourth lepton
 # tag = "v0.04_norundep" # deepCSV, integrated bsfs
 # tag = "v0.05" # deepCSV, integrated bsfs, triple RA7 class8
 # tag = "v0.04_ttzwhscales" # deepCSV, integrated bsfs, triple RA7 class8

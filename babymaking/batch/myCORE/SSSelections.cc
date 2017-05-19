@@ -13,7 +13,7 @@ Lep getFourthLepton(int iHyp, int lep3id, int lep3idx){
   std::vector<unsigned int> mu_idx;
   
   Lep fourthLepton = Lep(0,0);
-  float min = 10000000;
+  // float min = 10000000;
 
   int lt_id           = tas::hyp_lt_id().at(iHyp);
   int ll_id           = tas::hyp_ll_id().at(iHyp);
@@ -22,9 +22,10 @@ Lep getFourthLepton(int iHyp, int lep3id, int lep3idx){
 
   (abs(lt_id) == 11) ? ele_idx.push_back(lt_idx) : mu_idx.push_back(lt_idx);
   (abs(ll_id) == 11) ? ele_idx.push_back(ll_idx) : mu_idx.push_back(ll_idx);
+  (abs(lep3id) == 11) ? ele_idx.push_back(lep3idx) : mu_idx.push_back(lep3idx);
 
-  if (ele_idx.size() + mu_idx.size() != 2) {
-    std::cout << "ERROR: don't have 2 leptons in hypothesis!!!  Exiting..." << std::endl;
+  if (ele_idx.size() + mu_idx.size() != 3) {
+    std::cout << "ERROR: don't have 3 leptons for fourth lep!!!  Exiting..." << std::endl;
     return fourthLepton;
   }
       
@@ -33,22 +34,14 @@ Lep getFourthLepton(int iHyp, int lep3id, int lep3idx){
       bool is_hyp_lep = false;
       for (unsigned int vidx = 0; vidx < ele_idx.size(); vidx++){
           if (eidx == ele_idx.at(vidx)) is_hyp_lep = true;
-          if (abs(lep3id) == 11 && eidx == lep3idx) is_hyp_lep = true;
       }
       if (is_hyp_lep) continue;
       if (fabs(tas::els_p4().at(eidx).eta()) > 2.4) continue;
-      if (tas::els_p4().at(eidx).pt() < 7.0) continue;
+      if (tas::els_p4().at(eidx).pt() < 15.0) continue;
       if (!isGoodVetoElectron(eidx)) continue;
 
-      for (unsigned int vidx = 0; vidx < ele_idx.size(); vidx++) {
-          if (tas::els_charge().at(eidx) * tas::els_charge().at(ele_idx.at(vidx)) > 0) continue;
-          LorentzVector gamma_p4 = tas::els_p4().at(eidx) + tas::els_p4().at(ele_idx.at(vidx));
-          float gammacandmass = sqrt(fabs(gamma_p4.mass2()));
-          if (gammacandmass < min){
-            min = gammacandmass; 
-            fourthLepton = Lep(-11*els_charge().at(eidx), eidx);
-          }
-      }
+      fourthLepton = Lep(-11*els_charge().at(eidx), eidx);
+
     } 
   }
 
@@ -57,23 +50,15 @@ Lep getFourthLepton(int iHyp, int lep3id, int lep3idx){
       bool is_hyp_lep = false;
       for (unsigned int vidx = 0; vidx < mu_idx.size(); vidx++) {
         if (midx == mu_idx.at(vidx)) is_hyp_lep = true; 
-          if (abs(lep3id) == 13 && midx == lep3idx) is_hyp_lep = true;
       }
 
       if (is_hyp_lep) continue;
       if (fabs(tas::mus_p4().at(midx).eta()) > 2.4) continue;
-      if (tas::mus_p4().at(midx).pt() < 5.0) continue;
+      if (tas::mus_p4().at(midx).pt() < 10.0) continue;
       if (!isGoodVetoMuon(midx)) continue;
 
-      for (unsigned int vidx = 0; vidx < mu_idx.size(); vidx++) {
-          if (tas::mus_charge().at(midx) * tas::mus_charge().at(mu_idx.at(vidx)) > 0) continue;
-          LorentzVector gamma_p4 = tas::mus_p4().at(midx) + tas::mus_p4().at(mu_idx.at(vidx));
-          float gammacandmass = sqrt(fabs(gamma_p4.mass2()));
-          if (gammacandmass < min){
-            min = gammacandmass; 
-            fourthLepton = Lep(-13*mus_charge().at(midx), midx);
-          }
-      }
+      fourthLepton = Lep(-13*mus_charge().at(midx), midx);
+
     }
   }
 
@@ -1832,7 +1817,7 @@ pair<Lep, int> getThirdLepton_RA7(int hyp){
   return pair<Lep, int>(result, quality);
 
 }
-pair<Lep, int> getThirdLepton(int hyp){
+pair<Lep, int> getThirdLepton(int hyp, int ignore_id, int ignore_idx){
 
   //If hyp_class == 6, save the lepton that triggered the Z veto (so long as it is veto or higher)
   Z_result_t Zresult = makesExtraZ(hyp);
@@ -1865,6 +1850,7 @@ pair<Lep, int> getThirdLepton(int hyp){
     //Remove electrons already selected
     if (abs(ll_id) == 11 && ll_idx == i) continue; 
     if (abs(lt_id) == 11 && lt_idx == i) continue; 
+    if (abs(ignore_id) == 11 && ignore_idx == i) continue;
 
     //Remove electrons that fail kinematically
     if (tas::els_p4().at(i).pt() < 20) continue;
@@ -1891,6 +1877,7 @@ pair<Lep, int> getThirdLepton(int hyp){
     //Remove electrons already selected
     if (abs(ll_id) == 13 && ll_idx == i) continue; 
     if (abs(lt_id) == 13 && lt_idx == i) continue; 
+    if (abs(ignore_id) == 13 && ignore_idx == i) continue;
    
     //Remove electrons that fail kinematically
     if (tas::mus_p4().at(i).pt() < 20) continue;

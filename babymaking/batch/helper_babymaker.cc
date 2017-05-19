@@ -934,6 +934,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
   lep3_quality = thirdLepton.second;
   Lep fourthLepton = getFourthLepton(best_hyp, lep3_id, lep3_idx);
+  // // same function for getting 3rd lepton, but now we skip over the 3rd lepton we already found
+  // Lep fourthLepton = getThirdLepton(best_hyp, lep3_id, lep3_idx).first;
   lep4_id = fourthLepton.pdgId();
   lep4_idx = fourthLepton.idx();
   if (lep4_idx >= 0 && (abs(lep4_id) == 11 || abs(lep4_id) == 13)){
