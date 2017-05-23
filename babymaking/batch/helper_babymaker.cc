@@ -80,10 +80,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("jets_disc"                                               , &jets_disc                                               );
   // BabyTree->Branch("jets_disc_mva"                                           , &jets_disc_mva                                           );
   // BabyTree->Branch("jets_disc_ivf"                                           , &jets_disc_ivf                                           );
-  // BabyTree->Branch("jets_JEC"                                                , &jets_JEC                                                );
-  // BabyTree->Branch("btags_JEC"                                               , &btags_JEC                                               );
-  // BabyTree->Branch("jets_undoJEC"                                            , &jets_undoJEC                                            );
-  // BabyTree->Branch("btags_undoJEC"                                           , &btags_undoJEC                                           );
+  BabyTree->Branch("jets_JEC"                                                , &jets_JEC                                                );
+  BabyTree->Branch("btags_JEC"                                               , &btags_JEC                                               );
+  BabyTree->Branch("jets_undoJEC"                                            , &jets_undoJEC                                            );
+  BabyTree->Branch("btags_undoJEC"                                           , &btags_undoJEC                                           );
   BabyTree->Branch("btags_unc"                                               , &btags_unc                                               );
   BabyTree->Branch("btags_eff"                                               , &btags_eff                                               );
   BabyTree->Branch("btags_effpt"                                               , &btags_effpt                                               );
