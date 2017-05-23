@@ -50,6 +50,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
   BabyTree->Branch("gen_met_phi"                                             , &gen_met_phi                                             );
   BabyTree->Branch("njets"                                                   , &njets                                                   );
+  BabyTree->Branch("njetsAG"                                                   , &njetsAG                                                   );
+  BabyTree->Branch("nbtagsAG"                                                   , &nbtagsAG                                                   );
   BabyTree->Branch("njets_raw"                                               , &njets_raw                                               );
   BabyTree->Branch("hyp_class"                                               , &hyp_class                                               );
   BabyTree->Branch("lep1_p4"                                                 , &lep1_p4                                                 );
@@ -376,21 +378,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
 
   if (applyBtagSFs) {
     // setup btag calibration readers
-    // calib = new BTagCalibration("csvv2", "CORE/Tools/btagsf/data/run2_25ns/CSVv2_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco 
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME also below
-    // calib = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     calib = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
     calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     reader_heavy    = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central"); // central
     reader_heavy_UP = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "up");      // sys up
@@ -483,6 +471,8 @@ void babyMaker::InitBabyNtuple(){
     genweightsID.clear();
     gen_met_phi = -1;
     njets = -1;
+    njetsAG = -1;
+    nbtagsAG = -1;
     njets_raw = -1;
     hyp_class = -1;
     ht = -1;
@@ -1274,7 +1264,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
      //get btag eff weights
      float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
      // Don't consider any jets below 25
-     if (jet_pt<25.) continue;
+     if (jet_pt<bjetMinPt) continue;
      // Don't consider nonbjets with 25<pT<40
      // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
      float jet_eta = jet_results.first.at(i).p4().eta();
@@ -1355,7 +1345,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
      //get btag eff weights
      float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
      // Don't consider any jets below 25
-     if (jet_pt<25.) continue;
+     if (jet_pt<bjetMinPt) continue;
      // Don't consider nonbjets with 25<pT<40
      // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
      float jet_eta = jet_results.first.at(i).p4().eta();
@@ -1426,15 +1416,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // deciding which era the MC "belongs to", to assign the proper btag weight
   // Seed by event number to keep deterministic
   TRandom *tr1 = new TRandom(tas::evt_event());
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-    // weight_btagsf =    weight_btagsf1;
-    // weight_btagsf_UP = weight_btagsf1_UP;
-    // weight_btagsf_DN = weight_btagsf1_DN;
   if (tr1->Rndm() < 0.55) {
     // B-F is 55% of the lumi
     weight_btagsf =    weight_btagsf1;
@@ -1445,25 +1426,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     weight_btagsf_UP = weight_btagsf2_UP;
     weight_btagsf_DN = weight_btagsf2_DN;
   }
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-      // FIXME FIXME FIXME
-
-  // // ISR stuff for 2015
-  // if (isFastsim > 0){
-  //   for (unsigned int i = 0; i < tas::genps_status().size(); i++){
-  //     if (isFastsim  < 3 && abs(tas::genps_id().at(i)) != 1000021) continue;
-  //     if (isFastsim == 3 && abs(tas::genps_id().at(i)) != 1000005) continue;
-  //     if (tas::genps_status().at(i) != 22) continue;
-  //     if (gl1_p4.pt() <= 0){ gl1_p4 = tas::genps_p4().at(i); continue; }
-  //     if (gl2_p4.pt() <= 0){ gl2_p4 = tas::genps_p4().at(i); break; }
-  //   }
-  //   glglpt = (gl1_p4 + gl2_p4).pt();
-  //   isr_unc = (glglpt < 400) ? 0 : ((glglpt < 600) ? 0.15 : 0.30);
-  // }
 
   // ISR stuff for 2016
   // https://github.com/cmstas/MT2Analysis/blob/cmssw80x/babymaker/ScanChain.cc#L1870
@@ -1497,7 +1459,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     LorentzVector jet = tas::pfjets_p4().at(i);
 
     //Cuts
-    if (jet.pt() < 5.) continue;
+    // if (jet.pt() < 5.) continue;
     if (fabs(jet.eta()) > 2.4) continue;
 
     //Calculate raw pt
@@ -1515,17 +1477,21 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     jecUnc->setJetPt(rawpt*JEC);
     float jetUnc = jecUnc->getUncertainty(true);
 
+    if ( (rawpt*JEC*(1-jetUnc) < bjetMinPt)
+      && (rawpt*JEC*(1+jetUnc) < bjetMinPt)
+      && (rawpt*JEC*(1       ) < bjetMinPt) ) continue;
+
     //Save results
     mostJets.push_back(jet);
-    if (rawpt*JEC > 40 && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
+    // if (rawpt*JEC > jetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
+    if (rawpt*JEC > bjetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
     else                                                     mostJets_jet.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1+jetUnc) > 40 && isLoosePFJet_50nsV1(i)) mostJets_jet_up.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1+jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_up.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_up.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1-jetUnc) > 40 && isLoosePFJet_50nsV1(i)) mostJets_jet_dn.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1-jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_dn.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_dn.push_back(Jet(-1, -9999));
     mostJets_rawp4.push_back(jet*tas::pfjets_undoJEC().at(i));
     mostJets_idx.push_back(i);
-    // mostJets_disc.push_back(tas::getbtagvalue("pfCombinedInclusiveSecondaryVertexV2BJetTags", i));
     mostJets_disc.push_back(tas::getbtagvalue("deepFlavourJetTags:probb",i)+tas::getbtagvalue("deepFlavourJetTags:probbb",i));
     mostJets_unc.push_back(jetUnc);
     mostJets_JEC.push_back(JEC);
@@ -1539,31 +1505,35 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   vector <bool> mostJets_dn_passCleaning = cleanJets(mostJets_jet_dn);
 
   //Unc up/down results
-  int njetsAG = 0;
+  njetsAG = 0; // is the same as njets
+  nbtagsAG = 0; // is the same as nbtags
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i);
-    if (jet_pt > 40) njetsAG++;
+    if (jet_pt > bjetMinPt && mostJets_disc.at(i) > btagCut) nbtagsAG++;
+    if (jet_pt > jetMinPt) njetsAG++;
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_up_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_up = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0+mostJets_unc.at(i));
-    if (jet_pt_up > 40) njets_unc_up++;
-    if (jet_pt_up > 40) ht_unc_up += jet_pt_up;
+    if (jet_pt_up > jetMinPt) njets_unc_up++;
+    if (jet_pt_up > jetMinPt) ht_unc_up += jet_pt_up;
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_up > 25) nbtags_unc_up++;
+    if (jet_pt_up > bjetMinPt) nbtags_unc_up++;
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_dn_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_dn = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0-mostJets_unc.at(i));
-    if (jet_pt_dn > 40) njets_unc_dn++;
-    if (jet_pt_dn > 40) ht_unc_dn += jet_pt_dn;
+    if (jet_pt_dn > jetMinPt) njets_unc_dn++;
+    if (jet_pt_dn > jetMinPt) ht_unc_dn += jet_pt_dn;
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_dn > 25) nbtags_unc_dn++;
+    if (jet_pt_dn > bjetMinPt) nbtags_unc_dn++;
   }
+
+
   if(is_miniaodv1) {
     met_unc_up = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 1, true).first;
     met_unc_dn = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 0, true).first;

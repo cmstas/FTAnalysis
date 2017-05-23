@@ -17,7 +17,9 @@ const static float ptCutHigh = 25.;
 const static int   ssWhichCorr = 2;
 const static int   ssEAversion = 1;
 // const static float btagCut = 0.8484; // CSVv2M https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-const static float btagCut = 0.6324; // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco // FIXME
+const static float btagCut = 0.6324; // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
+const static float jetMinPt = 40.; // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
+const static float bjetMinPt = 25.; // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
 
 float ptCutLowAG(int id);
 

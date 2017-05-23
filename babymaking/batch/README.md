@@ -4,6 +4,7 @@
 ### So you want to develop the babymaker?
 ```bash
 # Copy over CORE and stuff
+# Note that this will also copy stuff inside myCORE/ over CORE/
 ./copy_files.sh
 # Edit the babymaker source files or whatever
 # Compile
@@ -16,7 +17,7 @@
 
 ### So you want to make some babies?
 I know this guy -- great guy -- the best. He uses condor to deliver his babies instead of storks.
-This is what he does
+I'm going to let you in on a secret...
 ```bash
 # Edit four_top.py with samples you want and increment tag near the bottom
 # Edit ducks.py to build instructions with appropriate samples

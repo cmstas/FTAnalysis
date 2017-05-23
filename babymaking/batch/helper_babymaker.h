@@ -155,6 +155,8 @@ class babyMaker {
     int njets_raw;
     float ht_raw;
     int njets;
+    int njetsAG;
+    int nbtagsAG;
     float ht;
     vector <LorentzVector> jets;
     vector <int> jets_flavor;
