@@ -1,3 +1,4 @@
+## MC Generation
 This directory contains configurations for the generation of rare SM background processes
 for the measurement of SM 4-top production.
 
