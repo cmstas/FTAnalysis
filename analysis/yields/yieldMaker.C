@@ -41,8 +41,16 @@ bool makeGenVariationsMC = true; // FIXME
 
 // TString dir = "v0.02_Apr27_test"; // tttt regions
 // TString dir = "v0.04_Apr29_norundep"; // tttt regions
-TString dir = "v0.04_May10_test"; // tttt regions
-TString tag = "v0.04";
+
+// TString dir = "v0.04_May10_test"; // tttt regions
+// TString tag = "v0.04";
+
+// TString dir = "v0.07_May28"; // tttt regions
+// TString tag = "v0.07";
+
+TString dir = "v0.08_May28"; // tttt regions
+TString tag = "v0.08";
+
 // TString dir = "v0.04_May1_test"; // tttt regions
 // TString tag = "v0.04_scalepdf";
 
