@@ -24,7 +24,8 @@ CC = g++
 CMSROOT = ./
 INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
 # CFLAGS = -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
-CFLAGS = -Wall -Wno-unused-function -g -O0 -fPIC $(INCLUDE) $(EXTRACFLAGS)
+CFLAGS =  -Wall -Wno-unused-function -g -O0 -fPIC -Wno-sign-compare -Wno-unused-variable $(INCLUDE) $(EXTRACFLAGS)
+# CFLAGS = -Wall -Wno-unused-function -g -O0 -fPIC  $(INCLUDE) $(EXTRACFLAGS) # default
 # CFLAGS = -Wall -Wno-unused-function -g -O1 -fPIC $(INCLUDE) $(EXTRACFLAGS)
 ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector
 COREDIR = CORE
@@ -50,12 +51,16 @@ CORESOURCES=$(DIR)/$(COREDIR)/CMS3.cc \
  $(DIR)/$(COREDIR)/Tools/MT2/MT2Utility.cc \
  $(DIR)/$(COREDIR)/Tools/MT2/MT2.cc \
  $(DIR)/$(COREDIR)/Tools/utils.cc \
+ $(DIR)/$(COREDIR)/Tools/JetResolution/JetResolution.cxx \
  $(DIR)/$(COREDIR)/Tools/JetCorrector.cc \
  $(DIR)/$(COREDIR)/Tools/goodrun.cc \
  $(DIR)/$(COREDIR)/Tools/datasetinfo/getDatasetInfo.cc \
  $(DIR)/$(COREDIR)/Tools/btagsf/BTagCalibrationStandalone.cc \
  $(DIR)/$(COREDIR)/SSSelections.cc
-COREOBJECTS=$(CORESOURCES:.cc=.o)
+
+COREOBJECTSTMP=$(CORESOURCES:.cc=.o) # replace .cc with .o
+COREOBJECTS=$(COREOBJECTSTMP:.cxx=.o) # replace .cxx with .o
+# $(info COREOBJECTS="$(COREOBJECTS)") # print out
 CORELIB=libCMS3CORE.so
 
 SOURCES = $(wildcard $(DIR)/*.cc)
@@ -123,5 +128,6 @@ clean: loopclean
 	./$(COREDIR)/*.o \
 	./Tools/MT2/*.o \
 	./Tools/*.o \
+	./Tools/JetResolution/*.o \
 
 endif

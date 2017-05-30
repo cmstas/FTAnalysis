@@ -17,6 +17,7 @@
 #include "CORE/IsolationTools.h"
 #include "CORE/JetSelections.h"
 #include "CORE/Tools/goodrun.h"
+#include "CORE/Tools/JetResolution/JetResolution.h"
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
 #include "CORE/Tools/datasetinfo/getDatasetInfo.h"
@@ -105,7 +106,11 @@ class babyMaker {
     TH2D* h_btag_eff_udsg;
 
     // DatasetInfo
+  JetResolution res;  
+
+    // DatasetInfo
   DatasetInfoFromFile df;
+
 
     //MET
     float met;
@@ -151,6 +156,8 @@ class babyMaker {
     float gen_met;
     float gen_met_phi;
 
+    int extragenb;
+
     //Jets
     int njets_raw;
     float ht_raw;
@@ -187,6 +194,23 @@ class babyMaker {
     float met_unc_dn;
     float metPhi_unc_up;
     float metPhi_unc_dn;
+
+    //Jets unc stuff - JER
+    int njets_JER;
+    int njets_JER_up;
+    int njets_JER_dn;
+    int nbtags_JER;
+    int nbtags_JER_up;
+    int nbtags_JER_dn;
+    float ht_JER;
+    float ht_JER_up;
+    float ht_JER_dn;
+    float met_JER;
+    float met_JER_up;
+    float met_JER_dn;
+    float metPhi_JER;
+    float metPhi_JER_up;
+    float metPhi_JER_dn;
 
     //Hyp Class -- in this order
        //3 for num-num SS leptons

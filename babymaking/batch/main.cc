@@ -132,6 +132,12 @@ int main(int argc, char *argv[]){
         jetCorrAG = makeJetCorrector(filenames);
     }
 
+    // // Jet Resolution ... :sad:
+  // JetResolution res;  
+  // res.loadResolutionFile("CORE/Tools/JetResolution/data/Spring16_25nsV10_MC/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
+  // res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Spring16_25nsV10_MC/Spring16_25nsV10_MC_SF_AK4PFchs.txt");
+
+
     //Histograms for cross-section calculation
     struct csErr_info_t { TH1F* cs; float cs_scale_up; float cs_scale_dn; float cs_pdf[102]; TH1F* results; int nEntries; int mGluino; int mLSP;}; 
     vector <csErr_info_t> csErr_info_v; 
@@ -186,6 +192,33 @@ int main(int argc, char *argv[]){
 
         //If data, check good run list
         if (tas::evt_isRealData() && !goodrun(tas::evt_run(), tas::evt_lumiBlock())) continue;
+
+        // if (cms3.pfjets_p4().size() > 0) {
+        //     res.resetSeed();
+        //     int ijet = 0;
+        //     vector<Double_t> GenJetPt;
+        //     for (auto& genjet : cms3.genjets_p4NoMuNoNu()) {
+        //         GenJetPt.push_back(genjet.pt());
+        //     }
+        //     res.loadVariable("JetEta", cms3.pfjets_p4().at(ijet).eta());
+        //     res.loadVariable("Rho", cms3.evt_fixgridfastjet_all_rho());
+        //     res.loadVariable("JetPt", cms3.pfjets_p4().at(ijet).pt()); // should be the corrected energy. Not taken into account here.
+        //     auto smearing = res.smear(cms3.pfjets_p4().at(ijet), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
+        //     auto smearingup = res.smear(cms3.pfjets_p4().at(ijet), cms3.genjets_p4NoMuNoNu(), GenJetPt, 1);
+        //     auto smearingdn = res.smear(cms3.pfjets_p4().at(ijet), cms3.genjets_p4NoMuNoNu(), GenJetPt, -1);
+        //     auto matching = res.match();
+        //     cout << "   MC resolution:        " << res.getResolution() << endl;
+        //     cout << "   data/MC scale factor: " << res.getScaleFactor(0) << endl;
+        //     cout << "   jet eta:              " << cms3.pfjets_p4().at(ijet).eta() << endl;
+        //     cout << "   jet phi:              " << cms3.pfjets_p4().at(ijet).phi() << endl;
+        //     cout << "   rho:                  " << cms3.evt_fixgridfastjet_all_rho() << endl;
+        //     cout << "   is matched:           " << matching[0] << endl;
+        //     cout << "   original jet pT:      " << cms3.pfjets_p4().at(ijet).pt() << endl;
+        //     cout << "   smeared jet pT:       " << smearing[0] << endl;
+        //     cout << "   smeared jet pT up:       " << smearingup[0] << endl;
+        //     cout << "   smeared jet pT dn:       " << smearingdn[0] << endl;
+        //     cout << endl;
+        // }
 
 
         //Progress bar

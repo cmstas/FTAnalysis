@@ -249,6 +249,21 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("met_unc_dn"                                              , &met_unc_dn                                              );
   BabyTree->Branch("metPhi_unc_up"                                           , &metPhi_unc_up                                           );
   BabyTree->Branch("metPhi_unc_dn"                                           , &metPhi_unc_dn                                           );
+  BabyTree->Branch("njets_JER"                                            , &njets_JER                                            );
+  BabyTree->Branch("ht_JER"                                               , &ht_JER                                               );
+  BabyTree->Branch("nbtags_JER"                                           , &nbtags_JER                                           );
+  BabyTree->Branch("met_JER"                                              , &met_JER                                              );
+  BabyTree->Branch("metPhi_JER"                                           , &metPhi_JER                                           );
+  BabyTree->Branch("njets_JER_up"                                            , &njets_JER_up                                            );
+  BabyTree->Branch("njets_JER_dn"                                            , &njets_JER_dn                                            );
+  BabyTree->Branch("ht_JER_up"                                               , &ht_JER_up                                               );
+  BabyTree->Branch("ht_JER_dn"                                               , &ht_JER_dn                                               );
+  BabyTree->Branch("nbtags_JER_up"                                           , &nbtags_JER_up                                           );
+  BabyTree->Branch("nbtags_JER_dn"                                           , &nbtags_JER_dn                                           );
+  BabyTree->Branch("met_JER_up"                                              , &met_JER_up                                              );
+  BabyTree->Branch("met_JER_dn"                                              , &met_JER_dn                                              );
+  BabyTree->Branch("metPhi_JER_up"                                           , &metPhi_JER_up                                           );
+  BabyTree->Branch("metPhi_JER_dn"                                           , &metPhi_JER_dn                                           );
   BabyTree->Branch("passedFilterList"                                        , &passedFilterList                                        );
   BabyTree->Branch("lep2_genps_isHardProcess"                                , &lep2_genps_isHardProcess                                );
   BabyTree->Branch("lep2_genps_fromHardProcessFinalState"                    , &lep2_genps_fromHardProcessFinalState                    );
@@ -376,6 +391,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep4_isTrigSafeNoIsov1"  , &lep4_isTrigSafeNoIsov1  );
   BabyTree->Branch("lep4_isTrigSafev1"       , &lep4_isTrigSafev1       );
 
+  BabyTree->Branch("extragenb"       , &extragenb       );
+
   if (applyBtagSFs) {
     // setup btag calibration readers
     calib = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
@@ -432,6 +449,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
         f_btag_eff->Close();
     }
   }
+
+    // Jet Resolution ... :sad:
+  res.loadResolutionFile("CORE/Tools/JetResolution/data/Spring16_25nsV10_MC/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
+  res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Spring16_25nsV10_MC/Spring16_25nsV10_MC_SF_AK4PFchs.txt");
 
   // Load scale1fbs/xsecs from file
   df.loadFromFile("CORE/Tools/datasetinfo/scale1fbs.txt");
@@ -725,6 +746,21 @@ void babyMaker::InitBabyNtuple(){
     met_unc_dn = 0;
     metPhi_unc_up = 0;
     metPhi_unc_dn = 0;
+    njets_JER = 0;
+    ht_JER = 0;
+    nbtags_JER = 0;
+    met_JER = 0;
+    metPhi_JER = 0;
+    njets_JER_up = 0;
+    njets_JER_dn = 0;
+    ht_JER_up = 0;
+    ht_JER_dn = 0;
+    nbtags_JER_up = 0;
+    nbtags_JER_dn = 0;
+    met_JER_up = 0;
+    met_JER_dn = 0;
+    metPhi_JER_up = 0;
+    metPhi_JER_dn = 0;
     passedFilterList = 1;
     lep1_genps_isHardProcess = 0;
     lep1_genps_fromHardProcessFinalState = 0;
@@ -785,6 +821,7 @@ void babyMaker::InitBabyNtuple(){
     lep3_isTrigSafev1 = 0;
     lep4_isTrigSafeNoIsov1 = 0;
     lep4_isTrigSafev1 = 0;
+    extragenb = 0;
 }
 
 //Main function
@@ -820,13 +857,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   is_real_data = tas::evt_isRealData();
 
   is_miniaodv1 = filename.find("MCRUN2_74_V9") != std::string::npos;
-  is_miniaodv1_80X = filename.find("RunIISpring16MiniAODv1") != std::string::npos;
   bool isJetHT = filename.find("JetHT") != std::string::npos;
   bool isRunH = filename.find("Run2016H") != std::string::npos;
   bool isReMiniAOD = filename.find("03Feb2017") != std::string::npos;
 
-  int nHHsr = 51;
-  int nHLsr = 41;
+  // int nHHsr = 51;
+  // int nHLsr = 41;
 
 
   //Fill lepton variables
@@ -857,12 +893,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   //Corrected MET
   int use_cleaned_met = tas::evt_isRealData();
-  pair <float, float> T1CHSMET;
-  if(is_miniaodv1) {
-    T1CHSMET = getT1CHSMET_fromMINIAOD( jetCorr, NULL, 0, true );
-  } else {
-    T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
-  }
+  pair <float, float> T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
   met = T1CHSMET.first;
   metPhi = T1CHSMET.second;
 
@@ -1179,6 +1210,42 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         all_leps_mc3idx.push_back(mcidx);
         all_leps_veto.push_back(isGoodVetoMuon(i));
     }
+  }
+
+  if (!is_real_data) {
+      // compute how many gen b-jets there are other than from top
+      // (i.e., match status 1 gen b-quarks to genjets and count)
+      extragenb = 0;
+      std::vector<int> bidxs; // check for duplicates so we don't double count/match
+      for (unsigned int ij = 0; ij < tas::genjets_p4NoMuNoNu().size(); ij++){
+          auto jet = tas::genjets_p4NoMuNoNu()[ij];
+          bool foundB = false;
+          float mindR = 0.25;
+          int bestidx = -1;
+          for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+              auto genp4 = tas::genps_p4()[igen];
+              int stat = tas::genps_status()[igen];
+              int id = tas::genps_id()[igen];
+              int mid = tas::genps_id_mother()[igen];
+              // if (stat != 1) continue; // <-- literally nothing useful is status 1, so ignoring
+              if (abs(id) != 5) continue;
+              if (abs(mid) == 6) continue;
+              if (std::find(bidxs.begin(), bidxs.end(), igen) != bidxs.end()) continue;
+              float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
+              if (dR < mindR) {
+                  foundB = true;
+                  bestidx = igen;
+              }
+          }
+          if (foundB) {
+              extragenb += 1;
+              bidxs.push_back(bestidx);
+              // int stat = tas::genps_status()[bestidx];
+              // int id = tas::genps_id()[bestidx];
+              // int mid = tas::genps_id_mother()[bestidx];
+              // std::cout << " stat: " << stat << " id: " << id << " mid: " << mid << std::endl;
+          }
+      }
   }
 
 
@@ -1534,17 +1601,158 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
 
-  if(is_miniaodv1) {
-    met_unc_up = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 1, true).first;
-    met_unc_dn = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 0, true).first;
-    metPhi_unc_up = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 1, true).second;
-    metPhi_unc_dn = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 0, true).second;
-  } else {
-    met_unc_up = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 1, false, use_cleaned_met).first;
-    met_unc_dn = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 0, false, use_cleaned_met).first;
-    metPhi_unc_up = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 1, false, use_cleaned_met).second;
-    metPhi_unc_dn = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 0, false, use_cleaned_met).second;
+    auto tmpup = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 1, false, use_cleaned_met);
+    auto tmpdn = getT1CHSMET_fromMINIAOD(jetCorr, jecUnc, 0, false, use_cleaned_met);
+    met_unc_up = tmpup.first;
+    metPhi_unc_up = tmpup.second;
+    met_unc_dn = tmpdn.first;
+    metPhi_unc_dn = tmpdn.second;
+
+    // JetResolution
+    
+  //Save Most jets - JER
+  vector <LorentzVector> jer_mostJets;
+  vector <Jet> jer_mostJets_jet;
+  vector <int> jer_mostJets_idx;
+  vector <Jet> jer_mostJets_jet_up;
+  vector <Jet> jer_mostJets_jet_dn;
+  vector <float> jer_mostJets_disc;
+  vector <float> jer_mostJets_JEC;
+  vector <float> jer_mostJets_JER;
+  vector <float> jer_mostJets_JERup;
+  vector <float> jer_mostJets_JERdn;
+  vector <float> jer_mostJets_undoJEC;
+  vector <bool> jer_mostJets_passID;
+  vector <Double_t> GenJetPt;
+  res.resetSeed(tas::evt_event()); // reset seed for JER smearing
+  res.loadVariable("Rho", cms3.evt_fixgridfastjet_all_rho());
+  for (auto& genjet : cms3.genjets_p4NoMuNoNu()) {
+      GenJetPt.push_back(genjet.pt());
   }
+  for (unsigned int i = 0; i < tas::pfjets_p4().size(); i++){
+    //Alias
+    LorentzVector jet = tas::pfjets_p4().at(i);
+
+    //Cuts
+    // if (jet.pt() < 5.) continue;
+    if (fabs(jet.eta()) > 2.4) continue;
+
+    //Calculate raw pt
+    float rawpt = jet.pt()*tas::pfjets_undoJEC().at(i);
+
+    //Calculate jet corr
+    jetCorr->setJetEta(jet.eta());
+    jetCorr->setJetPt(rawpt);
+    jetCorr->setJetA(tas::pfjets_area().at(i));
+    jetCorr->setRho(tas::evt_fixgridfastjet_all_rho());
+    float JEC = jetCorr->getCorrection();
+
+    res.loadVariable("JetEta", pfjets_p4().at(i).eta());
+    res.loadVariable("JetPt", rawpt*JEC); // corrected pT
+    auto smearing = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
+    auto smearingup = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 1);
+    auto smearingdn = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, -1);
+    float ptJER = smearing[0]; // these are the actual pTs, not scale factors, so don't multiply
+    float ptJER_up = smearingup[0];
+    float ptJER_dn = smearingdn[0];
+    float JER = ptJER/(rawpt*JEC); // JER wrt *corrected* jet
+    float JERup = ptJER_up/(rawpt*JEC); // JER wrt *corrected* jet
+    float JERdn = ptJER_dn/(rawpt*JEC); // JER wrt *corrected* jet
+
+    if ( (ptJER    < bjetMinPt)
+      && (ptJER_up < bjetMinPt)
+      && (ptJER_dn < bjetMinPt) ) continue;
+
+    //Save results
+    jer_mostJets.push_back(jet);
+    if (ptJER > bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
+    else                                                     jer_mostJets_jet.push_back(Jet(-1, -9999));
+    if (ptJER_up > bjetMinPt && isLoosePFJet_50nsV1(i)) jer_mostJets_jet_up.push_back(Jet(i, JEC));
+    else                                                     jer_mostJets_jet_up.push_back(Jet(-1, -9999));
+    if (ptJER_dn > bjetMinPt && isLoosePFJet_50nsV1(i)) jer_mostJets_jet_dn.push_back(Jet(i, JEC));
+    else                                                     jer_mostJets_jet_dn.push_back(Jet(-1, -9999));
+    jer_mostJets_idx.push_back(i);
+    jer_mostJets_disc.push_back(tas::getbtagvalue("deepFlavourJetTags:probb",i)+tas::getbtagvalue("deepFlavourJetTags:probbb",i));
+    jer_mostJets_JEC.push_back(JEC);
+    jer_mostJets_JER.push_back(JER);
+    jer_mostJets_JERup.push_back(JERup);
+    jer_mostJets_JERdn.push_back(JERdn);
+    jer_mostJets_undoJEC.push_back(tas::pfjets_undoJEC().at(i));
+    jer_mostJets_passID.push_back(isLoosePFJet_50nsV1(i));
+  }
+
+  //Separate cleaning for all the permutations
+  vector <bool> jer_mostJets_passCleaning = cleanJets(jer_mostJets_jet);
+  vector <bool> jer_mostJets_up_passCleaning = cleanJets(jer_mostJets_jet_up);
+  vector <bool> jer_mostJets_dn_passCleaning = cleanJets(jer_mostJets_jet_dn);
+
+  //Unc up/down results
+  njets_JER     = 0;
+  njets_JER_up  = 0;
+  njets_JER_dn  = 0;
+  nbtags_JER    = 0;
+  nbtags_JER_up = 0;
+  nbtags_JER_dn = 0;
+  ht_JER        = 0;
+  ht_JER_up     = 0;
+  ht_JER_dn     = 0;
+  for (unsigned int i = 0; i < jer_mostJets.size(); i++){
+    if (jer_mostJets_passCleaning.at(i) == 0) continue;
+    if (jer_mostJets_passID.at(i) == 0) continue;
+    float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
+    if (jet_pt > bjetMinPt && mostJets_disc.at(i) > btagCut) nbtags_JER++;
+    if (jet_pt > jetMinPt) njets_JER++;
+  }
+  for (unsigned int i = 0; i < jer_mostJets.size(); i++){
+    if (jer_mostJets_up_passCleaning.at(i) == 0) continue;
+    if (jer_mostJets_passID.at(i) == 0) continue;
+    float jet_pt_up = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JERup.at(i);
+    if (jet_pt_up > jetMinPt) njets_JER_up++;
+    if (jet_pt_up > jetMinPt) ht_JER_up += jet_pt_up;
+    if (jer_mostJets_disc.at(i) < btagCut) continue;
+    if (jet_pt_up > bjetMinPt) nbtags_JER_up++;
+  }
+  for (unsigned int i = 0; i < jer_mostJets.size(); i++){
+    if (jer_mostJets_dn_passCleaning.at(i) == 0) continue;
+    if (jer_mostJets_passID.at(i) == 0) continue;
+    float jet_pt_dn = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JERdn.at(i);
+    if (jet_pt_dn > jetMinPt) njets_JER_dn++;
+    if (jet_pt_dn > jetMinPt) ht_JER_dn += jet_pt_dn;
+    if (jer_mostJets_disc.at(i) < btagCut) continue;
+    if (jet_pt_dn > bjetMinPt) nbtags_JER_dn++;
+  }
+
+  LorentzVector jetp4_jer_up(0,0,0,0);
+  LorentzVector jetp4_jer_dn(0,0,0,0);
+  res.resetSeed(tas::evt_event()); // reset seed for JER smearing
+  for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
+    res.loadVariable("JetEta", pfjets_p4().at(i).eta());
+    res.loadVariable("JetPt", pfjets_p4().at(i).pt());
+    auto smearing = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
+    float ptJER = smearing[0]; // these are the actual pTs, not scale factors
+    float JER = ptJER/pfjets_p4().at(i).pt();
+    jetp4_jet_up += cms3.pfjets_p4().at(i) * (1+JER);
+    jetp4_jet_dn += cms3.pfjets_p4().at(i) * (1-JER);
+  }
+  float metx = met*cos(metPhi);
+  float mety = met*sin(metPhi);
+  float metx_up = metx + jetp4_jet_up.px();
+  float mety_up = mety + jetp4_jet_up.py();
+  float met_JER_up = sqrt(pow(metx_up,2),pow(mety_up,2))
+  float metPhi_JER_up = atan2(mety_up,metx_up);
+  float metx_dn = metx + jetp4_jet_dn.px();
+  float mety_dn = mety + jetp4_jet_dn.py();
+  float met_JER_dn = sqrt(pow(metx_dn,2),pow(mety_dn,2))
+  float metPhi_JER_dn = atan2(mety_dn,metx_dn);
+
+  if (is_real_data) {
+      njets_JER = njets;
+      nbtags_JER = nbtags;
+      ht_JER = ht;
+      met_JER = met;
+      metPhi_JER = metPhi;
+  }
+
 
   //Verbose for jets
   if (verbose){
