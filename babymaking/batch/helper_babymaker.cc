@@ -249,11 +249,11 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("met_unc_dn"                                              , &met_unc_dn                                              );
   BabyTree->Branch("metPhi_unc_up"                                           , &metPhi_unc_up                                           );
   BabyTree->Branch("metPhi_unc_dn"                                           , &metPhi_unc_dn                                           );
-  BabyTree->Branch("njets_JER"                                            , &njets_JER                                            );
-  BabyTree->Branch("ht_JER"                                               , &ht_JER                                               );
-  BabyTree->Branch("nbtags_JER"                                           , &nbtags_JER                                           );
-  BabyTree->Branch("met_JER"                                              , &met_JER                                              );
-  BabyTree->Branch("metPhi_JER"                                           , &metPhi_JER                                           );
+  // BabyTree->Branch("njets_JER"                                            , &njets_JER                                            );
+  // BabyTree->Branch("ht_JER"                                               , &ht_JER                                               );
+  // BabyTree->Branch("nbtags_JER"                                           , &nbtags_JER                                           );
+  // BabyTree->Branch("met_JER"                                              , &met_JER                                              );
+  // BabyTree->Branch("metPhi_JER"                                           , &metPhi_JER                                           );
   BabyTree->Branch("njets_JER_up"                                            , &njets_JER_up                                            );
   BabyTree->Branch("njets_JER_dn"                                            , &njets_JER_dn                                            );
   BabyTree->Branch("ht_JER_up"                                               , &ht_JER_up                                               );
@@ -1614,13 +1614,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   vector <LorentzVector> jer_mostJets;
   vector <Jet> jer_mostJets_jet;
   vector <int> jer_mostJets_idx;
-  vector <Jet> jer_mostJets_jet_up;
-  vector <Jet> jer_mostJets_jet_dn;
   vector <float> jer_mostJets_disc;
   vector <float> jer_mostJets_JEC;
   vector <float> jer_mostJets_JER;
-  vector <float> jer_mostJets_JERup;
-  vector <float> jer_mostJets_JERdn;
   vector <float> jer_mostJets_undoJEC;
   vector <bool> jer_mostJets_passID;
   vector <Double_t> GenJetPt;
@@ -1650,109 +1646,65 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     res.loadVariable("JetEta", pfjets_p4().at(i).eta());
     res.loadVariable("JetPt", rawpt*JEC); // corrected pT
     auto smearing = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
-    auto smearingup = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 1);
-    auto smearingdn = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, -1);
     float ptJER = smearing[0]; // these are the actual pTs, not scale factors, so don't multiply
-    float ptJER_up = smearingup[0];
-    float ptJER_dn = smearingdn[0];
     float JER = ptJER/(rawpt*JEC); // JER wrt *corrected* jet
-    float JERup = ptJER_up/(rawpt*JEC); // JER wrt *corrected* jet
-    float JERdn = ptJER_dn/(rawpt*JEC); // JER wrt *corrected* jet
 
-    if ( (ptJER    < bjetMinPt)
-      && (ptJER_up < bjetMinPt)
-      && (ptJER_dn < bjetMinPt) ) continue;
+    if ( (ptJER    < bjetMinPt) ) continue;
 
     //Save results
     jer_mostJets.push_back(jet);
     if (ptJER > bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
     else                                                     jer_mostJets_jet.push_back(Jet(-1, -9999));
-    if (ptJER_up > bjetMinPt && isLoosePFJet_50nsV1(i)) jer_mostJets_jet_up.push_back(Jet(i, JEC));
-    else                                                     jer_mostJets_jet_up.push_back(Jet(-1, -9999));
-    if (ptJER_dn > bjetMinPt && isLoosePFJet_50nsV1(i)) jer_mostJets_jet_dn.push_back(Jet(i, JEC));
-    else                                                     jer_mostJets_jet_dn.push_back(Jet(-1, -9999));
     jer_mostJets_idx.push_back(i);
     jer_mostJets_disc.push_back(tas::getbtagvalue("deepFlavourJetTags:probb",i)+tas::getbtagvalue("deepFlavourJetTags:probbb",i));
     jer_mostJets_JEC.push_back(JEC);
     jer_mostJets_JER.push_back(JER);
-    jer_mostJets_JERup.push_back(JERup);
-    jer_mostJets_JERdn.push_back(JERdn);
     jer_mostJets_undoJEC.push_back(tas::pfjets_undoJEC().at(i));
     jer_mostJets_passID.push_back(isLoosePFJet_50nsV1(i));
   }
 
-  //Separate cleaning for all the permutations
+  // Cleaning
   vector <bool> jer_mostJets_passCleaning = cleanJets(jer_mostJets_jet);
-  vector <bool> jer_mostJets_up_passCleaning = cleanJets(jer_mostJets_jet_up);
-  vector <bool> jer_mostJets_dn_passCleaning = cleanJets(jer_mostJets_jet_dn);
 
   //Unc up/down results
-  njets_JER     = 0;
   njets_JER_up  = 0;
-  njets_JER_dn  = 0;
-  nbtags_JER    = 0;
   nbtags_JER_up = 0;
-  nbtags_JER_dn = 0;
-  ht_JER        = 0;
   ht_JER_up     = 0;
-  ht_JER_dn     = 0;
   for (unsigned int i = 0; i < jer_mostJets.size(); i++){
     if (jer_mostJets_passCleaning.at(i) == 0) continue;
     if (jer_mostJets_passID.at(i) == 0) continue;
     float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
-    if (jet_pt > bjetMinPt && mostJets_disc.at(i) > btagCut) nbtags_JER++;
-    if (jet_pt > jetMinPt) njets_JER++;
+    if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
+    if (jet_pt > jetMinPt) ht_JER_up += jet_pt;
+    if (jet_pt > jetMinPt) njets_JER_up++;
   }
-  for (unsigned int i = 0; i < jer_mostJets.size(); i++){
-    if (jer_mostJets_up_passCleaning.at(i) == 0) continue;
-    if (jer_mostJets_passID.at(i) == 0) continue;
-    float jet_pt_up = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JERup.at(i);
-    if (jet_pt_up > jetMinPt) njets_JER_up++;
-    if (jet_pt_up > jetMinPt) ht_JER_up += jet_pt_up;
-    if (jer_mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_up > bjetMinPt) nbtags_JER_up++;
-  }
-  for (unsigned int i = 0; i < jer_mostJets.size(); i++){
-    if (jer_mostJets_dn_passCleaning.at(i) == 0) continue;
-    if (jer_mostJets_passID.at(i) == 0) continue;
-    float jet_pt_dn = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JERdn.at(i);
-    if (jet_pt_dn > jetMinPt) njets_JER_dn++;
-    if (jet_pt_dn > jetMinPt) ht_JER_dn += jet_pt_dn;
-    if (jer_mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_dn > bjetMinPt) nbtags_JER_dn++;
-  }
+  njets_JER_dn = max(2*njets-njets_JER_up,0);
+  nbtags_JER_dn = max(2*nbtags-nbtags_JER_up,0);
+  ht_JER_dn = max(2.*ht-ht_JER_up,0.);
 
   LorentzVector jetp4_jer_up(0,0,0,0);
   LorentzVector jetp4_jer_dn(0,0,0,0);
   res.resetSeed(tas::evt_event()); // reset seed for JER smearing
   for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
-    res.loadVariable("JetEta", pfjets_p4().at(i).eta());
-    res.loadVariable("JetPt", pfjets_p4().at(i).pt());
-    auto smearing = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
+    res.loadVariable("JetEta", pfjets_p4().at(iJet).eta());
+    res.loadVariable("JetPt", pfjets_p4().at(iJet).pt());
+    auto smearing = res.smear(cms3.pfjets_p4().at(iJet), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
     float ptJER = smearing[0]; // these are the actual pTs, not scale factors
-    float JER = ptJER/pfjets_p4().at(i).pt();
-    jetp4_jet_up += cms3.pfjets_p4().at(i) * (1+JER);
-    jetp4_jet_dn += cms3.pfjets_p4().at(i) * (1-JER);
+    float JER = ptJER/pfjets_p4().at(iJet).pt();
+    jetp4_jer_up += cms3.pfjets_p4().at(iJet) * (1.-1./JER);
+    jetp4_jer_dn += cms3.pfjets_p4().at(iJet) * (1.-JER);
   }
   float metx = met*cos(metPhi);
   float mety = met*sin(metPhi);
-  float metx_up = metx + jetp4_jet_up.px();
-  float mety_up = mety + jetp4_jet_up.py();
-  float met_JER_up = sqrt(pow(metx_up,2),pow(mety_up,2))
-  float metPhi_JER_up = atan2(mety_up,metx_up);
-  float metx_dn = metx + jetp4_jet_dn.px();
-  float mety_dn = mety + jetp4_jet_dn.py();
-  float met_JER_dn = sqrt(pow(metx_dn,2),pow(mety_dn,2))
-  float metPhi_JER_dn = atan2(mety_dn,metx_dn);
+  float metx_up = metx + jetp4_jer_up.px();
+  float mety_up = mety + jetp4_jer_up.py();
+  float metx_dn = metx + jetp4_jer_dn.px();
+  float mety_dn = mety + jetp4_jer_dn.py();
 
-  if (is_real_data) {
-      njets_JER = njets;
-      nbtags_JER = nbtags;
-      ht_JER = ht;
-      met_JER = met;
-      metPhi_JER = metPhi;
-  }
-
+  met_JER_up = sqrt(metx_up*metx_up+mety_up*mety_up);
+  metPhi_JER_up = atan2(mety_up,metx_up);
+  met_JER_dn = sqrt(metx_dn*metx_dn+mety_dn*mety_dn);
+  metPhi_JER_dn = atan2(mety_dn,metx_dn);
 
   //Verbose for jets
   if (verbose){
