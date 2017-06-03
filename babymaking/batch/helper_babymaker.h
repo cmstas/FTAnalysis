@@ -16,6 +16,7 @@
 #include "CORE/ElectronSelections.h"
 #include "CORE/IsolationTools.h"
 #include "CORE/JetSelections.h"
+#include "CORE/MCSelections.h"
 #include "CORE/Tools/goodrun.h"
 #include "CORE/Tools/JetResolution/JetResolution.h"
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
@@ -157,6 +158,7 @@ class babyMaker {
     float gen_met_phi;
 
     int extragenb;
+    int ngenjets;
 
     //Jets
     int njets_raw;

@@ -6,6 +6,7 @@ sys.path.insert(0,'../../')
 from common.Software.dataMCplotMaker.dataMCplotMaker import dataMCplot
 from analysis.limits.runLimits import get_lims
 from analysis.limits.singleBinLimits import get_singlebin_limits
+from analysis.limits.makeScan import make_scan
 
 if __name__ == "__main__":
 
@@ -47,7 +48,7 @@ if __name__ == "__main__":
           "l3pt"       : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel ordered l3pt --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  "],
           "disc"       : [("br",),   commonopts+"  --isLinear  --xAxisLabel disc  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
           "disc2"       : [("br",),  commonopts+" --isLinear  --xAxisLabel disc2  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
-          "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7#color[4]{test},SR8 "],
+          "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
           "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
           "SRDISC_TOTAL"   : [("",), commonopts+"   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox "],
 
@@ -78,14 +79,19 @@ if __name__ == "__main__":
 
             h_tttt.Sumw2()
             h_tttt.Scale(10.0)
-            if key == "SRCR_TOTAL":
-                pairs = zip(*sorted(get_singlebin_limits(cards_dir, redo=True)))[1]
-                buff = ["CRZ","CRW"]
-                buff += ["SR%i#scale[0.5]{#color[4]{ #downarrow%.0ffb}}" % (ib,pairs[ib-1].get("exp",-1)) for ib in range(1,8+1)]
-                d_newopts["xAxisBinLabels"] = ",".join(buff)
 
-            if key in ["SRCR_TOTAL", "SRDISC_TOTAL"]:
-            # if key in ["SRCR_TOTAL"]: #, "SRDISC_TOTAL"]:
+            # if key == "SRCR_TOTAL":
+            #     pairs = zip(*sorted(get_singlebin_limits(cards_dir, redo=True)))[1]
+            #     buff = ["CRZ","CRW"]
+            #     buff += ["SR%i#scale[0.5]{#color[4]{ #downarrow%.0ffb}}" % (ib,pairs[ib-1].get("exp",-1)) for ib in range(1,8+1)]
+            #     d_newopts["xAxisBinLabels"] = ",".join(buff)
+
+            if key == "SRCR_TOTAL":
+                make_scan(cards_dir)
+                os.system("cp scan.pdf plots/scan.pdf")
+
+            # if key in ["SRCR_TOTAL", "SRDISC_TOTAL"]:
+            if key in ["SRCR_TOTAL"]:
                 regions="srcr"
                 if "DISC" in key: regions="srdisc"
                 d_lims = get_lims(card=cards_dir, regions=regions, redocard=True, redolimits=True, domcfakes=False)
@@ -105,4 +111,4 @@ if __name__ == "__main__":
 os.system("cp ../misc/signal_regions.h plots/SR.extra")
 os.system("cp ../misc/signal_regions.h plots/SR_blind.extra")
 os.system("cp ../misc/signal_regions.h plots/SRCR_blind.extra")
-os.system("niceplots plots plots_tttt_May28")
+os.system("niceplots plots plots_tttt_Jun1_jet40")

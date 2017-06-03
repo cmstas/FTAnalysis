@@ -12,6 +12,9 @@
 tag="v0.08"
 basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
 
+# tag="v0.09"
+# basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
+
 cut="njets>=2"
 
 mkdir -p ${basedir}/skim

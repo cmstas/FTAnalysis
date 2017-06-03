@@ -392,6 +392,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep4_isTrigSafev1"       , &lep4_isTrigSafev1       );
 
   BabyTree->Branch("extragenb"       , &extragenb       );
+  BabyTree->Branch("ngenjets"       , &ngenjets       );
 
   if (applyBtagSFs) {
     // setup btag calibration readers
@@ -822,6 +823,7 @@ void babyMaker::InitBabyNtuple(){
     lep4_isTrigSafeNoIsov1 = 0;
     lep4_isTrigSafev1 = 0;
     extragenb = 0;
+    ngenjets = 0;
 }
 
 //Main function
@@ -1216,8 +1218,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       // compute how many gen b-jets there are other than from top
       // (i.e., match status 1 gen b-quarks to genjets and count)
       extragenb = 0;
+      ngenjets = 0;
       std::vector<int> bidxs; // check for duplicates so we don't double count/match
       for (unsigned int ij = 0; ij < tas::genjets_p4NoMuNoNu().size(); ij++){
+          ngenjets++;
           auto jet = tas::genjets_p4NoMuNoNu()[ij];
           bool foundB = false;
           float mindR = 0.25;
@@ -1228,8 +1232,13 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               int id = tas::genps_id()[igen];
               int mid = tas::genps_id_mother()[igen];
               // if (stat != 1) continue; // <-- literally nothing useful is status 1, so ignoring
-              if (abs(id) != 5) continue;
+              // if (abs(id) != 5) continue;
+              if (!idIsBeauty(abs(id))) continue;
               if (abs(mid) == 6) continue;
+              if (abs(mid) == 22) continue;
+              if (abs(mid) == 23) continue;
+              if (abs(mid) == 24) continue;
+              if (abs(mid) == 25) continue;
               if (std::find(bidxs.begin(), bidxs.end(), igen) != bidxs.end()) continue;
               float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
               if (dR < mindR) {
@@ -1610,101 +1619,102 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
     // JetResolution
     
-  //Save Most jets - JER
-  vector <LorentzVector> jer_mostJets;
-  vector <Jet> jer_mostJets_jet;
-  vector <int> jer_mostJets_idx;
-  vector <float> jer_mostJets_disc;
-  vector <float> jer_mostJets_JEC;
-  vector <float> jer_mostJets_JER;
-  vector <float> jer_mostJets_undoJEC;
-  vector <bool> jer_mostJets_passID;
-  vector <Double_t> GenJetPt;
-  res.resetSeed(tas::evt_event()); // reset seed for JER smearing
-  res.loadVariable("Rho", cms3.evt_fixgridfastjet_all_rho());
-  for (auto& genjet : cms3.genjets_p4NoMuNoNu()) {
-      GenJetPt.push_back(genjet.pt());
-  }
-  for (unsigned int i = 0; i < tas::pfjets_p4().size(); i++){
-    //Alias
-    LorentzVector jet = tas::pfjets_p4().at(i);
+    //Save Most jets - JER
+    if (!is_real_data) {
+        vector <LorentzVector> jer_mostJets;
+        vector <Jet> jer_mostJets_jet;
+        vector <int> jer_mostJets_idx;
+        vector <float> jer_mostJets_disc;
+        vector <float> jer_mostJets_JEC;
+        vector <float> jer_mostJets_JER;
+        vector <float> jer_mostJets_undoJEC;
+        vector <bool> jer_mostJets_passID;
+        vector <Double_t> GenJetPt;
+        res.resetSeed(tas::evt_event()); // reset seed for JER smearing
+        res.loadVariable("Rho", cms3.evt_fixgridfastjet_all_rho());
+        for (auto& genjet : cms3.genjets_p4NoMuNoNu()) {
+            GenJetPt.push_back(genjet.pt());
+        }
+        for (unsigned int i = 0; i < tas::pfjets_p4().size(); i++){
+            //Alias
+            LorentzVector jet = tas::pfjets_p4().at(i);
 
-    //Cuts
-    // if (jet.pt() < 5.) continue;
-    if (fabs(jet.eta()) > 2.4) continue;
+            //Cuts
+            // if (jet.pt() < 5.) continue;
+            if (fabs(jet.eta()) > 2.4) continue;
 
-    //Calculate raw pt
-    float rawpt = jet.pt()*tas::pfjets_undoJEC().at(i);
+            //Calculate raw pt
+            float rawpt = jet.pt()*tas::pfjets_undoJEC().at(i);
 
-    //Calculate jet corr
-    jetCorr->setJetEta(jet.eta());
-    jetCorr->setJetPt(rawpt);
-    jetCorr->setJetA(tas::pfjets_area().at(i));
-    jetCorr->setRho(tas::evt_fixgridfastjet_all_rho());
-    float JEC = jetCorr->getCorrection();
+            //Calculate jet corr
+            jetCorr->setJetEta(jet.eta());
+            jetCorr->setJetPt(rawpt);
+            jetCorr->setJetA(tas::pfjets_area().at(i));
+            jetCorr->setRho(tas::evt_fixgridfastjet_all_rho());
+            float JEC = jetCorr->getCorrection();
 
-    res.loadVariable("JetEta", pfjets_p4().at(i).eta());
-    res.loadVariable("JetPt", rawpt*JEC); // corrected pT
-    auto smearing = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
-    float ptJER = smearing[0]; // these are the actual pTs, not scale factors, so don't multiply
-    float JER = ptJER/(rawpt*JEC); // JER wrt *corrected* jet
+            res.loadVariable("JetEta", pfjets_p4().at(i).eta());
+            res.loadVariable("JetPt", rawpt*JEC); // corrected pT
+            auto smearing = res.smear(cms3.pfjets_p4().at(i), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
+            float ptJER = smearing[0]; // these are the actual pTs, not scale factors, so don't multiply
+            float JER = ptJER/(rawpt*JEC); // JER wrt *corrected* jet
 
-    if ( (ptJER    < bjetMinPt) ) continue;
+            if ( (ptJER    < bjetMinPt) ) continue;
 
-    //Save results
-    jer_mostJets.push_back(jet);
-    if (ptJER > bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
-    else                                                     jer_mostJets_jet.push_back(Jet(-1, -9999));
-    jer_mostJets_idx.push_back(i);
-    jer_mostJets_disc.push_back(tas::getbtagvalue("deepFlavourJetTags:probb",i)+tas::getbtagvalue("deepFlavourJetTags:probbb",i));
-    jer_mostJets_JEC.push_back(JEC);
-    jer_mostJets_JER.push_back(JER);
-    jer_mostJets_undoJEC.push_back(tas::pfjets_undoJEC().at(i));
-    jer_mostJets_passID.push_back(isLoosePFJet_50nsV1(i));
-  }
+            //Save results
+            jer_mostJets.push_back(jet);
+            if (ptJER > bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
+            else                                                     jer_mostJets_jet.push_back(Jet(-1, -9999));
+            jer_mostJets_idx.push_back(i);
+            jer_mostJets_disc.push_back(tas::getbtagvalue("deepFlavourJetTags:probb",i)+tas::getbtagvalue("deepFlavourJetTags:probbb",i));
+            jer_mostJets_JEC.push_back(JEC);
+            jer_mostJets_JER.push_back(JER);
+            jer_mostJets_undoJEC.push_back(tas::pfjets_undoJEC().at(i));
+            jer_mostJets_passID.push_back(isLoosePFJet_50nsV1(i));
+        }
 
-  // Cleaning
-  vector <bool> jer_mostJets_passCleaning = cleanJets(jer_mostJets_jet);
+        // Cleaning
+        vector <bool> jer_mostJets_passCleaning = cleanJets(jer_mostJets_jet);
 
-  //Unc up/down results
-  njets_JER_up  = 0;
-  nbtags_JER_up = 0;
-  ht_JER_up     = 0;
-  for (unsigned int i = 0; i < jer_mostJets.size(); i++){
-    if (jer_mostJets_passCleaning.at(i) == 0) continue;
-    if (jer_mostJets_passID.at(i) == 0) continue;
-    float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
-    if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
-    if (jet_pt > jetMinPt) ht_JER_up += jet_pt;
-    if (jet_pt > jetMinPt) njets_JER_up++;
-  }
-  njets_JER_dn = max(2*njets-njets_JER_up,0);
-  nbtags_JER_dn = max(2*nbtags-nbtags_JER_up,0);
-  ht_JER_dn = max(2.*ht-ht_JER_up,0.);
+        //Unc up/down results
+        njets_JER_up  = 0;
+        nbtags_JER_up = 0;
+        ht_JER_up     = 0;
+        for (unsigned int i = 0; i < jer_mostJets.size(); i++){
+            if (jer_mostJets_passCleaning.at(i) == 0) continue;
+            if (jer_mostJets_passID.at(i) == 0) continue;
+            float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
+            if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
+            if (jet_pt > jetMinPt) ht_JER_up += jet_pt;
+            if (jet_pt > jetMinPt) njets_JER_up++;
+        }
+        njets_JER_dn = max(2*njets-njets_JER_up,0);
+        nbtags_JER_dn = max(2*nbtags-nbtags_JER_up,0);
+        ht_JER_dn = max(2.*ht-ht_JER_up,0.);
 
-  LorentzVector jetp4_jer_up(0,0,0,0);
-  LorentzVector jetp4_jer_dn(0,0,0,0);
-  res.resetSeed(tas::evt_event()); // reset seed for JER smearing
-  for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
-    res.loadVariable("JetEta", pfjets_p4().at(iJet).eta());
-    res.loadVariable("JetPt", pfjets_p4().at(iJet).pt());
-    auto smearing = res.smear(cms3.pfjets_p4().at(iJet), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
-    float ptJER = smearing[0]; // these are the actual pTs, not scale factors
-    float JER = ptJER/pfjets_p4().at(iJet).pt();
-    jetp4_jer_up += cms3.pfjets_p4().at(iJet) * (1.-1./JER);
-    jetp4_jer_dn += cms3.pfjets_p4().at(iJet) * (1.-JER);
-  }
-  float metx = met*cos(metPhi);
-  float mety = met*sin(metPhi);
-  float metx_up = metx + jetp4_jer_up.px();
-  float mety_up = mety + jetp4_jer_up.py();
-  float metx_dn = metx + jetp4_jer_dn.px();
-  float mety_dn = mety + jetp4_jer_dn.py();
-
-  met_JER_up = sqrt(metx_up*metx_up+mety_up*mety_up);
-  metPhi_JER_up = atan2(mety_up,metx_up);
-  met_JER_dn = sqrt(metx_dn*metx_dn+mety_dn*mety_dn);
-  metPhi_JER_dn = atan2(mety_dn,metx_dn);
+        LorentzVector jetp4_jer_up(0,0,0,0);
+        LorentzVector jetp4_jer_dn(0,0,0,0);
+        res.resetSeed(tas::evt_event()); // reset seed for JER smearing
+        for(unsigned int iJet = 0; iJet < cms3.pfjets_p4().size(); iJet++){
+            res.loadVariable("JetEta", pfjets_p4().at(iJet).eta());
+            res.loadVariable("JetPt", pfjets_p4().at(iJet).pt());
+            auto smearing = res.smear(cms3.pfjets_p4().at(iJet), cms3.genjets_p4NoMuNoNu(), GenJetPt, 0);
+            float ptJER = smearing[0]; // these are the actual pTs, not scale factors
+            float JER = ptJER/pfjets_p4().at(iJet).pt();
+            jetp4_jer_up += cms3.pfjets_p4().at(iJet) * (1.-1./JER);
+            jetp4_jer_dn += cms3.pfjets_p4().at(iJet) * (1.-JER);
+        }
+        float metx = met*cos(metPhi);
+        float mety = met*sin(metPhi);
+        float metx_up = metx + jetp4_jer_up.px();
+        float mety_up = mety + jetp4_jer_up.py();
+        float metx_dn = metx + jetp4_jer_dn.px();
+        float mety_dn = mety + jetp4_jer_dn.py();
+        met_JER_up = sqrt(metx_up*metx_up+mety_up*mety_up);
+        metPhi_JER_up = atan2(mety_up,metx_up);
+        met_JER_dn = sqrt(metx_dn*metx_dn+mety_dn*mety_dn);
+        metPhi_JER_dn = atan2(mety_dn,metx_dn);
+    }
 
   //Verbose for jets
   if (verbose){

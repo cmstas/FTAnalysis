@@ -33,31 +33,40 @@ float scaleLumi = 1.;
 
 bool doTTWISR = true; // FIXME
 bool doTTZISR = true; // FIXME
-bool doBDT = true; // FIXME
+bool doBDT = false; // FIXME
 bool outputTrainingBDT = false; // FIXME
+// bool doJER = true; // FIXME
 
 bool makeRootFiles = true;
 bool makeGenVariationsMC = true; // FIXME
 
-// TString dir = "v0.02_Apr27_test"; // tttt regions
-// TString dir = "v0.04_Apr29_norundep"; // tttt regions
-
-// TString dir = "v0.04_May10_test"; // tttt regions
+// TString dir = "v0.04_May10_test";
 // TString tag = "v0.04";
 
-// TString dir = "v0.07_May28"; // tttt regions
+// TString dir = "v0.07_May28";
 // TString tag = "v0.07";
 
-TString dir = "v0.08_May28"; // tttt regions
-TString tag = "v0.08";
+// TString dir = "v0.08_May28";
+// TString tag = "v0.08";
 
-// TString dir = "v0.04_May1_test"; // tttt regions
-// TString tag = "v0.04_scalepdf";
+// TString dir = "v0.09_May30";
+// TString tag = "v0.09";
+
+// 40 gev jets
+bool doJER = false;
+TString dir = "v0.07_May30";
+TString tag = "v0.07"; // data is in v0.08
+TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+
+// // 30 gev jets
+// bool doJER = true;
+// TString dir = "v0.09_May30";
+// TString tag = "v0.09"; // data is in v0.08
+// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.08/output/skim/";
 
 bool suppressWarns = true;
 
 c2numpy_writer writer;
-
 
 // For output tree
 float tree_weight = -1;
@@ -268,11 +277,10 @@ void getyields(){
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/";
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.02/output/";
     // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.04/output/";
-    TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
-    // TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
+    // TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
+    TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
     // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
     // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/";
-    TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/skim/";
 
     //Fill chains
     tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
@@ -598,6 +606,20 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         p_jes_alt_up.SRDISC.TOTAL     = 0;
         p_jes_alt_dn.SRDISC.TOTAL     = 0;
     }
+    //For JER variations
+    plots_t p_jer_alt_up;
+    plots_t p_jer_alt_dn;
+    if (doFakes == 1 || isData==0) {
+        p_jer_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
+        p_jer_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
+        p_jer_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
+        p_jer_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
+    } else {
+        p_jer_alt_up.SRCR.TOTAL     = 0;
+        p_jer_alt_dn.SRCR.TOTAL     = 0;
+        p_jer_alt_up.SRDISC.TOTAL     = 0;
+        p_jer_alt_dn.SRDISC.TOTAL     = 0;
+    }
     //For btag SF variations
     plots_t p_btagSF_alt_up;
     plots_t p_btagSF_alt_dn;
@@ -691,6 +713,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     initHistError(doPoisson, p_jes_alt_up.SRDISC.TOTAL   );
     initHistError(doPoisson, p_jes_alt_dn.SRCR.TOTAL   );
     initHistError(doPoisson, p_jes_alt_dn.SRDISC.TOTAL   );
+    initHistError(doPoisson, p_jer_alt_up.SRCR.TOTAL   );
+    initHistError(doPoisson, p_jer_alt_up.SRDISC.TOTAL   );
+    initHistError(doPoisson, p_jer_alt_dn.SRCR.TOTAL   );
+    initHistError(doPoisson, p_jer_alt_dn.SRDISC.TOTAL   );
     initHistError(doPoisson, p_btagSF_alt_up.SRCR.TOTAL);
     initHistError(doPoisson, p_btagSF_alt_up.SRDISC.TOTAL);
     initHistError(doPoisson, p_btagSF_alt_dn.SRCR.TOTAL);
@@ -1004,6 +1030,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             float pto2 = pt1+pt2+pt3-pto1-pto3;
             int mytype = ss::hyp_type();
             if (mytype==2 && abs(ss::lep1_id())==13) mytype = 1;
+
+            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
+
+            // JEC
             float mll = (ss::lep1_p4()*lep1_pt/ss::lep1_p4().pt()+ss::lep2_p4()*lep2_pt/ss::lep2_p4().pt()).M();
             float mtl1_unc_up = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
             float mtl2_unc_up = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
@@ -1011,9 +1041,28 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             float mtl1_unc_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
             float mtl2_unc_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
             float mtmin_unc_dn = mtl1_unc_dn > mtl2_unc_dn ? mtl2_unc_dn : mtl1_unc_dn;
-            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
             int SR_unc_up = signalRegionTest(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
             int SR_unc_dn = signalRegionTest(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
+
+            // JER
+            float mtl1_JER_up = 0.;
+            float mtl2_JER_up = 0.;
+            float mtmin_JER_up = 0.;
+            float mtl1_JER_dn = 0.;
+            float mtl2_JER_dn = 0.;
+            float mtmin_JER_dn = 0.;
+            int SR_JER_up = SR;
+            int SR_JER_dn = SR;
+            if (doJER && !ss::is_real_data()) {
+                mtl1_JER_up = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_JER_up(), ss::metPhi_JER_up());
+                mtl2_JER_up = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_JER_up(), ss::metPhi_JER_up());
+                mtmin_JER_up = mtl1_JER_up > mtl2_JER_up ? mtl2_JER_up : mtl1_JER_up;
+                mtl1_JER_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
+                mtl2_JER_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
+                mtmin_JER_dn = mtl1_JER_dn > mtl2_JER_dn ? mtl2_JER_dn : mtl1_JER_dn;
+                SR_JER_up = signalRegionTest(ss::njets_JER_up(), ss::nbtags_JER_up(), ss::met_JER_up(), ss::ht_JER_up(), mtmin_JER_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
+                SR_JER_dn = signalRegionTest(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps, isClass6);
+            }
 
 
             float mvavalue = -2.;
@@ -1143,11 +1192,18 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (mvavalue >  0.456) SRdisc = 10;
             int SRdisc_unc_up = SRdisc;
             int SRdisc_unc_dn = SRdisc;
+            int SRdisc_JER_up = SRdisc;
+            int SRdisc_JER_dn = SRdisc;
 
             if (isData  == 0 && SR_unc_up > 0)            p_jes_alt_up.SRCR.TOTAL->Fill(SR_unc_up, weight);
             if (isData  == 0 && SR_unc_dn > 0)            p_jes_alt_dn.SRCR.TOTAL->Fill(SR_unc_dn, weight);
             if (isData  == 0 && SRdisc_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
             if (isData  == 0 && SRdisc_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
+
+            if (isData  == 0 && SR_JER_up > 0)            p_jer_alt_up.SRCR.TOTAL->Fill(SR_JER_up, weight);
+            if (isData  == 0 && SR_JER_dn > 0)            p_jer_alt_dn.SRCR.TOTAL->Fill(SR_JER_dn, weight);
+            if (isData  == 0 && SRdisc_JER_up > 0)            p_jer_alt_up.SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
+            if (isData  == 0 && SRdisc_JER_dn > 0)            p_jer_alt_dn.SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
 
             // require SRs+CR (= ttZ CR + ttW CR + SRs)
             if (!outputTrainingBDT) {
@@ -1327,6 +1383,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             avoidNegativeYields(p_jes_alt_dn.SRCR.TOTAL);
             avoidNegativeYields(p_jes_alt_up.SRDISC.TOTAL);
             avoidNegativeYields(p_jes_alt_dn.SRDISC.TOTAL);
+            avoidNegativeYields(p_jer_alt_up.SRCR.TOTAL);
+            avoidNegativeYields(p_jer_alt_dn.SRCR.TOTAL);
+            avoidNegativeYields(p_jer_alt_up.SRDISC.TOTAL);
+            avoidNegativeYields(p_jer_alt_dn.SRDISC.TOTAL);
         }
 
     if (makeRootFiles) {
@@ -1497,6 +1557,26 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 avoidZeroIntegrals(h_sr,jesUp,jesDown);
                 jesUp->Write();
                 jesDown->Write();
+
+                //jer
+                TH1F* plot_alt_jer_up = 0;
+                TH1F* plot_alt_jer_dn = 0;
+                if      (kinRegs[kr]=="srcr")   plot_alt_jer_up=p_jer_alt_up.SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_up=p_jer_alt_up.SRDISC.TOTAL;
+                else exit(1);
+                if      (kinRegs[kr]=="srcr")   plot_alt_jer_dn=p_jer_alt_dn.SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_dn=p_jer_alt_dn.SRDISC.TOTAL;
+                else exit(1);
+                TH1F* jerUp   = (TH1F*) plot_alt_jer_up->Clone("jerUp");
+                TH1F* jerDown = (TH1F*) plot_alt_jer_dn->Clone("jerDown");
+                if (name=="ttw" || name=="ttz") {
+                    //wz is normalized in data, so we want only the sr migration
+                    jerUp->Scale(h_sr->Integral()/jerUp->Integral());
+                    jerDown->Scale(h_sr->Integral()/jerDown->Integral());
+                }
+                avoidZeroIntegrals(h_sr,jerUp,jerDown);
+                jerUp->Write();
+                jerDown->Write();
 
                 //lep
                 TH1F* plot_alt_lep_up = 0;
