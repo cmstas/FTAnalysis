@@ -159,6 +159,8 @@ class babyMaker {
 
     int extragenb;
     int ngenjets;
+    vector <int> bjet_type;
+    vector <int> jet_type;
 
     //Jets
     int njets_raw;
