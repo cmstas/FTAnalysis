@@ -16,9 +16,16 @@ int main(int argc, char *argv[]){
     TString outname = "output.root";
     unsigned int nevents_max = 0;
     // bool useXrootd = false;
-    TString hostname(getenv("HOSTNAME"));
-    // bool useXrootd = !(hostname.Contains("t2.ucsd.edu"));
-    bool useXrootd = false;
+    char hostnamestupid[100];
+    int result = gethostname(hostnamestupid, 100);
+    TString hostname(hostnamestupid);
+    std::cout << ">>> Hostname is " << hostname << std::endl;  
+    bool useXrootd = !(hostname.Contains("t2.ucsd.edu"));
+    // bool useXrootd = false;
+    if (hostname.Contains("uafino")) {
+        std::cout << ">>> We're on uafino, so using xrootd!" << std::endl;  
+        useXrootd = true;
+    }
     string good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
     string jecEra = "Summer16_23Sep2016BCDV3";
     std::string jecEraMC = "Summer16_23Sep2016V3";
@@ -143,6 +150,8 @@ int main(int argc, char *argv[]){
     vector <csErr_info_t> csErr_info_v; 
 
     bool haveMadeErrStruct = false;
+
+    auto t0 = time(0);
 
     //Event Loop
     for(unsigned int eventAG=0; eventAG < nEvents; eventAG++){
@@ -275,6 +284,9 @@ int main(int argc, char *argv[]){
 
         }
     }
+
+    auto t1 = time(0);
+    std::cout << "Processed " << nEventsTotal << " events in " << t1-t0 << " seconds @ " << 0.001*nEventsTotal/(t1-t0) << "kHz" << std::endl;
 
     //Delete Chain
     mylooper->CloseBabyNtuple();
