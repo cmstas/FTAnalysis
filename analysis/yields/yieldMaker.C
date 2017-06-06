@@ -52,10 +52,16 @@ bool makeGenVariationsMC = true; // FIXME
 // TString dir = "v0.09_May30";
 // TString tag = "v0.09";
 
+// // 40 gev jets
+// bool doJER = false;
+// TString dir = "v0.07_May30";
+// TString tag = "v0.07"; // data is in v0.07
+// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+
 // 40 gev jets
-bool doJER = false;
-TString dir = "v0.07_May30";
-TString tag = "v0.07"; // data is in v0.08
+bool doJER = true;
+TString dir = "v0.10_Jun5";
+TString tag = "v0.10_fix"; // data is in v0.07 still
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
 
 // // 30 gev jets
@@ -286,6 +292,7 @@ void getyields(){
     tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
 
     ttww_chain   ->Add(Form("%s/TTWW.root"           , pfx.Data()));
+    // ttww_chain   ->Add("/home/users/namin/2017/fourtop/babymaking/batch/output_v2.root");
     ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));

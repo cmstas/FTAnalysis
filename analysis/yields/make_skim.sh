@@ -1,19 +1,9 @@
-# source me
+# source me, don't do ./make_skim.sh
+# will have to reinstate FT environment afterwards :(
 
-# tag="v0.04"
-# basedir="/nfs-7/userdata/namin/tupler_babies/merged/FT/${tag}/output/"
-
-# tag="v9.11"
-# basedir="/nfs-7/userdata/namin/tupler_babies/merged/SS/${tag}/output/"
-
-# tag="v0.07"
-# basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
-
-tag="v0.08"
+# tag="v0.10"
+tag="v0.10_fix"
 basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
-
-# tag="v0.09"
-# basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
 
 cut="njets>=2"
 
