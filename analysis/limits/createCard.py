@@ -22,6 +22,8 @@ class Process(object):
         self.isr  = "-"
         self.met  = "-"
         self.scale  = "-"
+        self.isrvar  = "-"
+        self.fsrvar  = "-"
         self.lepeff  = "-"
         self.hlt  = "-"
         self.lephlt  = "-"
@@ -201,6 +203,14 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     for process in processes: card.write("%-15s " % (process.btag))
     card.write("\n")
 
+    #nuisance isrvar
+    card.write("%-40s %-5s " % ("isrvar","shape"))
+    for process in processes: card.write("%-15s " % (process.isrvar))
+    card.write("\n")
+    #nuisance fsrvar
+    card.write("%-40s %-5s " % ("fsrvar","shape"))
+    for process in processes: card.write("%-15s " % (process.fsrvar))
+    card.write("\n")
     #nuisance scale
     card.write("%-40s %-5s " % ("scale","shape"))
     for process in processes: card.write("%-15s " % (process.scale))
@@ -317,6 +327,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal.btag = "1"
     signal.pu = "1"
     signal.scale = "1"
+    signal.isrvar = "1"
+    signal.fsrvar = "1"
     signal.pdf = "1"
     ttz_sf = "1.40"
     ttw_sf = "1.40"
