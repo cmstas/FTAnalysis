@@ -35,6 +35,7 @@ bool doTTWISR = true; // FIXME
 bool doTTZISR = true; // FIXME
 bool doBDT = false; // FIXME
 bool outputTrainingBDT = false; // FIXME
+bool doISRFSRsyst = true;
 // bool doJER = true; // FIXME
 
 bool makeRootFiles = true;
@@ -271,6 +272,10 @@ void getyields(){
     TChain *tth_chain    = new TChain("t","tth");
     TChain *xg_chain      = new TChain("t","xg");
     TChain *rares_chain   = new TChain("t","rares");
+    TChain *ttttisrup_chain    = new TChain("t","ttttisrup");
+    TChain *ttttfsrup_chain    = new TChain("t","ttttfsrup");
+    TChain *ttttisrdn_chain    = new TChain("t","ttttisrdn");
+    TChain *ttttfsrdn_chain    = new TChain("t","ttttfsrdn");
     TChain *tttt_chain    = new TChain("t","tttt");
     TChain *ttww_chain    = new TChain("t","ttww");
     // TChain *qqww_chain    = new TChain("t","qqww"); // separate this out to check shape uncertainties
@@ -289,6 +294,10 @@ void getyields(){
     // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/";
 
     //Fill chains
+    ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx.Data()));
+    ttttfsrup_chain   ->Add(Form("%s/TTTTfsrup.root"           , pfx.Data()));
+    ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx.Data()));
+    ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx.Data()));
     tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
 
     ttww_chain   ->Add(Form("%s/TTWW.root"           , pfx.Data()));
@@ -347,7 +356,11 @@ void getyields(){
     // pair<yields_t, plots_t> results_qqww     = run(qqww_chain);
     pair<yields_t, plots_t> results_xg       = run(xg_chain, 0, 0, 0, 0, 0, 1);
     pair<yields_t, plots_t> results_rares    = run(rares_chain);
-    pair<yields_t, plots_t> results_tttt     = run(tttt_chain);
+    pair<yields_t, plots_t> results_ttttisrup     = run(ttttisrup_chain);
+    pair<yields_t, plots_t> results_ttttfsrup     = run(ttttfsrup_chain);
+    pair<yields_t, plots_t> results_ttttisrdn     = run(ttttisrdn_chain);
+    pair<yields_t, plots_t> results_ttttfsrdn     = run(ttttfsrdn_chain);
+    pair<yields_t, plots_t> results_tttt     = run(tttt_chain); // [!] run after the variations
     pair<yields_t, plots_t> results_ttww     = run(ttww_chain);
     pair<yields_t, plots_t> results_data     = run(data_chain, 1);
     duplicate_removal::clear_list();
@@ -832,7 +845,6 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             // if (isWZ) weight*=getWZSF();
             // if (isttZ && applyttZSF) weight*=getttZSF();
             //apply lepton scale factors
-            // if (ss::is_real_data()==0 && (!isWZ) && (!isttZ || !applyttZSF)) {
               if (ss::is_real_data()==0 && (!isttW) && (!isttZ)) {
                 weight*=eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
@@ -1505,6 +1517,57 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 pdfDn->Write();
                 // pdfUp->Integral() pdfDn->Integral()
             }
+
+            if (istttt && doISRFSRsyst) {
+                TH1F* h_isrup = (TH1F*) h_sr->Clone("isrvarUp");
+                TH1F* h_fsrup = (TH1F*) h_sr->Clone("fsrvarUp");
+                TH1F* h_isrdn = (TH1F*) h_sr->Clone("isrvarDown");
+                TH1F* h_fsrdn = (TH1F*) h_sr->Clone("fsrvarDown");
+
+                TFile *file_isrup = TFile::Open(Form("../limits/%s/ttttisrup_histos_%s_%.1fifb.root",dir.Data(),kinRegs[kr].Data(),lumiAG),"OPEN");
+                TFile *file_fsrup = TFile::Open(Form("../limits/%s/ttttfsrup_histos_%s_%.1fifb.root",dir.Data(),kinRegs[kr].Data(),lumiAG),"OPEN");
+                TFile *file_isrdn = TFile::Open(Form("../limits/%s/ttttisrdn_histos_%s_%.1fifb.root",dir.Data(),kinRegs[kr].Data(),lumiAG),"OPEN");
+                TFile *file_fsrdn = TFile::Open(Form("../limits/%s/ttttfsrdn_histos_%s_%.1fifb.root",dir.Data(),kinRegs[kr].Data(),lumiAG),"OPEN");
+                if (file_isrup==0 || file_fsrup==0 || file_isrdn==0 || file_fsrdn==0) {
+                    cout << "error! need isr and fsr files for systematic" << endl;
+                    assert(0);
+                }
+                TH1F* hinput_isrup = (TH1F*) file_isrup->Get("sr");
+                TH1F* hinput_fsrup = (TH1F*) file_fsrup->Get("sr");
+                TH1F* hinput_isrdn = (TH1F*) file_isrdn->Get("sr");
+                TH1F* hinput_fsrdn = (TH1F*) file_fsrdn->Get("sr");
+                
+                for (int bin=1;bin<=h_isrup->GetNbinsX();++bin) {
+                    h_isrup->SetBinContent(bin,hinput_isrup->GetBinContent(bin));
+                    h_isrdn->SetBinContent(bin,hinput_isrdn->GetBinContent(bin));
+                    // scale fsr variations closer to central by sqrt(2) according to
+                    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
+                    float varup = hinput_fsrup->GetBinContent(bin);
+                    float vardn = hinput_fsrdn->GetBinContent(bin);
+                    float nom = h_sr->GetBinContent(bin);
+                    // float sgnup = (varup-nom)/fabs(varup-nom);
+                    // float sgndn = (vardn-nom)/fabs(vardn-nom);
+                    // h_fsrup->SetBinContent(bin,varup);
+                    // h_fsrdn->SetBinContent(bin,vardn);
+                    // float newup = nom+sgnup*sqrt(abs(varup-nom));
+                    // float newdn = nom+sgndn*sqrt(abs(vardn-nom));
+                    float newup = nom+(varup-nom)/sqrt(2.);
+                    float newdn = nom+(vardn-nom)/sqrt(2.);
+                    if (nom == 0.) continue;
+                    h_fsrup->SetBinContent(bin,newup);
+                    h_fsrdn->SetBinContent(bin,newdn);
+                }
+                file_isrup->Close();
+                file_fsrup->Close();
+                file_isrdn->Close();
+                file_fsrdn->Close();
+                fileOut->cd();
+                h_isrup->Write();
+                h_fsrup->Write();
+                h_isrdn->Write();
+                h_fsrdn->Write();
+            }
+
 
             if (!isData && !doFlips && !doFakes) {
                 //btag: init
