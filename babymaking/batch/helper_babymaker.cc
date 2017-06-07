@@ -427,11 +427,6 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     TFile* f_btag_eff = 0;
     if (isFastsim == 0) {
 
-        // f_btag_eff = new TFile("btagsf/bTagEffs_80X.root");
-        // TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("eff_total_M_b");
-        // TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("eff_total_M_c");
-        // TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("eff_total_M_udsg");
-
         // f_btag_eff = new TFile("btagsf/btageff__ttbar_powheg_pythia8_25ns.root");
         // f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root");
         f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_powheg_pythia8_25ns_Moriond17_deepCSV.root");
@@ -1191,7 +1186,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     cout << "lep2 ratio: " << lep2_p4.pt()/lep2_closeJet.pt() << endl;
     std::cout << " lep1_passes_id: " << lep1_passes_id << " lep2_passes_id: " << lep2_passes_id << " lep3_passes_id: " << lep3_passes_id << std::endl;
     std::cout << " isGoodLepton(lep3_id,lep3_idx): " << isGoodLepton(lep3_id,lep3_idx) << " lep3_tight: " << lep3_tight << " lep3_veto: " << lep3_veto << " lep3_fo: " << lep3_fo << std::endl;
-
     // muonID(lep3_idx,SS_tight_noiso_v5) muonID(lep3_idx,SS_tight_v5) muonID(lep3_idx,SS_fo_noiso_v5) muonID(lep3_idx,SS_veto_noiso_v5) isMediumMuonPOG(lep3_idx) isLooseMuonPOG(lep3_idx)
     std::cout << " muonID(lep3_idx,SS_tight_noiso_v5): " << muonID(lep3_idx,SS_tight_noiso_v5) << " muonID(lep3_idx,SS_tight_v5): " << muonID(lep3_idx,SS_tight_v5) << " muonID(lep3_idx,SS_fo_noiso_v5): " << muonID(lep3_idx,SS_fo_noiso_v5) << " muonID(lep3_idx,SS_veto_noiso_v5): " << muonID(lep3_idx,SS_veto_noiso_v5) << " isMediumMuonPOG(lep3_idx): " << isMediumMuonPOG(lep3_idx) << " isLooseMuonPOG(lep3_idx): " << isLooseMuonPOG(lep3_idx) << std::endl;
 
@@ -1742,30 +1736,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   jet_close_lep1 = closestJet(lep1_p4, 0.4, 3.0, ssWhichCorr);
   jet_close_lep2 = closestJet(lep2_p4, 0.4, 3.0, ssWhichCorr);
 
-  // //nVeto Leptons
-  // if (verbose) cout << " PRINTING RECO ELECTRONS" << endl;
-  // for (unsigned int eidx = 0; eidx < tas::els_p4().size(); eidx++){
-  //   if (!isGoodVetoElectron(eidx)) continue;
-  //   if (tas::els_p4().at(eidx).pt() < 7) continue;
-  //   nVetoElectrons7++;
-  //   if (verbose) cout << "good elec: " << tas::els_p4().at(eidx).pt() << endl;
-  //   if (tas::els_p4().at(eidx).pt() < 10) continue;
-  //   nVetoElectrons10++;
-  //   if (tas::els_p4().at(eidx).pt() < 25) continue;
-  //   nVetoElectrons25++;
-  // }
-  // if (verbose) cout << " PRINTING RECO MUONS" << endl;
-  // for (unsigned int muidx = 0; muidx < tas::mus_p4().size(); muidx++){
-  //   if (!isGoodVetoMuon(muidx)) continue;
-  //   if (tas::mus_p4().at(muidx).pt() < 5) continue;
-  //   nVetoMuons5++;
-  //   if (verbose) cout << "good muon: " << tas::mus_p4().at(muidx).pt() << endl;
-  //   if (tas::mus_p4().at(muidx).pt() < 10) continue;
-  //   nVetoMuons10++;
-  //   if (tas::mus_p4().at(muidx).pt() < 25) continue;
-  //   nVetoMuons25++;
-  // }
-
   //MT variables
   mt    = MT(lep1_p4.pt(), lep1_p4.phi(), met, metPhi);
   mt_l2 = MT(lep2_p4.pt(), lep2_p4.phi(), met, metPhi);
@@ -1777,8 +1747,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   if (verbose) cout << "met: " << met << endl;
 
   //Make sure one of our triggers fired
-  // if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v")))  (triggers |= 1<<1);
-
 
   if (isRunH) {
       if (passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
@@ -1831,88 +1799,13 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     }
   }
 
-  // //Electron ID variables
-  // for (unsigned int index = 0; index < els_fbrem().size(); index++){
-  //   if (!isGoodVetoElectron(index)) continue;
-  //   if (tas::els_p4().at(index).pt() < 7) continue;
-  //   if ((tas::els_p4().at(index).eta()) > 2.5) continue;
-  //   eleID_kfhits          .push_back(tas::els_ckf_laywithmeas().at(index));
-  //   eleID_oldsigmaietaieta.push_back(tas::els_sigmaIEtaIEta_full5x5().at(index));
-  //   eleID_oldsigmaiphiiphi.push_back(tas::els_sigmaIPhiIPhi_full5x5().at(index));
-  //   eleID_oldcircularity  .push_back(1.0 - tas::els_e1x5_full5x5().at(index)/tas::els_e5x5_full5x5().at(index));
-  //   eleID_oldr9           .push_back(tas::els_r9_full5x5().at(index));
-  //   eleID_scletawidth     .push_back(tas::els_etaSCwidth().at(index));
-  //   eleID_sclphiwidth     .push_back(tas::els_phiSCwidth().at(index));
-  //   eleID_he              .push_back(tas::els_hOverE().at(index));
-  //   eleID_psEoverEraw     .push_back(tas::els_eSCPresh().at(index)/tas::els_eSCRaw().at(index));
-  //   eleID_kfchi2          .push_back(tas::els_ckf_chi2().at(index)/tas::els_ckf_ndof().at(index));
-  //   eleID_chi2_hits       .push_back(tas::els_chi2().at(index)/tas::els_ndof().at(index));
-  //   eleID_fbrem           .push_back(tas::els_fbrem().at(index));
-  //   eleID_ep              .push_back(tas::els_eOverPIn().at(index));
-  //   eleID_eelepout        .push_back(tas::els_eOverPOut().at(index));
-  //   eleID_IoEmIop         .push_back(tas::els_ecalEnergy().at(index) != 0 ? 1.0/tas::els_ecalEnergy().at(index) - tas::els_eOverPIn().at(index)/tas::els_ecalEnergy().at(index) : 999999);
-  //   eleID_deltaetain      .push_back(tas::els_dEtaIn().at(index));
-  //   eleID_deltaphiin      .push_back(tas::els_dPhiIn().at(index));
-  //   eleID_deltaetaseed    .push_back(tas::els_dEtaOut().at(index));
-  //   eleID_pT              .push_back(tas::els_p4().at(index).pt());
-  //   eleID_isbarrel        .push_back(fabs(tas::els_etaSC().at(index)) < 1.479 ? 1 : 0);
-  //   eleID_isendcap        .push_back(fabs(tas::els_etaSC().at(index)) > 1.479 ? 1 : 0);
-  //   eleID_scl_eta         .push_back(tas::els_etaSC().at(index));
-  // }
-
-  // //Muon ID variables
-  // for (unsigned int index = 0; index < mus_ip3d().size(); index++){
-  //   if (!isGoodVetoMuon(index)) continue;
-  //   if (tas::mus_p4().at(index).pt() < 5) continue;
-  //   muID_dzPV      .push_back(fabs(mus_dzPV().at(index)));
-  //   muID_ptSig     .push_back(mus_ptErr().at(index)/mus_trk_p4().at(index).pt());
-  //   muID_ip3dSig   .push_back(fabs(mus_ip3d().at(index))/mus_ip3derr().at(index));
-  //   muID_medMuonPOG.push_back(isMediumMuonPOG(index));
-  //   muID_pt        .push_back(mus_p4().at(index).pt());
-  //   muID_eta       .push_back(fabs(mus_p4().at(index).eta()));
-  // }
-
   //Number of good vertices
   for (unsigned int i = 0; i < tas::vtxs_ndof().size(); i++){
     if (!isGoodVertex(i)) continue;
     nGoodVertices++;
   }
 
-  // bool failsFastSimJetFilter = 0;
-  // if(isFastsim) {
-  //     for (unsigned int i = 0; i < mostJets.size(); i++){
-  //         if (mostJets_passCleaning.at(i) == 0) continue;
-  //         if (mostJets_passID.at(i) == 0) continue;
-  //         float jet_pt = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i);
-  //         int jetIdx = mostJets_idx.at(i);
-  //         bool isBtag = mostJets_disc.at(i) > btagCut;
-  //         if( isBtag && jet_pt < 25.0) continue;
-  //         if(!isBtag && jet_pt < 40.0) continue;
-  //         if(isBadFastsimJet(jetIdx)) {
-  //             failsFastSimJetFilter = 1;
-  //             break;
-  //         }
-  //     }
-  // }
-
-  // failsRA2Filter = 0;
-  // for (unsigned int ijet = 0; ijet < tas::pfjets_p4().size(); ijet++) {
-  //     float dphi = fabs(tas::pfjets_p4()[ijet].phi()-metPhi);
-  //     if( dphi > TMath::Pi() ) dphi = TMath::TwoPi() - dphi;
-  //     float muf  = tas::pfjets_muonE()[ijet] / (tas::pfjets_undoJEC().at(ijet)*tas::pfjets_p4()[ijet].energy());
-  //     if(tas::pfjets_p4()[ijet].pt()>200 && dphi>(TMath::Pi()-0.4) && muf>0.5) failsRA2Filter = true;
-  // }
-
-  // //MET3p0 (aka FKW MET)
-  // pair<float,float> MET3p0_ = MET3p0();
-  // met3p0 = MET3p0_.first;
-  // metphi3p0 = MET3p0_.second;
-
-  // Met filters not filled properly in 80X miniAODv1
-  // if(is_miniaodv1_80X) passes_met_filters = true;
-  // else passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data);
-  // passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfiltersMoriond17(is_real_data);
-  passes_met_filters = passesMETfiltersMoriond17(is_real_data);
+  
 
   if (is_real_data && isReMiniAOD) {
       evt_egclean_pfmet = tas::evt_egclean_pfmet();
