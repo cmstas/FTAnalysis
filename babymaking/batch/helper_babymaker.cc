@@ -393,8 +393,13 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
 
   BabyTree->Branch("extragenb"       , &extragenb       );
   BabyTree->Branch("ngenjets"       , &ngenjets       );
+
+  // for tttt
   BabyTree->Branch("bjet_type"       , &bjet_type       );
   BabyTree->Branch("jet_type"       , &jet_type       );
+  BabyTree->Branch("ndrlt0p4"       , &ndrlt0p4       );
+  BabyTree->Branch("gengood"       , &gengood       );
+  BabyTree->Branch("nleptonic"       , &nleptonic       );
 
   if (applyBtagSFs) {
     // setup btag calibration readers
@@ -828,6 +833,9 @@ void babyMaker::InitBabyNtuple(){
     ngenjets = 0;
     bjet_type.clear();
     jet_type.clear();
+    ndrlt0p4 = 0;
+    gengood = 0;
+    nleptonic = 0;
 }
 
 //Main function
@@ -1916,104 +1924,147 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       filt_badMuons = tas::filt_badMuons();
   }
 
-  // -1 if unmatched
-  // 1 if matched to b from t
-  // 2 if matched to q from W
   if (!is_real_data) {
-      // match reco btags to b from t, q from W or other
-      // (i.e., match status 1 gen b-quarks to reco jets and count)
-      std::vector<int> bidxs; // check for duplicates so we don't double count/match
-      for (unsigned int ij = 0; ij < btags.size(); ij++){
-          // auto jet = tas::genjets_p4NoMuNoNu()[ij];
-          auto jet = btags[ij];
-          bool foundB = false;
-          float mindR = 0.25;
-          int bestidx = -1;
-          // first loop to find b's from top
-          for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
-              auto genp4 = tas::genps_p4()[igen];
-              int stat = tas::genps_status()[igen];
-              int id = tas::genps_id()[igen];
-              int mid = tas::genps_id_mother()[igen];
-              if (abs(id) != 5) continue;
-              if (abs(mid) != 6) continue;
-              if (std::find(bidxs.begin(), bidxs.end(), igen) != bidxs.end()) continue;
-              float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
-              if (dR < mindR) {
-                  foundB = true;
-                  bestidx = igen;
-              }
-          }
-          bool foundqFromW = false;
-          // second loop to find q from W
-          for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
-              auto genp4 = tas::genps_p4()[igen];
-              int stat = tas::genps_status()[igen];
-              int id = tas::genps_id()[igen];
-              int mid = tas::genps_id_mother()[igen];
-              if (abs(mid) != 24) continue;
-              float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
-              if (dR < 0.4) {
-                  foundqFromW = true;
-              }
-          }
-          if (foundB) {
-              bidxs.push_back(bestidx);
-              bjet_type.push_back(1);
-          }
-          else if (foundqFromW) {
-              bjet_type.push_back(2);
-          } else {
-              bjet_type.push_back(-1);
-          }
+      // Find 4 bquarks
+      std::vector<int> genbidxs;
+      for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+          int stat = tas::genps_status()[igen];
+          int id = tas::genps_id()[igen];
+          int mid = tas::genps_id_mother()[igen];
+          if (abs(id) != 5) continue;
+          if (abs(mid) != 6) continue;
+          if (stat != 23) continue;
+          genbidxs.push_back(igen);
       }
-      // match reco jets to b from t, q from W or other
-      // (i.e., match status 1 gen b-quarks to reco jets and count)
-      bidxs.clear();
-      for (unsigned int ij = 0; ij < jets.size(); ij++){
-          // auto jet = tas::genjets_p4NoMuNoNu()[ij];
-          auto jet = jets[ij];
-          bool foundB = false;
-          float mindR = 0.25;
-          int bestidx = -1;
-          // first loop to find b's from top
-          for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
-              auto genp4 = tas::genps_p4()[igen];
-              int stat = tas::genps_status()[igen];
-              int id = tas::genps_id()[igen];
-              int mid = tas::genps_id_mother()[igen];
-              if (abs(id) != 5) continue;
-              if (abs(mid) != 6) continue;
-              if (std::find(bidxs.begin(), bidxs.end(), igen) != bidxs.end()) continue;
-              float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
-              if (dR < mindR) {
-                  foundB = true;
-                  bestidx = igen;
-              }
+      // Find 4 pairs of daughters from W decays
+      std::vector<std::pair<int,int> > genwdaughteridxs;
+      std::vector<bool> genwleptonic;
+      for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+          int id = tas::genps_id()[igen];
+          int mid = tas::genps_id_mother()[igen];
+          if (abs(id) != 24) continue;
+          if (abs(mid) != 6) continue;
+          std::pair<int,int> daughter_indices = {-1,-1};
+          for (unsigned int idau = 0; idau < tas::genps_p4().size(); idau++){
+              int midx = tas::genps_idx_mother()[idau];
+              if (midx != igen) continue;
+              // Fill first, then second, then break once both are in, since we can have duplicates :(
+              if (daughter_indices.first == -1) daughter_indices.first = idau;
+              else if (daughter_indices.second == -1) daughter_indices.second = idau;
+              else break;
           }
-          bool foundqFromW = false;
-          // second loop to find q from W
-          for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
-              auto genp4 = tas::genps_p4()[igen];
-              int stat = tas::genps_status()[igen];
-              int id = tas::genps_id()[igen];
-              int mid = tas::genps_id_mother()[igen];
-              if (abs(mid) != 24) continue;
-              float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
-              if (dR < 0.4) {
-                  foundqFromW = true;
-              }
-          }
-          if (foundB) {
-              bidxs.push_back(bestidx);
-              jet_type.push_back(1);
-          }
-          else if (foundqFromW) {
-              jet_type.push_back(2);
-          } else {
-              jet_type.push_back(-1);
-          }
+          if (daughter_indices.first == -1 && daughter_indices.second == -1) continue;
+          genwdaughteridxs.push_back(daughter_indices);
+          genwleptonic.push_back(abs(tas::genps_id()[daughter_indices.first]) <= 16 && abs(tas::genps_id()[daughter_indices.first]) >= 11);
       }
+      // Only good if we found all b's and all W daughters
+      gengood = genbidxs.size()==4 && genwleptonic.size()==4;
+      nleptonic = std::accumulate(genwleptonic.begin(),genwleptonic.end(),0);
+      if (gengood) {
+
+
+          // // Print out some stuff
+          // std::cout << "found " << genbidxs.size() << " b quarks: ";
+          // for (auto ib : genbidxs) {
+          //     std::cout << ib << " ";
+          // }
+          // std::cout << std::endl;
+          // std::cout << "found " << genwdaughteridxs.size() << " W daughter pairs ";
+          // std::cout << " (" << nleptonic << " of which are leptonic): ";
+          // for (auto iwd : genwdaughteridxs) {
+          //     std::cout << iwd.first << "," << iwd.second << " ";
+          // }
+          // std::cout << std::endl;
+          
+          // Make vector of [12-2*nleptonic] quarks to be matched
+          std::vector<int> qidxtomatch;
+          for (auto ib : genbidxs) qidxtomatch.push_back(ib);
+          for (unsigned int gwd = 0; gwd < genwdaughteridxs.size(); gwd++) {
+              if (genwleptonic[gwd]) continue;
+              qidxtomatch.push_back(genwdaughteridxs[gwd].first);
+              qidxtomatch.push_back(genwdaughteridxs[gwd].second);
+          }
+          // std::cout << " qidxtomatch.size(): " << qidxtomatch.size() << std::endl;
+
+          ndrlt0p4 = 0;
+          for (unsigned int iq = 0; iq < qidxtomatch.size(); iq++) {
+              for (unsigned int jq = iq+1; jq < qidxtomatch.size(); jq++) {
+                  float dR = ROOT::Math::VectorUtil::DeltaR(tas::genps_p4()[qidxtomatch[iq]],tas::genps_p4()[qidxtomatch[jq]]);
+                  if (dR < 0.4)  {
+                      ndrlt0p4++;
+                  }
+              }
+          }
+          // std::cout << " ndrlt0p4: " << ndrlt0p4 << std::endl;
+
+          // Match pfjets to qidxs, so below vector indexes qidxtomatch
+          std::vector<int> alreadymatched;
+          jet_type.clear();
+          for (unsigned int ij = 0; ij < jets.size(); ij++){
+              auto jet = jets[ij];
+              float mindR = 0.40;
+              int bestidx = -1;
+              bool foundgenjet = false;
+              for (unsigned int iq = 0; iq < qidxtomatch.size(); iq++) {
+                  auto genp4 = tas::genps_p4()[qidxtomatch[iq]];
+                  if (std::find(alreadymatched.begin(), alreadymatched.end(), iq) != alreadymatched.end()) continue;
+                  float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
+                  // ij iq dR genp4.pt() jet.pt()
+                  if (dR < mindR) {
+                      bestidx = iq;
+                      mindR = dR;
+                  }
+              }
+              alreadymatched.push_back(bestidx);
+              for (unsigned int igj = 0; igj < genjets_p4NoMuNoNu().size(); igj++){
+                  auto genjet = tas::genjets_p4NoMuNoNu()[igj];
+                  float dR = ROOT::Math::VectorUtil::DeltaR(genjet,jet);
+                  if (dR < 0.4) { foundgenjet = true; break; }
+              }
+              if (bestidx < 0 && !foundgenjet) jet_type.push_back(-2); // other
+              else if (bestidx < 0 && foundgenjet) jet_type.push_back(-1); // other
+              else if (bestidx < 4) jet_type.push_back(1); // first 4 are b's
+              else jet_type.push_back(2); // q from W
+          }
+          alreadymatched.clear();
+          bjet_type.clear();
+          for (unsigned int ij = 0; ij < btags.size(); ij++){
+              auto jet = btags[ij];
+              float mindR = 0.45;
+              int bestidx = -1;
+              bool foundgenjet = false;
+              for (unsigned int iq = 0; iq < qidxtomatch.size(); iq++) {
+                  auto genp4 = tas::genps_p4()[qidxtomatch[iq]];
+                  if (std::find(alreadymatched.begin(), alreadymatched.end(), iq) != alreadymatched.end()) continue;
+                  float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
+                  // std::cout << " ij: " << ij << " iq: " << iq << " dR: " << dR << " genp4.pt(): " << genp4.pt() << " jet.pt(): " << jet.pt() << std::endl;
+                  // ij iq dR genp4.pt() jet.pt()
+                  if (dR < mindR) {
+                      bestidx = iq;
+                      mindR = dR;
+                  }
+              }
+              alreadymatched.push_back(bestidx);
+              for (unsigned int igj = 0; igj < genjets_p4NoMuNoNu().size(); igj++){
+                  auto genjet = tas::genjets_p4NoMuNoNu()[igj];
+                  float dR = ROOT::Math::VectorUtil::DeltaR(genjet,jet);
+                  if (dR < 0.4) { foundgenjet = true; break; }
+              }
+              if (bestidx < 0 && !foundgenjet) bjet_type.push_back(-2); // other
+              else if (bestidx < 0 && foundgenjet) bjet_type.push_back(-1); // other
+              else if (bestidx < 4) bjet_type.push_back(1); // first 4 are b's
+              else bjet_type.push_back(2); // q from W
+          }
+
+          // std::cout << "--> found some matches: ";
+          // for (auto mtype : bjet_type) {
+          //     std::cout << mtype << " ";
+          // }
+          // std::cout << std::endl;
+
+
+      }
+
   }
 
 

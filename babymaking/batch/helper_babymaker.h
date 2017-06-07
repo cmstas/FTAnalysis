@@ -25,6 +25,7 @@
 // #include "signal_regions.h"
 #include "TROOT.h"
 #include <vector>
+#include <algorithm>
 #include "Math/Vector4D.h"
 #include "Math/LorentzVector.h"
 
@@ -159,8 +160,13 @@ class babyMaker {
 
     int extragenb;
     int ngenjets;
+
+    // for TTTT
     vector <int> bjet_type;
     vector <int> jet_type;
+    int ndrlt0p4;
+    bool gengood;
+    int nleptonic;
 
     //Jets
     int njets_raw;
