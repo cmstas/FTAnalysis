@@ -428,7 +428,7 @@ pair <float, float> getT1CHSMET_fromMINIAOD( FactorizedJetCorrector * jet_correc
     //
 
 
-    if (cms3.evt_isRealData()) {
+    if (cms3.evt_isRealData() || cms3.evt_CMS3tag().at(0).Contains("08-00-16")) {
         for (unsigned int pfcind = 0; pfcind < cms3.pfjets_pfcandIndicies().at(iJet).size(); pfcind++){
             int index = cms3.pfjets_pfcandIndicies().at(iJet).at(pfcind);
             if( cms3.pfcands_isGlobalMuon()    .at(index) ||
