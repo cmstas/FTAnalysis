@@ -1358,6 +1358,11 @@ void SSAG::Init(TTree *tree) {
 		nisrMatch_branch = tree->GetBranch("nisrMatch");
 		if (nisrMatch_branch) {nisrMatch_branch->SetAddress(&nisrMatch_);}
 	}
+	extragenb_branch = 0;
+	if (tree->GetBranch("extragenb") != 0) {
+		extragenb_branch = tree->GetBranch("extragenb");
+		if (extragenb_branch) {extragenb_branch->SetAddress(&extragenb_);}
+	}
 	weight_isr_branch = 0;
 	if (tree->GetBranch("weight_isr") != 0) {
 		weight_isr_branch = tree->GetBranch("weight_isr");
@@ -1855,6 +1860,7 @@ void SSAG::GetEntry(unsigned int idx)
 		glglpt_isLoaded = false;
 		isr_unc_isLoaded = false;
 		nisrMatch_isLoaded = false;
+		extragenb_isLoaded = false;
 		weight_isr_isLoaded = false;
 		weight_isr_UP_isLoaded = false;
 		weight_isr_tt_isLoaded = false;
@@ -2175,6 +2181,7 @@ void SSAG::LoadAllBranches()
 	if (glglpt_branch != 0) glglpt();
 	if (isr_unc_branch != 0) isr_unc();
 	if (nisrMatch_branch != 0) nisrMatch();
+	if (extragenb_branch != 0) extragenb();
 	if (weight_isr_branch != 0) weight_isr();
 	if (weight_isr_UP_branch != 0) weight_isr_UP();
 	if (weight_isr_tt_branch != 0) weight_isr_tt();
@@ -5744,6 +5751,19 @@ void SSAG::LoadAllBranches()
 		}
 		return nisrMatch_;
 	}
+	const int &SSAG::extragenb()
+	{
+		if (not extragenb_isLoaded) {
+			if (extragenb_branch != 0) {
+				extragenb_branch->GetEntry(index);
+			} else { 
+				printf("branch extragenb_branch does not exist!\n");
+				exit(1);
+			}
+			extragenb_isLoaded = true;
+		}
+		return extragenb_;
+	}
 	const float &SSAG::weight_isr()
 	{
 		if (not weight_isr_isLoaded) {
@@ -6612,6 +6632,7 @@ namespace ss {
 	const float &glglpt() { return samesign.glglpt(); }
 	const float &isr_unc() { return samesign.isr_unc(); }
 	const int &nisrMatch() { return samesign.nisrMatch(); }
+	const int &extragenb() { return samesign.extragenb(); }
 	const float &weight_isr() { return samesign.weight_isr(); }
 	const float &weight_isr_UP() { return samesign.weight_isr_UP(); }
 	const float &weight_isr_tt() { return samesign.weight_isr_tt(); }

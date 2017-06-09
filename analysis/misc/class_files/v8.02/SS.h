@@ -838,6 +838,9 @@ protected:
 	int      nisrMatch_;
 	TBranch *nisrMatch_branch;
 	bool     nisrMatch_isLoaded;
+	int      extragenb_;
+	TBranch *extragenb_branch;
+	bool     extragenb_isLoaded;
 	float    weight_isr_;
 	TBranch *weight_isr_branch;
 	bool     weight_isr_isLoaded;
@@ -1245,6 +1248,7 @@ void LoadAllBranches();
 	const float &glglpt();
 	const float &isr_unc();
 	const int &nisrMatch();
+	const int &extragenb();
 	const float &weight_isr();
 	const float &weight_isr_UP();
 	const float &weight_isr_tt();
@@ -1569,6 +1573,7 @@ namespace ss {
 	const float &glglpt();
 	const float &isr_unc();
 	const int &nisrMatch();
+	const int &extragenb();
 	const float &weight_isr();
 	const float &weight_isr_UP();
 	const float &weight_isr_tt();

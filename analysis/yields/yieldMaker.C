@@ -36,6 +36,7 @@ bool doTTZISR = true; // FIXME
 bool doBDT = false; // FIXME
 bool outputTrainingBDT = false; // FIXME
 bool doISRFSRsyst = true;
+bool doTTBB = true;
 // bool doJER = true; // FIXME
 
 bool makeRootFiles = true;
@@ -488,6 +489,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     bool istttt = (chainTitle=="tttt");
     bool isttZ = (chainTitle=="ttz");
     bool isttW = (chainTitle=="ttw");
+    bool isttH = (chainTitle=="tth");
 
         
     // Calculate and store the normalization factors for the ISR reweighting
@@ -501,6 +503,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         chain->Draw("0.5>>htemp","weight_isr_tt");
         isr_norm_tt = chain->GetEntries()/htemp->GetBinContent(1);
     }
+
 
     yields_t y_result;
     plots_t  p_result;
@@ -683,6 +686,20 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         p_lep_alt_up.SRDISC.TOTAL     = 0;
         p_lep_alt_dn.SRDISC.TOTAL     = 0;
     }
+    //For bb variations
+    plots_t p_bb_alt_up;
+    plots_t p_bb_alt_dn;
+    if (doFakes == 1 || isData==0) {
+        p_bb_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_bb_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_bb_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_bb_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+    } else {
+        p_bb_alt_up.SRCR.TOTAL     = 0;
+        p_bb_alt_dn.SRCR.TOTAL     = 0;
+        p_bb_alt_up.SRDISC.TOTAL     = 0;
+        p_bb_alt_dn.SRDISC.TOTAL     = 0;
+    }
     //For PU variations
     plots_t p_isr_alt_up;
     plots_t p_isr_alt_dn;
@@ -747,6 +764,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     initHistError(doPoisson, p_lep_alt_up.SRDISC.TOTAL    );
     initHistError(doPoisson, p_isr_alt_up.SRCR.TOTAL    );
     initHistError(doPoisson, p_isr_alt_up.SRDISC.TOTAL    );
+    initHistError(doPoisson, p_bb_alt_up.SRCR.TOTAL    );
+    initHistError(doPoisson, p_bb_alt_up.SRDISC.TOTAL    );
     initHistError(doPoisson, p_pu_alt_dn.SRCR.TOTAL    );
     initHistError(doPoisson, p_pu_alt_dn.SRDISC.TOTAL    );
     initHistError(doPoisson, p_fake_alt_up.SRCR.TOTAL    );
@@ -849,21 +868,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 weight*=eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
 
-              float weight_alt_FR = weight;
-            float weight_btag_up_alt = weight;
-            float weight_btag_dn_alt = weight;
-            float weight_pu_up_alt = weight;
-            float weight_pu_dn_alt = weight;
             float weight_isr_up_alt = weight;
-            float weight_lep_up_alt = weight;
-            if (ss::is_real_data()==0) {
-                weight_btag_up_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_UP()/ss::weight_btagsf() : weight;
-                weight_btag_dn_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_DN()/ss::weight_btagsf() : weight;
-                weight_pu_up_alt = getTruePUw_Moriond(ss::trueNumInt()[0])>0 ? weight*getTruePUwUp(ss::trueNumInt()[0])/getTruePUw_Moriond(ss::trueNumInt()[0]) : weight;
-                weight_pu_dn_alt = getTruePUw_Moriond(ss::trueNumInt()[0])>0 ? weight*getTruePUwDn(ss::trueNumInt()[0])/getTruePUw_Moriond(ss::trueNumInt()[0]) : weight;
-                weight_lep_up_alt = weight*(1.0+leptonScaleFactor_err(ss::lep1_id(),  ss::lep1_p4().pt(),  ss::lep1_p4().eta(),  ss::ht())+leptonScaleFactor_err(ss::lep2_id(),  ss::lep2_p4().pt(),  ss::lep2_p4().eta(),  ss::ht()));
-            }
-
             if (doTTZISR && isttZ) {
                 // want to take 50% of the effect as unc, and since we scale
                 // nominal weight, scale up twice
@@ -876,6 +881,31 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 weight *= ss::weight_isr_tt()*isr_norm_tt;
             }
 
+            float weight_bb_up_alt = weight;
+            // if (doTTBB && (isttZ || isttW || isttH)) {
+            if (doTTBB && (isttZ || isttW)) {
+                // want to take full effect as unc, and since we scale
+                // nominal weight, scale up twice
+                if (ss::extragenb() == 2) {
+                    float scaleamt = 1.7;
+                    weight_bb_up_alt = weight*scaleamt*scaleamt;
+                    weight *= scaleamt;
+                }
+            }
+
+            float weight_alt_FR = weight;
+            float weight_btag_up_alt = weight;
+            float weight_btag_dn_alt = weight;
+            float weight_pu_up_alt = weight;
+            float weight_pu_dn_alt = weight;
+            float weight_lep_up_alt = weight;
+            if (ss::is_real_data()==0) {
+                weight_btag_up_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_UP()/ss::weight_btagsf() : weight;
+                weight_btag_dn_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_DN()/ss::weight_btagsf() : weight;
+                weight_pu_up_alt = getTruePUw_Moriond(ss::trueNumInt()[0])>0 ? weight*getTruePUwUp(ss::trueNumInt()[0])/getTruePUw_Moriond(ss::trueNumInt()[0]) : weight;
+                weight_pu_dn_alt = getTruePUw_Moriond(ss::trueNumInt()[0])>0 ? weight*getTruePUwDn(ss::trueNumInt()[0])/getTruePUw_Moriond(ss::trueNumInt()[0]) : weight;
+                weight_lep_up_alt = weight*(1.0+leptonScaleFactor_err(ss::lep1_id(),  ss::lep1_p4().pt(),  ss::lep1_p4().eta(),  ss::ht())+leptonScaleFactor_err(ss::lep2_id(),  ss::lep2_p4().pt(),  ss::lep2_p4().eta(),  ss::ht()));
+            }
 
 
             float lep1_pt = ss::lep1_coneCorrPt();
@@ -1275,6 +1305,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (isData  == 0 )            p_pu_alt_up.SRCR.TOTAL->Fill(SR, weight_pu_up_alt);
             if (isData  == 0 )            p_pu_alt_dn.SRCR.TOTAL->Fill(SR, weight_pu_dn_alt);
             if (isData  == 0 )            p_isr_alt_up.SRCR.TOTAL->Fill(SR, weight_isr_up_alt);
+            if (isData  == 0 )            p_bb_alt_up.SRCR.TOTAL->Fill(SR, weight_bb_up_alt);
             if (isData  == 0 )            p_lep_alt_up.SRCR.TOTAL->Fill(SR, weight_lep_up_alt);
 
             if (doFakes == 1 )            p_fake_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_alt_FR);
@@ -1283,6 +1314,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (isData  == 0 )            p_pu_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_pu_up_alt);
             if (isData  == 0 )            p_pu_alt_dn.SRDISC.TOTAL->Fill(SRdisc, weight_pu_dn_alt);
             if (isData  == 0 )            p_isr_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_isr_up_alt);
+            if (isData  == 0 )            p_bb_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_bb_up_alt);
             if (isData  == 0 )            p_lep_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_lep_up_alt);
 
             if (SR > 1) { // non ttZ CR
@@ -1662,6 +1694,30 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 fillDownMirrorUp(h_sr,lepUp,lepDown);
                 lepUp->Write();
                 lepDown->Write();
+
+                // ttbb/ttjj ~ 1.7 uncertainty
+                TH1F* plot_alt_bb_up = 0;
+                TH1F* plot_alt_bb_dn = 0;
+                if      (kinRegs[kr]=="srcr")   plot_alt_bb_up=p_bb_alt_up.SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_up=p_bb_alt_up.SRDISC.TOTAL;
+                else exit(1);
+                if      (kinRegs[kr]=="srcr")   plot_alt_bb_dn=p_bb_alt_dn.SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_dn=p_bb_alt_dn.SRDISC.TOTAL;
+                else exit(1);
+                TH1F* bbUp   = (TH1F*) plot_alt_bb_up->Clone("bbUp");
+                TH1F* bbDown = (TH1F*) plot_alt_bb_dn->Clone("bbDown");
+                for (int bin=1;bin<=bbUp->GetNbinsX();++bin) {
+                    float nomval = h_sr->GetBinContent(bin);
+                    float upval = bbUp->GetBinContent(bin);
+                    bbUp->SetBinContent(bin,0.5*(nomval+upval));
+                }
+                fillDownMirrorUp(h_sr,bbUp,bbDown);
+                // if (name=="ttw" || name=="ttz") {
+                //     bbUp->Scale(h_sr->Integral()/bbUp->Integral());
+                //     bbDown->Scale(h_sr->Integral()/bbDown->Integral());
+                // }
+                bbUp->Write();
+                bbDown->Write();
 
                 //isr
                 TH1F* plot_alt_isr_up = 0;

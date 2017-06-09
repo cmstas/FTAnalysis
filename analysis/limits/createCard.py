@@ -20,6 +20,7 @@ class Process(object):
         self.jes  = "-"
         self.jer  = "-"
         self.isr  = "-"
+        self.bb  = "-"
         self.met  = "-"
         self.scale  = "-"
         self.isrvar  = "-"
@@ -186,6 +187,10 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     card.write("%-40s %-5s " % ("isr","shape"))
     for process in processes: card.write("%-15s " % (process.isr))
     card.write("\n")
+    #nuisance bb
+    card.write("%-40s %-5s " % ("bb","shape"))
+    for process in processes: card.write("%-15s " % (process.bb))
+    card.write("\n")
     #nuisance lepeff
     card.write("%-40s %-5s " % ("lep","shape"))
     for process in processes: card.write("%-15s " % (process.lepeff))
@@ -336,6 +341,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTW.TTWSF          = ttw_sf
     TTW.lumi         = lumiunc
     TTW.isr         = "1"
+    TTW.bb         = "1"
     TTW.jes  = "1"
     TTW.jer  = "1"
     # TTW.lepeff  = "1.0"
@@ -347,6 +353,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.TTZSF          = ttz_sf
     TTZ.lumi          = lumiunc
     TTZ.isr  = "1"
+    TTZ.bb  = "1"
     TTZ.jes  = "1"
     TTZ.jer  = "1"
     # TTZ.lepeff  = "1.0"
@@ -358,6 +365,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # TTH.TTH          = "1.0"
     TTH.TTH          = "1.5"
     TTH.lumi          = lumiunc
+    TTH.bb  = "1"
     TTH.jes  = "1"
     TTH.jer  = "1"
     TTH.lepeff  = "1.0"

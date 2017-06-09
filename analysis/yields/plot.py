@@ -111,4 +111,5 @@ if __name__ == "__main__":
 os.system("cp ../misc/signal_regions.h plots/SR.extra")
 os.system("cp ../misc/signal_regions.h plots/SR_blind.extra")
 os.system("cp ../misc/signal_regions.h plots/SRCR_blind.extra")
-os.system("niceplots plots plots_tttt_isrfsr_Jun5")
+# os.system("niceplots plots plots_tttt_isrfsr_Jun5")
+os.system("niceplots plots plots_tttt_Jun9")
