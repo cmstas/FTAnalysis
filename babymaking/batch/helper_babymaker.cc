@@ -392,6 +392,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep4_isTrigSafev1"       , &lep4_isTrigSafev1       );
 
   BabyTree->Branch("extragenb"       , &extragenb       );
+  BabyTree->Branch("extragenbmoms"       , &extragenbmoms       );
   BabyTree->Branch("ngenjets"       , &ngenjets       );
 
   // for tttt
@@ -401,8 +402,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("gengood"       , &gengood       );
   BabyTree->Branch("nleptonic"       , &nleptonic       );
 
+  bool justUseFirstReader = false;
   if (applyBtagSFs) {
     // setup btag calibration readers
+      // calib = new BTagCalibration("csvv2", "CORE/Tools/btagsf/data/run2_25ns/CSVv2_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     calib = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     reader_heavy    = new BTagCalibrationReader(calib, BTagEntry::OP_MEDIUM, "comb", "central"); // central
@@ -825,6 +828,7 @@ void babyMaker::InitBabyNtuple(){
     lep4_isTrigSafeNoIsov1 = 0;
     lep4_isTrigSafev1 = 0;
     extragenb = 0;
+    extragenbmoms.clear();
     ngenjets = 0;
     bjet_type.clear();
     jet_type.clear();
@@ -873,6 +877,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // int nHHsr = 51;
   // int nHLsr = 41;
 
+  bool get_parentage = true;
+
+    int higgs_scan = 0;
+  if (isFastsim == 101) {
+      if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
+      if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
+      if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
+  }
 
   //Fill lepton variables
   std::pair<hyp_result_t,Lep> best_hyp_info_withlep3 = chooseBestHyp(verbose, /*doclass8=*/ false);
@@ -918,6 +930,24 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     kfactor = tas::evt_kfactor();
+
+    if (isFastsim > 0){
+        sparms = tas::sparm_values();
+        sparmNames = tas::sparm_names();
+        if (higgs_scan > 0) {
+            for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
+                if (abs(tas::genps_id()[gp])==25) {
+                    higgs_mass = floor(tas::genps_p4()[gp].M() + 0.5);
+                    break;
+                }
+            }
+            xsec = xsec_higgs(higgs_scan, higgs_mass);
+            xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
+            scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
+        }
+    }
+
+
   }
 
   // if (hyp_class == 7 && !is_wjets) return babyErrorStruct; // only care about OS ISFR events since we want more stats for WJets (this doubles ntuple size!!)
@@ -954,7 +984,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   if (lep3_idx >= 0 && (abs(lep3_id) == 11 || abs(lep3_id) == 13)){
     lep3_p4 = thirdLepton.first.p4();
     lep3_coneCorrPt = coneCorrPt(lep3_id, lep3_idx);
-    if (!is_real_data){
+    if (!is_real_data && get_parentage){
       pair <int, int> lep3_parentage = lepMotherID_v2(thirdLepton.first);
       lep3_motherID = lep3_parentage.first;
       lep3_mc3idx = lep3_parentage.second;
@@ -970,7 +1000,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep4_idx = fourthLepton.idx();
   if (lep4_idx >= 0 && (abs(lep4_id) == 11 || abs(lep4_id) == 13)){
     lep4_p4 = fourthLepton.p4();
-    if (!is_real_data){
+    if (!is_real_data && get_parentage){
       pair <int, int> lep4_parentage = lepMotherID_v2(fourthLepton);
       lep4_mcidx = lep4_parentage.second;
       lep4_mcid = lep4_mcidx >= 0 ? tas::genps_id().at(lep4_mcidx) : -9999;
@@ -1129,7 +1159,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
   //Lepton MC variables
-  if (!is_real_data){
+  if (!is_real_data && get_parentage){
     pair <int, int> lep1_parentage                          = lepMotherID_v2(lep1);
     pair <int, int> lep2_parentage                          = lepMotherID_v2(lep2);
     lep1_mc3idx                                             = lep1_parentage.second;
@@ -1226,6 +1256,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       extragenb = 0;
       ngenjets = 0;
       std::vector<int> bidxs; // check for duplicates so we don't double count/match
+      extragenbmoms.clear();
       for (unsigned int ij = 0; ij < tas::genjets_p4NoMuNoNu().size(); ij++){
           ngenjets++;
           auto jet = tas::genjets_p4NoMuNoNu()[ij];
@@ -1237,6 +1268,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               int stat = tas::genps_status()[igen];
               int id = tas::genps_id()[igen];
               int mid = tas::genps_id_mother()[igen];
+              if (stat == 1111) continue;
               // if (stat != 1) continue; // <-- literally nothing useful is status 1, so ignoring
               if (abs(id) != 5) continue;
               if (!idIsBeauty(abs(id))) continue;
@@ -1255,6 +1287,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           if (foundB) {
               extragenb += 1;
               bidxs.push_back(bestidx);
+              extragenbmoms.push_back(tas::genps_id_mother()[bestidx]);
               // int stat = tas::genps_status()[bestidx];
               // int id = tas::genps_id()[bestidx];
               // int mid = tas::genps_id_mother()[bestidx];
@@ -1500,7 +1533,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // deciding which era the MC "belongs to", to assign the proper btag weight
   // Seed by event number to keep deterministic
   TRandom *tr1 = new TRandom(tas::evt_event());
-  if (tr1->Rndm() < 0.55) {
+  if (tr1->Rndm() < 0.55 || justUseFirstReader) {
     // B-F is 55% of the lumi
     weight_btagsf =    weight_btagsf1;
     weight_btagsf_UP = weight_btagsf1_UP;
@@ -1805,6 +1838,23 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     nGoodVertices++;
   }
 
+  bool failsFastSimJetFilter = 0;
+  if(isFastsim) {
+      for (unsigned int i = 0; i < mostJets.size(); i++){
+          if (mostJets_passCleaning.at(i) == 0) continue;
+          if (mostJets_passID.at(i) == 0) continue;
+          float jet_pt = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i);
+          int jetIdx = mostJets_idx.at(i);
+          bool isBtag = mostJets_disc.at(i) > btagCut;
+          if( isBtag && jet_pt < 25.0) continue;
+          if(!isBtag && jet_pt < 40.0) continue;
+          if(isBadFastsimJet(jetIdx)) {
+              failsFastSimJetFilter = 1;
+              break;
+          }
+      }
+  }
+  passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data);
   
 
   if (is_real_data && isReMiniAOD) {
@@ -1959,6 +2009,29 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
 
   }
+
+  // if (!is_real_data) {
+  //     int nmatches = 0;
+  //     for (unsigned int igj = 0; igj < genjets_p4NoMuNoNu().size(); igj++){
+  //         bool found_match = false;
+  //         auto genjet = tas::genjets_p4NoMuNoNu()[igj];
+  //         // if (dR < 0.4) { foundgenjet = true; break; }
+  //         for (unsigned int igp = 0; igp < tas::genps_p4().size(); igp++){
+  //             std::cout << " igj: " << igj << " igp: " << igp << std::endl;
+  //             int id = tas::genps_id()[igp];
+  //             int mid = tas::genps_id_mother()[igp];
+  //             if (!idIsBeauty(abs(id))) continue;
+  //             auto genpart = tas::genps_p4()[igp];
+  //             float dR = ROOT::Math::VectorUtil::DeltaR(genjet,genpart);
+  //             if (dR > 0.4) continue;
+  //             found_match = true;
+  //             break;
+  //         }
+  //         nmatches += found_match;
+  //     }
+  //     // nmatches genjets_p4NoMuNoNu().size()
+  //     std::cout << " nmatches: " << nmatches << " genjets_p4NoMuNoNu().size(): " << genjets_p4NoMuNoNu().size() << std::endl;
+  // }
 
 
   //Fill Baby
