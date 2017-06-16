@@ -287,7 +287,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
 
     for process in processes:
         # if process.name in ["ttw","ttz","tth","wz","ww"]:
-        if process.name in ["ttw","ttz","tth","ttww"]:
+        if process.name in ["ttw","ttz","tth"]:
             statshape = 0.15 # ttw, ttz, tth, wz, tttt
             # if process.name in ["ww"]: statshape = 0.20
             process.statshape = 1.+statshape
@@ -374,7 +374,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTH.hthlt  = "1"
     TTH.btag = "1"
     TTH.pu = "1"
-    TTWW.TTWW          = "2.0"
+    TTWW.TTWW          = "1.5"
     TTWW.lumi          = lumiunc
     TTWW.jes  = "1"
     TTWW.jer  = "1"

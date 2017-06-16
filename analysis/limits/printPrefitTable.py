@@ -130,7 +130,8 @@ def print_table(d_yields):
         tojoin = [srnames[ibin]]
         for proc in procs:
             # print proc
-            cent = d_yields[proc]["central"][ibin]
+            # cent = d_yields[proc]["central"][ibin]
+            cent = max(d_yields[proc]["central"][ibin],0.)
             err = d_yields[proc]["error"][ibin]
             if "data" in proc:
                 tojoin.append("{0:.0f}".format(cent))

@@ -60,11 +60,20 @@ bool makeGenVariationsMC = true; // FIXME
 // TString tag = "v0.07"; // data is in v0.07
 // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
 
-// 40 gev jets
+// // 40 gev jets
+// bool doJER = true;
+// TString dir = "v0.10_Jun5";
+// TString tag = "v0.10_fix"; // data is in v0.07 still
+// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+
+// sync
 bool doJER = true;
-TString dir = "v0.10_Jun5";
+TString dir = "v0.10_Jun13";
 TString tag = "v0.10_fix"; // data is in v0.07 still
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+
+// TString dir = "v0.10_sync";
+bool doSync = false;
 
 // // 30 gev jets
 // bool doJER = true;
@@ -303,7 +312,11 @@ void getyields(){
 
     ttww_chain   ->Add(Form("%s/TTWW.root"           , pfx.Data()));
     // ttww_chain   ->Add("/home/users/namin/2017/fourtop/babymaking/batch/output_v2.root");
-    ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
+    if (doSync) {
+        ttw_chain    ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/TTWnlo.root");
+    } else {
+        ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
+    }
     ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
     tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
@@ -333,10 +346,14 @@ void getyields(){
     rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
     rares_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
     //data
-    data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    if (doSync) {
+        data_chain   ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/DataMuonEG.root");
+    } else {
+        data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+        data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+        data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+        data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    }
     //flips
     flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
     flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
@@ -490,6 +507,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     bool isttZ = (chainTitle=="ttz");
     bool isttW = (chainTitle=="ttw");
     bool isttH = (chainTitle=="tth");
+    bool isXgamma = (chainTitle=="xg");
 
         
     // Calculate and store the normalization factors for the ISR reweighting
@@ -1257,6 +1275,26 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             // require SRs+CR (= ttZ CR + ttW CR + SRs)
             if (!outputTrainingBDT) {
                 if (SR < 0) continue;
+            }
+
+            // if (doSync && SR == 2 && isttW && ss::hyp_class() == 3) {
+            //     std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\n",
+            //             ss::run(), ss::lumi(), ss::event(),
+            //             ss::lep1_id(), lep1_pt,
+            //             ss::lep2_id(), lep2_pt,
+            //             ss::njets(), ss::nbtags(), ss::met(), ss::ht()) << std::endl;
+            // }
+
+            if (doSync && SR == 2 && ss::is_real_data() && isData && ss::hyp_class() == 3) {
+                std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\n",
+                        ss::run(), ss::lumi(), ss::event(),
+                        ss::lep1_id(), lep1_pt,
+                        ss::lep2_id(), lep2_pt,
+                        ss::njets(), ss::nbtags(), ss::met(), ss::ht()) << std::endl;
+            }
+
+            if (isXgamma && SR > 2) {
+                std::cout << " filename: " << filename << " chainTitle: " << chainTitle << " weight: " << weight << " SR: " << SR << std::endl;
             }
 
 
