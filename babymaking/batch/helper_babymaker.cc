@@ -402,7 +402,6 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("gengood"       , &gengood       );
   BabyTree->Branch("nleptonic"       , &nleptonic       );
 
-  bool justUseFirstReader = false;
   if (applyBtagSFs) {
     // setup btag calibration readers
       // calib = new BTagCalibration("csvv2", "CORE/Tools/btagsf/data/run2_25ns/CSVv2_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
@@ -1533,6 +1532,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // deciding which era the MC "belongs to", to assign the proper btag weight
   // Seed by event number to keep deterministic
   TRandom *tr1 = new TRandom(tas::evt_event());
+  bool justUseFirstReader = false;
   if (tr1->Rndm() < 0.55 || justUseFirstReader) {
     // B-F is 55% of the lumi
     weight_btagsf =    weight_btagsf1;
@@ -1854,7 +1854,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           }
       }
   }
-  passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data);
+  passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : (is_real_data ? passesMETfilters2016(is_real_data) : true);
   
 
   if (is_real_data && isReMiniAOD) {
