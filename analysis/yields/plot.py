@@ -27,10 +27,10 @@ if __name__ == "__main__":
     r.gROOT.SetBatch(1)
 
     bginfo =   [
-               ("rares", "Rare SM",             r.kMagenta-7,  0.5),
                ("flips", "Charge misid.",       r.kGray+2,     0.3),
+               ("rares", "Rare SM",             r.kMagenta-7,  0.5),
                ("xg",    "X+#gamma",            r.kViolet+2,   0.5),
-               ("ttww",  "t#bar{t}W^{+}W^{-}",  r.kAzure-4,     0.2),
+               ("ttww",  "t#bar{t}VV",  r.kAzure-4,     0.2),
                ("ttz",   "t#bar{t}Z",           r.kGreen-6,    0.2),
                ("fakes", "Nonprompt lep.",      18,            0.35),
                ("tth",   "t#bar{t}H",           r.kBlue-5,     0.2),
@@ -161,4 +161,4 @@ if __name__ == "__main__":
 # os.system("cp ../misc/signal_regions.h plots/SR_blind.extra")
 # os.system("cp ../misc/signal_regions.h plots/SRCR_blind.extra")
 # os.system("niceplots plots plots_tttt_Jun16")
-os.system("niceplots plots plots_tttt_ttgothers_Jun16")
+os.system("niceplots plots plots_tttt_Jun18")

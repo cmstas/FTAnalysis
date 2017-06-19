@@ -70,11 +70,9 @@ bool makeGenVariationsMC = true; // FIXME
 // TString tag = "v0.10_fix"; // data is in v0.07 still
 // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
 
-TString dir = "v0.10_ttgothers_Jun16";
+TString dir = "v0.10_Jun19";
 TString tag = "v0.10_fix"; // data is in v0.07 still
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
-bool doHighStatsTTG = true;
-bool doOtherRares = true;
 
 // TString dir = "v0.10_sync";
 bool doSync = false;
@@ -299,13 +297,7 @@ void getyields(){
     TChain *fakes_chain   = new TChain("t","fakes");
     //signals full sim
 
-    // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/";
-    // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.02/output/";
-    // TString pfx  = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.04/output/";
-    // TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
     TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
-    // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.06/output/";
-    // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.11/output/";
 
     //Fill chains
     ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx.Data()));
@@ -313,21 +305,12 @@ void getyields(){
     ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx.Data()));
     ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx.Data()));
     tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
-
-    bool doOtherRares = true;
-    if (doOtherRares) {
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTHH.root");
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTTJ.root");
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTTW.root");
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTWH.root");
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTWW.root");
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTWZ.root");
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTZH.root");
-        ttww_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_raresxg/output/TTZZ.root");
-    } else {
-        ttww_chain   ->Add(Form("%s/TTWW.root"           , pfx.Data()));
-    }
-    // ttww_chain   ->Add("/home/users/namin/2017/fourtop/babymaking/batch/output_v2.root");
+    ttww_chain->Add(Form("%s/TTHH.root",pfx.Data()));
+    ttww_chain->Add(Form("%s/TTWH.root",pfx.Data()));
+    ttww_chain->Add(Form("%s/TTWW.root",pfx.Data()));
+    ttww_chain->Add(Form("%s/TTWZ.root",pfx.Data()));
+    ttww_chain->Add(Form("%s/TTZH.root",pfx.Data()));
+    ttww_chain->Add(Form("%s/TTZZ.root",pfx.Data()));
     if (doSync) {
         ttw_chain    ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/TTWnlo.root");
     } else {
@@ -346,13 +329,9 @@ void getyields(){
     // xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
     xg_chain     ->Add(Form("%s/TGext.root"             , pfx.Data()));
     xg_chain     ->Add(Form("%s/WGToLNuGext.root"           , pfx.Data()));
-    if (doHighStatsTTG) {
-        xg_chain     ->Add("/nfs-7/userdata/namin/tupler_babies/merged//FT/v0.10_raresxg/output/TTGdilep.root");
-        xg_chain     ->Add("/nfs-7/userdata/namin/tupler_babies/merged//FT/v0.10_raresxg/output/TTGsinglelep.root");
-        xg_chain     ->Add("/nfs-7/userdata/namin/tupler_babies/merged//FT/v0.10_raresxg/output/TTGsinglelepbar.root");
-    } else {
-        xg_chain     ->Add(Form("%s/TTG.root"            , pfx.Data()));
-    }
+    xg_chain     ->Add(Form("%s/TTGdilep.root"             , pfx.Data()));
+    xg_chain     ->Add(Form("%s/TTGsinglelep.root"             , pfx.Data()));
+    xg_chain     ->Add(Form("%s/TTGsinglelepbar.root"             , pfx.Data()));
     xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
     rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
     rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
@@ -367,6 +346,8 @@ void getyields(){
     rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
     rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
     rares_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+    rares_chain->Add(Form("%s/TTTJ.root",pfx.Data()));
+    rares_chain->Add(Form("%s/TTTW.root",pfx.Data()));
     //data
     if (doSync) {
         data_chain   ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/DataMuonEG.root");
