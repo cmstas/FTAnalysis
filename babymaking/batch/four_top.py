@@ -116,14 +116,15 @@ baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 # tag = "v0.10_osft" # same as v0.10 but tttt only and OS is in babies too
 # tag = "v0.10_fix" # same as v0.10 but JER/JEC unc fixed?
 tag = "v0.10_raresxg" # same as v0.10 but tttt only and OS is in babies too
+tag = "v0.10_data" # same as previous but data only
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
 dashboard_name = "AutoTwopler_FTbabies"
 
 if not os.path.isfile(package):
     raise Exception("Woah! Did you run make_tar.sh? I don't see the package.tar.gz file in %s" % inputs_path)
-elif ((os.path.getmtime(package) < os.path.getmtime("main.exe")) or (os.path.getmtime(package) < os.path.getmtime("helper_babymaker.cc"))):
-    raise Exception("Woah! Did you run make_job_inputs.sh? It looks like main.exe or helper_babymaker.cc might be newer than the tarball in %s" % inputs_path)
+# elif ((os.path.getmtime(package) < os.path.getmtime("main.exe")) or (os.path.getmtime(package) < os.path.getmtime("helper_babymaker.cc"))):
+#     raise Exception("Woah! Did you run make_job_inputs.sh? It looks like main.exe or helper_babymaker.cc might be newer than the tarball in %s" % inputs_path)
 
 
 

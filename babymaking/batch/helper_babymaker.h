@@ -171,6 +171,7 @@ class babyMaker {
     int ndrlt0p4;
     bool gengood;
     int nleptonic;
+    int ntau;
 
     //Jets
     int njets_raw;

@@ -70,9 +70,14 @@ bool makeGenVariationsMC = true; // FIXME
 // TString tag = "v0.10_fix"; // data is in v0.07 still
 // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
 
+// preapproval
 TString dir = "v0.10_Jun19";
 TString tag = "v0.10_fix"; // data is in v0.07 still
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+
+// TString dir = "v0.10_Jun19";
+// TString tag = "v0.10_fix"; // data is in v0.07 still
+// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
 
 // TString dir = "v0.10_sync";
 bool doSync = false;
@@ -296,6 +301,9 @@ void getyields(){
     TChain *flips_chain   = new TChain("t","flips");
     TChain *fakes_chain   = new TChain("t","fakes");
     //signals full sim
+    
+  // #include "higgs_scan.h"
+  // #include "higgs_scan_ps.h"
 
     TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
 
@@ -512,6 +520,24 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     bool isttH = (chainTitle=="tth");
     bool isXgamma = (chainTitle=="xg");
 
+    bool isHiggsScan = false;
+    bool isHiggsPseudoscalar = false;
+    vector<float> mysparms;
+    if (isSignal && (
+                chainTitle.Contains("higgs_scan") ||  chainTitle.Contains("higgs_ps_scan") 
+                || chainTitle.Contains("tth_scan") || chainTitle.Contains("thq_scan") || chainTitle.Contains("thw_scan")
+                || chainTitle.Contains("tta_scan") || chainTitle.Contains("taq_scan") || chainTitle.Contains("taw_scan")
+                ) ) {
+        isHiggsScan = true;
+        isHiggsPseudoscalar = chainTitle.Contains("tta_scan") || chainTitle.Contains("taq_scan") || chainTitle.Contains("taw_scan") || chainTitle.Contains("higgs_ps_scan");
+        TObjArray *tx = chainTitle.Tokenize("_");
+        for (int i = 0; i < tx->GetEntries(); i++) {
+            if (((TObjString *)(tx->At(i)))->String().BeginsWith("m")) {
+                float asparm = ((TObjString *)(tx->At(i)))->String().ReplaceAll("m","").Atof();
+                mysparms.push_back(asparm);
+            }
+        }
+    }
         
     // Calculate and store the normalization factors for the ISR reweighting
     float isr_norm_dy = 1.;
@@ -868,15 +894,24 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             //Reject not triggered
-            if (!ss::fired_trigger()) continue;
+            if (!isHiggsScan) {
+                if (!ss::fired_trigger()) continue;
+            }
             if (!ss::passes_met_filters()) continue;
 
             if (doCustomSelection) {
 
             }
 
+            if (isHiggsScan) {
+                // make sure the higgs mass point we are considering is the same as chain title
+                if (fabs(mysparms[0]-ss::higgs_mass()) > 0.1) continue;
+            }
+
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
             weight*=scaleLumi;
+
+            if (isHiggsPseudoscalar) weight *= ss::xsec_ps()/ss::xsec();
 
             if (!ss::is_real_data()) {
                 weight *= getTruePUw_Moriond(ss::trueNumInt()[0]);
@@ -1087,6 +1122,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 duplicate_removal::DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
                 if (duplicate_removal::is_duplicate(id)){ continue; }
             }
+
+                // if (istttt) {
+                //     float blah = eventScaleFactor_trigonly(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
+                //     std::cout <<  " blah: " << blah <<  std::endl;
+                // }
 
         // c2numpy_intc(&writer, 3);
         // c2numpy_float64(&writer, 3.3);

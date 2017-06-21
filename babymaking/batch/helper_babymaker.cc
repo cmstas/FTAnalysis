@@ -401,6 +401,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("ndrlt0p4"       , &ndrlt0p4       );
   BabyTree->Branch("gengood"       , &gengood       );
   BabyTree->Branch("nleptonic"       , &nleptonic       );
+  BabyTree->Branch("ntau"       , &ntau       );
 
   if (applyBtagSFs) {
     // setup btag calibration readers
@@ -834,6 +835,7 @@ void babyMaker::InitBabyNtuple(){
     ndrlt0p4 = 0;
     gengood = 0;
     nleptonic = 0;
+    ntau = 0;
 }
 
 //Main function
@@ -1882,6 +1884,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       // Find 4 pairs of daughters from W decays
       std::vector<std::pair<int,int> > genwdaughteridxs;
       std::vector<bool> genwleptonic;
+      std::vector<bool> genwtau;
       for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
           int id = tas::genps_id()[igen];
           int mid = tas::genps_id_mother()[igen];
@@ -1899,10 +1902,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           if (daughter_indices.first == -1 && daughter_indices.second == -1) continue;
           genwdaughteridxs.push_back(daughter_indices);
           genwleptonic.push_back(abs(tas::genps_id()[daughter_indices.first]) <= 16 && abs(tas::genps_id()[daughter_indices.first]) >= 11);
+          genwtau.push_back(abs(tas::genps_id()[daughter_indices.first]) <= 16 && abs(tas::genps_id()[daughter_indices.first]) >= 15);
       }
       // Only good if we found all b's and all W daughters
       gengood = genbidxs.size()==4 && genwleptonic.size()==4;
       nleptonic = std::accumulate(genwleptonic.begin(),genwleptonic.end(),0);
+      ntau = std::accumulate(genwtau.begin(),genwtau.end(),0);
       if (gengood) {
 
 

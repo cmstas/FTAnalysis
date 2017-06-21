@@ -2,7 +2,8 @@
 # will have to reinstate FT environment afterwards :(
 
 # tag="v0.10"
-tag="v0.10_fix"
+# tag="v0.10_fix"
+tag="v0.10_data"
 basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
 
 cut="njets>=2"

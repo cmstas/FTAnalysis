@@ -105,7 +105,6 @@ def get_yields(card, regions="srcr"):
     d_yields["data"] = {}
     d_yields["data"]["central"] = np.array(list(fdata.Get(data_hname))[1:-1])
     d_yields["data"]["error"] = d_yields["data"]["central"]**0.5
-    # print d_yields["data"]
 
     return  d_yields
 
@@ -134,7 +133,10 @@ def print_table(d_yields):
             cent = max(d_yields[proc]["central"][ibin],0.)
             err = d_yields[proc]["error"][ibin]
             if "data" in proc:
-                tojoin.append("{0:.0f}".format(cent))
+                if ibin in [0,1]:
+                    tojoin.append("{0:.0f}".format(cent))
+                else:
+                    tojoin.append("-".format(cent))
             else:
                 tojoin.append("{0:5.2f}$\\pm${1:5.2f}".format(cent,err))
         print " & ".join(tojoin),
