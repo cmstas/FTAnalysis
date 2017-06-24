@@ -19,7 +19,7 @@ if __name__ == "__main__":
                ("flips", "Charge misid.",       r.kGray+2,     0.3),
                ("rares", "Rare SM",             r.kMagenta-7,  0.5),
                ("xg",    "X+#gamma",            r.kViolet+2,   0.5),
-               ("ttww",  "t#bar{t}VV",  r.kAzure-4,     0.2),
+               ("ttvv",  "t#bar{t}VV",  r.kAzure-4,     0.2),
                ("ttz",   "t#bar{t}Z",           r.kGreen-6,    0.2),
                ("fakes", "Nonprompt lep.",      18,            0.35),
                ("tth",   "t#bar{t}H",           r.kBlue-5,     0.2),
@@ -37,6 +37,8 @@ if __name__ == "__main__":
 
           "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4.0 --xAxisLabel H_{T} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.0  "],
           "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel E_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.0  "],
+          "mvis"       : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel m^{vis} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.0  "],
+          "mtvis"      : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel m_{T}^{vis} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.0  "],
           "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel N_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset 0.1  "],
           "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel N_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset 0.1  --makeTable "],
           "mtmin"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel m_{T}^{min} --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  "],
@@ -53,6 +55,7 @@ if __name__ == "__main__":
           # "disc"       : [("br",),   commonopts+"  --isLinear  --xAxisLabel disc  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
           # "disc2"       : [("br",),  commonopts+" --isLinear  --xAxisLabel disc2  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
           # "SRDISC_TOTAL"   : [("",), commonopts+"   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox "],
+          # "ntops"      : [("sr",), commonopts+"   --xAxisLabel N_{tops} --noXaxisUnit --nDivisions 5 --noDivisionLabel  --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset 0.1  --makeTable "],
 
           }
 
@@ -139,4 +142,4 @@ if __name__ == "__main__":
                     dataMCplot(h_data_empty, bgs=bgs, sigs=[h_tttt], sigtitles=["t#bar{t}t#bar{t} x 10"], systs=systs, titles=titles, title=title, subtitle=subtitle, colors=colors, opts=d_newopts, opts_str=opts_str)
 
 
-os.system("niceplots plots plots_tttt_Jun18_test")
+os.system("niceplots plots plots_tttt_Jun21_test")

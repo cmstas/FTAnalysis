@@ -8,7 +8,7 @@ import math
 import glob
 import argparse
 
-do_ttww = True
+do_uncorrfakes = False
 
 class Process(object):
     def __init__(self, mycount, myname, myrootf, myplot, thedir):
@@ -23,6 +23,7 @@ class Process(object):
         self.bb  = "-"
         self.met  = "-"
         self.scale  = "-"
+        self.alphas  = "-"
         self.isrvar  = "-"
         self.fsrvar  = "-"
         self.lepeff  = "-"
@@ -35,7 +36,7 @@ class Process(object):
         self.TTZSF = "-"
         # self.WZSF = "-"
         self.TTH = "-"
-        self.TTWW = "-"
+        self.TTVV = "-"
         # self.WW = "-"
         self.XG = "-"
         self.rares = "-"
@@ -70,6 +71,44 @@ class Process(object):
             else:
                 print self.plot+" not found in "+self.rootf
                 return []
+
+def writeUncorrelatedFakesForProcess(thedir, card, kine, process, processes, lnN=1.3):
+    if process.name=="sig": return #fake signal for MI limits does not need stat unc.
+    ra5 = ""
+    # open file first to read. if one of the hists exists, then we've already called this function
+    # and no need to open the file again and write
+    f = ROOT.TFile(process.rootf)
+
+    name = "_uncorrfakes_"
+
+    h_test = "%s%s%s%s%sUp" % (ra5,process.name,name,kine,1)
+    bypass = True
+    if not f.Get(h_test) or bypass:
+        f = ROOT.TFile(process.rootf,"UPDATE")
+
+    h = f.Get("sr")
+
+    for ibin in range(1,h.GetNbinsX()+1):
+        card.write ("%-40s %-5s " % (("%s%s%s%s%s" % (ra5,process.name,name,kine,ibin)), "shape") )
+        for myprocess in processes:
+            if myprocess.count == process.count:
+                card.write("%-15s " % "1")
+                cent = h.GetBinContent(ibin)
+                hupnewtest = f.Get("%s%s%s%s%sUp" % (ra5,process.name,name,kine,ibin))
+                if not hupnewtest or bypass:
+                    hupnew = h.Clone("%s%s%s%s%sUp" % (ra5,process.name,name,kine,ibin))
+                    hupnew.SetBinContent(ibin,cent*lnN)
+                    hupnew.Write()
+                hdnnewtest = f.Get("%s%s%s%s%sDown" % (ra5,process.name,name,kine,ibin))
+                if not hdnnewtest or bypass:
+                    hdnnew = h.Clone("%s%s%s%s%sDown" % (ra5,process.name,name,kine,ibin))
+                    hdnnew.SetBinContent(ibin,max(cent/lnN,1.e-6))
+                    hdnnew.Write()
+            else:  card.write("%-15s " % ("-"))
+        card.write("\n")
+
+    if not h_test:
+        f.Close()
 
 def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
     if process.name=="sig": return #fake signal for MI limits does not need stat unc.
@@ -224,6 +263,10 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     card.write("%-40s %-5s " % ("pdf","shape"))
     for process in processes: card.write("%-15s " % (process.pdf))
     card.write("\n")
+    #nuisance alphas
+    card.write("%-40s %-5s " % ("alphas","shape"))
+    for process in processes: card.write("%-15s " % (process.alphas))
+    card.write("\n")
 
     #nuisance pu
     card.write("%-40s %-5s " % ("pu","shape"))
@@ -245,9 +288,9 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     for process in processes: card.write("%-15s " % (process.TTH))
     card.write("\n")
 
-    #nuisance TTWW
-    card.write("%-40s %-5s " % ("TTWW","lnN"))
-    for process in processes: card.write("%-15s " % (process.TTWW))
+    #nuisance TTVV
+    card.write("%-40s %-5s " % ("TTVV","lnN"))
+    for process in processes: card.write("%-15s " % (process.TTVV))
     card.write("\n")
 
     # #nuisance WZ
@@ -294,6 +337,8 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
             writeStatForProcess(thedir,card,kine,process,processes, statshape=statshape)
         else:
             writeStatForProcess(thedir,card,kine,process,processes)
+        if process.name in ["fakes"] and do_uncorrfakes:
+            writeUncorrelatedFakesForProcess(thedir,card,kine,process,processes,lnN=1.6)
 
     return
 
@@ -318,8 +363,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     else:
         fakes = Process(6,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     flips = Process(7,"flips","flips_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    if do_ttww:
-        TTWW = Process(8,"ttww","ttww_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+    TTVV = Process(8,"ttvv","ttvv_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     #overwrite nuisances
     lumiunc = "1.025"
     signal.lumi  = lumiunc
@@ -332,6 +376,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal.btag = "1"
     signal.pu = "1"
     signal.scale = "1"
+    signal.alphas = "1"
     signal.isrvar = "1"
     signal.fsrvar = "1"
     signal.pdf = "1"
@@ -374,16 +419,16 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTH.hthlt  = "1"
     TTH.btag = "1"
     TTH.pu = "1"
-    TTWW.TTWW          = "1.5"
-    TTWW.lumi          = lumiunc
-    TTWW.jes  = "1"
-    TTWW.jer  = "1"
-    TTWW.lepeff  = "1.0"
-    TTWW.lephlt  = "1.04"
-    TTWW.hlt  = "1.03"
-    TTWW.hthlt  = "1"
-    TTWW.btag = "1"
-    TTWW.pu = "1"
+    TTVV.TTVV          = "1.5"
+    TTVV.lumi          = lumiunc
+    TTVV.jes  = "1"
+    TTVV.jer  = "1"
+    TTVV.lepeff  = "1.0"
+    TTVV.lephlt  = "1.04"
+    TTVV.hlt  = "1.03"
+    TTVV.hthlt  = "1"
+    TTVV.btag = "1"
+    TTVV.pu = "1"
     # WZ.WZSF = wz_sf
     # WZ.jes  = "1"
     # WZ.btag = "1"
@@ -418,7 +463,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     rares.btag = "1"
     rares.pu = "1"
     if not domcfakes:
-        fakes.fakes = "1.30"
+        if not do_uncorrfakes:
+            fakes.fakes = "1.30"
         fakes.fakes_EWK = "1"
     else:
         fakes.fakes = "1.20"
@@ -437,8 +483,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     processes.append(rares)
     processes.append(fakes)
     processes.append(flips)
-    if do_ttww:
-        processes.append(TTWW)
+    processes.append(TTVV)
 
     if do_expected_data:
         # for proc in processes:

@@ -117,7 +117,7 @@ def print_table(d_yields):
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
     # procs = ["ttw","ttz","tth","xg","rares","flips","fakes","bgtot","data","tttt"]
     colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    procs = ["ttw","ttz","tth","ttww","xg","rares","flips","fakes","bgtot","data","tttt"]
+    procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
     srnames = ["CRZ","CRW","SR1","SR2","SR3","SR4","SR5","SR6","SR7","SR8"]
     for ibin in range(nbins):
         # print ibin
