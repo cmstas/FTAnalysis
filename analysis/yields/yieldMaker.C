@@ -84,6 +84,7 @@ bool makeGenVariationsMC = true;
 TString dir = "v0.10_Jun22_test";
 // TString dir = "v0.10_Jun22_crfit";
 // TString dir = "v0.10_Jun22_mcfakecent";
+// TString dir = "v0.10_Jun22_sens18bins";
 TString tag = "v0.10_fix"; // data is in v0.07 still
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_data/output/skim/";
 
