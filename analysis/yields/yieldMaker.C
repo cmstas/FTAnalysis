@@ -321,11 +321,12 @@ void getyields(){
     TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
 
     //Fill chains
+    tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
+
     ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx.Data()));
     ttttfsrup_chain   ->Add(Form("%s/TTTTfsrup.root"           , pfx.Data()));
     ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx.Data()));
     ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx.Data()));
-    tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
     ttvv_chain->Add(Form("%s/TTHH.root",pfx.Data()));
     ttvv_chain->Add(Form("%s/TTWH.root",pfx.Data()));
     ttvv_chain->Add(Form("%s/TTWW.root",pfx.Data()));
@@ -340,7 +341,6 @@ void getyields(){
     ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
     tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
-
     ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data()));
     // wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
     // dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
@@ -1545,7 +1545,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_met.sr->Fill(ss::met() , weight);
                 p_result.h_mvis.sr->Fill(mvis , weight);
                 p_result.h_mtvis.sr->Fill(mtvis , weight);
-                // p_result.h_ntops.sr->Fill(getNtops() , weight);
+                p_result.h_ntops.sr->Fill(getNtops() , weight);
                 p_result.h_mll.sr->Fill(mll , weight);
                 p_result.h_mtmin.sr->Fill(mtmin , weight);
                 p_result.h_l1pt.sr->Fill(pto1, weight);
@@ -2033,9 +2033,6 @@ void initHistError(bool usePoisson, TH1F* plot) {
   else  plot->Sumw2();
 }
 
-// int getNtops(std::vector<LorentzVector>& bjets
-//                 std::vector<LorentzVector> bjets;
-//                 std::vector<LorentzVector> jets;
 int getNtops() {
     std::vector<LorentzVector> bjets;
     std::vector<LorentzVector> jets;
@@ -2046,32 +2043,43 @@ int getNtops() {
         if (ss::jets_disc()[ijet] > bmed) continue;
         jets.push_back(ss::jets()[ijet]);
     }
+    // std::cout << "begin getNtops() -->" << std::endl;
+    // std::cout << "   found " << jets.size() << " jets and " << bjets.size() << " bjets" << std::endl;
 
-    float cutw = 20.;
-    float cutt = 40.;
+    float cutw = 30.;
+    float cutt = 50.;
     int ntops = 0;
-    std::vector<std::pair<int,int> > used_pairs;
+    std::vector<int> used_ijets;
     for (auto bjet : bjets) {
-        std::pair<int,int> best_pair(-1,-1);
-        float best_dmw = 9999.;
-
+        int best_ijet1 = -1;
+        int best_ijet2 = -1;
+        float best_dmt = cutt;
+        // std::cout << "   considering bjet with pt " << bjet.pt() << std::endl;
         for (unsigned int i = 0; i < jets.size(); i++) {
             for (unsigned int j = i+1; j < jets.size(); j++) {
-                // if (i,j) in used_pairs
                 float dmw = fabs((jets[i]+jets[j]).M()-80.4);
+                float dmt = fabs((jets[i]+jets[j]+bjet).M()-172.5);
                 if (dmw > cutw) continue;
-                if (std::find(used_pairs.begin(), used_pairs.end(), std::make_pair<int,int>(i,j)) != used_pairs.end()) continue;
-                if (dmw < best_dmw) {
-                    best_dmw = dmw;
-                    best_pair.first = i;
-                    best_pair.second = j;
+                if (dmt > cutt) continue;
+                // bool already_used = std::find(used_pairs.begin(), used_pairs.end(), std::make_pair<int,int>(i,j)) != used_pairs.end();
+                bool already_used = (std::find(used_ijets.begin(), used_ijets.end(), i) != used_ijets.end()
+                                    || std::find(used_ijets.begin(), used_ijets.end(), j) != used_ijets.end());
+                // std::cout << "       pair " << i << "," << j << " already used? " << already_used << std::endl;
+                if (already_used) continue;
+                if (dmt < best_dmt) {
+                    // std::cout << "       pair " << i << "," << j << " has better dmt of " << dmt << std::endl;
+                    best_dmt = dmt;
+                    best_ijet1 = i;
+                    best_ijet2 = j;
                 }
             }
         }
-        if (best_pair.first < 0 || best_pair.second < 0) continue;
-        used_pairs.push_back(best_pair);
-        float dmt = fabs((jets[best_pair.first]+jets[best_pair.second]+bjet).M()-172.5);
-        if (dmt < cutt) ntops++;
+        if (best_ijet1 < 0 || best_ijet2 < 0) continue;
+        used_ijets.push_back(best_ijet1);
+        used_ijets.push_back(best_ijet2);
+        // std::cout << "   incrementing ntops" << std::endl;
+        ntops++;
     }
+    // std::cout << "end getNtops() -->" << std::endl;
     return ntops;
 }

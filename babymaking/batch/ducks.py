@@ -5,8 +5,8 @@ import four_top as ft
 
 # make instructions
 instructions = []
-types = ["data"]
-# types = ["backgrounds"]
+# types = ["data"]
+types = ["backgrounds"]
 # types = ["backgrounds","data"]
 for typ in types:
     for ds in ft.d_ds2name[typ].keys():
