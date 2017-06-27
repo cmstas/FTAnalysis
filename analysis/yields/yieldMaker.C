@@ -2034,6 +2034,7 @@ void initHistError(bool usePoisson, TH1F* plot) {
 }
 
 int getNtops() {
+    // Separate out b-tagged jets from non-btagged jets
     std::vector<LorentzVector> bjets;
     std::vector<LorentzVector> jets;
     for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
@@ -2050,6 +2051,10 @@ int getNtops() {
     float cutt = 50.;
     int ntops = 0;
     std::vector<int> used_ijets;
+    // for each bjet, increment ntops if there is a unique pair
+    // of quarks q1,q2 that satisfies
+    //      |m(q1,q2)-mW| < 30
+    //      |m(b,q1,q2)-mtop| < 50
     for (auto bjet : bjets) {
         int best_ijet1 = -1;
         int best_ijet2 = -1;
