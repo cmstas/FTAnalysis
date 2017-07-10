@@ -12,9 +12,11 @@ cd -
 
 export LD_LIBRARY_PATH=$PWD/babymaking/batch/:$LD_LIBRARY_PATH
 
-export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/lib/python2.7/site-packages/:$PYTHONPATH
-export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/:$PYTHONPATH
-export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages/:$PYTHONPATH
+export PYTHONPATH=$PWD/:$PYTHONPATH
+
+# export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/lib/python2.7/site-packages/:$PYTHONPATH
+# export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/:$PYTHONPATH
+# export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages/:$PYTHONPATH
 
 [[ -d babymaking/batch/NtupleTools/ ]] || git clone git@github.com:cmstas/NtupleTools.git babymaking/batch/NtupleTools/
 [[ -d common/Software/ ]] || git clone git@github.com:cmstas/Software.git common/Software/
@@ -24,7 +26,7 @@ export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages
     cd -;
 }
 [[ -d common/${therelease}/src/HiggsAnalysis/CombinedLimit/ ]] || {
-    pushd
+    pushd $(pwd)
     cd $CMSSW_BASE/src
     cmsenv
     git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
