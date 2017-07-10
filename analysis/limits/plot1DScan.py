@@ -117,7 +117,8 @@ def main():
         if args.POI in name_translate:
             fixed_name = name_translate[args.POI]
 
-    yvals = [1., 3.84]
+    # yvals = [1., 3.84]
+    yvals = [1., 4.0]
 
 
     main_scan = BuildScan(args.output, args.POI, [args.main], args.main_color, yvals, args.y_cut)

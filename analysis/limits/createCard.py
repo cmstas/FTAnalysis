@@ -343,6 +343,8 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     return
 
 def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False):
+    # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
+    do_tttt = signal != "tttt"
     #define processes (signal first)
     # if pseudoData:
     #     print "Using pseudo data!"
@@ -364,6 +366,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         fakes = Process(6,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     flips = Process(7,"flips","flips_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     TTVV = Process(8,"ttvv","ttvv_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+    if do_tttt:
+        TTTT = Process(9,"tttt","tttt_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     #overwrite nuisances
     lumiunc = "1.025"
     signal.lumi  = lumiunc
@@ -377,8 +381,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal.pu = "1"
     signal.scale = "1"
     signal.alphas = "1"
-    signal.isrvar = "1"
-    signal.fsrvar = "1"
+    if signal == "tttt":
+        signal.isrvar = "1"
+        signal.fsrvar = "1"
     signal.pdf = "1"
     ttz_sf = "1.40"
     ttw_sf = "1.40"
@@ -484,6 +489,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     processes.append(fakes)
     processes.append(flips)
     processes.append(TTVV)
+    if do_tttt:
+        processes.append(TTTT)
 
     if do_expected_data:
         # for proc in processes:
