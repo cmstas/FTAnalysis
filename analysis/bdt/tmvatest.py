@@ -46,7 +46,8 @@ if dotrain:
     # # extra = "(ht>300)"
     # extra = "(ht>600)"
     sigCut = ROOT.TCut("name == \"tttt\" && "+extra)
-    bgCut = ROOT.TCut("name != \"tttt\" && "+extra) 
+    # bgCut = ROOT.TCut("name != \"tttt\" && "+extra) 
+    bgCut = ROOT.TCut("name == \"ttw\" && "+extra)  # FIXME go back to previous line
     # Prepare the training/testing signal/background  
     factory.PrepareTrainingAndTestTree(sigCut,bgCut,"SplitMode=Random:NormMode=NumEvents:!V") 
      
@@ -54,7 +55,8 @@ if dotrain:
                        ":".join([
                            "!H",
                            "!V",
-                           "NTrees=2000", # orig 500
+                           # "NTrees=2000", # orig 500
+                           "NTrees=500", # orig 500
                            # "NTrees=150",
                            "nEventsMin=150",
                            "MaxDepth=5", # orig 4
@@ -76,7 +78,8 @@ f_out = ROOT.TFile("LearningOutput.root")
  
 normfact = 10
 # xmin,xmax = -0.55, 0.95
-xmin,xmax = -0.4, 0.7
+# xmin,xmax = -0.4, 0.7
+xmin,xmax = -0.45, 0.95
 Histo_training_S = ROOT.TH1D('Histo_training_S' , '%i x S (Train)'%normfact , 25 , xmin,xmax)
 Histo_training_B = ROOT.TH1D('Histo_training_B' , 'B (Train)'               , 25 , xmin,xmax)
 Histo_testing_S = ROOT.TH1D('Histo_testing_S'   , '%i x S (Test)'%normfact  , 25 , xmin,xmax)

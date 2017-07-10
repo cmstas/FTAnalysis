@@ -402,6 +402,12 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("gengood"       , &gengood       );
   BabyTree->Branch("nleptonic"       , &nleptonic       );
   BabyTree->Branch("ntau"       , &ntau       );
+  BabyTree->Branch("nleptonicW"       , &nleptonicW       );
+  BabyTree->Branch("nhadronicW"       , &nhadronicW       );
+  BabyTree->Branch("nW"       , &nW       );
+  BabyTree->Branch("leptonicWSF"       , &leptonicWSF       );
+  BabyTree->Branch("hadronicWSF"       , &hadronicWSF       );
+  BabyTree->Branch("decayWSF"       , &decayWSF       );
 
   if (applyBtagSFs) {
     // setup btag calibration readers
@@ -836,6 +842,12 @@ void babyMaker::InitBabyNtuple(){
     gengood = 0;
     nleptonic = 0;
     ntau = 0;
+    nleptonicW = 0;
+    nhadronicW = 0;
+    nW = 0;
+    leptonicWSF = 0.;
+    hadronicWSF = 0.;
+    decayWSF = 0.;
 }
 
 //Main function
@@ -880,12 +892,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   bool get_parentage = true;
 
-    int higgs_scan = 0;
-  if (isFastsim == 101) {
-      if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
-      if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
-      if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
-  }
+  int higgs_scan = 0;
+  if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
+  if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
+  if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
 
   //Fill lepton variables
   std::pair<hyp_result_t,Lep> best_hyp_info_withlep3 = chooseBestHyp(verbose, /*doclass8=*/ false);
@@ -913,8 +923,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     for (int i = 0; i < 100; i++) babyErrorStruct.cs_pdf[i] = tas::genweights().at(i+10);
   }
 
+
   //Corrected MET
   int use_cleaned_met = tas::evt_isRealData();
+  
+  if (filename.find("Run2017") != std::string::npos) use_cleaned_met = false;
+
   pair <float, float> T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
   met = T1CHSMET.first;
   metPhi = T1CHSMET.second;
@@ -932,20 +946,15 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     kfactor = tas::evt_kfactor();
 
-    if (isFastsim > 0){
-        sparms = tas::sparm_values();
-        sparmNames = tas::sparm_names();
-        if (higgs_scan > 0) {
-            for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
-                if (abs(tas::genps_id()[gp])==25) {
-                    higgs_mass = floor(tas::genps_p4()[gp].M() + 0.5);
-                    break;
-                }
+    if (higgs_scan > 0) {
+        for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
+            if (abs(tas::genps_id()[gp])==25) {
+                higgs_mass = floor(tas::genps_p4()[gp].M() + 0.5);
+                break;
             }
-            xsec = xsec_higgs(higgs_scan, higgs_mass);
-            xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
-            scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
         }
+        xsec = xsec_higgs(higgs_scan, higgs_mass);
+        xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
     }
 
 
@@ -1856,7 +1865,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           }
       }
   }
-  passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : (is_real_data ? passesMETfilters2016(is_real_data) : true);
+  passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data);
   
 
   if (is_real_data && isReMiniAOD) {
@@ -1870,6 +1879,36 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
   if (!is_real_data) {
+
+      float pdgleptW = 0.3258;
+      float genleptW = 1.0/3;
+      nleptonicW = 0;
+      nW = 0;
+      nhadronicW = 0;
+      for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+          int id = tas::genps_id()[igen];
+          if (abs(id) != 24) continue;
+          int smid = tas::genps_id_simplemother()[igen];
+          if (abs(smid) == 24) continue;
+          int stat = tas::genps_status()[igen];
+          if (stat != 22 && stat != 52) continue;
+          nW++;
+      }
+      // Sometimes, we lose a W in the event record for ttW. Pin it to 3 if it's not 3.
+      if (nW != 3 && (filename.find("TTWJetsToLNu") != std::string::npos)) nW = 3;
+      for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+          int id = tas::genps_id()[igen];
+          int mid = tas::genps_id_mother()[igen];
+          if (abs(id) != 12 && abs(id) != 14 && abs(id) != 16) continue;
+          if (abs(mid) != 24) continue;
+          if (!(tas::genps_isPromptFinalState()[igen])) continue;
+          nleptonicW++;
+      }
+      nhadronicW = nW - nleptonicW;
+      leptonicWSF = pow((pdgleptW/genleptW),nleptonicW);
+      hadronicWSF = pow(((1-pdgleptW)/(1-genleptW)),nhadronicW);
+      decayWSF = leptonicWSF*hadronicWSF;
+
       // Find 4 bquarks
       std::vector<int> genbidxs;
       for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
@@ -1948,6 +1987,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           // Match pfjets to qidxs, so below vector indexes qidxtomatch
           std::vector<int> alreadymatched;
           jet_type.clear();
+          bool ignore_already_found = true;
           for (unsigned int ij = 0; ij < jets.size(); ij++){
               auto jet = jets[ij];
               float mindR = 0.40;
@@ -1955,7 +1995,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               bool foundgenjet = false;
               for (unsigned int iq = 0; iq < qidxtomatch.size(); iq++) {
                   auto genp4 = tas::genps_p4()[qidxtomatch[iq]];
-                  if (std::find(alreadymatched.begin(), alreadymatched.end(), iq) != alreadymatched.end()) continue;
+                  if (!ignore_already_found && std::find(alreadymatched.begin(), alreadymatched.end(), iq) != alreadymatched.end()) continue;
                   float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
                   // ij iq dR genp4.pt() jet.pt()
                   if (dR < mindR) {
@@ -1983,7 +2023,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               bool foundgenjet = false;
               for (unsigned int iq = 0; iq < qidxtomatch.size(); iq++) {
                   auto genp4 = tas::genps_p4()[qidxtomatch[iq]];
-                  if (std::find(alreadymatched.begin(), alreadymatched.end(), iq) != alreadymatched.end()) continue;
+                  if (!ignore_already_found && std::find(alreadymatched.begin(), alreadymatched.end(), iq) != alreadymatched.end()) continue;
                   float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
                   // std::cout << " ij: " << ij << " iq: " << iq << " dR: " << dR << " genp4.pt(): " << genp4.pt() << " jet.pt(): " << jet.pt() << std::endl;
                   // ij iq dR genp4.pt() jet.pt()

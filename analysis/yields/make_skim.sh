@@ -3,7 +3,9 @@
 
 # tag="v0.10"
 # tag="v0.10_fix"
-tag="v0.10_data"
+# tag="v0.10_data"
+# tag="v0.10_WSF"
+tag="v0.10_WSFv2"
 basedir="/nfs-7/userdata/namin/tupler_babies/merged//FT/${tag}/output/"
 
 cut="njets>=2"

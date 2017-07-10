@@ -13,6 +13,9 @@ bool applyThirdLeptonVeto() { return false; }
 #include "pu_weights.h"
 #include "lepton_sf.h"
 
+#include "LaurentSFs_fastsim.h"
+#include "lepton_sf_fastsim.h"
+
 float fakeRate(int id, float pt, float eta, float ht) { 
   if (ht>300.) {
     if (abs(id)==11) return electronFakeRate(pt,eta);

@@ -172,6 +172,12 @@ class babyMaker {
     bool gengood;
     int nleptonic;
     int ntau;
+    int nleptonicW;
+    int nhadronicW;
+    int nW;
+    float leptonicWSF;
+    float hadronicWSF;
+    float decayWSF;
 
     //Jets
     int njets_raw;

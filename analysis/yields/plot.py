@@ -20,10 +20,10 @@ if __name__ == "__main__":
                ("rares", "Rare SM",             r.kMagenta-7,  0.5),
                ("xg",    "X+#gamma",            r.kViolet+2,   0.5),
                ("ttvv",  "t#bar{t}VV",  r.kAzure-4,     0.2),
-               ("ttz",   "t#bar{t}Z",           r.kGreen-6,    0.2),
+               ("ttz",   "t#bar{t}Z",           r.kGreen-6,    0.35),
                ("fakes", "Nonprompt lep.",      18,            0.35),
-               ("tth",   "t#bar{t}H",           r.kBlue-5,     0.2),
-               ("ttw",   "t#bar{t}W",           r.kGreen+3,    0.2),
+               ("tth",   "t#bar{t}H",           r.kBlue-5,     0.35),
+               ("ttw",   "t#bar{t}W",           r.kGreen+3,    0.35),
                ]
 
     bgnames, titles, colors, systs = map(list,zip(*bginfo))
@@ -54,11 +54,13 @@ if __name__ == "__main__":
           # "l3pt"       : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel ordered l3pt --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  "],
           # "disc"       : [("br",),   commonopts+"  --isLinear  --xAxisLabel disc  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
           # "disc2"       : [("br",),  commonopts+" --isLinear  --xAxisLabel disc2  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
-          # "SRDISC_TOTAL"   : [("",), commonopts+"   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox "],
+          "SRDISC_TOTAL"   : [("",), commonopts+"   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox "],
           "ntops"      : [("sr",), commonopts+"   --xAxisLabel N_{tops} --noXaxisUnit --nDivisions 5 --noDivisionLabel  --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset 0.1  --makeTable "],
+          "ntopness"      : [("sr",), commonopts+"     --xAxisLabel N_{tops}ness --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.0  "],
 
           }
 
+    do_stats = False
     for key in d_opts_br.keys():
         types, opts_str = d_opts_br[key]
         for typ in types:
@@ -85,18 +87,21 @@ if __name__ == "__main__":
             h_tttt.Sumw2()
             h_tttt.Scale(5.0)
 
-            if key == "SRCR_TOTAL":
-                make_scan(cards_dir)
+            do_unblind = True
+
+            if do_stats and key == "SRCR_TOTAL":
+            # if key == "SRCR_TOTAL":
+                make_scan(cards_dir, do_blind=not do_unblind)
                 os.system("cp scan.pdf plots/scan.pdf")
 
-            if key in ["SRCR_TOTAL"]:
+            if do_stats and key in ["SRCR_TOTAL"]:
                 regions="srcr"
                 if "DISC" in key: regions="srdisc"
                 d_lims = get_lims(card=cards_dir, regions=regions, redocard=True, redolimits=True, domcfakes=False)
                 exp, expp1, expm1 = d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"]
                 subtitle = "#sigma^{UL}_{exp} = %.2f^{+%.1f}_{-%.1f} fb" % (exp, expp1, expm1)
 
-            do_unblind = typ in ["ttwcr","ttzcr"]
+            # do_unblind = typ in ["ttwcr","ttzcr", "sr"]
             do_blind = not do_unblind
             if do_unblind:
                 d_newopts["noTextBetweenPads"] = True
@@ -118,13 +123,12 @@ if __name__ == "__main__":
                 new_d_newopts["outputName"] = d_newopts["outputName"].replace(".pdf","_blindstack.pdf")
                 dataMCplot(h_data_empty, bgs=new_bgs, systs=new_systs, titles=new_titles, title="Prefit", subtitle=subtitle, colors=new_colors, opts=new_d_newopts, opts_str=opts_str)
 
-            if key == "SRCR_TOTAL":
-                d_postfit = get_postfit_dict("mlfitname.root")
-                new_d_newopts["outputName"] = d_newopts["outputName"].replace(".pdf","_blindstackpostfit.pdf")
-                postfit_bgs = [d_postfit[bg.GetName().rsplit("_",1)[-1]] for bg in new_bgs]
-                h_totalbgsyst = d_postfit["total_background"]
-
-                dataMCplot(h_data_empty, bgs=postfit_bgs, titles=new_titles, title="Postfit", subtitle=subtitle, colors=new_colors, opts=new_d_newopts, opts_str=opts_str, total_syst=h_totalbgsyst)
+            # if do_stats and key == "SRCR_TOTAL":
+            #     d_postfit = get_postfit_dict("mlfitname.root")
+            #     new_d_newopts["outputName"] = d_newopts["outputName"].replace(".pdf","_blindstackpostfit.pdf")
+            #     postfit_bgs = [d_postfit[bg.GetName().rsplit("_",1)[-1]] for bg in new_bgs]
+            #     h_totalbgsyst = d_postfit["total_background"]
+            #     dataMCplot(h_data_empty, bgs=postfit_bgs, titles=new_titles, title="Postfit", subtitle=subtitle, colors=new_colors, opts=new_d_newopts, opts_str=opts_str, total_syst=h_totalbgsyst)
 
             if do_blind:
                 d_newopts["outputName"] = d_newopts["outputName"].replace(".pdf","_blind.pdf")
@@ -142,4 +146,4 @@ if __name__ == "__main__":
                     dataMCplot(h_data_empty, bgs=bgs, sigs=[h_tttt], sigtitles=["t#bar{t}t#bar{t} x 5"], systs=systs, titles=titles, title=title, subtitle=subtitle, colors=colors, opts=d_newopts, opts_str=opts_str)
 
 
-os.system("niceplots plots plots_tttt_Jun21_test")
+os.system("niceplots plots plots_tttt_Jun30_secret")

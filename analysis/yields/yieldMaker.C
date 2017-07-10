@@ -25,7 +25,7 @@ float bmed = 0.6324;
 float btight = 0.8958;
 
 int nsr = getNsrsTTTT();
-int nsrdisc = 10; //getNsrsTTTT();
+int nsrdisc = 6; //getNsrsTTTT();
 int nCR = 2;
 
 bool doCustomSelection = false;
@@ -72,7 +72,7 @@ bool makeGenVariationsMC = true;
 
 // // preapproval
 // TString dir = "v0.10_Jun19";
-// TString tag = "v0.10_fix"; // data is in v0.07 still
+// TString tag = "v0.10_fix";
 // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
 
 // TString dir = "v0.10_Jun21_sync";
@@ -81,11 +81,15 @@ bool makeGenVariationsMC = true;
 
 
 // latest
-TString dir = "v0.10_Jun22_test";
 // TString dir = "v0.10_Jun22_crfit";
 // TString dir = "v0.10_Jun22_mcfakecent";
 // TString dir = "v0.10_Jun22_sens18bins";
-TString tag = "v0.10_fix"; // data is in v0.07 still
+// TString dir = "v0.10_Jun22_sens8bins";
+// TString dir = "v0.10_Jun22_unblind";
+// TString dir = "v0.10_Jul6_test";
+TString dir = "v0.10_Jul6_WSF";
+TString tag = "v0.10_WSFv2"; // data is in v0.07 still
+// TString tag = "v0.10_fix"; // data is in v0.07 still
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_data/output/skim/";
 
 
@@ -203,6 +207,7 @@ struct plots_t  {
     triple_t h_mvis;
     triple_t h_mtvis;
     triple_t h_ntops;
+    triple_t h_ntopness;
 };
 
 
@@ -218,7 +223,7 @@ void writeStatUpDown(TH1F* central,string name,bool down);
 void writeStat(TH1F* central,string name);
 void writeHTHltSyst(TH1F* central,string name,TString kine);
 void initHistError(bool usePoisson, TH1F* plot);
-int getNtops();
+std::pair<int,float> getNtops();
 
 void getyields(){
 
@@ -315,8 +320,8 @@ void getyields(){
     TChain *fakes_chain   = new TChain("t","fakes");
     //signals full sim
     
-  // #include "higgs_scan.h"
-  // #include "higgs_scan_ps.h"
+  #include "higgs_scan_v2.h"
+  #include "higgs_scan_ps_v2.h"
 
     TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
 
@@ -457,6 +462,7 @@ void getyields(){
     WRITE(h_mvis.sr)    ; WRITE(h_mvis.ttzcr)    ; WRITE(h_mvis.ttwcr)    ; WRITE(h_mvis.br)    ;
     WRITE(h_mtvis.sr)  ; WRITE(h_mtvis.ttzcr)  ; WRITE(h_mtvis.ttwcr)  ; WRITE(h_mtvis.br)  ;
     WRITE(h_ntops.sr)  ; 
+    WRITE(h_ntopness.sr)  ; 
 
     WRITE(h_mid1.br);
     WRITE(h_mid2.br);
@@ -520,7 +526,9 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     reader->AddSpectator("ptl2",&tree_ptl2);
     reader->AddSpectator("SR",&tree_SR);
 
-    reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
+    // reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
+    reader->BookMVA("BDT","TMVAClassification_BDT_500trees.weights.xml");
+    // reader->BookMVA("BDT","TMVAClassification_BDT_bgttw.weights.xml");
 
     // out_file->cd();
 
@@ -596,9 +604,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_mu_l1pt.sr  = new TH1F(Form("sr_mu_l1pt_%s"    , chainTitleCh) , Form("mu_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
     p_result.h_mu_l2pt.sr  = new TH1F(Form("sr_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
     p_result.h_mu_l3pt.sr  = new TH1F(Form("sr_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mvis.sr      = new TH1F(Form("sr_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 25      , 0    , 2500);
-    p_result.h_mtvis.sr      = new TH1F(Form("sr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 25      , 0    , 1000);
+    p_result.h_mvis.sr      = new TH1F(Form("sr_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 15      , 250    , 2750);
+    p_result.h_mtvis.sr      = new TH1F(Form("sr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
     p_result.h_ntops.sr      = new TH1F(Form("sr_ntops_%s"        , chainTitleCh) , Form("ntops_%s"        , chainTitleCh) , 5      , -0.5    , 4.5);
+    p_result.h_ntopness.sr      = new TH1F(Form("sr_ntopness_%s"        , chainTitleCh) , Form("ntopness_%s"        , chainTitleCh) , 15      , 0., 0.75);
 
     p_result.h_ht.ttzcr       = new TH1F(Form("ttzcr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.ttzcr      = new TH1F(Form("ttzcr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
@@ -619,7 +628,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_mu_l2pt.ttzcr  = new TH1F(Form("ttzcr_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
     p_result.h_mu_l3pt.ttzcr  = new TH1F(Form("ttzcr_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
     p_result.h_mvis.ttzcr      = new TH1F(Form("ttzcr_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 25      , 0    , 2500);
-    p_result.h_mtvis.ttzcr      = new TH1F(Form("ttzcr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 25      , 0    , 1000);
+    p_result.h_mtvis.ttzcr      = new TH1F(Form("ttzcr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
 
     p_result.h_ht.ttwcr       = new TH1F(Form("ttwcr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.ttwcr      = new TH1F(Form("ttwcr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
@@ -640,7 +649,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_mu_l2pt.ttwcr  = new TH1F(Form("ttwcr_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
     p_result.h_mu_l3pt.ttwcr  = new TH1F(Form("ttwcr_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
     p_result.h_mvis.ttwcr      = new TH1F(Form("ttwcr_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 25      , 0    , 2500);
-    p_result.h_mtvis.ttwcr      = new TH1F(Form("ttwcr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 25      , 0    , 1000);
+    p_result.h_mtvis.ttwcr      = new TH1F(Form("ttwcr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
 
     p_result.h_ht.br       = new TH1F(Form("br_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.br      = new TH1F(Form("br_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
@@ -661,7 +670,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_mu_l2pt.br  = new TH1F(Form("br_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
     p_result.h_mu_l3pt.br  = new TH1F(Form("br_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
     p_result.h_mvis.br      = new TH1F(Form("br_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 25      , 0    , 2500);
-    p_result.h_mtvis.br      = new TH1F(Form("br_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 25      , 0    , 1000);
+    p_result.h_mtvis.br      = new TH1F(Form("br_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
 
     p_result.h_mid1.br     = new TH1F(Form("br_mid1_%s"       , chainTitleCh) , Form("mid1_%s"       , chainTitleCh) , 5       , -2    , 3);
     p_result.h_mid2.br     = new TH1F(Form("br_mid2_%s"       , chainTitleCh) , Form("mid2_%s"       , chainTitleCh) , 5       , -2    , 3);
@@ -888,7 +897,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         samesign.Init(tree);
 
 
-        if (istttt && makeGenVariationsMC) {
+        if ((istttt||isHiggsScan) && makeGenVariationsMC) {
             TH1F *cs_hist = 0;
             for (auto&& keyAsObj : *file->GetListOfKeys()){
                 auto key = (TKey*) keyAsObj;
@@ -933,9 +942,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             //Reject not triggered
-            if (!isHiggsScan) {
-                if (!ss::fired_trigger()) continue;
-            }
+            if (!ss::fired_trigger()) continue;
             if (!ss::passes_met_filters()) continue;
 
             if (doCustomSelection) {
@@ -962,6 +969,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
 
             if (isHiggsPseudoscalar) weight *= ss::xsec_ps()/ss::xsec();
+
+            if (!ss::is_real_data()) weight *= ss::decayWSF();
 
             if (!ss::is_real_data()) {
                 weight *= getTruePUw_Moriond(ss::trueNumInt()[0]);
@@ -1119,6 +1128,35 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 }
             }
 
+            // // Before any real continue statements
+            //     if ( ss::event()==1005336 || ss::event()==1006314 || ss::event()==1008479 || ss::event()==1009254 || ss::event()==1010876 || ss::event()==101671 || ss::event()==1016768 || ss::event()==1019408 || ss::event()==1022705 || ss::event()==1028170 || ss::event()==1030143 || ss::event()==1032198 || ss::event()==1032389 || ss::event()==1032455 || ss::event()==1036135 || ss::event()==1037830 || ss::event()==1037956 || ss::event()==1039352 || ss::event()==1042593 || ss::event()==1042741 || ss::event()==1043427 || ss::event()==104549 || ss::event()==104553 || ss::event()==1047421 || ss::event()==1054276 || ss::event()==1063334 || ss::event()==1063763 || ss::event()==1068999 || ss::event()==1070192 || ss::event()==1074142 || ss::event()==1075459 || ss::event()==1075840 || ss::event()==1076337 || ss::event()==1076462 || ss::event()==1078925 || ss::event()==1079158 || ss::event()==1079244 || ss::event()==1079634 || ss::event()==1081267 || ss::event()==1081557 || ss::event()==1082285 || ss::event()==1083335 || ss::event()==1083649 || ss::event()==1084089 || ss::event()==1091511 || ss::event()==1092166 || ss::event()==110387 || ss::event()==1109435 || ss::event()==110957 || ss::event()==1110582 || ss::event()==1111580 || ss::event()==1111817 || ss::event()==1112757 || ss::event()==1112980 || ss::event()==1114212 || ss::event()==1117607 || ss::event()==1120281 || ss::event()==112149 || ss::event()==1122094 || ss::event()==1126564 || ss::event()==1126637 || ss::event()==1130057 || ss::event()==1131439 || ss::event()==1131694 || ss::event()==1132669 || ss::event()==1134589 || ss::event()==1134967 || ss::event()==1135665 || ss::event()==1135941 || ss::event()==1136036 || ss::event()==1136143 || ss::event()==1137489 || ss::event()==1143724 || ss::event()==1145006 || ss::event()==1146851 || ss::event()==1147852 || ss::event()==1155272 || ss::event()==1162988 || ss::event()==1164374 || ss::event()==1166037 || ss::event()==1171445 || ss::event()==1178948 || ss::event()==1179241 || ss::event()==1180272 || ss::event()==1180966 || ss::event()==1184423 || ss::event()==1184813 || ss::event()==1185696 || ss::event()==1186504 || ss::event()==1189719 || ss::event()==1193795 || ss::event()==1194809 || ss::event()==1194993 || ss::event()==1199012 || ss::event()==1200084 || ss::event()==1202161 || ss::event()==1203320 || ss::event()==1203665 || ss::event()==120677 || ss::event()==1208453 || ss::event()==1212152 
+            //     || ss::event()==1213341 || ss::event()==1219043 || ss::event()==121951 || ss::event()==1220544 || ss::event()==1222605 || ss::event()==1225234 || ss::event()==1226430 || ss::event()==1228769 || ss::event()==122976 || ss::event()==1231038 || ss::event()==1232346 || ss::event()==1235637 || ss::event()==1240160 || ss::event()==124137 || ss::event()==1242117 || ss::event()==1242603 || ss::event()==1246484 || ss::event()==1248770 || ss::event()==1252490 || ss::event()==1255197 || ss::event()==1258521 || ss::event()==1258588 || ss::event()==1259800 || ss::event()==1260177 || ss::event()==1261793 || ss::event()==1265086 || ss::event()==1265710 || ss::event()==1267035 || ss::event()==1267257 || ss::event()==1267325 || ss::event()==1267552 || ss::event()==1269065 || ss::event()==1270632 || ss::event()==1273472 || ss::event()==1276433 || ss::event()==1276473 || ss::event()==1278634 || ss::event()==1279435 || ss::event()==1280577 || ss::event()==1286369 || ss::event()==1286778 || ss::event()==1286781 || ss::event()==1288293 || ss::event()==1289757 || ss::event()==1290160 || ss::event()==1291118 || ss::event()==1291551 || ss::event()==1292509 || ss::event()==1295238 || ss::event()==1298014 || ss::event()==1299129 || ss::event()==1299474 || ss::event()==1299516 || ss::event()==1304710 || ss::event()==1312217 || ss::event()==1317717 || ss::event()==1321726 || ss::event()==1329026 || ss::event()==1331730 || ss::event()==133342 || ss::event()==1334552 || ss::event()==1335679 || ss::event()==1341232 || ss::event()==1346500 || ss::event()==1346873 || ss::event()==1348086 || ss::event()==1349052 || ss::event()==1349173 || ss::event()==1349294 || ss::event()==1350155 || ss::event()==1350605 || ss::event()==1351070 || ss::event()==1352128 || ss::event()==1353832 || ss::event()==135529 || ss::event()==1356135 || ss::event()==1357509 || ss::event()==1361728 || ss::event()==1363564 || ss::event()==1364719 || ss::event()==1365287 || ss::event()==1369677 || ss::event()==1371989 || ss::event()==1373478 || ss::event()==1375476 || ss::event()==1379515 || ss::event()==1379744 || ss::event()==1380415 || ss::event()==1380761 || ss::event()==1381705 || ss::event()==1389175 || ss::event()==1389200 || ss::event()==1390228 || ss::event()==1393899 || ss::event()==1396335 || ss::event()==1396617 || ss::event()==1397849 || ss::event()==1400438 || ss::event()==1410583 || ss::event()==1411054 || ss::event()==1412640 
+            //     || ss::event()==1414106 || ss::event()==1414630 || ss::event()==1416141 || ss::event()==1417057 || ss::event()==1417723 || ss::event()==1419192 || ss::event()==1431962 || ss::event()==1438291 || ss::event()==1442166 || ss::event()==1447489 || ss::event()==1449986 || ss::event()==1450658 || ss::event()==1451553 || ss::event()==1457142 || ss::event()==1458604 || ss::event()==1458834 || ss::event()==1461914 || ss::event()==1461996 || ss::event()==1462159 || ss::event()==1462708 || ss::event()==1464990 || ss::event()==146579 || ss::event()==1469627 || ss::event()==1472626 || ss::event()==1472830 || ss::event()==1473819 || ss::event()==1474074 || ss::event()==1475398 || ss::event()==147620 || ss::event()==1476875 || ss::event()==147930 || ss::event()==1479343 || ss::event()==1480651 || ss::event()==1481178 || ss::event()==1483013 || ss::event()==1484356 || ss::event()==1485570 || ss::event()==1488659 || ss::event()==1490932 || ss::event()==1492830 || ss::event()==149290 || ss::event()==1493639 || ss::event()==1496953 || ss::event()==1499707 || ss::event()==1502717 || ss::event()==1504029 || ss::event()==1505312 || ss::event()==1506759 || ss::event()==1510387 || ss::event()==1510507 || ss::event()==1512030 || ss::event()==1512795 || ss::event()==1514874 || ss::event()==1515706 || ss::event()==1518394 || ss::event()==1520621 || ss::event()==1521886 || ss::event()==1521917 || ss::event()==1523992 || ss::event()==1528784 || ss::event()==1530483 || ss::event()==1530711 || ss::event()==1531974 || ss::event()==1537115 || ss::event()==1537431 || ss::event()==1537461 || ss::event()==1537535 || ss::event()==153904 || ss::event()==1541084 || ss::event()==1541646 || ss::event()==1542093 || ss::event()==1544543 || ss::event()==1546922 || ss::event()==1547585 || ss::event()==1548514 || ss::event()==1551622 || ss::event()==155211 || ss::event()==1557179 || ss::event()==1558218 || ss::event()==1561448 || ss::event()==1565898 || ss::event()==1569042 || ss::event()==1570072 || ss::event()==1570801 || ss::event()==157144 || ss::event()==1571809 || ss::event()==1572236 || ss::event()==1574938 || ss::event()==1575365 || ss::event()==1578770 || ss::event()==1582788 || ss::event()==1584855 || ss::event()==1586405 || ss::event()==1588227 || ss::event()==1588845 || ss::event()==1592621 || ss::event()==1596889 || ss::event()==1598738 || ss::event()==1603545 || ss::event()==160592 || ss::event()==1606309 
+            //     || ss::event()==1608070 || ss::event()==1608245 || ss::event()==1609402 || ss::event()==1609719 || ss::event()==1609959 || ss::event()==1610930 || ss::event()==1611187 || ss::event()==1611344 || ss::event()==1613546 || ss::event()==1614566 || ss::event()==1615702 || ss::event()==1620026 || ss::event()==1632856 || ss::event()==1633090 || ss::event()==1637212 || ss::event()==1641802 || ss::event()==1646594 || ss::event()==1652373 || ss::event()==1652403 || ss::event()==1658362 || ss::event()==1661890 || ss::event()==1662276 || ss::event()==1664111 || ss::event()==1665635 || ss::event()==1666355 || ss::event()==1667309 || ss::event()==1672202 || ss::event()==167512 || ss::event()==1675389 || ss::event()==1675949 || ss::event()==1685554 || ss::event()==1687110 || ss::event()==1688282 || ss::event()==1693048 || ss::event()==169916 || ss::event()==1700371 || ss::event()==1701095 || ss::event()==1706020 || ss::event()==1708627 || ss::event()==1708649 || ss::event()==1710652 || ss::event()==1710981 || ss::event()==1715076 || ss::event()==1716446 || ss::event()==1720016 || ss::event()==1722235 || ss::event()==1725412 || ss::event()==1730850 || ss::event()==1734654 || ss::event()==173495 || ss::event()==1736391 || ss::event()==1737368 || ss::event()==1738153 || ss::event()==1739626 || ss::event()==1742140 || ss::event()==1742439 || ss::event()==1743724 || ss::event()==1748478 || ss::event()==1752576 || ss::event()==1756479 || ss::event()==1756898 || ss::event()==1757421 || ss::event()==1759247 || ss::event()==1766544 || ss::event()==1768224 || ss::event()==1771110 || ss::event()==1772073 || ss::event()==1773925 || ss::event()==1774674 || ss::event()==1779360 || ss::event()==1781602 || ss::event()==1781732 || ss::event()==1783472 || ss::event()==1784754 || ss::event()==178527 || ss::event()==1786858 || ss::event()==1786962 || ss::event()==1791930 || ss::event()==179246 || ss::event()==1795327 || ss::event()==1796058 || ss::event()==1796845 || ss::event()==179719 || ss::event()==1797317 || ss::event()==1800573 || ss::event()==1801234 || ss::event()==1804520 || ss::event()==1804765 || ss::event()==1806897 || ss::event()==1810307 || ss::event()==1810454 || ss::event()==1810730 || ss::event()==1811788 || ss::event()==1813363 || ss::event()==1816226 || ss::event()==1816667 || ss::event()==1816797 || ss::event()==1817016 || ss::event()==1818340 || ss::event()==1818437 || ss::event()==1820057 
+            //     || ss::event()==1820249 || ss::event()==1820752 || ss::event()==1824029 || ss::event()==1825114 || ss::event()==1825789 || ss::event()==1830666 || ss::event()==1832384 || ss::event()==1833298 || ss::event()==1836896 || ss::event()==1837752 || ss::event()==1840800 || ss::event()==1841349 || ss::event()==1843467 || ss::event()==1848622 || ss::event()==1848845 || ss::event()==1850714 || ss::event()==1851409 || ss::event()==1851651 || ss::event()==1853037 || ss::event()==1855390 || ss::event()==1856485 || ss::event()==1857221 || ss::event()==1858749 || ss::event()==1859143 || ss::event()==185921 || ss::event()==186470 || ss::event()==186475 || ss::event()==1865175 || ss::event()==1865394 || ss::event()==186752 || ss::event()==186867 || ss::event()==187283 || ss::event()==1875022 || ss::event()==1876734 || ss::event()==1878514 || ss::event()==188142 || ss::event()==1885123 || ss::event()==1888992 || ss::event()==1891092 || ss::event()==1892617 || ss::event()==1893634 || ss::event()==1897318 || ss::event()==1901067 || ss::event()==1901471 || ss::event()==1903220 || ss::event()==1907114 || ss::event()==1907954 || ss::event()==1909481 || ss::event()==1910009 || ss::event()==1913025 || ss::event()==1913621 || ss::event()==1914562 || ss::event()==1916092 || ss::event()==1920042 || ss::event()==1920391 || ss::event()==1921495 || ss::event()==1923332 || ss::event()==1925063 || ss::event()==1929520 || ss::event()==1935437 || ss::event()==193578 || ss::event()==1939422 || ss::event()==1944552 || ss::event()==194471 || ss::event()==1945259 || ss::event()==1945420 || ss::event()==1948335 || ss::event()==1950543 || ss::event()==1951227 || ss::event()==1952929 || ss::event()==1955545 || ss::event()==195917 || ss::event()==1959853 || ss::event()==1960878 || ss::event()==1964617 || ss::event()==1964982 || ss::event()==1967944 || ss::event()==1969104 || ss::event()==1969522 || ss::event()==1970496 || ss::event()==1971358 || ss::event()==1974656 || ss::event()==1974889 || ss::event()==1978110 || ss::event()==1979371 || ss::event()==1982368 || ss::event()==1985354 || ss::event()==1988805 || ss::event()==1989890 || ss::event()==1992974 || ss::event()==1993254 || ss::event()==1996415 || ss::event()==199710 || ss::event()==2003175 || ss::event()==2003512 || ss::event()==200678 || ss::event()==2011469 || ss::event()==201515 || ss::event()==2015582 || ss::event()==2016005 || ss::event()==2020006 
+            //     || ss::event()==2021745 || ss::event()==2023132 || ss::event()==2024750 || ss::event()==2034912 || ss::event()==2036490 || ss::event()==2037051 || ss::event()==2037251 || ss::event()==2037649 || ss::event()==2039922 || ss::event()==2041189 || ss::event()==2041360 || ss::event()==2044639 || ss::event()==2045175 || ss::event()==2045557 || ss::event()==205086 || ss::event()==2050940 || ss::event()==2051186 || ss::event()==2052205 || ss::event()==2053244 || ss::event()==2053861 || ss::event()==205635 || ss::event()==2056435 || ss::event()==2057492 || ss::event()==2057596 || ss::event()==2058748 || ss::event()==2060262 || ss::event()==2062732 || ss::event()==2063794 || ss::event()==2063843 || ss::event()==2074265 || ss::event()==2074731 || ss::event()==2076570 || ss::event()==2084640 || ss::event()==2089153 || ss::event()==2090123 || ss::event()==2090176 || ss::event()==2092518 || ss::event()==2096956 || ss::event()==2098542 || ss::event()==2100104 || ss::event()==2101505 || ss::event()==2101788 || ss::event()==2101967 || ss::event()==2103959 || ss::event()==2104203 || ss::event()==2105770 || ss::event()==2105816 || ss::event()==2106922 || ss::event()==2115583 || ss::event()==2116355 || ss::event()==2118558 || ss::event()==2119180 || ss::event()==2120328 || ss::event()==2120381 || ss::event()==212217 || ss::event()==2124482 || ss::event()==2124950 || ss::event()==2127470 || ss::event()==2129642 || ss::event()==2130899 || ss::event()==2131070 || ss::event()==2137098 || ss::event()==2141102 || ss::event()==2142183 || ss::event()==2143604 || ss::event()==2143675 || ss::event()==2144420 || ss::event()==2145197 || ss::event()==2145208 || ss::event()==2146199 || ss::event()==2147820 || ss::event()==2148327 || ss::event()==2151613 || ss::event()==2152471 || ss::event()==2152843 || ss::event()==2153785 || ss::event()==2155529 || ss::event()==2156056 || ss::event()==2158283 || ss::event()==2161687 || ss::event()==2161756 || ss::event()==2164702 || ss::event()==2164956 || ss::event()==2173465 || ss::event()==2175029 || ss::event()==217706 || ss::event()==2183315 || ss::event()==2183789 || ss::event()==2184632 || ss::event()==2185979 || ss::event()==2193397 || ss::event()==2193887 || ss::event()==2196654 || ss::event()==2202591 || ss::event()==220546 || ss::event()==22108 || ss::event()==2226279 || ss::event()==2227827 || ss::event()==2231734 || ss::event()==2233734 || ss::event()==2233823 
+            //     || ss::event()==2234415 || ss::event()==2236336 || ss::event()==2236463 || ss::event()==2238776 || ss::event()==2239767 || ss::event()==2240295 || ss::event()==2242826 || ss::event()==2242847 || ss::event()==2251102 || ss::event()==2258363 || ss::event()==226181 || ss::event()==2261890 || ss::event()==2264435 || ss::event()==2264784 || ss::event()==2265085 || ss::event()==2268600 || ss::event()==2276640 || ss::event()==2278223 || ss::event()==2278258 || ss::event()==2280802 || ss::event()==228121 || ss::event()==2284114 || ss::event()==2284358 || ss::event()==2284497 || ss::event()==2285924 || ss::event()==2287318 || ss::event()==2287649 || ss::event()==2287895 || ss::event()==2289372 || ss::event()==2293722 || ss::event()==2297766 || ss::event()==2299846 || ss::event()==230001 || ss::event()==230801 || ss::event()==2308107 || ss::event()==2308999 || ss::event()==2309384 || ss::event()==2310472 || ss::event()==2312788 || ss::event()==2314161 || ss::event()==2314324 || ss::event()==231608 || ss::event()==2317422 || ss::event()==2320832 || ss::event()==2321462 || ss::event()==2330668 || ss::event()==2332225 || ss::event()==2332849 || ss::event()==2334330 || ss::event()==2336591 || ss::event()==2336768 || ss::event()==2337542 || ss::event()==2337908 || ss::event()==234106 || ss::event()==2341430 || ss::event()==2342518 || ss::event()==2342868 || ss::event()==2344127 || ss::event()==2346180 || ss::event()==2347132 || ss::event()==2348716 || ss::event()==2350144 || ss::event()==2353030 || ss::event()==2355016 || ss::event()==2357002 || ss::event()==2357344 || ss::event()==2362165 || ss::event()==2363744 || ss::event()==2364823 || ss::event()==2365779 || ss::event()==2368346 || ss::event()==2370910 || ss::event()==2372727 || ss::event()==2374836 || ss::event()==2376506 || ss::event()==2378602 || ss::event()==2381321 || ss::event()==2381481 || ss::event()==2383325 || ss::event()==2386007 || ss::event()==2386021 || ss::event()==2386181 || ss::event()==2387700 || ss::event()==239030 || ss::event()==2390872 || ss::event()==2391737 || ss::event()==2393600 || ss::event()==2394567 || ss::event()==2395350 || ss::event()==2397035 || ss::event()==2397604 || ss::event()==2404732 || ss::event()==2407541 || ss::event()==2409848 || ss::event()==2413683 || ss::event()==2415749 || ss::event()==2416880 || ss::event()==2418117 || ss::event()==2420803 || ss::event()==2425035 || ss::event()==2432124 
+            //     || ss::event()==2433092 || ss::event()==2435842 || ss::event()==243627 || ss::event()==243669 || ss::event()==2440975 || ss::event()==2444015 || ss::event()==2444216 || ss::event()==2444335 || ss::event()==2445019 || ss::event()==2447883 || ss::event()==2455186 || ss::event()==2456008 || ss::event()==2458655 || ss::event()==2460385 || ss::event()==2466363 || ss::event()==2469186 || ss::event()==2470641 || ss::event()==2472962 || ss::event()==2475038 || ss::event()==2480450 || ss::event()==2494634 || ss::event()==2496000 || ss::event()==249680 || ss::event()==2497200 || ss::event()==249767 || ss::event()==250031 || ss::event()==2501827 || ss::event()==2502928 || ss::event()==2503428 || ss::event()==2509488 || ss::event()==2512951 || ss::event()==2513157 || ss::event()==2514101 || ss::event()==2514679 || ss::event()==2519125 || ss::event()==2525577 || ss::event()==252604 || ss::event()==2532505 || ss::event()==254029 || ss::event()==2544059 || ss::event()==2544395 || ss::event()==2544769 || ss::event()==2545646 || ss::event()==2555809 || ss::event()==2556587 || ss::event()==2562042 || ss::event()==2565525 || ss::event()==2573466 || ss::event()==2577651 || ss::event()==2580854 || ss::event()==2582640 || ss::event()==2588344 || ss::event()==2589776 || ss::event()==2593702 || ss::event()==2594842 || ss::event()==2595876 || ss::event()==2597901 || ss::event()==2600294 || ss::event()==260109 || ss::event()==2601793 || ss::event()==2605980 || ss::event()==2609768 || ss::event()==2612310 || ss::event()==2615325 || ss::event()==2621156 || ss::event()==2621521 || ss::event()==2626552 || ss::event()==2628006 || ss::event()==2630931 || ss::event()==2634644 || ss::event()==263497 || ss::event()==2635590 || ss::event()==2635995 || ss::event()==263646 || ss::event()==263660 || ss::event()==2639335 || ss::event()==2640309 || ss::event()==264138 || ss::event()==2643007 || ss::event()==2643341 || ss::event()==2644633 || ss::event()==2645762 || ss::event()==26469 || ss::event()==2647907 || ss::event()==2649160 || ss::event()==2653662 || ss::event()==265719 || ss::event()==2658502 || ss::event()==2658565 || ss::event()==2661258 || ss::event()==266262 || ss::event()==26635 || ss::event()==266613 || ss::event()==2668374 || ss::event()==2668605 || ss::event()==2669009 || ss::event()==2672138 || ss::event()==2674475 || ss::event()==2675479 || ss::event()==2675512 || ss::event()==2686161 
+            //     || ss::event()==2690930 || ss::event()==2692191 || ss::event()==2692843 || ss::event()==2693555 || ss::event()==2697644 || ss::event()==2698916 || ss::event()==2700646 || ss::event()==2701211 || ss::event()==2709545 || ss::event()==2710409 || ss::event()==2712015 || ss::event()==2712607 || ss::event()==2724025 || ss::event()==2730623 || ss::event()==2731047 || ss::event()==2731455 || ss::event()==2734471 || ss::event()==2738680 || ss::event()==2738888 || ss::event()==2742947 || ss::event()==274340 || ss::event()==274357 || ss::event()==2744870 || ss::event()==2745463 || ss::event()==2746968 || ss::event()==2747306 || ss::event()==274865 || ss::event()==2749762 || ss::event()==2751107 || ss::event()==2752883 || ss::event()==2754781 || ss::event()==2758423 || ss::event()==2764439 || ss::event()==2766497 || ss::event()==2767823 || ss::event()==2772493 || ss::event()==2773181 || ss::event()==2774609 || ss::event()==2774855 || ss::event()==2775238 || ss::event()==27755 || ss::event()==2777311 || ss::event()==2780178 || ss::event()==2780394 || ss::event()==2782949 || ss::event()==278605 || ss::event()==2790431 || ss::event()==2790591 || ss::event()==27906 || ss::event()==2791822 || ss::event()==2795720 || ss::event()==2796122 || ss::event()==2796778 || ss::event()==2797617 || ss::event()==2798636 || ss::event()==2800031 || ss::event()==2802057 || ss::event()==2802623 || ss::event()==2805006 || ss::event()==2805463 || ss::event()==2807235 || ss::event()==280794 || ss::event()==2808026 || ss::event()==2812731 || ss::event()==2814783 || ss::event()==2815434 || ss::event()==281562 || ss::event()==2817158 || ss::event()==2817906 || ss::event()==282252 || ss::event()==2825283 || ss::event()==2829241 || ss::event()==283003 || ss::event()==2832399 || ss::event()==2837619 || ss::event()==2840584 || ss::event()==2851501 || ss::event()==2853015 || ss::event()==2854658 || ss::event()==2855637 || ss::event()==285580 || ss::event()==2855927 || ss::event()==285835 || ss::event()==2858553 || ss::event()==2858985 || ss::event()==2860775 || ss::event()==2864462 || ss::event()==2867069 || ss::event()==2867317 || ss::event()==2867365 || ss::event()==2867957 || ss::event()==2870275 || ss::event()==2871245 || ss::event()==2871428 || ss::event()==2877242 || ss::event()==2877562 || ss::event()==2880585 || ss::event()==2883636 || ss::event()==2884146 || ss::event()==2885416 || ss::event()==2891037 
+            //     || ss::event()==2891750 || ss::event()==2892607 || ss::event()==2893937 || ss::event()==2896089 || ss::event()==2896629 || ss::event()==2897504 || ss::event()==2898754 || ss::event()==2899568 || ss::event()==2902662 || ss::event()==2903284 || ss::event()==2904132 || ss::event()==2904199 || ss::event()==2905021 || ss::event()==2906054 || ss::event()==2907496 || ss::event()==2907911 || ss::event()==2909490 || ss::event()==2910141 || ss::event()==2910612 || ss::event()==2913545 || ss::event()==2917949 || ss::event()==2920649 || ss::event()==292242 || ss::event()==2927358 || ss::event()==292754 || ss::event()==2931928 || ss::event()==29331 || ss::event()==2933414 || ss::event()==2937026 || ss::event()==2938155 || ss::event()==294054 || ss::event()==2940995 || ss::event()==2945044 || ss::event()==2951060 || ss::event()==2952648 || ss::event()==2954902 || ss::event()==2956186 || ss::event()==2962952 || ss::event()==2963302 || ss::event()==2967612 || ss::event()==2968268 || ss::event()==2971783 || ss::event()==2973258 || ss::event()==2973888 || ss::event()==2975467 || ss::event()==2983072 || ss::event()==2996339 || ss::event()==2997717 || ss::event()==3000354 || ss::event()==3002624 || ss::event()==3004929 || ss::event()==3006743 || ss::event()==3007133 || ss::event()==3007560 || ss::event()==3009702 || ss::event()==3009963 || ss::event()==301001 || ss::event()==3012494 || ss::event()==3014710 || ss::event()==3015889 || ss::event()==301613 || ss::event()==3018415 || ss::event()==3019201 || ss::event()==302073 || ss::event()==3023277 || ss::event()==3025052 || ss::event()==3027062 || ss::event()==3027758 || ss::event()==3029199 || ss::event()==3029249 || ss::event()==3031281 || ss::event()==3032969 || ss::event()==303308 || ss::event()==3036490 || ss::event()==3036670 || ss::event()==304080 || ss::event()==3043421 || ss::event()==3044519 || ss::event()==3048213 || ss::event()==3057483 || ss::event()==305753 || ss::event()==305759 || ss::event()==305997 || ss::event()==3061724 || ss::event()==3065886 || ss::event()==3066130 || ss::event()==3066681 || ss::event()==3067773 || ss::event()==3070507 || ss::event()==3076588 || ss::event()==3077193 || ss::event()==3079123 || ss::event()==3083719 || ss::event()==3084608 || ss::event()==3085964 || ss::event()==3086635 || ss::event()==3090263 || ss::event()==3091415 || ss::event()==3091751 || ss::event()==3094200 || ss::event()==3094696 
+            //     || ss::event()==3096065 || ss::event()==309833 || ss::event()==3099295 || ss::event()==3103201 || ss::event()==3108433 || ss::event()==3112208 || ss::event()==3114656 || ss::event()==3120611 || ss::event()==3126611 || ss::event()==3128101 || ss::event()==3128270 || ss::event()==3128584 || ss::event()==313463 || ss::event()==3136267 || ss::event()==3136886 || ss::event()==3138589 || ss::event()==3140435 || ss::event()==3140677 || ss::event()==3142982 || ss::event()==314662 || ss::event()==3148233 || ss::event()==3149809 || ss::event()==3152523 || ss::event()==3153602 || ss::event()==3157703 || ss::event()==3158790 || ss::event()==3159295 || ss::event()==3165416 || ss::event()==3165606 || ss::event()==3166994 || ss::event()==3167850 || ss::event()==3170573 || ss::event()==3173578 || ss::event()==317632 || ss::event()==3176879 || ss::event()==3180525 || ss::event()==3183230 || ss::event()==3183735 || ss::event()==3184809 || ss::event()==3193706 || ss::event()==3194237 || ss::event()==3194351 || ss::event()==3195334 || ss::event()==319768 || ss::event()==3198625 || ss::event()==3200456 || ss::event()==3200968 || ss::event()==3202756 || ss::event()==3207977 || ss::event()==3209221 || ss::event()==3211745 || ss::event()==3213635 || ss::event()==3215743 || ss::event()==3216053 || ss::event()==3216352 || ss::event()==3219768 || ss::event()==3220619 || ss::event()==3224713 || ss::event()==3229921 || ss::event()==3231843 || ss::event()==3234653 || ss::event()==323643 || ss::event()==3242551 || ss::event()==3244068 || ss::event()==3245570 || ss::event()==3247215 || ss::event()==3247564 || ss::event()==3248590 || ss::event()==324965 || ss::event()==3253088 || ss::event()==3253545 || ss::event()==3257829 || ss::event()==3260903 || ss::event()==3263544 || ss::event()==3266872 || ss::event()==3273285 || ss::event()==3274273 || ss::event()==3281123 || ss::event()==3285111 || ss::event()==3285449 || ss::event()==3289963 || ss::event()==3294712 || ss::event()==3295805 || ss::event()==3298095 || ss::event()==329872 || ss::event()==3300311 || ss::event()==3301258 || ss::event()==3303983 || ss::event()==3305455 || ss::event()==3306135 || ss::event()==3306288 || ss::event()==3307064 || ss::event()==3312422 || ss::event()==3313633 || ss::event()==3314519 || ss::event()==3315249 || ss::event()==3318358 || ss::event()==3322574 || ss::event()==3322585 || ss::event()==3322888 || ss::event()==3322891 
+            //     || ss::event()==3326765 || ss::event()==3327322 || ss::event()==3330508 || ss::event()==333290 || ss::event()==333432 || ss::event()==3336316 || ss::event()==3337483 || ss::event()==3337942 || ss::event()==3340086 || ss::event()==3341545 || ss::event()==3341850 || ss::event()==3343996 || ss::event()==3348562 || ss::event()==3351901 || ss::event()==3356547 || ss::event()==3357259 || ss::event()==3358094 || ss::event()==3358828 || ss::event()==335902 || ss::event()==3360312 || ss::event()==336232 || ss::event()==3364492 || ss::event()==336596 || ss::event()==3368023 || ss::event()==3375080 || ss::event()==3376654 || ss::event()==3376986 || ss::event()==3380651 || ss::event()==338276 || ss::event()==3385469 || ss::event()==3386252 || ss::event()==3386730 || ss::event()==3388349 || ss::event()==3389101 || ss::event()==3389388 || ss::event()==3392643 || ss::event()==3394592 || ss::event()==3397543 || ss::event()==3398670 || ss::event()==3399231 || ss::event()==3399635 || ss::event()==3400606 || ss::event()==3405935 || ss::event()==3406532 || ss::event()==341199 || ss::event()==3418829 || ss::event()==3420033 || ss::event()==3421024 || ss::event()==3433750 || ss::event()==3435414 || ss::event()==3435450 || ss::event()==3435457 || ss::event()==3437998 || ss::event()==3440200 || ss::event()==3445236 || ss::event()==3446429 || ss::event()==3447812 || ss::event()==3451677 || ss::event()==3452895 || ss::event()==3454384 || ss::event()==3454635 || ss::event()==3454826 || ss::event()==3457630 || ss::event()==3457786 || ss::event()==3458618 || ss::event()==3464924 || ss::event()==3466881 || ss::event()==3468839 || ss::event()==3478986 || ss::event()==3480190 || ss::event()==3483506 || ss::event()==3484579 || ss::event()==3489014 || ss::event()==3493803 || ss::event()==3495768 || ss::event()==3496844 || ss::event()==3500464 || ss::event()==3500601 || ss::event()==3503065 || ss::event()==3504407 || ss::event()==3508323 || ss::event()==3511799 || ss::event()==351214 || ss::event()==351397 || ss::event()==3515083 || ss::event()==3517630 || ss::event()==352087 || ss::event()==3525044 || ss::event()==352722 || ss::event()==3527900 || ss::event()==3529709 || ss::event()==3531679 || ss::event()==3537080 || ss::event()==3537767 || ss::event()==3542009 || ss::event()==3558733 || ss::event()==3562888 || ss::event()==3563826 || ss::event()==3564731 || ss::event()==3566244 || ss::event()==3567057 
+            //     || ss::event()==3568505 || ss::event()==3568596 || ss::event()==3570105 || ss::event()==3573508 || ss::event()==3574564 || ss::event()==3577691 || ss::event()==3577907 || ss::event()==3578084 || ss::event()==3584208 || ss::event()==3586533 || ss::event()==3591707 || ss::event()==3596925 || ss::event()==3598423 || ss::event()==3599753 || ss::event()==3602881 || ss::event()==3606934 || ss::event()==3609220 || ss::event()==3611703 || ss::event()==3611851 || ss::event()==3613663 || ss::event()==3613729 || ss::event()==3616694 || ss::event()==361928 || ss::event()==3619413 || ss::event()==3624984 || ss::event()==3625078 || ss::event()==3627750 || ss::event()==3628069 || ss::event()==3634414 || ss::event()==3635185 || ss::event()==366385 || ss::event()==368288 || ss::event()==370165 || ss::event()==379886 || ss::event()==380143 || ss::event()==384610 || ss::event()==386529 || ss::event()==38741 || ss::event()==39168 || ss::event()==393186 || ss::event()==395084 || ss::event()==399694 || ss::event()==400860 || ss::event()==401034 || ss::event()==404834 || ss::event()==405703 || ss::event()==406591 || ss::event()==416020 || ss::event()==416443 || ss::event()==418182 || ss::event()==420222 || ss::event()==420254 || ss::event()==423653 || ss::event()==424760 || ss::event()==429636 || ss::event()==433225 || ss::event()==434521 || ss::event()==437183 || ss::event()==43891 || ss::event()==440781 || ss::event()==44303 || ss::event()==446496 || ss::event()==451489 || ss::event()==451669 || ss::event()==454786 || ss::event()==459665 || ss::event()==460032 || ss::event()==461193 || ss::event()==462098 || ss::event()==463361 || ss::event()==464381 || ss::event()==468664 || ss::event()==469516 || ss::event()==471215 || ss::event()==471711 || ss::event()==474862 || ss::event()==477389 || ss::event()==48013 || ss::event()==482715 || ss::event()==483662 || ss::event()==486609 || ss::event()==487607 || ss::event()==489781 || ss::event()==490231 || ss::event()==490550 || ss::event()==500181 || ss::event()==501006 || ss::event()==503353 || ss::event()==503868 || ss::event()==505874 || ss::event()==506992 || ss::event()==510475 || ss::event()==510998 || ss::event()==521669 || ss::event()==529985 || ss::event()==532451 || ss::event()==535609 || ss::event()==537829 || ss::event()==53864 || ss::event()==544817 || ss::event()==545970 
+            //     || ss::event()==549285 || ss::event()==551432 || ss::event()==554248 || ss::event()==555586 || ss::event()==558708 || ss::event()==562211 || ss::event()==563005 || ss::event()==563711 || ss::event()==565622 || ss::event()==568350 || ss::event()==569580 || ss::event()==570482 || ss::event()==571661 || ss::event()==572476 || ss::event()==573482 || ss::event()==575161 || ss::event()==57815 || ss::event()==578626 || ss::event()==581052 || ss::event()==583445 || ss::event()==584384 || ss::event()==586594 || ss::event()==587121 || ss::event()==588845 || ss::event()==590394 || ss::event()==592889 || ss::event()==598078 || ss::event()==601355 || ss::event()==601883 || ss::event()==603635 || ss::event()==606382 || ss::event()==606932 || ss::event()==607129 || ss::event()==61094 || ss::event()==613061 || ss::event()==613120 || ss::event()==615667 || ss::event()==618561 || ss::event()==618841 || ss::event()==620914 || ss::event()==625187 || ss::event()==625814 || ss::event()==627783 || ss::event()==63209 || ss::event()==632290 || ss::event()==633343 || ss::event()==635994 || ss::event()==63726 || ss::event()==640499 || ss::event()==64124 || ss::event()==642549 || ss::event()==64409 || ss::event()==644530 || ss::event()==644574 || ss::event()==645677 || ss::event()==646622 || ss::event()==64722 || ss::event()==653344 || ss::event()==657044 || ss::event()==657865 || ss::event()==66016 || ss::event()==660594 || ss::event()==66163 || ss::event()==662387 || ss::event()==663598 || ss::event()==66423 || ss::event()==669053 || ss::event()==672036 || ss::event()==67326 || ss::event()==674792 || ss::event()==677945 || ss::event()==679227 || ss::event()==680373 || ss::event()==684795 || ss::event()==685382 || ss::event()==685966 || ss::event()==699830 || ss::event()==700020 || ss::event()==700340 || ss::event()==700717 || ss::event()==703526 || ss::event()==708151 || ss::event()==709286 || ss::event()==710619 || ss::event()==713904 || ss::event()==716313 || ss::event()==721803 || ss::event()==723274 || ss::event()==724702 || ss::event()==72509 || ss::event()==726611 || ss::event()==727386 || ss::event()==728226 || ss::event()==728681 || ss::event()==733884 || ss::event()==737211 || ss::event()==737676 || ss::event()==739752 || ss::event()==741134 || ss::event()==742981 || ss::event()==74299 
+            //     || ss::event()==743426 || ss::event()==749563 || ss::event()==751618 || ss::event()==753129 || ss::event()==754922 || ss::event()==755762 || ss::event()==755868 || ss::event()==756143 || ss::event()==756512 || ss::event()==757278 || ss::event()==759758 || ss::event()==760550 || ss::event()==763712 || ss::event()==76624 || ss::event()==767584 || ss::event()==769243 || ss::event()==77552 || ss::event()==777080 || ss::event()==781717 || ss::event()==782158 || ss::event()==783099 || ss::event()==786132 || ss::event()==786166 || ss::event()==792377 || ss::event()==794166 || ss::event()==795866 || ss::event()==796706 || ss::event()==803727 || ss::event()==804240 || ss::event()==804909 || ss::event()==805186 || ss::event()==806093 || ss::event()==80744 || ss::event()==807804 || ss::event()==809998 || ss::event()==811174 || ss::event()==811179 || ss::event()==812437 || ss::event()==813194 || ss::event()==814909 || ss::event()==815777 || ss::event()==816777 || ss::event()==818395 || ss::event()==818561 || ss::event()==824020 || ss::event()==826757 || ss::event()==827488 || ss::event()==83511 || ss::event()==837993 || ss::event()==838393 || ss::event()==841052 || ss::event()==843601 || ss::event()==845158 || ss::event()==85022 || ss::event()==851997 || ss::event()==859146 || ss::event()==861078 || ss::event()==862699 || ss::event()==865169 || ss::event()==871276 || ss::event()==873081 || ss::event()==87340 || ss::event()==876155 || ss::event()==877877 || ss::event()==878611 || ss::event()==879647 || ss::event()==883806 || ss::event()==884919 || ss::event()==885094 || ss::event()==895395 || ss::event()==895498 || ss::event()==896979 || ss::event()==900910 || ss::event()==902126 || ss::event()==904005 || ss::event()==904348 || ss::event()==905575 || ss::event()==906989 || ss::event()==909093 || ss::event()==91222 || ss::event()==915344 || ss::event()==915641 || ss::event()==917837 || ss::event()==920854 || ss::event()==92124 || ss::event()==923206 || ss::event()==924610 || ss::event()==924825 || ss::event()==925142 || ss::event()==925221 || ss::event()==92912 || ss::event()==929888 || ss::event()==932009 || ss::event()==932655 || ss::event()==937375 || ss::event()==938387 || ss::event()==939359 || ss::event()==941660 || ss::event()==943306 || ss::event()==944534 || ss::event()==946893 
+            //     || ss::event()==949676 || ss::event()==952599 || ss::event()==953730 || ss::event()==955047 || ss::event()==956457 || ss::event()==956689 || ss::event()==957452 || ss::event()==959156 || ss::event()==959439 || ss::event()==961174 || ss::event()==962096 || ss::event()==964836 || ss::event()==966308 || ss::event()==975412 || ss::event()==976135 || ss::event()==977432 || ss::event()==977526 || ss::event()==982623 || ss::event()==98587 || ss::event()==989622 || ss::event()==992344 || ss::event()==994201 || ss::event()==994710 || ss::event()==995201 || ss::event()==997435 || ss::event()==997456 ) {
+            //     int nleps_temp = 2;
+            //     if (ss::lep3_passes_id()) nleps_temp++;
+            //     int SR_temp = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, nleps_temp, isClass6);
+            //     if (doSync && isttW) {
+            //         std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%1d\t%1d\t%1d\n",
+            //                 ss::run(), ss::lumi(), ss::event(),
+            //                 ss::lep1_id(), lep1_pt,
+            //                 ss::lep2_id(), lep2_pt,
+            //                 ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::hyp_class(), SR_temp, nleps_temp) << std::endl;
+            //     }
+            // }
+
             if (isClass6) {
                 float zmass23 = ss::lep2_id() == -ss::lep3_id() ? (ss::lep2_p4()+ss::lep3_p4()).mass() : -999.0;
                 float zmass31 = ss::lep3_id() == -ss::lep1_id() ? (ss::lep3_p4()+ss::lep1_p4()).mass() : -999.0;
@@ -1195,7 +1233,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             visible += ss::lep2_p4();
             if (nleps > 2) visible += ss::lep3_p4();
             float mvis = visible.M();
-            float mtvis = MT(visible.pt(), visible.phi(), ss::met(), ss::metPhi());
+            // float mtvis = MT(visible.pt(), visible.phi(), ss::met(), ss::metPhi());
+            float mtvis = visible.Mt();
 
             float pt1 = lep1_pt;
             float pt2 = lep2_pt;
@@ -1356,15 +1395,34 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
             // int SRdisc = mvavalue*10+1;
             int SRdisc = 1;
-            if (mvavalue > -0.217) SRdisc = 2;
-            if (mvavalue > -0.164) SRdisc = 3;
-            if (mvavalue > -0.044) SRdisc = 4;
-            if (mvavalue >  0.055) SRdisc = 5;
-            if (mvavalue >  0.135) SRdisc = 6;
-            if (mvavalue >  0.205) SRdisc = 7;
-            if (mvavalue >  0.283) SRdisc = 8;
-            if (mvavalue >  0.368) SRdisc = 9;
-            if (mvavalue >  0.456) SRdisc = 10;
+            // if (mvavalue > -0.217) SRdisc = 2;
+            // if (mvavalue > -0.164) SRdisc = 3;
+            // if (mvavalue > -0.044) SRdisc = 4;
+            // if (mvavalue >  0.055) SRdisc = 5;
+            // if (mvavalue >  0.135) SRdisc = 6;
+            // if (mvavalue >  0.205) SRdisc = 7;
+            // if (mvavalue >  0.283) SRdisc = 8;
+            // if (mvavalue >  0.368) SRdisc = 9;
+            // if (mvavalue >  0.456) SRdisc = 10;
+
+            // if (mvavalue > -0.217) SRdisc = 2;
+            // if (mvavalue > -0.044) SRdisc = 3;
+            // if (mvavalue >  0.135) SRdisc = 4;
+            // if (mvavalue >  0.283) SRdisc = 5;
+            // if (mvavalue >  0.456) SRdisc = 6;
+            
+            // if (mvavalue > -0.4) SRdisc = 2;
+            // if (mvavalue > -0.2) SRdisc = 3;
+            // if (mvavalue >  0.0) SRdisc = 4;
+            // if (mvavalue >  0.2) SRdisc = 5;
+            // if (mvavalue >  0.4) SRdisc = 6;
+
+            if (mvavalue > -0.4) SRdisc = 2;
+            if (mvavalue > -0.2) SRdisc = 3;
+            if (mvavalue >  0.0) SRdisc = 4;
+            if (mvavalue >  0.21) SRdisc = 5;
+            if (mvavalue >  0.42) SRdisc = 6;
+
             int SRdisc_unc_up = SRdisc;
             int SRdisc_unc_dn = SRdisc;
             int SRdisc_JER_up = SRdisc;
@@ -1393,13 +1451,23 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             //             ss::njets(), ss::nbtags(), ss::met(), ss::ht()) << std::endl;
             // }
 
-            if (doSync && SR == 2 && ss::is_real_data() && isData && ss::hyp_class() == 3) {
-                std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\n",
-                        ss::run(), ss::lumi(), ss::event(),
-                        ss::lep1_id(), lep1_pt,
-                        ss::lep2_id(), lep2_pt,
-                        ss::njets(), ss::nbtags(), ss::met(), ss::ht()) << std::endl;
-            }
+            // if (doSync && SR == 2 && ss::is_real_data() && isData && ss::hyp_class() == 3) { // signal leptons
+            //     std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\n",
+            //             ss::run(), ss::lumi(), ss::event(),
+            //             ss::lep1_id(), lep1_pt,
+            //             ss::lep2_id(), lep2_pt,
+            //             ss::njets(), ss::nbtags(), ss::met(), ss::ht()) << std::endl;
+            // }
+
+            // // fake app
+            // if (doSync && SR == 2 && ss::is_real_data() && doFakes && (ss::hyp_class() == 1 || ss::hyp_class() == 2 || (ss::hyp_class()==6 && isClass6Fake))) {
+            //     std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%1d\t%1d\t%1d\n",
+            //             ss::run(), ss::lumi(), ss::event(),
+            //             ss::lep1_id(), lep1_pt,
+            //             ss::lep2_id(), lep2_pt,
+            //             ss::njets(), ss::nbtags(), ss::met(), ss::ht(),
+            //             ss::lep1_passes_id(), ss::lep2_passes_id(), ss::lep3_passes_id()) << std::endl;
+            // }
 
             // if (isXgamma && SR > 2) {
             //     std::cout << " filename: " << filename << " chainTitle: " << chainTitle << " weight: " << weight << " SR: " << SR << std::endl;
@@ -1421,7 +1489,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
 
             //These c-s errors
-            if (istttt && makeGenVariationsMC && ss::genweights().size()>110) {
+            if ((istttt || isHiggsScan) && makeGenVariationsMC && ss::genweights().size()>110) {
                 float nom = ss::genweights().at(0);
                 // float pdfrms = 0.;
                 float scale_up = ss::genweights().at(4)/nom;
@@ -1545,7 +1613,9 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_met.sr->Fill(ss::met() , weight);
                 p_result.h_mvis.sr->Fill(mvis , weight);
                 p_result.h_mtvis.sr->Fill(mtvis , weight);
-                p_result.h_ntops.sr->Fill(getNtops() , weight);
+                auto ntopinfo = getNtops();
+                p_result.h_ntops.sr->Fill(ntopinfo.first , weight);
+                p_result.h_ntopness.sr->Fill(ntopinfo.second , weight);
                 p_result.h_mll.sr->Fill(mll , weight);
                 p_result.h_mtmin.sr->Fill(mtmin , weight);
                 p_result.h_l1pt.sr->Fill(pto1, weight);
@@ -1665,7 +1735,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             // signal scale
-            if (istttt && makeGenVariationsMC) {
+            if ((istttt || isHiggsScan) && makeGenVariationsMC) {
                 TH1F* plot_alt = 0;
                 if      (kinRegs[kr] == "srcr")   plot_alt = p_scale_alt_up.SRCR.TOTAL;
                 else if (kinRegs[kr] == "srdisc")  plot_alt = p_scale_alt_up.SRDISC.TOTAL;
@@ -1884,7 +1954,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 for (int bin=1;bin<=bbUp->GetNbinsX();++bin) {
                     float nomval = h_sr->GetBinContent(bin);
                     float upval = bbUp->GetBinContent(bin);
-                    bbUp->SetBinContent(bin,0.5*(nomval+upval));
+                    // bbUp->SetBinContent(bin,0.5*(nomval+upval));
+                    bbUp->SetBinContent(bin,nomval+(0.6/0.7)*(upval-nomval));
                 }
                 fillDownMirrorUp(h_sr,bbUp,bbDown);
                 // if (name=="ttw" || name=="ttz") {
@@ -2033,7 +2104,7 @@ void initHistError(bool usePoisson, TH1F* plot) {
   else  plot->Sumw2();
 }
 
-int getNtops() {
+std::pair<int,float> getNtops() {
     // Separate out b-tagged jets from non-btagged jets
     std::vector<LorentzVector> bjets;
     std::vector<LorentzVector> jets;
@@ -2046,6 +2117,10 @@ int getNtops() {
     }
     // std::cout << "begin getNtops() -->" << std::endl;
     // std::cout << "   found " << jets.size() << " jets and " << bjets.size() << " bjets" << std::endl;
+    
+
+    // Try to divide out combinatorics
+    float ncomb = 0.5 * bjets.size() * jets.size();
 
     float cutw = 30.;
     float cutt = 50.;
@@ -2086,5 +2161,5 @@ int getNtops() {
         ntops++;
     }
     // std::cout << "end getNtops() -->" << std::endl;
-    return ntops;
+    return std::pair<int,float>(ntops, 1.0*ntops/ncomb);
 }

@@ -21,6 +21,7 @@ int main(int argc, char *argv[]){
     TString hostname(hostnamestupid);
     std::cout << ">>> Hostname is " << hostname << std::endl;  
     bool useXrootd = !(hostname.Contains("t2.ucsd.edu"));
+    bool goodRunsOnly = true;
     // bool useXrootd = false;
     if (hostname.Contains("uafino")) {
         std::cout << ">>> We're on uafino, so using xrootd!" << std::endl;  
@@ -64,7 +65,12 @@ int main(int argc, char *argv[]){
             return 0;
         }
     }
-    if (filename.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
+    // if (filename.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
+
+    if (filename.Contains("Run2017")) {
+        std::cout << ">>> [!] This is Run2017 data, so not using goodrun list right now!!!" << std::endl;
+        goodRunsOnly = false;
+    }
 
     //Set up file and tree
     mylooper->MakeBabyNtuple(outname.Data(), isSignal);
@@ -200,7 +206,7 @@ int main(int argc, char *argv[]){
         }
 
         //If data, check good run list
-        if (tas::evt_isRealData() && !goodrun(tas::evt_run(), tas::evt_lumiBlock())) continue;
+        if (goodRunsOnly && tas::evt_isRealData() && !goodrun(tas::evt_run(), tas::evt_lumiBlock())) continue;
 
         // if (cms3.pfjets_p4().size() > 0) {
         //     res.resetSeed();

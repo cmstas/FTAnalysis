@@ -1343,10 +1343,10 @@ void SSAG::Init(TTree *tree) {
 		weight_btagsf_DN_branch = tree->GetBranch("weight_btagsf_DN");
 		if (weight_btagsf_DN_branch) {weight_btagsf_DN_branch->SetAddress(&weight_btagsf_DN_);}
 	}
-	glglpt_branch = 0;
-	if (tree->GetBranch("glglpt") != 0) {
-		glglpt_branch = tree->GetBranch("glglpt");
-		if (glglpt_branch) {glglpt_branch->SetAddress(&glglpt_);}
+	decayWSF_branch = 0;
+	if (tree->GetBranch("decayWSF") != 0) {
+		decayWSF_branch = tree->GetBranch("decayWSF");
+		if (decayWSF_branch) {decayWSF_branch->SetAddress(&decayWSF_);}
 	}
 	isr_unc_branch = 0;
 	if (tree->GetBranch("isr_unc") != 0) {
@@ -1857,7 +1857,7 @@ void SSAG::GetEntry(unsigned int idx)
 		weight_btagsf_DN_isLoaded = false;
 		gl1_p4_isLoaded = false;
 		gl2_p4_isLoaded = false;
-		glglpt_isLoaded = false;
+		decayWSF_isLoaded = false;
 		isr_unc_isLoaded = false;
 		nisrMatch_isLoaded = false;
 		extragenb_isLoaded = false;
@@ -2178,7 +2178,7 @@ void SSAG::LoadAllBranches()
 	if (weight_btagsf_DN_branch != 0) weight_btagsf_DN();
 	if (gl1_p4_branch != 0) gl1_p4();
 	if (gl2_p4_branch != 0) gl2_p4();
-	if (glglpt_branch != 0) glglpt();
+	if (decayWSF_branch != 0) decayWSF();
 	if (isr_unc_branch != 0) isr_unc();
 	if (nisrMatch_branch != 0) nisrMatch();
 	if (extragenb_branch != 0) extragenb();
@@ -5712,18 +5712,18 @@ void SSAG::LoadAllBranches()
 		}
 		return *gl2_p4_;
 	}
-	const float &SSAG::glglpt()
+	const float &SSAG::decayWSF()
 	{
-		if (not glglpt_isLoaded) {
-			if (glglpt_branch != 0) {
-				glglpt_branch->GetEntry(index);
+		if (not decayWSF_isLoaded) {
+			if (decayWSF_branch != 0) {
+				decayWSF_branch->GetEntry(index);
 			} else { 
-				printf("branch glglpt_branch does not exist!\n");
+				printf("branch decayWSF_branch does not exist!\n");
 				exit(1);
 			}
-			glglpt_isLoaded = true;
+			decayWSF_isLoaded = true;
 		}
-		return glglpt_;
+		return decayWSF_;
 	}
 	const float &SSAG::isr_unc()
 	{
@@ -6629,7 +6629,7 @@ namespace ss {
 	const float &weight_btagsf_DN() { return samesign.weight_btagsf_DN(); }
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &gl1_p4() { return samesign.gl1_p4(); }
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &gl2_p4() { return samesign.gl2_p4(); }
-	const float &glglpt() { return samesign.glglpt(); }
+	const float &decayWSF() { return samesign.decayWSF(); }
 	const float &isr_unc() { return samesign.isr_unc(); }
 	const int &nisrMatch() { return samesign.nisrMatch(); }
 	const int &extragenb() { return samesign.extragenb(); }
