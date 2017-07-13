@@ -46,7 +46,6 @@ d_ds2name = {
             "/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-fsrdown-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM": "TTTTfsrdown",
             "/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-fsrup-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM": "TTTTfsrup",
             "/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-isrup-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM": "TTTTisrup",
-
             "/tHW_HToTT_0J_mH-350_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THW_scan350",
             "/tHW_HToTT_0J_mH-370_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THW_scan370",
             "/tHW_HToTT_0J_mH-390_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THW_scan390",
@@ -58,7 +57,6 @@ d_ds2name = {
             "/tHW_HToTT_0J_mH-510_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THW_scan510",
             "/tHW_HToTT_0J_mH-530_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THW_scan530",
             "/tHW_HToTT_0J_mH-550_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THW_scan550",
-
             "/tHq_HToTT_0J_mH-350_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THQ_scan350",
             "/tHq_HToTT_0J_mH-370_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THQ_scan370",
             "/tHq_HToTT_0J_mH-390_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THQ_scan390",
@@ -70,7 +68,6 @@ d_ds2name = {
             "/tHq_HToTT_0J_mH-510_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THQ_scan510",
             "/tHq_HToTT_0J_mH-530_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THQ_scan530",
             "/tHq_HToTT_0J_mH-550_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "THQ_scan550",
-
             "/ttH_HToTT_1J_mH-350_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "TTH_scan350",
             "/ttH_HToTT_1J_mH-370_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "TTH_scan370",
             "/ttH_HToTT_1J_mH-390_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM":    "TTH_scan390",
@@ -152,7 +149,8 @@ baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 # tag = "v0.10_data" # same as previous but data only
 # tag = "v0.10_mcosv2" # same as previous but MC only (and with OS)
 # tag = "v0.10_WSF" # same as v0.10_fix, no OS, but also has pdgW{leptonic,hadronic} SFs -- bugged, didn't have MC met filters
-tag = "v0.10_WSFv2" # same as non v2, but with fixed met filters
+# tag = "v0.10_WSFv2" # same as non v2, but with fixed met filters
+tag = "v0.10_mll" # same as previous line, but with mll<12 veto for ee or OSSF
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
 dashboard_name = "AutoTwopler_FTbabies"

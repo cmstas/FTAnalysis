@@ -31,14 +31,15 @@ def get_singlebin_limits(thedir, redo=False):
     # pool = ThreadPool(1)
 
     bins = [
-        [1,2,3],
-        [1,2,4],
-        [1,2,5],
-        [1,2,6],
-        [1,2,7],
-        [1,2,8],
-        [1,2,9],
-        [1,2,10],
+            [1,2],
+        # [1,2,3],
+        # [1,2,4],
+        # [1,2,5],
+        # [1,2,6],
+        # [1,2,7],
+        # [1,2,8],
+        # [1,2,9],
+        # [1,2,10],
         ]
 
     def do_bin_setup(inp,rfiles):
@@ -55,7 +56,7 @@ def get_singlebin_limits(thedir, redo=False):
         # threadsafe - just run limits
         ibin,outbins = inp
         outdir = "{0}/bin_{1}/".format(thedir,ibin+1)
-        try: return [inp, runLimits.get_lims(outdir, redocard=False, redolimits=redo, verbose=False)]
+        try: return [inp, runLimits.get_lims(outdir, redocard=False, redolimits=redo, verbose=False,unblinded=False)]
         except: return {}
 
     if redo:

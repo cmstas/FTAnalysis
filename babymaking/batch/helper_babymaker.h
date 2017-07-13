@@ -178,6 +178,8 @@ class babyMaker {
     float leptonicWSF;
     float hadronicWSF;
     float decayWSF;
+    int njincone1;
+    int njincone2;
 
     //Jets
     int njets_raw;

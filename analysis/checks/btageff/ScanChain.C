@@ -25,12 +25,13 @@ int ScanChain(TChain *ch){
     TH1F * h_den_vs_dr = new TH1F("h_den_vs_dr", "h_den_vs_dr", 40, 0, 4);
     TH1F * h_dms_vs_dr = new TH1F("h_dms_vs_dr", "h_dms_vs_dr", 40, 0, 4);
 
-    TH1F * h_num_vs_nj = new TH1F("h_num_vs_nj", "h_num_vs_nj", 15, 0, 15);
-    TH1F * h_mis_vs_nj = new TH1F("h_mis_vs_nj", "h_mis_vs_nj", 15, 0, 15);
-    TH1F * h_den_vs_nj = new TH1F("h_den_vs_nj", "h_den_vs_nj", 15, 0, 15);
-    TH1F * h_dms_vs_nj = new TH1F("h_dms_vs_nj", "h_dms_vs_nj", 15, 0, 15);
+    TH1F * h_num_vs_nj = new TH1F("h_num_vs_nj", "h_num_vs_nj", 8, -0.5, 8.5);
+    TH1F * h_mis_vs_nj = new TH1F("h_mis_vs_nj", "h_mis_vs_nj", 8, -0.5, 8.5);
+    TH1F * h_den_vs_nj = new TH1F("h_den_vs_nj", "h_den_vs_nj", 8, -0.5, 8.5);
+    TH1F * h_dms_vs_nj = new TH1F("h_dms_vs_nj", "h_dms_vs_nj", 8, -0.5, 8.5);
 
     TH2F * h_dr_vs_pt = new TH2F("h_dr_vs_pt", "h_dr_vs_pt", 60, 0, 300, 12, 0, 6);
+    TH2F * h_mindr_vs_pt = new TH2F("h_mindr_vs_pt", "h_mindr_vs_pt", 60, 0, 300, 30, 0, 3);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -68,23 +69,25 @@ int ScanChain(TChain *ch){
                     if (dR < 0.01) continue;
                     if (dR < mindR) mindR = dR;
                 }
+                int njets = ss::jets().size();
+                if (njets > 8) njets = 8;
                 if (is_b) {
                     if (is_tagged) {
-                        h_num_vs_nj->Fill(ss::jets().size());
+                        h_num_vs_nj->Fill(njets);
                         h_num_vs_dr->Fill(mindR);
                         h_num_vs_pt->Fill(pt);
                     }
-                    h_den_vs_nj->Fill(ss::jets().size());
+                    h_den_vs_nj->Fill(njets);
                     h_den_vs_dr->Fill(mindR);
                     h_den_vs_pt->Fill(pt);
                 }
                 if (is_light) {
                     if (is_tagged) {
-                        h_mis_vs_nj->Fill(ss::jets().size());
+                        h_mis_vs_nj->Fill(njets);
                         h_mis_vs_dr->Fill(mindR);
                         h_mis_vs_pt->Fill(pt);
                     }
-                    h_dms_vs_nj->Fill(ss::jets().size());
+                    h_dms_vs_nj->Fill(njets);
                     h_dms_vs_dr->Fill(mindR);
                     h_dms_vs_pt->Fill(pt);
                 }
@@ -93,14 +96,20 @@ int ScanChain(TChain *ch){
             if (ss::hyp_class()==3 && ss::nbtags()>=2 && ss::njets()>=2 && ss::met()>50 && ss::ht()>300) {
                 float maxdr1 = 0.;
                 float maxdr2 = 0.;
+                float mindr1 = 999.;
+                float mindr2 = 999.;
                 for (unsigned int ibtag = 0; ibtag < ss::btags().size(); ibtag++) {
                     float dr1 = ROOT::Math::VectorUtil::DeltaR(ss::lep1_p4(),ss::btags()[ibtag]);
                     float dr2 = ROOT::Math::VectorUtil::DeltaR(ss::lep2_p4(),ss::btags()[ibtag]);
                     if (dr1 > maxdr1) maxdr1 = dr1;
                     if (dr2 > maxdr2) maxdr2 = dr2;
+                    if (dr1 < mindr1 && mindr1 > 0.01) mindr1 = dr1;
+                    if (dr2 < mindr2 && mindr2 > 0.01) mindr2 = dr2;
                 }
                 h_dr_vs_pt->Fill(ss::lep1_p4().pt(), maxdr1);
                 h_dr_vs_pt->Fill(ss::lep2_p4().pt(), maxdr2);
+                h_mindr_vs_pt->Fill(ss::lep1_p4().pt(), mindr1);
+                h_mindr_vs_pt->Fill(ss::lep2_p4().pt(), mindr2);
             }
 
         }//event loop
@@ -123,6 +132,7 @@ int ScanChain(TChain *ch){
     h_den_vs_nj->Write();
     h_dms_vs_nj->Write();
     h_dr_vs_pt->Write();
+    h_mindr_vs_pt->Write();
     fout->Close();
 
     return 0;

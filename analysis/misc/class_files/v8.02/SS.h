@@ -166,6 +166,9 @@ protected:
 	float    lep2_coneCorrPt_;
 	TBranch *lep2_coneCorrPt_branch;
 	bool     lep2_coneCorrPt_isLoaded;
+	float    lep3_coneCorrPt_;
+	TBranch *lep3_coneCorrPt_branch;
+	bool     lep3_coneCorrPt_isLoaded;
 	int      lep1_idx_;
 	TBranch *lep1_idx_branch;
 	bool     lep1_idx_isLoaded;
@@ -1024,6 +1027,7 @@ void LoadAllBranches();
 	const int &lep2_id();
 	const float &lep1_coneCorrPt();
 	const float &lep2_coneCorrPt();
+	const float &lep3_coneCorrPt();
 	const int &lep1_idx();
 	const int &lep2_idx();
 	const vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > &jets();
@@ -1349,6 +1353,7 @@ namespace ss {
 	const int &lep2_id();
 	const float &lep1_coneCorrPt();
 	const float &lep2_coneCorrPt();
+	const float &lep3_coneCorrPt();
 	const int &lep1_idx();
 	const int &lep2_idx();
 	const vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > &jets();

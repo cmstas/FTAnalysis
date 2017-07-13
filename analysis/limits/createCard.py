@@ -381,7 +381,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal.pu = "1"
     signal.scale = "1"
     signal.alphas = "1"
-    if signal == "tttt":
+    if not do_tttt:
         signal.isrvar = "1"
         signal.fsrvar = "1"
     signal.pdf = "1"

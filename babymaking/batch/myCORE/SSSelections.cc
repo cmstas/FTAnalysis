@@ -1506,8 +1506,14 @@ int isGoodHyp(int iHyp, bool verbose){
   if (!passed_id_inSituFR_ll && !passed_id_denom_ll && !passed_id_numer_ll) return 0;
   if (!passed_id_inSituFR_lt && !passed_id_denom_lt && !passed_id_numer_lt) return 0;
 
-  //Other cuts
-  if ((tas::hyp_ll_p4().at(iHyp) + tas::hyp_lt_p4().at(iHyp)).M() < 8) return 0; 
+  //Other cuts - veto SS ee or any OSSF, with mll<12
+  if (isss && abs(id_ll) == 11 && abs(id_lt) == 11) {
+      if ((tas::hyp_ll_p4().at(iHyp) + tas::hyp_lt_p4().at(iHyp)).M() < 12) return 0; 
+  }
+  if (abs(id_ll) == -abs(id_lt)) {
+      if ((tas::hyp_ll_p4().at(iHyp) + tas::hyp_lt_p4().at(iHyp)).M() < 12) return 0; 
+  }
+
   if (!hypsFromFirstGoodVertex(iHyp)) return 0;
 
   //Finished for events that fail z veto

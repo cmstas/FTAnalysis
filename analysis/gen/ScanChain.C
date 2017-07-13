@@ -129,20 +129,37 @@ int ScanChain(TChain *ch){
             if (ht < 300) continue; // skip event
             weight_ht += weight;
 
+            // // Get MET
+            // LorentzVector neutrinop4(0,0,0,0);
+            // int nneutrinos = 0;
+            // float met = 0;
+            // for (unsigned int igen = 0; igen < genps_p4().size(); igen++){
+            //     int id = genps_id()[igen];
+            //     int mid = genps_id_mother()[igen];
+            //     if (abs(id) != 12 && abs(id) != 14 && abs(id) != 16) continue;
+            //     if (abs(mid) != 24) continue;
+            //     if (!(genps_isPromptFinalState()[igen])) continue;
+            //     neutrinop4 += genps_p4()[igen];
+            //     nneutrinos++;
+            // }
+            // met = neutrinop4.pt();
+
             // Get MET
-            LorentzVector neutrinop4(0,0,0,0);
-            int nneutrinos = 0;
-            float met = 0;
-            for (unsigned int igen = 0; igen < genps_p4().size(); igen++){
-                int id = genps_id()[igen];
-                int mid = genps_id_mother()[igen];
-                if (abs(id) != 12 && abs(id) != 14 && abs(id) != 16) continue;
-                if (abs(mid) != 24) continue;
-                if (!(genps_isPromptFinalState()[igen])) continue;
-                neutrinop4 += genps_p4()[igen];
-                nneutrinos++;
-            }
-            met = neutrinop4.pt();
+            // LorentzVector neutrinop4(0,0,0,0);
+            // int nneutrinos = 0;
+            // float met = 0;
+            // for (unsigned int igen = 0; igen < genps_p4().size(); igen++){
+            //     int id = genps_id()[igen];
+            //     if (abs(id) != 12 && abs(id) != 14 && abs(id) != 16) continue;
+            //     if (!(genps_status()[igen]==1)) continue;
+            //     neutrinop4 += genps_p4()[igen];
+            //     nneutrinos++;
+            // }
+            // met = neutrinop4.pt();
+            // float genmet = gen_met();
+            float met = gen_met();
+            // std::cout <<  " met: " << met <<  " genmet: " << genmet <<  std::endl;
+
             if (met < 50) continue; // skip event
             weight_met += weight;
 

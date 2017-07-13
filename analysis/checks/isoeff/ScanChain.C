@@ -32,18 +32,18 @@ int ScanChain(TChain *ch){
 
     TH1F * h_num_vs_pt = new TH1F("h_num_vs_pt", "h_num_vs_pt", 50, 0, 300);
     TH1F * h_den_vs_pt = new TH1F("h_den_vs_pt", "h_den_vs_pt", 50, 0, 300);
-    TH1F * h_num_vs_nj = new TH1F("h_num_vs_nj", "h_num_vs_nj", 15, 0, 15);
-    TH1F * h_den_vs_nj = new TH1F("h_den_vs_nj", "h_den_vs_nj", 15, 0, 15);
+    TH1F * h_num_vs_nj = new TH1F("h_num_vs_nj", "h_num_vs_nj", 8, -0.5, 8.5);
+    TH1F * h_den_vs_nj = new TH1F("h_den_vs_nj", "h_den_vs_nj", 8, -0.5, 8.5);
 
     TH1F * h_num_vs_pt2 = new TH1F("h_num_vs_pt2", "h_num_vs_pt2", 50, 0, 300);
     TH1F * h_den_vs_pt2 = new TH1F("h_den_vs_pt2", "h_den_vs_pt2", 50, 0, 300);
-    TH1F * h_num_vs_nj2 = new TH1F("h_num_vs_nj2", "h_num_vs_nj2", 15, 0, 15);
-    TH1F * h_den_vs_nj2 = new TH1F("h_den_vs_nj2", "h_den_vs_nj2", 15, 0, 15);
+    TH1F * h_num_vs_nj2 = new TH1F("h_num_vs_nj2", "h_num_vs_nj2", 8, -0.5, 8.5);
+    TH1F * h_den_vs_nj2 = new TH1F("h_den_vs_nj2", "h_den_vs_nj2", 8, -0.5, 8.5);
     
     TH1F * h_num_vs_pt3 = new TH1F("h_num_vs_pt3", "h_num_vs_pt3", 50, 0, 300);
     TH1F * h_den_vs_pt3 = new TH1F("h_den_vs_pt3", "h_den_vs_pt3", 50, 0, 300);
-    TH1F * h_num_vs_nj3 = new TH1F("h_num_vs_nj3", "h_num_vs_nj3", 15, 0, 15);
-    TH1F * h_den_vs_nj3 = new TH1F("h_den_vs_nj3", "h_den_vs_nj3", 15, 0, 15);
+    TH1F * h_num_vs_nj3 = new TH1F("h_num_vs_nj3", "h_num_vs_nj3", 8, -0.5, 8.5);
+    TH1F * h_den_vs_nj3 = new TH1F("h_den_vs_nj3", "h_den_vs_nj3", 8, -0.5, 8.5);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -119,6 +119,8 @@ int ScanChain(TChain *ch){
                     auto jet_results = SSJetsCalculator(jetCorr, 1);
                     njets = jet_results.first.size();
                 }
+
+                if (njets > 8) njets = 8;
 
 
                 if (lep1_passes_idnoiso) {

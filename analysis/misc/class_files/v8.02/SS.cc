@@ -318,6 +318,11 @@ void SSAG::Init(TTree *tree) {
 		lep2_coneCorrPt_branch = tree->GetBranch("lep2_coneCorrPt");
 		if (lep2_coneCorrPt_branch) {lep2_coneCorrPt_branch->SetAddress(&lep2_coneCorrPt_);}
 	}
+	lep3_coneCorrPt_branch = 0;
+	if (tree->GetBranch("lep3_coneCorrPt") != 0) {
+		lep3_coneCorrPt_branch = tree->GetBranch("lep3_coneCorrPt");
+		if (lep3_coneCorrPt_branch) {lep3_coneCorrPt_branch->SetAddress(&lep3_coneCorrPt_);}
+	}
 	lep1_idx_branch = 0;
 	if (tree->GetBranch("lep1_idx") != 0) {
 		lep1_idx_branch = tree->GetBranch("lep1_idx");
@@ -1636,6 +1641,7 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_id_isLoaded = false;
 		lep1_coneCorrPt_isLoaded = false;
 		lep2_coneCorrPt_isLoaded = false;
+		lep3_coneCorrPt_isLoaded = false;
 		lep1_idx_isLoaded = false;
 		lep2_idx_isLoaded = false;
 		jets_isLoaded = false;
@@ -1957,6 +1963,7 @@ void SSAG::LoadAllBranches()
 	if (lep2_id_branch != 0) lep2_id();
 	if (lep1_coneCorrPt_branch != 0) lep1_coneCorrPt();
 	if (lep2_coneCorrPt_branch != 0) lep2_coneCorrPt();
+	if (lep3_coneCorrPt_branch != 0) lep3_coneCorrPt();
 	if (lep1_idx_branch != 0) lep1_idx();
 	if (lep2_idx_branch != 0) lep2_idx();
 	if (jets_branch != 0) jets();
@@ -2838,6 +2845,19 @@ void SSAG::LoadAllBranches()
 			lep2_coneCorrPt_isLoaded = true;
 		}
 		return lep2_coneCorrPt_;
+	}
+	const float &SSAG::lep3_coneCorrPt()
+	{
+		if (not lep3_coneCorrPt_isLoaded) {
+			if (lep3_coneCorrPt_branch != 0) {
+				lep3_coneCorrPt_branch->GetEntry(index);
+			} else { 
+				printf("branch lep3_coneCorrPt_branch does not exist!\n");
+				exit(1);
+			}
+			lep3_coneCorrPt_isLoaded = true;
+		}
+		return lep3_coneCorrPt_;
 	}
 	const int &SSAG::lep1_idx()
 	{
@@ -6408,6 +6428,7 @@ namespace ss {
 	const int &lep2_id() { return samesign.lep2_id(); }
 	const float &lep1_coneCorrPt() { return samesign.lep1_coneCorrPt(); }
 	const float &lep2_coneCorrPt() { return samesign.lep2_coneCorrPt(); }
+	const float &lep3_coneCorrPt() { return samesign.lep3_coneCorrPt(); }
 	const int &lep1_idx() { return samesign.lep1_idx(); }
 	const int &lep2_idx() { return samesign.lep2_idx(); }
 	const vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > &jets() { return samesign.jets(); }

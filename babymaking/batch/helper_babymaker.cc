@@ -408,6 +408,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("leptonicWSF"       , &leptonicWSF       );
   BabyTree->Branch("hadronicWSF"       , &hadronicWSF       );
   BabyTree->Branch("decayWSF"       , &decayWSF       );
+  BabyTree->Branch("njincone1"       , &njincone1       );
+  BabyTree->Branch("njincone2"       , &njincone2       );
 
   if (applyBtagSFs) {
     // setup btag calibration readers
@@ -436,9 +438,14 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     TFile* f_btag_eff = 0;
     if (isFastsim == 0) {
 
-        // f_btag_eff = new TFile("btagsf/btageff__ttbar_powheg_pythia8_25ns.root");
-        // f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root");
         f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_powheg_pythia8_25ns_Moriond17_deepCSV.root");
+        // // FIXME FIXME FIXME FIXME FIXME normally we use ttbar above
+        // // FIXME FIXME FIXME FIXME FIXME was just testing tttt
+        // // FIXME FIXME FIXME FIXME FIXME
+        // f_btag_eff = new TFile("/home/users/namin/2017/btageff/bTagEfficiencyTools/btageff__tttt_powheg_pythia8_25ns.root");
+        // // FIXME FIXME FIXME FIXME FIXME
+        // // FIXME FIXME FIXME FIXME FIXME
+        // // FIXME FIXME FIXME FIXME FIXME
         TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
         TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
         TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
@@ -848,6 +855,8 @@ void babyMaker::InitBabyNtuple(){
     leptonicWSF = 0.;
     hadronicWSF = 0.;
     decayWSF = 0.;
+    njincone1 = 0;
+    njincone2 = 0;
 }
 
 //Main function
@@ -1948,6 +1957,16 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       nleptonic = std::accumulate(genwleptonic.begin(),genwleptonic.end(),0);
       ntau = std::accumulate(genwtau.begin(),genwtau.end(),0);
       if (gengood) {
+
+
+              // njincone1 = 0;
+              // njincone2 = 0;
+              // for (unsigned int ijet = 0; ijet < tas::pfjets_p4().size(); ijet++){
+              //     float dR1 = ROOT::Math::VectorUtil::DeltaR(tas::pfjets_p4()[ijet],lep1_p4);
+              //     float dR2 = ROOT::Math::VectorUtil::DeltaR(tas::pfjets_p4()[ijet],lep2_p4);
+              //     if (dR1 < 0.4) njincone1++;
+              //     if (dR2 < 0.4) njincone2++;
+              // }
 
 
           // // Print out some stuff
