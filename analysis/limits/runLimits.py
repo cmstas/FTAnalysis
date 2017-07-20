@@ -90,8 +90,10 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
             if do_blind:
                 cardname_scan = cardname.replace(".txt","_asimov.txt")
                 full_card_name_scan = full_card_name.replace(".txt","_asimov.txt")
-            createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig)
-            scan_cmd = "combine -M MaxLikelihoodFit {0} --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
+            if redocard:
+                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig)
+            # scan_cmd = "combine -M MaxLikelihoodFit {0} --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
+            scan_cmd = "combine -M MaxLikelihoodFit {0} --robustFit=1 --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
             if verbose: print ">>> Running combine for mu [{0}]".format(scan_cmd)
             stat, out_scan = commands.getstatusoutput(scan_cmd)
             out += out_scan
