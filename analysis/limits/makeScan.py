@@ -34,6 +34,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("dir", help="directory")
     parser.add_argument("-N", "--noredocard", help="*don't* remake the card", action="store_true")
+    parser.add_argument("-U", "--unblind", help="run unblind", action="store_true")
     args = parser.parse_args()
 
-    make_scan(args.dir, args.noredocard)
+    make_scan(args.dir, args.noredocard, do_blind=(not args.unblind))
