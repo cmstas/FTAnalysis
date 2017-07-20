@@ -370,7 +370,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         TTTT = Process(9,"tttt","tttt_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     #overwrite nuisances
     lumiunc = "1.025"
-    signal.lumi  = lumiunc
+    signal.lumi  = "1"
     signal.lephlt  = "1.04"
     signal.hlt  = "1.03"
     signal.jes  = "1"
