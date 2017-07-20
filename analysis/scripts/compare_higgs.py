@@ -23,13 +23,16 @@ def make_plots():
         chain_map[key] = r.TChain("Events")
         chain_map[key].Add(fnames_map[key])
 
+        chain_map[key].SetAlias("njets", "Sum$(pfjets_p4.pt()>40)")
+
     thedir = "plots_higgs/"
     os.system("mkdir -p %s" % thedir)
 
     plots = [
 
+            ("njets", "", "njets", "(15,0,15)", "1"),
+            ("nbtags", "", "Sum$(pfjets_p4.pt()>25 && (pfjets_bDiscriminators[][17]+pfjets_bDiscriminators[][19] > 0.6324))", "(10,0,10)", "1"),
             ("met", "", "evt_pfmet", "(50,0,500)", "1"),
-            ("njets", "", "Sum$(pfjets_p4.pt()>40)", "(15,0,15)", "1"),
             ("ht", "", "Sum$(pfjets_p4.pt()*(pfjets_p4.pt()>40))", "(50,0,1500)", "1"),
             ("leppt", "", "hyp_lt_p4[0].pt()", "(50,0,200)","1"),
             ("nss", "", "Sum$((hyp_lt_id*hyp_ll_id)>0)", "(6,0,6)","1"),
@@ -37,6 +40,7 @@ def make_plots():
             ("nels", "", "Length$(els_p4)", "(15,0,15)","1"),
             ("nmus", "", "Length$(mus_p4)", "(15,0,15)","1"),
             ("nvtxs", "", "evt_nvtxs", "(50,0,50)","1"),
+            
             # ("nbtags", "Nbtags", "nbtags", "(11,0,11)", "1"),
             # ("mtmin", "m_{T}^{min}", "mtmin", "(10,0,300)", "1"),
             # ("lep1pt", "p_{T}(lep1)", "lep1_coneCorrPt", "(10,0,300)", "1"),
@@ -126,6 +130,12 @@ def make_plots():
 
             pads[1].cd()
 
+            
+            if shortname in ["njets","nbtags"]:
+                for ib in range(1,h1.GetNbinsX()+1):
+                    fast_val = d_hists["fastsim"].GetBinContent(ib)
+                    full_val = h1.GetBinContent(ib)
+                    print shortname, h1.GetBinLowEdge(ib), fast_val, full_val
 
             # for orig,ratio in zip([h2,h3],[r2,r3]):
             d_ratios = {}
@@ -167,5 +177,5 @@ def make_plots():
 if __name__ == "__main__":
 
     make_plots()
-    os.system("niceplots plots_higgs plots_higgs_Jul8")
+    os.system("niceplots plots_higgs plots_higgs_Jul19")
 

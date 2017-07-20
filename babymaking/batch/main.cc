@@ -66,6 +66,7 @@ int main(int argc, char *argv[]){
         }
     }
     // if (filename.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
+    if (filename.Contains("_HToTT_") && filename.Contains("Summer16Fast")) isSignal = 101; // fastsim higgs vs fullsim higgs
 
     if (filename.Contains("Run2017")) {
         std::cout << ">>> [!] This is Run2017 data, so not using goodrun list right now!!!" << std::endl;

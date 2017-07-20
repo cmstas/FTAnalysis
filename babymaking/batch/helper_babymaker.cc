@@ -457,7 +457,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
         f_btag_eff->Close();
     }
     if (isFastsim >  0 ) {
-        f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1bbbb-T1qqqq_25ns_Moriond17.root");
+        // f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1bbbb-T1qqqq_25ns_Moriond17.root");
+        f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__fastsim_ttH.root");
         TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
         TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
         TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
@@ -964,6 +965,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         }
         xsec = xsec_higgs(higgs_scan, higgs_mass);
         xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
+        if (isFastsim > 0) {
+            scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
+        }
     }
 
 
@@ -1426,6 +1430,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
        weight_UP   *= reader_fastsim_UP->eval(flavor, jet_eta, pt_cutoff);
        weight_DN   *= reader_fastsim_DN->eval(flavor, jet_eta, pt_cutoff);
      }
+     // std::cout <<  " i: " << i <<  " jet_pt: " << jet_pt <<  " weight_cent: " << weight_cent <<  " eff: " << eff <<  " jet_mcFlavour: " << jet_mcFlavour <<  " jet_results.first.at(i).isBtag(): " << jet_results.first.at(i).isBtag() <<  std::endl;
      if (jet_results.first.at(i).isBtag()) {
        btagprob_data *= weight_cent * eff;
        btagprob_mc *= eff;
@@ -1466,6 +1471,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   weight_btagsf1 = btagprob_data / btagprob_mc;
   weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
   weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
+  // std::cout <<  " btagprob_data: " << btagprob_data <<  " btagprob_mc: " << btagprob_mc <<  " weight_btagsf1: " << weight_btagsf1 <<  std::endl;
 
   // --------------------------------------- //
   // AGAIN BECAUSE THERE'S TWO GODDAMN FILES //
