@@ -163,7 +163,6 @@ int main(int argc, char *argv[]){
     //Event Loop
     for(unsigned int eventAG=0; eventAG < nEvents; eventAG++){
 
-
         if ((nevents_max > 0) && (eventAG > nevents_max)) break;
 
         //Get Event Content

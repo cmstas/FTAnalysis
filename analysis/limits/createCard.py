@@ -345,6 +345,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
 def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False):
     # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
     do_tttt = signal != "tttt"
+    # do_tttt = True
     #define processes (signal first)
     # if pseudoData:
     #     print "Using pseudo data!"

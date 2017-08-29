@@ -111,6 +111,9 @@ def main():
     # print '--------------------------------------'
 
     fixed_name = args.POI
+    xaxis_name = fixed_name
+    label_name = fixed_name
+    unit = ""
     if args.translate is not None:
         with open(args.translate) as jsonfile:
             name_translate = json.load(jsonfile)
@@ -121,7 +124,12 @@ def main():
     yvals = [1., 4.0]
 
 
-    main_scan = BuildScan(args.output, args.POI, [args.main], args.main_color, yvals, args.y_cut)
+    scalePOI = 9.2
+    xaxis_name = "#sigma [fb]"
+    label_name = "#sigma"
+    unit = "fb"
+
+    main_scan = BuildScan(args.output, "{0}*{1}".format(scalePOI,args.POI), [args.main], args.main_color, yvals, args.y_cut)
 
     other_scans = [ ]
     other_scans_opts = [ ]
@@ -141,7 +149,7 @@ def main():
 
     axishist.SetMaximum(args.y_max)
     axishist.GetYaxis().SetTitle("- 2 #Delta ln L")
-    axishist.GetXaxis().SetTitle("%s" % fixed_name)
+    axishist.GetXaxis().SetTitle("%s" % xaxis_name)
 
     new_min = axishist.GetXaxis().GetXmin()
     new_max = axishist.GetXaxis().GetXmax()
@@ -191,7 +199,7 @@ def main():
     val_nom = main_scan['val']
     val_2sig = main_scan['val_2sig']
 
-    textfit = '%s = %.3f{}^{#plus %.3f}_{#minus %.3f}' % (fixed_name, val_nom[0], val_nom[1], abs(val_nom[2]))
+    textfit = '%s = %.1f{}^{#plus %.1f}_{#minus %.1f} %s' % (label_name, val_nom[0], val_nom[1], abs(val_nom[2]), unit)
 
 
     pt = ROOT.TPaveText(0.59, 0.82 - len(other_scans)*0.08, 0.95, 0.91, 'NDCNB')
@@ -217,7 +225,7 @@ def main():
             v_hi.append(other['val'][1])
             v_lo.append(other['val'][2])
         assert(len(v_hi) == len(breakdown))
-        textfit = '%s = %.3f' % (fixed_name, val_nom[0])
+        textfit = '%s = %.2f' % (label_name, val_nom[0])
         for i, br in enumerate(breakdown):
             if i < (len(breakdown) - 1):
                 if (abs(v_hi[i+1]) > abs(v_hi[i])):
@@ -233,7 +241,7 @@ def main():
             else:
                 hi = v_hi[i]
                 lo = v_lo[i]
-            textfit += '{}^{#plus %.3f}_{#minus %.3f}(%s)' % (hi, abs(lo), br)
+            textfit += '{}^{#plus %.2f}_{#minus %.2f}(%s)' % (hi, abs(lo), br)
         pt.AddText(textfit)
 
 
@@ -257,12 +265,13 @@ def main():
     legend.Draw()
 
     save_graph = main_scan['graph'].Clone()
-    save_graph.GetXaxis().SetTitle('%s = %.3f %+.3f/%+.3f' % (fixed_name, val_nom[0], val_nom[2], val_nom[1]))
+    save_graph.GetXaxis().SetTitle('%s = %.2f %+.2f/%+.2f' % (label_name, val_nom[0], val_nom[2], val_nom[1]))
     outfile = ROOT.TFile(args.output+'.root', 'RECREATE')
     outfile.WriteTObject(save_graph)
     outfile.Close()
     canv.Print('.pdf')
     canv.Print('.png')
+    canv.Print('.C')
 
 if __name__ == "__main__":
     main()

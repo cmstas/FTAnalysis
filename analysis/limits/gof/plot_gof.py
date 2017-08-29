@@ -54,3 +54,6 @@ draw_line(observed, h1.GetMaximum(), width=4, style=1, color=r.kBlack) # observe
 c1.SaveAs("plots/gof.pdf")
 os.system("ic plots/gof.pdf")
 
+# c1.SaveAs("plots/gof_bgonly.pdf")
+# os.system("ic plots/gof_bgonly.pdf")
+

@@ -7,9 +7,19 @@ ntoys=15
 
 # run toys
 for seed in $(seq 1 ${njobs}); do
+
+    # # bg only
+    # echo "nice -10 combine -M GoodnessOfFit ${card} --fixedSignalStrength 0 --algo=saturated -t ${ntoys} -s ${seed} >& log_gof_${seed}.txt &"
+    # nice -10 combine -M GoodnessOfFit ${card} --fixedSignalStrength 0 --algo=saturated -t ${ntoys} -s ${seed} >& log_gof_${seed}.txt &
+
     echo "nice -10 combine -M GoodnessOfFit ${card} --algo=saturated -t ${ntoys} -s ${seed} >& log_gof_${seed}.txt &"
     nice -10 combine -M GoodnessOfFit ${card} --algo=saturated -t ${ntoys} -s ${seed} >& log_gof_${seed}.txt &
+
 done
+
+# # bg only
+# # get observed
+# combine -M GoodnessOfFit ${card} --fixedSignalStrength 0 --algo=saturated >& log_gof_observed.txt &
 
 # get observed
 combine -M GoodnessOfFit ${card} --algo=saturated >& log_gof_observed.txt &

@@ -12,14 +12,14 @@ def reduce_bins(h_in, nbins):
         h_tmp.SetBinError( ibin, h_in.GetBinError(ibin) )
     return h_tmp
 
-def get_postfit_dict(fname="mlfitname.root", nbins=10):
+def get_dict(fname,typ="shapes_fit_s", nbins=10, _tostore=[]):
     f1 = r.TFile(fname)
     if not f1: 
         print "[!] Error, couldn't find file {0}".format(fname)
         raise Exception
 
     d = {}
-    typ = "shapes_fit_b"
+    # typ = "shapes_fit_s"
     g_data = f1.Get("{0}/SS/data".format(typ))
     tkeys = f1.Get("{0}/SS".format(typ)).GetListOfKeys()
     for tkey in tkeys:
@@ -40,8 +40,25 @@ def get_postfit_dict(fname="mlfitname.root", nbins=10):
             d[key] = h_data
         else:
             d[key] = obj
+        _tostore.append(d[key])
     f1.Close()
     return d
+# shapes_prefit
+
+def get_postfit_dict(fname="mlfitname.root"):
+    d_splusbfit = get_dict(fname,"shapes_fit_s")
+    d_prefit = get_dict(fname,"shapes_prefit")
+    # for key in d_splusbfit:
+    ratios = {} # postfit SRCR / prefit SRCR integrals
+    for key in d_prefit:
+        if "covar" in key: continue
+        h_spb = d_splusbfit.get(key, None)
+        h_prefit = d_prefit.get(key, None)
+        if not h_spb or not h_prefit: continue
+        ratios[key] = 1.0*h_spb.Integral()/h_prefit.Integral()
+    return d_splusbfit, ratios
+    # return d_prefit
+
 
 if __name__ == "__main__":
 
@@ -49,4 +66,8 @@ if __name__ == "__main__":
     # parser.add_argument("dir", help="directory")
     # args = parser.parse_args()
 
-    print get_postfit_dict()
+    # print get_postfit_dict()
+    d_postfit, ratios = get_postfit_dict("v0.10_Jul20/mlfit.root")
+    print d_postfit
+    print d_postfit["tttt"].Integral()
+    print ratios

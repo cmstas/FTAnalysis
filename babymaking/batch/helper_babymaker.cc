@@ -429,7 +429,9 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     // And another one for fastsim
     // calib_fs = new BTagCalibration("csvv2_fs", "btagsf/CSV_13TEV_Combined_20_11_2015.csv");
     // calib_fs = new BTagCalibration("csvv2_fs", "btagsf/CSV_13TEV_T1tttt_1200_800_11_7_2016.csv");  // see email from Dominick titled "Fwd: btag eff and SFs for fastsim"
-    calib_fs = new BTagCalibration("csvv2_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_csvv2_ttbar_26_1_2017.csv");  // see email from Dominick titled "Fwd: btag eff and SFs for fastsim"
+    // calib_fs = new BTagCalibration("csvv2_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_csvv2_ttbar_26_1_2017.csv");  // see email from Dominick titled "Fwd: btag eff and SFs for fastsim"
+    // calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_deepcsv_ttbar_26_1_2017.csv");
+    calib_fs = new BTagCalibration("csvv2_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_csvv2_ttbar_26_1_2017.csv");
     reader_fastsim    = new BTagCalibrationReader(calib_fs, BTagEntry::OP_MEDIUM, "fastsim", "central"); // central
     reader_fastsim_UP = new BTagCalibrationReader(calib_fs, BTagEntry::OP_MEDIUM, "fastsim", "up");      // sys up
     reader_fastsim_DN = new BTagCalibrationReader(calib_fs, BTagEntry::OP_MEDIUM, "fastsim", "down");    // sys down
@@ -469,6 +471,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
         f_btag_eff->Close();
     }
   }
+
 
     // Jet Resolution ... :sad:
   res.loadResolutionFile("CORE/Tools/JetResolution/data/Spring16_25nsV10_MC/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
@@ -1286,6 +1289,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           bool foundB = false;
           float mindR = 0.25;
           int bestidx = -1;
+
+          // if (fabs(jet.eta()) > 2.5) continue;
+          // if (fabs(jet.pt()) < 20.) continue;
+
           for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
               auto genp4 = tas::genps_p4()[igen];
               int stat = tas::genps_status()[igen];
@@ -1300,6 +1307,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               if (abs(mid) == 23) continue;
               if (abs(mid) == 24) continue;
               if (abs(mid) == 25) continue;
+
+
+
               if (std::find(bidxs.begin(), bidxs.end(), igen) != bidxs.end()) continue;
               float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
               if (dR < mindR) {

@@ -25,7 +25,8 @@ float bmed = 0.6324;
 float btight = 0.8958;
 
 int nsr = getNsrsTTTT();
-int nsrdisc = 14; //getNsrsTTTT();
+// int nsrdisc = 14; //getNsrsTTTT();
+int nsrdisc = 7; //getNsrsTTTT();
 int nCR = 2;
 
 bool doCustomSelection = false;
@@ -96,7 +97,7 @@ bool makeGenVariationsMC = true;
 // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_data/output/skim/";
 
 // TString dir = "v0.10_Jul12_higgs";
-TString dir = "v0.10_Jul20";
+TString dir = "v0.10_Jul20_fastsimhiggs";
 TString tag = "v0.10_mll";
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
 
@@ -243,6 +244,16 @@ struct plots_t  {
     triple_t h_el_lep2_miniIso;
     triple_t h_el_lep2_ptRel;
     // triple_t h_el_lep2_ptRatio;
+    triple_t h_mu_sip3d_lep3;
+    triple_t h_mu_l3eta;
+    triple_t h_mu_lep3_miniIso;
+    triple_t h_mu_lep3_ptRel;
+    // triple_t h_mu_lep3_ptRatio;
+    triple_t h_el_sip3d_lep3;
+    triple_t h_el_l3eta;
+    triple_t h_el_lep3_miniIso;
+    triple_t h_el_lep3_ptRel;
+    // triple_t h_el_lep3_ptRatio;
 };
 
 
@@ -360,8 +371,8 @@ void getyields(){
     
   // #include "higgs_scan_v2.h" // fullsim
   // #include "higgs_scan_ps_v2.h"
-  // #include "higgs_scan.h" // fastsim
-  // #include "higgs_scan_ps.h"
+  #include "higgs_scan.h" // fastsim
+  #include "higgs_scan_ps.h"
 
     TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
 
@@ -512,24 +523,34 @@ void getyields(){
     WRITE(h_mva.br)               ;   WRITE(h_mva.sr);
     WRITE(h_mu_sip3d_lep1.br)     ;   WRITE(h_mu_sip3d_lep1.sr);
     WRITE(h_mu_sip3d_lep2.br)     ;   WRITE(h_mu_sip3d_lep2.sr);
+    WRITE(h_mu_sip3d_lep3.br)     ;   WRITE(h_mu_sip3d_lep3.sr);
     WRITE(h_el_sip3d_lep1.br)     ;   WRITE(h_el_sip3d_lep1.sr);
     WRITE(h_el_sip3d_lep2.br)     ;   WRITE(h_el_sip3d_lep2.sr);
+    WRITE(h_el_sip3d_lep3.br)     ;   WRITE(h_el_sip3d_lep3.sr);
     WRITE(h_mu_l1eta.br)          ;   WRITE(h_mu_l1eta.sr);
     WRITE(h_mu_l2eta.br)          ;   WRITE(h_mu_l2eta.sr);
+    WRITE(h_mu_l3eta.br)          ;   WRITE(h_mu_l3eta.sr);
     WRITE(h_el_l1eta.br)          ;   WRITE(h_el_l1eta.sr);
     WRITE(h_el_l2eta.br)          ;   WRITE(h_el_l2eta.sr);
+    WRITE(h_el_l3eta.br)          ;   WRITE(h_el_l3eta.sr);
     WRITE(h_mu_lep1_miniIso.br)   ;   WRITE(h_mu_lep1_miniIso.sr);
     WRITE(h_mu_lep2_miniIso.br)   ;   WRITE(h_mu_lep2_miniIso.sr);
+    WRITE(h_mu_lep3_miniIso.br)   ;   WRITE(h_mu_lep3_miniIso.sr);
     // WRITE(h_mu_lep1_ptRatio.br)   ;   WRITE(h_mu_lep1_ptRatio.sr);
     // WRITE(h_mu_lep2_ptRatio.br)   ;   WRITE(h_mu_lep2_ptRatio.sr);
+    // WRITE(h_mu_lep3_ptRatio.br)   ;   WRITE(h_mu_lep3_ptRatio.sr);
     WRITE(h_mu_lep1_ptRel.br)     ;   WRITE(h_mu_lep1_ptRel.sr);
     WRITE(h_mu_lep2_ptRel.br)     ;   WRITE(h_mu_lep2_ptRel.sr);
+    WRITE(h_mu_lep3_ptRel.br)     ;   WRITE(h_mu_lep3_ptRel.sr);
     WRITE(h_el_lep1_miniIso.br)   ;   WRITE(h_el_lep1_miniIso.sr);
     WRITE(h_el_lep2_miniIso.br)   ;   WRITE(h_el_lep2_miniIso.sr);
+    WRITE(h_el_lep3_miniIso.br)   ;   WRITE(h_el_lep3_miniIso.sr);
     // WRITE(h_el_lep1_ptRatio.br)   ;   WRITE(h_el_lep1_ptRatio.sr);
     // WRITE(h_el_lep2_ptRatio.br)   ;   WRITE(h_el_lep2_ptRatio.sr);
+    // WRITE(h_el_lep3_ptRatio.br)   ;   WRITE(h_el_lep3_ptRatio.sr);
     WRITE(h_el_lep1_ptRel.br)     ;   WRITE(h_el_lep1_ptRel.sr);
     WRITE(h_el_lep2_ptRel.br)     ;   WRITE(h_el_lep2_ptRel.sr);
+    WRITE(h_el_lep3_ptRel.br)     ;   WRITE(h_el_lep3_ptRel.sr);
 
     WRITE(h_metnm1.br)     ;
 
@@ -763,49 +784,69 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.SRDISC.TOTAL = new TH1F(Form("SRDISC_TOTAL_%s" , chainTitleCh) , Form("SRDISC_TOTAL_%s" , chainTitleCh) , nsrdisc     , 0.5  , nsrdisc+0.5);
     p_result.SR.TOTAL   = new TH1F(Form("SR_TOTAL_%s"   , chainTitleCh) , Form("SR_TOTAL_%s"   , chainTitleCh) , nsr-nCR , 0.5  , nsr-nCR+0.5);
 
-    p_result.h_mva.br             = new TH1F(Form("br_mva_%s"             , chainTitleCh), Form("mva_%s"             , chainTitleCh), 20, 0    , 1.5);
+    p_result.h_mva.br             = new TH1F(Form("br_mva_%s"             , chainTitleCh), Form("mva_%s"             , chainTitleCh), 10, 0    , 1.5);
     p_result.h_mu_sip3d_lep1.br   = new TH1F(Form("br_sip3d_mu_lep1_%s"   , chainTitleCh), Form("sip3d_mu_lep1_%s"   , chainTitleCh), 20, 0    , 5);
     p_result.h_mu_sip3d_lep2.br   = new TH1F(Form("br_sip3d_mu_lep2_%s"   , chainTitleCh), Form("sip3d_mu_lep2_%s"   , chainTitleCh), 20, 0    , 5);
+    p_result.h_mu_sip3d_lep3.br   = new TH1F(Form("br_sip3d_mu_lep3_%s"   , chainTitleCh), Form("sip3d_mu_lep3_%s"   , chainTitleCh), 20, 0    , 5);
     p_result.h_el_sip3d_lep1.br   = new TH1F(Form("br_sip3d_el_lep1_%s"   , chainTitleCh), Form("sip3d_el_lep1_%s"   , chainTitleCh), 20, 0    , 5);
     p_result.h_el_sip3d_lep2.br   = new TH1F(Form("br_sip3d_el_lep2_%s"   , chainTitleCh), Form("sip3d_el_lep2_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_l1eta.br        = new TH1F(Form("br_l1eta_mu_%s"        , chainTitleCh), Form("l1eta_mu_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_mu_l2eta.br        = new TH1F(Form("br_l2eta_mu_%s"        , chainTitleCh), Form("l2eta_mu_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_el_l1eta.br        = new TH1F(Form("br_l1eta_el_%s"        , chainTitleCh), Form("l1eta_el_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_el_l2eta.br        = new TH1F(Form("br_l2eta_el_%s"        , chainTitleCh), Form("l2eta_el_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_mu_lep1_miniIso.br = new TH1F(Form("br_lep1_mu_miniIso_%s" , chainTitleCh), Form("lep1_mu_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_mu_lep2_miniIso.br = new TH1F(Form("br_lep2_mu_miniIso_%s" , chainTitleCh), Form("lep2_mu_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_mu_lep1_ptRel.br   = new TH1F(Form("br_lep1_mu_ptRel_%s"   , chainTitleCh), Form("lep1_mu_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
-    p_result.h_mu_lep2_ptRel.br   = new TH1F(Form("br_lep2_mu_ptRel_%s"   , chainTitleCh), Form("lep2_mu_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
-    p_result.h_el_lep1_miniIso.br = new TH1F(Form("br_lep1_el_miniIso_%s" , chainTitleCh), Form("lep1_el_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_el_lep2_miniIso.br = new TH1F(Form("br_lep2_el_miniIso_%s" , chainTitleCh), Form("lep2_el_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_el_lep1_ptRel.br   = new TH1F(Form("br_lep1_el_ptRel_%s"   , chainTitleCh), Form("lep1_el_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
-    p_result.h_el_lep2_ptRel.br   = new TH1F(Form("br_lep2_el_ptRel_%s"   , chainTitleCh), Form("lep2_el_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
+    p_result.h_el_sip3d_lep3.br   = new TH1F(Form("br_sip3d_el_lep3_%s"   , chainTitleCh), Form("sip3d_el_lep3_%s"   , chainTitleCh), 20, 0    , 5);
+    p_result.h_mu_l1eta.br        = new TH1F(Form("br_l1eta_mu_%s"        , chainTitleCh), Form("l1eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_mu_l2eta.br        = new TH1F(Form("br_l2eta_mu_%s"        , chainTitleCh), Form("l2eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_mu_l3eta.br        = new TH1F(Form("br_l3eta_mu_%s"        , chainTitleCh), Form("l3eta_mu_%s"        , chainTitleCh), 8, -2.5 , 2.5);
+    p_result.h_el_l1eta.br        = new TH1F(Form("br_l1eta_el_%s"        , chainTitleCh), Form("l1eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_el_l2eta.br        = new TH1F(Form("br_l2eta_el_%s"        , chainTitleCh), Form("l2eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_el_l3eta.br        = new TH1F(Form("br_l3eta_el_%s"        , chainTitleCh), Form("l3eta_el_%s"        , chainTitleCh), 8, -2.5 , 2.5);
+    p_result.h_mu_lep1_miniIso.br = new TH1F(Form("br_lep1_mu_miniIso_%s" , chainTitleCh), Form("lep1_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_mu_lep2_miniIso.br = new TH1F(Form("br_lep2_mu_miniIso_%s" , chainTitleCh), Form("lep2_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_mu_lep3_miniIso.br = new TH1F(Form("br_lep3_mu_miniIso_%s" , chainTitleCh), Form("lep3_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_mu_lep1_ptRel.br   = new TH1F(Form("br_lep1_mu_ptRel_%s"   , chainTitleCh), Form("lep1_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_mu_lep2_ptRel.br   = new TH1F(Form("br_lep2_mu_ptRel_%s"   , chainTitleCh), Form("lep2_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_mu_lep3_ptRel.br   = new TH1F(Form("br_lep3_mu_ptRel_%s"   , chainTitleCh), Form("lep3_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_el_lep1_miniIso.br = new TH1F(Form("br_lep1_el_miniIso_%s" , chainTitleCh), Form("lep1_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_el_lep2_miniIso.br = new TH1F(Form("br_lep2_el_miniIso_%s" , chainTitleCh), Form("lep2_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_el_lep3_miniIso.br = new TH1F(Form("br_lep3_el_miniIso_%s" , chainTitleCh), Form("lep3_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_el_lep1_ptRel.br   = new TH1F(Form("br_lep1_el_ptRel_%s"   , chainTitleCh), Form("lep1_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_el_lep2_ptRel.br   = new TH1F(Form("br_lep2_el_ptRel_%s"   , chainTitleCh), Form("lep2_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_el_lep3_ptRel.br   = new TH1F(Form("br_lep3_el_ptRel_%s"   , chainTitleCh), Form("lep3_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
     // p_result.h_mu_lep1_ptRatio.br = new TH1F(Form("lep1_mu_ptRatio_%s" , chainTitleCh), Form("lep1_mu_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
     // p_result.h_mu_lep2_ptRatio.br = new TH1F(Form("lep2_mu_ptRatio_%s" , chainTitleCh), Form("lep2_mu_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
+    // p_result.h_mu_lep3_ptRatio.br = new TH1F(Form("lep3_mu_ptRatio_%s" , chainTitleCh), Form("lep3_mu_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
     // p_result.h_el_lep1_ptRatio.br = new TH1F(Form("lep1_el_ptRatio_%s" , chainTitleCh), Form("lep1_el_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
     // p_result.h_el_lep2_ptRatio.br = new TH1F(Form("lep2_el_ptRatio_%s" , chainTitleCh), Form("lep2_el_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
+    // p_result.h_el_lep3_ptRatio.br = new TH1F(Form("lep3_el_ptRatio_%s" , chainTitleCh), Form("lep3_el_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
 
-    p_result.h_mva.sr             = new TH1F(Form("sr_mva_%s"             , chainTitleCh), Form("mva_%s"             , chainTitleCh), 20, 0    , 1.5);
+    p_result.h_mva.sr             = new TH1F(Form("sr_mva_%s"             , chainTitleCh), Form("mva_%s"             , chainTitleCh), 10, 0    , 1.5);
     p_result.h_mu_sip3d_lep1.sr   = new TH1F(Form("sr_sip3d_mu_lep1_%s"   , chainTitleCh), Form("sip3d_mu_lep1_%s"   , chainTitleCh), 20, 0    , 5);
     p_result.h_mu_sip3d_lep2.sr   = new TH1F(Form("sr_sip3d_mu_lep2_%s"   , chainTitleCh), Form("sip3d_mu_lep2_%s"   , chainTitleCh), 20, 0    , 5);
+    p_result.h_mu_sip3d_lep3.sr   = new TH1F(Form("sr_sip3d_mu_lep3_%s"   , chainTitleCh), Form("sip3d_mu_lep3_%s"   , chainTitleCh), 20, 0    , 5);
     p_result.h_el_sip3d_lep1.sr   = new TH1F(Form("sr_sip3d_el_lep1_%s"   , chainTitleCh), Form("sip3d_el_lep1_%s"   , chainTitleCh), 20, 0    , 5);
     p_result.h_el_sip3d_lep2.sr   = new TH1F(Form("sr_sip3d_el_lep2_%s"   , chainTitleCh), Form("sip3d_el_lep2_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_l1eta.sr        = new TH1F(Form("sr_l1eta_mu_%s"        , chainTitleCh), Form("l1eta_mu_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_mu_l2eta.sr        = new TH1F(Form("sr_l2eta_mu_%s"        , chainTitleCh), Form("l2eta_mu_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_el_l1eta.sr        = new TH1F(Form("sr_l1eta_el_%s"        , chainTitleCh), Form("l1eta_el_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_el_l2eta.sr        = new TH1F(Form("sr_l2eta_el_%s"        , chainTitleCh), Form("l2eta_el_%s"        , chainTitleCh), 24, -2.5 , 2.5);
-    p_result.h_mu_lep1_miniIso.sr = new TH1F(Form("sr_lep1_mu_miniIso_%s" , chainTitleCh), Form("lep1_mu_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_mu_lep2_miniIso.sr = new TH1F(Form("sr_lep2_mu_miniIso_%s" , chainTitleCh), Form("lep2_mu_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_mu_lep1_ptRel.sr   = new TH1F(Form("sr_lep1_mu_ptRel_%s"   , chainTitleCh), Form("lep1_mu_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
-    p_result.h_mu_lep2_ptRel.sr   = new TH1F(Form("sr_lep2_mu_ptRel_%s"   , chainTitleCh), Form("lep2_mu_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
-    p_result.h_el_lep1_miniIso.sr = new TH1F(Form("sr_lep1_el_miniIso_%s" , chainTitleCh), Form("lep1_el_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_el_lep2_miniIso.sr = new TH1F(Form("sr_lep2_el_miniIso_%s" , chainTitleCh), Form("lep2_el_miniIso_%s" , chainTitleCh), 30, 0    , 0.2);
-    p_result.h_el_lep1_ptRel.sr   = new TH1F(Form("sr_lep1_el_ptRel_%s"   , chainTitleCh), Form("lep1_el_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
-    p_result.h_el_lep2_ptRel.sr   = new TH1F(Form("sr_lep2_el_ptRel_%s"   , chainTitleCh), Form("lep2_el_ptRel_%s"   , chainTitleCh), 25, 0    , 50);
+    p_result.h_el_sip3d_lep3.sr   = new TH1F(Form("sr_sip3d_el_lep3_%s"   , chainTitleCh), Form("sip3d_el_lep3_%s"   , chainTitleCh), 20, 0    , 5);
+    p_result.h_mu_l1eta.sr        = new TH1F(Form("sr_l1eta_mu_%s"        , chainTitleCh), Form("l1eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_mu_l2eta.sr        = new TH1F(Form("sr_l2eta_mu_%s"        , chainTitleCh), Form("l2eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_mu_l3eta.sr        = new TH1F(Form("sr_l3eta_mu_%s"        , chainTitleCh), Form("l3eta_mu_%s"        , chainTitleCh), 8, -2.5 , 2.5);
+    p_result.h_el_l1eta.sr        = new TH1F(Form("sr_l1eta_el_%s"        , chainTitleCh), Form("l1eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_el_l2eta.sr        = new TH1F(Form("sr_l2eta_el_%s"        , chainTitleCh), Form("l2eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
+    p_result.h_el_l3eta.sr        = new TH1F(Form("sr_l3eta_el_%s"        , chainTitleCh), Form("l3eta_el_%s"        , chainTitleCh), 8, -2.5 , 2.5);
+    p_result.h_mu_lep1_miniIso.sr = new TH1F(Form("sr_lep1_mu_miniIso_%s" , chainTitleCh), Form("lep1_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_mu_lep2_miniIso.sr = new TH1F(Form("sr_lep2_mu_miniIso_%s" , chainTitleCh), Form("lep2_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_mu_lep3_miniIso.sr = new TH1F(Form("sr_lep3_mu_miniIso_%s" , chainTitleCh), Form("lep3_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_mu_lep1_ptRel.sr   = new TH1F(Form("sr_lep1_mu_ptRel_%s"   , chainTitleCh), Form("lep1_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_mu_lep2_ptRel.sr   = new TH1F(Form("sr_lep2_mu_ptRel_%s"   , chainTitleCh), Form("lep2_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_mu_lep3_ptRel.sr   = new TH1F(Form("sr_lep3_mu_ptRel_%s"   , chainTitleCh), Form("lep3_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_el_lep1_miniIso.sr = new TH1F(Form("sr_lep1_el_miniIso_%s" , chainTitleCh), Form("lep1_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_el_lep2_miniIso.sr = new TH1F(Form("sr_lep2_el_miniIso_%s" , chainTitleCh), Form("lep2_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_el_lep3_miniIso.sr = new TH1F(Form("sr_lep3_el_miniIso_%s" , chainTitleCh), Form("lep3_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
+    p_result.h_el_lep1_ptRel.sr   = new TH1F(Form("sr_lep1_el_ptRel_%s"   , chainTitleCh), Form("lep1_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_el_lep2_ptRel.sr   = new TH1F(Form("sr_lep2_el_ptRel_%s"   , chainTitleCh), Form("lep2_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
+    p_result.h_el_lep3_ptRel.sr   = new TH1F(Form("sr_lep3_el_ptRel_%s"   , chainTitleCh), Form("lep3_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
     // p_result.h_mu_lep1_ptRatio.sr = new TH1F(Form("lep1_mu_ptRatio_%s" , chainTitleCh), Form("lep1_mu_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
     // p_result.h_mu_lep2_ptRatio.sr = new TH1F(Form("lep2_mu_ptRatio_%s" , chainTitleCh), Form("lep2_mu_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
+    // p_result.h_mu_lep3_ptRatio.sr = new TH1F(Form("lep3_mu_ptRatio_%s" , chainTitleCh), Form("lep3_mu_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
     // p_result.h_el_lep1_ptRatio.sr = new TH1F(Form("lep1_el_ptRatio_%s" , chainTitleCh), Form("lep1_el_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
     // p_result.h_el_lep2_ptRatio.sr = new TH1F(Form("lep2_el_ptRatio_%s" , chainTitleCh), Form("lep2_el_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
+    // p_result.h_el_lep3_ptRatio.sr = new TH1F(Form("lep3_el_ptRatio_%s" , chainTitleCh), Form("lep3_el_ptRatio_%s" , chainTitleCh), 30, 0    , 1.5);
 
 
     //For FR variations
@@ -1127,7 +1168,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             // if (isWZ) weight*=getWZSF();
             // if (isttZ && applyttZSF) weight*=getttZSF();
             //apply lepton scale factors
-            if (ss::is_real_data()==0 && (!isttW) && (!isttZ) && !isFastSim) {
+            if (ss::is_real_data()==0 && (!isttW) && (!isttZ)) {
                 weight*=eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
             if (isFastSim) {
@@ -1780,6 +1821,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_el_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
                     // p_result.h_el_lep2_ptRatio.br->Fill(ptratio_2                                                                               , weight);
                 }
+                if (plotlep3) {
+                    if(abs(ss::lep3_id()) == 13) {
+                        p_result.h_mu_l3eta.br       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                    } else {
+                        p_result.h_el_l3eta.br       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                    }
+                }
 
             }
 
@@ -1832,6 +1880,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             if (SR > nCR) {
+            // if (SR-nCR == 4) { // FIXME FIXME
                 p_result.h_njets.sr->Fill(ss::njets() , weight);
                 p_result.h_nbtags.sr->Fill(ss::nbtags() , weight);
                 p_result.h_type.sr->Fill(mytype , weight);
@@ -1895,6 +1944,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_el_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_el_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
                     // p_result.h_el_lep2_ptRatio.sr->Fill(ptratio_2                                                                               , weight);
+                }
+                if (plotlep3) {
+                    if(abs(ss::lep3_id()) == 13) {
+                        p_result.h_mu_l3eta.sr       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                    } else {
+                        p_result.h_el_l3eta.sr       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                    }
                 }
 
                 // if (nleps > 2) {
@@ -2480,24 +2536,34 @@ std::pair<float,float> getFirstTwoTops() {
 
 int getBDTBin(float disc) {
     int ibin = 1;
-    // if (disc > -0.4)  SRdiscup = 2;
-    // if (disc > -0.2)  SRdiscup = 3;
-    // if (disc >  0.0)  SRdiscup = 4;
-    // if (disc >  0.21) SRdiscup = 5;
-    // if (disc >  0.42) SRdiscup = 6;
-    if (disc > -0.51) ibin = 2;
-    if (disc > -0.41) ibin = 3;
-    if (disc > -0.31) ibin = 4;
-    if (disc > -0.20) ibin = 5;
-    if (disc > -0.13) ibin = 6;
-    if (disc > -0.05) ibin = 7;
-    if (disc >  0.03) ibin = 8;
-    if (disc >  0.10) ibin = 9;
-    if (disc >  0.17) ibin = 10;
-    if (disc >  0.25) ibin = 11;
-    if (disc >  0.32) ibin = 12;
-    if (disc >  0.39) ibin = 13;
-    if (disc >  0.45) ibin = 14;
+
+    // if (disc > -0.30) ibin = 2;
+    // if (disc >  0.00) ibin = 3;
+    // if (disc >  0.21) ibin = 4;
+    // if (disc >  0.31) ibin = 5;
+    // if (disc >  0.42) ibin = 6;
+    // if (disc >  0.62) ibin = 7;
+
+    if (disc >  0.00) ibin = 2;
+    if (disc >  0.21) ibin = 3;
+    if (disc >  0.31) ibin = 4;
+    if (disc >  0.38) ibin = 5;
+    if (disc >  0.46) ibin = 6;
+    if (disc >  0.58) ibin = 7;
+    
+    // if (disc > -0.41) ibin = 2;
+    // if (disc > -0.31) ibin = 3;
+    // if (disc > -0.20) ibin = 4;
+    // if (disc > -0.13) ibin = 5;
+    // if (disc > -0.05) ibin = 6;
+    // if (disc >  0.03) ibin = 7;
+    // if (disc >  0.10) ibin = 8;
+    // if (disc >  0.17) ibin = 9;
+    // if (disc >  0.25) ibin = 10;
+    // if (disc >  0.32) ibin = 11;
+    // if (disc >  0.39) ibin = 12;
+    // if (disc >  0.45) ibin = 13;
+    // if (disc >  0.55) ibin = 14;
 
 
     return ibin;

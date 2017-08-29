@@ -96,6 +96,7 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
             scan_cmd = "combine -M MaxLikelihoodFit {0} --robustFit=1 --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
             if verbose: print ">>> Running combine for mu [{0}]".format(scan_cmd)
             stat, out_scan = commands.getstatusoutput(scan_cmd)
+            commands.getstatusoutput("cp mlfitname.root {0}/mlfit.root".format(dirname))
             out += out_scan
     else:
         if verbose: print ">>> [!] Limits already run, so reusing. Pass the --redolimits flag to redo the limits"

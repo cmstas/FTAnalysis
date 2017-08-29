@@ -74,3 +74,13 @@ float eventScaleFactorFastSim(int pdgId1, int pdgId2, float pt1, float pt2, floa
 
   return FastSimTriggerEfficiency(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht) * leptonScaleFactorFastSim(pdgId1, pt1, eta1, nvtx, ht) * leptonScaleFactorFastSim(pdgId2, pt2, eta2, nvtx, ht);
 }
+
+float eventScaleFactorFastSim_leponly(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht, int nvtx) {
+
+  return leptonScaleFactorFastSim(pdgId1, pt1, eta1, nvtx, ht) * leptonScaleFactorFastSim(pdgId2, pt2, eta2, nvtx, ht);
+}
+
+float eventScaleFactorFastSim_trigonly(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht, int nvtx) {
+
+  return FastSimTriggerEfficiency(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
+}
