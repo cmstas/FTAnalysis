@@ -108,7 +108,8 @@ padt.cd()
 
 h = r.TH2F("h","h",nbinsx,xlow,xhigh,nbinsy,ylow,yhigh)
 h.SetTitle("")
-h.GetXaxis().SetTitle("|y_{T}/y_{T}^{SM}|")
+# h.GetXaxis().SetTitle("|y_{T}/y_{T}^{SM}|")
+h.GetXaxis().SetTitle("|#it{y}_{t}/#it{y}_{t}^{SM}|")
 h.GetYaxis().SetTitle("#sigma(t#bar{t}t#bar{t}) (fb)")
 h.GetXaxis().SetLabelSize(0.04)
 h.GetYaxis().SetLabelSize(0.04)
@@ -190,7 +191,7 @@ leg.AddEntry(None,"Obs. UL","")
 leg.AddEntry(None,"Obs. #pm#sigma_{experiment}","")
 leg.AddEntry(None,"LHC Run 1, arXiv:1606.02266","")
 leg.AddEntry(None,"SM (LO #times 1.27)","")
-leg.SetFillColorAlpha(r.kWhite, 0.92)
+# leg.SetFillColorAlpha(r.kWhite, 0.92)
 
 leg.Draw()
 

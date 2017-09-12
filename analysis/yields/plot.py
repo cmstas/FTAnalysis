@@ -63,12 +63,19 @@ if __name__ == "__main__":
     commonopts = "--darkColorLines --lumi 35.9 --topYaxisTitle Data/Pred. --type Preliminary --poissonErrorsNoZeros --dataName Data --outOfFrame --systInclStat --systFillStyle 3344 "
     d_opts_br = {
 
-          "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
-          "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
-          "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel H_{T} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  "],
-          "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel E_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  "],
-          "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel N_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  "],
-          "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel N_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  --makeTable "],
+          # "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          # "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          # "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel H_{T} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
+          # "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel p_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
+          # "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel N_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
+          # "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel N_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
+
+          "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel H_{T} --isLinear --legendUp 0.03 --legendRight -0.08   --legendTaller 0.05 --yTitleOffset -0.1  --yAxisLabel Events "],
+          "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel p_{T}^{miss} --isLinear --legendUp 0.03 --legendRight -0.08   --legendTaller 0.05 --yTitleOffset -0.1  --yAxisLabel Events "],
+          "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel N_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp 0.03 --legendRight -0.08   --legendTaller 0.05 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
+          "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel N_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp 0.03 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
 
           # "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
           # "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
@@ -159,6 +166,8 @@ if __name__ == "__main__":
 
             do_unblind = True
 
+            d_newopts["noDataWidth"] = True
+
             # if do_stats and key == "SRCR_TOTAL":
             # # if key == "SRCR_TOTAL":
             #     make_scan(cards_dir, do_blind=not do_unblind)
@@ -178,8 +187,6 @@ if __name__ == "__main__":
                     d_newopts["noGrass"] = True
                 dataMCplot(h_data, bgs=bgs, sigs=[h_tttt], sigtitles=["t#bar{t}t#bar{t} x 5"], systs=systs, titles=titles, title=title, subtitle=subtitle, colors=colors, opts=d_newopts, opts_str=opts_str)
 
-
-            # if key in ["SR_TOTAL","SRCR_TOTAL"]:
 
             new_d_newopts = d_newopts.copy()
             new_h_tttt = h_tttt.Clone("new_tttt")
@@ -231,6 +238,8 @@ if __name__ == "__main__":
                 new_d_newopts["outputName"] = oname.replace(".pdf","_stacked.pdf")
                 dataMCplot(h_data, bgs=new_bgs, titles=new_titles, title=title, subtitle=subtitle, colors=new_colors, opts=new_d_newopts, opts_str=opts_str, systs=new_systs)
 
+
+
             # if do_blind:
             #     d_newopts["outputName"] = d_newopts["outputName"].replace(".pdf","_blind.pdf")
             #     d_newopts["poissonErrorsNoZeros"] = False
@@ -251,3 +260,4 @@ if __name__ == "__main__":
 # os.system("niceplots plots plots_tttt_Jul20_unblind")
 # os.system("niceplots plots plots_tttt_Aug1_sr4")
 # os.system("niceplots plots plots_tttt_Aug8")
+os.system("niceplots plots plots_tttt_Sep11")

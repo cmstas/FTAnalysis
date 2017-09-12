@@ -26,8 +26,8 @@ def print_table(d_yields):
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
     # procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","total_background","data","tttt"]
 
-    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    allprocs = [["ttw"],["ttz"],["tth"],["ttvv"],["xg"],["rares"],["flips"],["fakes"],["total_background"],["data"],["tttt"]]
+    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$", "tot s+b"]
+    allprocs = [["ttw"],["ttz"],["tth"],["ttvv"],["xg"],["rares"],["flips"],["fakes"],["total_background"],["data"],["tttt"],["total"]]
 
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Others","Total","Data","$\\tttt$"]
     # allprocs = [["ttw"],["ttz"],["tth"],["ttvv","xg","rares","flips","fakes"],["total_background"],["data"],["tttt"]]
