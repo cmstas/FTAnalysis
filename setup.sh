@@ -3,6 +3,7 @@ therelease=CMSSW_7_4_7_patch1
 mkdir -p common
 if [ ! -d common/$therelease ]; then 
     cd common/ ;
+    source /code/osgcode/cmssoft/cms/cmsset_default.sh
     cmsrel $therelease;
     cd -
 fi

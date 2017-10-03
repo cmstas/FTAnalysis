@@ -26,17 +26,17 @@ float btight = 0.8958;
 
 int nsr = getNsrsTTTT();
 // int nsrdisc = 14; //getNsrsTTTT();
-int nsrdisc = 7; //getNsrsTTTT();
-int nCR = 2; // FIXME FIXME - default 2
+int nsrdisc = 7;
+int nCR = 2;
 
 bool doCustomSelection = false;
-float scaleLumi = 1.; // FIXME FIXME
+float scaleLumi = 1.;
 
 bool doTTWISR = true;
 bool doTTZISR = true;
-bool doBDT = false; // FIXME
-bool outputTrainingBDT = true; // FIXME
-bool includeDataInBDTTree = true; // FIXME
+bool doBDT = false;
+bool outputTrainingBDT = false;
+bool includeDataInBDTTree = false;
 bool doISRFSRsyst = true;
 bool doTTBB = true;
 bool doJER = true;
@@ -574,8 +574,8 @@ void getyields(){
 
      WRITE(h_mllos.ttzcr)     ; 
 
-    WRITE(h_disc.br);
-    WRITE(h_disc2.br);
+    // WRITE(h_disc.br);
+    // WRITE(h_disc2.br);
     WRITE(SRCR.TOTAL);
     WRITE(SRDISC.TOTAL);
     WRITE(SR.TOTAL);

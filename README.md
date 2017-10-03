@@ -35,12 +35,21 @@ cd analysis/limits/
 
 ## Hitting the ground running (quick start)
 ```
+# clone and set up
 git clone https://github.com/cmstas/FTAnalysis
 cd FTAnalysis
 source setup.sh
+
+# get the yields
 cd analysis/yields/
 root -b -q -l do.C
-python plot.py
+
+# run the limits (making postfit histograms)
 cd ../limits/
-./runLimits.py v0.10_Oct3_test --redocard --redolimits
+./runLimits.py v0.10_Oct3_test --redocard --redolimits --unblinded
+# note: paper result has sigma=1.556 to make sure quick start is "calibrated"
+
+# now go back and make the plots (which uses postfit histograms as input)
+cd ../yields/
+python plot.py # puts plots in `plots/`
 ```
