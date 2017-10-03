@@ -37,9 +37,9 @@ def parse_lims(lim_lines, fb=False):
             "sp1":exp_sp1,"sm1":exp_sm1,
             "significance": d.get("significance",-1.),
             "pvalue": d.get("pvalue",-1.),
-            "mu": d.get("mu",-1.),
-            "mu_up": d.get("mu_up",-1.),
-            "mu_down": d.get("mu_down",-1.),
+            "mu": d.get("mu",-999.),
+            "mu_up": d.get("mu_up",-999.),
+            "mu_down": d.get("mu_down",-999.),
             }
 
 def print_lims(d_lims, fb=False, unblinded=False):
@@ -49,10 +49,10 @@ def print_lims(d_lims, fb=False, unblinded=False):
     print "  Exp UL: %.2f +%.2f -%.2f %s" % (d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"], unit)
     if d_lims.get("significance",-1) > 0.:
         print "  Sig: %.3f (p-value: %.3f)" % (d_lims["significance"], d_lims["pvalue"])
-    if d_lims.get("mu",-1) > 0.:
+    if d_lims.get("mu",-999) > -980.:
         print "  Mu: %.3f (+%.3f -%.3f)" % (d_lims["mu"], d_lims["mu_up"], d_lims["mu_down"])
 
-def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=False, verbose=True, dolimits=True, dosignificance=True, doscan=True, unblinded=False,sig="tttt"):
+def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=False, verbose=True, dolimits=True, dosignificance=True, doscan=True, unblinded=False,sig="tttt", yukawa=-1,allownegative=False):
 
     if ".txt" not in card:
         card += "/card_{0}_{1}.txt".format(sig, regions)
@@ -64,14 +64,15 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
     if not os.path.isfile(full_card_name) or redocard:
         if verbose: print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
-        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig)
+        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa))
+        if int(yukawa) >  0:
+            print "yukawa",yukawa
     else:
         if verbose: print ">>> [!] Card already made, so reusing. Pass the --redocard flag to remake the card"
 
     if not dolimits: return {}
 
     if not os.path.isfile(full_log_name) or (redolimits or redocard):
-        # extra = "--noFitAsimov" if not unblinded else ""
         extra = "--noFitAsimov"
         limit_cmd = "combine -M Asymptotic {0} {1}  2>&1 | tee {2}".format(full_card_name, extra, full_log_name)
         if verbose: print ">>> Running combine [{0}]".format(limit_cmd)
@@ -91,9 +92,13 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
                 cardname_scan = cardname.replace(".txt","_asimov.txt")
                 full_card_name_scan = full_card_name.replace(".txt","_asimov.txt")
             if redocard:
-                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig)
+                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa))
             # scan_cmd = "combine -M MaxLikelihoodFit {0} --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
-            scan_cmd = "combine -M MaxLikelihoodFit {0} --robustFit=1 --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
+            if allownegative:
+                extra = "--rMin -2.0 --rMax +10.0"
+            else:
+                extra = ""
+            scan_cmd = "combine -M MaxLikelihoodFit {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} -n name 2>&1 | tee -a {2}".format(full_card_name_scan, extra, full_log_name)
             if verbose: print ">>> Running combine for mu [{0}]".format(scan_cmd)
             stat, out_scan = commands.getstatusoutput(scan_cmd)
             commands.getstatusoutput("cp mlfitname.root {0}/mlfit.root".format(dirname))
@@ -120,10 +125,12 @@ if __name__ == "__main__":
     parser.add_argument("-L", "--redolimits", help="force the rerunning of limits", action="store_true")
     parser.add_argument("-M", "--domcfakes", help="use fakes from MC", action="store_true")
     parser.add_argument("-X", "--noscan", help="don't do a likelihood fit/scan", action="store_true")
-    parser.add_argument("-Y", "--nosignificance", help="don't calculate significance", action="store_true")
+    parser.add_argument("-N", "--nosignificance", help="don't calculate significance", action="store_true")
     parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits", default="srcr")
     parser.add_argument("-u", "--unblinded", help="show unblinded quantities", action="store_true")
+    parser.add_argument("-a", "--allownegative", help="allow negative mu in maxlikelihood fit", action="store_true")
     parser.add_argument("-s", "--sig", help="signal name", default="tttt")
+    parser.add_argument("-y", "--yukawa", help="yukawa coupling int for tth", default=-1)
     args = parser.parse_args()
 
     # d_lims = get_lims(args)
@@ -137,6 +144,8 @@ if __name__ == "__main__":
             unblinded=args.unblinded,
             doscan=(not args.noscan),
             dosignificance=(not args.nosignificance),
+            yukawa=int(args.yukawa),
+            allownegative=args.allownegative
             )
     print "------------------------------"
     print_lims(d_lims, fb=True, unblinded=args.unblinded)

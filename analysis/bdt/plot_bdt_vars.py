@@ -10,7 +10,7 @@ if __name__ == "__main__":
     r.gROOT.SetBatch(1)
 
     ch = r.TChain("t")
-    ch.Add("output.root")
+    ch.Add("output_withdata.root")
     c1 = r.TCanvas()
 
     triplets = [
@@ -79,26 +79,36 @@ if __name__ == "__main__":
 
         hnamebg = var+"_bg"
         hnamesig = var+"_sig"
-        ch.Draw("{}>>{}({})".format(var,hnamebg,bins), "weight*(({}) && (name!=\"tttt\"))".format(sel), "goff")
-        ch.Draw("{}>>{}({})".format(var,hnamesig,bins),"weight*(({}) && (name==\"tttt\"))".format(sel), "goff")
+        hnamedata = var+"_data"
+        bgstr = "(name==\"ttw\" || name==\"ttz\" || name==\"tth\" || name==\"xg\" || name==\"rares\" || name==\"ttvv\" || name==\"flips\" || name==\"fakes\")"
+        sigstr = "(name==\"tttt\")"
+        datastr = "(name==\"data\")"
+        ch.Draw("{}>>{}({})".format(var,hnamebg,bins), "weight*(({}) && ({}))".format(sel,bgstr), "goff")
+        ch.Draw("{}>>{}({})".format(var,hnamesig,bins),"weight*(({}) && ({}))".format(sel,sigstr), "goff")
+        ch.Draw("{}>>{}({})".format(var,hnamedata,bins),"weight*(({}) && ({}))".format(sel,datastr), "goff")
         hbg = r.gDirectory.Get(hnamebg)
         hsig = r.gDirectory.Get(hnamesig)
+        hdata = r.gDirectory.Get(hnamedata)
         # print hbg, hsig
 
-        hbg.SetLineColor(r.kBlack)
+        hdata.SetLineColor(r.kBlack)
+        hbg.SetLineColor(r.kBlue)
         hsig.SetLineColor(r.kRed)
+
+        hdata.SetMarkerSize(1.2)
 
         hbg.SetTitle("%s {%s} [both normed]" % (var,sel))
         hbg.SetMaximum(1.3*max(hbg.GetMaximum(),hsig.GetMaximum()))
         hsig.SetMaximum(1.3*max(hbg.GetMaximum(),hsig.GetMaximum()))
-        hbg.DrawNormalized()
-        hsig.DrawNormalized("same")
+        hbg.DrawNormalized("histe")
+        hsig.DrawNormalized("samehiste")
+        hdata.DrawNormalized("samePE")
 
 
         c1.SaveAs("plots/{}.pdf".format(var))
 
 
-    os.system("niceplots plots plots_bdt_Jul6")
+    os.system("niceplots plots plots_bdt_Sep26")
 
 
 

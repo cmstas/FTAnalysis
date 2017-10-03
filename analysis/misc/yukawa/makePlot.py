@@ -3,12 +3,13 @@ import numpy as np
 import array
 import sys, glob
 import os
+import scipy.optimize
 
 r.gROOT.SetBatch(1)
 
 # xvals=[0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0]
 # xvals=[0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0,3.2]
-xvals = [0.1*i for i in range(8,33)]
+xvals = [0.1*i for i in range(1,29)]
 lumi = 35.9
 xlow = min(xvals)
 xhigh = max(xvals)
@@ -21,6 +22,10 @@ nbinsy = 10
 magic2 = 2.08
 
 
+from parse import get_stuff
+ktvals, ul, central, ups, downs = get_stuff("scaninfo.txt")
+# ktvals, ul, central, ups, downs = get_stuff("scaninfo_negative_theorylnN.txt")
+# ktvals, ul, central, ups, downs = get_stuff("scaninfo_negative.txt")
 
 obs=[16.9 for _ in xvals]
 theory = [0.05*i*i+0.25 for i in range(len(xvals))]
@@ -76,7 +81,9 @@ theoryhigh = [calc_sigma(kt,gza_13tev_up,int_13tev_up,higgs_13tev_up) for kt in 
 def decrease(vals,minus):
     return [v-minus for v in vals]
 
-ul= [41.7 for _ in xvals]
+# ul= [41.7 for _ in xvals]
+
+
 obs=decrease(obs,.0)
 exp=obs[:]
 m1s=decrease(exp,11.4)
@@ -122,14 +129,25 @@ h.GetXaxis().SetLabelSize(0.045)
 h.Draw()
 
 
-gr_s1b = r.TGraphAsymmErrors(len(xvals),array.array('d', xvals),array.array('d', exp),array.array('d', x0e),array.array('d', x0e),array.array('d', m1s),array.array('d', p1s))
+# gr_s1b = r.TGraphAsymmErrors(len(xvals),array.array('d', xvals),array.array('d', exp),array.array('d', x0e),array.array('d', x0e),array.array('d', m1s),array.array('d', p1s))
+# print zip([ktvals,central, downs, ups])
+gr_s1b = r.TGraphAsymmErrors(
+        len(ktvals),
+        array.array('d', ktvals),
+        array.array('d', central),
+        array.array('d', [0. for _ in ktvals]),
+        array.array('d', [0. for _ in ktvals]),
+        array.array('d', downs),
+        array.array('d', ups),
+        )
 gr_s1b.SetFillColor(r.kGray)
 gr_s1b.SetLineStyle(1)
 gr_s1b.SetLineWidth(3)
 gr_s1b.SetLineColor(r.kBlack)
 gr_s1b.Draw("3L")
 
-gexp = r.TGraph(len(xvals), array.array('d', xvals), array.array('d', exp))
+# gexp = r.TGraph(len(xvals), array.array('d', xvals), array.array('d', exp))
+gexp = r.TGraph(len(ktvals), array.array('d', ktvals), array.array('d', central))
 gexp.SetLineStyle(1)
 gexp.SetLineWidth(3)
 gexp.SetLineColor(r.kBlack)
@@ -139,14 +157,21 @@ gexp.Draw("L")
 r.gPad.Update()
 r.gPad.RedrawAxis()
 
+# print ktvals
+# print ul
+# print theory
+# print thp1s
+# print thm1s
+# print xvals
+
 gr_ulb = r.TGraphAsymmErrors(
-        len(xvals),
-        array.array('d', xvals),
+        len(ktvals),
+        array.array('d', ktvals),
         array.array('d', ul),
-        array.array('d', x0e),
-        array.array('d', x0e),
-        array.array('d', [0.0 for v in ul]),
-        array.array('d', [3.5 for v in ul]
+        array.array('d', [0. for _ in ul]),
+        array.array('d', [0. for _ in ul]),
+        array.array('d', [0.0 for _ in ul]),
+        array.array('d', [3.5 for _ in ul]
             ))
 gr_ulb.SetLineWidth(3)
 gr_ulb.SetLineColor(r.kGray+2)
@@ -154,7 +179,7 @@ gr_ulb.SetFillStyle(3554)
 gr_ulb.SetFillColor(r.kGray+2)
 gr_ulb.Draw("3L")
 
-gr_theory = r.TGraphAsymmErrors(len(xvals),array.array('d', xvals),array.array('d', theory),array.array('d', x0e),array.array('d', x0e),array.array('d', thp1s),array.array('d', thm1s))
+gr_theory = r.TGraphAsymmErrors(len(xvals),array.array('d', xvals),array.array('d', theory),array.array('d', x0e),array.array('d', x0e),array.array('d', thm1s),array.array('d', thp1s))
 gr_theory.SetFillColorAlpha(r.kAzure+2,0.4)
 # gr_theory.SetFillColorAlpha(r.kViolet+5,0.5)
 gr_theory.SetLineStyle(1)
@@ -168,8 +193,8 @@ arxiv = r.TGraphAsymmErrors(
         2,
         array.array('d', [higcent,higcent]),
         array.array('d', [ylow,yhigh]),
-        array.array('d', [0.23,0.23]),
         array.array('d', [0.22,0.22]),
+        array.array('d', [0.23,0.23]),
         array.array('d', [100.,100.]),
         array.array('d', [0.,0.])
         )
@@ -179,19 +204,23 @@ arxiv.SetLineStyle(1)
 arxiv.SetLineWidth(2)
 arxiv.Draw("2LPC")
 
-line = r.TLine(xsm,yhigh,xsm,0.0)
+line = r.TLine(xsm,yhigh,xsm,ylow)
 line.SetLineWidth(2)
 line.SetLineStyle(7)
 line.SetLineColor(r.kRed)
 line.Draw()
 
+
+xshift = 0.1
+yshift = 0.
 # leg = r.TLegend(0.6, 0.7, 0.90, 0.85)
-leg = r.TLegend(0.23, 0.68, 0.63, 0.88)
+# leg = r.TLegend(0.23, 0.68, 0.63, 0.88)
+leg = r.TLegend(0.23+xshift, 0.72+yshift, 0.63+xshift, 0.87+yshift)
 leg.AddEntry(None,"Obs. UL","")
 leg.AddEntry(None,"Obs. #pm#sigma_{experiment}","")
 leg.AddEntry(None,"LHC Run 1, arXiv:1606.02266","")
 leg.AddEntry(None,"SM (LO #times 1.27)","")
-# leg.SetFillColorAlpha(r.kWhite, 0.92)
+leg.SetFillColorAlpha(r.kWhite, 0.80)
 
 leg.Draw()
 
@@ -316,7 +345,8 @@ offset = 0.00
 
 # masstex = r.TLatex(0.70,0.79, "H_{T} > 300 GeV" )
 # smtex = r.TLatex(0.25,0.79, "SM" )
-smtex = r.TLatex(0.16,0.52, "SM" ) # horizontal to left of line
+# smtex = r.TLatex(0.16,0.52, "SM" ) # horizontal to left of line
+smtex = r.TLatex(0.36,0.52, "SM" ) # new position with ktvals
 # smtex = r.TLatex(0.20,0.52, "SM" ) # vertical to left of line
 smtex.SetNDC()
 smtex.SetTextColor(r.kRed)
@@ -350,3 +380,26 @@ cmstexprel.Draw()
 fname = "plots/ihateroot.pdf"
 c1.SaveAs(fname)
 os.system("ic " + fname)
+
+calculate = True
+if calculate:
+    ktvals = np.array(ktvals) # for non theory y values
+    ul = np.array(ul)
+    theory = np.array(theory)
+    theorylow = np.array(theorylow)
+    theoryhigh = np.array(theoryhigh)
+    xvals = np.array(xvals) # for theory y values
+
+    def fcrossing_main(xtest):
+        return (np.interp(xtest,ktvals,ul) - np.interp(xtest,xvals,theory))**2.
+    def fcrossing_plus(xtest):
+        return (np.interp(xtest,ktvals,ul) - np.interp(xtest,xvals,theorylow))**2.
+    def fcrossing_minus(xtest):
+        return (np.interp(xtest,ktvals,ul) - np.interp(xtest,xvals,theoryhigh))**2.
+
+
+    cent = scipy.optimize.minimize(fcrossing_main, 2.5)["x"][0]
+    high = scipy.optimize.minimize(fcrossing_plus, 2.5)["x"][0]
+    low = scipy.optimize.minimize(fcrossing_minus, 2.5)["x"][0]
+    print "{:.2f},{:.2f},{:.2f}".format(cent, low, high)
+    print "yt/ytSM < {:.2f} (+{:.2f} -{:.2f})".format(cent, cent-low, high-cent)

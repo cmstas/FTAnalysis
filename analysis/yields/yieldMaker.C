@@ -27,15 +27,16 @@ float btight = 0.8958;
 int nsr = getNsrsTTTT();
 // int nsrdisc = 14; //getNsrsTTTT();
 int nsrdisc = 7; //getNsrsTTTT();
-int nCR = 2;
+int nCR = 2; // FIXME FIXME - default 2
 
 bool doCustomSelection = false;
-float scaleLumi = 1.;
+float scaleLumi = 1.; // FIXME FIXME
 
 bool doTTWISR = true;
 bool doTTZISR = true;
 bool doBDT = false; // FIXME
-bool outputTrainingBDT = false; // FIXME
+bool outputTrainingBDT = true; // FIXME
+bool includeDataInBDTTree = true; // FIXME
 bool doISRFSRsyst = true;
 bool doTTBB = true;
 bool doJER = true;
@@ -96,8 +97,9 @@ bool makeGenVariationsMC = true;
 // // TString tag = "v0.10_fix"; // data is in v0.07 still
 // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_data/output/skim/";
 
-// TString dir = "v0.10_Jul12_higgs";
-TString dir = "v0.10_Jul20_fastsimhiggs";
+TString dir = "v0.10_Oct3_test";
+// TString dir = "v0.10_Sep22_ytscan";
+// TString dir = "v0.10_Sep15_triplelumi18bins";
 TString tag = "v0.10_mll";
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
 
@@ -261,7 +263,7 @@ struct plots_t  {
 yields_t total;
 
 //function declaration
-pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, int doFakes = 0, int exclude = 0, bool isSignal = 0, bool isGamma = 0);
+pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, int doFakes = 0, int exclude = 0, bool isSignal = 0, bool isGamma = 0, bool promptSubtraction = 0, float yt = 0. );
 void avoidNegativeYields(TH1F* plot);
 void avoidZeroIntegrals(TH1F* central,TH1F* up,TH1F* down);
 void fillDownMirrorUp(TH1F* central,TH1F* up,TH1F* down);
@@ -367,12 +369,16 @@ void getyields(){
     TChain *data_chain    = new TChain("t","data");
     TChain *flips_chain   = new TChain("t","flips");
     TChain *fakes_chain   = new TChain("t","fakes");
+    TChain *promptsub_chain   = new TChain("t","promptsub");
     //signals full sim
     
+  // #include "yt_scan.h"
+  
   // #include "higgs_scan_v2.h" // fullsim
   // #include "higgs_scan_ps_v2.h"
-  #include "higgs_scan.h" // fastsim
-  #include "higgs_scan_ps.h"
+
+  // #include "higgs_scan.h" // fastsim
+  // #include "higgs_scan_ps.h"
 
     TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
 
@@ -447,6 +453,11 @@ void getyields(){
     fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
     fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
     fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
+    //promptsub
+    promptsub_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
+    promptsub_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
+    promptsub_chain  ->Add(Form("%s/TTTTnew.root"                  , pfx.Data()));
+    promptsub_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
 
     pair<yields_t, plots_t> results_ttw      = run(ttw_chain);
     pair<yields_t, plots_t> results_ttz     = run(ttz_chain);
@@ -468,6 +479,7 @@ void getyields(){
     duplicate_removal::clear_list();
     pair<yields_t, plots_t> results_fakes    = run(fakes_chain, 1, 0, 1);
     duplicate_removal::clear_list();
+    pair<yields_t, plots_t> results_promptsub       = run(promptsub_chain, 0, 0, 1, 0, 0, 0, 1);
 
     if (outputTrainingBDT) {
         // Write output tree
@@ -585,7 +597,7 @@ void getyields(){
 }
 
 //doFakes = 1 for QCD, 2 for inSitu
-pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFakes, int exclude, bool isSignal, bool isGamma){
+pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFakes, int exclude, bool isSignal, bool isGamma, bool promptSubtraction, float yt){
 
 
     TMVA::Reader* reader = new TMVA::Reader("Silent");
@@ -1142,6 +1154,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
             weight*=scaleLumi;
 
+            if (yt > 0.) weight *= yt*yt;
+
             if (isHiggsScan && isFastSim) {
                 weight *= fudgefactor;
             }
@@ -1272,6 +1286,12 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     flipFact += (flr/(1-flr));
                 }
                 weight *= flipFact;
+            }
+
+            if (promptSubtraction && doFakes) {
+                if (!isData && !isGamma && ss::lep1_motherID()==2) continue;
+                if (!isData && !isGamma && ss::lep2_motherID()==2) continue;
+                if (!isData && !( (ss::lep1_motherID()==1 && ss::lep2_motherID()==1) || (ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3)) ) continue;
             }
 
             //QCD Fakes
@@ -1573,7 +1593,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 tree_f_q2 = tree_q2;
                 // // fill discriminant before requiring SR
                 pred = get_prediction((float)tree_njets,(float)tree_nbtags,(float)tree_mt1,(float)tree_mt2,(float)tree_met,(float)tree_ml1l2,(float)tree_htb,(float)tree_nleps,(float)tree_ht,(float)tree_mj1j2,(float)tree_dphij1j2,(float)tree_ptj1,(float)tree_ptj2,(float)tree_ml1j2,(float)tree_ml1j1,(float)tree_wcands,(float)tree_dphil1j1,(float)tree_detal1l2,(float)tree_nlb40,(float)tree_nmb40,(float)tree_ntb40,(float)tree_q1,(float)tree_q2,(float)tree_ht4ratio);
-                if (outputTrainingBDT && !isData) out_tree->Fill();
+                if (outputTrainingBDT && (!isData || includeDataInBDTTree)) out_tree->Fill();
                 mvavalue = reader->EvaluateMVA("BDT");
 
                 tree_njets = ss::njets_unc_up();
