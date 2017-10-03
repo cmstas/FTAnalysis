@@ -37,6 +37,7 @@ cd analysis/limits/
 ```
 # clone and set up
 git clone https://github.com/cmstas/FTAnalysis
+git checkout paper2017
 cd FTAnalysis
 source setup.sh
 
