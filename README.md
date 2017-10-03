@@ -42,7 +42,7 @@ source setup.sh
 
 # get the yields
 cd analysis/yields/
-root -b -q -l do.C
+root -b -q -l do.C # there might be a harmless segfault at the end
 
 # run the limits (making postfit histograms)
 cd ../limits/
