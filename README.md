@@ -32,3 +32,15 @@ cd analysis/yields/
 ```bash
 cd analysis/limits/
 ```
+
+## Hitting the ground running (quick start)
+```
+git clone https://github.com/cmstas/FTAnalysis
+cd FTAnalysis
+source setup.sh
+cd analysis/yields/
+root -b -q -l doAll.C
+python plot.py
+cd ../limits/
+./runLimits.py v0.10_Oct3_test --redocard --redolimits
+```
