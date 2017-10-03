@@ -39,7 +39,7 @@ git clone https://github.com/cmstas/FTAnalysis
 cd FTAnalysis
 source setup.sh
 cd analysis/yields/
-root -b -q -l doAll.C
+root -b -q -l do.C
 python plot.py
 cd ../limits/
 ./runLimits.py v0.10_Oct3_test --redocard --redolimits
