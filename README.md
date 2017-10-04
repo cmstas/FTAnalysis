@@ -37,9 +37,10 @@ cd analysis/limits/
 ```
 # clone and set up
 git clone https://github.com/cmstas/FTAnalysis
-git checkout paper2017
 cd FTAnalysis
-source setup.sh
+git checkout paper2017
+source /code/osgcode/cmssoft/cms/cmsset_default.sh # might as well put in .bashrc
+source setup.sh # configure ssh token with github since `git clone git@...` syntax used here
 
 # get the yields
 cd analysis/yields/
