@@ -141,14 +141,15 @@ gr_s1b = r.TGraphAsymmErrors(
         array.array('d', ups),
         )
 gr_s1b.SetFillColor(r.kGray)
-gr_s1b.SetLineStyle(1)
-gr_s1b.SetLineWidth(3)
+style = 1
+gr_s1b.SetLineStyle(0)
+gr_s1b.SetLineWidth(0)
 gr_s1b.SetLineColor(r.kBlack)
 gr_s1b.Draw("3L")
 
 # gexp = r.TGraph(len(xvals), array.array('d', xvals), array.array('d', exp))
 gexp = r.TGraph(len(ktvals), array.array('d', ktvals), array.array('d', central))
-gexp.SetLineStyle(1)
+gexp.SetLineStyle(style)
 gexp.SetLineWidth(3)
 gexp.SetLineColor(r.kBlack)
 gexp.Draw("L")
@@ -182,8 +183,9 @@ gr_ulb.Draw("3L")
 gr_theory = r.TGraphAsymmErrors(len(xvals),array.array('d', xvals),array.array('d', theory),array.array('d', x0e),array.array('d', x0e),array.array('d', thm1s),array.array('d', thp1s))
 gr_theory.SetFillColorAlpha(r.kAzure+2,0.4)
 # gr_theory.SetFillColorAlpha(r.kViolet+5,0.5)
-gr_theory.SetLineStyle(1)
-gr_theory.SetLineWidth(2)
+# gr_theory.SetLineStyle(1)
+gr_theory.SetLineStyle(7)
+gr_theory.SetLineWidth(3)
 gr_theory.Draw("3C")
 
 higcent = 1.43
@@ -200,33 +202,38 @@ arxiv = r.TGraphAsymmErrors(
         )
 arxiv.SetFillColorAlpha(r.kRed+2,0.5)
 arxiv.SetLineColor(r.kRed-2)
-arxiv.SetLineStyle(1)
-arxiv.SetLineWidth(2)
-arxiv.Draw("2LPC")
+arxiv.SetLineStyle(3)
+arxiv.SetLineWidth(4)
+# arxiv.Draw("2LPC")
 
 line = r.TLine(xsm,yhigh,xsm,ylow)
 line.SetLineWidth(2)
 line.SetLineStyle(7)
 line.SetLineColor(r.kRed)
-line.Draw()
+# line.Draw()
 
 
 xshift = 0.1
 yshift = 0.
 # leg = r.TLegend(0.6, 0.7, 0.90, 0.85)
 # leg = r.TLegend(0.23, 0.68, 0.63, 0.88)
-leg = r.TLegend(0.23+xshift, 0.72+yshift, 0.63+xshift, 0.87+yshift)
-leg.AddEntry(None,"Obs. UL","")
-leg.AddEntry(None,"Obs. #pm#sigma_{experiment}","")
-leg.AddEntry(None,"LHC Run 1, arXiv:1606.02266","")
-leg.AddEntry(None,"SM (LO #times 1.27)","")
+# leg = r.TLegend(0.10+xshift, 0.73+yshift, 0.66+xshift, 0.88+yshift) # Oct 13
+# leg = r.TLegend(0.10+xshift, 0.70+yshift, 0.79+xshift, 0.88+yshift) # Oct 13 long
+leg = r.TLegend(0.12+xshift, 0.70+yshift, 0.64+xshift, 0.88+yshift)
+leg.AddEntry(None,"Obs. upper limit","")
+leg.AddEntry(None,"Obs. cross section","")
+# leg.AddEntry(None,"LHC Run 1, arXiv:1606.02266","")
+# leg.AddEntry(None,"Predicted cross section, arXiv:1602.01934","") # cao paper
+leg.AddEntry(None,"#splitline{Predicted cross section,}{Phys. Rev. D 95 (2017) 053004}","") # cao paper
+# leg.AddEntry(None,"Pred. cross section, Phys. Rev. D 95, 053004 (2017)","") # cao paper
 leg.SetFillColorAlpha(r.kWhite, 0.80)
 
 leg.Draw()
 
-leg.SetTextSize(0.027)
+leg.SetTextSize(0.029)
+# leg.SetTextSize(0.020)
 
-leg.SetMargin(leg.GetMargin()*0.76)
+leg.SetMargin(leg.GetMargin()*0.70)
 # leg.SetMargin(leg.GetMargin()*1.25)
 legHeight=abs(leg.GetY1()-leg.GetY2());
 entryHeight=legHeight/leg.GetNRows();
@@ -279,16 +286,18 @@ LObs1.SetPoint(0,ux1,uy1)
 LObs1.SetPointError(0,0.,0.,dy,dy)
 LObs1.SetPoint(1,ux2,uy2)
 LObs1.SetPointError(1,0.,0.,dy,dy)
+LObs1.SetLineStyle(gr_s1b.GetLineStyle())
 LObs1.Draw("3L")
 LObs2 = r.TGraphAsymmErrors(2)
 LObs2.SetLineColor(gexp.GetLineColor())
 LObs2.SetLineWidth(gexp.GetLineWidth())
+LObs2.SetLineStyle(gexp.GetLineStyle())
 LObs2.SetFillStyle(0)
 LObs2.SetPoint(0,ux1,uy1)
 LObs2.SetPoint(1,ux2,uy2)
 LObs2.Draw("3L")
 
-idx = 3
+idx = 2
 ux1, uy1 = ndc_to_user(coords[idx][0],coords[idx][1])
 ux1 -= 0.1
 ux2 = ux1+dx
@@ -297,6 +306,8 @@ uy2 = uy1
 LTh1 = r.TGraphAsymmErrors(2)
 LTh1.SetFillColor(gr_theory.GetFillColor())
 LTh1.SetLineColor(gr_theory.GetLineColor())
+LTh1.SetLineStyle(gr_theory.GetLineStyle())
+LTh1.SetLineStyle(gr_theory.GetLineStyle())
 LTh1.SetLineWidth(gr_theory.GetLineWidth())
 LTh1.SetPoint(0,ux1,uy1)
 LTh1.SetPointError(0,0.,0.,dy,dy)
@@ -323,21 +334,21 @@ LUpper1.SetPoint(1,ux2,uy2)
 LUpper1.SetPointError(1,0.,0.,0,dy)
 LUpper1.Draw("3L")
 
-idx = 2
-ux1, uy1 = ndc_to_user(coords[idx][0],coords[idx][1])
-ux1 -= 0.1
-ux2 = ux1+dx
-uy2 = uy1
-
-LArxiv1 = r.TGraphAsymmErrors(2)
-LArxiv1.SetFillColor(arxiv.GetFillColor())
-LArxiv1.SetLineColor(arxiv.GetLineColor())
-LArxiv1.SetLineWidth(arxiv.GetLineWidth())
-LArxiv1.SetPoint(0,ux1,uy1)
-LArxiv1.SetPointError(0,0.,0.,dy,dy)
-LArxiv1.SetPoint(1,ux2,uy2)
-LArxiv1.SetPointError(1,0.,0.,dy,dy)
-LArxiv1.Draw("3L")
+# idx = 2
+# ux1, uy1 = ndc_to_user(coords[idx][0],coords[idx][1])
+# ux1 -= 0.1
+# ux2 = ux1+dx
+# uy2 = uy1
+# LArxiv1 = r.TGraphAsymmErrors(2)
+# LArxiv1.SetFillColor(arxiv.GetFillColor())
+# LArxiv1.SetLineColor(arxiv.GetLineColor())
+# LArxiv1.SetLineWidth(arxiv.GetLineWidth())
+# LArxiv1.SetLineStyle(arxiv.GetLineStyle())
+# LArxiv1.SetPoint(0,ux1,uy1)
+# LArxiv1.SetPointError(0,0.,0.,dy,dy)
+# LArxiv1.SetPoint(1,ux2,uy2)
+# LArxiv1.SetPointError(1,0.,0.,dy,dy)
+# LArxiv1.Draw("3L")
 
 
 
@@ -354,7 +365,7 @@ smtex.SetTextSize(0.036)
 # smtex.SetTextAngle(90)
 smtex.SetLineWidth(2)
 smtex.SetTextFont(42)
-smtex.Draw()
+# smtex.Draw()
 
 cmstex = r.TLatex(0.670,0.91-offset, "%.1f fb^{-1} (13 TeV)" % lumi)
 cmstex.SetNDC()

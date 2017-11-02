@@ -70,12 +70,12 @@ if __name__ == "__main__":
           # "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel N_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
           # "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel N_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
 
-          "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
-          "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
-          "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel #it{H}_{T} --isLinear --legendUp 0.03 --legendRight -0.08   --legendTaller 0.05 --yTitleOffset -0.1  --yAxisLabel Events "],
-          "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel #it{p}_{T}^{miss} --isLinear --legendUp 0.03 --legendRight -0.08   --legendTaller 0.05 --yTitleOffset -0.1  --yAxisLabel Events "],
-          "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel #it{N}_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp 0.03 --legendRight -0.08   --legendTaller 0.05 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
-          "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel #it{N}_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp 0.03 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
+          "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.09 --legendRight -0.08    --legendTaller 0.18 --yTitleOffset -0.15  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.10 --legendRight -0.08    --legendTaller 0.20 --yTitleOffset -0.00  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel #it{H}_{T} --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events "],
+          "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel #it{p}_{T}^{miss} --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events "],
+          "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel #it{N}_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
+          "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel #it{N}_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -0.09 --legendRight -0.08    --legendTaller 0.16 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
 
           # "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
           # "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
@@ -150,21 +150,35 @@ if __name__ == "__main__":
                 "outputName": oname,
             }
 
-            if key == "njets" and typ == "ttwcr": subtitle = "(a)"
-            if key == "nbtags" and typ == "ttwcr": subtitle = "(b)"
-            if key == "njets" and typ == "ttzcr": subtitle = "(c)"
-            if key == "nbtags" and typ == "ttzcr": subtitle = "(d)"
+            # if key == "njets" and typ == "ttwcr": subtitle = "(a)"
+            # if key == "nbtags" and typ == "ttwcr": subtitle = "(b)"
+            # if key == "njets" and typ == "ttzcr": subtitle = "(c)"
+            # if key == "nbtags" and typ == "ttzcr": subtitle = "(d)"
+            # if key == "njets" and typ == "sr": subtitle = "(a)"
+            # if key == "nbtags" and typ == "sr": subtitle = "(b)"
+            # if key == "ht" and typ == "sr": subtitle = "(c)"
+            # if key == "met" and typ == "sr": subtitle = "(d)"
+            # if key == "SRCR_TOTAL": subtitle = "(a)"
+            # if key == "SR_TOTAL": subtitle = "(b)"
 
-            if key == "njets" and typ == "sr": subtitle = "(a)"
-            if key == "nbtags" and typ == "sr": subtitle = "(b)"
-            if key == "ht" and typ == "sr": subtitle = "(c)"
-            if key == "met" and typ == "sr": subtitle = "(d)"
+            if key == "njets" and typ == "ttwcr": subtitle = "CRW"
+            if key == "nbtags" and typ == "ttwcr": subtitle = "CRW"
+            if key == "njets" and typ == "ttzcr": subtitle = "CRZ"
+            if key == "nbtags" and typ == "ttzcr": subtitle = "CRZ"
+            if key == "njets" and typ == "sr": subtitle = ""
+            if key == "nbtags" and typ == "sr": subtitle = ""
+            if key == "ht" and typ == "sr": subtitle = ""
+            if key == "met" and typ == "sr": subtitle = ""
+            if key == "SRCR_TOTAL": subtitle = ""
+            if key == "SR_TOTAL": subtitle = ""
 
-            if key == "SRCR_TOTAL": subtitle = "(a)"
-            if key == "SR_TOTAL": subtitle = "(b)"
+
 
             if typ in ["ttzcr","sr"] and ("njets" in name  or "nbtags" in name or "met" in name):
                 d_newopts["ratioUpperBound"] = 4.0
+
+            if key in ["njets","nbtags","ht","met"] and typ == "sr":
+                d_newopts["ratioUpperBound"] = 5.0
 
             print name, typ
 
@@ -232,7 +246,7 @@ if __name__ == "__main__":
                 new_d_newopts["noTextBetweenPads"] = True
                 del new_d_newopts["noGrass"]
                 this_opts_str = opts_str.replace("--isLinear","--setMinimum 0.1")
-                this_opts_str = this_opts_str.replace("--legendUp -.03","--legendUp .03")
+                # this_opts_str = this_opts_str.replace("--legendUp -.05","--legendUp .00")
                 
                 postfit_bgs = [reduce_bins(d_postfit[get_name(bg)],0) for bg in new_bgs]
                 h_totalsyst = reduce_bins(d_postfit["total"],0) # total_background is tot bg, total is totbg+sig
@@ -273,4 +287,5 @@ if __name__ == "__main__":
 # os.system("niceplots plots plots_tttt_Jul20_unblind")
 # os.system("niceplots plots plots_tttt_Aug1_sr4")
 # os.system("niceplots plots plots_tttt_Aug8")
-os.system("niceplots plots plots_tttt_Sep11")
+# os.system("niceplots plots plots_tttt_Sep11")
+os.system("niceplots plots plots_tttt_Oct9")
