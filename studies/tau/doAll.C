@@ -27,7 +27,7 @@
     ch_ft->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-02/merged_ntuple_7.root");
     ch_ft->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-02/merged_ntuple_8.root");
     ScanChain(ch_ft, &out_ft, INCLUDE_TAU);
-    out_ft.Close()
+    out_ft.Close();
 
     TChain *ch_ttw = new TChain("Events");
     TFile out_ttw(fname("ttw"), "RECREATE");
@@ -39,7 +39,7 @@
     ch_ttw->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v3/V00-00-01/merged_ntuple_6.root");
     ch_ttw->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v3/V00-00-01/merged_ntuple_7.root");
     ScanChain(ch_ttw, &out_ttw, INCLUDE_TAU);
-    out_ttw.Close()
+    out_ttw.Close();
 
     TChain *ch_ttz = new TChain("Events");
     TFile out_ttz(fname("ttz"), "RECREATE");
@@ -52,7 +52,7 @@
     ch_ttz->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V00-00-01/merged_ntuple_7.root");
     ch_ttz->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V00-00-01/merged_ntuple_8.root");
     ScanChain(ch_ttz, &out_ttz, INCLUDE_TAU);
-    out_ttz.Close()
+    out_ttz.Close();
 
     TChain *ch_tth = new TChain("Events");
     TFile out_tth(fname("tth"), "RECREATE");
@@ -77,5 +77,5 @@
     ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_21.root");
     ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_22.root");
     ScanChain(ch_tth, &out_tth, INCLUDE_TAU);
-    out_tth.Close()
+    out_tth.Close();
 }

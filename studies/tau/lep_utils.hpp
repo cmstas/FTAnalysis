@@ -64,9 +64,10 @@ bool isGoodTau(size_t idx, const string& id_name = "byTightIsolationMVArun2v1DBo
 
 struct RecoLepton {
     unsigned int idx;
+    int charge;
     int id;
     P4 p4;
-    int charge;
+    bool isGood;
 
     RecoLepton() {};
     virtual ~RecoLepton() {};
@@ -78,9 +79,10 @@ struct RecoLepton {
             RecoLepton reco;
             reco.idx = recoIdx;
             reco.charge = tas::els_charge()[recoIdx];
-            reco.id = (reco.charge>0) ? 11 : -11;
+            reco.id = (reco.charge<0) ? 11 : -11;
             reco.p4 = tas::els_p4()[recoIdx];
-            if(isGoodLepton(reco.id, reco.idx)) recos.push_back(reco);
+            reco.isGood = isGoodLepton(reco.id, reco.idx);
+            if(reco.isGood) recos.push_back(reco);
         }
         return recos;
     };
@@ -94,7 +96,8 @@ struct RecoLepton {
             reco.charge = tas::mus_charge()[recoIdx];
             reco.id = (reco.charge<0) ? 13 : -13;
             reco.p4 = tas::mus_p4()[recoIdx];
-            if(isGoodLepton(reco.id, reco.idx)) recos.push_back(reco);
+            reco.isGood = isGoodLepton(reco.id, reco.idx);
+            if(reco.isGood) recos.push_back(reco);
         }
         return recos;
     };
@@ -108,7 +111,8 @@ struct RecoLepton {
             reco.charge = tas::taus_pf_charge()[recoIdx];
             reco.id = (reco.charge<0) ? 15 : -15;
             reco.p4 = tas::taus_pf_p4()[recoIdx];
-            if (isGoodTau(reco.idx)) recos.push_back(reco);
+            reco.isGood = isGoodTau(reco.idx);
+            if (reco.isGood) recos.push_back(reco);
         }
         return recos;
     };
@@ -118,6 +122,7 @@ std::ostream& operator<<(std::ostream& os, const RecoLepton& reco) {
     os << "< RecoLepton: idx="  << reco.idx
        << ", id=" << reco.id
        << ", pt=" << reco.p4.pt()
+       << ", isGood=" << reco.isGood
        << " >";
     return os;
 }
