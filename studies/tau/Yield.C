@@ -38,7 +38,7 @@ void event_summary(RecoLeptons els, RecoLeptons mus, RecoLeptons taus, int nJet,
     cout << endl;
 }
 
-int ScanChain(TChain *ch, TFile* dest_file, bool include_tau){
+int ScanChain(TChain *ch, TFile* dest_file, bool include_tau) {
     using namespace std;
     using namespace tas;
 
@@ -63,6 +63,16 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau){
     TH1F nEls("nEls",   "nEls",  10, -0.5, 9.5);
     TH1F nMus("nMus",   "nMus",  10, -0.5, 9.5);
     TH1F nTaus("nTaus", "nTaus", 10, -0.5, 9.5);
+    TH1F nEls_mc("nEls_mc",   "nEls_mc",  10, -0.5, 9.5);
+    TH1F nMus_mc("nMus_mc",   "nMus_mc",  10, -0.5, 9.5);
+    TH1F nTaus_mc("nTaus_mc", "nTaus_mc", 10, -0.5, 9.5);
+
+    TH1F h_ht("ht", "Ht", 100, 0, 1500);
+    TH1F h_met("met", "met", 100, 0, 500);
+    TH1F h_njet("njet", "njet", 15, -0.5, 14.5);
+    TH1F h_nbjet("nbjet", "nbjet", 10, -0.5, 9.5);
+
+    EfficiencyMeasurement tau_fakes("tau_fakes_v_pt", 50, 0, 300);
 
     float sr1 = 0;
     float sr2 = 0;
@@ -87,31 +97,53 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau){
             cms3.GetEntry(event);
             N_EVENTS_TOTAL++;
 
-            /* if (event > 100) break; */
+            /* if (N_EVENTS_TOTAL > 5000) break; */
             CMS3::progress(N_EVENTS_TOTAL, nEventsChain);
 
             // Get all leptons in event that pass appropriate selection.
-            RecoLeptons all_leps;
+            RecoLeptons all_good_leps;
+            RecoLeptons all_fakable_leps;
             RecoLeptons els = RecoLepton::els();
             RecoLeptons mus = RecoLepton::mus();
             RecoLeptons taus = RecoLepton::taus();
-            nEls.Fill(els.size());
-            nMus.Fill(mus.size());
-            nTaus.Fill(taus.size());
-            for(auto& lep : els) all_leps.push_back(lep);
-            for(auto& lep : mus) all_leps.push_back(lep);
-            if (include_tau) {
-                for(auto& lep : taus) all_leps.push_back(lep);
+            int nGoodEls = 0;
+            int nGoodMus = 0;
+            int nGoodTaus = 0;
+            for(auto& lep : els) {
+                if (lep.isGood) {
+                    all_good_leps.push_back(lep);
+                    nGoodEls++;
+                }
+                if (lep.isFakable) all_fakable_leps.push_back(lep);
             }
+            for(auto& lep : mus) {
+                if (lep.isGood) {
+                    all_good_leps.push_back(lep);
+                    nGoodMus++;
+                }
+                if (lep.isFakable) all_fakable_leps.push_back(lep);
+            }
+            if (include_tau) {
+                for(auto& lep : taus) {
+                    if (lep.isGood) {
+                        all_good_leps.push_back(lep);
+                        nGoodTaus++;
+                    }
+                    if (lep.isFakable) all_fakable_leps.push_back(lep);
+                }
+            }
+            nEls.Fill(nGoodEls);
+            nMus.Fill(nGoodMus);
+            nTaus.Fill(nGoodTaus);
 
-            sort(all_leps.begin(), all_leps.end(),
+            sort(all_good_leps.begin(), all_good_leps.end(),
                  [](const RecoLepton& lep1, const RecoLepton& lep2){
                      return lep1.p4.pt() > lep2.p4.pt();
                  });
 
             RecoLeptons pos_leps;
             RecoLeptons neg_leps;
-            for (auto& lep : all_leps) {
+            for (auto& lep : all_good_leps) {
                 if(lep.charge > 0) pos_leps.push_back(lep);
                 else neg_leps.push_back(lep);
             }
@@ -153,7 +185,7 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau){
             bool is_ss = false;
             bool is_multilep = false;
             if (ss_pair and passes_zVeto){
-                if (all_leps.size() > 2 and all_leps[2].p4.pt() > 20) {
+                if (all_good_leps.size() > 2 and all_good_leps[2].p4.pt() > 20) {
                     is_multilep = true;
                 } else {
                     is_ss = true;
@@ -161,41 +193,71 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau){
             }
 
             float Ht = 0;
-            // TODO: Try to use some jet/lepton cross-cleaning a la : https://github.com/cmstas/CORE/blob/master/SSSelections.cc#L302
             int nJet = 0;
             int nBJet = 0;
-            int nJetsAll = tas::pfjets_p4().size();
-            for(size_t idx=0; idx<nJetsAll; idx++) {
-                float jetPt = tas::pfjets_p4()[idx].pt();
-                float jetEta = tas::pfjets_p4()[idx].eta();
+            auto& jets_p4 = tas::pfjets_p4();
+            int nJetsAll = jets_p4.size();
+            for (size_t idx=0; idx<nJetsAll; idx++) {
+                bool matched_lepton = false;
+                for (auto& lep : all_fakable_leps) {
+                    float dR = ROOT::Math::VectorUtil::DeltaR(jets_p4[idx], lep.p4);
+                    if (dR < 0.4) {
+                        matched_lepton = true;
+                        break;
+                    }
+                }
+                if (matched_lepton) continue;
+                float jetPt = jets_p4[idx].pt();
+                float jetEta = jets_p4[idx].eta();
                 float disc = tas::getbtagvalue("deepFlavourJetTags:probb",idx) +
                              tas::getbtagvalue("deepFlavourJetTags:probbb",idx);
-                if (jetPt > 40 and abs(jetEta) < 2.4) {
+                if (abs(jetEta) > 2.4) continue;
+                if (jetPt > 40) {
                     nJet++;
                     Ht += jetPt;
                 }
                 if (jetPt > 25 and disc>0.6324) nBJet++;
             }
 
-            /* if (all_leps.size() > 0) event_summary(els, mus, taus, nJet, nBJet); */
-
-            if (Ht <= 300) continue;
-            if (tas::evt_pfmet() < 50) continue;
+            /* if (all_good_leps.size() > 0) event_summary(els, mus, taus, nJet, nBJet); */
 
             // Calculate the monte-carlo event weight
             float sgnMCweight = ((genps_weight() > 0) - (genps_weight() < 0));
             float scale1fb = sgnMCweight*df.getScale1fbFromFile(evt_dataset()[0].Data(),evt_CMS3tag()[0].Data());
             float moriond_int_lumi = 35.9;
-            float weight = moriond_int_lumi*scale1fb;  // 
+            float weight = moriond_int_lumi*scale1fb;
 
-            if (is_ss       and nBJet == 2 and nJet == 6)                sr1 += weight;
-            if (is_ss       and nBJet == 2 and nJet == 7)                sr2 += weight;
-            if (is_ss       and nBJet == 2 and nJet >= 8)                sr3 += weight;
-            if (is_ss       and nBJet == 3 and (nJet == 5 or nJet == 6)) sr4 += weight;
-            if (is_ss       and nBJet == 3 and nJet >= 7)                sr5 += weight;
-            if (is_ss       and nBJet >= 4 and nJet >= 5)                sr6 += weight;
-            if (is_multilep and nBJet == 2 and nJet >= 5)                sr7 += weight;
-            if (is_multilep and nBJet >= 3 and nJet >= 4)                sr8 += weight;
+            nEls_mc.Fill(nGoodEls, weight);
+            nMus_mc.Fill(nGoodMus, weight);
+            nTaus_mc.Fill(nGoodTaus, weight);
+
+            h_ht.Fill(Ht, weight);
+            h_met.Fill(tas::evt_pfmet(), weight);
+            h_njet.Fill(nJet, weight);
+            h_nbjet.Fill(nBJet, weight);
+
+            bool evnt_reqs = Ht > 300 and tas::evt_pfmet() > 50;
+            if (evnt_reqs) {
+                if (is_ss       and nBJet == 2 and nJet == 6)                sr1 += weight;
+                if (is_ss       and nBJet == 2 and nJet == 7)                sr2 += weight;
+                if (is_ss       and nBJet == 2 and nJet >= 8)                sr3 += weight;
+                if (is_ss       and nBJet == 3 and (nJet == 5 or nJet == 6)) sr4 += weight;
+                if (is_ss       and nBJet == 3 and nJet >= 7)                sr5 += weight;
+                if (is_ss       and nBJet >= 4 and nJet >= 5)                sr6 += weight;
+                if (is_multilep and nBJet == 2 and nJet >= 5)                sr7 += weight;
+                if (is_multilep and nBJet >= 3 and nJet >= 4)                sr8 += weight;
+            }
+            // Calculate tau fake rate via truth matching
+            vector<GenLepton> gentaus_hadronic;
+            for (auto& gentau : GenLepton::taus())
+                if (gentau.is_hadronic()) gentaus_hadronic.push_back(gentau);
+            vector<RecoLepton> taus_good;
+            for (auto& tau : taus)
+                if (tau.isGood) taus_good.push_back(tau);
+
+            match(taus_good, gentaus_hadronic, 0.4);
+            for (auto& tau : taus_good)
+                tau_fakes.fill(tau.p4.pt(), tau.match == nullptr);
         }  // event loop
         delete file;
     }  // file loop
@@ -216,6 +278,16 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau){
     nEls.Write();
     nMus.Write();
     nTaus.Write();
+    nEls_mc.Write();
+    nMus_mc.Write();
+    nTaus_mc.Write();
+
+    h_ht.Write();
+    h_met.Write();
+    h_njet.Write();
+    h_nbjet.Write();
+    tau_fakes.save();
+
     cout << "Done!" << endl;
 
     cout << "Summary: " << endl
