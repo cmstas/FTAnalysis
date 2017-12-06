@@ -72,7 +72,7 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau) {
     TH1F h_njet("njet", "njet", 15, -0.5, 14.5);
     TH1F h_nbjet("nbjet", "nbjet", 10, -0.5, 9.5);
 
-    EfficiencyMeasurement tau_fakes("tau_fakes_v_pt", 50, 0, 300);
+    EfficiencyMeasurement tau_purity("tau_purity_v_pt", 50, 0, 300);
 
     float sr1 = 0;
     float sr2 = 0;
@@ -255,9 +255,9 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau) {
             for (auto& tau : taus)
                 if (tau.isGood) taus_good.push_back(tau);
 
-            match(taus_good, gentaus_hadronic, 0.4);
+            match(taus_good, gentaus_hadronic, 0.3);
             for (auto& tau : taus_good)
-                tau_fakes.fill(tau.p4.pt(), tau.match == nullptr);
+                tau_purity.fill(tau.p4.pt(), tau.match != nullptr);
         }  // event loop
         delete file;
     }  // file loop
@@ -286,7 +286,7 @@ int ScanChain(TChain *ch, TFile* dest_file, bool include_tau) {
     h_met.Write();
     h_njet.Write();
     h_nbjet.Write();
-    tau_fakes.save();
+    tau_purity.save();
 
     cout << "Done!" << endl;
 

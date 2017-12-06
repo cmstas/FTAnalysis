@@ -53,7 +53,8 @@ struct GenLepton {
     unsigned int idx;
     int status;
     int decay_mode;  // Really only valid on taus
-    P4 p4;
+    P4 p4_full; // pt of particle
+    P4 p4;  // Just p4 of visible decay products
     int id;
     int mother_id;
     int gmother_id;
@@ -65,17 +66,6 @@ struct GenLepton {
     GenLepton(){};
     virtual ~GenLepton(){};
 
-    P4 vis_p4(){
-        P4 _p4;
-        for(const Child& child : children){
-            if(abs(child.id) != 12 &&
-               abs(child.id) != 14 &&
-               abs(child.id) != 16){
-                _p4 += child.p4;
-            }
-        }
-        return _p4;
-    }
 
     bool passes_acceptance(float max_eta=2.4) const{
         return abs(p4.eta()) < max_eta;
@@ -130,7 +120,7 @@ struct GenLepton {
             genlep.id = id[gentauidx];
             genlep.mother_id = tas::genps_id_mother()[gentauidx];
             genlep.gmother_id = tas::genps_id_simplegrandma()[gentauidx];
-            genlep.p4 = tas::genps_p4()[gentauidx];
+            genlep.p4_full = tas::genps_p4()[gentauidx];
             for (unsigned int igen = 0; igen < Ngen; igen++){
                 if (tas::genps_idx_mother()[igen] == genlep.idx) {
                     genlep.children.push_back({igen,
@@ -138,6 +128,13 @@ struct GenLepton {
                                                tas::genps_charge()[igen],
                                                tas::genps_p4()[igen],
                                                status[igen]});
+                }
+            }
+            for (const Child& child : genlep.children) {
+                if(abs(child.id) != 12 &&
+                   abs(child.id) != 14 &&
+                   abs(child.id) != 16) {
+                    genlep.p4 += child.p4;
                 }
             }
             genlep.set_decay_mode();
