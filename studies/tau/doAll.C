@@ -11,17 +11,24 @@
         else return default_;
     };
 
-    bool includeTau = getEnv("includeTau", 0);
+    int tau_selection = getEnv("tau_selection", 0);
     int datasetIdx = getEnv("datasetIdx", 0);
 
-    cout << "Finding yields with includeTau=" << includeTau << " and datasetIdx=" << datasetIdx << endl;
+    cout << "Finding yields with tau_selection=" << tau_selection << " and datasetIdx=" << datasetIdx << endl;
 
-    auto fname = [includeTau](const string& category) {
+    auto fname = [tau_selection](const string& category) {
         stringstream res;
-        if(includeTau)
-            res << "output/yield_" << category << ".root";
-        else
-            res << "output/yield_" << category << "_notau.root";
+        switch(tau_selection) {
+            case 0:
+                res << "output/yield_" << category << "_notau.root";
+                break;
+            case 1:
+                res << "output/yield_" << category << ".root";
+                break;
+            case 2:
+                res << "output/yield_" << category << "_matchtau.root";
+                break;
+        }
         return TString(res.str());
     };
     switch(datasetIdx){
@@ -37,7 +44,7 @@
             ch_ft->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-02/merged_ntuple_6.root");
             ch_ft->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-02/merged_ntuple_7.root");
             ch_ft->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-02/merged_ntuple_8.root");
-            ScanChain(ch_ft, &out_ft, includeTau);
+            ScanChain(ch_ft, &out_ft, tau_selection);
             out_ft.Close();
             break;
         } case 1: {
@@ -50,7 +57,7 @@
             ch_ttw->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v3/V00-00-01/merged_ntuple_5.root");
             ch_ttw->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v3/V00-00-01/merged_ntuple_6.root");
             ch_ttw->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v3/V00-00-01/merged_ntuple_7.root");
-            ScanChain(ch_ttw, &out_ttw, includeTau);
+            ScanChain(ch_ttw, &out_ttw, tau_selection);
             out_ttw.Close();
             break;
         } case 2: {
@@ -64,7 +71,7 @@
             ch_ttz->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V00-00-01/merged_ntuple_6.root");
             ch_ttz->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V00-00-01/merged_ntuple_7.root");
             ch_ttz->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V00-00-01/merged_ntuple_8.root");
-            ScanChain(ch_ttz, &out_ttz, includeTau);
+            ScanChain(ch_ttz, &out_ttz, tau_selection);
             out_ttz.Close();
             break;
         } case 3: {
@@ -90,7 +97,7 @@
             ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_20.root");
             ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_21.root");
             ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_22.root");
-            ScanChain(ch_tth, &out_tth, includeTau);
+            ScanChain(ch_tth, &out_tth, tau_selection);
             out_tth.Close();
             break;
         }

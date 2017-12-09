@@ -18,17 +18,17 @@ map<string, int> id_lookup = {
     {"byTightIsolationMVArun2v1DBoldDMwLT", -1},
     {"byTightIsolationMVArun2v1DBdR03oldDMwLT", -1}
 };
-bool id_lookup_populated = false;
+bool ID_LOOKUP_POPULATED = false;
 bool isGoodTau(size_t idx, const string& id_name = "byTightIsolationMVArun2v1DBoldDMwLT") {
     //Find index of specific ids for first event only, cache result
-    if (!id_lookup_populated){
+    if (!ID_LOOKUP_POPULATED){
         const vector<TString> &pf_IDnames = tas::taus_pf_IDnames();
         for(unsigned int idx=0; idx<pf_IDnames.size(); idx++){
             string s = string(pf_IDnames[idx]);
             if(id_lookup.find(s) == id_lookup.end()) continue;
             id_lookup[s] = idx;
         }
-        id_lookup_populated = true;
+        ID_LOOKUP_POPULATED = true;
     }
     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs();
     return pf_IDs[idx][id_lookup[id_name]];
@@ -223,23 +223,23 @@ std::ostream& operator<<(std::ostream& os, const RecoLepton& reco) {
 }
 
 template <typename T1, typename T2>
-void match(vector<T1>& setA, vector<T2>& setB, float dR_window){
-    for(T1& lepA : setA){
+void match(vector<T1>& setA, vector<T2>& setB, float dR_window) {
+    for (T1& lepA : setA) {
         lepA.match = nullptr;
         lepA.matched_dR = dR_window;
     }
-    for(T2& lepB : setB){
+    for (T2& lepB : setB){
         float min_dR = dR_window;
         lepB.match = nullptr;
-        for(T1& lepA : setA){
+        for (T1& lepA : setA) {
             float dR = ROOT::Math::VectorUtil::DeltaR(lepB.p4, lepA.p4);
-            if(dR < min_dR){
+            if (dR < min_dR) {
                 min_dR = dR;
                 lepB.match = &lepA;
                 lepB.matched_dR = dR;
             }
         }
-        if(lepB.match != nullptr and lepB.matched_dR < lepB.match->matched_dR){
+        if (lepB.match != nullptr and lepB.matched_dR < lepB.match->matched_dR) {
             lepB.match->match = &lepB;
             lepB.match->matched_dR = lepB.matched_dR;
         }
