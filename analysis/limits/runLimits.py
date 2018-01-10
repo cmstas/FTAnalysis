@@ -6,7 +6,7 @@ import argparse
 import createCard
 import commands
 
-XSEC_TTTT = 0.0092 # pb
+XSEC_TTTT = 0.01197 # pb @ NLO
 
 def parse_lims(lim_lines, fb=False):
     """
