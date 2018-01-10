@@ -30,7 +30,7 @@ int nsrdisc = 7;
 int nCR = 2;
 
 bool doCustomSelection = false;
-float scaleLumi = 1.;
+float scaleLumi = 2.0909;  // Scales integrated luminosity to 75 fb^-1
 
 bool doTTWISR = true;
 bool doTTZISR = true;
