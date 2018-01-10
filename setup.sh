@@ -1,10 +1,5 @@
 therelease=CMSSW_7_4_7_patch1
 
-git submodule update --checkout babymaking/batch/NtupleTools
-git submodule update --checkout common/Software
-git submodule update --checkout common/CORE
-git submodule update --checkout common/HiggsAnalysis-CombinedLimit
-
 # export SCRAM_ARCH=slc6_amd64_gcc530
 if [ ! -d "common/$therelease" ]; then
     (cd common/ ; cmsrel "$therelease")
