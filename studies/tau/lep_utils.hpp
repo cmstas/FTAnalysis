@@ -18,8 +18,41 @@ map<string, int> id_lookup = {
     {"byTightIsolationMVArun2v1DBoldDMwLT", -1},
     {"byTightIsolationMVArun2v1DBdR03oldDMwLT", -1}
 };
+
+/* void print_ids(size_t tau_idx) { */
+/*     const vector<TString> &pf_IDnames = tas::taus_pf_IDnames(); */
+/*     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs(); */
+/*     /1* cout << "NEW TAU: " << tau_idx << endl; *1/ */
+/*     float pass = false; */
+/*     bool found = false; */
+/*     for(unsigned int idx=0; idx<pf_IDnames.size(); idx++){ */
+/*         if(pf_IDnames[idx] != "byTightIsolationMVArun2v1DBoldDMwLT") continue; */
+/*         found = true; */
+/*         pass = pf_IDs[tau_idx][idx]; */
+/*     } */
+/*     if(!found) cout << "  Didn't find id!" << endl; */
+/*     else if((pass==1.0) != pf_IDs[tau_idx][id_lookup["byTightIsolationMVArun2v1DBoldDMwLT"]]) */
+/*             cout << "  id mismatch!!!" << endl; */
+/* } */
+
+bool isTauIsoFromBJet(size_t tau_idx, float dR_min = 0.1) {
+    /** Remove taus that are not isolated from B-Jets. The idea being that B->tau
+     *  decays should be removed, only the W->tau should remain.
+     */
+    auto& tau_p4 = tas::taus_pf_p4()[tau_idx];
+    auto& jet_p4s  = tas::pfjets_p4();
+    int nJets = jet_p4s.size();
+    for(size_t jet_idx = 0; jet_idx<nJets; jet_idx++) {
+        float dR = ROOT::Math::VectorUtil::DeltaR(tau_p4, jet_p4s[jet_idx]);
+        float disc = tas::getbtagvalue("deepFlavourJetTags:probb", jet_idx) +
+                     tas::getbtagvalue("deepFlavourJetTags:probbb", jet_idx);
+        if (disc > 0.6324 and dR < dR_min) return false;
+    }
+    return true;
+}
+
 bool ID_LOOKUP_POPULATED = false;
-bool isGoodTau(size_t idx, const string& id_name = "byTightIsolationMVArun2v1DBoldDMwLT") {
+bool isGoodTau (size_t tau_idx, const string& id_name = "byTightIsolationMVArun2v1DBoldDMwLT") {
     //Find index of specific ids for first event only, cache result
     if (!ID_LOOKUP_POPULATED){
         const vector<TString> &pf_IDnames = tas::taus_pf_IDnames();
@@ -31,8 +64,17 @@ bool isGoodTau(size_t idx, const string& id_name = "byTightIsolationMVArun2v1DBo
         ID_LOOKUP_POPULATED = true;
     }
     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs();
-    return pf_IDs[idx][id_lookup[id_name]];
+    bool pass_id = pf_IDs[tau_idx][id_lookup[id_name]];
+    bool iso_b_jet = isTauIsoFromBJet(tau_idx);
+    /* if (pass_id and !iso_b_jet) { */
+    /*     std::cout << "cleaned jet!" << std::endl; */
+    /* } */
+    /* return pass_id and iso_b_jet; */
+    return pass_id;
 }
+
+
+
 
 bool isFakebleTau(size_t idx){
     return false; //TODO: Do something more reasonable here.
@@ -99,15 +141,20 @@ struct GenLepton {
             decay_mode = -1;
     }
 
-    static vector<GenLepton> taus(){
+    static vector<GenLepton> taus(bool hadronic_only=true) {
         unsigned int Ngen = tas::genps_p4().size();
 
         std::vector<unsigned int> gentauidxs;
-        // Just find all non-status 23 taus.
+        // Just find all non-status 23 taus w/ W mother
         auto& id = tas::genps_id();
         auto& status = tas::genps_status();
-        for (unsigned int igen = 0; igen < Ngen; igen++){
-            if (abs(id[igen]) == 15 and status[igen] != 23) {
+        auto& mother = tas::genps_id_simplemother();
+        auto& tau_fs = tas::genps_isDirectHardProcessTauDecayProductFinalState();
+        for (unsigned int igen = 0; igen < Ngen; igen++) {
+            /* if (fs[igen]) */
+            /*     cout << "igen: " << igen << ", " << id[igen] << ", " << status[igen] */
+            /*          << "<-" << tas::genps_idx_mother()[igen] << endl; */
+            if (abs(id[igen]) == 15 and status[igen] != 23 and abs(mother[igen]) == 24){
                 gentauidxs.push_back(igen);
             }
         }
@@ -123,6 +170,11 @@ struct GenLepton {
             genlep.p4_full = tas::genps_p4()[gentauidx];
             for (unsigned int igen = 0; igen < Ngen; igen++){
                 if (tas::genps_idx_mother()[igen] == genlep.idx) {
+                    /* if (!tau_fs[gentauidx]) */
+                    /*     cout << "gentauidx: " << igen << ", " << id[igen] << ", " << status[igen] */
+                    /*          << "<-" << tas::genps_idx_mother()[igen] */
+                    /*          << "(" << id[tas::genps_idx_mother()[igen]] << ")" */
+                    /*          << "<- (" << tas::genps_id_simplegrandma()[igen] << ")" << endl; */
                     genlep.children.push_back({igen,
                                                id[igen],
                                                tas::genps_charge()[igen],
@@ -130,6 +182,7 @@ struct GenLepton {
                                                status[igen]});
                 }
             }
+            // Calculate visible momentum
             for (const Child& child : genlep.children) {
                 if(abs(child.id) != 12 &&
                    abs(child.id) != 14 &&
@@ -138,6 +191,7 @@ struct GenLepton {
                 }
             }
             genlep.set_decay_mode();
+            if (hadronic_only and !genlep.is_hadronic()) continue;
             gentaus.push_back(genlep);
         }
         return gentaus;
@@ -206,18 +260,42 @@ struct RecoLepton {
             reco.id = (reco.charge<0) ? 15 : -15;
             reco.p4 = p4s[recoIdx];
             reco.isGood = isGoodTau(reco.idx);
-            reco.isFakable = isFakebleTau(reco.idx);
+            /* reco.isFakable = isFakebleTau(reco.idx); */
+            reco.isFakable = reco.isGood;
             recos.push_back(reco);
         }
         return recos;
     };
 };
 
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vec) {
+    if (vec.size() == 0) os << "[]";
+    else {
+        os << "[" << vec[0];
+        for(size_t i=1; i<vec.size(); i++) os << ", " << vec[i];
+        os << "]";
+    }
+    return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const RecoLepton& reco) {
     os << "< RecoLepton: idx="  << reco.idx
        << ", id=" << reco.id
        << ", pt=" << reco.p4.pt()
        << ", isGood=" << reco.isGood
+       << ((reco.match==nullptr) ? ", truthFailed" : ", truthMatched")
+       << " >";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const GenLepton& gen) {
+    os << "< GenLepton: idx="  << gen.idx
+       << ", id=" << gen.id
+       << ", mid=" << gen.mother_id
+       << ", gid=" << gen.gmother_id
+       << ", pt=" << gen.p4.pt()
+       << ((gen.match==nullptr) ? ", truthFailed" : ", truthMatched")
        << " >";
     return os;
 }

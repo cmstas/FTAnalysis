@@ -4,6 +4,7 @@
 #include <string>
 
 #include "TH1F.h"
+#include "TH2F.h"
 
 class KinematicMeasurement{
     TH1F pt;
@@ -67,11 +68,48 @@ class EfficiencyMeasurement{
         }
     }
 
-    void fill(const float& v, const bool& pass){
-        den.Fill(v);
-        if(pass){
-            num.Fill(v);
+    void fill(const float& x, const bool& pass, float weight=1){
+        den.Fill(x, weight);
+        if(pass) num.Fill(x, weight);
+    }
+};
+
+class EfficiencyMeasurement2D{
+    TH2F num;
+    TH2F den;
+    TH2F eff;
+
+    void update(){
+        eff.Sumw2();
+        eff.Divide(&num, &den, 1, 1, "B");
+    }
+
+  public:
+    EfficiencyMeasurement2D(const string& title, int nbins_x, float min_x, float max_x,
+                                                 int nbins_y, float min_y, float max_y)
+      :num{(title+"_num").c_str(), (title+"_num").c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y},
+       den{(title+"_den").c_str(), (title+"_den").c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y},
+       eff{title.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y} { }
+
+    TH2F& get_eff() {
+        update();
+        return eff;
+    }
+
+    void save(bool save_all=false, TFile* dest = nullptr) {
+        if (dest) dest->cd();
+
+        update();
+        eff.Write();
+        if (save_all) {
+            num.Write();
+            den.Write();
         }
+    }
+
+    void fill(const float& x, const float& y, const bool& pass, float weight=1) {
+        den.Fill(x, y, weight);
+        if (pass) num.Fill(x, y, weight);
     }
 };
 
