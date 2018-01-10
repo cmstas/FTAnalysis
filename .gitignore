@@ -13,4 +13,7 @@
 *.log
 *.db
 *.cxx
-CMSSW*
+
+tags
+
+common/CMSSW_*
