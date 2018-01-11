@@ -4,7 +4,8 @@ therelease=CMSSW_7_4_7_patch1
 if [ ! -d "common/$therelease" ]; then
     (cd common/ ; cmsrel "$therelease")
     mkdir "common/$therelease/src/HiggsAnalysis/"
-    ln -s ../../../HiggsAnalysis-CombinedLimit "common/$therelease/src/HiggsAnalysis/CombinedLimit"
+    git clone -b 74x-root6 https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git \
+        "common/$therelease/src/HiggsAnalysis/CombinedLimit/"
 fi
 
 cd "common/$therelease/src"
