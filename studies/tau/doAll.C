@@ -66,9 +66,9 @@
         } case 3: {
             TChain *ch_tth = new TChain("Events");
             TFile out_tth(fname("tth"), "RECREATE");
-            ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_1.root");
+            /* CORRUPT ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_1.root"); */
             ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_3.root");
-            ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_4.root");
+            /* CORRUPT ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_4.root"); */
             ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_5.root");
             ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_6.root");
             ch_tth->Add("/hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/merged_ntuple_7.root");

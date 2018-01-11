@@ -36,7 +36,7 @@ void event_summary(vector<RecoLepton>& els, vector<RecoLepton>& mus, vector<Reco
     cout << endl;
 }
 
-float mcWeight(DatasetInfoFromFile& df) {
+float mc_weight(DatasetInfoFromFile& df) {
     using namespace tas;
     float sgnMCweight = ((genps_weight() > 0) - (genps_weight() < 0));
     float scale1fb = sgnMCweight*df.getScale1fbFromFile(evt_dataset()[0].Data(),evt_CMS3tag()[0].Data());
@@ -62,7 +62,7 @@ struct Leptons {
     int nGoodMus = 0;
     int nGoodTaus = 0;
 
-    Leptons(int tau_selection)
+    Leptons(bool ignore_taus)
       :els(RecoLepton::els()), mus(RecoLepton::mus()),
        taus(RecoLepton::taus()), gen_taus(GenLepton::taus()) {
         using namespace std;
@@ -82,22 +82,16 @@ struct Leptons {
             if (lep.isFakable) fakable_leps.push_back(&lep);
         }
 
-        match(taus, gen_taus, 0.3);
+        if (!ignore_taus) {
+            match(taus, gen_taus, 0.3);
 
-        for (auto& lep : taus) {
-            switch (tau_selection) {
-                case 0:
-                   break;
-                case 1:
-                   if (lep.isGood) good_leps.push_back(&lep);
-                   if (lep.isFakable) fakable_leps.push_back(&lep);
-                   break;
-                case 2:
-                   if (lep.isGood and lep.match != nullptr) good_leps.push_back(&lep);
-                   if (lep.isFakable) fakable_leps.push_back(&lep);
-                   break;
+            for (auto& lep : taus) {
+               if (lep.isGood) {
+                   good_leps.push_back(&lep);
+                   nGoodTaus++;
+               }
+               if (lep.isFakable) fakable_leps.push_back(&lep);
             }
-            if (lep.isGood) nGoodTaus++;
         }
 
         sort(good_leps.begin(), good_leps.end(),
@@ -123,7 +117,7 @@ struct Leptons {
         if (pos_leps.size() >= 2 and pos_leps[0]->p4.pt() > 25 and pos_leps[1]->p4.pt() > 20) {
             pos_ss_pair = true;
             for (const RecoLepton* lep : neg_leps) {
-                if(zVeto(lep, pos_leps[0]) or zVeto(lep, pos_leps[1])) {
+                if (zVeto(lep, pos_leps[0]) or zVeto(lep, pos_leps[1])) {
                     zVeto_pos = true;
                     break;
                 }
@@ -134,7 +128,7 @@ struct Leptons {
         if (neg_leps.size() >= 2 and neg_leps[0]->p4.pt() > 25 and neg_leps[1]->p4.pt() > 20) {
             neg_ss_pair = true;
             for (const RecoLepton* lep : pos_leps) {
-                if(zVeto(lep, neg_leps[0]) or zVeto(lep, neg_leps[1])) {
+                if (zVeto(lep, neg_leps[0]) or zVeto(lep, neg_leps[1])) {
                     zVeto_neg = true;
                     break;
                 }
@@ -193,14 +187,14 @@ int to_SR(const Leptons& leps, const Jets& jets) {
     auto is_multilep = leps.is_multilep;
     auto nBJet = jets.nBJet;
     auto nJet = jets.nJet;
-    if (is_ss       and nBJet == 2 and nJet == 6) return 1;
-    if (is_ss       and nBJet == 2 and nJet == 7) return 2;
-    if (is_ss       and nBJet == 2 and nJet >= 8) return 3;
+    if (is_ss       and nBJet == 2 and nJet == 6)                return 1;
+    if (is_ss       and nBJet == 2 and nJet == 7)                return 2;
+    if (is_ss       and nBJet == 2 and nJet >= 8)                return 3;
     if (is_ss       and nBJet == 3 and (nJet == 5 or nJet == 6)) return 4;
-    if (is_ss       and nBJet == 3 and nJet >= 7) return 5;
-    if (is_ss       and nBJet >= 4 and nJet >= 5) return 6;
-    if (is_multilep and nBJet == 2 and nJet >= 5) return 7;
-    if (is_multilep and nBJet >= 3 and nJet >= 4) return 8;
+    if (is_ss       and nBJet == 3 and nJet >= 7)                return 5;
+    if (is_ss       and nBJet >= 4 and nJet >= 5)                return 6;
+    if (is_multilep and nBJet == 2 and nJet >= 5)                return 7;
+    if (is_multilep and nBJet >= 3 and nJet >= 4)                return 8;
     return -1;
 }
 
@@ -232,11 +226,11 @@ int ScanChain(TChain *ch, TFile* dest_file) {
     TObjArray *listOfFiles = ch->GetListOfFiles();
     TIter fileIter(listOfFiles);
 
-    TH1F nEls("nEls",   "nEls",  10, -0.5, 9.5);
-    TH1F nMus("nMus",   "nMus",  10, -0.5, 9.5);
-    TH1F nTaus("nTaus", "nTaus", 10, -0.5, 9.5);
-    TH1F nGenTaus("nGenTaus", "nGenTaus", 10, -0.5, 9.5);
-    TH2F nGen_v_RecoTaus("nGen_v_RecoTaus", "nGen_v_RecoTaus", 10, -0.5, 9.5, 10, -0.5, 9.5);
+    TH1F h_nEls("nEls",   "nEls",  10, -0.5, 9.5);
+    TH1F h_nMus("nMus",   "nMus",  10, -0.5, 9.5);
+    TH1F h_nTaus("nTaus", "nTaus", 10, -0.5, 9.5);
+    TH1F h_nGenTaus("nGenTaus", "nGenTaus", 10, -0.5, 9.5);
+    TH2F h_nGen_v_RecoTaus("nGen_v_RecoTaus", "nGen_v_RecoTaus", 10, -0.5, 9.5, 10, -0.5, 9.5);
 
     TH1F h_ht("ht", "Ht", 15, 100, 1600);
     TH1F h_met("met", "met", 15, 0, 600);
@@ -258,16 +252,15 @@ int ScanChain(TChain *ch, TFile* dest_file) {
     EfficiencyMeasurement2D tau_efficiency_v_pt_nJet("tau_efficiency_v_pt_nJet", 20, 0, 300, 16, -0.5, 15.5);
     EfficiencyMeasurement2D tau_efficiency_v_eta_nJet("tau_efficiency_v_eta_nJet", 20, -3, 3, 16, -0.5, 15.5);
 
-    TH1F SRs_0tau("SRs_0tau", "SRs_0tau", 8, 0.5, 8.5);
-    TH1F SRs_1tau("SRs_1tau", "SRs_1tau", 8, 0.5, 8.5);
-    TH1F SRs_2tau("SRs_2tau", "SRs_2tau", 8, 0.5, 8.5);
-    TH1F SRs_3tau("SRs_3tau", "SRs_3tau", 8, 0.5, 8.5);
-    TH1F SRs_4tau("SRs_4tau", "SRs_4tau", 8, 0.5, 8.5);
+    TH1F SRs("SRs", "SRs", 8, 0.5, 8.5);
 
-    TH1F* SRs[] = {&SRs_0tau, &SRs_1tau,
-                   &SRs_2tau, &SRs_3tau,
-                   &SRs_4tau};
-
+    std::vector<TH1F> tau_SRs = {
+        {"SRs_0tau", "SRs_0tau", 8, 0.5, 8.5},
+        {"SRs_1tau", "SRs_1tau", 8, 0.5, 8.5},
+        {"SRs_2tau", "SRs_2tau", 8, 0.5, 8.5},
+        {"SRs_3tau", "SRs_3tau", 8, 0.5, 8.5},
+        {"SRs_4tau", "SRs_4tau", 8, 0.5, 8.5}
+    };
 
     while ((currentFile = (TFile*)fileIter.Next())) {
         if(STOP_REQUESTED) break;
@@ -285,25 +278,34 @@ int ScanChain(TChain *ch, TFile* dest_file) {
             /* if (N_EVENTS_CURRENT > 5000) break; */
             CMS3::progress(N_EVENTS_CURRENT, nEventsChain);
 
-            Leptons leps(0);
+            Leptons leps(false);
+            Leptons leps_ignore_tau(true);
             Jets jets(leps);
 
             float met = tas::evt_pfmet();
 
             // Calculate the monte-carlo event weight
-            float weight = mcWeight(df);
+            float weight = mc_weight(df);
 
-            nEls.Fill(leps.nGoodEls, weight);
-            nMus.Fill(leps.nGoodMus, weight);
-            nTaus.Fill(leps.nGoodTaus, weight);
-            nGenTaus.Fill(leps.gen_taus.size(), weight);
-            nGen_v_RecoTaus.Fill(leps.gen_taus.size(), leps.nGoodTaus, weight);
+            h_nEls.Fill(leps.nGoodEls, weight);
+            h_nMus.Fill(leps.nGoodMus, weight);
+            h_nTaus.Fill(leps.nGoodTaus, weight);
+            h_nGenTaus.Fill(leps.gen_taus.size(), weight);
+            h_nGen_v_RecoTaus.Fill(leps.gen_taus.size(), leps.nGoodTaus, weight);
 
 
             bool evnt_reqs = jets.ht > 300 and met > 50;
+            // Fill SRs where taus are included and broken down into
+            // categories based on # of taus
             int theSR = to_SR(leps, jets);
             if (evnt_reqs and theSR != -1) {
-                SRs[min(leps.nGoodTaus, 4)]->Fill(theSR, weight);
+                tau_SRs[min(leps.nGoodTaus, 4)].Fill(theSR, weight);
+            }
+
+            // Fill SRs where taus are ignored
+            theSR = to_SR(leps_ignore_tau, jets);
+            if (evnt_reqs and theSR != -1) {
+                SRs.Fill(theSR, weight);
             }
 
             h_met.Fill(met, weight);
@@ -340,17 +342,15 @@ int ScanChain(TChain *ch, TFile* dest_file) {
     cout << "\nLoop Finished. Saving Results... " << flush;
 
     dest_file->cd();
-    SRs_0tau.Write();
-    SRs_1tau.Write();
-    SRs_2tau.Write();
-    SRs_3tau.Write();
-    SRs_4tau.Write();
 
-    nEls.Write();
-    nMus.Write();
-    nTaus.Write();
-    nGenTaus.Write();
-    nGen_v_RecoTaus.Write();
+    SRs.Write();
+    for (auto& sr : tau_SRs) sr.Write();
+
+    h_nEls.Write();
+    h_nMus.Write();
+    h_nTaus.Write();
+    h_nGenTaus.Write();
+    h_nGen_v_RecoTaus.Write();
 
     h_ht.Write();
     h_met.Write();
