@@ -65,7 +65,7 @@ bool isGoodTau (size_t tau_idx, const string& id_name = "byTightIsolationMVArun2
     }
     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs();
     bool pass_id = pf_IDs[tau_idx][id_lookup[id_name]];
-    bool iso_b_jet = isTauIsoFromBJet(tau_idx);
+    /* bool iso_b_jet = isTauIsoFromBJet(tau_idx); */
     /* if (pass_id and !iso_b_jet) { */
     /*     std::cout << "cleaned jet!" << std::endl; */
     /* } */
@@ -77,8 +77,7 @@ bool isGoodTau (size_t tau_idx, const string& id_name = "byTightIsolationMVArun2
 
 
 bool isFakebleTau(size_t idx){
-    return false; //TODO: Do something more reasonable here.
-                  // false just exludes taus from the jet cross-cleaning
+    return isGoodTau(idx);
 }
 
 struct RecoLepton;  // Forward Declaration
@@ -260,8 +259,7 @@ struct RecoLepton {
             reco.id = (reco.charge<0) ? 15 : -15;
             reco.p4 = p4s[recoIdx];
             reco.isGood = isGoodTau(reco.idx);
-            /* reco.isFakable = isFakebleTau(reco.idx); */
-            reco.isFakable = reco.isGood;
+            reco.isFakable = isFakebleTau(reco.idx);
             recos.push_back(reco);
         }
         return recos;
