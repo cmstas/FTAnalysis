@@ -2,6 +2,7 @@
 
 # events_max=0 -> all events
 events_max=1000000
+# events_max=100
 
 echo "Compiling code"
 cd ~/FTAnalysis && source setup.sh && cd studies/tau/

@@ -25,6 +25,8 @@
 int N_EVENTS_CURRENT = 0;
 bool STOP_REQUESTED = false;
 
+ofstream* logger;
+
 void event_summary(vector<RecoLepton>& els, vector<RecoLepton>& mus, vector<RecoLepton>& taus, int nJet, int nBJet) {
     cout << "---Event " << N_EVENTS_CURRENT << endl;
     cout << "Els: \n  ";
@@ -47,11 +49,15 @@ float mc_weight(DatasetInfoFromFile& df) {
 
 bool matched_to_set(const RecoLepton& lep, const vector<RecoLepton*>& leps, float min_pt_cut = 20, float dR_cut=0.4) {
     for (auto lep2 : leps) {
-        if (abs(lep2->id) != 11 or abs(lep2->id) != 13) continue;
+        if (abs(lep2->id) != 11 and abs(lep2->id) != 13) continue;
         if (lep.p4.pt() < min_pt_cut) continue;  // Only consider leptons that will pass subsequent pt cut
-        if (ROOT::Math::VectorUtil::DeltaR(lep2->p4, lep.p4) < dR_cut)
+        float dR = ROOT::Math::VectorUtil::DeltaR(lep2->p4, lep.p4);
+        if (dR < dR_cut) {
+            *logger << "tau " << lep.idx << " matched w/ (" << lep2->id << ", " << lep2->idx << ") w/ dR=" << dR << endl;
             return true;
+        }
     }
+    *logger << "tau " << lep.idx << " passed cross-cleaning." << endl;
     return false;
 }
 
@@ -79,35 +85,36 @@ struct Leptons {
     int nSelMus = 0;
     int nSelTaus = 0;
 
-    Leptons(bool ignore_taus)
+    Leptons(bool ignore_taus, bool cross_clean_taus, bool truth_match_taus)
       :els(RecoLepton::els()), mus(RecoLepton::mus()),
        taus(RecoLepton::taus()), gen_taus(GenLepton::taus()) {
         using namespace std;
 
         for (auto& lep : els) {
+            if (lep.isFakable) fakable_leps.push_back(&lep);
             if (lep.isGood) {
                 good_leps.push_back(&lep);
                 nGoodEls++;
             }
-            if (lep.isFakable) fakable_leps.push_back(&lep);
         }
         for (auto& lep : mus) {
+            if (lep.isFakable) fakable_leps.push_back(&lep);
             if (lep.isGood) {
                 good_leps.push_back(&lep);
                 nGoodMus++;
             }
-            if (lep.isFakable) fakable_leps.push_back(&lep);
         }
 
         if (!ignore_taus) {
             match(taus, gen_taus, 0.3);
 
             for (auto& lep : taus) {
-                if (lep.isGood and !matched_to_set(lep, good_leps)) {
-                    good_leps.push_back(&lep);
-                    nGoodTaus++;
-                }
                 if (lep.isFakable) fakable_leps.push_back(&lep);
+                if (!lep.isGood) continue;
+                if (cross_clean_taus and matched_to_set(lep, good_leps)) continue;
+                if (truth_match_taus and lep.match == nullptr) continue;
+                good_leps.push_back(&lep);
+                nGoodTaus++;
             }
         }
 
@@ -176,14 +183,13 @@ struct Leptons {
                 return abs(lep1->id) == abs(lep2->id) and lep1->idx == lep2->idx;
             };
 
-            // Search for a 3rd lepton not already in the SS pair w/ sufficient pt
+            // Search for a additional leptons not already in the SS pair w/ sufficient pt
             for (RecoLepton* lep : good_leps) {
                 if (is_same_lep(lep, sel_leps[0]) or is_same_lep(lep, sel_leps[1])) continue;
                 if (lep->p4.pt() < 20) continue;
                 sel_leps.push_back(lep);
                 is_ss = false;
                 is_multilep = true;
-                break;
             }
         }
 
@@ -251,9 +257,14 @@ int to_SR(const Leptons& leps, const Jets& jets, float met) {
     return -1;
 }
 
-int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
+int ScanChain(TChain *ch, TFile* dest_file, int events_max=0, std::string logbase="") {
     using namespace std;
     using namespace tas;
+
+    if (logbase != "")
+        logger = new ofstream("output/" + logbase + ".txt");
+    else
+        logger = new ofstream("/dev/null");
 
     signal(SIGINT, [](int){
         cout << "SIGINT Caught, stopping after current event" << endl;
@@ -290,6 +301,10 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
     TH1F h_nGenTaus_in_SR("nGenTaus_in_SR", "nGenTaus_in_SR", 10, -0.5, 9.5);
     TH2F h_nGen_v_RecoTaus_in_SR("nGen_v_RecoTaus_in_SR", "nGen_v_RecoTaus_in_SR", 10, -0.5, 9.5, 10, -0.5, 9.5);
 
+    TH1F h_nSelEls("nSelEls",   "nSelEls",  5, -0.5, 4.5);
+    TH1F h_nSelMus("nSelMus",   "nSelMus",  5, -0.5, 4.5);
+    TH1F h_nSelTaus("nSelTaus", "nSelTaus", 5, -0.5, 4.5);
+
     TH1F h_ht("ht", "Ht", 15, 100, 1600);
     TH1F h_met("met", "met", 15, 0, 600);
     TH1F h_njet("njet", "njet", 12, -0.5, 11.5);
@@ -317,18 +332,7 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
         {"SRs_2tau", "SRs_2tau", 8, 0.5, 8.5},
     };
 
-    // Signal region for ID'd *and* truth-matched taus
-    std::vector<TH1F> tm_tau_SRs = {
-        {"SRs_tm_0tau", "SRs_tm_0tau", 8, 0.5, 8.5},
-        {"SRs_tm_1tau", "SRs_tm_1tau", 8, 0.5, 8.5},
-        {"SRs_tm_2tau", "SRs_tm_2tau", 8, 0.5, 8.5},
-    };
-
     TH1F ignore_tau_SRs("ignore_tau_SRs", "ignore_tau_SRs", 8, 0.5, 8.5);
-
-    std::vector<float> lep_breakdown = {0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                        0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                        0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     while ((currentFile = (TFile*)fileIter.Next())) {
         if(STOP_REQUESTED) break;
@@ -346,12 +350,9 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
 
             CMS3::progress(N_EVENTS_CURRENT, events_max);
 
-            Leptons leps(false);
-            Leptons leps_ignore_tau(true);
-
-            // Need separate jets for each selection of taus since they are used in the cross-cleaning
+            Leptons leps(false, true, false);
             Jets jets(leps);
-            Jets jets_ignore_tau(leps_ignore_tau);
+
 
             float met = tas::evt_pfmet();
 
@@ -359,9 +360,6 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
             float weight = mc_weight(df) / event_fraction;
 
 
-            // Fill SRs where taus are included and broken down into
-            // categories based on # of taus
-            int theSR = to_SR(leps, jets, met);
             h_nEls.Fill(leps.nGoodEls, weight);
             h_nMus.Fill(leps.nGoodMus, weight);
             h_nTaus.Fill(leps.nGoodTaus, weight);
@@ -372,6 +370,10 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
             h_ht.Fill(jets.ht, weight);
             h_njet.Fill(jets.nJet, weight);
             h_nbjet.Fill(jets.nBJet, weight);
+
+            // Fill SRs where taus are included and broken down into
+            // categories based on # of taus
+            int theSR = to_SR(leps, jets, met);
             if (theSR != -1) {
                 tau_SRs[min(leps.nGoodTaus, 2)].Fill(theSR, weight);
 
@@ -385,14 +387,11 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
                 h_ht_in_SR.Fill(jets.ht, weight);
                 h_njet_in_SR.Fill(jets.nJet, weight);
                 h_nbjet_in_SR.Fill(jets.nBJet, weight);
-            }
 
-            // Fill SRs where taus are ignored
-            theSR = to_SR(leps_ignore_tau, jets_ignore_tau, met);
-            if (theSR != -1) {
-                ignore_tau_SRs.Fill(theSR, weight);
+                h_nSelEls.Fill(leps.nSelEls, weight);
+                h_nSelMus.Fill(leps.nSelMus, weight);
+                h_nSelTaus.Fill(leps.nSelTaus, weight);
             }
-
 
             for (auto& tau : leps.taus) {
                 if (tau.isGood) {
@@ -411,6 +410,15 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
                 tau_efficiency_v_eta_nJet.fill(gentau.p4.eta(), jets.nJet, pass);
             }
 
+            Leptons leps_ignore_tau(true, false, false);
+            // Need separate jets for each selection of taus since they are used in the cross-cleaning
+            Jets jets_ignore_tau(leps_ignore_tau);
+
+            // Fill SRs where taus are ignored
+            theSR = to_SR(leps_ignore_tau, jets_ignore_tau, met);
+            if (theSR != -1) {
+                ignore_tau_SRs.Fill(theSR, weight);
+            }
         }  // event loop
         delete file;
     }  // file loop
@@ -432,6 +440,10 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
     h_nTaus_in_SR.Write();
     h_nGenTaus_in_SR.Write();
     h_nGen_v_RecoTaus_in_SR.Write();
+
+    h_nSelEls.Write();
+    h_nSelMus.Write();
+    h_nSelTaus.Write();
 
     h_met.Write();
     h_ht.Write();
@@ -457,5 +469,6 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0) {
 
     cout << "Summary: " << endl
          << "Ran Over " << N_EVENTS_CURRENT << " total events" << endl;
+    delete logger;
     return 0;
 }
