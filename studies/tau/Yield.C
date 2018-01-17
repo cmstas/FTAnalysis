@@ -257,7 +257,9 @@ int to_SR(const Leptons& leps, const Jets& jets, float met) {
     return -1;
 }
 
-int ScanChain(TChain *ch, TFile* dest_file, int events_max=0, std::string logbase="") {
+int ScanChain(TChain *ch, TFile* dest_file, float good_ratio = 1.0, int events_max=0, std::string logbase="") {
+    // good_ratio is needed to compensate for some corrupted data files (this is just the ratio of events in the chain
+    // to the number of events in the dataset)
     using namespace std;
     using namespace tas;
 
@@ -283,7 +285,7 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0, std::string logbas
     if (events_max > nEventsChain or events_max <= 0) {
         events_max = nEventsChain;
     }
-    float event_fraction = float(events_max) / nEventsChain;
+    float event_fraction = (float(events_max) / nEventsChain) * good_ratio;
 
     TFile *currentFile = 0;
     TObjArray *listOfFiles = ch->GetListOfFiles();
@@ -325,11 +327,18 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0, std::string logbas
     EfficiencyMeasurement2D tau_efficiency_v_pt_nJet("tau_efficiency_v_pt_nJet", 20, 0, 300, 16, -0.5, 15.5);
     EfficiencyMeasurement2D tau_efficiency_v_eta_nJet("tau_efficiency_v_eta_nJet", 20, -3, 3, 16, -0.5, 15.5);
 
-    // Signal region for ID'd taus
+    // Signal region for ID'd Selected taus
     std::vector<TH1F> tau_SRs = {
         {"SRs_0tau", "SRs_0tau", 8, 0.5, 8.5},
         {"SRs_1tau", "SRs_1tau", 8, 0.5, 8.5},
         {"SRs_2tau", "SRs_2tau", 8, 0.5, 8.5},
+    };
+
+    // Signal region for Truth Matched Selected taus
+    std::vector<TH1F> tmtau_SRs = {
+        {"SRs_0tmtau", "SRs_0tmtau", 8, 0.5, 8.5},
+        {"SRs_1tmtau", "SRs_1tmtau", 8, 0.5, 8.5},
+        {"SRs_2tmtau", "SRs_2tmtau", 8, 0.5, 8.5},
     };
 
     TH1F ignore_tau_SRs("ignore_tau_SRs", "ignore_tau_SRs", 8, 0.5, 8.5);
@@ -375,7 +384,7 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0, std::string logbas
             // categories based on # of taus
             int theSR = to_SR(leps, jets, met);
             if (theSR != -1) {
-                tau_SRs[min(leps.nGoodTaus, 2)].Fill(theSR, weight);
+                tau_SRs[min(leps.nSelTaus, 2)].Fill(theSR, weight);
 
                 h_nEls_in_SR.Fill(leps.nGoodEls, weight);
                 h_nMus_in_SR.Fill(leps.nGoodMus, weight);
@@ -419,6 +428,15 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0, std::string logbas
             if (theSR != -1) {
                 ignore_tau_SRs.Fill(theSR, weight);
             }
+
+            Leptons leps_tmtau(true, true, true);
+            Jets jets_tmtau(leps_tmtau);
+
+            // Fill SRs where taus are truth-matched
+            theSR = to_SR(leps_tmtau, jets_tmtau, met);
+            if (theSR != -1) {
+                tmtau_SRs[min(leps.nSelTaus, 2)].Fill(theSR, weight);
+            }
         }  // event loop
         delete file;
     }  // file loop
@@ -428,6 +446,7 @@ int ScanChain(TChain *ch, TFile* dest_file, int events_max=0, std::string logbas
 
     ignore_tau_SRs.Write();
     for (auto& sr : tau_SRs) sr.Write();
+    for (auto& sr : tmtau_SRs) sr.Write();
 
     h_nEls.Write();
     h_nMus.Write();
