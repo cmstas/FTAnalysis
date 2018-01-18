@@ -7,23 +7,30 @@
     if (error != 0) exit(error);
 
 
-    auto getEnv = [](const char* name, int default_){
+    auto getEnvInt = [](const char* name, int default_){
         const char* env = gSystem->Getenv(name);
         if (env != nullptr) return atoi(env);
         else return default_;
     };
 
-    int datasetIdx = getEnv("datasetIdx", 0);
-    int events_max = getEnv("events_max", 0);
-    bool logging_enabled = false;
+    auto getEnv = [](const char* name, string default_){
+        const char* env = gSystem->Getenv(name);
+        if (env != nullptr) return string(env);
+        else return default_;
+    };
+
+    int datasetIdx = getEnvInt("datasetIdx", 0);
+    int events_max = getEnvInt("events_max", 0);
+    bool logging_enabled = getEnvInt("logging_enabled", 0);
+    string output_path = getEnv("output_path", "output");
 
     if (datasetIdx < 0) exit(0);
 
     cout << "Finding yields with datasetIdx=" << datasetIdx << endl;
 
-    auto fname = [](const string& category) {
+    auto fname = [output_path](const string& category) {
         stringstream res;
-        res << "output/yield_" << category << ".root";
+        res << output_path << "yield_" << category << ".root";
         return TString(res.str());
     };
     switch(datasetIdx){

@@ -144,16 +144,17 @@ struct GenLepton {
         unsigned int Ngen = tas::genps_p4().size();
 
         std::vector<unsigned int> gentauidxs;
-        // Just find all non-status 23 taus w/ W mother
+
         auto& id = tas::genps_id();
         auto& status = tas::genps_status();
         auto& mother = tas::genps_id_simplemother();
-        auto& tau_fs = tas::genps_isDirectHardProcessTauDecayProductFinalState();
+        auto& tau_hp_decayed = tas::genps_fromHardProcessDecayed();
+
         for (unsigned int igen = 0; igen < Ngen; igen++) {
-            /* if (fs[igen]) */
-            /*     cout << "igen: " << igen << ", " << id[igen] << ", " << status[igen] */
-            /*          << "<-" << tas::genps_idx_mother()[igen] << endl; */
-            if (abs(id[igen]) == 15 and status[igen] != 23 and abs(mother[igen]) == 24){
+            /* if ((abs(id[igen]) == 15) and status[igen] != 23 and abs(mother[igen]) == 24) { */
+            /*     gentauidxs.push_back(igen); */
+            /* } */
+            if ((abs(id[igen]) == 15) and tau_hp_decayed[igen]) {
                 gentauidxs.push_back(igen);
             }
         }
@@ -169,11 +170,6 @@ struct GenLepton {
             genlep.p4_full = tas::genps_p4()[gentauidx];
             for (unsigned int igen = 0; igen < Ngen; igen++){
                 if (tas::genps_idx_mother()[igen] == genlep.idx) {
-                    /* if (!tau_fs[gentauidx]) */
-                    /*     cout << "gentauidx: " << igen << ", " << id[igen] << ", " << status[igen] */
-                    /*          << "<-" << tas::genps_idx_mother()[igen] */
-                    /*          << "(" << id[tas::genps_idx_mother()[igen]] << ")" */
-                    /*          << "<- (" << tas::genps_id_simplegrandma()[igen] << ")" << endl; */
                     genlep.children.push_back({igen,
                                                id[igen],
                                                tas::genps_charge()[igen],
