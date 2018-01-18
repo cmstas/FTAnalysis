@@ -1,0 +1,62 @@
+tttt:
+  dir: /hadoop/cms/store/group/snt/run2_moriond17_cms4/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-02/
+  files:
+    - merged_ntuple_1.root
+    - merged_ntuple_2.root
+    - merged_ntuple_3.root
+    - merged_ntuple_4.root
+    - merged_ntuple_5.root
+    - merged_ntuple_6.root
+    - merged_ntuple_7.root
+    - merged_ntuple_8.root
+    - merged_ntuple_10.root
+ttw:
+  dir: /hadoop/cms/store/group/snt/run2_moriond17_cms4/TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v3/V00-00-01/
+  files:
+    - merged_ntuple_1.root
+    - merged_ntuple_2.root
+    - merged_ntuple_3.root
+    - merged_ntuple_4.root
+    - merged_ntuple_5.root
+    - merged_ntuple_6.root
+    - merged_ntuple_7.root
+ttz:
+  dir: /hadoop/cms/store/group/snt/run2_moriond17_cms4/TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/V00-00-01/
+  files:
+    - merged_ntuple_1.root
+    - merged_ntuple_2.root
+    - merged_ntuple_3.root
+    - merged_ntuple_4.root
+    - merged_ntuple_5.root
+    - merged_ntuple_6.root
+    - merged_ntuple_7.root
+    - merged_ntuple_8.root
+tth:
+  dir: /hadoop/cms/store/group/snt/run2_moriond17_cms4/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V00-00-01/
+  files:
+    # - merged_ntuple_1.root CORRUPT
+    - merged_ntuple_3.root
+    # - merged_ntuple_4.root CORRUPT
+    - merged_ntuple_5.root
+    - merged_ntuple_6.root
+    - merged_ntuple_7.root
+    - merged_ntuple_8.root
+    - merged_ntuple_10.root
+    - merged_ntuple_11.root
+    - merged_ntuple_12.root
+    - merged_ntuple_13.root
+    - merged_ntuple_14.root
+    - merged_ntuple_15.root
+    - merged_ntuple_16.root
+    - merged_ntuple_17.root
+    - merged_ntuple_18.root
+    - merged_ntuple_19.root
+    - merged_ntuple_20.root
+    - merged_ntuple_21.root
+    - merged_ntuple_22.root
+  good_ratio: 0.7402
+
+events_max: 100
+logging_enabled: true
+output_path: output/
+

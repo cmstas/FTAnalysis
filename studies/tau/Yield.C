@@ -12,6 +12,8 @@
 #include "TTree.h"
 #include "TChain.h"
 
+#include "yaml-cpp/yaml.h"
+
 #include "CORE/CMS3.h"
 
 #include "CORE/SSSelections.h"
@@ -257,14 +259,36 @@ int to_SR(const Leptons& leps, const Jets& jets, float met) {
     return -1;
 }
 
-int ScanChain(TChain *ch, TFile* dest_file, float good_ratio = 1.0, int events_max=0, std::string logbase="") {
+int ScanChain(const std::string& dataset, const std::string& config_filename) {
     // good_ratio is needed to compensate for some corrupted data files (this is just the ratio of events in the chain
     // to the number of events in the dataset)
     using namespace std;
     using namespace tas;
 
-    if (logbase != "")
-        logger = new ofstream("output/" + logbase + ".txt");
+    cout << "Finding yields with dataset=" << dataset << endl;
+    YAML::Node config = YAML::LoadFile(config_filename);
+
+    /* string default_ = "default"; */
+    /* cout << config[""].as<string>(default_) << endl; */
+
+    string output_path = config["output_path"].as<string>("output/");
+
+    auto join = [](const vector<string> v) {
+        stringstream res;
+        for (auto s : v) res << s;
+        return TString(res.str());
+    };
+
+    TChain *chain = new TChain("Events");
+    TFile dest_file(join({output_path, "/", "yield_", dataset, ".root"}), "RECREATE");
+
+    string data_dir = config[dataset]["dir"].as<string>();
+    for (auto fname : config[dataset]["files"].as<vector<string>>()) {
+        chain->Add(join({data_dir, "/", fname}));
+    }
+
+    if (config["logging_enabled"].as<bool>(false))
+        logger = new ofstream(output_path + "/" + dataset + ".txt");
     else
         logger = new ofstream("/dev/null");
 
@@ -281,14 +305,16 @@ int ScanChain(TChain *ch, TFile* dest_file, float good_ratio = 1.0, int events_m
     df.loadFromFile("CORE/Tools/datasetinfo/scale1fbs.txt");
 
     N_EVENTS_CURRENT = 0;
-    int nEventsChain = ch->GetEntries();
+    int nEventsChain = chain->GetEntries();
+    int events_max = config["events_max"].as<int>(-1);
     if (events_max > nEventsChain or events_max <= 0) {
         events_max = nEventsChain;
     }
+    float good_ratio = config[dataset]["good_ratio"].as<float>(1.0);
     float event_fraction = (float(events_max) / nEventsChain) * good_ratio;
 
     TFile *currentFile = 0;
-    TObjArray *listOfFiles = ch->GetListOfFiles();
+    TObjArray *listOfFiles = chain->GetListOfFiles();
     TIter fileIter(listOfFiles);
 
     TH1F h_nEls("nEls",   "nEls",  10, -0.5, 9.5);
@@ -442,7 +468,7 @@ int ScanChain(TChain *ch, TFile* dest_file, float good_ratio = 1.0, int events_m
     }  // file loop
     cout << "\nLoop Finished. Saving Results... " << flush;
 
-    dest_file->cd();
+    dest_file.cd();
 
     ignore_tau_SRs.Write();
     for (auto& sr : tau_SRs) sr.Write();
