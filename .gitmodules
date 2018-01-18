@@ -10,3 +10,6 @@
 [submodule "common/HiggsAnalysis-CombinedLimit"]
 	path = common/HiggsAnalysis-CombinedLimit
 	url = https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git
+[submodule "common/yaml-cpp"]
+	path = common/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
