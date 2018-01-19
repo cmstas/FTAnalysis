@@ -56,7 +56,6 @@ tth:
     - merged_ntuple_22.root
   good_ratio: 0.7402
 
-events_max: 100
-logging_enabled: true
+events_max: 500000
+logging_enabled: false
 output_path: output/
-

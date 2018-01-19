@@ -94,7 +94,7 @@ struct GenLepton {
     unsigned int idx;
     int status;
     int decay_mode;  // Really only valid on taus
-    P4 p4_full; // pt of particle
+    P4 p4_full; // p4 of particle
     P4 p4;  // Just p4 of visible decay products
     int id;
     int mother_id;
@@ -151,9 +151,6 @@ struct GenLepton {
         auto& tau_hp_decayed = tas::genps_fromHardProcessDecayed();
 
         for (unsigned int igen = 0; igen < Ngen; igen++) {
-            /* if ((abs(id[igen]) == 15) and status[igen] != 23 and abs(mother[igen]) == 24) { */
-            /*     gentauidxs.push_back(igen); */
-            /* } */
             if ((abs(id[igen]) == 15) and tau_hp_decayed[igen]) {
                 gentauidxs.push_back(igen);
             }

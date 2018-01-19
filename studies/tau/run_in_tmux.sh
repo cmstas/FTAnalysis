@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 
+config="config.yaml"
 
 echo "Compiling code"
 source /code/osgcode/cmssoft/cms/cmsset_default.sh
@@ -13,25 +14,25 @@ if [ "$?" -eq 0 ]; then
                             cd ~/FTAnalysis && \
                             source setup.sh && \
                             cd studies/tau/ && clear && \
-                            dataset=tttt root -b -q -l doAll.C"
+                            config=$config dataset=tttt root -b -q -l doAll.C"
 
     tmux split-window -h  "source /code/osgcode/cmssoft/cms/cmsset_default.sh && \
                            cd ~/FTAnalysis && \
                            source setup.sh && \
                            cd studies/tau/ && clear && \
-                           dataset=ttw root -b -q -l doAll.C"
+                           config=$config dataset=ttw root -b -q -l doAll.C"
 
     tmux split-window -h  "source /code/osgcode/cmssoft/cms/cmsset_default.sh && \
                            cd ~/FTAnalysis && \
                            source setup.sh && \
                            cd studies/tau/ && clear && \
-                           dataset=ttz root -b -q -l doAll.C"
+                           config=$config dataset=ttz root -b -q -l doAll.C"
 
     tmux split-window -h  "source /code/osgcode/cmssoft/cms/cmsset_default.sh && \
                            cd ~/FTAnalysis && \
                            source setup.sh && \
                            cd studies/tau/ && clear && \
-                           dataset=tth root -b -q -l doAll.C"
+                           config=$config dataset=tth root -b -q -l doAll.C"
 
     tmux select-layout even-vertical
 fi

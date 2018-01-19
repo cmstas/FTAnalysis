@@ -260,18 +260,11 @@ int to_SR(const Leptons& leps, const Jets& jets, float met) {
 }
 
 int ScanChain(const std::string& dataset, const std::string& config_filename) {
-    // good_ratio is needed to compensate for some corrupted data files (this is just the ratio of events in the chain
-    // to the number of events in the dataset)
     using namespace std;
     using namespace tas;
 
     cout << "Finding yields with dataset=" << dataset << endl;
     YAML::Node config = YAML::LoadFile(config_filename);
-
-    /* string default_ = "default"; */
-    /* cout << config[""].as<string>(default_) << endl; */
-
-    string output_path = config["output_path"].as<string>("output/");
 
     auto join = [](const vector<string> v) {
         stringstream res;
@@ -279,6 +272,9 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
         return TString(res.str());
     };
 
+    string output_path = config["output_path"].as<string>("output/");
+    system(("mkdir -p " + output_path).c_str());
+    system(("cp " + config_filename + " " + output_path + "/config.yaml").c_str());
     TChain *chain = new TChain("Events");
     TFile dest_file(join({output_path, "/", "yield_", dataset, ".root"}), "RECREATE");
 
@@ -288,7 +284,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
     }
 
     if (config["logging_enabled"].as<bool>(false))
-        logger = new ofstream(output_path + "/" + dataset + ".txt");
+        logger = new ofstream(output_path + "/log_" + dataset + ".txt");
     else
         logger = new ofstream("/dev/null");
 
@@ -310,6 +306,9 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
     if (events_max > nEventsChain or events_max <= 0) {
         events_max = nEventsChain;
     }
+
+    // good_ratio is needed to compensate for some corrupted data files (this is just the ratio of events in the chain
+    // to the number of events in the dataset from whence the weights have been calculated)
     float good_ratio = config[dataset]["good_ratio"].as<float>(1.0);
     float event_fraction = (float(events_max) / nEventsChain) * good_ratio;
 
@@ -388,7 +387,6 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
             Leptons leps(false, true, false);
             Jets jets(leps);
 
-
             float met = tas::evt_pfmet();
 
             // Calculate the monte-carlo event weight
@@ -446,7 +444,6 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
             }
 
             Leptons leps_ignore_tau(true, false, false);
-            // Need separate jets for each selection of taus since they are used in the cross-cleaning
             Jets jets_ignore_tau(leps_ignore_tau);
 
             // Fill SRs where taus are ignored
@@ -455,13 +452,13 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
                 ignore_tau_SRs.Fill(theSR, weight);
             }
 
-            Leptons leps_tmtau(true, true, true);
+            Leptons leps_tmtau(false, true, true);
             Jets jets_tmtau(leps_tmtau);
 
             // Fill SRs where taus are truth-matched
             theSR = to_SR(leps_tmtau, jets_tmtau, met);
             if (theSR != -1) {
-                tmtau_SRs[min(leps.nSelTaus, 2)].Fill(theSR, weight);
+                tmtau_SRs[min(leps_tmtau.nSelTaus, 2)].Fill(theSR, weight);
             }
         }  // event loop
         delete file;
