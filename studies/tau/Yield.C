@@ -366,6 +366,12 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
         {"SRs_2tmtau", "SRs_2tmtau", 8, 0.5, 8.5},
     };
 
+    std::vector<TH2F> tmtau_SRs_diff_nGenTau = {
+        {"SRs_0tmtau_diff_nGenTau", "SRs_0tmtau_diff_nGenTau", 8, 0.5, 8.5, 5, -0.5, 4.5},
+        {"SRs_1tmtau_diff_nGenTau", "SRs_1tmtau_diff_nGenTau", 8, 0.5, 8.5, 5, -0.5, 4.5},
+        {"SRs_2tmtau_diff_nGenTau", "SRs_2tmtau_diff_nGenTau", 8, 0.5, 8.5, 5, -0.5, 4.5},
+    };
+
     TH1F ignore_tau_SRs("ignore_tau_SRs", "ignore_tau_SRs", 8, 0.5, 8.5);
 
     while ((currentFile = (TFile*)fileIter.Next())) {
@@ -459,6 +465,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
             theSR = to_SR(leps_tmtau, jets_tmtau, met);
             if (theSR != -1) {
                 tmtau_SRs[min(leps_tmtau.nSelTaus, 2)].Fill(theSR, weight);
+                tmtau_SRs_diff_nGenTau[min(leps_tmtau.nSelTaus, 2)].Fill(theSR, leps_tmtau.gen_taus.size(), weight);
             }
         }  // event loop
         delete file;
@@ -470,6 +477,8 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
     ignore_tau_SRs.Write();
     for (auto& sr : tau_SRs) sr.Write();
     for (auto& sr : tmtau_SRs) sr.Write();
+    for (auto& sr : tmtau_SRs_diff_nGenTau) sr.Write();
+
 
     h_nEls.Write();
     h_nMus.Write();
