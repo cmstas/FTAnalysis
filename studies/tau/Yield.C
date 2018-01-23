@@ -420,7 +420,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
                 h_nMus_in_SR.Fill(leps.nGoodMus, weight);
                 h_nTaus_in_SR.Fill(leps.nGoodTaus, weight);
                 h_nGenTaus_in_SR.Fill(leps.gen_taus.size(), weight);
-                h_nGen_v_RecoTaus_in_SR.Fill(leps.gen_taus.size(), leps.nGoodTaus, weight);
+                h_nGen_v_RecoTaus_in_SR.Fill(leps.gen_taus.size(), leps.nSelTaus, weight);
 
                 h_met_in_SR.Fill(met, weight);
                 h_ht_in_SR.Fill(jets.ht, weight);
