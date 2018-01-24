@@ -242,21 +242,48 @@ struct Jets {
 
 };
 
-int to_SR(const Leptons& leps, const Jets& jets, float met) {
+int to_SR(int n_sr, const Leptons& leps, const Jets& jets, float met) {
     if(jets.ht < 300 or met < 50) return -1;
     auto is_ss = leps.is_ss;
     auto is_multilep = leps.is_multilep;
     auto nBJet = jets.nBJet;
     auto nJet = jets.nJet;
-    if (is_ss       and nBJet == 2 and nJet == 6)                return 1;
-    if (is_ss       and nBJet == 2 and nJet == 7)                return 2;
-    if (is_ss       and nBJet == 2 and nJet >= 8)                return 3;
-    if (is_ss       and nBJet == 3 and (nJet == 5 or nJet == 6)) return 4;
-    if (is_ss       and nBJet == 3 and nJet >= 7)                return 5;
-    if (is_ss       and nBJet >= 4 and nJet >= 5)                return 6;
-    if (is_multilep and nBJet == 2 and nJet >= 5)                return 7;
-    if (is_multilep and nBJet >= 3 and nJet >= 4)                return 8;
-    return -1;
+    if (n_sr == 8) {
+        if (is_ss       and nBJet == 2 and nJet == 6)                return 1;
+        if (is_ss       and nBJet == 2 and nJet == 7)                return 2;
+        if (is_ss       and nBJet == 2 and nJet >= 8)                return 3;
+        if (is_ss       and nBJet == 3 and (nJet == 5 or nJet == 6)) return 4;
+        if (is_ss       and nBJet == 3 and nJet >= 7)                return 5;
+        if (is_ss       and nBJet >= 4 and nJet >= 5)                return 6;
+        if (is_multilep and nBJet == 2 and nJet >= 5)                return 7;
+        if (is_multilep and nBJet >= 3 and nJet >= 4)                return 8;
+        return -1;
+    } else if (n_sr == 17) {
+        if (is_ss       and nBJet == 2 and nJet <= 5) return 1;
+        if (is_ss       and nBJet == 2 and nJet == 6) return 2;
+        if (is_ss       and nBJet == 2 and nJet == 7) return 3;
+        if (is_ss       and nBJet == 2 and nJet >= 8) return 4;
+
+        if (is_ss       and nBJet == 3 and nJet <= 5) return 5;
+        if (is_ss       and nBJet == 3 and nJet == 6) return 6;
+        if (is_ss       and nBJet == 3 and nJet == 7) return 7;
+        if (is_ss       and nBJet == 3 and nJet >= 8) return 8;
+
+        if (is_ss       and nBJet >= 4 and nJet <= 5) return 9;
+        if (is_ss       and nBJet >= 4 and nJet == 6) return 10;
+        if (is_ss       and nBJet >= 4 and nJet >= 7) return 11;
+
+        if (is_multilep and nBJet == 2 and nJet <= 5) return 12;
+        if (is_multilep and nBJet == 2 and nJet == 6) return 13;
+        if (is_multilep and nBJet == 2 and nJet >= 7) return 14;
+
+        if (is_multilep and nBJet >= 3 and nJet <= 4) return 15;
+        if (is_multilep and nBJet >= 3 and nJet == 5) return 16;
+        if (is_multilep and nBJet >= 3 and nJet >= 6) return 17;
+        return -1;
+    } else {
+        return -1;
+    }
 }
 
 int ScanChain(const std::string& dataset, const std::string& config_filename) {
@@ -287,6 +314,9 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
         logger = new ofstream(output_path + "/log_" + dataset + ".txt");
     else
         logger = new ofstream("/dev/null");
+
+    tau_id = config["tau_id"].as<std::string>("byTightIsolationMVArun2v1DBdR03oldDMwLT");
+    int n_sr = config["n_sr"].as<int>(8);
 
     signal(SIGINT, [](int){
         cout << "SIGINT Caught, stopping after current event" << endl;
@@ -326,7 +356,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
     TH1F h_nMus_in_SR("nMus_in_SR",   "nMus_in_SR",  10, -0.5, 9.5);
     TH1F h_nTaus_in_SR("nTaus_in_SR", "nTaus_in_SR", 10, -0.5, 9.5);
     TH1F h_nGenTaus_in_SR("nGenTaus_in_SR", "nGenTaus_in_SR", 10, -0.5, 9.5);
-    TH2F h_nGen_v_RecoTaus_in_SR("nGen_v_RecoTaus_in_SR", "nGen_v_RecoTaus_in_SR", 10, -0.5, 9.5, 10, -0.5, 9.5);
+    TH2F h_nGen_v_RecoTaus_in_SR("nGen_v_RecoTaus_in_SR", "nGen_v_RecoTaus_in_SR", 5, -0.5, 4.5, 5, -0.5, 4.5);
 
     TH1F h_nSelEls("nSelEls",   "nSelEls",  5, -0.5, 4.5);
     TH1F h_nSelMus("nSelMus",   "nSelMus",  5, -0.5, 4.5);
@@ -354,25 +384,25 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
 
     // Signal region for ID'd Selected taus
     std::vector<TH1F> tau_SRs = {
-        {"SRs_0tau", "SRs_0tau", 8, 0.5, 8.5},
-        {"SRs_1tau", "SRs_1tau", 8, 0.5, 8.5},
-        {"SRs_2tau", "SRs_2tau", 8, 0.5, 8.5},
+        {"SRs_0tau", "SRs_0tau", n_sr, 0.5, n_sr+.5},
+        {"SRs_1tau", "SRs_1tau", n_sr, 0.5, n_sr+.5},
+        {"SRs_2tau", "SRs_2tau", n_sr, 0.5, n_sr+.5},
     };
 
     // Signal region for Truth Matched Selected taus
     std::vector<TH1F> tmtau_SRs = {
-        {"SRs_0tmtau", "SRs_0tmtau", 8, 0.5, 8.5},
-        {"SRs_1tmtau", "SRs_1tmtau", 8, 0.5, 8.5},
-        {"SRs_2tmtau", "SRs_2tmtau", 8, 0.5, 8.5},
+        {"SRs_0tmtau", "SRs_0tmtau", n_sr, 0.5, n_sr+.5},
+        {"SRs_1tmtau", "SRs_1tmtau", n_sr, 0.5, n_sr+.5},
+        {"SRs_2tmtau", "SRs_2tmtau", n_sr, 0.5, n_sr+.5},
     };
 
     std::vector<TH2F> tmtau_SRs_diff_nGenTau = {
-        {"SRs_0tmtau_diff_nGenTau", "SRs_0tmtau_diff_nGenTau", 8, 0.5, 8.5, 5, -0.5, 4.5},
-        {"SRs_1tmtau_diff_nGenTau", "SRs_1tmtau_diff_nGenTau", 8, 0.5, 8.5, 5, -0.5, 4.5},
-        {"SRs_2tmtau_diff_nGenTau", "SRs_2tmtau_diff_nGenTau", 8, 0.5, 8.5, 5, -0.5, 4.5},
+        {"SRs_0tmtau_diff_nGenTau", "SRs_0tmtau_diff_nGenTau", n_sr, 0.5, n_sr+.5, 5, -0.5, 4.5},
+        {"SRs_1tmtau_diff_nGenTau", "SRs_1tmtau_diff_nGenTau", n_sr, 0.5, n_sr+.5, 5, -0.5, 4.5},
+        {"SRs_2tmtau_diff_nGenTau", "SRs_2tmtau_diff_nGenTau", n_sr, 0.5, n_sr+.5, 5, -0.5, 4.5},
     };
 
-    TH1F ignore_tau_SRs("ignore_tau_SRs", "ignore_tau_SRs", 8, 0.5, 8.5);
+    TH1F ignore_tau_SRs("ignore_tau_SRs", "ignore_tau_SRs", n_sr, 0.5, n_sr+.5);
 
     while ((currentFile = (TFile*)fileIter.Next())) {
         if(STOP_REQUESTED) break;
@@ -412,7 +442,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
 
             // Fill SRs where taus are included and broken down into
             // categories based on # of taus
-            int theSR = to_SR(leps, jets, met);
+            int theSR = to_SR(n_sr, leps, jets, met);
             if (theSR != -1) {
                 tau_SRs[min(leps.nSelTaus, 2)].Fill(theSR, weight);
 
@@ -453,7 +483,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
             Jets jets_ignore_tau(leps_ignore_tau);
 
             // Fill SRs where taus are ignored
-            theSR = to_SR(leps_ignore_tau, jets_ignore_tau, met);
+            theSR = to_SR(n_sr, leps_ignore_tau, jets_ignore_tau, met);
             if (theSR != -1) {
                 ignore_tau_SRs.Fill(theSR, weight);
             }
@@ -462,7 +492,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
             Jets jets_tmtau(leps_tmtau);
 
             // Fill SRs where taus are truth-matched
-            theSR = to_SR(leps_tmtau, jets_tmtau, met);
+            theSR = to_SR(n_sr, leps_tmtau, jets_tmtau, met);
             if (theSR != -1) {
                 tmtau_SRs[min(leps_tmtau.nSelTaus, 2)].Fill(theSR, weight);
                 tmtau_SRs_diff_nGenTau[min(leps_tmtau.nSelTaus, 2)].Fill(theSR, leps_tmtau.gen_taus.size(), weight);

@@ -19,6 +19,8 @@ map<string, int> id_lookup = {
     {"byTightIsolationMVArun2v1DBdR03oldDMwLT", -1}
 };
 
+std::string tau_id;
+
 /* void print_ids(size_t tau_idx) { */
 /*     const vector<TString> &pf_IDnames = tas::taus_pf_IDnames(); */
 /*     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs(); */
@@ -52,7 +54,7 @@ bool isTauIsoFromBJet(size_t tau_idx, float dR_min = 0.1) {
 }
 
 bool ID_LOOKUP_POPULATED = false;
-bool isGoodTau (size_t tau_idx, const string& id_name = "byTightIsolationMVArun2v1DBoldDMwLT") {
+bool isGoodTau (size_t tau_idx) {
     //Find index of specific ids for first event only, cache result
     if (!ID_LOOKUP_POPULATED){
         const vector<TString> &pf_IDnames = tas::taus_pf_IDnames();
@@ -64,7 +66,7 @@ bool isGoodTau (size_t tau_idx, const string& id_name = "byTightIsolationMVArun2
         ID_LOOKUP_POPULATED = true;
     }
     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs();
-    bool pass_id = pf_IDs[tau_idx][id_lookup[id_name]];
+    bool pass_id = pf_IDs[tau_idx][id_lookup[tau_id]];
     /* bool iso_b_jet = isTauIsoFromBJet(tau_idx); */
     /* if (pass_id and !iso_b_jet) { */
     /*     std::cout << "cleaned jet!" << std::endl; */

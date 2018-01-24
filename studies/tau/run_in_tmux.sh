@@ -8,7 +8,7 @@ cd ~/FTAnalysis && source setup.sh && cd studies/tau/
 datasetIdx="-1" root -b -q -l doAll.C  # just compliles the code
 
 if [ "$?" -eq 0 ]; then
-    echo "Code compiled, running in new window w/ events_max=$events_max"
+    echo "Code compiled, running in new window"
     tmux new-window -n  'Run' \
                            "source /code/osgcode/cmssoft/cms/cmsset_default.sh && \
                             cd ~/FTAnalysis && \
