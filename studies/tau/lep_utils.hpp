@@ -150,10 +150,10 @@ struct GenLepton {
         auto& id = tas::genps_id();
         auto& status = tas::genps_status();
         auto& mother = tas::genps_id_simplemother();
-        auto& tau_hp_decayed = tas::genps_fromHardProcessDecayed();
+        auto& is_prompt = tas::genps_fromHardProcessDecayed();
 
         for (unsigned int igen = 0; igen < Ngen; igen++) {
-            if ((abs(id[igen]) == 15) and tau_hp_decayed[igen]) {
+            if ((abs(id[igen]) == 15) and is_prompt[igen]) {
                 gentauidxs.push_back(igen);
             }
         }
@@ -167,7 +167,7 @@ struct GenLepton {
             genlep.mother_id = tas::genps_id_mother()[gentauidx];
             genlep.gmother_id = tas::genps_id_simplegrandma()[gentauidx];
             genlep.p4_full = tas::genps_p4()[gentauidx];
-            for (unsigned int igen = 0; igen < Ngen; igen++){
+            for (unsigned int igen = 0; igen < Ngen; igen++) {
                 if (tas::genps_idx_mother()[igen] == genlep.idx) {
                     genlep.children.push_back({igen,
                                                id[igen],
@@ -291,6 +291,39 @@ std::ostream& operator<<(std::ostream& os, const GenLepton& gen) {
        << ((gen.match==nullptr) ? ", truthFailed" : ", truthMatched")
        << " >";
     return os;
+}
+
+int closest_prompt_gen_match(const RecoLepton& lep, float dR_window=0.3) {
+    auto& lep_p4 = lep.p4;
+    float dR_min = dR_window;
+    int closest_id = 0;
+
+    auto& ids = tas::genps_id();
+    auto& is_prompt = tas::genps_fromHardProcessDecayed();
+    auto& p4s = tas::genps_p4();
+
+    for (size_t igen=0; igen<ids.size(); igen++) {
+        if (!is_prompt[igen]) continue;
+        int id = abs(ids[igen]);
+        if (id == 12 or id == 14 or id == 16) continue;
+        float dR = ROOT::Math::VectorUtil::DeltaR(p4s[igen], lep_p4);
+        if (dR < dR_min) {
+            dR_min = dR;
+            closest_id = id;
+        }
+    }
+    switch (closest_id) {
+        case 0:
+            return 0;  // Matched nothing
+        case 11:
+            return 1;  // Matched electron
+        case 13:
+            return 2;  // Matched Muon
+        case 15:
+            return 3;  // Matched Tau
+        default:
+            return 4;  // Some hadron
+    }
 }
 
 template <typename T1, typename T2>

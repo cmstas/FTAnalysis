@@ -52,7 +52,6 @@ float mc_weight(DatasetInfoFromFile& df) {
 bool matched_to_set(const RecoLepton& lep, const vector<RecoLepton*>& leps, float min_pt_cut = 20, float dR_cut=0.4) {
     for (auto lep2 : leps) {
         if (abs(lep2->id) != 11 and abs(lep2->id) != 13) continue;
-        if (lep.p4.pt() < min_pt_cut) continue;  // Only consider leptons that will pass subsequent pt cut
         float dR = ROOT::Math::VectorUtil::DeltaR(lep2->p4, lep.p4);
         if (dR < dR_cut) {
             *logger << "tau " << lep.idx << " matched w/ (" << lep2->id << ", " << lep2->idx << ") w/ dR=" << dR << endl;
@@ -113,7 +112,7 @@ struct Leptons {
             for (auto& lep : taus) {
                 if (lep.isFakable) fakable_leps.push_back(&lep);
                 if (!lep.isGood) continue;
-                if (cross_clean_taus and matched_to_set(lep, good_leps)) continue;
+                if (cross_clean_taus and matched_to_set(lep, fakable_leps)) continue;
                 if (truth_match_taus and lep.match == nullptr) continue;
                 good_leps.push_back(&lep);
                 nGoodTaus++;
@@ -372,6 +371,8 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
     TH1F h_njet_in_SR("njet_in_SR", "njet in SR", 12, -0.5, 11.5);
     TH1F h_nbjet_in_SR("nbjet_in_SR", "nbjet in SR", 7, -0.5, 6.5);
 
+    TH1F h_reco_tau_genmatch_id("h_reco_tau_genmatch_id", "h_reco_tau_genmatch_id", 5, -0.5, 4.5);
+
     EfficiencyMeasurement tau_purity_v_pt("tau_purity_v_pt", 20, 0, 300);
     EfficiencyMeasurement tau_purity_v_eta("tau_purity_v_eta", 20, -3, 3);
     EfficiencyMeasurement2D tau_purity_v_pt_nJet("tau_purity_v_pt_nJet", 20, 0, 300, 16, -0.5, 15.5);
@@ -460,24 +461,36 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
                 h_nSelEls.Fill(leps.nSelEls, weight);
                 h_nSelMus.Fill(leps.nSelMus, weight);
                 h_nSelTaus.Fill(leps.nSelTaus, weight);
-            }
 
-            for (auto& tau : leps.taus) {
-                if (tau.isGood) {
-                    bool pass = tau.match != nullptr;
-                    tau_purity_v_pt.fill(tau.p4.pt(), pass);
-                    tau_purity_v_eta.fill(tau.p4.eta(), pass);
-                    tau_purity_v_pt_nJet.fill(tau.p4.pt(), jets.nJet, pass);
-                    tau_purity_v_eta_nJet.fill(tau.p4.eta(), jets.nJet, pass);
+                for (auto tau : leps.good_leps) {
+                    if (abs(tau->id) != 15) continue;
+                    if (tau->p4.pt() < 20 ) continue;
+                    bool pass = tau->match != nullptr;
+                    tau_purity_v_pt.fill(tau->p4.pt(), pass);
+                    tau_purity_v_eta.fill(tau->p4.eta(), pass);
+                    tau_purity_v_pt_nJet.fill(tau->p4.pt(), jets.nJet, pass);
+                    tau_purity_v_eta_nJet.fill(tau->p4.eta(), jets.nJet, pass);
+                }
+
+                // Selection Efficiency
+                std::vector<RecoLepton> sel_taus;
+                for (auto sel_lep : leps.sel_leps) {
+                    if (abs(sel_lep->id) == 15) sel_taus.push_back(*sel_lep);
+                }
+                match(sel_taus, leps.gen_taus, 0.3);
+                for (auto& gentau : leps.gen_taus) {
+                    bool pass =  gentau.match != nullptr;
+                    tau_efficiency_v_pt.fill(gentau.p4.pt(), pass);
+                    tau_efficiency_v_eta.fill(gentau.p4.eta(), pass);
+                    tau_efficiency_v_pt_nJet.fill(gentau.p4.pt(), jets.nJet, pass);
+                    tau_efficiency_v_eta_nJet.fill(gentau.p4.eta(), jets.nJet, pass);
+                }
+                for (const auto& lep : sel_taus) {
+                    int match_id = closest_prompt_gen_match(lep);
+                    h_reco_tau_genmatch_id.Fill(match_id);
                 }
             }
-            for (auto& gentau : leps.gen_taus) {
-                bool pass =  gentau.match != nullptr and gentau.match->isGood;
-                tau_efficiency_v_pt.fill(gentau.p4.pt(), pass);
-                tau_efficiency_v_eta.fill(gentau.p4.eta(), pass);
-                tau_efficiency_v_pt_nJet.fill(gentau.p4.pt(), jets.nJet, pass);
-                tau_efficiency_v_eta_nJet.fill(gentau.p4.eta(), jets.nJet, pass);
-            }
+
 
             Leptons leps_ignore_tau(true, false, false);
             Jets jets_ignore_tau(leps_ignore_tau);
@@ -535,6 +548,8 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
     h_ht_in_SR.Write();
     h_njet_in_SR.Write();
     h_nbjet_in_SR.Write();
+
+    h_reco_tau_genmatch_id.Write();
 
     tau_purity_v_pt.save();
     tau_purity_v_eta.save();

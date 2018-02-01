@@ -55,10 +55,11 @@ tth:
     - merged_ntuple_21.root
     - merged_ntuple_22.root
   good_ratio: 0.7402
-tau_id: byTightIsolationMVArun2v1DBoldDMwLT
-# tau_id: byTightIsolationMVArun2v1DBdR03oldDMwLT
-sr_breakdown: 17
+# tau_id:   byTightIsolationMVArun2v1DBoldDMwLT
+tau_id: byTightIsolationMVArun2v1DBdR03oldDMwLT
+n_sr: 8
+# n_sr: 17
 
-events_max: -1
+events_max: 10000
 logging_enabled: false
-output_path: output_new_sr_binning/
+output_path: output_testing/
