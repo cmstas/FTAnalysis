@@ -44,6 +44,15 @@ bool doJER = true;
 bool makeRootFiles = true;
 bool makeGenVariationsMC = true;
 
+/** Set to true to use minor backgrounds in yields.
+ *  These are everything besides TT, TTH, TTZ, and TTW.
+ */
+bool include_minor_backgrounds = false;
+
+/** Set to true run over data
+ */
+bool include_data = false;
+
 // TString dir = "v0.04_May10_test";
 // TString tag = "v0.04";
 
@@ -95,13 +104,15 @@ bool makeGenVariationsMC = true;
 // TString dir = "v0.10_Jul12";
 // TString tag = "v0.10_WSFv2"; // data is in v0.07 still
 // // TString tag = "v0.10_fix"; // data is in v0.07 still
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_data/output/skim/";
 
-TString dir = "v0.10_Oct3_test";
 // TString dir = "v0.10_Sep22_ytscan";
 // TString dir = "v0.10_Sep15_triplelumi18bins";
-TString tag = "v0.10_mll";
-TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
+TString tag = "v1.00";
+TString user = "cfangmei";
+TString pfxMC  = Form("/nfs-7/userdata/%s/tupler_babies/merged/FT/%s/output/", user.Data(), tag.Data());
+TString pfxData = Form("/nfs-7/userdata/%s/tupler_babies/merged/FT/%s/output/", user.Data(), tag.Data());
+
+TString dir = tag;
 
 
 // TString dir = "v0.10_sync";
@@ -278,12 +289,6 @@ int getBDTBin(float disc);
 
 void getyields(){
 
-    c2numpy_init(&writer, "testout", 10000000);
-    c2numpy_addcolumn(&writer, "one", C2NUMPY_INTC);
-    c2numpy_addcolumn(&writer, "two", C2NUMPY_FLOAT64);
-    c2numpy_addcolumn(&writer, "three", (c2numpy_type)((int)C2NUMPY_STRING + 5));
-    c2numpy_open(&writer);
-
     if (outputTrainingBDT) {
         out_file = new TFile("output.root", "RECREATE");
         out_file->cd();
@@ -380,106 +385,112 @@ void getyields(){
   // #include "higgs_scan.h" // fastsim
   // #include "higgs_scan_ps.h"
 
-    TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
-
     //Fill chains
-    tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
-
-    ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx.Data()));
-    ttttfsrup_chain   ->Add(Form("%s/TTTTfsrup.root"           , pfx.Data()));
-    ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx.Data()));
-    ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTHH.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTWH.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTWW.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTWZ.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTZH.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTZZ.root",pfx.Data()));
+    tttt_chain   ->Add(Form("%s/TTTTnew.root", pfxMC.Data()));
     if (doSync) {
         ttw_chain    ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/TTWnlo.root");
     } else {
-        ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
+        ttw_chain    ->Add(Form("%s/TTWnlo.root", pfxMC.Data()));
     }
-    ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
-    ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
-    tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
-    ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data()));
-    // wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
-    // dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
-    // dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
-    // qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    // xg_chain     ->Add(Form("%s/TG.root"             , pfx.Data()));
-    // xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TGext.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/WGToLNuGext.root"           , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TTGdilep.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TTGsinglelep.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TTGsinglelepbar.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
-    rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
-    rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWG.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx.Data()));
-    rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
-    rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
-    rares_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    rares_chain->Add(Form("%s/TTTJ.root",pfx.Data()));
-    rares_chain->Add(Form("%s/TTTW.root",pfx.Data()));
+    ttz_chain   ->Add(Form("%s/TTZnlo.root", pfxMC.Data()));
+    ttz_chain   ->Add(Form("%s/TTZLOW.root", pfxMC.Data()));
+    tth_chain   ->Add(Form("%s/TTHtoNonBB.root", pfxMC.Data()));
+    ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root", pfxMC.Data()));
+    if (include_minor_backgrounds) {
+        ttttisrup_chain->Add(Form("%s/TTTTisrup.root", pfxMC.Data()));
+        ttttfsrup_chain->Add(Form("%s/TTTTfsrup.root", pfxMC.Data()));
+        ttttisrdn_chain->Add(Form("%s/TTTTisrdown.root", pfxMC.Data()));
+        ttttfsrdn_chain->Add(Form("%s/TTTTfsrdown.root", pfxMC.Data()));
+        ttvv_chain->Add(Form("%s/TTHH.root", pfxMC.Data()));
+        ttvv_chain->Add(Form("%s/TTWH.root", pfxMC.Data()));
+        ttvv_chain->Add(Form("%s/TTWW.root", pfxMC.Data()));
+        ttvv_chain->Add(Form("%s/TTWZ.root", pfxMC.Data()));
+        ttvv_chain->Add(Form("%s/TTZH.root", pfxMC.Data()));
+        ttvv_chain->Add(Form("%s/TTZZ.root", pfxMC.Data()));
+        // wjets_chain->Add(Form("%s/WJets.root", pfxMC.Data()));
+        // dy_chain->Add(Form("%s/DY_high*.root", pfxMC.Data()));
+        // dy_chain->Add(Form("%s/DY_low*.root", pfxMC.Data()));
+        // qqww_chain->Add(Form("%s/QQWW.root", pfxMC.Data()));
+        // xg_chain->Add(Form("%s/TG.root", pfxMC.Data()));
+        // xg_chain->Add(Form("%s/WGToLNuG.root", pfxMC.Data()));
+        xg_chain->Add(Form("%s/TGext.root", pfxMC.Data()));
+        xg_chain->Add(Form("%s/WGToLNuGext.root", pfxMC.Data()));
+        xg_chain->Add(Form("%s/TTGdilep.root", pfxMC.Data()));
+        xg_chain->Add(Form("%s/TTGsinglelep.root", pfxMC.Data()));
+        xg_chain->Add(Form("%s/TTGsinglelepbar.root", pfxMC.Data()));
+        xg_chain->Add(Form("%s/ZG.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/ZZ.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/GGHtoZZto4L.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/WWZ.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/WZZ.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/WWW.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/WWG.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/WZG.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/VHtoNonBB.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/TZQ.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/TWZ.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/WWDPS.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/WZ.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/QQWW.root", pfxMC.Data()));
+        rares_chain->Add(Form("%s/TTTJ.root",pfxMC.Data()));
+        rares_chain->Add(Form("%s/TTTW.root",pfxMC.Data()));
+    }
     //data
-    if (doSync) {
-        data_chain   ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/DataMuonEG.root");
-    } else {
-        data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-        data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-        data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-        data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
+    if (include_data) {
+        if (doSync) {
+            data_chain->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/DataMuonEG.root");
+        } else {
+            data_chain->Add(Form("%s/DataDoubleMuon*.root", pfxData.Data()));
+            data_chain->Add(Form("%s/DataDoubleEG*.root", pfxData.Data()));
+            data_chain->Add(Form("%s/DataMuonEG*.root", pfxData.Data()));
+            data_chain->Add(Form("%s/JetHT*.root", pfxData.Data()));
+        }
+        //flips
+        flips_chain->Add(Form("%s/DataMuonEG*.root", pfxData.Data()));
+        flips_chain->Add(Form("%s/DataDoubleEG*.root", pfxData.Data()));
     }
-    //flips
-    flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
-    flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
     //fakes
-    fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
-    //promptsub
-    promptsub_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
-    promptsub_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    promptsub_chain  ->Add(Form("%s/TTTTnew.root"                  , pfx.Data()));
-    promptsub_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
+    fakes_chain->Add(Form("%s/TTWnlo.root", pfxMC.Data()));
+    fakes_chain->Add(Form("%s/TTZnlo.root", pfxMC.Data()));
+    fakes_chain->Add(Form("%s/TTHtoNonBB.root", pfxMC.Data()));
+    if (include_data) {
+        fakes_chain->Add(Form("%s/JetHT*.root", pfxData.Data()));
+        fakes_chain->Add(Form("%s/DataDoubleMuon*.root", pfxData.Data()));
+        fakes_chain->Add(Form("%s/DataDoubleEG*.root", pfxData.Data()));
+        fakes_chain->Add(Form("%s/DataMuonEG*.root", pfxData.Data()));
+    }
+    if (include_minor_backgrounds) {
+        fakes_chain->Add(Form("%s/WZ.root", pfxMC.Data()));
+        fakes_chain->Add(Form("%s/QQWW.root", pfxMC.Data()));
+    }
 
-    pair<yields_t, plots_t> results_ttw      = run(ttw_chain);
-    pair<yields_t, plots_t> results_ttz     = run(ttz_chain);
-    pair<yields_t, plots_t> results_tth     = run(tth_chain);
-    // pair<yields_t, plots_t> results_qqww     = run(qqww_chain);
-    pair<yields_t, plots_t> results_xg       = run(xg_chain, 0, 0, 0, 0, 0, 1);
-    pair<yields_t, plots_t> results_rares    = run(rares_chain);
-    pair<yields_t, plots_t> results_ttttisrup     = run(ttttisrup_chain);
-    pair<yields_t, plots_t> results_ttttfsrup     = run(ttttfsrup_chain);
-    pair<yields_t, plots_t> results_ttttisrdn     = run(ttttisrdn_chain);
-    pair<yields_t, plots_t> results_ttttfsrdn     = run(ttttfsrdn_chain);
-    pair<yields_t, plots_t> results_tttt     = run(tttt_chain); // [!] run after the variations
-    pair<yields_t, plots_t> results_ttvv     = run(ttvv_chain);
-    pair<yields_t, plots_t> results_data     = run(data_chain, 1);
+    //promptsub
+    promptsub_chain->Add(Form("%s/TTWnlo.root", pfxMC.Data()));
+    promptsub_chain->Add(Form("%s/TTZnlo.root", pfxMC.Data()));
+    promptsub_chain->Add(Form("%s/TTTTnew.root", pfxMC.Data()));
+    promptsub_chain->Add(Form("%s/TTHtoNonBB.root", pfxMC.Data()));
+
+    pair<yields_t, plots_t> results_ttw = run(ttw_chain);
+    pair<yields_t, plots_t> results_ttz = run(ttz_chain);
+    pair<yields_t, plots_t> results_tth = run(tth_chain);
+    // pair<yields_t, plots_t> results_qqww = run(qqww_chain);
+    pair<yields_t, plots_t> results_xg = run(xg_chain, 0, 0, 0, 0, 0, 1);
+    pair<yields_t, plots_t> results_rares = run(rares_chain);
+    pair<yields_t, plots_t> results_ttttisrup = run(ttttisrup_chain);
+    pair<yields_t, plots_t> results_ttttfsrup = run(ttttfsrup_chain);
+    pair<yields_t, plots_t> results_ttttisrdn = run(ttttisrdn_chain);
+    pair<yields_t, plots_t> results_ttttfsrdn = run(ttttfsrdn_chain);
+    pair<yields_t, plots_t> results_tttt = run(tttt_chain); // [!] run after the variations
+    pair<yields_t, plots_t> results_ttvv = run(ttvv_chain);
+    pair<yields_t, plots_t> results_data = run(data_chain, 1);
     duplicate_removal::clear_list();
-    pair<yields_t, plots_t> results_flips    = run(flips_chain, 1, 1);
+    pair<yields_t, plots_t> results_flips = run(flips_chain, 1, 1);
     ttbar_chain->SetTitle("fakes_mc");
     pair<yields_t, plots_t> results_fakes_mc = run(ttbar_chain, 0, 0, 1);
     duplicate_removal::clear_list();
-    pair<yields_t, plots_t> results_fakes    = run(fakes_chain, 1, 0, 1);
+    pair<yields_t, plots_t> results_fakes = run(fakes_chain, 1, 0, 1);
     duplicate_removal::clear_list();
-    pair<yields_t, plots_t> results_promptsub       = run(promptsub_chain, 0, 0, 1, 0, 0, 0, 1);
+    pair<yields_t, plots_t> results_promptsub = run(promptsub_chain, 0, 0, 1, 0, 0, 0, 1);
 
     if (outputTrainingBDT) {
         // Write output tree
@@ -580,10 +591,8 @@ void getyields(){
     WRITE(SRDISC.TOTAL);
     WRITE(SR.TOTAL);
 
-    TNamed metadata(TString("metadata"),dir);
+    TNamed metadata(TString("metadata"), dir);
     metadata.Write();
-
-    c2numpy_close(&writer);
 
     // fout->Write();
     fout->Close();
@@ -592,8 +601,6 @@ void getyields(){
 
     // copy the root file with kinematic plots to live with the cards
     gSystem->Exec(Form("cp histos.root ../limits/%s/", dir.Data()));
-
-
 }
 
 //doFakes = 1 for QCD, 2 for inSitu
