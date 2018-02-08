@@ -1160,6 +1160,9 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
             weight*=scaleLumi;
+            if (istttt) {
+                weight *= 11.97 / 9.103;  // Rescale to TTTT nLO X-Section from LO
+            }
 
             if (yt > 0.) weight *= yt*yt;
 
@@ -1210,14 +1213,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             float weight_bb_up_alt = weight;
-            // if (doTTBB && (isttZ || isttW || isttH)) {
             if (doTTBB && (isttZ || isttW)) {
-                // want to take full effect as unc, and since we scale
-                // nominal weight, scale up twice
                 if (ss::extragenb() == 2) {
-                    float scaleamt = 1.7;
-                    weight_bb_up_alt = weight*scaleamt*scaleamt;
-                    weight *= scaleamt;
+                    weight_bb_up_alt *= 1.35;  // (ttbb/ttjj) data/mc uncertainty
+                    weight *= 1.0;
                 }
             }
 
