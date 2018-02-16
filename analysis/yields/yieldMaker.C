@@ -107,7 +107,7 @@ bool include_data = false;
 
 // TString dir = "v0.10_Sep22_ytscan";
 // TString dir = "v0.10_Sep15_triplelumi18bins";
-TString tag = "v1.00";
+TString tag = "v1.00_JetPtCut20";
 TString user = "cfangmei";
 TString pfxMC  = Form("/nfs-7/userdata/%s/tupler_babies/merged/FT/%s/output/", user.Data(), tag.Data());
 TString pfxData = Form("/nfs-7/userdata/%s/tupler_babies/merged/FT/%s/output/", user.Data(), tag.Data());
@@ -1305,13 +1305,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (doFakes == 1){
                 if (!isClass6) {
                     if (ss::hyp_class() != 2 && ss::hyp_class() != 1) continue;
-                    if (ss::lep1_passes_id()==0) {
+                    if (!ss::lep1_passes_id()) {
                         float fr = fakeRate(ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
                         float fra = alternativeFakeRate(ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
                         weight *= fr/(1.-fr);
                         weight_alt_FR *= fra/(1.-fra);
                     }
-                    if (ss::lep2_passes_id()==0) {
+                    if (!ss::lep2_passes_id()) {
                         float fr = fakeRate(ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
                         float fra = alternativeFakeRate(ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
                         weight *= fr/(1.-fr);
@@ -1427,14 +1427,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
 
-                // if (istttt) {
-                //     float blah = eventScaleFactor_trigonly(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
-                //     std::cout <<  " blah: " << blah <<  std::endl;
-                // }
-
-        // c2numpy_intc(&writer, 3);
-        // c2numpy_float64(&writer, 3.3);
-        // c2numpy_string(&writer, "THREE");
+            // if (istttt) {
+            //     float blah = eventScaleFactor_trigonly(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
+            //     std::cout <<  " blah: " << blah <<  std::endl;
+            // }
 
             LorentzVector visible;
             for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
@@ -1818,40 +1814,40 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_jetpt.br->Fill(ss::jets()[ijet].pt(),weight);
                 }
 
-                if (abs(ss::lep1_id()) == 11) p_result.h_mva.br->Fill(ss::lep1_MVA()                                                     , weight);
+                if (abs(ss::lep1_id()) == 11) p_result.h_mva.br->Fill(ss::lep1_MVA(), weight);
                 if(abs(ss::lep1_id()) == 13) {
-                    p_result.h_mu_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_mu_l1eta.br       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
-                    p_result.h_mu_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    // p_result.h_mu_lep1_ptRatio.br->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_mu_sip3d_lep1.br  ->Fill(ss::lep1_sip(), weight);
+                    p_result.h_mu_l1eta.br       ->Fill(ss::lep1_p4().eta(), weight);
+                    p_result.h_mu_lep1_miniIso.br->Fill(ss::lep1_miniIso(), weight);
+                    p_result.h_mu_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1(), weight);
+                    // p_result.h_mu_lep1_ptRatio.br->Fill(ptratio_1, weight);
                 } else {
-                    p_result.h_el_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_el_l1pt.br        ->Fill(lep1_pt                                                                                 , weight);
-                    p_result.h_el_l1eta.br       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
-                    p_result.h_el_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_el_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    // p_result.h_el_lep1_ptRatio.br->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_el_sip3d_lep1.br  ->Fill(ss::lep1_sip(), weight);
+                    p_result.h_el_l1pt.br        ->Fill(lep1_pt, weight);
+                    p_result.h_el_l1eta.br       ->Fill(ss::lep1_p4().eta(), weight);
+                    p_result.h_el_lep1_miniIso.br->Fill(ss::lep1_miniIso(), weight);
+                    p_result.h_el_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1(), weight);
+                    // p_result.h_el_lep1_ptRatio.br->Fill(ptratio_1, weight);
                 }
-                if (abs(ss::lep2_id()) == 11) p_result.h_mva.br->Fill(ss::lep2_MVA()                                                     , weight);
+                if (abs(ss::lep2_id()) == 11) p_result.h_mva.br->Fill(ss::lep2_MVA(), weight);
                 if(abs(ss::lep2_id()) == 13) {
-                    p_result.h_mu_sip3d_lep2.br  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_mu_l2eta.br       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
-                    p_result.h_mu_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    // p_result.h_mu_lep2_ptRatio.br->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_mu_sip3d_lep2.br  ->Fill(ss::lep2_sip(), weight);
+                    p_result.h_mu_l2eta.br       ->Fill(ss::lep2_p4().eta(), weight);
+                    p_result.h_mu_lep2_miniIso.br->Fill(ss::lep2_miniIso(), weight);
+                    p_result.h_mu_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1(), weight);
+                    // p_result.h_mu_lep2_ptRatio.br->Fill(ptratio_2, weight);
                 } else {
-                    p_result.h_el_sip3d_lep2.br  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_el_l2eta.br       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
-                    p_result.h_el_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_el_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    // p_result.h_el_lep2_ptRatio.br->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_el_sip3d_lep2.br  ->Fill(ss::lep2_sip(), weight);
+                    p_result.h_el_l2eta.br       ->Fill(ss::lep2_p4().eta(), weight);
+                    p_result.h_el_lep2_miniIso.br->Fill(ss::lep2_miniIso(), weight);
+                    p_result.h_el_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1(), weight);
+                    // p_result.h_el_lep2_ptRatio.br->Fill(ptratio_2, weight);
                 }
                 if (plotlep3) {
                     if(abs(ss::lep3_id()) == 13) {
-                        p_result.h_mu_l3eta.br       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                        p_result.h_mu_l3eta.br->Fill(ss::lep3_p4().eta(), weight);
                     } else {
-                        p_result.h_el_l3eta.br       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                        p_result.h_el_l3eta.br->Fill(ss::lep3_p4().eta(), weight);
                     }
                 }
 
@@ -1943,39 +1939,39 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_jetpt.sr->Fill(ss::jets()[ijet].pt(),weight);
                 }
 
-                if (abs(ss::lep1_id()) == 11) p_result.h_mva.sr->Fill(ss::lep1_MVA()                                                     , weight);
+                if (abs(ss::lep1_id()) == 11) p_result.h_mva.sr->Fill(ss::lep1_MVA(), weight);
                 if(abs(ss::lep1_id()) == 13) {
-                    p_result.h_mu_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_mu_l1eta.sr       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
-                    p_result.h_mu_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    // p_result.h_mu_lep1_ptRatio.sr->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_mu_sip3d_lep1.sr->Fill(ss::lep1_sip(), weight);
+                    p_result.h_mu_l1eta.sr->Fill(ss::lep1_p4().eta(), weight);
+                    p_result.h_mu_lep1_miniIso.sr->Fill(ss::lep1_miniIso(), weight);
+                    p_result.h_mu_lep1_ptRel.sr->Fill(ss::lep1_ptrel_v1(), weight);
+                    // p_result.h_mu_lep1_ptRatio.sr->Fill(ptratio_1, weight);
                 } else {
-                    p_result.h_el_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_el_l1eta.sr       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
-                    p_result.h_el_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_el_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    // p_result.h_el_lep1_ptRatio.sr->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_el_sip3d_lep1.sr->Fill(ss::lep1_sip(), weight);
+                    p_result.h_el_l1eta.sr->Fill(ss::lep1_p4().eta(), weight);
+                    p_result.h_el_lep1_miniIso.sr->Fill(ss::lep1_miniIso(), weight);
+                    p_result.h_el_lep1_ptRel.sr->Fill(ss::lep1_ptrel_v1(), weight);
+                    // p_result.h_el_lep1_ptRatio.sr->Fill(ptratio_1, weight);
                 }
-                if (abs(ss::lep2_id()) == 11) p_result.h_mva.sr->Fill(ss::lep2_MVA()                                                     , weight);
+                if (abs(ss::lep2_id()) == 11) p_result.h_mva.sr->Fill(ss::lep2_MVA(), weight);
                 if(abs(ss::lep2_id()) == 13) {
-                    p_result.h_mu_sip3d_lep2.sr  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_mu_l2eta.sr       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
-                    p_result.h_mu_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    // p_result.h_mu_lep2_ptRatio.sr->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_mu_sip3d_lep2.sr  ->Fill(ss::lep2_sip(), weight);
+                    p_result.h_mu_l2eta.sr       ->Fill(ss::lep2_p4().eta(), weight);
+                    p_result.h_mu_lep2_miniIso.sr->Fill(ss::lep2_miniIso(), weight);
+                    p_result.h_mu_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1(), weight);
+                    // p_result.h_mu_lep2_ptRatio.sr->Fill(ptratio_2, weight);
                 } else {
-                    p_result.h_el_sip3d_lep2.sr  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_el_l2eta.sr       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
-                    p_result.h_el_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_el_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    // p_result.h_el_lep2_ptRatio.sr->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_el_sip3d_lep2.sr  ->Fill(ss::lep2_sip(), weight);
+                    p_result.h_el_l2eta.sr       ->Fill(ss::lep2_p4().eta(), weight);
+                    p_result.h_el_lep2_miniIso.sr->Fill(ss::lep2_miniIso(), weight);
+                    p_result.h_el_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1(), weight);
+                    // p_result.h_el_lep2_ptRatio.sr->Fill(ptratio_2, weight);
                 }
                 if (plotlep3) {
                     if(abs(ss::lep3_id()) == 13) {
-                        p_result.h_mu_l3eta.sr       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                        p_result.h_mu_l3eta.sr->Fill(ss::lep3_p4().eta(), weight);
                     } else {
-                        p_result.h_el_l3eta.sr       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
+                        p_result.h_el_l3eta.sr->Fill(ss::lep3_p4().eta(), weight);
                     }
                 }
 
@@ -2055,7 +2051,6 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                         // // NJA: this was only for testing on Jun23
                         // plot->SetBinError(bin,h_mc->GetBinError(bin)); 
                         // plot->SetBinContent(bin,h_mc->GetBinContent(bin)); 
-
                     }
                 }
                 file_fakes_mc->Close();
@@ -2239,11 +2234,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //jes
                 TH1F* plot_alt_jes_up = 0;
                 TH1F* plot_alt_jes_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_jes_up=p_jes_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jes_up=p_jes_alt_up.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_jes_up=p_jes_alt_up.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_jes_up=p_jes_alt_up.SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_jes_dn=p_jes_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jes_dn=p_jes_alt_dn.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_jes_dn=p_jes_alt_dn.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_jes_dn=p_jes_alt_dn.SRDISC.TOTAL;
                 else exit(1);
                 TH1F* jesUp   = (TH1F*) plot_alt_jes_up->Clone("jesUp");
                 TH1F* jesDown = (TH1F*) plot_alt_jes_dn->Clone("jesDown");
@@ -2259,11 +2254,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //jer
                 TH1F* plot_alt_jer_up = 0;
                 TH1F* plot_alt_jer_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_jer_up=p_jer_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_up=p_jer_alt_up.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_jer_up=p_jer_alt_up.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_jer_up=p_jer_alt_up.SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_jer_dn=p_jer_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_dn=p_jer_alt_dn.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_jer_dn=p_jer_alt_dn.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_jer_dn=p_jer_alt_dn.SRDISC.TOTAL;
                 else exit(1);
                 TH1F* jerUp   = (TH1F*) plot_alt_jer_up->Clone("jerUp");
                 TH1F* jerDown = (TH1F*) plot_alt_jer_dn->Clone("jerDown");
@@ -2279,11 +2274,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //lep
                 TH1F* plot_alt_lep_up = 0;
                 TH1F* plot_alt_lep_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_lep_up=p_lep_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_lep_up=p_lep_alt_up.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_lep_up=p_lep_alt_up.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_lep_up=p_lep_alt_up.SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_lep_dn=p_lep_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_lep_dn=p_lep_alt_dn.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_lep_dn=p_lep_alt_dn.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_lep_dn=p_lep_alt_dn.SRDISC.TOTAL;
                 else exit(1);
                 TH1F* lepUp   = (TH1F*) plot_alt_lep_up->Clone("lepUp");
                 TH1F* lepDown = (TH1F*) plot_alt_lep_dn->Clone("lepDown");
@@ -2291,16 +2286,16 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 lepUp->Write();
                 lepDown->Write();
 
-                // ttbb/ttjj ~ 1.7 uncertainty
+                // ttbb/ttjj ~ 1.35 uncertainty
                 TH1F* plot_alt_bb_up = 0;
                 TH1F* plot_alt_bb_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_bb_up=p_bb_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_up=p_bb_alt_up.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_bb_up=p_bb_alt_up.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_bb_up=p_bb_alt_up.SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_bb_dn=p_bb_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_dn=p_bb_alt_dn.SRDISC.TOTAL;
+                if (kinRegs[kr]=="srcr") plot_alt_bb_dn=p_bb_alt_dn.SRCR.TOTAL;
+                else if (kinRegs[kr]=="srdisc") plot_alt_bb_dn=p_bb_alt_dn.SRDISC.TOTAL;
                 else exit(1);
-                TH1F* bbUp   = (TH1F*) plot_alt_bb_up->Clone("bbUp");
+                TH1F* bbUp = (TH1F*) plot_alt_bb_up->Clone("bbUp");
                 TH1F* bbDown = (TH1F*) plot_alt_bb_dn->Clone("bbDown");
                 for (int bin=1;bin<=bbUp->GetNbinsX();++bin) {
                     float nomval = h_sr->GetBinContent(bin);

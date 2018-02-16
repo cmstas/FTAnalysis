@@ -74,7 +74,8 @@ def get_yields(card, regions="srcr"):
                 up = val*central-central
 
             if kind == "shape":
-                up = val*np.array(list(f1.Get(ns["name"]+"Up"))[1:-1])-central
+                # up = val*np.array(list(f1.Get(ns["name"]+"Up"))[1:-1])-central
+                up = 0
 
             upper += up**2.0
 
@@ -112,17 +113,26 @@ def get_yields(card, regions="srcr"):
 def print_table(d_yields):
     nbins = len(d_yields["ttz"]["central"])
     print nbins
-    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","WZ","WW","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    # procs = ["ttw","ttz","tth","wz","ww","xg","rares","flips","fakes","bgtot","data","tttt"]
-    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    # procs = ["ttw","ttz","tth","xg","rares","flips","fakes","bgtot","data","tttt"]
-    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
-    srnames = ["CRZ","CRW","SR1","SR2","SR3","SR4","SR5","SR6","SR7","SR8"]
+    colname_lookup = {
+        'ttw': '$\\ttW$',
+        'ttz': '$\\ttZ$',
+        'tth': '$\\ttH$',
+        'ttvv': '$\\ttVV$',
+        'xg': 'X+$\\gamma$',
+        'rares':'Rares',
+        'flips':'Flips',
+        'fakes':'Fakes',
+        'bgtot':'Total',
+        'data':'Data',
+        'tttt':'$\\tttt$'
+    }
+    # procs = ["ttw", "ttz", "tth", "ttvv", "xg", "rares", "flips", "fakes", "bgtot", "data", "tttt"]
+    procs = ["ttw", "ttz", "tth", "bgtot", "data", "tttt"]
+    srnames = ["CRZ"] + ["SR{:d}".format(i+1) for i in range(nbins-1)]
     for ibin in range(nbins):
         # print ibin
         if ibin == 0:
-            print "&".join(map(lambda x: "{0:12s}".format(x),colnames)),
+            print "&".join("{0:12s}".format(colname_lookup[proc]) for proc in procs),
             print r"\\"
             print r"\hline\hline"
 
@@ -145,6 +155,7 @@ def print_table(d_yields):
 
 
 if __name__ == "__main__":
+    import json
 
     parser = argparse.ArgumentParser()
     parser.add_argument("card", help="card name in directory")
@@ -156,6 +167,11 @@ if __name__ == "__main__":
             # card="v0.04_Apr28_test"
             )
 
-    print_table(d_yields)
+    for key, val in d_yields.items():
+        d_yields[key] = dict(central = val['central'].tolist(), error= val['error'].tolist())
+
+    with open('{}_yields.json'.format(args.card), 'w') as f:
+        f.write(json.dumps(d_yields))
+    # print_table(d_yields)
 
 
