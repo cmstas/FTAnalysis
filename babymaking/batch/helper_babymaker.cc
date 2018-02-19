@@ -1402,167 +1402,96 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // for applying btagging SFs, using Method 1a from the twiki below:
   //   https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
   //   https://twiki.cern.ch/twiki/pub/CMS/BTagSFMethods/Method1aExampleCode_CSVM.cc.txt
-  float btagprob_data = 1.;
-  float btagprob_err_heavy_UP = 0.;
-  float btagprob_err_heavy_DN = 0.;
-  float btagprob_err_light_UP = 0.;
-  float btagprob_err_light_DN = 0.;
-  float btagprob_mc = 1.;
   jet_results = SSJetsCalculator(jetCorr, 1, 0, 1);
-  for (unsigned int i = 0; i < jet_results.first.size(); i++) {
-     if (is_real_data) continue;
-     //get btag eff weights
-     float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
-     // Don't consider any jets below 25
-     if (jet_pt<bjetMinPt) continue;
-     // Don't consider nonbjets with 25<pT<40
-     // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
-     float jet_eta = jet_results.first.at(i).p4().eta();
-     int jet_mcFlavour = jet_results.first.at(i).mcFlavor();
-     float eff = getBtagEffFromFile(jet_pt, jet_eta, jet_mcFlavour);
-     BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
-     if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
-     else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
-     float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt)));
-     float weight_cent(1.), weight_UP(1.), weight_DN(1.);
-     if (flavor == BTagEntry::FLAV_UDSG) {
-       weight_cent    = reader_light->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_light_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_light_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     else {
-       weight_cent    = reader_heavy->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_heavy_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_heavy_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     if (isFastsim > 0){
-       weight_cent *= reader_fastsim->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP   *= reader_fastsim_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN   *= reader_fastsim_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     // std::cout <<  " i: " << i <<  " jet_pt: " << jet_pt <<  " weight_cent: " << weight_cent <<  " eff: " << eff <<  " jet_mcFlavour: " << jet_mcFlavour <<  " jet_results.first.at(i).isBtag(): " << jet_results.first.at(i).isBtag() <<  std::endl;
-     if (jet_results.first.at(i).isBtag()) {
-       btagprob_data *= weight_cent * eff;
-       btagprob_mc *= eff;
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
+  for (int reader_light_id=1; reader_light_id<=2; reader_light_id++) { // Loop over each light flavor id file
+    float btagprob_data = 1.;
+    float btagprob_err_heavy_UP = 0.;
+    float btagprob_err_heavy_DN = 0.;
+    float btagprob_err_light_UP = 0.;
+    float btagprob_err_light_DN = 0.;
+    float btagprob_mc = 1.;
+    for (unsigned int i = 0; i < jet_results.first.size(); i++) {
+       if (is_real_data) continue;
+       //get btag eff weights
+       float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
+       // Don't consider any jets below 25
+       if (jet_pt<bjetMinPt) continue;
+       // Don't consider nonbjets with 25<pT<40
+       // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
+       float jet_eta = jet_results.first.at(i).p4().eta();
+       int jet_mcFlavour = jet_results.first.at(i).mcFlavor();
+       float eff = getBtagEffFromFile(jet_pt, jet_eta, jet_mcFlavour);
+       BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
+       if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
+       else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
+       float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt)));
+       float weight_cent(1.), weight_UP(1.), weight_DN(1.);
        if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += abserr_UP/weight_cent;
-         btagprob_err_light_DN += abserr_DN/weight_cent;
+         if (reader_light_id == 1) {
+           weight_cent    = reader_light->eval(flavor, jet_eta, pt_cutoff);
+           weight_UP      = reader_light_UP->eval(flavor, jet_eta, pt_cutoff);
+           weight_DN      = reader_light_DN->eval(flavor, jet_eta, pt_cutoff);
+         } else if (reader_light_id == 2) {
+           weight_cent    = reader_light2->eval(flavor, jet_eta, pt_cutoff);
+           weight_UP      = reader_light2_UP->eval(flavor, jet_eta, pt_cutoff);
+           weight_DN      = reader_light2_DN->eval(flavor, jet_eta, pt_cutoff);
+         }
        }
        else {
-         btagprob_err_heavy_UP += abserr_UP/weight_cent;
-         btagprob_err_heavy_DN += abserr_DN/weight_cent;
+         weight_cent    = reader_heavy->eval(flavor, jet_eta, pt_cutoff);
+         weight_UP      = reader_heavy_UP->eval(flavor, jet_eta, pt_cutoff);
+         weight_DN      = reader_heavy_DN->eval(flavor, jet_eta, pt_cutoff);
        }
-     }
-     else {
-       btagprob_data *= (1. - weight_cent * eff);
-       btagprob_mc *= (1. - eff);
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
-       if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+       if (isFastsim > 0){
+         weight_cent *= reader_fastsim->eval(flavor, jet_eta, pt_cutoff);
+         weight_UP   *= reader_fastsim_UP->eval(flavor, jet_eta, pt_cutoff);
+         weight_DN   *= reader_fastsim_DN->eval(flavor, jet_eta, pt_cutoff);
+       }
+       if (jet_results.first.at(i).isBtag()) {
+         btagprob_data *= weight_cent * eff;
+         btagprob_mc *= eff;
+         float abserr_UP = weight_UP - weight_cent;
+         float abserr_DN = weight_cent - weight_DN;
+         if (flavor == BTagEntry::FLAV_UDSG) {
+           btagprob_err_light_UP += abserr_UP/weight_cent;
+           btagprob_err_light_DN += abserr_DN/weight_cent;
+         }
+         else {
+           btagprob_err_heavy_UP += abserr_UP/weight_cent;
+           btagprob_err_heavy_DN += abserr_DN/weight_cent;
+         }
        }
        else {
-         btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+         btagprob_data *= (1. - weight_cent * eff);
+         btagprob_mc *= (1. - eff);
+         float abserr_UP = weight_UP - weight_cent;
+         float abserr_DN = weight_cent - weight_DN;
+         if (flavor == BTagEntry::FLAV_UDSG) {
+           btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+           btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+         }
+         else {
+           btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+           btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+         }
        }
-     }
-     if (verbose) {
-       cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
-       cout << Form("eff, SF = %f %f",eff,weight_cent) << endl;
-       cout << Form("partial SF is %f",btagprob_data / btagprob_mc) << endl;
-     }
-     // btags_effpt.push_back(jet_pt);
-     // btags_eff.push_back(eff);
-     // btags_sf.push_back(weight_cent);
-  }
-  weight_btagsf1 = btagprob_data / btagprob_mc;
-  weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-  weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
-  // std::cout <<  " btagprob_data: " << btagprob_data <<  " btagprob_mc: " << btagprob_mc <<  " weight_btagsf1: " << weight_btagsf1 <<  std::endl;
 
-  // --------------------------------------- //
-  // AGAIN BECAUSE THERE'S TWO GODDAMN FILES //
-  // --------------------------------------- //
-  btagprob_data = 1.;
-  btagprob_err_heavy_UP = 0.;
-  btagprob_err_heavy_DN = 0.;
-  btagprob_err_light_UP = 0.;
-  btagprob_err_light_DN = 0.;
-  btagprob_mc = 1.;
-  for (unsigned int i = 0; i < jet_results.first.size(); i++) {
-     if (is_real_data) continue;
-     //get btag eff weights
-     float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
-     // Don't consider any jets below 25
-     if (jet_pt<bjetMinPt) continue;
-     // Don't consider nonbjets with 25<pT<40
-     // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
-     float jet_eta = jet_results.first.at(i).p4().eta();
-     int jet_mcFlavour = jet_results.first.at(i).mcFlavor();
-     float eff = getBtagEffFromFile(jet_pt, jet_eta, jet_mcFlavour);
-     BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
-     if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
-     else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
-     float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt)));
-     float weight_cent(1.), weight_UP(1.), weight_DN(1.);
-     if (flavor == BTagEntry::FLAV_UDSG) {
-       weight_cent    = reader_light2->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_light2_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_light2_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     else {
-       weight_cent    = reader_heavy->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_heavy_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_heavy_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     if (isFastsim > 0){
-       weight_cent *= reader_fastsim->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP   *= reader_fastsim_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN   *= reader_fastsim_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     if (jet_results.first.at(i).isBtag()) {
-       btagprob_data *= weight_cent * eff;
-       btagprob_mc *= eff;
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
-       if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += abserr_UP/weight_cent;
-         btagprob_err_light_DN += abserr_DN/weight_cent;
+       if (verbose) {
+         cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
+         cout << Form("eff, SF = %f %f",eff,weight_cent) << endl;
+         cout << Form("partial SF is %f",btagprob_data / btagprob_mc) << endl;
        }
-       else {
-         btagprob_err_heavy_UP += abserr_UP/weight_cent;
-         btagprob_err_heavy_DN += abserr_DN/weight_cent;
-       }
-     }
-     else {
-       btagprob_data *= (1. - weight_cent * eff);
-       btagprob_mc *= (1. - eff);
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
-       if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
-       }
-       else {
-         btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
-       }
-     }
-     if (verbose) {
-       cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
-       cout << Form("eff, SF = %f %f",eff,weight_cent) << endl;
-       cout << Form("partial SF is %f",btagprob_data / btagprob_mc) << endl;
-     }
-     // btags_effpt.push_back(jet_pt);
-     // btags_eff.push_back(eff);
-     // btags_sf.push_back(weight_cent);
+    }
+    if (reader_light_id == 1) {
+      weight_btagsf1 = btagprob_data / btagprob_mc;
+      weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
+      weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
+    } else if (reader_light_id == 2) {
+      weight_btagsf2 = btagprob_data / btagprob_mc;
+      weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
+      weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
+    }
   }
-  weight_btagsf2 = btagprob_data / btagprob_mc;
-  weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-  weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
 
   // Now we do this stupid thing of rolling a random number and
   // deciding which era the MC "belongs to", to assign the proper btag weight
