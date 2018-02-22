@@ -238,7 +238,6 @@ std::pair <vector <Jet>, vector <Jet> > SSJetsCalculator(FactorizedJetCorrector*
     if (doCorr == 2) pt = jet.pt()*tas::pfjets_undoJEC().at(i);
     
     //Kinematic jet cuts
-    if (pt < bjetMinPt) continue;
     if (fabs(jet.eta()) > 2.4) continue;
 
     //Require loose jet ID
@@ -272,6 +271,7 @@ std::pair <vector <Jet>, vector <Jet> > SSJetsCalculator(FactorizedJetCorrector*
   for (unsigned int i = 0; i < result_jets.size(); i++){
       float disc = result_disc.at(i);
       if (disc < btagCut) continue;
+      if (result_jets.at(i).pt() < bjetMinPt) continue;
       result_btags.push_back(result_jets.at(i));
   }
 
