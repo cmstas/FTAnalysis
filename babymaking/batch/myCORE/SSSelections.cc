@@ -278,7 +278,7 @@ std::pair <vector <Jet>, vector <Jet> > SSJetsCalculator(FactorizedJetCorrector*
   // Only retain high pt jets if not saving all pts
   vector<Jet> result_jets_cut;
   for (unsigned int i = 0; i < result_jets.size(); i++){
-      if(!saveAllPt && (result_corrpt.at(i) < jetMinPt)) continue;
+      if(!saveAllPt && (result_corrpt.at(i) < cfg.jetMinPt)) continue;
       result_jets_cut.push_back(result_jets.at(i));
   }
 

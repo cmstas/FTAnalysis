@@ -3,6 +3,7 @@
 #include "CORE/Tools/jetcorr/Utilities.icc"
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
+#include "cfg.h"
 
 using namespace tas;
 
@@ -1594,14 +1595,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i);
     if (jet_pt > bjetMinPt && mostJets_disc.at(i) > btagCut) nbtagsAG++;
-    if (jet_pt > jetMinPt) njetsAG++;
+    if (jet_pt > cfg.jetMinPt) njetsAG++;
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_up_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_up = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0+mostJets_unc.at(i));
-    if (jet_pt_up > jetMinPt) njets_unc_up++;
-    if (jet_pt_up > jetMinPt) ht_unc_up += jet_pt_up;
+    if (jet_pt_up > cfg.jetMinPt) njets_unc_up++;
+    if (jet_pt_up > cfg.jetMinPt) ht_unc_up += jet_pt_up;
     if (mostJets_disc.at(i) < btagCut) continue;
     if (jet_pt_up > bjetMinPt) nbtags_unc_up++;
   }
@@ -1609,8 +1610,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (mostJets_dn_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_dn = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0-mostJets_unc.at(i));
-    if (jet_pt_dn > jetMinPt) njets_unc_dn++;
-    if (jet_pt_dn > jetMinPt) ht_unc_dn += jet_pt_dn;
+    if (jet_pt_dn > cfg.jetMinPt) njets_unc_dn++;
+    if (jet_pt_dn > cfg.jetMinPt) ht_unc_dn += jet_pt_dn;
     if (mostJets_disc.at(i) < btagCut) continue;
     if (jet_pt_dn > bjetMinPt) nbtags_unc_dn++;
   }
@@ -1691,8 +1692,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             if (jer_mostJets_passID.at(i) == 0) continue;
             float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
             if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
-            if (jet_pt > jetMinPt) ht_JER_up += jet_pt;
-            if (jet_pt > jetMinPt) njets_JER_up++;
+            if (jet_pt > cfg.jetMinPt) ht_JER_up += jet_pt;
+            if (jet_pt > cfg.jetMinPt) njets_JER_up++;
         }
         njets_JER_dn = max(2*njets-njets_JER_up,0);
         nbtags_JER_dn = max(2*nbtags-nbtags_JER_up,0);
