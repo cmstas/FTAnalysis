@@ -1,14 +1,16 @@
 #ifndef __CFG_H__
 #define __CFG_H__
+
 #include <string>
 #include <iostream>
 
-#include "yaml-cpp/yaml.h"
-
-struct {
+struct Config {
     float jetMinPt;
-} cfg;
+    float bjetMinPt;
+};
 
-void read_config(const std::string&);
+extern Config cfg;
+
+bool read_config(const std::string&);
 
 #endif  // __CFG_H__

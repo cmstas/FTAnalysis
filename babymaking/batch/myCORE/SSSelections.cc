@@ -149,7 +149,7 @@ Z_result_t makesExtraZ(int iHyp, bool RA7vetoID){
     std::cout << "ERROR: don't have 2 leptons in hypothesis!!!  Exiting" << std::endl;
     return result;
   }
-      
+
   if (ele_idx.size() > 0) {
     for (unsigned int eidx = 0; eidx < tas::els_p4().size(); eidx++) {
 
@@ -271,7 +271,7 @@ std::pair <vector <Jet>, vector <Jet> > SSJetsCalculator(FactorizedJetCorrector*
   for (unsigned int i = 0; i < result_jets.size(); i++){
       float disc = result_disc.at(i);
       if (disc < btagCut) continue;
-      if (result_jets.at(i).pt() < bjetMinPt) continue;
+      if (result_jets.at(i).pt() < cfg.bjetMinPt) continue;
       result_btags.push_back(result_jets.at(i));
   }
 

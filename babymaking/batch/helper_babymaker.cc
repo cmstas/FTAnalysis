@@ -1416,7 +1416,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
        //get btag eff weights
        float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
        // Don't consider any jets below 25
-       if (jet_pt<bjetMinPt) continue;
+       if (jet_pt<cfg.bjetMinPt) continue;
        // Don't consider nonbjets with 25<pT<40
        // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
        float jet_eta = jet_results.first.at(i).p4().eta();
@@ -1560,18 +1560,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     jecUnc->setJetPt(rawpt*JEC);
     float jetUnc = jecUnc->getUncertainty(true);
 
-    if ( (rawpt*JEC*(1-jetUnc) < bjetMinPt)
-      && (rawpt*JEC*(1+jetUnc) < bjetMinPt)
-      && (rawpt*JEC*(1       ) < bjetMinPt) ) continue;
+    if ( (rawpt*JEC*(1-jetUnc) < cfg.bjetMinPt)
+      && (rawpt*JEC*(1+jetUnc) < cfg.bjetMinPt)
+      && (rawpt*JEC*(1       ) < cfg.bjetMinPt) ) continue;
 
     //Save results
     mostJets.push_back(jet);
     // if (rawpt*JEC > jetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
-    if (rawpt*JEC > bjetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
+    if (rawpt*JEC > cfg.bjetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
     else                                                     mostJets_jet.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1+jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_up.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1+jetUnc) > cfg.bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_up.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_up.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1-jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_dn.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1-jetUnc) > cfg.bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_dn.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_dn.push_back(Jet(-1, -9999));
     mostJets_rawp4.push_back(jet*tas::pfjets_undoJEC().at(i));
     mostJets_idx.push_back(i);
@@ -1594,7 +1594,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (mostJets_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i);
-    if (jet_pt > bjetMinPt && mostJets_disc.at(i) > btagCut) nbtagsAG++;
+    if (jet_pt > cfg.bjetMinPt && mostJets_disc.at(i) > btagCut) nbtagsAG++;
     if (jet_pt > cfg.jetMinPt) njetsAG++;
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
@@ -1604,7 +1604,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (jet_pt_up > cfg.jetMinPt) njets_unc_up++;
     if (jet_pt_up > cfg.jetMinPt) ht_unc_up += jet_pt_up;
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_up > bjetMinPt) nbtags_unc_up++;
+    if (jet_pt_up > cfg.bjetMinPt) nbtags_unc_up++;
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_dn_passCleaning.at(i) == 0) continue;
@@ -1613,7 +1613,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (jet_pt_dn > cfg.jetMinPt) njets_unc_dn++;
     if (jet_pt_dn > cfg.jetMinPt) ht_unc_dn += jet_pt_dn;
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_dn > bjetMinPt) nbtags_unc_dn++;
+    if (jet_pt_dn > cfg.bjetMinPt) nbtags_unc_dn++;
   }
 
 
@@ -1666,11 +1666,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             float ptJER = smearing[0]; // these are the actual pTs, not scale factors, so don't multiply
             float JER = ptJER/(rawpt*JEC); // JER wrt *corrected* jet
 
-            if ( (ptJER    < bjetMinPt) ) continue;
+            if ( (ptJER    < cfg.bjetMinPt) ) continue;
 
             //Save results
             jer_mostJets.push_back(jet);
-            if (ptJER > bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
+            if (ptJER > cfg.bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
             else                                                     jer_mostJets_jet.push_back(Jet(-1, -9999));
             jer_mostJets_idx.push_back(i);
             jer_mostJets_disc.push_back(tas::getbtagvalue("deepFlavourJetTags:probb",i)+tas::getbtagvalue("deepFlavourJetTags:probbb",i));
@@ -1691,7 +1691,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             if (jer_mostJets_passCleaning.at(i) == 0) continue;
             if (jer_mostJets_passID.at(i) == 0) continue;
             float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
-            if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
+            if (jet_pt > cfg.bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
             if (jet_pt > cfg.jetMinPt) ht_JER_up += jet_pt;
             if (jet_pt > cfg.jetMinPt) njets_JER_up++;
         }
