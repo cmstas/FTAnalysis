@@ -1,6 +1,6 @@
 # config.yaml
 # Main configuration for FT Baby generation
 
-jetMinPt: 25
-bjetMinPt: 20
+jetMinPt: 40
+bjetMinPt: 25
 
