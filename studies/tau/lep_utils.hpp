@@ -14,65 +14,57 @@
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float>> P4;
 
-map<string, int> id_lookup = {
-    {"byTightIsolationMVArun2v1DBoldDMwLT", -1},
+map<string, int> tau_id_lookup = {
+    {"decayModeFinding", -1},
+    {"againstMuonTight3", -1},
+    {"againstElectronTightMVA6", -1},
     {"byTightIsolationMVArun2v1DBdR03oldDMwLT", -1}
 };
 
-std::string tau_id;
+// void print_ids(size_t tau_idx) {
+//     const vector<TString> &pf_IDnames = tas::taus_pf_IDnames();
+//     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs();
+//     cout << "NEW TAU: " << tau_idx << endl;
+//     for(unsigned int idx=0; idx<pf_IDnames.size(); idx++) {
+//         std::cout << "  " << pf_IDnames[idx] << ": " << pf_IDs[tau_idx][idx] << std::endl;
+//     }
+// }
 
-/* void print_ids(size_t tau_idx) { */
-/*     const vector<TString> &pf_IDnames = tas::taus_pf_IDnames(); */
-/*     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs(); */
-/*     /1* cout << "NEW TAU: " << tau_idx << endl; *1/ */
-/*     float pass = false; */
-/*     bool found = false; */
-/*     for(unsigned int idx=0; idx<pf_IDnames.size(); idx++){ */
-/*         if(pf_IDnames[idx] != "byTightIsolationMVArun2v1DBoldDMwLT") continue; */
-/*         found = true; */
-/*         pass = pf_IDs[tau_idx][idx]; */
-/*     } */
-/*     if(!found) cout << "  Didn't find id!" << endl; */
-/*     else if((pass==1.0) != pf_IDs[tau_idx][id_lookup["byTightIsolationMVArun2v1DBoldDMwLT"]]) */
-/*             cout << "  id mismatch!!!" << endl; */
-/* } */
-
-bool isTauIsoFromBJet(size_t tau_idx, float dR_min = 0.1) {
-    /** Remove taus that are not isolated from B-Jets. The idea being that B->tau
-     *  decays should be removed, only the W->tau should remain.
-     */
-    auto& tau_p4 = tas::taus_pf_p4()[tau_idx];
-    auto& jet_p4s  = tas::pfjets_p4();
-    int nJets = jet_p4s.size();
-    for(size_t jet_idx = 0; jet_idx<nJets; jet_idx++) {
-        float dR = ROOT::Math::VectorUtil::DeltaR(tau_p4, jet_p4s[jet_idx]);
-        float disc = tas::getbtagvalue("deepFlavourJetTags:probb", jet_idx) +
-                     tas::getbtagvalue("deepFlavourJetTags:probbb", jet_idx);
-        if (disc > 0.6324 and dR < dR_min) return false;
-    }
-    return true;
-}
+// bool isTauIsoFromBJet(size_t tau_idx, float dR_min = 0.1) {
+//     /** Remove taus that are not isolated from B-Jets. The idea being that B->tau
+//      *  decays should be removed, only the W->tau should remain.
+//      */
+//     auto& tau_p4 = tas::taus_pf_p4()[tau_idx];
+//     auto& jet_p4s  = tas::pfjets_p4();
+//     int nJets = jet_p4s.size();
+//     for(size_t jet_idx = 0; jet_idx<nJets; jet_idx++) {
+//         float dR = ROOT::Math::VectorUtil::DeltaR(tau_p4, jet_p4s[jet_idx]);
+//         float disc = tas::getbtagvalue("deepFlavourJetTags:probb", jet_idx) +
+//                      tas::getbtagvalue("deepFlavourJetTags:probbb", jet_idx);
+//         if (disc > 0.6324 and dR < dR_min) return false;
+//     }
+//     return true;
+// }
 
 bool ID_LOOKUP_POPULATED = false;
 bool isGoodTau (size_t tau_idx) {
+    /* print_ids(tau_idx); */
     //Find index of specific ids for first event only, cache result
     if (!ID_LOOKUP_POPULATED){
         const vector<TString> &pf_IDnames = tas::taus_pf_IDnames();
         for(unsigned int idx=0; idx<pf_IDnames.size(); idx++){
             string s = string(pf_IDnames[idx]);
-            if(id_lookup.find(s) == id_lookup.end()) continue;
-            id_lookup[s] = idx;
+            if(tau_id_lookup.find(s) == tau_id_lookup.end()) continue;
+            tau_id_lookup[s] = idx;
         }
         ID_LOOKUP_POPULATED = true;
     }
     const vector<vector<float>> &pf_IDs = tas::taus_pf_IDs();
-    bool pass_id = pf_IDs[tau_idx][id_lookup[tau_id]];
-    /* bool iso_b_jet = isTauIsoFromBJet(tau_idx); */
-    /* if (pass_id and !iso_b_jet) { */
-    /*     std::cout << "cleaned jet!" << std::endl; */
-    /* } */
-    /* return pass_id and iso_b_jet; */
-    return pass_id;
+    for (const auto& p : tau_id_lookup) {
+        if (pf_IDs[tau_idx][p.second]) continue;
+        return false;
+    }
+    return true;
 }
 
 

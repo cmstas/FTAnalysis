@@ -44,8 +44,8 @@ float mc_weight(DatasetInfoFromFile& df) {
     using namespace tas;
     float sgnMCweight = ((genps_weight() > 0) - (genps_weight() < 0));
     float scale1fb = sgnMCweight*df.getScale1fbFromFile(evt_dataset()[0].Data(),evt_CMS3tag()[0].Data());
-    float moriond_int_lumi = 35.9;
-    return moriond_int_lumi*scale1fb;
+    float int_lumi = 75;
+    return int_lumi*scale1fb;
 }
 
 
@@ -257,28 +257,28 @@ int to_SR(int n_sr, const Leptons& leps, const Jets& jets, float met) {
         if (is_multilep and nBJet == 2 and nJet >= 5)                return 7;
         if (is_multilep and nBJet >= 3 and nJet >= 4)                return 8;
         return -1;
-    } else if (n_sr == 17) {
-        if (is_ss       and nBJet == 2 and nJet <= 5) return 1;
-        if (is_ss       and nBJet == 2 and nJet == 6) return 2;
-        if (is_ss       and nBJet == 2 and nJet == 7) return 3;
-        if (is_ss       and nBJet == 2 and nJet >= 8) return 4;
+    } else if (n_sr == 16) {
+//         if (is_ss       and nBJet == 2 and nJet <= 5) return 1;  // CRW
+        if (is_ss       and nBJet == 2 and nJet == 6) return 1;
+        if (is_ss       and nBJet == 2 and nJet == 7) return 2;
+        if (is_ss       and nBJet == 2 and nJet >= 8) return 3;
 
-        if (is_ss       and nBJet == 3 and nJet <= 5) return 5;
-        if (is_ss       and nBJet == 3 and nJet == 6) return 6;
-        if (is_ss       and nBJet == 3 and nJet == 7) return 7;
-        if (is_ss       and nBJet == 3 and nJet >= 8) return 8;
+        if (is_ss       and nBJet == 3 and nJet == 5) return 4;
+        if (is_ss       and nBJet == 3 and nJet == 6) return 5;
+        if (is_ss       and nBJet == 3 and nJet == 7) return 6;
+        if (is_ss       and nBJet == 3 and nJet >= 8) return 7;
 
-        if (is_ss       and nBJet >= 4 and nJet <= 5) return 9;
-        if (is_ss       and nBJet >= 4 and nJet == 6) return 10;
-        if (is_ss       and nBJet >= 4 and nJet >= 7) return 11;
+        if (is_ss       and nBJet >= 4 and nJet == 5) return 8;
+        if (is_ss       and nBJet >= 4 and nJet == 6) return 9;
+        if (is_ss       and nBJet >= 4 and nJet >= 7) return 10;
 
-        if (is_multilep and nBJet == 2 and nJet <= 5) return 12;
-        if (is_multilep and nBJet == 2 and nJet == 6) return 13;
-        if (is_multilep and nBJet == 2 and nJet >= 7) return 14;
+        if (is_multilep and nBJet == 2 and nJet == 5) return 11;
+        if (is_multilep and nBJet == 2 and nJet == 6) return 12;
+        if (is_multilep and nBJet == 2 and nJet >= 7) return 13;
 
-        if (is_multilep and nBJet >= 3 and nJet <= 4) return 15;
-        if (is_multilep and nBJet >= 3 and nJet == 5) return 16;
-        if (is_multilep and nBJet >= 3 and nJet >= 6) return 17;
+        if (is_multilep and nBJet >= 3 and nJet == 4) return 14;
+        if (is_multilep and nBJet >= 3 and nJet == 5) return 15;
+        if (is_multilep and nBJet >= 3 and nJet >= 6) return 16;
         return -1;
     } else {
         return -1;
@@ -314,8 +314,12 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
     else
         logger = new ofstream("/dev/null");
 
-    tau_id = config["tau_id"].as<std::string>("byTightIsolationMVArun2v1DBdR03oldDMwLT");
     int n_sr = config["n_sr"].as<int>(8);
+
+    float xsec_scale = 1.0;
+    if (dataset == "tttt") {
+        xsec_scale = 11.97 / 9.103;
+    }
 
     signal(SIGINT, [](int){
         cout << "SIGINT Caught, stopping after current event" << endl;
@@ -428,6 +432,7 @@ int ScanChain(const std::string& dataset, const std::string& config_filename) {
 
             // Calculate the monte-carlo event weight
             float weight = mc_weight(df) / event_fraction;
+            weight *= xsec_scale;
 
 
             h_nEls.Fill(leps.nGoodEls, weight);
