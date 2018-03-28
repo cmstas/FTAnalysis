@@ -152,7 +152,8 @@ baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 # tag = "v0.10_WSFv2" # same as non v2, but with fixed met filters
 # tag = "v0.10_mll" # same as previous line, but with mll<12 veto for ee or OSSF
 # tag = "v1.00" # new baseline
-tag = "v1.0.5_bJetPtCut25JetPtCut40"
+tag = "v1.0.6" # bJetCut40, jetCut20, 3rd lep cut 10
+tag = "v1.0.6_fixed" # fixes reversed jet/bjet cuts from v1.0.6
 
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"

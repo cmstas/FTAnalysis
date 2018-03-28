@@ -1859,7 +1859,7 @@ pair<Lep, int> getThirdLepton(int hyp, int ignore_id, int ignore_idx){
     if (abs(ignore_id) == 11 && ignore_idx == i) continue;
 
     //Remove electrons that fail kinematically
-    if (tas::els_p4().at(i).pt() < 20) continue;
+    if (tas::els_p4().at(i).pt() < 5) continue;
     if (fabs(tas::els_p4().at(i).eta()) > 2.4) continue;
 
     //Remove electrons that fail loosest ID, determine tighter IDs
@@ -1886,7 +1886,7 @@ pair<Lep, int> getThirdLepton(int hyp, int ignore_id, int ignore_idx){
     if (abs(ignore_id) == 13 && ignore_idx == i) continue;
    
     //Remove electrons that fail kinematically
-    if (tas::mus_p4().at(i).pt() < 20) continue;
+    if (tas::mus_p4().at(i).pt() < 7) continue;
     if (fabs(tas::mus_p4().at(i).eta()) > 2.4) continue;
 
     //Remove muons that fail ID

@@ -2,5 +2,4 @@
 # Main configuration for FT Baby generation
 
 jetMinPt: 40
-bjetMinPt: 25
-
+bjetMinPt: 20
