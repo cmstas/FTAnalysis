@@ -45,11 +45,11 @@ bool makeGenVariationsMC = true;
 /** Set to true to use minor backgrounds in yields.
  *  These are everything besides TT, TTH, TTZ, and TTW.
  */
-bool include_minor_backgrounds = false;
+bool include_minor_backgrounds = true;
 
 /** Set to true to use run over TTTT ISR/FSR variations
  */
-bool include_tttt_isrfsr = false;
+bool include_tttt_isrfsr = true;
 
 /** Set to true run over data
  */
@@ -114,11 +114,12 @@ std::string getEnv(const char* name, string default_) {
 // TString dir = "v0.10_Sep22_ytscan";
 // TString dir = "v0.10_Sep15_triplelumi18bins";
 TString tag = getEnv("tag", "v1.00");
+TString ext = getEnv("ext", "");
 TString user = getEnv("USER", "cfangmei");
 TString pfxMC  = Form("/nfs-7/userdata/%s/tupler_babies/merged/FT/%s/output/", user.Data(), tag.Data());
 TString pfxData = Form("/nfs-7/userdata/%s/tupler_babies/merged/FT/%s/output/", user.Data(), tag.Data());
 
-TString dir = tag;
+TString dir = tag+ext;
 
 
 // TString dir = "v0.10_sync";
@@ -1171,7 +1172,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, in
             // // Before any real continue statements
             //     int nleps_temp = 2;
             //     if (ss::lep3_passes_id()) nleps_temp++;
-            //     int SR_temp = SRDefinition::SR(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps_temp, isClass6);
+            //     int SR_temp = SRDefinition::SR(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps_temp, isClass6);
             //     if (doSync && isttW) {
             //         std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%1d\t%1d\t%1d\n",
             //                 ss::run(), ss::lumi(), ss::event(),
@@ -1193,8 +1194,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, in
             }
 
             int nleps = 2;
-            bool lep3_pid = ss::lep3_passes_id();
-            if (ss::lep3_passes_id()) nleps++;
+            if (ss::lep3_passes_id() && ss::lep3_p4().pt() > 20) nleps++;
             // if (ss::is_real_data()) {
             //     if (ss::lep3_passes_id()) nleps++;
             // } else {
@@ -1221,7 +1221,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, in
               if (q3==q1) continue;
             }
 
-            if (SRDefinition::SR(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps, isClass6) > 1) {
+            if (SRDefinition::SR(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6) > 1) {
                 p_result.h_metnm1.br->Fill(ss::met() , weight);
             }
 
@@ -1271,7 +1271,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, in
             int mytype = ss::hyp_type();
             if (mytype==2 && abs(ss::lep1_id())==13) mytype = 1;
 
-            int SR = SRDefinition::SR(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps, isClass6);
+            int SR = SRDefinition::SR(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6);
+
+            /* if (SR == 1) {  // CRZ */
+            /*     if (ss::lep3_p4().pt() < 20) { */
+            /*         cout << "ERROR: CRZ event w/ 3rd lepton pt=" << ss::lep3_p4().pt() << endl; */
+            /*     } */
+            /* } */
 
             /* std::cout << "event " << nEventsTotal */
             /*           << "  " << ss::njets() */
@@ -1289,8 +1295,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, in
             float mtl1_unc_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
             float mtl2_unc_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
             float mtmin_unc_dn = mtl1_unc_dn > mtl2_unc_dn ? mtl2_unc_dn : mtl1_unc_dn;
-            int SR_unc_up = SRDefinition::SR(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps, isClass6);
-            int SR_unc_dn = SRDefinition::SR(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps, isClass6);
+            int SR_unc_up = SRDefinition::SR(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6);
+            int SR_unc_dn = SRDefinition::SR(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6);
 
             // JER
             float mtl1_JER_up = 0.;
@@ -1308,8 +1314,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, in
                 mtl1_JER_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
                 mtl2_JER_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
                 mtmin_JER_dn = mtl1_JER_dn > mtl2_JER_dn ? mtl2_JER_dn : mtl1_JER_dn;
-                SR_JER_up = SRDefinition::SR(ss::njets_JER_up(), ss::nbtags_JER_up(), ss::met_JER_up(), ss::ht_JER_up(), mtmin_JER_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps, isClass6);
-                SR_JER_dn = SRDefinition::SR(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps, isClass6);
+                SR_JER_up = SRDefinition::SR(ss::njets_JER_up(), ss::nbtags_JER_up(), ss::met_JER_up(), ss::ht_JER_up(), mtmin_JER_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6);
+                SR_JER_dn = SRDefinition::SR(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6);
             }
 
 
