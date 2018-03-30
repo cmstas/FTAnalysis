@@ -6,8 +6,8 @@ import four_top as ft
 # make instructions
 instructions = []
 # types = ["data"]
-# types = ["backgrounds"]
-types = ["backgrounds","data"]
+types = ["backgrounds"]
+# types = ["backgrounds","data"]
 for typ in types:
     for ds in ft.d_ds2name[typ].keys():
         instructions.append({"executable": ft.executable, "package": ft.package, "analysis": "FT", "dataset": ds, "baby_tag": ft.tag, "type": "BABY", "extra": ""})
