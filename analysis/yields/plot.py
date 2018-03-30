@@ -49,33 +49,37 @@ if __name__ == "__main__":
 
     cards_dir = "../limits/{0}".format(f1.Get("metadata").GetTitle())
 
-    d_postfit, fitratios = get_postfit_dict("{}/mlfit.root".format(cards_dir))
-    # d_postfit, fitratios = get_postfit_dict("../limits/v0.10_Jul20/mlfit.root".format(cards_dir))
-    # print d_postfit
-    # print fitratios
+    do_postfit = False
+    if do_postfit:
+        d_postfit, fitratios = get_postfit_dict("{}/mlfit.root".format(cards_dir))
+        # d_postfit, fitratios = get_postfit_dict("../limits/v0.10_Jul20/mlfit.root".format(cards_dir))
+        # print d_postfit
+        # print fitratios
 
-    for proc,h1 in d_postfit.items():
-        if not h1: continue
-        vals,errs = zip(*[[h1.GetBinContent(ib),h1.GetBinError(ib)] for ib in range(1,h1.GetNbinsX()+1)])
-        # print proc, zip(vals,errs)
-    # print d_postfit, fitratios
+        for proc,h1 in d_postfit.items():
+            if not h1: continue
+            vals,errs = zip(*[[h1.GetBinContent(ib),h1.GetBinError(ib)] for ib in range(1,h1.GetNbinsX()+1)])
+            # print proc, zip(vals,errs)
+        # print d_postfit, fitratios
 
-    commonopts = "--darkColorLines --lumi 35.9 --topYaxisTitle Data/Pred. --type Preliminary --poissonErrorsNoZeros --dataName Data --outOfFrame --systInclStat --systFillStyle 3344 "
+    # commonopts = "--darkColorLines --lumi 35.9 --topYaxisTitle Data/Pred. --type Preliminary --poissonErrorsNoZeros --dataName Data --outOfFrame --systInclStat --systFillStyle 3344 "
+    commonopts = "--darkColorLines --lumi 75.0 --topYaxisTitle Data/Pred. --type Preliminary --poissonErrorsNoZeros --dataName Data --outOfFrame --systInclStat --systFillStyle 3344 "
     d_opts_br = {
 
           # "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
           # "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
           # "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel H_{T} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
+          "metnm1"        : [("br",), commonopts+"     --xAxisLabel p_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
           # "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel p_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
           # "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel N_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
           # "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel N_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
 
-          "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.09 --legendRight -0.08    --legendTaller 0.18 --yTitleOffset -0.15  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
-          "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.10 --legendRight -0.08    --legendTaller 0.20 --yTitleOffset -0.00  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
-          "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel #it{H}_{T} --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events "],
-          "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel #it{p}_{T}^{miss} --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events "],
-          "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel #it{N}_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
-          "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel #it{N}_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -0.09 --legendRight -0.08    --legendTaller 0.16 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
+          # "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.09 --legendRight -0.08    --legendTaller 0.18 --yTitleOffset -0.15  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          # "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.10 --legendRight -0.08    --legendTaller 0.20 --yTitleOffset -0.00  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
+          # "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel #it{H}_{T} --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events "],
+          # "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel #it{p}_{T}^{miss} --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events "],
+          # "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel #it{N}_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -0.09 --legendRight -0.08   --legendTaller 0.18 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
+          # "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel #it{N}_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -0.09 --legendRight -0.08    --legendTaller 0.16 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
 
           # "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel SR --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
           # "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 "],
@@ -126,7 +130,7 @@ if __name__ == "__main__":
 
           # "disc"       : [("br",),   commonopts+"  --isLinear  --xAxisLabel disc  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
           # "disc2"       : [("br",),  commonopts+" --isLinear  --xAxisLabel disc2  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
-          # "SRDISC_TOTAL"   : [("",), commonopts+"   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox "],
+          "SRDISC_TOTAL"   : [("",), commonopts+"   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox "],
           # "ntops"      : [("sr",), commonopts+"   --xAxisLabel N_{tops} --noXaxisUnit --nDivisions 5 --noDivisionLabel  --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset 0.1  --makeTable "],
           # "ntopness"      : [("sr",), commonopts+"     --xAxisLabel N_{tops}ness --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.0  "],
 
@@ -288,4 +292,4 @@ if __name__ == "__main__":
 # os.system("niceplots plots plots_tttt_Aug1_sr4")
 # os.system("niceplots plots plots_tttt_Aug8")
 # os.system("niceplots plots plots_tttt_Sep11")
-os.system("niceplots plots plots_tttt_Oct9")
+# os.system("niceplots plots plots_tttt_Feb16")
