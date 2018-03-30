@@ -72,6 +72,12 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep1_idx"                                                , &lep1_idx                                                );
   BabyTree->Branch("lep2_idx"                                                , &lep2_idx                                                );
   BabyTree->Branch("jets"                                                    , &jets                                                    );
+  BabyTree->Branch("jets_jec_up"                                            , &jets_jec_up                                            );
+  BabyTree->Branch("jets_jec_dn"                                            , &jets_jec_dn                                            );
+  BabyTree->Branch("jets_disc_up"                                            , &jets_disc_up                                            );
+  BabyTree->Branch("jets_disc_dn"                                            , &jets_disc_dn                                            );
+  BabyTree->Branch("bjets_jec_up"                                            , &bjets_jec_up                                            );
+  BabyTree->Branch("bjets_jec_dn"                                            , &bjets_jec_dn                                            );
   BabyTree->Branch("btags_flavor"                                              , &btags_flavor                                              );
   BabyTree->Branch("btags_disc"                                              , &btags_disc                                              );
   // BabyTree->Branch("btags_disc_mva"                                          , &btags_disc_mva                                          );
@@ -239,6 +245,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   // BabyTree->Branch("mostJets_undoJEC"                                        , &mostJets_undoJEC                                        );
   // BabyTree->Branch("mostJets_passID"                                         , &mostJets_passID                                         );
   // BabyTree->Branch("mostJets_passCleaning"                                   , &mostJets_passCleaning                                   );
+
+
   BabyTree->Branch("njets_unc_up"                                            , &njets_unc_up                                            );
   BabyTree->Branch("njets_unc_dn"                                            , &njets_unc_dn                                            );
   BabyTree->Branch("ht_unc_up"                                               , &ht_unc_up                                               );
@@ -535,6 +543,12 @@ void babyMaker::InitBabyNtuple(){
     lep1_idx = -1;
     lep2_idx = -1;
     jets.clear();
+    jets_jec_up.clear();
+    jets_jec_dn.clear();
+    jets_disc_up.clear();
+    jets_disc_dn.clear();
+    bjets_jec_up.clear();
+    bjets_jec_dn.clear();
     btags_flavor.clear();
     btags_disc.clear();
     btags_disc_mva.clear();
@@ -1671,19 +1685,33 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (mostJets_up_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_up = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0+mostJets_unc.at(i));
-    if (jet_pt_up > jetMinPt) njets_unc_up++;
-    if (jet_pt_up > jetMinPt) ht_unc_up += jet_pt_up;
+    if (jet_pt_up > jetMinPt) {
+        njets_unc_up++;
+        jets_jec_up.push_back(mostJets.at(i));
+        jets_disc_up.push_back(mostJets_disc.at(i));
+        ht_unc_up += jet_pt_up;
+    }
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_up > bjetMinPt) nbtags_unc_up++;
+    if (jet_pt_up > bjetMinPt) {
+        nbtags_unc_up++;
+        bjets_jec_up.push_back(mostJets.at(i));
+    }
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_dn_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_dn = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0-mostJets_unc.at(i));
-    if (jet_pt_dn > jetMinPt) njets_unc_dn++;
-    if (jet_pt_dn > jetMinPt) ht_unc_dn += jet_pt_dn;
+    if (jet_pt_dn > jetMinPt) {
+        njets_unc_dn++;
+        jets_jec_dn.push_back(mostJets.at(i));
+        jets_disc_dn.push_back(mostJets_disc.at(i));
+        ht_unc_dn += jet_pt_dn;
+    }
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_dn > bjetMinPt) nbtags_unc_dn++;
+    if (jet_pt_dn > bjetMinPt) {
+        nbtags_unc_dn++;
+        bjets_jec_dn.push_back(mostJets.at(i));
+    }
   }
 
 

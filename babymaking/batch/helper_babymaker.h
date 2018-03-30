@@ -189,6 +189,12 @@ class babyMaker {
     int nbtagsAG;
     float ht;
     vector <LorentzVector> jets;
+    vector <LorentzVector> jets_jec_up;
+    vector <LorentzVector> jets_jec_dn;
+    vector <LorentzVector> bjets_jec_up;
+    vector <LorentzVector> bjets_jec_dn;
+    vector <float> jets_disc_up;
+    vector <float> jets_disc_dn;
     vector <int> jets_flavor;
     vector <float> jets_disc;
     vector <float> jets_disc_mva;
