@@ -36,6 +36,7 @@ class Process(object):
         self.TTZSF = "-"
         # self.WZSF = "-"
         self.TTH = "-"
+        self.TTTT = "-"
         self.TTVV = "-"
         # self.WW = "-"
         self.XG = "-"
@@ -127,10 +128,11 @@ def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
         f = ROOT.TFile(process.rootf,"UPDATE")
 
     h = f.Get("sr")
-    hup = f.Get(("%s_statUp" % (process.name)))
-    hdn = f.Get(("%s_statDown" % (process.name)))
+    hup = f.Get(("%s_statUp" % (process.name.replace("_bkg",""))))
+    hdn = f.Get(("%s_statDown" % (process.name.replace("_bkg",""))))
 
     if not hup:
+        # print "%s_statUp" % (process.name), hup, process.rootf
         print hup.GetName()+" not found in "+process.rootf
         return 0
 
@@ -210,6 +212,10 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     #separate
     card.write(line+"\n")
 
+    #nuisance TTTT
+    card.write("%-40s %-5s " % ("TTTT","lnN"))
+    for process in processes: card.write("%-15s " % (process.TTTT))
+    card.write("\n")
     #nuisance lumi
     card.write("%-40s %-5s " % ("lumi","lnN"))
     for process in processes: card.write("%-15s " % (process.lumi))
@@ -255,6 +261,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     card.write("%-40s %-5s " % ("fsrvar","shape"))
     for process in processes: card.write("%-15s " % (process.fsrvar))
     card.write("\n")
+
     #nuisance scale
     card.write("%-40s %-5s " % ("scale","shape"))
     for process in processes: card.write("%-15s " % (process.scale))
@@ -342,9 +349,9 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
 
     return
 
-def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, yukawa=-1):
+def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, yukawa=-1, inject_tttt=False):
     # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
-    do_tttt = signal != "tttt"
+    inject_tttt = (signal != "tttt") or inject_tttt
     # do_tttt = True
     #define processes (signal first)
     # if pseudoData:
@@ -370,8 +377,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         fakes = Process(6,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     flips = Process(7,"flips","flips_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     TTVV = Process(8,"ttvv","ttvv_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    if do_tttt:
-        TTTT = Process(9,"tttt","tttt_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+    if inject_tttt:
+        os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
+        TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     #overwrite nuisances
     lumiunc = "1.025"
     signal.lumi  = "1"
@@ -385,9 +393,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal.pu = "1"
     signal.scale = "1"
     signal.alphas = "1"
-    if not do_tttt:
-        signal.isrvar = "1"
-        signal.fsrvar = "1"
+    signal.isrvar = "1"
+    signal.fsrvar = "1"
     signal.pdf = "1"
     ttz_sf = "1.40"
     ttw_sf = "1.40"
@@ -472,6 +479,20 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     rares.hthlt  = "1"
     rares.btag = "1"
     rares.pu = "1"
+    if inject_tttt:
+        TTTT.TTTT = "0.79/1.18" # - In 2017, latest NLO(QCD+EWK) calculation (arxiv:1711.02116).  - 11.97 +2.15 -2.51
+        TTTT.lumi  = "1"
+        TTTT.lephlt  = "1.04"
+        TTTT.hlt  = "1.03"
+        TTTT.jes  = "1"
+        TTTT.jer  = "1"
+        TTTT.lepeff  = "1.0"
+        TTTT.hthlt  = "1"
+        TTTT.btag = "1"
+        TTTT.pu = "1"
+        TTTT.scale = "1"
+        TTTT.alphas = "1"
+        TTTT.pdf = "1"
     if not domcfakes:
         if not do_uncorrfakes:
             fakes.fakes = "1.30"
@@ -494,7 +515,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     processes.append(fakes)
     processes.append(flips)
     processes.append(TTVV)
-    if do_tttt:
+    if inject_tttt:
         processes.append(TTTT)
 
     if do_expected_data:
