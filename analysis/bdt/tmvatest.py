@@ -2,14 +2,35 @@ import ROOT
 import sys
 import os
 import numpy as np
+
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("input", help="input root file")
+parser.add_argument("-o", "--output", help="output ROOT file name", default="LearningOutput.root")
+parser.add_argument("-m", "--maxvars", help="maximum number of input variables", default=999)
+parser.add_argument("-t", "--train", help="do training", action="store_true")
+
+args = parser.parse_args()
  
-dotrain = False
+dotrain = True
+# inname = "output_toptag_75ifb_18sr_jet2020.root"
+# outname = "LearningOutput_2020_notoptag.root"
+
+# inname = "output_75ifb_18sr_nominal.root"
+# outname = "LearningOutput_nominal.root"
+
+inname = args.input
+outname = args.output 
+max_vars = int(args.maxvars)
+
 if dotrain:
-    f1 = ROOT.TFile.Open('output.root')
+    f1 = ROOT.TFile.Open(inname)
     t1 = f1.Get('t')
      
     # Useful output information will be stored in a new root file:
-    f_out = ROOT.TFile("LearningOutput.root","RECREATE")
+    f_out = ROOT.TFile(outname,"RECREATE")
      
     # Create the TMVA factory
     ROOT.TMVA.Tools.Instance()
@@ -19,10 +40,14 @@ if dotrain:
     all_vars = ["l1id", "l2id", "nbtags", "njets", "nleps", "wcands", "met", "ht", "htb", "mt1", "mt2", "dphil1j1", "dphil2j2", "dphil1j2", "dphil2j1", "dphil1l2", "dphij1j2", "dphil1met", "dphil2met", "dphij1met", "dphij2met", "detal1j1", "detal2j2", "detal1j2", "detal2j1", "detal1l2", "detaj1j2", "ml1j1", "ml2j2", "ml1j2", "ml2j1", "ml1l2", "mj1j2", "ptl1", "ptl2", "ptj1", "ptj2", "nlb40", "nmb40", "ntb40", "q1", "q2", "q3", "ht4ratio"]
     # nominal_vars = ["njets", "nbtags", "mt1", "mt2", "met", "ml1l2", "htb", "nleps", "ht", "mj1j2", "dphij1j2", "ptj1", "ptj2", "ml1j2", "ml1j1", "wcands", "dphil1j1", "detal1l2","nlb40","nmb40","ntb40","q1","q2","ht4ratio"]
     nominal_vars = ["njets", "nbtags", "mt1", "mt2", "met", "ml1l2", "htb", "nleps", "ht", "mj1j2", "dphij1j2", "ptj1", "ptj2", "ml1j2", "ml1j1", "wcands", "dphil1j1", "detal1l2","nlb40","nmb40","ntb40","q1","ht4ratio"]
+    new_vars = ["nbtags", "njets", "met", "ptl2", "nlb40", "ntb40", "nleps", "htb", "q1", "ptj1", "ptj6", "ptj7", "ml1j1", "dphil1l2", "maxmjoverpt", "ptl1", "detal1l2", "ptj8", "ptl3"]
+
+    new_vars = new_vars[:max_vars]
     small_vars = ["nbtags"]
     test_vars = ["ht"]
     # for x in all_vars:
-    for x in nominal_vars:
+    # for x in new_vars:
+    for x in new_vars:
     # for x in small_vars:
     # for x in test_vars:
         typ = "F"
@@ -45,9 +70,8 @@ if dotrain:
     extra = "1"
     # # extra = "(ht>300)"
     # extra = "(ht>600)"
-    sigCut = ROOT.TCut("name == \"tttt\" && "+extra)
-    # bgCut = ROOT.TCut("name != \"tttt\" && "+extra) 
-    bgCut = ROOT.TCut("name == \"ttw\" && "+extra)  # FIXME go back to previous line
+    sigCut = ROOT.TCut("(stype == 7) && "+extra)
+    bgCut = ROOT.TCut("(stype >= 0 && stype < 7) && "+extra) 
     # Prepare the training/testing signal/background  
     factory.PrepareTrainingAndTestTree(sigCut,bgCut,"SplitMode=Random:NormMode=NumEvents:!V") 
      
@@ -74,7 +98,8 @@ if dotrain:
 
     f_out.Close()
 
-f_out = ROOT.TFile("LearningOutput.root")
+# f_out = ROOT.TFile("LearningOutput_2020_yestoptag.root")
+f_out = ROOT.TFile(outname)
  
 normfact = 10
 # xmin,xmax = -0.55, 0.95
@@ -176,13 +201,16 @@ soverb_cumulative.SetMarkerStyle(20)
 soverb_cumulative.SetMarkerSize(0.7)    
 
 p2.cd()
-arrs = np.array(list(Histo_training_S))/normfact
-arrb = np.array(list(Histo_training_B))
+# arrs = np.array(list(Histo_training_S))/normfact
+# arrb = np.array(list(Histo_training_B))
+arrs = np.array(list(Histo_testing_S))/normfact
+arrb = np.array(list(Histo_testing_B))
 cumsum_s = np.cumsum(arrs[::-1])[::-1]
 cumsum_b = np.cumsum(arrb[::-1])[::-1]
 auc = abs(np.trapz(cumsum_s/np.sum(arrs),cumsum_b/np.sum(arrb)))
 cumsum = (cumsum_s/cumsum_b)
 cumsum[np.abs(cumsum)>1e5] = 1000.
+
 
 cumsum_sqrtsb = cumsum_s/np.sqrt(cumsum_s+cumsum_b)
 cumsum_sqrtsb[np.abs(cumsum_sqrtsb)>1e5] = 1000.
@@ -190,19 +218,22 @@ cumsum_sqrtsb[np.abs(cumsum_sqrtsb)>1e5] = 1000.
 #     soverb_cumulative.SetBinContent(ibz,val)
 #     soverb_cumulative.SetBinError(ibz,0.)
 for ibz, val in enumerate(cumsum_sqrtsb):
+    if np.isnan(val): continue
     soverb_cumulative.SetBinContent(ibz,val)
     soverb_cumulative.SetBinError(ibz,0.)
+maxsb = max(list(soverb_cumulative))
+print "GREP", maxsb, auc, max_vars, ",".join(new_vars)
 soverb_cumulative.SetLineColor(ROOT.kBlue-2)
 soverb_cumulative.SetMarkerColor(ROOT.kBlue-2)
 # soverb_cumulative.GetYaxis().SetTitle("Cumulative s/b")
 soverb_cumulative.GetYaxis().SetTitle("Cumulative s/#sqrt{s+b}")
-soverb_cumulative.GetYaxis().SetRangeUser(0.01,1.)
+soverb_cumulative.GetYaxis().SetRangeUser(0.01,2.)
 soverb_cumulative.Draw("samepe")
 
 p1.cd()
 l1=ROOT.TLatex()
 l1.SetNDC();
-l1.DrawLatex(0.26,0.93,"BDT [AUC = %.2f]" % auc)
+l1.DrawLatex(0.26,0.93,"BDT [AUC = %.3f] [%.3f]" % (auc,maxsb))
 
 l1.SetTextSize(l1.GetTextSize()*0.5)
 l1.DrawLatex(0.76,0.63,"N^{sig}_{train} = %.1f" % (Histo_training_S.Integral()/normfact))
@@ -210,6 +241,6 @@ l1.DrawLatex(0.76,0.58,"N^{sig}_{test} = %.1f" % (Histo_testing_S.Integral()/nor
 l1.DrawLatex(0.76,0.53,"N^{bg}_{train} = %.1f" % Histo_training_B.Integral())
 l1.DrawLatex(0.76,0.48,"N^{bg}_{test} = %.1f" % Histo_testing_B.Integral())
  
-pname = 'validation_bdt.pdf'
+pname = 'plots/validation_bdt_{}.pdf'.format(outname.rsplit(".",1)[0].split("/")[-1])
 c1.Print(pname)
 os.system("ic "+pname)
