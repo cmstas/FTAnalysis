@@ -6,7 +6,8 @@ import argparse
 import createCard
 import commands
 
-XSEC_TTTT = 0.0092 # pb
+# XSEC_TTTT = 0.0092 # pb
+XSEC_TTTT = 0.01197 # pb
 
 def parse_lims(lim_lines, fb=False):
     """
@@ -52,7 +53,7 @@ def print_lims(d_lims, fb=False, unblinded=False):
     if d_lims.get("mu",-999) > -980.:
         print "  Mu: %.3f (+%.3f -%.3f)" % (d_lims["mu"], d_lims["mu_up"], d_lims["mu_down"])
 
-def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=False, verbose=True, dolimits=True, dosignificance=True, doscan=True, unblinded=False,sig="tttt", yukawa=-1,allownegative=False):
+def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=False, verbose=True, dolimits=True, dosignificance=True, doscan=True, unblinded=False,sig="tttt", yukawa=-1,allownegative=False, inject_tttt=False):
 
     if ".txt" not in card:
         card += "/card_{0}_{1}.txt".format(sig, regions)
@@ -64,7 +65,7 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
     if not os.path.isfile(full_card_name) or redocard:
         if verbose: print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
-        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa))
+        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt)
         if int(yukawa) >  0:
             print "yukawa",yukawa
     else:
@@ -92,7 +93,7 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
                 cardname_scan = cardname.replace(".txt","_asimov.txt")
                 full_card_name_scan = full_card_name.replace(".txt","_asimov.txt")
             if redocard:
-                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa))
+                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt)
             # scan_cmd = "combine -M MaxLikelihoodFit {0} --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
             if allownegative:
                 extra = "--rMin -2.0 --rMax +10.0"
@@ -129,6 +130,7 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits", default="srcr")
     parser.add_argument("-u", "--unblinded", help="show unblinded quantities", action="store_true")
     parser.add_argument("-a", "--allownegative", help="allow negative mu in maxlikelihood fit", action="store_true")
+    parser.add_argument("-i", "--inject_tttt", help="inject tttt as a bkg", action="store_true")
     parser.add_argument("-s", "--sig", help="signal name", default="tttt")
     parser.add_argument("-y", "--yukawa", help="yukawa coupling int for tth", default=-1)
     args = parser.parse_args()
@@ -143,6 +145,7 @@ if __name__ == "__main__":
             domcfakes=args.domcfakes,
             unblinded=args.unblinded,
             doscan=(not args.noscan),
+            inject_tttt=args.inject_tttt,
             dosignificance=(not args.nosignificance),
             yukawa=int(args.yukawa),
             allownegative=args.allownegative
