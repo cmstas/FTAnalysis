@@ -24,13 +24,18 @@ float bloose = 	0.2219;
 float bmed = 0.6324;
 float btight = 0.8958;
 
+
 int nsr = getNsrsTTTT();
-// int nsrdisc = 14; //getNsrsTTTT();
-int nsrdisc = 7;
 int nCR = 2;
+// int nCR = 1;
+int nsrdisc = 13;
+// int nsrdisc = 19;
+// int nsrdisc = 17;
+// int nCR = 1;
 
 bool doCustomSelection = false;
-float scaleLumi = 1.;
+float scaleLumi = 2.0909; // 75/35.87
+// float scaleLumi = 1;
 
 bool doTTWISR = true;
 bool doTTZISR = true;
@@ -44,64 +49,45 @@ bool doJER = true;
 bool makeRootFiles = true;
 bool makeGenVariationsMC = true;
 
-// TString dir = "v0.04_May10_test";
-// TString tag = "v0.04";
+// TString dir = "v1.00_baseline";
+// TString tag = "v1.00";
+// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
 
-// TString dir = "v0.07_May28";
-// TString tag = "v0.07";
+// TString dir = "v1.00_baseline_caleb";
+// TString tag = "v1.02_JetPtCut40";
+// // TString tag = "v1.00";
+// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
 
-// TString dir = "v0.08_May28";
-// TString tag = "v0.08";
+// float metcut = 50;
+// bool doData = false;
+// // TString dir = "v1.00_baseline_full_bdtcrz13bins";
+// TString dir = "v1.00_baseline_full_resolvedtop_40_25";
+// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
 
-// TString dir = "v0.09_May30";
-// TString tag = "v0.09";
+float metcut = 50;
+bool doData = false;
+// TString dir = "v1.00_baseline_full_bdtcrz13bins";
+// /nfs-7/userdata/namin/tupler_babies/merged/FT/v1.00_80x_baseline_full_v2/output/
 
-// // 40 gev jets
-// bool doJER = false;
-// TString dir = "v0.07_May30";
-// TString tag = "v0.07"; // data is in v0.07
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+// // 20,20
+// TString dir = "v1.00_baseline_full_resolvedtop_20_20";
+// TString tag = "v1.0.4_bJetPtCut20JetPtCut20"; // from caleb's dir
 
-// // 40 gev jets
-// bool doJER = true;
-// TString dir = "v0.10_Jun5";
-// TString tag = "v0.10_fix"; // data is in v0.07 still
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+// // 40,25
+// TString dir = "v1.00_baseline_full_resolvedtop_40_25";
+// TString tag = "v1.0.4_JetPtCut40"; // from caleb's dir
 
-// TString dir = "v0.10_Jun13";
-// TString tag = "v0.10_fix"; // data is in v0.07 still
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+// 40,25
+TString tag = "v1.00_80x_baseline_full_v2";
+TString dir = "v1.00_baseline_v2";
 
-// // preapproval
-// TString dir = "v0.10_Jun19";
-// TString tag = "v0.10_fix";
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.07/output/skim/";
+// // 20,20
+// TString tag = "v1.0.5_bJetPtCut20JetPtCut20";
+// TString dir = "v1.00_baseline_2020_toptag_bdtout";
 
-// TString dir = "v0.10_Jun21_sync";
-// TString tag = "v0.10_fix";
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_data/output/skim/";
-
-
-// latest
-// TString dir = "v0.10_Jun22_crfit";
-// TString dir = "v0.10_Jun22_mcfakecent";
-// TString dir = "v0.10_Jun22_sens18bins";
-// TString dir = "v0.10_Jun22_sens8bins";
-// TString dir = "v0.10_Jun22_unblind";
-// TString dir = "v0.10_Jul6_test";
-// TString dir = "v0.10_Jul6_WSF";
-// TString dir = "v0.10_Jul10_higgstest";
-
-// TString dir = "v0.10_Jul12";
-// TString tag = "v0.10_WSFv2"; // data is in v0.07 still
-// // TString tag = "v0.10_fix"; // data is in v0.07 still
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_data/output/skim/";
-
-TString dir = "v0.10_Oct3_test";
-// TString dir = "v0.10_Sep22_ytscan";
-// TString dir = "v0.10_Sep15_triplelumi18bins";
-TString tag = "v0.10_mll";
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
+bool doTTTTisrfsr = true;
+bool doRares = true;
 
 
 // TString dir = "v0.10_sync";
@@ -155,8 +141,16 @@ float tree_ml1l2 = -1;
 float tree_mj1j2 = -1;
 float tree_ptl1 = -1;
 float tree_ptl2 = -1;
+float tree_ptl3 = -1;
 float tree_ptj1 = -1;
 float tree_ptj2 = -1;
+float tree_ptj3 = -1;
+float tree_ptj4 = -1;
+float tree_ptj5 = -1;
+float tree_ptj6 = -1;
+float tree_ptj7 = -1;
+float tree_ptj8 = -1;
+float tree_maxmjoverpt = -1;
 // float tree_stb = -1;
 int tree_nlb40 = -1;
 int tree_nmb40 = -1;
@@ -167,6 +161,9 @@ int tree_q3 = 0;
 float tree_ht4ratio = 0;
 int tree_SR = -1;
 float tree_disc = -1;
+
+float tree_topdisc1 = -1;
+float tree_topdisc2 = -1;
 
 float tree_f_njets = -1.;
 float tree_f_nbtags = -1.;
@@ -179,6 +176,7 @@ float tree_f_q1 = -1.;
 float tree_f_q2 = -1.;
 
 TString tree_name = "";
+int tree_stype = -1;
 TFile *out_file;
 TTree *out_tree;
 
@@ -222,6 +220,8 @@ struct plots_t  {
     triple_t h_ntops;
     triple_t h_mtop1;
     triple_t h_mtop2;
+    triple_t h_topdisc1;
+    triple_t h_topdisc2;
     triple_t h_ntopness;
     triple_t h_bjetpt;
     triple_t h_jetpt;
@@ -273,7 +273,8 @@ void writeHTHltSyst(TH1F* central,string name,TString kine);
 void initHistError(bool usePoisson, TH1F* plot);
 std::pair<int,float> getNtops();
 std::pair<float,float> getFirstTwoTops();
-int getBDTBin(float disc);
+std::pair<float,float> getTrijetDiscs(TMVA::Reader* reader);
+int getBDTBin(float disc, bool isClass6);
 
 
 void getyields(){
@@ -293,6 +294,7 @@ void getyields(){
         out_tree->Branch("run" , &tree_run );
         out_tree->Branch("weight" , &tree_weight );
         out_tree->Branch("name" , &tree_name );
+        out_tree->Branch("stype" , &tree_stype );
         out_tree->Branch("SR" , &tree_SR );
         out_tree->Branch("l1id", &tree_l1id );
         out_tree->Branch("l2id", &tree_l2id );
@@ -329,15 +331,25 @@ void getyields(){
         out_tree->Branch("mj1j2", &tree_mj1j2 );
         out_tree->Branch("ptl1", &tree_ptl1 );
         out_tree->Branch("ptl2", &tree_ptl2 );
+        out_tree->Branch("ptl3", &tree_ptl3 );
         out_tree->Branch("ptj1", &tree_ptj1 );
         out_tree->Branch("ptj2", &tree_ptj2 );
+        out_tree->Branch("ptj3", &tree_ptj3 );
+        out_tree->Branch("ptj4", &tree_ptj4 );
+        out_tree->Branch("ptj5", &tree_ptj5 );
+        out_tree->Branch("ptj6", &tree_ptj6 );
+        out_tree->Branch("ptj7", &tree_ptj7 );
+        out_tree->Branch("ptj8", &tree_ptj8 );
         out_tree->Branch("nlb40", &tree_nlb40 );
         out_tree->Branch("nmb40", &tree_nmb40 );
         out_tree->Branch("ntb40", &tree_ntb40 );
+        out_tree->Branch("topdisc1", &tree_topdisc1 );
+        out_tree->Branch("topdisc2", &tree_topdisc2 );
         out_tree->Branch("q1", &tree_q1 );
         out_tree->Branch("q2", &tree_q2 );
         out_tree->Branch("q3", &tree_q3 );
         out_tree->Branch("ht4ratio", &tree_ht4ratio );
+        out_tree->Branch("maxmjoverpt", &tree_maxmjoverpt );
         out_tree->Branch("disc", &tree_disc );
     }
 
@@ -380,21 +392,20 @@ void getyields(){
   // #include "higgs_scan.h" // fastsim
   // #include "higgs_scan_ps.h"
 
-    TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/skim/",tag.Data());
+    // TString pfx  = Form("/nfs-7/userdata/cfangmei/tupler_babies/merged/FT/%s//output/",tag.Data());
+    TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
+    // TString pfx  = Form("/nfs-7/userdata/cfangmei/tupler_babies/merged/FT/%s//output/",tag.Data());
 
     //Fill chains
     tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
 
-    ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx.Data()));
-    ttttfsrup_chain   ->Add(Form("%s/TTTTfsrup.root"           , pfx.Data()));
-    ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx.Data()));
-    ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTHH.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTWH.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTWW.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTWZ.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTZH.root",pfx.Data()));
-    ttvv_chain->Add(Form("%s/TTZZ.root",pfx.Data()));
+    if (doTTTTisrfsr) {
+        ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx.Data()));
+        ttttfsrup_chain   ->Add(Form("%s/TTTTfsrup.root"           , pfx.Data()));
+        ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx.Data()));
+        ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx.Data()));
+    }
+
     if (doSync) {
         ttw_chain    ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/TTWnlo.root");
     } else {
@@ -403,56 +414,67 @@ void getyields(){
     ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
     ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
     tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
-    ttbar_chain  ->Add(Form("%s/TTBAR_PH*.root"       , pfx.Data()));
+    ttbar_chain  ->Add(Form("%s/TTBAR_*.root"       , pfx.Data()));
+
     // wjets_chain  ->Add(Form("%s/WJets.root"       , pfx.Data()));
     // dy_chain     ->Add(Form("%s/DY_high*.root"        , pfx.Data()));
     // dy_chain     ->Add(Form("%s/DY_low*.root"         , pfx.Data()));
     // qqww_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
     // xg_chain     ->Add(Form("%s/TG.root"             , pfx.Data()));
     // xg_chain     ->Add(Form("%s/WGToLNuG.root"           , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TGext.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/WGToLNuGext.root"           , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TTGdilep.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TTGsinglelep.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/TTGsinglelepbar.root"             , pfx.Data()));
-    xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
-    rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
-    rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWG.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx.Data()));
-    rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
-    rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
-    rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
-    rares_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
-    rares_chain->Add(Form("%s/TTTJ.root",pfx.Data()));
-    rares_chain->Add(Form("%s/TTTW.root",pfx.Data()));
+    if (doRares) {
+        ttvv_chain->Add(Form("%s/TTHH.root",pfx.Data()));
+        ttvv_chain->Add(Form("%s/TTWH.root",pfx.Data()));
+        ttvv_chain->Add(Form("%s/TTWW.root",pfx.Data()));
+        ttvv_chain->Add(Form("%s/TTWZ.root",pfx.Data()));
+        ttvv_chain->Add(Form("%s/TTZH.root",pfx.Data()));
+        ttvv_chain->Add(Form("%s/TTZZ.root",pfx.Data()));
+        xg_chain     ->Add(Form("%s/TGext.root"             , pfx.Data()));
+        xg_chain     ->Add(Form("%s/WGToLNuGext.root"           , pfx.Data()));
+        xg_chain     ->Add(Form("%s/TTGdilep.root"             , pfx.Data()));
+        xg_chain     ->Add(Form("%s/TTGsinglelep.root"             , pfx.Data()));
+        xg_chain     ->Add(Form("%s/TTGsinglelepbar.root"             , pfx.Data()));
+        xg_chain     ->Add(Form("%s/ZG.root"             , pfx.Data()));
+        rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
+        rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx.Data()));
+        rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
+        rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
+        rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
+        rares_chain  ->Add(Form("%s/WWG.root"            , pfx.Data()));
+        rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
+        rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx.Data()));
+        rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
+        rares_chain  ->Add(Form("%s/TWZ.root"            , pfx.Data()));
+        rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
+        rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
+        rares_chain     ->Add(Form("%s/QQWW.root"           , pfx.Data()));
+        rares_chain->Add(Form("%s/TTTJ.root",pfx.Data()));
+        rares_chain->Add(Form("%s/TTTW.root",pfx.Data()));
+    }
     //data
-    if (doSync) {
-        data_chain   ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/DataMuonEG.root");
-    } else {
+    
+    if (doData) {
         data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
         data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
         data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
         data_chain   ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
     }
-    //flips
+
+    // //flips
     flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
     flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
-    //fakes
-    fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    // //fakes
+    // fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    // fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    // fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
     fakes_chain  ->Add(Form("%s/JetHT*.root"      , pfxData.Data()));
     fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
     fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
     fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
+    if (doRares) {
+        fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
+        fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx.Data()));
+    }
     //promptsub
     promptsub_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
     promptsub_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
@@ -527,6 +549,8 @@ void getyields(){
     WRITE(h_ntops.sr)  ; 
     WRITE(h_mtop1.sr)  ; 
     WRITE(h_mtop2.sr)  ; 
+    WRITE(h_topdisc1.sr)  ; 
+    WRITE(h_topdisc2.sr)  ; 
     WRITE(h_ntopness.sr)  ; 
 
     WRITE(h_bjetpt.br)  ; WRITE(h_bjetpt.sr)  ; 
@@ -574,7 +598,7 @@ void getyields(){
 
      WRITE(h_mllos.ttzcr)     ; 
 
-    // WRITE(h_disc.br);
+    WRITE(h_disc.br);
     // WRITE(h_disc2.br);
     WRITE(SRCR.TOTAL);
     WRITE(SRDISC.TOTAL);
@@ -631,6 +655,16 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     // reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
     reader->BookMVA("BDT","TMVAClassification_BDT_500trees.weights.xml");
     // reader->BookMVA("BDT","TMVAClassification_BDT_bgttw.weights.xml");
+
+    float dummy = 0;
+    TMVA::Reader* reader_toptag = new TMVA::Reader("Silent");
+    reader_toptag->AddVariable("btag", &dummy);
+    reader_toptag->AddVariable("ThPtOverSumPt", &dummy);
+    reader_toptag->AddVariable("AngleThWh", &dummy);
+    reader_toptag->AddVariable("AngleThBh", &dummy);
+    reader_toptag->AddVariable("HadrWmass", &dummy);
+    reader_toptag->AddVariable("TopMass", &dummy);
+    reader_toptag->BookMVA("BDT","JetCombTrainer_BDT.weights.xml");
 
     // out_file->cd();
 
@@ -712,6 +746,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_ntops.sr      = new TH1F(Form("sr_ntops_%s"        , chainTitleCh) , Form("ntops_%s"        , chainTitleCh) , 5      , -0.5    , 4.5);
     p_result.h_mtop1.sr      = new TH1F(Form("sr_mtop1_%s"        , chainTitleCh) , Form("mtop1_%s"        , chainTitleCh) , 15      , 100    , 250);
     p_result.h_mtop2.sr      = new TH1F(Form("sr_mtop2_%s"        , chainTitleCh) , Form("mtop2_%s"        , chainTitleCh) , 15      , 100    , 250);
+    p_result.h_topdisc1.sr      = new TH1F(Form("sr_topdisc1_%s"        , chainTitleCh) , Form("topdisc1_%s"        , chainTitleCh) , 30      , -0.6    , 0.4);
+    p_result.h_topdisc2.sr      = new TH1F(Form("sr_topdisc2_%s"        , chainTitleCh) , Form("topdisc2_%s"        , chainTitleCh) , 30      , -0.6    , 0.4);
     p_result.h_ntopness.sr      = new TH1F(Form("sr_ntopness_%s"        , chainTitleCh) , Form("ntopness_%s"        , chainTitleCh) , 15      , 0., 0.75);
     p_result.h_bjetpt.sr      = new TH1F(Form("sr_bjetpt_%s"        , chainTitleCh) , Form("bjetpt_%s"        , chainTitleCh) , 16      , 0., 200.);
     p_result.h_jetpt.sr      = new TH1F(Form("sr_jetpt_%s"        , chainTitleCh) , Form("jetpt_%s"        , chainTitleCh) , 20      , 0., 200.);
@@ -782,14 +818,15 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_bjetpt.br      = new TH1F(Form("br_bjetpt_%s"        , chainTitleCh) , Form("bjetpt_%s"        , chainTitleCh) , 16      , 0., 200.);
     p_result.h_jetpt.br      = new TH1F(Form("br_jetpt_%s"        , chainTitleCh) , Form("jetpt_%s"        , chainTitleCh) , 20      , 0., 200.);
 
-    p_result.h_metnm1.br      = new TH1F(Form("br_metnm1_%s"        , chainTitleCh) , Form("metnm1_%s"        , chainTitleCh) , 24      , 0    , 600);
+    // p_result.h_metnm1.br      = new TH1F(Form("br_metnm1_%s"        , chainTitleCh) , Form("metnm1_%s"        , chainTitleCh) , 80      , 0    , 400);
+    p_result.h_metnm1.br      = new TH1F(Form("br_metnm1_%s"        , chainTitleCh) , Form("metnm1_%s"        , chainTitleCh) , 40      , 0    , 400);
     p_result.h_mid1.br     = new TH1F(Form("br_mid1_%s"       , chainTitleCh) , Form("mid1_%s"       , chainTitleCh) , 5       , -2    , 3);
     p_result.h_mid2.br     = new TH1F(Form("br_mid2_%s"       , chainTitleCh) , Form("mid2_%s"       , chainTitleCh) , 5       , -2    , 3);
     p_result.h_mid3.br     = new TH1F(Form("br_mid3_%s"       , chainTitleCh) , Form("mid3_%s"       , chainTitleCh) , 5       , -2    , 3);
     p_result.h_charge3.sr   = new TH1F(Form("sr_charge3_%s"     , chainTitleCh) , Form("charge3_%s"     , chainTitleCh) , 3       , 0   , 3);
 
     // p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 16       , -1.0    , 1.0);
-    p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 20       , 0.    , 1.0);
+    p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 20       , -1.0    , 1.0);
     // p_result.h_disc2.br     = new TH1F(Form("br_disc2_%s"       , chainTitleCh) , Form("disc2_%s"       , chainTitleCh) , 16       ,0., 1.0);
     p_result.h_disc2.br     = new TH1F(Form("br_disc2_%s"       , chainTitleCh) , Form("disc2_%s"       , chainTitleCh) , 4       ,0., 0.8);
     p_result.SRCR.TOTAL = new TH1F(Form("SRCR_TOTAL_%s" , chainTitleCh) , Form("SRCR_TOTAL_%s" , chainTitleCh) , nsr     , 0.5  , nsr+0.5);
@@ -1152,6 +1189,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
 
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
+
+            if (istttt) {
+                // new xsec is 11.97
+                weight *= 11.97 / 9.103;
+            }
             weight*=scaleLumi;
 
             if (yt > 0.) weight *= yt*yt;
@@ -1208,9 +1250,12 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 // want to take full effect as unc, and since we scale
                 // nominal weight, scale up twice
                 if (ss::extragenb() == 2) {
-                    float scaleamt = 1.7;
-                    weight_bb_up_alt = weight*scaleamt*scaleamt;
-                    weight *= scaleamt;
+                    float scaleamt = 0.7;
+                    weight_bb_up_alt = (0.5*scaleamt+1)*weight;
+                    weight *= 1.0;
+                    // float scaleamt = 1.7;
+                    // weight_bb_up_alt = weight*scaleamt*scaleamt;
+                    // weight *= scaleamt;
                 }
             }
 
@@ -1399,14 +1444,14 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             //Require nominal baseline selections
-            int BR = baselineRegion(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, true);
+            int BR = baseline_region(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, metcut);
             if (BR < 0) continue;
 
             if (!outputTrainingBDT) {
                 // tttt baseline selections
                 if (ss::njets() < 2) continue;
                 if (ss::nbtags() < 2) continue;
-                if (ss::met() < 50) continue;
+                if (ss::met() < metcut) continue;
                 if (ss::ht() < 300) continue;
                 if (lep1_pt < 25.) continue;
                 if (lep2_pt < 20.) continue;
@@ -1419,6 +1464,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (ss::njets() < 2) continue;
                 if (ss::nbtags() < 1) continue;
             }
+
+            // if (ss::ht() < 400) continue; // FIXME
 
 
                 // if (istttt) {
@@ -1510,7 +1557,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 int ntb40 = 0;
                 float ht_first4 = 0.;
                 float ht_rest = 0.;
+                float maxmjoverpt = 0.;
+                float maxmjoverpt_high = 0.;
                 for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
+                    float mjoverpt = ss::jets()[ijet].M()/ss::jets()[ijet].pt();
+                    if (mjoverpt > maxmjoverpt) {
+                        maxmjoverpt = mjoverpt;
+                    }
                     if (ss::jets_disc().at(ijet) > bloose) nlb40++;
                     if (ss::jets_disc().at(ijet) > bmed)   nmb40++;
                     if (ss::jets_disc().at(ijet) > btight) ntb40++;
@@ -1534,6 +1587,17 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 tree_run = ss::run();
                 tree_lumi = ss::lumi();
                 tree_name = chainTitle;
+
+                tree_stype = -1;
+                if (isttW) tree_stype = 0;
+                if (isttZ) tree_stype = 1;
+                if (isttH) tree_stype = 2;
+                if (tree_name == "fakes_mc") tree_stype = 3;
+                if (tree_name == "xg") tree_stype = 4;
+                if (tree_name == "ttvv") tree_stype = 5;
+                if (tree_name == "rares") tree_stype = 6;
+                if (tree_name == "tttt") tree_stype = 7;
+
                 tree_weight = weight;
                 tree_SR = SR;
                 tree_l1id = ss::lep1_id();
@@ -1570,14 +1634,22 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 tree_ml1l2 = (ss::lep1_p4()+ss::lep2_p4()).M();
                 tree_mj1j2 = (ss::jets().at(0)+ss::jets().at(1)).M();
                 tree_ptl1 = ss::lep1_p4().pt();
-                tree_ptl2 = ss::lep1_p4().pt();
+                tree_ptl2 = ss::lep2_p4().pt();
+                tree_ptl3 = (nleps >= 3) ? ss::lep3_p4().pt() : 0.;
                 tree_ptj1 = ss::jets().at(0).pt();
                 tree_ptj2 = ss::jets().at(1).pt();
+                tree_ptj3 = (ss::jets().size() > 2) ? ss::jets().at(2).pt() : 0.;
+                tree_ptj4 = (ss::jets().size() > 3) ? ss::jets().at(3).pt() : 0.;
+                tree_ptj5 = (ss::jets().size() > 4) ? ss::jets().at(4).pt() : 0.;
+                tree_ptj6 = (ss::jets().size() > 5) ? ss::jets().at(5).pt() : 0.;
+                tree_ptj7 = (ss::jets().size() > 6) ? ss::jets().at(6).pt() : 0.;
+                tree_ptj8 = (ss::jets().size() > 7) ? ss::jets().at(7).pt() : 0.;
                 // tree_stb = stb;
                 tree_q1 = (ss::lep1_id()<0)-(ss::lep1_id()>0);
                 tree_q2 = (ss::lep2_id()<0)-(ss::lep2_id()>0);
                 tree_q3 = nleps >= 3 ? ((ss::lep3_id()<0)-(ss::lep3_id()>0)) : 0;
                 tree_ht4ratio = ss::njets()>4 ? ht_first4/ht_rest : 0;
+                tree_maxmjoverpt = maxmjoverpt;
                 tree_nlb40 = nlb40;
                 tree_nmb40 = nmb40;
                 tree_ntb40 = ntb40;
@@ -1595,6 +1667,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 pred = get_prediction((float)tree_njets,(float)tree_nbtags,(float)tree_mt1,(float)tree_mt2,(float)tree_met,(float)tree_ml1l2,(float)tree_htb,(float)tree_nleps,(float)tree_ht,(float)tree_mj1j2,(float)tree_dphij1j2,(float)tree_ptj1,(float)tree_ptj2,(float)tree_ml1j2,(float)tree_ml1j1,(float)tree_wcands,(float)tree_dphil1j1,(float)tree_detal1l2,(float)tree_nlb40,(float)tree_nmb40,(float)tree_ntb40,(float)tree_q1,(float)tree_q2,(float)tree_ht4ratio);
                 if (outputTrainingBDT && (!isData || includeDataInBDTTree)) out_tree->Fill();
                 mvavalue = reader->EvaluateMVA("BDT");
+                tree_disc = mvavalue;
 
                 tree_njets = ss::njets_unc_up();
                 tree_nbtags = ss::nbtags_unc_up();
@@ -1625,49 +1698,10 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             int SRdisc = 1;
             int SRdiscup = 1;
             int SRdiscdn = 1;
-            // if (mvavalue > -0.217) SRdisc = 2;
-            // if (mvavalue > -0.164) SRdisc = 3;
-            // if (mvavalue > -0.044) SRdisc = 4;
-            // if (mvavalue >  0.055) SRdisc = 5;
-            // if (mvavalue >  0.135) SRdisc = 6;
-            // if (mvavalue >  0.205) SRdisc = 7;
-            // if (mvavalue >  0.283) SRdisc = 8;
-            // if (mvavalue >  0.368) SRdisc = 9;
-            // if (mvavalue >  0.456) SRdisc = 10;
 
-            // if (mvavalue > -0.217) SRdisc = 2;
-            // if (mvavalue > -0.044) SRdisc = 3;
-            // if (mvavalue >  0.135) SRdisc = 4;
-            // if (mvavalue >  0.283) SRdisc = 5;
-            // if (mvavalue >  0.456) SRdisc = 6;
-            
-            // if (mvavalue > -0.4) SRdisc = 2;
-            // if (mvavalue > -0.2) SRdisc = 3;
-            // if (mvavalue >  0.0) SRdisc = 4;
-            // if (mvavalue >  0.2) SRdisc = 5;
-            // if (mvavalue >  0.4) SRdisc = 6;
-
-            // if (mvavalue > -0.4) SRdisc = 2;
-            // if (mvavalue > -0.2) SRdisc = 3;
-            // if (mvavalue >  0.0) SRdisc = 4;
-            // if (mvavalue >  0.21) SRdisc = 5;
-            // if (mvavalue >  0.42) SRdisc = 6;
-
-            // if (mvavalueup > -0.4)  SRdiscup = 2;
-            // if (mvavalueup > -0.2)  SRdiscup = 3;
-            // if (mvavalueup >  0.0)  SRdiscup = 4;
-            // if (mvavalueup >  0.21) SRdiscup = 5;
-            // if (mvavalueup >  0.42) SRdiscup = 6;
-
-            // if (mvavaluedn > -0.4)  SRdiscdn = 2;
-            // if (mvavaluedn > -0.2)  SRdiscdn = 3;
-            // if (mvavaluedn >  0.0)  SRdiscdn = 4;
-            // if (mvavaluedn >  0.21) SRdiscdn = 5;
-            // if (mvavaluedn >  0.42) SRdiscdn = 6;
-
-            SRdisc = getBDTBin(mvavalue);
-            SRdiscup = getBDTBin(mvavalueup);
-            SRdiscdn = getBDTBin(mvavaluedn);
+            SRdisc = getBDTBin(mvavalue, isClass6);
+            SRdiscup = getBDTBin(mvavalueup, isClass6);
+            SRdiscdn = getBDTBin(mvavaluedn, isClass6);
 
             int SRdisc_unc_up = SRdiscup;
             int SRdisc_unc_dn = SRdiscdn;
@@ -1680,15 +1714,17 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (isData  == 0 && SR_JER_up > 0)            p_jer_alt_up.SRCR.TOTAL->Fill(SR_JER_up, weight);
             if (isData  == 0 && SR_JER_dn > 0)            p_jer_alt_dn.SRCR.TOTAL->Fill(SR_JER_dn, weight);
 
+            if (isData  == 0 && SRdisc_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
+            if (isData  == 0 && SRdisc_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
+
+            if (isData  == 0 && SRdisc_JER_up > 0)            p_jer_alt_up.SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
+            if (isData  == 0 && SRdisc_JER_dn > 0)            p_jer_alt_dn.SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
+
             // require SRs+CR (= ttZ CR + ttW CR + SRs)
             if (!outputTrainingBDT) {
                 if (SR < 0) continue;
             }
 
-            if (isData  == 0 && SRdisc_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
-            if (isData  == 0 && SRdisc_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
-            if (isData  == 0 && SRdisc_JER_up > 0)            p_jer_alt_up.SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
-            if (isData  == 0 && SRdisc_JER_dn > 0)            p_jer_alt_dn.SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
 
             // if (doSync && SR == 2 && isttW && ss::hyp_class() == 3) {
             //     std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\n",
@@ -1911,6 +1947,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_mvis.sr->Fill(mvis , weight);
                 p_result.h_mtvis.sr->Fill(mtvis , weight);
                 auto firsttwotops = getFirstTwoTops();
+
+                auto trijet_discpair = getTrijetDiscs(reader_toptag);
+                p_result.h_topdisc1.sr->Fill(trijet_discpair.first, weight);
+                p_result.h_topdisc2.sr->Fill(trijet_discpair.second, weight);
+                tree_topdisc1 = trijet_discpair.first;
+                tree_topdisc2 = trijet_discpair.second;
+
                 // auto ntopinfo = getNtops();
                 // p_result.h_ntops.sr->Fill(ntopinfo.first , weight);
                 // p_result.h_ntopness.sr->Fill(ntopinfo.second , weight);
@@ -2449,6 +2492,59 @@ void initHistError(bool usePoisson, TH1F* plot) {
   else  plot->Sumw2();
 }
 
+std::pair<float,float> getTrijetDiscs(TMVA::Reader* reader) {
+    // Separate out b-tagged jets from non-btagged jets
+    std::vector<LorentzVector> bjets;
+    std::vector<float> bjets_disc;
+    std::vector<LorentzVector> jets;
+    for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
+        bjets.push_back(ss::btags()[ijet]);
+        bjets_disc.push_back(ss::btags_disc()[ijet]);
+    }
+    for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
+        if (ss::jets_disc()[ijet] > bmed) continue;
+        jets.push_back(ss::jets()[ijet]);
+    }
+
+    // std::vector<float> discs;
+    float disc_best = -2;
+    float disc_secondbest = -2;
+    for (unsigned int ib = 0; ib < bjets.size(); ib++) {
+        LorentzVector bjet = (bjets[ib]);
+        float disc = bjets_disc[ib];
+        for (unsigned int i = 0; i < jets.size(); i++) {
+            for (unsigned int j = i+1; j < jets.size(); j++) {
+
+                LorentzVector w = (jets[i]+jets[j]);
+                float HadrWmass = w.M();
+                if (HadrWmass > 1650. || HadrWmass < 15.) continue;
+
+                LorentzVector top = (jets[i]+jets[j]+bjet);
+                float TopMass = top.M();
+                if (TopMass > 3900 || TopMass < 30) continue;
+
+                float sumpt = jets[i].pt() + jets[j].pt() + bjet.pt();
+
+                float ThPtOverSumPt = top.pt()/sumpt;
+
+                float AngleThWh = fabs(DeltaPhi(top.phi(),w.phi()));
+                float AngleThBh = fabs(DeltaPhi(top.phi(),bjet.phi()));
+
+                std::vector<float> inputs = {disc,ThPtOverSumPt,AngleThWh,AngleThBh,HadrWmass,TopMass};
+                float disc = reader->EvaluateMVA(inputs,"BDT");
+
+                if (disc > disc_best) disc_best = disc;
+                else if (disc > disc_secondbest) disc_secondbest = disc;
+
+                // discs.push_back(disc);
+
+            }
+        }
+    }
+    // return discs;
+    return std::pair<float,float>(disc_best,disc_secondbest);
+}
+
 std::pair<int,float> getNtops() {
     // Separate out b-tagged jets from non-btagged jets
     std::vector<LorentzVector> bjets;
@@ -2554,37 +2650,24 @@ std::pair<float,float> getFirstTwoTops() {
     return std::pair<float,float>(bestmt1,bestmt2);
 }
 
-int getBDTBin(float disc) {
+int getBDTBin(float disc, bool isClass6) {
     int ibin = 1;
 
-    // if (disc > -0.30) ibin = 2;
-    // if (disc >  0.00) ibin = 3;
-    // if (disc >  0.21) ibin = 4;
-    // if (disc >  0.31) ibin = 5;
-    // if (disc >  0.42) ibin = 6;
-    // if (disc >  0.62) ibin = 7;
+    if (isClass6) return ibin;
 
-    if (disc >  0.00) ibin = 2;
-    if (disc >  0.21) ibin = 3;
-    if (disc >  0.31) ibin = 4;
-    if (disc >  0.38) ibin = 5;
-    if (disc >  0.46) ibin = 6;
-    if (disc >  0.58) ibin = 7;
-    
-    // if (disc > -0.41) ibin = 2;
-    // if (disc > -0.31) ibin = 3;
-    // if (disc > -0.20) ibin = 4;
-    // if (disc > -0.13) ibin = 5;
-    // if (disc > -0.05) ibin = 6;
-    // if (disc >  0.03) ibin = 7;
-    // if (disc >  0.10) ibin = 8;
-    // if (disc >  0.17) ibin = 9;
-    // if (disc >  0.25) ibin = 10;
-    // if (disc >  0.32) ibin = 11;
-    // if (disc >  0.39) ibin = 12;
-    // if (disc >  0.45) ibin = 13;
-    // if (disc >  0.55) ibin = 14;
-
+    // 13 bins
+    if (disc > -0.48) ibin = 2;
+    if (disc > -0.37) ibin = 3;
+    if (disc > -0.25) ibin = 4;
+    if (disc > -0.14) ibin = 5;
+    if (disc > -0.02) ibin = 6;
+    if (disc >  0.08) ibin = 7;
+    if (disc >  0.2) ibin = 8;
+    if (disc >  0.31) ibin = 9;
+    if (disc >  0.42) ibin = 10;
+    if (disc >  0.54) ibin = 11;
+    if (disc >  0.65) ibin = 12;
+    if (disc >  0.77) ibin = 13;
 
     return ibin;
 }
