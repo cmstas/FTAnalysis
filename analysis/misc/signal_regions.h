@@ -124,16 +124,55 @@ struct SRDefinition {
         return -1;
     }
 
+    static int SR18(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, int isClass6) {
+        if (lep1pt < 25.) return -1;
+        if (lep2pt < 20.) return -1;
+        if (njets < 2) return -1;
+        if (nbtags < 2) return -1;
+        if (ht < 300) return -1;
+        if (isClass6 && nleps < 3) return -1;  // Z-Veto w/ low pt 3rd lepton
+        if (isClass6 && nleps >= 3) return 1;  // CRZ
+        if (nleps == 2) {
+            /* if (10 < lep3pt  and lep3pt < 20) return -1;  // 3rd lepton veto */
+            if (nbtags == 2) {
+                if (njets <= 5) return 2;  // CRW
+                if (njets == 6) return 3;
+                if (njets == 7) return 4;
+                if (njets >= 8) return 5;
+            } else if (nbtags == 3) {
+                if (njets == 5) return 6;
+                if (njets == 6) return 7;
+                if (njets == 7) return 8;
+                if (njets >= 8) return 9;
+            } else if (nbtags >= 4) {
+                if (njets == 5) return 10;
+                if (njets == 6) return 11;
+                if (njets >= 7) return 12;
+            }
+        } else {
+            if (nbtags == 2) {
+                if (njets == 5) return 13;
+                if (njets == 6) return 14;
+                if (njets >= 7) return 15;
+            } else if (nbtags >= 3) {
+                if (njets == 4) return 16;
+                if (njets == 5) return 17;
+                if (njets >= 6) return 18;
+            }
+        }
+        return -1;
+    }
+
     static int SR19(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, int isClass6) {
         if (lep1pt < 25.) return -1;
         if (lep2pt < 20.) return -1;
         if (njets < 2) return -1;
         if (nbtags < 2) return -1;
         if (ht < 300) return -1;
-        if (nleps>=3 && isClass6) return 1;  // CRZ
-        /* if (isClass6) return 1;  // CRZ */
+        if (isClass6 && nleps < 3) return -1;  // Z-Veto w/ low pt 3rd lepton
+        if (isClass6 && nleps >= 3) return 1;  // CRZ
         if (nleps == 2) {
-            if (!isClass6 and 10 < lep3pt  and lep3pt < 20) return 19;  // 3rd lepton veto
+            if (10 < lep3pt  and lep3pt < 20) return 19;  // 3rd lepton veto
             if (nbtags == 2) {
                 if (njets <= 5) return 2;  // CRW
                 if (njets == 6) return 3;
@@ -164,30 +203,25 @@ struct SRDefinition {
     }
 
     static int SR(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, int isClass6) {
-        int theSR = -1;
         switch (nSRs) {
             case 3:
-                theSR = SR3(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
-                break;
+                return SR3(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
             case 4:
-                theSR = SR4(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
-                break;
+                return SR4(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
             case 7:
-                theSR = SR7(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
-                break;
+                return SR7(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
             case 8:
-                theSR = SR8(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
-                break;
+                return SR8(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
             case 10:
-                theSR = SR10(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
-                break;
+                return SR10(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, nleps, isClass6);
+            case 18:
+                return SR18(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, lep3pt, nleps, isClass6);
             case 19:
-                theSR = SR19(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, lep3pt, nleps, isClass6);
-                break;
+                return SR19(njets, nbtags, met, ht, mt_min, id1, id2, lep1pt, lep2pt, lep3pt, nleps, isClass6);
             default:
                 std::cout << "Error: SR" << nSRs << " not implemented!" << std::endl;
+                return -1;
         }
-        return theSR;
     }
 };
 

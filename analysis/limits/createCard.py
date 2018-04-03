@@ -490,8 +490,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # processes.append(WZ)
     # processes.append(WW)
     # processes.append(XG)
-    # processes.append(rares)
-    # processes.append(fakes)
+    processes.append(rares)
+    processes.append(fakes)
     # processes.append(flips)
     # processes.append(TTVV)
     if do_tttt:
