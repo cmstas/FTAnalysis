@@ -131,7 +131,6 @@ class babyMaker {
     int run;
     bool is_real_data;
     bool is_fastsim;
-    bool is_miniaodv1;
     bool is_miniaodv1_80X;
     float scale1fb;
     float xsec;
