@@ -1,5 +1,5 @@
-therelease=CMSSW_7_4_7_patch1
-# export SCRAM_ARCH=slc6_amd64_gcc530
+therelease=CMSSW_9_2_8
+export SCRAM_ARCH=slc6_amd64_gcc530
 mkdir -p common
 if [ ! -d common/$therelease ]; then 
     cd common/ ;
@@ -22,7 +22,9 @@ export PYTHONPATH=$PWD/:$PYTHONPATH
 [[ -d common/Software/ ]] || git clone git@github.com:cmstas/Software.git common/Software/
 [[ -d common/CORE/ ]] || {
     git clone git@github.com:cmstas/CORE.git common/CORE/;
-    cd common/CORE; make -j10 >&/dev/null &
+    cd common/CORE; 
+    git checkout -b 2017 origin/2017;
+    make -j10 >&/dev/null &
     cd -;
 }
 [[ -d common/${therelease}/src/HiggsAnalysis/CombinedLimit/ ]] || {
@@ -31,7 +33,7 @@ export PYTHONPATH=$PWD/:$PYTHONPATH
     cmsenv
     git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
     cd HiggsAnalysis/CombinedLimit
-    git checkout 74x-root6
+    git checkout 94x
     scramv1 b vclean
     scramv1 b -j 15
     popd
