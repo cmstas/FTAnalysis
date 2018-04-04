@@ -27,9 +27,10 @@ int main(int argc, char *argv[]){
         std::cout << ">>> We're on uafino, so using xrootd!" << std::endl;  
         useXrootd = true;
     }
-    string good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
-    string jecEra = "Summer16_23Sep2016BCDV3";
-    std::string jecEraMC = "Summer16_23Sep2016V3";
+    string good_run_file = "goodRunList/Cert_294927-306462_13TeV_PromptReco_Collisions17_snt.txt";
+    string jecEra = "Fall17_17Nov2017B_V6";
+    std::string jecEraMC = "Fall17_17Nov2017_V6";
+
 
 
     if (argc > 1) filename = TString(argv[1]);
@@ -67,11 +68,6 @@ int main(int argc, char *argv[]){
     }
     // if (filename.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
     if (filename.Contains("_HToTT_") && filename.Contains("Summer16Fast")) isSignal = 101; // fastsim higgs vs fullsim higgs
-
-    if (filename.Contains("Run2017")) {
-        std::cout << ">>> [!] This is Run2017 data, so not using goodrun list right now!!!" << std::endl;
-        goodRunsOnly = false;
-    }
 
     //Set up file and tree
     mylooper->MakeBabyNtuple(outname.Data(), isSignal);
@@ -172,10 +168,15 @@ int main(int argc, char *argv[]){
         // HAVE TO MAKE DATA JEC HERE SINCE WE NEED RUN NUMBER BECAUSE SO MANY JECS
         // Only need to check first event because a merged file can't span eras
         if (isData && eventAG == 0) {
-            if (tas::evt_run() <= 276811) jecEra = "Summer16_23Sep2016BCDV3";
+            if (     tas::evt_run() <= 276811) jecEra = "Summer16_23Sep2016BCDV3";
             else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = "Summer16_23Sep2016EFV3";
             else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = "Summer16_23Sep2016GV3";
-            else if (tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV3";
+            else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV3";
+            else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V6";
+            else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V6";
+            else if (tas::evt_run() <= 303434 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017D_V6";
+            else if (tas::evt_run() <= 304797 && tas::evt_run() >= 303824) jecEra = "Fall17_17Nov2017E_V6";
+            else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V6";
             else std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;
             jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/"+jecEra+"_DATA/"+jecEra+"_DATA_Uncertainty_AK4PFchs.txt"); 
             jetcorr_filenames_25ns_DATA_pfL1L2L3.clear();
@@ -302,6 +303,12 @@ int main(int argc, char *argv[]){
     BabyFile->cd();
     for (unsigned int j = 0; j < csErr_info_v.size(); j++){
         csErr_info_v[j].results->Write(); 
+    }
+
+    if (nEvents != nEventsTotal) {
+        std::cout << "Number of input events in tree is " << nEvents << " but we processed " << nEventsTotal << ", ";
+        std::cout << "so something went wrong and the return code will not be 0." << std::endl;
+        return 1;
     }
 
     return 0;
