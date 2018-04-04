@@ -20,9 +20,9 @@
 
 float lumiAG = getLumiUnblind();
 
-float bloose = 	0.2219;
-float bmed = 0.6324;
-float btight = 0.8958;
+float bloose = 	0.1522;
+float bmed = 0.4941;
+float btight = 0.8001;
 
 
 int nsr = getNsrsTTTT();
