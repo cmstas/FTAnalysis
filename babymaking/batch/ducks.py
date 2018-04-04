@@ -6,8 +6,8 @@ import four_top as ft
 # make instructions
 instructions = []
 # types = ["data"]
-types = ["backgrounds"]
-# types = ["backgrounds","data"]
+# types = ["backgrounds"]
+types = ["backgrounds","data"]
 for typ in types:
     for ds in ft.d_ds2name[typ].keys():
         instructions.append({"executable": ft.executable, "package": ft.package, "analysis": "FT", "dataset": ds, "baby_tag": ft.tag, "type": "BABY", "extra": ""})
@@ -19,6 +19,7 @@ p.merging_scripts = ft.merging_scripts
 p.baby_merged_dir = ft.baby_merged_dir
 p.exit_when_done = True
 p.open_datasets = False
+p.do_cms3 = False # when querying DIS, only consider CMS4
 
 import run
 run.main(instructions=instructions, params=p)
