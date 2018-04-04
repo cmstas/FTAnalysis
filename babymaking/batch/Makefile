@@ -28,6 +28,7 @@ CFLAGS =  -Wall -Wno-unused-function -g -O0 -fPIC -Wno-sign-compare -Wno-unused-
 # CFLAGS = -Wall -Wno-unused-function -g -O0 -fPIC  $(INCLUDE) $(EXTRACFLAGS) # default
 # CFLAGS = -Wall -Wno-unused-function -g -O1 -fPIC $(INCLUDE) $(EXTRACFLAGS)
 ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector
+OTHERLIBS = -L../../common/yaml-cpp/build/ -lyaml-cpp
 COREDIR = CORE
 
 DICTINCLUDE = $(ROOTSYS)/include/Math/QuantFuncMathCore.h $(ROOTSYS)/include/TLorentzVector.h $(ROOTSYS)/include/Math/Vector4D.h
@@ -94,7 +95,7 @@ LinkDef_out.cxx: LinkDef.h
 
 %.exe:  $(LIBS)
 	$(QUIET) echo "Building $@"; \
-	$(CC) -o $@ $(LIBS) $(ROOTLIBS) ${@:.exe=.cc} 
+	$(CC) -o $@ $(LIBS) $(INCLUDE) $(ROOTLIBS) $(OTHERLIBS) ${@:.exe=.cc} 
 
 %.o: 	%.cc %.h
 	$(QUIET) echo "Compiling $<"; \

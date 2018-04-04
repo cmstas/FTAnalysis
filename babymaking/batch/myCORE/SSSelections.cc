@@ -149,7 +149,7 @@ Z_result_t makesExtraZ(int iHyp, bool RA7vetoID){
     std::cout << "ERROR: don't have 2 leptons in hypothesis!!!  Exiting" << std::endl;
     return result;
   }
-      
+
   if (ele_idx.size() > 0) {
     for (unsigned int eidx = 0; eidx < tas::els_p4().size(); eidx++) {
 
@@ -238,7 +238,6 @@ std::pair <vector <Jet>, vector <Jet> > SSJetsCalculator(FactorizedJetCorrector*
     if (doCorr == 2) pt = jet.pt()*tas::pfjets_undoJEC().at(i);
     
     //Kinematic jet cuts
-    if (pt < bjetMinPt) continue;
     if (fabs(jet.eta()) > 2.4) continue;
 
     //Require loose jet ID
@@ -272,13 +271,14 @@ std::pair <vector <Jet>, vector <Jet> > SSJetsCalculator(FactorizedJetCorrector*
   for (unsigned int i = 0; i < result_jets.size(); i++){
       float disc = result_disc.at(i);
       if (disc < btagCut) continue;
+      if (result_jets.at(i).pt() < cfg.bjetMinPt) continue;
       result_btags.push_back(result_jets.at(i));
   }
 
   // Only retain high pt jets if not saving all pts
   vector<Jet> result_jets_cut;
   for (unsigned int i = 0; i < result_jets.size(); i++){
-      if(!saveAllPt && (result_corrpt.at(i) < jetMinPt)) continue;
+      if(!saveAllPt && (result_corrpt.at(i) < cfg.jetMinPt)) continue;
       result_jets_cut.push_back(result_jets.at(i));
   }
 
@@ -1859,7 +1859,7 @@ pair<Lep, int> getThirdLepton(int hyp, int ignore_id, int ignore_idx){
     if (abs(ignore_id) == 11 && ignore_idx == i) continue;
 
     //Remove electrons that fail kinematically
-    if (tas::els_p4().at(i).pt() < 20) continue;
+    if (tas::els_p4().at(i).pt() < 5) continue;
     if (fabs(tas::els_p4().at(i).eta()) > 2.4) continue;
 
     //Remove electrons that fail loosest ID, determine tighter IDs
@@ -1886,7 +1886,7 @@ pair<Lep, int> getThirdLepton(int hyp, int ignore_id, int ignore_idx){
     if (abs(ignore_id) == 13 && ignore_idx == i) continue;
    
     //Remove electrons that fail kinematically
-    if (tas::mus_p4().at(i).pt() < 20) continue;
+    if (tas::mus_p4().at(i).pt() < 7) continue;
     if (fabs(tas::mus_p4().at(i).eta()) > 2.4) continue;
 
     //Remove muons that fail ID

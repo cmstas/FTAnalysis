@@ -154,15 +154,16 @@ baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 # tag = "v0.10_WSF" # same as v0.10_fix, no OS, but also has pdgW{leptonic,hadronic} SFs -- bugged, didn't have MC met filters
 # tag = "v0.10_WSFv2" # same as non v2, but with fixed met filters
 # tag = "v0.10_mll" # same as previous line, but with mll<12 veto for ee or OSSF
-tag = "v1.00_80x_baseline_full_v2" # same as previous line, but with mll<12 veto for ee or OSSF
+# tag = "v1.00_80x_baseline_full_v2" # same as previous line, but with mll<12 veto for ee or OSSF
+# tag = "v1.00" # new baseline
+# tag = "v1.0.6" # bJetCut40, jetCut20, 3rd lep cut 10
+tag = "v1.0.6_fixed" # fixes reversed jet/bjet cuts from v1.0.6
+
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
-dashboard_name = "AutoTwopler_FTbabies"
+dashboard_name = "AutoTwopler_FTbabies" + tag
 
 if not os.path.isfile(package):
     raise Exception("Woah! Did you run make_tar.sh? I don't see the package.tar.gz file in %s" % inputs_path)
 elif ((os.path.getmtime(package) < os.path.getmtime("main.exe")) or (os.path.getmtime(package) < os.path.getmtime("helper_babymaker.cc"))):
     raise Exception("Woah! Did you run make_job_inputs.sh? It looks like main.exe or helper_babymaker.cc might be newer than the tarball in %s" % inputs_path)
-
-
-

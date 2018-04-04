@@ -1,38 +1,35 @@
 therelease=CMSSW_7_4_7_patch1
+combineversion=74x-root6
 # export SCRAM_ARCH=slc6_amd64_gcc530
-mkdir -p common
-if [ ! -d common/$therelease ]; then 
-    cd common/ ;
-    cmsrel $therelease;
-    cd -
+
+if [ ! -d "common/$therelease" ]; then
+    (cd common/
+     cmsrel "$therelease")
+    mkdir "common/$therelease/src/HiggsAnalysis/"
+    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git "common/$therelease/src/HiggsAnalysis/CombinedLimit/"
+    (cd "common/$therelease/src/HiggsAnalysis/CombinedLimit/"
+     git checkout $combineversion)
 fi
-cd common/$therelease/src
-eval `scram ru -sh`
-cd -
 
-export LD_LIBRARY_PATH=$PWD/babymaking/batch/:$LD_LIBRARY_PATH
+cd "common/$therelease/src"
+cmsenv
+cd ../../..
 
-export PYTHONPATH=$PWD/:$PYTHONPATH
+if [ "$1" = "build" ]; then
+    echo "Building CMSSW Release"
+    (cd "common/$therelease/src" ; scram b -j 15)
 
-# export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/lib/python2.7/site-packages/:$PYTHONPATH
-# export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/:$PYTHONPATH
-# export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages/:$PYTHONPATH
+    echo "Building yaml-cpp"
+    (mkdir -p common/yaml-cpp/build
+     cd common/yaml-cpp/build
+     cmake .. -DBUILD_SHARED_LIBS=ON
+     make -j15)
 
-[[ -d babymaking/batch/NtupleTools/ ]] || git clone git@github.com:cmstas/NtupleTools.git babymaking/batch/NtupleTools/
-[[ -d common/Software/ ]] || git clone git@github.com:cmstas/Software.git common/Software/
-[[ -d common/CORE/ ]] || {
-    git clone git@github.com:cmstas/CORE.git common/CORE/;
-    cd common/CORE; make -j10 >&/dev/null &
-    cd -;
-}
-[[ -d common/${therelease}/src/HiggsAnalysis/CombinedLimit/ ]] || {
-    pushd $(pwd)
-    cd $CMSSW_BASE/src
-    cmsenv
-    git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-    cd HiggsAnalysis/CombinedLimit
-    git checkout 74x-root6
-    scramv1 b vclean
-    scramv1 b -j 15
-    popd
-}
+    echo "Building CORE"
+    make -j15 -C common/CORE
+fi
+
+export ROOT_INCLUDE_PATH="$PWD/common/yaml-cpp/include:$ROOT_INCLUDE_PATH"
+
+export LD_LIBRARY_PATH="$PWD/babymaking/batch:$PWD/common/yaml-cpp/build/:$LD_LIBRARY_PATH"
+export PYTHONPATH="$PWD:$PYTHONPATH"

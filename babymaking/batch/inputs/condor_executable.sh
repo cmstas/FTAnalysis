@@ -19,7 +19,7 @@ echo "OUTPUT_NAMES=${OUTPUT_NAMES[*]}"
 EXE_ARGS=(`echo $EXE_ARGS | sed s/,/" "/g`)
 echo "EXE_ARGS=${EXE_ARGS[*]}"
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
 
 ls -l
 

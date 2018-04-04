@@ -9,6 +9,7 @@
 #include "CORE/Tools/datasetinfo/getDatasetInfo.h"
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"  
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
+#include "cfg.h"
 
 int main(int argc, char *argv[]){
 
@@ -41,7 +42,11 @@ int main(int argc, char *argv[]){
     std::cout << "     outname:     " << outname << std::endl;
     std::cout << "     nevents_max: " << nevents_max << std::endl;
 
-    if (argc <= 1) { 
+    if (!read_config("config.yaml")) {
+        return -1;
+    }
+
+    if (argc <= 1) {
         std::cout << ">>> [!] Not enough arguments!" << std::endl;  
         return 0;
     }

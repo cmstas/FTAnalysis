@@ -261,7 +261,6 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     card.write("%-40s %-5s " % ("fsrvar","shape"))
     for process in processes: card.write("%-15s " % (process.fsrvar))
     card.write("\n")
-
     #nuisance scale
     card.write("%-40s %-5s " % ("scale","shape"))
     for process in processes: card.write("%-15s " % (process.scale))
@@ -350,9 +349,8 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     return
 
 def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, yukawa=-1, inject_tttt=False):
-    # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
+    # if we're not using tttt as the signal, then want to include tttt as a bg (--> inject_tttt = True) 
     inject_tttt = (signal != "tttt") or inject_tttt
-    # do_tttt = True
     #define processes (signal first)
     # if pseudoData:
     #     print "Using pseudo data!"
