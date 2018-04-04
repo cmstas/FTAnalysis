@@ -12,5 +12,5 @@ cp ../../common/CORE/data/*.xml CORE/data/
 mkdir -p CORE/Tools
 cp -r ../../common/CORE/Tools CORE/
 
-cp myCORE/* CORE/
+# cp myCORE/* CORE/
 
