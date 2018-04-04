@@ -67,8 +67,8 @@ bool isHighPtMuonPOG(unsigned int muIdx){
   if (mus_numberOfMatchedStations().at(muIdx)      <  2   ) return false;
   if (mus_bfit_ptErr()             .at(muIdx)
            /mus_bfit_p4()          .at(muIdx).pt() > 0.3  ) return false;
-  if (mus_dxyPV()                  .at(muIdx)      > 0.2  ) return false; //should be using best fit tracks
-  if (mus_dzPV()                   .at(muIdx)      > 0.5  ) return false; //should be using best fit tracks
+  if (fabs(mus_dxyPV()             .at(muIdx))     > 0.2  ) return false; //should be using best fit tracks
+  if (fabs(mus_dzPV()              .at(muIdx))     > 0.5  ) return false; //should be using best fit tracks
   if (mus_validPixelHits()         .at(muIdx)      == 0   ) return false;
   if (mus_nlayers()                .at(muIdx)      <  6   ) return false;
 
@@ -88,8 +88,8 @@ bool isBadGlobalMuon(unsigned int muIdx, bool selectClones){
   // HACK: should replace numberOfMatchedStations with muonStationsWithValidHits when available
   bool tightGlobal = bool(mus_numberOfMatchedStations().at(muIdx) >= 3 && mus_gfit_chi2().at(muIdx)/get_mus_gfit_ndof(muIdx) <= 20.);
   // HACK: should replace validPixelHits with pixelLayersWithMeasurement when available
-  bool ipLoose = bool((mus_dxyPV().at(muIdx) < 0.5 && mus_dzPV().at(muIdx) < 2.0) || (mus_validPixelHits().at(muIdx) >= 2));
-  bool ipTight = bool(mus_dxyPV().at(muIdx) < 0.2 && mus_dzPV().at(muIdx) < 0.5);
+  bool ipLoose = bool((fabs(mus_dxyPV().at(muIdx)) < 0.5 && fabs(mus_dzPV().at(muIdx)) < 2.0) || (mus_validPixelHits().at(muIdx) >= 2));
+  bool ipTight = bool(fabs(mus_dxyPV().at(muIdx)) < 0.2 && fabs(mus_dzPV().at(muIdx)) < 0.5);
   bool tighterId = bool(isMediumMuonPOG(muIdx) && mus_numberOfMatchedStations().at(muIdx) >= 2);
   bool safeId = bool((mus_bfit_ptErr().at(muIdx) < 0.2 * mus_bfit_p4().at(muIdx).pt()) && ((mus_numberOfMatchedStations().at(muIdx) >= 1) || tightGlobal));
   if (tighterId) {
