@@ -1,14 +1,19 @@
 {
-    gSystem->Exec("mkdir -p plots");
+    gSystem->Load("CORE/CMS3_CORE.so");
+    gSystem->Load("libyaml-cpp.so");
 
-    gROOT->ProcessLine(".L Software/dataMCplotMaker/dataMCplotMaker.cc+");
-    gROOT->ProcessLine(".L CMS3.cc+");
-    gROOT->ProcessLine(".L ScanChain.C+");
+    int error;
+    gROOT->ProcessLine(".L Yield.C+", &error);
+    if (error != 0) exit(error);
 
-    TChain *ch = new TChain("Events");
-    ch->Add("/hadoop/cms/store/group/snt/run2_moriond17/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/V08-00-16/merged_ntuple_1.root");
+    auto getEnv = [](const char* name, string default_){
+        const char* env = gSystem->Getenv(name);
+        if (env != nullptr) return string(env);
+        else return default_;
+    };
 
-    ScanChain(ch);
-
+    string dataset = getEnv("dataset", "N/A");
+    if (dataset == "N/A") exit(0);
+    string config_filename = getEnv("config", "config.yaml");
+    ScanChain(dataset, config_filename);
 }
-

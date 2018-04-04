@@ -33,16 +33,13 @@ cd analysis/yields/
 cd analysis/limits/
 ```
 
-## Hitting the ground running (quick start to reproduce paper yields)
+## Hitting the ground running (quick start for running the new baseline)
 ```
 # clone and set up
-git clone https://github.com/cmstas/FTAnalysis
+git clone --recurse-submodules -b new_baseline https://github.com/cfangmeier/FTAnalysis
 cd FTAnalysis
-git checkout paper2017
 source /code/osgcode/cmssoft/cms/cmsset_default.sh # might as well put in .bashrc
-# patch setup to make sure we get the exact HiggsCombine hash
-sed '/git checkout 74x-root6/agit checkout eea907cf928bf235579f015e9e6e6d1cd0a067b4' setup.sh
-source setup.sh # configure ssh token with github since `git clone git@...` syntax used here
+source setup.sh build # configure ssh token with github since `git clone git@...` syntax used here
 
 # get the yields
 cd analysis/yields/

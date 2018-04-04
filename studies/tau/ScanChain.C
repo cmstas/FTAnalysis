@@ -1,24 +1,38 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
-#include "Software/dataMCplotMaker/dataMCplotMaker.h"
+
+#include <iostream>
+#include <fstream>
 
 #include "TFile.h"
 #include "TTree.h"
-#include "TCut.h"
-#include "TColor.h"
-#include "TCanvas.h"
-#include "TH2F.h"
-#include "TH1.h"
 #include "TChain.h"
-#include "Math/VectorUtil.h"
 
-#include "CMS3.h"
+#include "../../common/CORE/CMS3.h"
 
-using namespace std;
-using namespace tas;
+#include "../../common/CORE/SSSelections.h"
+#include "../../common/CORE/ElectronSelections.h"
+#include "../../common/CORE/MuonSelections.h"
+#include "../../common/CORE/Tools/datasetinfo/getDatasetInfo.h"
 
-int ScanChain(TChain *ch){
+#include "tau_utils.hpp"
+#include "hist_utils.hpp"
 
-    // TH1F * h_met = new TH1F("met", "met", 50, 0, 300);
+
+int ScanChain(TChain *ch, TFile* dest_file){
+    using namespace std;
+    using namespace tas;
+
+    KinematicMeasurement pf_kin("pf",   50, 600, 50, 4, 50);
+    KinematicMeasurement gen_kin("gen", 50, 600, 50, 4, 50);
+
+
+    EfficiencyMeasurement accept_eff("accept_eff", 50, 0, 300);
+    EfficiencyMeasurement reco_eff("reco_eff", 50, 0, 300);
+    EfficiencyMeasurement id_eff("id_eff", 50, 0, 300);
+    EfficiencyMeasurement ult_eff("ult_eff", 50, 0, 300);
+
+    EfficiencyMeasurement id_eff_old("id_eff_old", 50, 0, 300);
+    EfficiencyMeasurement ult_eff_old("ult_eff_old", 50, 0, 300);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -27,132 +41,112 @@ int ScanChain(TChain *ch){
     TObjArray *listOfFiles = ch->GetListOfFiles();
     TIter fileIter(listOfFiles);
 
+
     while ( (currentFile = (TFile*)fileIter.Next()) ) { 
 
         TFile *file = new TFile( currentFile->GetTitle() );
         TTree *tree = (TTree*)file->Get("Events");
         cms3.Init(tree);
 
-        TString filename(currentFile->GetTitle());
-
-        for( unsigned int event = 0; event < tree->GetEntriesFast(); ++event) {
+        for(unsigned int event = 0; event < tree->GetEntriesFast(); ++event) {
 
             cms3.GetEntry(event);
             nEventsTotal++;
 
             if (event > 1000) break;
-
             CMS3::progress(nEventsTotal, nEventsChain);
 
-            // Find 4 pairs of daughters from W decays
-            std::vector<std::pair<int,int> > genwdaughteridxs;
-            std::vector<bool> genwleptonic;
-            std::vector<bool> genwtau;
-            std::vector<int> tauidxs;
-            // Loop over the vector of gen particles
-            for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
-                // PDG id
-                int id = tas::genps_id()[igen];
-                // mother particle PDG ID
-                int mid = tas::genps_id_mother()[igen];
-                if (abs(id) != 24) continue; // skip if not W
-                if (abs(mid) != 6) continue; // skip if not from top
-                std::pair<int,int> daughter_indices = {-1,-1};
-                // Loop through genparticles again to look for daughters (i.e., which particles have a mother which is igen)
-                for (unsigned int idau = 0; idau < tas::genps_p4().size(); idau++){
-                    int midx = tas::genps_idx_mother()[idau];
-                    if (abs(tas::genps_id()[idau]) == 15 && tas::genps_status()[idau] == 23) continue; // status 23 taus
-                    if (midx != igen) continue;
-                    // Fill first, then second, then break once both are in, since we can have duplicate particles with different statuses
-                    if (daughter_indices.first == -1) daughter_indices.first = idau;
-                    else if (daughter_indices.second == -1) daughter_indices.second = idau;
-                    else break;
-                }
-                if (daughter_indices.first == -1 && daughter_indices.second == -1) continue;
-                genwdaughteridxs.push_back(daughter_indices);
-                genwleptonic.push_back(abs(tas::genps_id()[daughter_indices.first]) <= 16 && abs(tas::genps_id()[daughter_indices.first]) >= 11);
-                bool istau = abs(tas::genps_id()[daughter_indices.first]) <= 16 && abs(tas::genps_id()[daughter_indices.first]) >= 15;
-                genwtau.push_back(istau);
-                if (istau) {
-                    if (abs(tas::genps_id()[daughter_indices.first]) == 15) tauidxs.push_back(daughter_indices.first);
-                    else  tauidxs.push_back(daughter_indices.second);
-                }
+            // Get all hadronically decaying (1- and 3-prong) Generator-Level
+            // Taus in the event
+            std::vector<GenTau> gentaus = GenTau::build();
+            for(auto& gt : gentaus) gen_kin.fill(gt);
+
+            std::vector<GenTau> gentaus_pass_accept;
+            for(auto& gt : gentaus){
+                if(gt.passes_acceptance()) gentaus_pass_accept.push_back(gt);
             }
 
-            vector<int> hadronicgentauidxs;
-            vector<int> hadronicpftauidxs;
-            for (auto tauidx : tauidxs) {
-                vector<int> taudaughteridxs;
-                for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
-                    int midx = tas::genps_idx_mother()[igen];
-                    int id = tas::genps_id()[igen];
-                    if (midx == tauidx) {
-                        taudaughteridxs.push_back(id);
-                    }
-                }
-                bool foundemu = false;
-                for (auto id : taudaughteridxs) {
-                    if (abs(id) == 13 || abs(id) == 11) foundemu = true;
-                }
-                if (!foundemu) hadronicgentauidxs.push_back(tauidx);
+            // Get all Particle-Flow Taus in event
+            std::vector<PFTau> pftaus = PFTau::build();
+            for(auto& pft : pftaus) pf_kin.fill(pft);
+
+            // Get all Particle-Flow Taus in event that pass:
+            //   - acceptance
+            std::vector<PFTau> pftaus_pass_accept;
+            for(auto& pft : pftaus){
+                if(pft.passes_acceptance())
+                    pftaus_pass_accept.push_back(pft);
             }
 
-            // At this point, size of hadronic gen tau idxs vector matches the 
-            // distribution of hadronic tops from the python script
-            if (hadronicgentauidxs.size()  < 1) continue;
-
-            for (auto genidx : hadronicgentauidxs) {
-                int matchidx = -1;
-                int mindR = 999.;
-                for (unsigned int ipf = 0; ipf < tas::taus_pf_p4().size(); ipf++){
-                    auto pftau = tas::taus_pf_p4()[ipf];
-                    auto gentau = tas::genps_p4()[genidx];
-                    float dR = ROOT::Math::VectorUtil::DeltaR(pftau,gentau);
-                    if (dR > 0.5) continue;
-                    if (dR < mindR) {
-                        matchidx = ipf;
-                        mindR = dR;
-                    }
-                }
-                hadronicpftauidxs.push_back(matchidx);
+            // Get all Particle-Flow Taus in event that pass:
+            //   - acceptance
+            //   - identification
+            std::vector<PFTau> pftaus_pass_id;
+            std::vector<PFTau> pftaus_pass_id_old;
+            for(auto& pft : pftaus){
+                if(!pft.passes_acceptance()) continue;
+                if(pft.passes_id("byTightIsolationMVArun2v1DBdR03oldDMwLT"))
+                    pftaus_pass_id.push_back(pft);
+                if(pft.passes_id("byTightIsolationMVArun2v1DBoldDMwLT"))
+                    pftaus_pass_id_old.push_back(pft);
             }
 
-            // std::cout <<  " hadronicgentauidxs.size(): " << hadronicgentauidxs.size() <<  std::endl;
-            // for (int i = 0; i < hadronicgentauidxs.size(); i++) {
-            //     int genidx = hadronicgentauidxs[i];
-            //     int pfidx = hadronicpftauidxs[i];
-            //     if (pfidx < 0) continue;
-            //     float genpt = tas::genps_p4()[genidx].pt();
-            //     float pfpt = tas::taus_pf_p4()[pfidx].pt();
-            //     std::cout <<  " genpt: " << genpt <<  " pfpt: " << pfpt <<  std::endl;
-            // }
-            // // for (auto genidx : hadronicgentauidxs) {
-            // // }
-            // // std::cout << std::endl;
-            // // for (auto pfidx : hadronicpftauidxs) {
-            // //     if (pfidx < 0)  {
-            // //         std::cout << "       ";
-            // //         continue;
-            // //     }
-            // // }
-            // // std::cout << std::endl;
+            // acceptance efficiency (accept)
+            // Proportion of GenTaus that pass acceptance requirement
+            for(auto& gentau : gentaus){
+                accept_eff.fill(gentau.p4.pt(), gentau.passes_acceptance());
+            }
 
-            
+            // reco efficiency (reco wrt accept)
+            // Proportion of Gentaus that pass acceptance and match a PFTau over
+            // the number that only pass acceptance
+            match(gentaus_pass_accept, pftaus_pass_accept, 0.5);
+            for(auto& gentau : gentaus_pass_accept){
+                reco_eff.fill(gentau.p4.pt(), gentau.matched_pftau != nullptr);
+            }
 
+            // ID efficiency (id wrt reco)
+            // Proportion of PFTaus with match that pass acceptance and ID over only acceptance
+            for(auto& pftau : pftaus_pass_accept){
+                if(pftau.matched_gentau == nullptr) continue;
+                id_eff.fill(pftau.p4.pt(), pftau.passes_id("byTightIsolationMVArun2v1DBdR03oldDMwLT"));
+            }
 
+            // "ultimate" efficiency (reco + id wrt accept)
+            match(gentaus_pass_accept, pftaus_pass_id, 0.5);
+            for(const GenTau& gentau : gentaus_pass_accept){
+                ult_eff.fill(gentau.p4.pt(), gentau.matched_pftau != nullptr);
+            }
 
-        }//event loop
+            // ID efficiency (id wrt reco)
+            // Proportion of PFTaus with match that pass acceptance and ID over only acceptance
+            for(auto& pftau : pftaus_pass_accept){
+                if(pftau.matched_gentau == nullptr) continue;
+                id_eff_old.fill(pftau.p4.pt(), pftau.passes_id("byTightIsolationMVArun2v1DBoldDMwLT"));
+            }
 
+            // "ultimate" efficiency (reco + id wrt accept)
+            match(gentaus_pass_accept, pftaus_pass_id_old, 0.5);
+            for(const GenTau& gentau : gentaus_pass_accept){
+                ult_eff_old.fill(gentau.p4.pt(), gentau.matched_pftau != nullptr);
+            }
+
+        }  // event loop
         delete file;
-    }//file loop
+    }  // file loop
+    cout << "\nLoop Finished. Saving Results... " << flush;
 
-    // TString comt = " --outOfFrame --lumi 1.0 --type Simulation --darkColorLines --legendCounts --legendRight -0.05  --outputName plots/";
-    // std::string com = comt.Data();
-    // TH1F * empty = new TH1F("","",1,0,1);
+    dest_file->cd();
+    accept_eff.save();
+    reco_eff.save();
+    id_eff.save();
+    ult_eff.save();
+    id_eff_old.save();
+    ult_eff_old.save();
 
-    // dataMCplotMaker(empty,{h_met} ,{"t#bar{t}"},"MET","",com+"h_met.pdf --isLinear");
+    pf_kin.save();
+    gen_kin.save();
 
+    cout << "Done!" << endl;
     return 0;
-
 }
-

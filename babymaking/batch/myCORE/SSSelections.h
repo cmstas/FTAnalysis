@@ -12,26 +12,38 @@
 #include "Math/VectorUtil.h"
 #include "Tools/JetCorrector.h"
 #include "Tools/utils.h"
+#include "cfg.h"
 
 const static float ptCutHigh = 25.;
 const static int   ssWhichCorr = 2;
 const static int   ssEAversion = 1;
 // const static float btagCut = 0.8484; // CSVv2M https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
 const static float btagCut = 0.6324; // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
-const static float jetMinPt = 40.; // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
-const static float bjetMinPt = 25.; // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
 
 float ptCutLowAG(int id);
 
 //Enums
 enum anal_type_t { HighHigh = 0, HighLow = 1, LowLow = 2, Undefined = -1 };
-enum hyp_type_t { EE, MM, EM, UNASSIGNED }; 
-enum est_type_t { MCSS, FLIPMC, SFAKEMC, DFAKEMC, FLIPDD, SFAKEDD, DFAKEDD, ALLMC }; 
+enum hyp_type_t { EE, MM, EM, UNASSIGNED };
+enum est_type_t { MCSS, FLIPMC, SFAKEMC, DFAKEMC, FLIPDD, SFAKEDD, DFAKEDD, ALLMC };
+
 //fixme: put WF and FSR in different categories
-enum LeptonCategories { Prompt = 0, PromptWS = 1, PromptWF = 2, PromptFSR = 2, 
-			FakeLightTrue = 3, FakeC = 4, FakeB = 5, FakeLightFake = 6, FakeHiPtGamma = 7, 
-			FakeUnknown = 8, FakeLowPtGamma = 9, All9999 = 10,
-			Other = 11, End = 12};
+enum LeptonCategories {
+    Prompt = 0,
+    romptWS = 1,
+    PromptWF = 2,
+    PromptFSR = 2,
+    FakeLightTrue = 3,
+    FakeC = 4,
+    FakeB = 5,
+    FakeLightFake = 6,
+    FakeHiPtGamma = 7,
+    FakeUnknown = 8,
+    FakeLowPtGamma = 9,
+    All9999 = 10,
+    Other = 11,
+    End = 12
+};
 
 //Structs
 struct Lep;

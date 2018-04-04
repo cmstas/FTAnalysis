@@ -3,6 +3,7 @@
 #include "CORE/Tools/jetcorr/Utilities.icc"
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
+#include "cfg.h"
 
 using namespace tas;
 
@@ -1416,167 +1417,96 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // for applying btagging SFs, using Method 1a from the twiki below:
   //   https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
   //   https://twiki.cern.ch/twiki/pub/CMS/BTagSFMethods/Method1aExampleCode_CSVM.cc.txt
-  float btagprob_data = 1.;
-  float btagprob_err_heavy_UP = 0.;
-  float btagprob_err_heavy_DN = 0.;
-  float btagprob_err_light_UP = 0.;
-  float btagprob_err_light_DN = 0.;
-  float btagprob_mc = 1.;
   jet_results = SSJetsCalculator(jetCorr, 1, 0, 1);
-  for (unsigned int i = 0; i < jet_results.first.size(); i++) {
-     if (is_real_data) continue;
-     //get btag eff weights
-     float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
-     // Don't consider any jets below 25
-     if (jet_pt<bjetMinPt) continue;
-     // Don't consider nonbjets with 25<pT<40
-     // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
-     float jet_eta = jet_results.first.at(i).p4().eta();
-     int jet_mcFlavour = jet_results.first.at(i).mcFlavor();
-     float eff = getBtagEffFromFile(jet_pt, jet_eta, jet_mcFlavour);
-     BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
-     if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
-     else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
-     float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt)));
-     float weight_cent(1.), weight_UP(1.), weight_DN(1.);
-     if (flavor == BTagEntry::FLAV_UDSG) {
-       weight_cent    = reader_light->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_light_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_light_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     else {
-       weight_cent    = reader_heavy->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_heavy_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_heavy_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     if (isFastsim > 0){
-       weight_cent *= reader_fastsim->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP   *= reader_fastsim_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN   *= reader_fastsim_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     // std::cout <<  " i: " << i <<  " jet_pt: " << jet_pt <<  " weight_cent: " << weight_cent <<  " eff: " << eff <<  " jet_mcFlavour: " << jet_mcFlavour <<  " jet_results.first.at(i).isBtag(): " << jet_results.first.at(i).isBtag() <<  std::endl;
-     if (jet_results.first.at(i).isBtag()) {
-       btagprob_data *= weight_cent * eff;
-       btagprob_mc *= eff;
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
+  for (int reader_light_id=1; reader_light_id<=2; reader_light_id++) { // Loop over each light flavor id file
+    float btagprob_data = 1.;
+    float btagprob_err_heavy_UP = 0.;
+    float btagprob_err_heavy_DN = 0.;
+    float btagprob_err_light_UP = 0.;
+    float btagprob_err_light_DN = 0.;
+    float btagprob_mc = 1.;
+    for (unsigned int i = 0; i < jet_results.first.size(); i++) {
+       if (is_real_data) continue;
+       //get btag eff weights
+       float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
+       // Don't consider any jets below 25
+       if (jet_pt<cfg.bjetMinPt) continue;
+       // Don't consider nonbjets with 25<pT<40
+       // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
+       float jet_eta = jet_results.first.at(i).p4().eta();
+       int jet_mcFlavour = jet_results.first.at(i).mcFlavor();
+       float eff = getBtagEffFromFile(jet_pt, jet_eta, jet_mcFlavour);
+       BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
+       if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
+       else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
+       float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt)));
+       float weight_cent(1.), weight_UP(1.), weight_DN(1.);
        if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += abserr_UP/weight_cent;
-         btagprob_err_light_DN += abserr_DN/weight_cent;
+         if (reader_light_id == 1) {
+           weight_cent    = reader_light->eval(flavor, jet_eta, pt_cutoff);
+           weight_UP      = reader_light_UP->eval(flavor, jet_eta, pt_cutoff);
+           weight_DN      = reader_light_DN->eval(flavor, jet_eta, pt_cutoff);
+         } else if (reader_light_id == 2) {
+           weight_cent    = reader_light2->eval(flavor, jet_eta, pt_cutoff);
+           weight_UP      = reader_light2_UP->eval(flavor, jet_eta, pt_cutoff);
+           weight_DN      = reader_light2_DN->eval(flavor, jet_eta, pt_cutoff);
+         }
        }
        else {
-         btagprob_err_heavy_UP += abserr_UP/weight_cent;
-         btagprob_err_heavy_DN += abserr_DN/weight_cent;
+         weight_cent    = reader_heavy->eval(flavor, jet_eta, pt_cutoff);
+         weight_UP      = reader_heavy_UP->eval(flavor, jet_eta, pt_cutoff);
+         weight_DN      = reader_heavy_DN->eval(flavor, jet_eta, pt_cutoff);
        }
-     }
-     else {
-       btagprob_data *= (1. - weight_cent * eff);
-       btagprob_mc *= (1. - eff);
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
-       if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+       if (isFastsim > 0){
+         weight_cent *= reader_fastsim->eval(flavor, jet_eta, pt_cutoff);
+         weight_UP   *= reader_fastsim_UP->eval(flavor, jet_eta, pt_cutoff);
+         weight_DN   *= reader_fastsim_DN->eval(flavor, jet_eta, pt_cutoff);
+       }
+       if (jet_results.first.at(i).isBtag()) {
+         btagprob_data *= weight_cent * eff;
+         btagprob_mc *= eff;
+         float abserr_UP = weight_UP - weight_cent;
+         float abserr_DN = weight_cent - weight_DN;
+         if (flavor == BTagEntry::FLAV_UDSG) {
+           btagprob_err_light_UP += abserr_UP/weight_cent;
+           btagprob_err_light_DN += abserr_DN/weight_cent;
+         }
+         else {
+           btagprob_err_heavy_UP += abserr_UP/weight_cent;
+           btagprob_err_heavy_DN += abserr_DN/weight_cent;
+         }
        }
        else {
-         btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+         btagprob_data *= (1. - weight_cent * eff);
+         btagprob_mc *= (1. - eff);
+         float abserr_UP = weight_UP - weight_cent;
+         float abserr_DN = weight_cent - weight_DN;
+         if (flavor == BTagEntry::FLAV_UDSG) {
+           btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+           btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+         }
+         else {
+           btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+           btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+         }
        }
-     }
-     if (verbose) {
-       cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
-       cout << Form("eff, SF = %f %f",eff,weight_cent) << endl;
-       cout << Form("partial SF is %f",btagprob_data / btagprob_mc) << endl;
-     }
-     // btags_effpt.push_back(jet_pt);
-     // btags_eff.push_back(eff);
-     // btags_sf.push_back(weight_cent);
-  }
-  weight_btagsf1 = btagprob_data / btagprob_mc;
-  weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-  weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
-  // std::cout <<  " btagprob_data: " << btagprob_data <<  " btagprob_mc: " << btagprob_mc <<  " weight_btagsf1: " << weight_btagsf1 <<  std::endl;
 
-  // --------------------------------------- //
-  // AGAIN BECAUSE THERE'S TWO GODDAMN FILES //
-  // --------------------------------------- //
-  btagprob_data = 1.;
-  btagprob_err_heavy_UP = 0.;
-  btagprob_err_heavy_DN = 0.;
-  btagprob_err_light_UP = 0.;
-  btagprob_err_light_DN = 0.;
-  btagprob_mc = 1.;
-  for (unsigned int i = 0; i < jet_results.first.size(); i++) {
-     if (is_real_data) continue;
-     //get btag eff weights
-     float jet_pt = jet_results.first.at(i).p4().pt()*jet_results.first.at(i).undo_jec()*jet_results.first.at(i).jec();
-     // Don't consider any jets below 25
-     if (jet_pt<bjetMinPt) continue;
-     // Don't consider nonbjets with 25<pT<40
-     // if ((!jet_results.first.at(i).isBtag()) && (jet_pt<40.)) continue;
-     float jet_eta = jet_results.first.at(i).p4().eta();
-     int jet_mcFlavour = jet_results.first.at(i).mcFlavor();
-     float eff = getBtagEffFromFile(jet_pt, jet_eta, jet_mcFlavour);
-     BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
-     if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
-     else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
-     float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt)));
-     float weight_cent(1.), weight_UP(1.), weight_DN(1.);
-     if (flavor == BTagEntry::FLAV_UDSG) {
-       weight_cent    = reader_light2->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_light2_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_light2_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     else {
-       weight_cent    = reader_heavy->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP      = reader_heavy_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN      = reader_heavy_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     if (isFastsim > 0){
-       weight_cent *= reader_fastsim->eval(flavor, jet_eta, pt_cutoff);
-       weight_UP   *= reader_fastsim_UP->eval(flavor, jet_eta, pt_cutoff);
-       weight_DN   *= reader_fastsim_DN->eval(flavor, jet_eta, pt_cutoff);
-     }
-     if (jet_results.first.at(i).isBtag()) {
-       btagprob_data *= weight_cent * eff;
-       btagprob_mc *= eff;
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
-       if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += abserr_UP/weight_cent;
-         btagprob_err_light_DN += abserr_DN/weight_cent;
+       if (verbose) {
+         cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
+         cout << Form("eff, SF = %f %f",eff,weight_cent) << endl;
+         cout << Form("partial SF is %f",btagprob_data / btagprob_mc) << endl;
        }
-       else {
-         btagprob_err_heavy_UP += abserr_UP/weight_cent;
-         btagprob_err_heavy_DN += abserr_DN/weight_cent;
-       }
-     }
-     else {
-       btagprob_data *= (1. - weight_cent * eff);
-       btagprob_mc *= (1. - eff);
-       float abserr_UP = weight_UP - weight_cent;
-       float abserr_DN = weight_cent - weight_DN;
-       if (flavor == BTagEntry::FLAV_UDSG) {
-         btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
-       }
-       else {
-         btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-         btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
-       }
-     }
-     if (verbose) {
-       cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
-       cout << Form("eff, SF = %f %f",eff,weight_cent) << endl;
-       cout << Form("partial SF is %f",btagprob_data / btagprob_mc) << endl;
-     }
-     // btags_effpt.push_back(jet_pt);
-     // btags_eff.push_back(eff);
-     // btags_sf.push_back(weight_cent);
+    }
+    if (reader_light_id == 1) {
+      weight_btagsf1 = btagprob_data / btagprob_mc;
+      weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
+      weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
+    } else if (reader_light_id == 2) {
+      weight_btagsf2 = btagprob_data / btagprob_mc;
+      weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
+      weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
+    }
   }
-  weight_btagsf2 = btagprob_data / btagprob_mc;
-  weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-  weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
 
   // Now we do this stupid thing of rolling a random number and
   // deciding which era the MC "belongs to", to assign the proper btag weight
@@ -1644,18 +1574,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     jecUnc->setJetPt(rawpt*JEC);
     float jetUnc = jecUnc->getUncertainty(true);
 
-    if ( (rawpt*JEC*(1-jetUnc) < bjetMinPt)
-      && (rawpt*JEC*(1+jetUnc) < bjetMinPt)
-      && (rawpt*JEC*(1       ) < bjetMinPt) ) continue;
+    if ( (rawpt*JEC*(1-jetUnc) < cfg.bjetMinPt)
+      && (rawpt*JEC*(1+jetUnc) < cfg.bjetMinPt)
+      && (rawpt*JEC*(1       ) < cfg.bjetMinPt) ) continue;
 
     //Save results
     mostJets.push_back(jet);
     // if (rawpt*JEC > jetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
-    if (rawpt*JEC > bjetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
+    if (rawpt*JEC > cfg.bjetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
     else                                                     mostJets_jet.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1+jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_up.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1+jetUnc) > cfg.bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_up.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_up.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1-jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_dn.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1-jetUnc) > cfg.bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_dn.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_dn.push_back(Jet(-1, -9999));
     mostJets_rawp4.push_back(jet*tas::pfjets_undoJEC().at(i));
     mostJets_idx.push_back(i);
@@ -1678,21 +1608,21 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (mostJets_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i);
-    if (jet_pt > bjetMinPt && mostJets_disc.at(i) > btagCut) nbtagsAG++;
-    if (jet_pt > jetMinPt) njetsAG++;
+    if (jet_pt > cfg.bjetMinPt && mostJets_disc.at(i) > btagCut) nbtagsAG++;
+    if (jet_pt > cfg.jetMinPt) njetsAG++;
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_up_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_up = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0+mostJets_unc.at(i));
-    if (jet_pt_up > jetMinPt) {
+    if (jet_pt_up > cfg.jetMinPt) {
         njets_unc_up++;
         jets_jec_up.push_back(mostJets.at(i));
         jets_disc_up.push_back(mostJets_disc.at(i));
         ht_unc_up += jet_pt_up;
     }
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_up > bjetMinPt) {
+    if (jet_pt_up > cfg.bjetMinPt) {
         nbtags_unc_up++;
         bjets_jec_up.push_back(mostJets.at(i));
     }
@@ -1701,14 +1631,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (mostJets_dn_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt_dn = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0-mostJets_unc.at(i));
-    if (jet_pt_dn > jetMinPt) {
+    if (jet_pt_dn > cfg.jetMinPt) {
         njets_unc_dn++;
         jets_jec_dn.push_back(mostJets.at(i));
         jets_disc_dn.push_back(mostJets_disc.at(i));
         ht_unc_dn += jet_pt_dn;
     }
     if (mostJets_disc.at(i) < btagCut) continue;
-    if (jet_pt_dn > bjetMinPt) {
+    if (jet_pt_dn > cfg.bjetMinPt) {
         nbtags_unc_dn++;
         bjets_jec_dn.push_back(mostJets.at(i));
     }
@@ -1764,11 +1694,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             float ptJER = smearing[0]; // these are the actual pTs, not scale factors, so don't multiply
             float JER = ptJER/(rawpt*JEC); // JER wrt *corrected* jet
 
-            if ( (ptJER    < bjetMinPt) ) continue;
+            if ( (ptJER    < cfg.bjetMinPt) ) continue;
 
             //Save results
             jer_mostJets.push_back(jet);
-            if (ptJER > bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
+            if (ptJER > cfg.bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
             else                                                     jer_mostJets_jet.push_back(Jet(-1, -9999));
             jer_mostJets_idx.push_back(i);
             jer_mostJets_disc.push_back(tas::getbtagvalue("deepFlavourJetTags:probb",i)+tas::getbtagvalue("deepFlavourJetTags:probbb",i));
@@ -1789,9 +1719,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             if (jer_mostJets_passCleaning.at(i) == 0) continue;
             if (jer_mostJets_passID.at(i) == 0) continue;
             float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
-            if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
-            if (jet_pt > jetMinPt) ht_JER_up += jet_pt;
-            if (jet_pt > jetMinPt) njets_JER_up++;
+            if (jet_pt > cfg.bjetMinPt && jer_mostJets_disc.at(i) > btagCut) nbtags_JER_up++;
+            if (jet_pt > cfg.jetMinPt) ht_JER_up += jet_pt;
+            if (jet_pt > cfg.jetMinPt) njets_JER_up++;
         }
         njets_JER_dn = max(2*njets-njets_JER_up,0);
         nbtags_JER_dn = max(2*nbtags-nbtags_JER_up,0);

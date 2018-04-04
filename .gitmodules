@@ -1,0 +1,15 @@
+[submodule "babymaking/batch/NtupleTools"]
+	path = babymaking/batch/NtupleTools
+	url = git@github.com:cmstas/NtupleTools.git
+[submodule "common/Software"]
+	path = common/Software
+	url = git@github.com:cmstas/Software.git
+[submodule "common/CORE"]
+	path = common/CORE
+	url = git@github.com:cmstas/CORE.git
+[submodule "common/HiggsAnalysis-CombinedLimit"]
+	path = common/HiggsAnalysis-CombinedLimit
+	url = https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git
+[submodule "common/yaml-cpp"]
+	path = common/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+from __future__ import print_function
 
 import sys
 import os
@@ -8,13 +9,12 @@ import createCard
 import commands
 import ROOT as r
 import numpy as np
-import pprint
 
 def get_yields(card, regions="srcr",stats_only=False):
 
     if ".txt" not in card:
         card += "/card_tttt_{0}.txt".format(regions)
-        print ">>> [!] no card name specified, so using {0}".format(card)
+        print(">>> [!] no card name specified, so using {0}".format(card))
 
     full_card_name = "{0}".format(card)
 
@@ -77,7 +77,8 @@ def get_yields(card, regions="srcr",stats_only=False):
                 up = val*central-central
 
             if kind == "shape":
-                up = val*np.array(list(f1.Get(ns["name"]+"Up"))[1:-1])-central
+                # up = val*np.array(list(f1.Get(ns["name"]+"Up"))[1:-1])-central
+                up = 0
 
             upper += up**2.0
 
@@ -112,33 +113,35 @@ def get_yields(card, regions="srcr",stats_only=False):
 
 def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
     nbins = len(d_yields["ttz"]["central"])
-    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    # procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
-    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Fakes","Total","Data","$\\tttt$"]
+    colname_lookup = {
+        "ttw":   "$\\ttW$",
+        "ttz":   "$\\ttZ$",
+        "tth":   "$\\ttH$",
+        "ttvv":  "$\\ttVV$",
+        "xg":    "X+$\\gamma$",
+        "rares": "Rares",
+        "flips": "Flips",
+        "fakes": "Fakes",
+        "bgtot": "Total",
+        "data":  "Data",
+        "tttt":  "$\\tttt$"
+    }
     procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
     if slim:
-        # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Fakes MC","Total","$\\tttt$"]
-        # procs = ["ttw","ttz","tth","fakes_mc","bgtot","tttt"]
-        colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Total","$\\tttt$"]
         procs = ["ttw","ttz","tth","bgtot","tttt"]
-    # srnames = ["CRZ","CRW","SR1","SR2","SR3","SR4","SR5","SR6","SR7","SR8"]
     if regions == "srcr":
-        srnames = ["CRZ","CRW"]+["SR{}".format(i) for i in range(1,17)]
+        srnames = ["CRZ","CRW"]+["SR{}".format(i+1) for i in range(16)]
     elif regions == "srdisc":
-        # srnames = ["SR{}".format(i) for i in range(1,15)]
-        srnames = ["SR{}".format(i) for i in range(1,14)]
+        srnames = ["SR{}".format(i+1) for i in range(13)]
 
     if not pretty:
-        for ibin in range(nbins):
-            # print ibin
-            if ibin == 0:
-                print "&".join(map(lambda x: "{0:12s}".format(x),colnames)),
-                print r"\\"
-                print r"\hline\hline"
+        header = "&".join("{0:12s}".format(colname_lookup[proc]) for proc in procs)
+        header += r"\\ \hline\hline"
+        body = []
+        for ibin, srname in enumerate(srnames):
 
-            tojoin = [srnames[ibin]]
+            tojoin = [srname]
             for proc in procs:
-                # print proc
                 # cent = d_yields[proc]["central"][ibin]
                 cent = max(d_yields[proc]["central"][ibin],0.)
                 err = d_yields[proc]["error"][ibin]
@@ -149,16 +152,13 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
                         tojoin.append("-".format(cent))
                 else:
                     tojoin.append("{0:5.2f}$\\pm${1:5.2f}".format(cent,err))
-            print " & ".join(tojoin),
-            print r"\\"
-
+            body.append(" & ".join(tojoin) + r"\\")
+        print("\n".join([header]+body)
     else:
-
         from pytable import Table
         tab = Table()
         tab.set_column_names([cname.replace("$","").replace("\\","") for cname in colnames])
-        sep = u"\u00B1".encode("utf-8")
-        # sep = "+-"
+        sep = u"\u00B1".encode("utf-8")  # +-
         if len(srnames)+1 == len(d_yields[d_yields.keys()[0]]["central"]):
             # if we have one more bin than bins we expect,
             # the protocol is that the last one was made to be
@@ -177,6 +177,7 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
 
 
 if __name__ == "__main__":
+    import json
 
     parser = argparse.ArgumentParser()
     parser.add_argument("card", help="card name in directory")
