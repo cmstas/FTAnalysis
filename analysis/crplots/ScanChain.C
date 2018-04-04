@@ -91,10 +91,6 @@ int ScanChain(TChain *ch){
                 if (duplicate_removal::is_duplicate(id)) continue; 
             }
 
-            // if (which == 1 && ss::hyp_class() != 4 && ss::hyp_class() != 6) continue;
-            // if (which == SIGNAL && ss::hyp_class() != 3) continue;
-            // if (type == FAKES && ss::hyp_class() != 2) continue;
-
             //Calculate weight
             float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
