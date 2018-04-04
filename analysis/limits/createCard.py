@@ -254,9 +254,9 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     card.write("\n")
 
     #nuisance isrvar
-    # card.write("%-40s %-5s " % ("isrvar","shape"))
-    # for process in processes: card.write("%-15s " % (process.isrvar))
-    # card.write("\n")
+    card.write("%-40s %-5s " % ("isrvar","shape"))
+    for process in processes: card.write("%-15s " % (process.isrvar))
+    card.write("\n")
     #nuisance fsrvar
     card.write("%-40s %-5s " % ("fsrvar","shape"))
     for process in processes: card.write("%-15s " % (process.fsrvar))
@@ -508,7 +508,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     processes.append(TTH)
     # processes.append(WZ)
     # processes.append(WW)
-    # processes.append(XG)
+    processes.append(XG)
     processes.append(rares)
     processes.append(fakes)
     processes.append(flips)

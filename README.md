@@ -36,7 +36,7 @@ cd analysis/limits/
 ## Hitting the ground running (quick start for running the new baseline)
 ```
 # clone and set up
-git clone --recurse-submodules -b new_baseline https://github.com/cfangmeier/FTAnalysis
+git clone --recurse-submodules -b new_baseline https://github.com/cmstas/FTAnalysis
 cd FTAnalysis
 source /code/osgcode/cmssoft/cms/cmsset_default.sh # might as well put in .bashrc
 source setup.sh build # configure ssh token with github since `git clone git@...` syntax used here
