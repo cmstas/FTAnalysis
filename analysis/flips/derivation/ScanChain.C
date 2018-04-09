@@ -10,10 +10,10 @@
 #include "TChain.h"
 #include "Math/VectorUtil.h"
 
-#include "../misc/class_files/v8.02/SS.h"
-#include "../../common/CORE/Tools/utils.h"
-#include "../misc/common_utils.h"
-#include "../misc/signal_regions.h"
+#include "../../misc/class_files/v8.02/SS.h"
+#include "../../../common/CORE/Tools/utils.h"
+#include "../../misc/common_utils.h"
+#include "../../misc/signal_regions.h"
 
 using namespace std;
 // using namespace tas;
@@ -28,8 +28,10 @@ void flip(TChain *ch) {
   float ybins[] = { 0, 0.8, 1.479, 2.5 }; 
   TH2D *numer = new TH2D("numer" , "numer" , nBinsX, xbins, nBinsY, ybins);
   TH2D *denom = new TH2D("denom" , "denom" , nBinsX, xbins, nBinsY, ybins);
+  TH2D *numer_raw = new TH2D("numer_raw" , "numer_raw" , nBinsX, xbins, nBinsY, ybins);
   numer->Sumw2();
   denom->Sumw2();
+  numer_raw->Sumw2();
 
   //Set up chains
   TChain *chain = new TChain("t");
@@ -62,10 +64,10 @@ void flip(TChain *ch) {
             SSAG::progress(nEventsTotal, nEventsChain);
 
             //Calculate weight
-            float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
+            float weight = ss::is_real_data() ? 1 : fabs(ss::scale1fb())*lumiAG;
 
             if (!ss::is_real_data()) {
-                weight *= getTruePUw(ss::trueNumInt()[0]);
+                // weight *= getTruePUw(ss::trueNumInt()[0]);
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
                 // weight *= ss::weight_btagsf();
             }
@@ -88,6 +90,9 @@ void flip(TChain *ch) {
             if (isCF1) numer->Fill(ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta()), weight); 
             if (isCF2) numer->Fill(ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta()), weight); 
 
+            if (isCF1) numer_raw->Fill(ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta())); 
+            if (isCF2) numer_raw->Fill(ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta())); 
+
         }//event loop
 
         delete file;
@@ -102,6 +107,7 @@ void flip(TChain *ch) {
     numer->Write();
     denom->Write();
     ratio->Write();
+    numer_raw->Write();
 
     f1->Close();
 
