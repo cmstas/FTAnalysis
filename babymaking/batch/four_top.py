@@ -12,6 +12,7 @@ d_ds2name = {
 
             "/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v2/MINIAODSIM": "DY_low",
             "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAOD-RECOSIMstep_94X_mc2017_realistic_v10-v1/MINIAODSIM": "DY_high",
+            "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAOD-RECOSIMstep_94X_mc2017_realistic_v10_ext1-v1/MINIAODSIM": "DY_highext1",
 
             # note: 92X
             "/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer17MiniAOD-92X_upgrade2017_realistic_v10-v1/MINIAODSIM": "WJets",
@@ -59,32 +60,29 @@ d_ds2name = {
             },
         "data": {
 
-                "/DoubleEG/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleEGB",
-                "/DoubleEG/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleEGB",
-                "/DoubleEG/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleEGB",
-                "/DoubleEG/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleEGC",
-                "/DoubleEG/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleEGC",
-                "/DoubleEG/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleEGC",
+                "/DoubleEG/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleEGBv1",
+                "/DoubleEG/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleEGBv2",
+                "/DoubleEG/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleEGCv1",
+                "/DoubleEG/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleEGCv2",
+                "/DoubleEG/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleEGCv3",
                 "/DoubleEG/Run2017D-PromptReco-v1/MINIAOD": "DataDoubleEGD",
                 "/DoubleEG/Run2017E-PromptReco-v1/MINIAOD": "DataDoubleEGE",
                 "/DoubleEG/Run2017F-PromptReco-v1/MINIAOD": "DataDoubleEGF",
 
-                "/MuonEG/Run2017B-PromptReco-v1/MINIAOD": "DataMuonEGB",
-                "/MuonEG/Run2017B-PromptReco-v1/MINIAOD": "DataMuonEGB",
-                "/MuonEG/Run2017B-PromptReco-v2/MINIAOD": "DataMuonEGB",
-                "/MuonEG/Run2017C-PromptReco-v1/MINIAOD": "DataMuonEGC",
-                "/MuonEG/Run2017C-PromptReco-v2/MINIAOD": "DataMuonEGC",
-                "/MuonEG/Run2017C-PromptReco-v3/MINIAOD": "DataMuonEGC",
+                "/MuonEG/Run2017B-PromptReco-v1/MINIAOD": "DataMuonEGBv1",
+                "/MuonEG/Run2017B-PromptReco-v2/MINIAOD": "DataMuonEGBv2",
+                "/MuonEG/Run2017C-PromptReco-v1/MINIAOD": "DataMuonEGCv1",
+                "/MuonEG/Run2017C-PromptReco-v2/MINIAOD": "DataMuonEGCv2",
+                "/MuonEG/Run2017C-PromptReco-v3/MINIAOD": "DataMuonEGCv3",
                 "/MuonEG/Run2017D-PromptReco-v1/MINIAOD": "DataMuonEGD",
                 "/MuonEG/Run2017E-PromptReco-v1/MINIAOD": "DataMuonEGE",
                 "/MuonEG/Run2017F-PromptReco-v1/MINIAOD": "DataMuonEGF",
 
-                "/DoubleMuon/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleMuonB",
-                "/DoubleMuon/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleMuonB",
-                "/DoubleMuon/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleMuonB",
-                "/DoubleMuon/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleMuonC",
-                "/DoubleMuon/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleMuonC",
-                "/DoubleMuon/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleMuonC",
+                "/DoubleMuon/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleMuonBv1",
+                "/DoubleMuon/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleMuonBv2",
+                "/DoubleMuon/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleMuonCv1",
+                "/DoubleMuon/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleMuonCv2",
+                "/DoubleMuon/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleMuonCv3",
                 "/DoubleMuon/Run2017D-PromptReco-v1/MINIAOD": "DataDoubleMuonD",
                 "/DoubleMuon/Run2017E-PromptReco-v1/MINIAOD": "DataDoubleMuonE",
                 "/DoubleMuon/Run2017F-PromptReco-v1/MINIAOD": "DataDoubleMuonF",
@@ -105,7 +103,9 @@ sweepRoot_scripts = [inputs_path+"sweeproot.sh", inputs_path+"sweeproot_macro.C"
 merging_scripts = [inputs_path+"merge_script.sh", inputs_path+"merge_macro.C"]
 baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 
-tag = "v1.00_94x_baseline_v1"
+# tag = "v1.00_94x_baseline_v1"
+# tag = "v1.00_94x_baseline_dyonly_v1"
+tag = "v1.00_94x_baseline_withos_v3"
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
 dashboard_name = "AutoTwopler_FTbabies"
