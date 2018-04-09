@@ -18,6 +18,9 @@ export PYTHONPATH=$PWD/:$PYTHONPATH
 # export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/:$PYTHONPATH
 # export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages/:$PYTHONPATH
 
+[[ -d common/matplottery/ ]] || {
+    git clone git@github.com:aminnj/matplottery.git common/matplottery/;
+}
 [[ -d babymaking/batch/NtupleTools/ ]] || git clone git@github.com:cmstas/NtupleTools.git babymaking/batch/NtupleTools/
 [[ -d common/Software/ ]] || git clone git@github.com:cmstas/Software.git common/Software/
 [[ -d common/CORE/ ]] || {
