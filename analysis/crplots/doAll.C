@@ -8,8 +8,10 @@
     gROOT->ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc++");
     gROOT->ProcessLine(".L ScanChain.C+");
 
-    TString tag = "v1.00_94x_baseline_v1";
+    TString tag = "v1.00_94x_baseline_withos_v3";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
+
+    TString options = " doAllHT useEraBLowHTTriggers ";
 
     TChain *ch_data = new TChain("t","data");
     ch_data->Add(basedir+"Data*.root");
@@ -24,7 +26,8 @@
     ScanChain(ch_ttz);
 
     TChain *ch_dy = new TChain("t","dy");
-    ch_dy->Add(basedir+"DY*.root");
+    ch_dy->Add(basedir+"DY_low.root");
+    ch_dy->Add(basedir+"DY_high.root");
     ScanChain(ch_dy);
 
     TChain *ch_wjets = new TChain("t","wjets");

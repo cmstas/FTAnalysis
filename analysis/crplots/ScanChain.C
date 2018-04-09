@@ -21,7 +21,12 @@ using namespace std;
 
 float lumiAG = getLumi();
 
-int ScanChain(TChain *ch){
+
+
+int ScanChain(TChain *ch, TString options=""){
+
+    bool doAllHT = options.Contains("doAllHT");
+    bool useEraBLowHTTriggers = options.Contains("useEraBLowHTTriggers");
 
     std::cout << "Working on " << ch->GetTitle() << std::endl;
 
@@ -38,6 +43,7 @@ int ScanChain(TChain *ch){
     TH1D *h_os_pte     = new TH1D("os_pte"   , "pte"    , 25 , 0    , 300);
     TH1D *h_os_ptm     = new TH1D("os_ptm"   , "ptm"    , 25 , 0    , 300);
     TH1D *h_os_type     = new TH1D("os_type" , "type"   , 4  , 0    , 4);
+    TH1D *h_os_nvtx     = new TH1D("os_nvtx" , "nvtx"   , 50  , 0    , 50);
 
     TH1F *h_tl_met = new TH1F("tl_met"      , "met"    , 50 , 0    , 300);
     TH1D *h_tl_ht     = new TH1D("tl_ht"     , "ht"     , 50 , 0    , 1000);
@@ -52,6 +58,7 @@ int ScanChain(TChain *ch){
     TH1D *h_tl_pte     = new TH1D("tl_pte"   , "pte"    , 25 , 0    , 300);
     TH1D *h_tl_ptm     = new TH1D("tl_ptm"   , "ptm"    , 25 , 0    , 300);
     TH1D *h_tl_type     = new TH1D("tl_type" , "type"   , 4  , 0    , 4);
+    TH1D *h_tl_nvtx     = new TH1D("tl_nvtx" , "nvtx"   , 50  , 0    , 50);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -80,8 +87,20 @@ int ScanChain(TChain *ch){
             if (ss::lep1_coneCorrPt() < 25) continue;
             if (ss::lep2_coneCorrPt() < 20) continue;
             if (ss::met() < 50) continue;
-            if (ss::ht() < 400) continue;
-            if (!ss::fired_trigger()) continue;
+            if (!doAllHT) {
+                if (ss::ht() < 400) continue;
+            }
+
+            bool pass_trig = ss::fired_trigger();
+            if (useEraBLowHTTriggers && ss::is_real_data()) {
+                if (ss::run() <= 299329 && ss::run() >= 297046) {
+                    if ( ss::hyp_type()==0 && ((ss::triggers() & 1<<3)==(1<<3) || (ss::triggers() & 1<<4)==(1<<4)) ) pass_trig = true;
+                    else if ( ss::hyp_type()==3 && (ss::triggers() & 1<<6)==(1<<6) ) pass_trig = true;
+                    else if ( (ss::hyp_type()==1 || ss::hyp_type()==2) && ((ss::triggers() & 1<<1)==(1<<1) || (ss::triggers() & 1<<2)==(1<<2)) ) pass_trig = true;
+                    else {}
+                }
+            }
+            if (!pass_trig) continue;
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
@@ -97,7 +116,7 @@ int ScanChain(TChain *ch){
             if (ss::hyp_class() != 4 && ss::hyp_class() != 6 && ss::hyp_class() != 2) continue;
 
             if (!ss::is_real_data()) {
-                weight *= getTruePUw(ss::trueNumInt()[0]);
+                // weight *= getTruePUw(ss::trueNumInt()[0]);
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
                 // weight *= ss::weight_btagsf();
             }
@@ -118,6 +137,7 @@ int ScanChain(TChain *ch){
                 h_os_eta1->Fill(ss::lep1_p4().eta(), weight);
                 h_os_eta2->Fill(ss::lep2_p4().eta(), weight);
                 h_os_type->Fill(ss::hyp_type(), weight);
+                h_os_nvtx->Fill(ss::nGoodVertices(), weight);
             }
 
             if (ss::hyp_class() == 2) {
@@ -134,6 +154,7 @@ int ScanChain(TChain *ch){
                 h_tl_eta1->Fill(ss::lep1_p4().eta(), weight);
                 h_tl_eta2->Fill(ss::lep2_p4().eta(), weight);
                 h_tl_type->Fill(ss::hyp_type(), weight);
+                h_tl_nvtx->Fill(ss::nGoodVertices(), weight);
             }
 
         }//event loop
@@ -157,6 +178,7 @@ int ScanChain(TChain *ch){
     h_os_pte->Write();
     h_os_ptm->Write();
     h_os_type->Write();
+    h_os_nvtx->Write();
 
     h_tl_met->Write();
     h_tl_ht->Write();
@@ -171,6 +193,7 @@ int ScanChain(TChain *ch){
     h_tl_pte->Write();
     h_tl_ptm->Write();
     h_tl_type->Write();
+    h_tl_nvtx->Write();
 
     f1->Close();
 
