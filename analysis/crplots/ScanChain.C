@@ -21,44 +21,70 @@ using namespace std;
 
 float lumiAG = getLumi();
 
+struct HistCol {
+    map<string, TH1D> ee;
+    map<string, TH1D> em;
+    map<string, TH1D> mm;
+    map<string, TH1D> in;
 
+    HistCol(vector<string> regions, const string& name, int nbins, float low, float high) {
+        for (string region : regions) {
+            string base_name = region + "_" + name;
+            string base_title = region + " " + name;
+            ee.emplace(region, TH1D((base_name + "_ee").c_str(), (base_title + " ee").c_str(), nbins, low, high));
+            em.emplace(region, TH1D((base_name + "_em").c_str(), (base_title + " em").c_str(), nbins, low, high));
+            mm.emplace(region, TH1D((base_name + "_mm").c_str(), (base_title + " mm").c_str(), nbins, low, high));
+            in.emplace(region, TH1D((base_name + "_in").c_str(), (base_title + " in").c_str(), nbins, low, high));
+        }
+    }
+
+    void Fill(const string& region, int id1, int id2, float val, float weight) {
+        in[region].Fill(val, weight);
+        if (abs(id1) == 11 and abs(id2) == 11) {
+            ee[region].Fill(val, weight);
+        } else if (abs(id1) == 13 and abs(id2) == 13) {
+            mm[region].Fill(val, weight);
+        } else if ((abs(id1) == 11 and abs(id2) == 13) or
+                   (abs(id1) == 13 and abs(id2) == 11)) {
+            em[region].Fill(val, weight);
+        } else {
+            cout << "These ids are garbage: (" << id1 << ", " << id2 << ")\n";
+        }
+    }
+
+    void Write() {
+        for (auto p : ee) p.second.Write();
+        for (auto p : em) p.second.Write();
+        for (auto p : mm) p.second.Write();
+        for (auto p : in) p.second.Write();
+    }
+};
 
 int ScanChain(TChain *ch, TString options=""){
 
-    bool doAllHT = options.Contains("doAllHT");
+    /* bool doAllHT = options.Contains("doAllHT"); */
     bool useEraBLowHTTriggers = options.Contains("useEraBLowHTTriggers");
 
-    std::cout << "Working on " << ch->GetTitle() << std::endl;
+    cout << "Working on " << ch->GetTitle() << endl;
 
-    TH1F *h_os_met = new TH1F("os_met"      , "met"    , 50 , 0    , 300);
-    TH1D *h_os_ht     = new TH1D("os_ht"     , "ht"     , 50 , 0    , 1000);
-    TH1D *h_os_mll    = new TH1D("os_mll"    , "mll"    , 25 , 0    , 300);
-    TH1D *h_os_mtmin  = new TH1D("os_mtmin"  , "mtmin"  , 25 , 0    , 300);
-    TH1D *h_os_njets  = new TH1D("os_njets"  , "njets"  , 8  , 0    , 8  );
-    TH1D *h_os_nbtags = new TH1D("os_nbtags" , "nbtags" , 5  , 0    , 5  );
-    TH1D *h_os_pt1     = new TH1D("os_pt1"   , "pt1"    , 25 , 0    , 300);
-    TH1D *h_os_pt2     = new TH1D("os_pt2"   , "pt2"    , 25 , 0    , 300);
-    TH1D *h_os_eta1    = new TH1D("os_eta1"  , "eta1"   , 25 , -3.2 , 3.2);
-    TH1D *h_os_eta2    = new TH1D("os_eta2"  , "eta2"   , 25 , -3.2 , 3.2);
-    TH1D *h_os_pte     = new TH1D("os_pte"   , "pte"    , 25 , 0    , 300);
-    TH1D *h_os_ptm     = new TH1D("os_ptm"   , "ptm"    , 25 , 0    , 300);
-    TH1D *h_os_type     = new TH1D("os_type" , "type"   , 4  , 0    , 4);
-    TH1D *h_os_nvtx     = new TH1D("os_nvtx" , "nvtx"   , 50  , 0    , 50);
-
-    TH1F *h_tl_met = new TH1F("tl_met"      , "met"    , 50 , 0    , 300);
-    TH1D *h_tl_ht     = new TH1D("tl_ht"     , "ht"     , 50 , 0    , 1000);
-    TH1D *h_tl_mll    = new TH1D("tl_mll"    , "mll"    , 25 , 0    , 300);
-    TH1D *h_tl_mtmin  = new TH1D("tl_mtmin"  , "mtmin"  , 25 , 0    , 300);
-    TH1D *h_tl_njets  = new TH1D("tl_njets"  , "njets"  , 8  , 0    , 8  );
-    TH1D *h_tl_nbtags = new TH1D("tl_nbtags" , "nbtags" , 5  , 0    , 5  );
-    TH1D *h_tl_pt1     = new TH1D("tl_pt1"   , "pt1"    , 25 , 0    , 300);
-    TH1D *h_tl_pt2     = new TH1D("tl_pt2"   , "pt2"    , 25 , 0    , 300);
-    TH1D *h_tl_eta1    = new TH1D("tl_eta1"  , "eta1"   , 25 , -3.2 , 3.2);
-    TH1D *h_tl_eta2    = new TH1D("tl_eta2"  , "eta2"   , 25 , -3.2 , 3.2);
-    TH1D *h_tl_pte     = new TH1D("tl_pte"   , "pte"    , 25 , 0    , 300);
-    TH1D *h_tl_ptm     = new TH1D("tl_ptm"   , "ptm"    , 25 , 0    , 300);
-    TH1D *h_tl_type     = new TH1D("tl_type" , "type"   , 4  , 0    , 4);
-    TH1D *h_tl_nvtx     = new TH1D("tl_nvtx" , "nvtx"   , 50  , 0    , 50);
+    vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
+                              "crz", "crw",                   // CRZ, CRW
+                              "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
+                              "isr"};
+    HistCol h_met    (regions, "met"   , 50, 0   , 300 );
+    HistCol h_ht     (regions, "ht"    , 50, 0   , 1000);
+    HistCol h_mll    (regions, "mll"   , 25, 0   , 300 );
+    HistCol h_mtmin  (regions, "mtmin" , 25, 0   , 300 );
+    HistCol h_njets  (regions, "njets" , 8 , 0   , 8   );
+    HistCol h_nbtags (regions, "nbtags", 5 , 0   , 5   );
+    HistCol h_pt1    (regions, "pt1"   , 25, 0   , 300 );
+    HistCol h_pt2    (regions, "pt2"   , 25, 0   , 300 );
+    HistCol h_eta1   (regions, "eta1"  , 25, -3.2, 3.2 );
+    HistCol h_eta2   (regions, "eta2"  , 25, -3.2, 3.2 );
+    HistCol h_pte    (regions, "pte"   , 25, 0   , 300 );
+    HistCol h_ptm    (regions, "ptm"   , 25, 0   , 300 );
+    HistCol h_type   (regions, "type"  , 4 , 0   , 4   );
+    HistCol h_nvtx   (regions, "nvtx"  , 50, 0   , 50  );
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -67,7 +93,7 @@ int ScanChain(TChain *ch, TString options=""){
     TObjArray *listOfFiles = ch->GetListOfFiles();
     TIter fileIter(listOfFiles);
 
-    while ( (currentFile = (TFile*)fileIter.Next()) ) { 
+    while ( (currentFile = (TFile*)fileIter.Next()) ) {
 
         TFile *file = new TFile( currentFile->GetTitle() );
         TTree *tree = (TTree*)file->Get("t");
@@ -82,18 +108,12 @@ int ScanChain(TChain *ch, TString options=""){
 
             // if (event > 10000) break;
 
-            // Baseline selections
-            if (ss::njets() < 2) continue;
-            if (ss::lep1_coneCorrPt() < 25) continue;
-            if (ss::lep2_coneCorrPt() < 20) continue;
-            if (ss::met() < 50) continue;
-            if (!doAllHT) {
-                if (ss::ht() < 400) continue;
-            }
+            if (abs(ss::lep1_id()) == 11 && !ss::lep1_el_exp_innerlayers()) continue;
+            if (abs(ss::lep2_id()) == 11 && !ss::lep2_el_exp_innerlayers()) continue;
 
             bool pass_trig = ss::fired_trigger();
             if (useEraBLowHTTriggers && ss::is_real_data()) {
-                if (ss::run() <= 299329 && ss::run() >= 297046) {
+                if (ss::run() <= 299329 && ss::run() >= 297046) {  // Era B
                     if ( ss::hyp_type()==0 && ((ss::triggers() & 1<<3)==(1<<3) || (ss::triggers() & 1<<4)==(1<<4)) ) pass_trig = true;
                     else if ( ss::hyp_type()==3 && (ss::triggers() & 1<<6)==(1<<6) ) pass_trig = true;
                     else if ( (ss::hyp_type()==1 || ss::hyp_type()==2) && ((ss::triggers() & 1<<1)==(1<<1) || (ss::triggers() & 1<<2)==(1<<2)) ) pass_trig = true;
@@ -104,57 +124,68 @@ int ScanChain(TChain *ch, TString options=""){
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
-            // Reject duplicates 
+            // Reject duplicates
             if (ss::is_real_data()){
                 duplicate_removal::DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
-                if (duplicate_removal::is_duplicate(id)) continue; 
+                if (duplicate_removal::is_duplicate(id)) continue;
             }
 
             //Calculate weight
             float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
-
-            if (ss::hyp_class() != 4 && ss::hyp_class() != 6 && ss::hyp_class() != 2) continue;
 
             if (!ss::is_real_data()) {
                 // weight *= getTruePUw(ss::trueNumInt()[0]);
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
                 // weight *= ss::weight_btagsf();
             }
+            int nleps = (ss::lep3_passes_id() and ss::lep3_p4().Pt()>20) ? 3 : 2;
+            int SR = signalRegionTest(ss::njets(),  ss::nbtags(), ss::met(), ss::ht(), 0,
+                                      ss::lep1_id(),  ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(),
+                                      nleps, ss::hyp_class() == 6);
 
             // Fill histograms
+            //
+            auto fill_region = [&](const string& region) {
+                int lep1id = ss::lep1_id();
+                int lep2id = ss::lep2_id();
 
-            if (ss::hyp_class() == 4 || ss::hyp_class() == 6) {
-                h_os_met->Fill(ss::met(), weight);
-                h_os_njets->Fill(ss::njets(), weight);
-                h_os_ht->Fill(ss::ht(), weight);  
-                h_os_nbtags->Fill(ss::nbtags(), weight);  
-                h_os_mll->Fill(ss::dilep_p4().M() , weight);
-                h_os_mtmin->Fill(ss::mtmin()      , weight);
-                h_os_pt1->Fill(ss::lep1_coneCorrPt()  , weight);
-                h_os_pt2->Fill(ss::lep2_coneCorrPt()  , weight);
-                abs(ss::lep1_id()) == 11 ? h_os_pte->Fill(ss::lep1_coneCorrPt()  , weight) : h_os_ptm->Fill(ss::lep1_coneCorrPt()  , weight);
-                abs(ss::lep2_id()) == 11 ? h_os_pte->Fill(ss::lep2_coneCorrPt()  , weight) : h_os_ptm->Fill(ss::lep2_coneCorrPt()  , weight);
-                h_os_eta1->Fill(ss::lep1_p4().eta(), weight);
-                h_os_eta2->Fill(ss::lep2_p4().eta(), weight);
-                h_os_type->Fill(ss::hyp_type(), weight);
-                h_os_nvtx->Fill(ss::nGoodVertices(), weight);
+                auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
+                    h.Fill(region, lep1id, lep2id, val, weight);
+                };
+                do_fill(h_met,    ss::met());
+                do_fill(h_njets,  ss::njets());
+                do_fill(h_ht,     ss::ht());
+                do_fill(h_nbtags, ss::nbtags());
+                do_fill(h_mll,    ss::dilep_p4().M());
+                do_fill(h_mtmin,  ss::mtmin());
+                do_fill(h_pt1,    ss::lep1_coneCorrPt());
+                do_fill(h_pt2,    ss::lep2_coneCorrPt());
+                abs(lep1id) == 11 ? do_fill(h_pte, ss::lep1_coneCorrPt()) : do_fill(h_ptm, ss::lep1_coneCorrPt());
+                abs(lep2id) == 11 ? do_fill(h_pte, ss::lep2_coneCorrPt()) : do_fill(h_ptm, ss::lep2_coneCorrPt());
+                do_fill(h_eta1,   ss::lep1_p4().eta());
+                do_fill(h_eta2,   ss::lep2_p4().eta());
+                do_fill(h_type,   ss::hyp_type());
+                do_fill(h_nvtx,   ss::nGoodVertices());
+            };
+
+            if (SR == 1) fill_region("crz");
+            if (SR == 2) fill_region("crw");
+
+            if (ss::lep1_coneCorrPt() > 25. and ss::lep2_coneCorrPt() > 20. and ss::njets() >= 2 and
+                    ss::met() > 50. and ss::ht() > 400) {
+                if (ss::hyp_class() == 4 || ss::hyp_class() == 6) fill_region("os");
+                if (ss::hyp_class() == 2)                         fill_region("tl");
             }
 
-            if (ss::hyp_class() == 2) {
-                h_tl_met->Fill(ss::met(), weight);
-                h_tl_njets->Fill(ss::njets(), weight);
-                h_tl_ht->Fill(ss::ht(), weight);  
-                h_tl_nbtags->Fill(ss::nbtags(), weight);  
-                h_tl_mll->Fill(ss::dilep_p4().M() , weight);
-                h_tl_mtmin->Fill(ss::mtmin()      , weight);
-                h_tl_pt1->Fill(ss::lep1_coneCorrPt()  , weight);
-                h_tl_pt2->Fill(ss::lep2_coneCorrPt()  , weight);
-                abs(ss::lep1_id()) == 11 ? h_tl_pte->Fill(ss::lep1_coneCorrPt()  , weight) : h_tl_ptm->Fill(ss::lep1_coneCorrPt()  , weight);
-                abs(ss::lep2_id()) == 11 ? h_tl_pte->Fill(ss::lep2_coneCorrPt()  , weight) : h_tl_ptm->Fill(ss::lep2_coneCorrPt()  , weight);
-                h_tl_eta1->Fill(ss::lep1_p4().eta(), weight);
-                h_tl_eta2->Fill(ss::lep2_p4().eta(), weight);
-                h_tl_type->Fill(ss::hyp_type(), weight);
-                h_tl_nvtx->Fill(ss::nGoodVertices(), weight);
+            if (ss::lep1_coneCorrPt() >= 25. and ss::lep2_coneCorrPt() >= 20.  and ss::njets() > 2 and ss::hyp_class() != 6) {
+                if (ss::nbtags() < 2  and ss::ht() > 400 and ss::met() > 50) fill_region("bdt_nb");   // invert Nb
+                if (ss::nbtags() >= 2 and ss::ht() < 400 and ss::met() > 50) fill_region("bdt_ht");   // invert Ht
+                if (ss::nbtags() >= 2 and ss::ht() > 400 and ss::met() < 50) fill_region("bdt_met");  // invert MET
+            }
+
+            if (ss::lep1_coneCorrPt() >= 25. and ss::lep2_coneCorrPt() >= 20.  and ss::njets() > 2 and
+                    ss::hyp_class() != 6 and nleps == 2 and ss::nbtags() == 2 and ss::njets() >= 2) {
+                if (ss::nbtags() < 2  and ss::ht() > 400 and ss::met() > 50) fill_region("isr");
             }
 
         }//event loop
@@ -163,39 +194,24 @@ int ScanChain(TChain *ch, TString options=""){
     }//file loop
 
 
-    TFile* f1 = new TFile(Form("outputs/histos_%s.root",ch->GetTitle()),"RECREATE");
+    TFile f1(Form("outputs%s/histos_%s.root", options.Data(), ch->GetTitle()), "RECREATE");
 
-    h_os_met->Write();
-    h_os_ht->Write();
-    h_os_mll->Write();
-    h_os_mtmin->Write();
-    h_os_njets->Write();
-    h_os_nbtags->Write();
-    h_os_pt1->Write();
-    h_os_pt2->Write();
-    h_os_eta1->Write();
-    h_os_eta2->Write();
-    h_os_pte->Write();
-    h_os_ptm->Write();
-    h_os_type->Write();
-    h_os_nvtx->Write();
+    h_met.Write();
+    h_ht.Write();
+    h_mll.Write();
+    h_mtmin.Write();
+    h_njets.Write();
+    h_nbtags.Write();
+    h_pt1.Write();
+    h_pt2.Write();
+    h_eta1.Write();
+    h_eta2.Write();
+    h_pte.Write();
+    h_ptm.Write();
+    h_type.Write();
+    h_nvtx.Write();
 
-    h_tl_met->Write();
-    h_tl_ht->Write();
-    h_tl_mll->Write();
-    h_tl_mtmin->Write();
-    h_tl_njets->Write();
-    h_tl_nbtags->Write();
-    h_tl_pt1->Write();
-    h_tl_pt2->Write();
-    h_tl_eta1->Write();
-    h_tl_eta2->Write();
-    h_tl_pte->Write();
-    h_tl_ptm->Write();
-    h_tl_type->Write();
-    h_tl_nvtx->Write();
-
-    f1->Close();
+    f1.Close();
 
     return 0;
 
