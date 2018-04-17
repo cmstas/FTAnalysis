@@ -71,8 +71,8 @@ int ScanChain(TChain *ch, TString options=""){
                               "crz", "crw",                   // CRZ, CRW
                               "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
                               "isr"};
-    HistCol h_met    (regions, "met"   , 50, 0   , 300 );
-    HistCol h_ht     (regions, "ht"    , 50, 0   , 1000);
+    HistCol h_met    (regions, "met"   , 15, 0   , 600 );
+    HistCol h_ht     (regions, "ht"    , 16, 0   , 1600);
     HistCol h_mll    (regions, "mll"   , 25, 0   , 300 );
     HistCol h_mtmin  (regions, "mtmin" , 25, 0   , 300 );
     HistCol h_njets  (regions, "njets" , 8 , 0   , 8   );
