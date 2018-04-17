@@ -27,7 +27,7 @@ def print_flip_rate(hist, do_errors=False):
 
 if __name__ == "__main__":
 
-    f = r.TFile("outputs/histos_dy.root")
+    f = r.TFile("outputs/histos_both.root")
     ratio = f.Get("ratio")
     print_flip_rate(ratio, do_errors=False)
     print_flip_rate(ratio, do_errors=True)

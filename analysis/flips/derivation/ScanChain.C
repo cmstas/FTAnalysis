@@ -10,6 +10,12 @@
 #include "TChain.h"
 #include "Math/VectorUtil.h"
 
+// Following 3 includes are for ctrl-c handling
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+
 #include "../../misc/class_files/v8.02/SS.h"
 #include "../../../common/CORE/Tools/utils.h"
 #include "../../misc/common_utils.h"
@@ -19,22 +25,29 @@ using namespace std;
 // using namespace tas;
 
 float lumiAG = getLumi();
+bool STOP_REQUESTED = false;
 
 void flip(TChain *ch) {
 
-  int nBinsX = 6; 
-  int nBinsY = 3; 
-  float xbins[] = { 15, 40, 60, 80, 100, 200, 300 }; 
-  float ybins[] = { 0, 0.8, 1.479, 2.5 }; 
-  TH2D *numer = new TH2D("numer" , "numer" , nBinsX, xbins, nBinsY, ybins);
-  TH2D *denom = new TH2D("denom" , "denom" , nBinsX, xbins, nBinsY, ybins);
-  TH2D *numer_raw = new TH2D("numer_raw" , "numer_raw" , nBinsX, xbins, nBinsY, ybins);
-  numer->Sumw2();
-  denom->Sumw2();
-  numer_raw->Sumw2();
+    signal(SIGINT, [](int){
+            cout << "SIGINT Caught, stopping after current event" << endl;
+            STOP_REQUESTED=true;
+            });
+    STOP_REQUESTED=false;
 
-  //Set up chains
-  TChain *chain = new TChain("t");
+    int nBinsX = 6; 
+    int nBinsY = 3; 
+    float xbins[] = { 15, 40, 60, 80, 100, 200, 300 }; 
+    float ybins[] = { 0, 0.8, 1.479, 2.5 }; 
+    TH2D *numer = new TH2D("numer" , "numer" , nBinsX, xbins, nBinsY, ybins);
+    TH2D *denom = new TH2D("denom" , "denom" , nBinsX, xbins, nBinsY, ybins);
+    TH2D *numer_raw = new TH2D("numer_raw" , "numer_raw" , nBinsX, xbins, nBinsY, ybins);
+    numer->Sumw2();
+    denom->Sumw2();
+    numer_raw->Sumw2();
+
+    //Set up chains
+    TChain *chain = new TChain("t");
 
     std::cout << "Working on " << ch->GetTitle() << std::endl;
 
@@ -45,7 +58,10 @@ void flip(TChain *ch) {
     TObjArray *listOfFiles = ch->GetListOfFiles();
     TIter fileIter(listOfFiles);
 
+    float scaling = 1.;
+
     while ( (currentFile = (TFile*)fileIter.Next()) ) { 
+        if (STOP_REQUESTED) break;
 
         TFile *file = new TFile( currentFile->GetTitle() );
         TTree *tree = (TTree*)file->Get("t");
@@ -53,7 +69,17 @@ void flip(TChain *ch) {
 
         TString filename(currentFile->GetTitle());
 
+        // when running DY_high, we have ext+nonext, so need to lower scale1fb by
+        // 0.5. This only matters when we're running with ttbar to get relative
+        // xsec right
+        if (filename.Contains("DY_high")) {
+            std::cout << "Scaling xsec down by 0.5 since using extension and nonextension for DY_high: " << filename << std::endl;
+            scaling = 0.5;
+        }
+
         for( unsigned int event = 0; event < tree->GetEntriesFast(); ++event) {
+
+            if (STOP_REQUESTED) break;
 
             samesign.GetEntry(event);
             nEventsTotal++;
@@ -64,7 +90,7 @@ void flip(TChain *ch) {
             SSAG::progress(nEventsTotal, nEventsChain);
 
             //Calculate weight
-            float weight = ss::is_real_data() ? 1 : fabs(ss::scale1fb())*lumiAG;
+            float weight = ss::is_real_data() ? 1 : scaling*fabs(ss::scale1fb())*lumiAG;
 
             if (!ss::is_real_data()) {
                 // weight *= getTruePUw(ss::trueNumInt()[0]);
@@ -72,7 +98,8 @@ void flip(TChain *ch) {
                 // weight *= ss::weight_btagsf();
             }
 
-            if (!ss::lep1_passes_id() || !ss::lep2_passes_id()) continue;
+            if (abs(ss::lep1_id()) == 13 && abs(ss::lep2_id()) == 13) continue;
+
 
             //If they make it this far, they are denominator events
             if (abs(ss::lep1_id()) == 11) denom->Fill(min(ss::lep1_p4().pt(), float(299.)), fabs(ss::lep1_p4().eta()), weight); 

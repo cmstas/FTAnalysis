@@ -38,5 +38,6 @@ plot_2d(ratio, filename="plots/ratio.pdf", title="Rate", **opts)
 opts["colz_fmt"] = ".0f"
 plot_2d(numer_raw, filename="plots/numer_raw.pdf", title="Unw. numerator", **opts)
 # os.system("web plots/ratio.pdf")
-os.system("ic plots/numer_raw.pdf")
+# os.system("ic plots/numer_raw.pdf")
+os.system("ic plots/ratio.pdf")
 print("Made plots")

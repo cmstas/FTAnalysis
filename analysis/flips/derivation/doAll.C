@@ -5,8 +5,13 @@
     gROOT->ProcessLine(".L ../../misc/class_files/v8.02/SS.cc+"); 
     gROOT->ProcessLine(".L ScanChain.C+");
 
-    TString tag = "v1.00_94x_baseline_withos_v3";
+    TString tag = "v1.02_94x_withos_relaxhits";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
+
+    TChain *ch_both = new TChain("t","both");
+    ch_both->Add(basedir+"DY*.root");
+    ch_both->Add(basedir+"TTBAR*.root");
+    flip(ch_both);
 
     TChain *ch_tt = new TChain("t","tt");
     ch_tt->Add(basedir+"TTBAR*.root");
@@ -16,10 +21,6 @@
     ch_dy->Add(basedir+"DY*.root");
     flip(ch_dy);
 
-    TChain *ch_both = new TChain("t","both");
-    ch_both->Add(basedir+"DY*.root");
-    ch_both->Add(basedir+"TTBAR*.root");
-    flip(ch_both);
 
 }
 
