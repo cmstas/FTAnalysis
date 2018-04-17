@@ -32,6 +32,10 @@
     ch_ttz->Add(basedir+"TTZnlo.root");
     ScanChain(ch_ttz, options);
 
+    TChain *ch_tth = new TChain("t","tth");
+    ch_tth->Add(basedir+"TTHtoNonBB.root");
+    ScanChain(ch_tth, options);
+
     TChain *ch_dy = new TChain("t","dy");
     ch_dy->Add(basedir+"DY_low.root");
     ch_dy->Add(basedir+"DY_high.root");

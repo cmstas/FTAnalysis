@@ -152,6 +152,7 @@ int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, i
     if (njets < 2) return -1;
     if (nbtags < 2) return -1;
     if (ht < 400) return -1;
+    if (met < 50) return -1;
     if (isClass6) return 1;
     if (nleps == 2) {
         if (nbtags == 2) {

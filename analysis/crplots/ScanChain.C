@@ -63,7 +63,7 @@ struct HistCol {
 int ScanChain(TChain *ch, TString options=""){
 
     /* bool doAllHT = options.Contains("doAllHT"); */
-    bool useEraBLowHTTriggers = options.Contains("useEraBLowHTTriggers");
+    /* bool useEraBLowHTTriggers = options.Contains("useEraBLowHTTriggers"); */
 
     cout << "Working on " << ch->GetTitle() << endl;
 
@@ -83,8 +83,8 @@ int ScanChain(TChain *ch, TString options=""){
     HistCol h_eta2   (regions, "eta2"  , 25, -3.2, 3.2 );
     HistCol h_pte    (regions, "pte"   , 25, 0   , 300 );
     HistCol h_ptm    (regions, "ptm"   , 25, 0   , 300 );
-    HistCol h_type   (regions, "type"  , 4 , 0   , 4   );
-    HistCol h_nvtx   (regions, "nvtx"  , 50, 0   , 50  );
+    HistCol h_type   (regions, "type"  , 3 , 0   , 3   );
+    HistCol h_nvtx   (regions, "nvtx"  , 70, 0   , 70  );
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -112,14 +112,14 @@ int ScanChain(TChain *ch, TString options=""){
             if (abs(ss::lep2_id()) == 11 && !ss::lep2_el_exp_innerlayers()) continue;
 
             bool pass_trig = ss::fired_trigger();
-            if (useEraBLowHTTriggers && ss::is_real_data()) {
-                if (ss::run() <= 299329 && ss::run() >= 297046) {  // Era B
-                    if ( ss::hyp_type()==0 && ((ss::triggers() & 1<<3)==(1<<3) || (ss::triggers() & 1<<4)==(1<<4)) ) pass_trig = true;
-                    else if ( ss::hyp_type()==3 && (ss::triggers() & 1<<6)==(1<<6) ) pass_trig = true;
-                    else if ( (ss::hyp_type()==1 || ss::hyp_type()==2) && ((ss::triggers() & 1<<1)==(1<<1) || (ss::triggers() & 1<<2)==(1<<2)) ) pass_trig = true;
-                    else {}
-                }
-            }
+            /* if (useEraBLowHTTriggers && ss::is_real_data()) { */
+            /*     if (ss::run() <= 299329 && ss::run() >= 297046) {  // Era B */
+            /*         if ( ss::hyp_type()==0 && ((ss::triggers() & 1<<3)==(1<<3) || (ss::triggers() & 1<<4)==(1<<4)) ) pass_trig = true; */
+            /*         else if ( ss::hyp_type()==3 && (ss::triggers() & 1<<6)==(1<<6) ) pass_trig = true; */
+            /*         else if ( (ss::hyp_type()==1 || ss::hyp_type()==2) && ((ss::triggers() & 1<<1)==(1<<1) || (ss::triggers() & 1<<2)==(1<<2)) ) pass_trig = true; */
+            /*         else {} */
+            /*     } */
+            /* } */
             if (!pass_trig) continue;
 
             SSAG::progress(nEventsTotal, nEventsChain);
@@ -142,6 +142,7 @@ int ScanChain(TChain *ch, TString options=""){
             int SR = signalRegionTest(ss::njets(),  ss::nbtags(), ss::met(), ss::ht(), 0,
                                       ss::lep1_id(),  ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(),
                                       nleps, ss::hyp_class() == 6);
+            bool SS = (ss::lep1_id()>0) == (ss::lep2_id()>0);
 
             // Fill histograms
             //
@@ -164,12 +165,32 @@ int ScanChain(TChain *ch, TString options=""){
                 abs(lep2id) == 11 ? do_fill(h_pte, ss::lep2_coneCorrPt()) : do_fill(h_ptm, ss::lep2_coneCorrPt());
                 do_fill(h_eta1,   ss::lep1_p4().eta());
                 do_fill(h_eta2,   ss::lep2_p4().eta());
-                do_fill(h_type,   ss::hyp_type());
+                int type = ss::hyp_type();
+                do_fill(h_type,   type>1 ? type-1 : type);
                 do_fill(h_nvtx,   ss::nGoodVertices());
             };
 
-            if (SR == 1) fill_region("crz");
-            if (SR == 2) fill_region("crw");
+            /* Hyp Class
+             * 1: SS, loose-loose
+             * 2: SS, tight-loose
+             * 3: SS, tight-tight
+             * 4: OS, tight-tight
+             * 5: SS, inSituFR
+             * 6: SS, tight-tight and fails Z-veto
+             */
+
+            // if all 3 charges are the same, throw the event away
+            if (SS and nleps > 2) {
+              int q1 = 2*(ss::lep1_id() > 0) - 1;
+              int q3 = 2*(ss::lep3_id() > 0) - 1;
+              if (q3==q1) {
+                   cout << "Skipping +++/---" << endl;
+                  continue;
+              }
+            }
+
+            if (nleps >= 3 and SR == 1) fill_region("crz");
+            if (ss::hyp_class() == 3 and SR == 2) fill_region("crw");
 
             if (ss::lep1_coneCorrPt() > 25. and ss::lep2_coneCorrPt() > 20. and ss::njets() >= 2 and
                     ss::met() > 50. and ss::ht() > 400) {
@@ -177,7 +198,7 @@ int ScanChain(TChain *ch, TString options=""){
                 if (ss::hyp_class() == 2)                         fill_region("tl");
             }
 
-            if (ss::lep1_coneCorrPt() >= 25. and ss::lep2_coneCorrPt() >= 20.  and ss::njets() > 2 and ss::hyp_class() != 6) {
+            if (ss::hyp_class() == 3 and ss::lep1_coneCorrPt() >= 25. and ss::lep2_coneCorrPt() >= 20. and ss::njets() >= 2) {
                 if (ss::nbtags() < 2  and ss::ht() > 400 and ss::met() > 50) fill_region("bdt_nb");   // invert Nb
                 if (ss::nbtags() >= 2 and ss::ht() < 400 and ss::met() > 50) fill_region("bdt_ht");   // invert Ht
                 if (ss::nbtags() >= 2 and ss::ht() > 400 and ss::met() < 50) fill_region("bdt_met");  // invert MET
