@@ -5342,7 +5342,7 @@ void SSAG::LoadAllBranches()
 		}
 		return lep2_el_conv_vtx_flag_;
 	}
-	const bool &SSAG::lep1_el_exp_innerlayers()
+	const int &SSAG::lep1_el_exp_innerlayers()
 	{
 		if (not lep1_el_exp_innerlayers_isLoaded) {
 			if (lep1_el_exp_innerlayers_branch != 0) {
@@ -5407,7 +5407,7 @@ void SSAG::LoadAllBranches()
 		}
 		return lep2_el_threeChargeAgree_;
 	}
-	const bool &SSAG::lep2_el_exp_innerlayers()
+	const int &SSAG::lep2_el_exp_innerlayers()
 	{
 		if (not lep2_el_exp_innerlayers_isLoaded) {
 			if (lep2_el_exp_innerlayers_branch != 0) {
@@ -6620,12 +6620,12 @@ namespace ss {
 	const int &lep2_mc3idx() { return samesign.lep2_mc3idx(); }
 	const bool &lep1_el_conv_vtx_flag() { return samesign.lep1_el_conv_vtx_flag(); }
 	const bool &lep2_el_conv_vtx_flag() { return samesign.lep2_el_conv_vtx_flag(); }
-	const bool &lep1_el_exp_innerlayers() { return samesign.lep1_el_exp_innerlayers(); }
+	const int &lep1_el_exp_innerlayers() { return samesign.lep1_el_exp_innerlayers(); }
 	const bool &lep1_mu_ptErr() { return samesign.lep1_mu_ptErr(); }
 	const bool &lep2_mu_ptErr() { return samesign.lep2_mu_ptErr(); }
 	const bool &lep1_el_threeChargeAgree() { return samesign.lep1_el_threeChargeAgree(); }
 	const bool &lep2_el_threeChargeAgree() { return samesign.lep2_el_threeChargeAgree(); }
-	const bool &lep2_el_exp_innerlayers() { return samesign.lep2_el_exp_innerlayers(); }
+	const int &lep2_el_exp_innerlayers() { return samesign.lep2_el_exp_innerlayers(); }
 	const bool &lep1_nPixelMiss() { return samesign.lep1_nPixelMiss(); }
 	const bool &lep2_nPixelMiss() { return samesign.lep2_nPixelMiss(); }
 	const bool &lep1_tightCharge() { return samesign.lep1_tightCharge(); }
