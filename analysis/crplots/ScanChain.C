@@ -68,7 +68,7 @@ int ScanChain(TChain *ch, TString options=""){
     cout << "Working on " << ch->GetTitle() << endl;
 
     vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
-                              "crz", "crw",                   // CRZ, CRW
+                              "crz", "crw", "crw350",         // CRZ, CRW
                               "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
                               "isr"};
     HistCol h_met    (regions, "met"   , 15, 0   , 600 );
@@ -108,19 +108,10 @@ int ScanChain(TChain *ch, TString options=""){
 
             // if (event > 10000) break;
 
-            if (abs(ss::lep1_id()) == 11 && !ss::lep1_el_exp_innerlayers()) continue;
-            if (abs(ss::lep2_id()) == 11 && !ss::lep2_el_exp_innerlayers()) continue;
+            if (ss::lep1_el_exp_innerlayers() > 0) continue;
+            if (ss::lep2_el_exp_innerlayers() > 0) continue;
 
-            bool pass_trig = ss::fired_trigger();
-            /* if (useEraBLowHTTriggers && ss::is_real_data()) { */
-            /*     if (ss::run() <= 299329 && ss::run() >= 297046) {  // Era B */
-            /*         if ( ss::hyp_type()==0 && ((ss::triggers() & 1<<3)==(1<<3) || (ss::triggers() & 1<<4)==(1<<4)) ) pass_trig = true; */
-            /*         else if ( ss::hyp_type()==3 && (ss::triggers() & 1<<6)==(1<<6) ) pass_trig = true; */
-            /*         else if ( (ss::hyp_type()==1 || ss::hyp_type()==2) && ((ss::triggers() & 1<<1)==(1<<1) || (ss::triggers() & 1<<2)==(1<<2)) ) pass_trig = true; */
-            /*         else {} */
-            /*     } */
-            /* } */
-            if (!pass_trig) continue;
+            if (!ss::fired_trigger()) continue;
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
@@ -139,37 +130,16 @@ int ScanChain(TChain *ch, TString options=""){
                 // weight *= ss::weight_btagsf();
             }
             int nleps = (ss::lep3_passes_id() and ss::lep3_p4().Pt()>20) ? 3 : 2;
-            int SR = signalRegionTest(ss::njets(),  ss::nbtags(), ss::met(), ss::ht(), 0,
-                                      ss::lep1_id(),  ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(),
-                                      nleps, ss::hyp_class() == 6);
-            bool SS = (ss::lep1_id()>0) == (ss::lep2_id()>0);
-
-            // Fill histograms
-            //
-            auto fill_region = [&](const string& region) {
-                int lep1id = ss::lep1_id();
-                int lep2id = ss::lep2_id();
-
-                auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
-                    h.Fill(region, lep1id, lep2id, val, weight);
-                };
-                do_fill(h_met,    ss::met());
-                do_fill(h_njets,  ss::njets());
-                do_fill(h_ht,     ss::ht());
-                do_fill(h_nbtags, ss::nbtags());
-                do_fill(h_mll,    ss::dilep_p4().M());
-                do_fill(h_mtmin,  ss::mtmin());
-                do_fill(h_pt1,    ss::lep1_coneCorrPt());
-                do_fill(h_pt2,    ss::lep2_coneCorrPt());
-                abs(lep1id) == 11 ? do_fill(h_pte, ss::lep1_coneCorrPt()) : do_fill(h_ptm, ss::lep1_coneCorrPt());
-                abs(lep2id) == 11 ? do_fill(h_pte, ss::lep2_coneCorrPt()) : do_fill(h_ptm, ss::lep2_coneCorrPt());
-                do_fill(h_eta1,   ss::lep1_p4().eta());
-                do_fill(h_eta2,   ss::lep2_p4().eta());
-                int type = ss::hyp_type();
-                do_fill(h_type,   type>1 ? type-1 : type);
-                do_fill(h_nvtx,   ss::nGoodVertices());
-            };
-
+            float lep1pt = ss::lep1_coneCorrPt();
+            float lep2pt = ss::lep2_coneCorrPt();
+            float lep3pt = ss::lep3_p4().Pt();
+            int lep1id = ss::lep1_id();
+            int lep2id = ss::lep2_id();
+            int lep3id = ss::lep3_id();
+            int njets = ss::njets();
+            int nbtags = ss::nbtags();
+            int ht = ss::ht();
+            int met = ss::met();
             /* Hyp Class
              * 1: SS, loose-loose
              * 2: SS, tight-loose
@@ -178,35 +148,90 @@ int ScanChain(TChain *ch, TString options=""){
              * 5: SS, inSituFR
              * 6: SS, tight-tight and fails Z-veto
              */
+            int hyp_class = ss::hyp_class();
+
+            // Fill histograms
+            auto fill_region = [&](const string& region) {
+
+                auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
+                    h.Fill(region, lep1id, lep2id, val, weight);
+                };
+                do_fill(h_met,    met);
+                do_fill(h_njets,  njets);
+                do_fill(h_ht,     ht);
+                do_fill(h_nbtags, nbtags);
+                do_fill(h_mll,    ss::dilep_p4().M());
+                do_fill(h_mtmin,  ss::mtmin());
+                do_fill(h_pt1,    lep1pt);
+                do_fill(h_pt2,    lep2pt);
+                abs(lep1id) == 11 ? do_fill(h_pte, lep1pt) : do_fill(h_ptm, lep1pt);
+                abs(lep2id) == 11 ? do_fill(h_pte, lep2pt) : do_fill(h_ptm, lep2pt);
+                do_fill(h_eta1,   ss::lep1_p4().eta());
+                do_fill(h_eta2,   ss::lep2_p4().eta());
+                int type = ss::hyp_type();
+                do_fill(h_type,   type>1 ? type-1 : type);
+                do_fill(h_nvtx,   ss::nGoodVertices());
+            };
 
             // if all 3 charges are the same, throw the event away
-            if (SS and nleps > 2) {
-              int q1 = 2*(ss::lep1_id() > 0) - 1;
-              int q3 = 2*(ss::lep3_id() > 0) - 1;
+            if ((lep1id>0) == (lep2id>0) and nleps > 2) {
+              int q1 = 2*(lep1id > 0) - 1;
+              int q3 = 2*(lep3id > 0) - 1;
               if (q3==q1) {
-                   cout << "Skipping +++/---" << endl;
+                  // cout << "Skipping +++/---" << endl;
                   continue;
               }
             }
 
-            if (nleps >= 3 and SR == 1) fill_region("crz");
-            if (ss::hyp_class() == 3 and SR == 2) fill_region("crw");
 
-            if (ss::lep1_coneCorrPt() > 25. and ss::lep2_coneCorrPt() > 20. and ss::njets() >= 2 and
-                    ss::met() > 50. and ss::ht() > 400) {
-                if (ss::hyp_class() == 4 || ss::hyp_class() == 6) fill_region("os");
-                if (ss::hyp_class() == 2)                         fill_region("tl");
+            if (hyp_class == 6 and
+                    lep1pt > 25. and
+                    lep2pt > 20. and
+                    ht > 400 and
+                    met > 50 and
+                    nleps > 2 and
+                    nbtags >= 2 and
+                    njets >= 2) fill_region("crz");
+
+            if (hyp_class == 3 and
+                    lep1pt > 25. and
+                    lep2pt > 20. and
+                    ht > 400 and
+                    met > 50 and
+                    nleps == 2 and
+                    nbtags == 2 and
+                    njets <= 5) fill_region("crw");
+
+            if (hyp_class == 3 and
+                    lep1pt > 25. and
+                    lep2pt > 20. and
+                    ht > 350 and
+                    met > 50 and
+                    nleps == 2 and
+                    nbtags == 2 and
+                    njets <= 5) fill_region("crw350");
+
+
+            if (lep1pt > 25. and
+                    lep2pt > 20. and
+                    njets >= 2 and
+                    met > 50. and
+                    ht > 400) {
+                if (hyp_class == 4 || hyp_class == 6) fill_region("os");
+                if (hyp_class == 2)                   fill_region("tl");
             }
 
-            if (ss::hyp_class() == 3 and ss::lep1_coneCorrPt() >= 25. and ss::lep2_coneCorrPt() >= 20. and ss::njets() >= 2) {
-                if (ss::nbtags() < 2  and ss::ht() > 400 and ss::met() > 50) fill_region("bdt_nb");   // invert Nb
-                if (ss::nbtags() >= 2 and ss::ht() < 400 and ss::met() > 50) fill_region("bdt_ht");   // invert Ht
-                if (ss::nbtags() >= 2 and ss::ht() > 400 and ss::met() < 50) fill_region("bdt_met");  // invert MET
+            if (hyp_class == 3 and
+                    lep1pt >= 25. and
+                    lep2pt >= 20. and
+                    njets >= 2) {
+                if (nbtags < 2  and ht > 400 and met > 50) fill_region("bdt_nb");   // invert Nb
+                if (nbtags >= 2 and ht < 400 and met > 50) fill_region("bdt_ht");   // invert Ht
+                if (nbtags >= 2 and ht > 400 and met < 50) fill_region("bdt_met");  // invert MET
             }
 
-            if (ss::lep1_coneCorrPt() >= 25. and ss::lep2_coneCorrPt() >= 20.  and ss::njets() > 2 and
-                    ss::hyp_class() != 6 and nleps == 2 and ss::nbtags() == 2 and ss::njets() >= 2) {
-                if (ss::nbtags() < 2  and ss::ht() > 400 and ss::met() > 50) fill_region("isr");
+            if (lep1pt >= 25. and lep2pt >= 20.  and hyp_class != 6 and nleps == 2 and nbtags == 2 and njets >= 2) {
+                if (nbtags < 2  and ht > 400 and met > 50) fill_region("isr");
             }
 
         }//event loop

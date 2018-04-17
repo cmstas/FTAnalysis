@@ -8,7 +8,8 @@
     gROOT->ProcessLine(".L ScanChain.C+");
 
 
-    TString tag = "v1.00_94x_baseline_withos_v3";
+    /* TString tag = "v1.00_94x_baseline_withos_v3"; */
+    TString tag = "v1.02_94x_withos_relaxhitsmore"; 
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
 
     /* Options:
