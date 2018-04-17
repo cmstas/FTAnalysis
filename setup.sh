@@ -13,6 +13,7 @@ cd -
 export LD_LIBRARY_PATH=$PWD/babymaking/batch/:$LD_LIBRARY_PATH
 
 export PYTHONPATH=$PWD/:$PYTHONPATH
+export PYTHONPATH=$PWD/common/matplottery:$PYTHONPATH
 
 # export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/lib/python2.7/site-packages/:$PYTHONPATH
 # export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/:$PYTHONPATH
