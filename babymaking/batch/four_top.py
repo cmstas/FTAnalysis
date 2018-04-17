@@ -60,6 +60,12 @@ d_ds2name = {
             },
         "data": {
 
+                "/DoubleEG/Run2017B-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGB",
+                "/DoubleEG/Run2017C-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGC",
+                "/DoubleEG/Run2017D-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGD",
+                "/DoubleEG/Run2017E-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGE",
+                "/DoubleEG/Run2017F-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGF",
+
                 "/DoubleEG/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleEGBv1",
                 "/DoubleEG/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleEGBv2",
                 "/DoubleEG/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleEGCv1",
@@ -105,7 +111,10 @@ baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 
 # tag = "v1.00_94x_baseline_v1"
 # tag = "v1.00_94x_baseline_dyonly_v1"
-tag = "v1.00_94x_baseline_withos_v3"
+# tag = "v1.00_94x_baseline_withos_v3"
+# tag = "v1.00_94x_baseline_withos_v3_2017egid"
+# tag = "v1.02_94x_withos_relaxhits"
+tag = "v1.02_94x_withos_relaxhitsmore"
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
 dashboard_name = "AutoTwopler_FTbabies"

@@ -180,8 +180,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_ptrel_v1"                                           , &lep2_ptrel_v1                                           );
   BabyTree->Branch("lep1_miniIso"                                            , &lep1_miniIso                                            );
   BabyTree->Branch("lep2_miniIso"                                            , &lep2_miniIso                                            );
-  // BabyTree->Branch("jet_close_lep1"                                          , &jet_close_lep1                                          );
-  // BabyTree->Branch("jet_close_lep2"                                          , &jet_close_lep2                                          );
+  BabyTree->Branch("jet_close_lep1"                                          , &jet_close_lep1                                          );
+  BabyTree->Branch("jet_close_lep2"                                          , &jet_close_lep2                                          );
   // BabyTree->Branch("eleID_kfhits"                                            , &eleID_kfhits                                            );
   // BabyTree->Branch("eleID_oldsigmaietaieta"                                  , &eleID_oldsigmaietaieta                                  );
   // BabyTree->Branch("eleID_oldsigmaiphiiphi"                                  , &eleID_oldsigmaiphiiphi                                  );
@@ -326,8 +326,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_multiIso"                                           , &lep2_multiIso                                                                           );
   BabyTree->Branch("lep1_sip"                                                , &lep1_sip                                                                                );
   BabyTree->Branch("lep2_sip"                                                , &lep2_sip                                                                                );
-  // BabyTree->Branch("lep1_closeJet"                                           , &lep1_closeJet                                                                           );
-  // BabyTree->Branch("lep2_closeJet"                                           , &lep2_closeJet                                                                           );
+  BabyTree->Branch("lep1_closeJet"                                           , &lep1_closeJet                                                                           );
+  BabyTree->Branch("lep2_closeJet"                                           , &lep2_closeJet                                                                           );
   BabyTree->Branch("passed_id_inSituFR_lep1"                                 , &passed_id_inSituFR_lep1                                                                 );
   BabyTree->Branch("passed_id_inSituFR_lep2"                                 , &passed_id_inSituFR_lep2                                                                 );
 
@@ -448,7 +448,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     TFile* f_btag_eff = 0;
     if (isFastsim == 0) {
 
-        f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_powheg_pythia8_25ns_Moriond17_deepCSV.root");
+        f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_amc_94X_deepCSV.root");
         TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
         TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
         TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
@@ -1062,7 +1062,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep1_el_conv_vtx_flag = abs(lep1_id) == 11 ? (!(els_conv_vtx_flag().at(lep1_idx))) : 0;
     lep1_nPixelMiss = abs(lep1_id) == 11 ? (!(els_lost_pixelhits().at(lep1_idx))) : -1;
     lep1_tightCharge = abs(lep1_id) == 11 ? tightChargeEle(lep1_idx) : -1;
-    lep1_el_exp_innerlayers  = abs(lep1_id) == 11 ? (els_exp_innerlayers().at(lep1_idx) <= 0) : -1;
+    lep1_el_exp_innerlayers  = abs(lep1_id) == 11 ? (els_exp_innerlayers().at(lep1_idx)) : -1;
     lep1_el_threeChargeAgree = abs(lep1_id) == 11 ? threeChargeAgree(lep1_idx) : -1;
     lep1_el_etaSC = abs(lep1_id) == 11 ? els_etaSC().at(lep1_idx) : -999;
 
@@ -1086,7 +1086,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep2_el_conv_vtx_flag = abs(lep2_id) == 11 ? (!(els_conv_vtx_flag().at(lep2_idx))) : 0;
     lep2_nPixelMiss = abs(lep2_id) == 11 ? (!(els_lost_pixelhits().at(lep2_idx))) : -1;
     lep2_tightCharge = abs(lep2_id) == 11 ? tightChargeEle(lep2_idx) : -1;
-    lep2_el_exp_innerlayers  = abs(lep2_id) == 11 ? (els_exp_innerlayers().at(lep2_idx) <= 0) : -1;
+    lep2_el_exp_innerlayers  = abs(lep2_id) == 11 ? (els_exp_innerlayers().at(lep2_idx)) : -1;
     lep2_el_threeChargeAgree = abs(lep2_id) == 11 ? threeChargeAgree(lep2_idx) : -1;
     lep2_el_etaSC = abs(lep2_id) == 11 ? els_etaSC().at(lep2_idx) : -999;
 
@@ -1846,15 +1846,13 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
           passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
-  if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v")))              (triggers |= 1<<3);
+  if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")))              (triggers |= 1<<3);
   if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")))        (triggers |= 1<<6);
 
   if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_v")) ||
       passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
   if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v")))    (triggers |= 1<<5);
   if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
-
-
 
 
   fired_trigger = false;
