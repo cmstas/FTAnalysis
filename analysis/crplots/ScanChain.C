@@ -65,6 +65,8 @@ int ScanChain(TChain *ch, TString options=""){
     /* bool doAllHT = options.Contains("doAllHT"); */
     /* bool useEraBLowHTTriggers = options.Contains("useEraBLowHTTriggers"); */
 
+    bool doFakes = options.Contains("doFakes");
+
     cout << "Working on " << ch->GetTitle() << endl;
 
     vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
@@ -101,7 +103,8 @@ int ScanChain(TChain *ch, TString options=""){
 
         TString filename(currentFile->GetTitle());
 
-        for( unsigned int event = 0; event < tree->GetEntriesFast(); ++event) {
+        for(unsigned int event = 0; event < tree->GetEntriesFast(); ++event) {
+            /* cout << "hello world" << endl; */
 
             samesign.GetEntry(event);
             nEventsTotal++;
@@ -121,21 +124,13 @@ int ScanChain(TChain *ch, TString options=""){
                 if (duplicate_removal::is_duplicate(id)) continue;
             }
 
-            //Calculate weight
-            float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
-
-            if (!ss::is_real_data()) {
-                // weight *= getTruePUw(ss::trueNumInt()[0]);
-                // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
-                // weight *= ss::weight_btagsf();
-            }
-            int nleps = (ss::lep3_passes_id() and ss::lep3_p4().Pt()>20) ? 3 : 2;
             float lep1pt = ss::lep1_coneCorrPt();
             float lep2pt = ss::lep2_coneCorrPt();
-            float lep3pt = ss::lep3_p4().Pt();
+            float lep3pt = ss::lep3_coneCorrPt();
             int lep1id = ss::lep1_id();
             int lep2id = ss::lep2_id();
             int lep3id = ss::lep3_id();
+            int nleps = (ss::lep3_passes_id() and lep3pt > 20.) ? 3 : 2;
             int njets = ss::njets();
             int nbtags = ss::nbtags();
             int ht = ss::ht();
@@ -150,8 +145,50 @@ int ScanChain(TChain *ch, TString options=""){
              */
             int hyp_class = ss::hyp_class();
 
-            // Fill histograms
+            //Calculate weight
+            float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
+
+            if (!ss::is_real_data()) {
+                // weight *= getTruePUw(ss::trueNumInt()[0]);
+                // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
+                // weight *= ss::weight_btagsf();
+            }
+
+            if (doFakes) {
+                if (hyp_class == 6) {
+                    if (ss::is_real_data() && (ss::lep3_fo() && !ss::lep3_tight()) && ss::lep1_passes_id() && ss::lep2_passes_id()) {  // lep3 fake
+                        float fr = fakeRate(lep3id, ss::lep3_p4().pt(), ss::lep3_p4().eta(), ht);
+                        /* isClass6Fake = true; */
+                        weight *= fr / (1-fr);
+                    }
+                    if (ss::is_real_data() && (ss::lep2_fo() && !ss::lep2_tight()) && ss::lep1_passes_id() && ss::lep3_passes_id()) {  // lep2 fake
+                        float fr = fakeRate(lep2id, lep2pt, ss::lep2_p4().eta(), ht);
+                        /* isClass6Fake = true; */
+                        weight *= fr / (1-fr);
+                    }
+                    if (ss::is_real_data() && (ss::lep1_fo() && !ss::lep1_tight()) && ss::lep2_passes_id() && ss::lep3_passes_id()) {  // lep1 fake
+                        float fr = fakeRate(lep1id, lep1pt, ss::lep1_p4().eta(), ht);
+                        /* isClass6Fake = true; */
+                        weight *= fr / (1-fr);
+                    }
+                } else {
+                    if (hyp_class != 2 && hyp_class != 1) continue;
+                    if (ss::lep1_passes_id()==0) {
+                        float fr = fakeRate(lep1id, lep1pt, ss::lep1_p4().eta(), ht);
+                        weight *= fr/(1.-fr);
+                    }
+                    if (ss::lep2_passes_id()==0) {
+                        float fr = fakeRate(lep2id, lep2pt, ss::lep2_p4().eta(), ht);
+                        weight *= fr/(1.-fr);
+                    }
+                    // subtract double FO (why is this?)
+                    if (hyp_class == 1) weight *= -1.;
+                }
+                hyp_class = 3; // we've faked a SS Tight-Tight with a SS LL or SS TL
+            }
+
             auto fill_region = [&](const string& region) {
+                // Fill all observables for a region
 
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
@@ -240,7 +277,7 @@ int ScanChain(TChain *ch, TString options=""){
     }//file loop
 
 
-    TFile f1(Form("outputs%s/histos_%s.root", options.Data(), ch->GetTitle()), "RECREATE");
+    TFile f1(Form("outputs/histos_%s.root", ch->GetTitle()), "RECREATE");
 
     h_met.Write();
     h_ht.Write();
