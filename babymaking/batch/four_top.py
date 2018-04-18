@@ -60,38 +60,57 @@ d_ds2name = {
             },
         "data": {
 
-                "/DoubleEG/Run2017B-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGB",
-                "/DoubleEG/Run2017C-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGC",
-                "/DoubleEG/Run2017D-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGD",
-                "/DoubleEG/Run2017E-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGE",
-                "/DoubleEG/Run2017F-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGF",
+                "/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD": "DataDoubleEGB",
+                "/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD": "DataDoubleEGC",
+                "/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD": "DataDoubleEGD",
+                "/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD": "DataDoubleEGE",
+                "/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD": "DataDoubleEGF",
 
-                "/DoubleEG/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleEGBv1",
-                "/DoubleEG/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleEGBv2",
-                "/DoubleEG/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleEGCv1",
-                "/DoubleEG/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleEGCv2",
-                "/DoubleEG/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleEGCv3",
-                "/DoubleEG/Run2017D-PromptReco-v1/MINIAOD": "DataDoubleEGD",
-                "/DoubleEG/Run2017E-PromptReco-v1/MINIAOD": "DataDoubleEGE",
-                "/DoubleEG/Run2017F-PromptReco-v1/MINIAOD": "DataDoubleEGF",
+                "/MuonEG/Run2017B-31Mar2018-v1/MINIAOD": "DataMuonEGB",
+                "/MuonEG/Run2017C-31Mar2018-v1/MINIAOD": "DataMuonEGC",
+                "/MuonEG/Run2017D-31Mar2018-v1/MINIAOD": "DataMuonEGD",
+                "/MuonEG/Run2017E-31Mar2018-v1/MINIAOD": "DataMuonEGE",
+                "/MuonEG/Run2017F-31Mar2018-v1/MINIAOD": "DataMuonEGF",
 
-                "/MuonEG/Run2017B-PromptReco-v1/MINIAOD": "DataMuonEGBv1",
-                "/MuonEG/Run2017B-PromptReco-v2/MINIAOD": "DataMuonEGBv2",
-                "/MuonEG/Run2017C-PromptReco-v1/MINIAOD": "DataMuonEGCv1",
-                "/MuonEG/Run2017C-PromptReco-v2/MINIAOD": "DataMuonEGCv2",
-                "/MuonEG/Run2017C-PromptReco-v3/MINIAOD": "DataMuonEGCv3",
-                "/MuonEG/Run2017D-PromptReco-v1/MINIAOD": "DataMuonEGD",
-                "/MuonEG/Run2017E-PromptReco-v1/MINIAOD": "DataMuonEGE",
-                "/MuonEG/Run2017F-PromptReco-v1/MINIAOD": "DataMuonEGF",
-
-                "/DoubleMuon/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleMuonBv1",
-                "/DoubleMuon/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleMuonBv2",
-                "/DoubleMuon/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleMuonCv1",
-                "/DoubleMuon/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleMuonCv2",
-                "/DoubleMuon/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleMuonCv3",
-                "/DoubleMuon/Run2017D-PromptReco-v1/MINIAOD": "DataDoubleMuonD",
+                "/DoubleMuon/Run2017B-31Mar2018-v1/MINIAOD": "DataDoubleMuonB",
+                "/DoubleMuon/Run2017C-31Mar2018-v1/MINIAOD": "DataDoubleMuonC",
+                "/DoubleMuon/Run2017D-31Mar2018-v1/MINIAOD": "DataDoubleMuonD",
+                ## FIXME using Prompt for DoubleMuonE still
                 "/DoubleMuon/Run2017E-PromptReco-v1/MINIAOD": "DataDoubleMuonE",
-                "/DoubleMuon/Run2017F-PromptReco-v1/MINIAOD": "DataDoubleMuonF",
+                "/DoubleMuon/Run2017F-31Mar2018-v1/MINIAOD": "DataDoubleMuonF",
+
+                # "/DoubleEG/Run2017B-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGB",
+                # "/DoubleEG/Run2017C-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGC",
+                # "/DoubleEG/Run2017D-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGD",
+                # "/DoubleEG/Run2017E-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGE",
+                # "/DoubleEG/Run2017F-17Nov2017-v1/MINIAOD": "rereco_DataDoubleEGF",
+
+                # "/DoubleEG/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleEGBv1",
+                # "/DoubleEG/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleEGBv2",
+                # "/DoubleEG/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleEGCv1",
+                # "/DoubleEG/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleEGCv2",
+                # "/DoubleEG/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleEGCv3",
+                # "/DoubleEG/Run2017D-PromptReco-v1/MINIAOD": "DataDoubleEGD",
+                # "/DoubleEG/Run2017E-PromptReco-v1/MINIAOD": "DataDoubleEGE",
+                # "/DoubleEG/Run2017F-PromptReco-v1/MINIAOD": "DataDoubleEGF",
+
+                # "/MuonEG/Run2017B-PromptReco-v1/MINIAOD": "DataMuonEGBv1",
+                # "/MuonEG/Run2017B-PromptReco-v2/MINIAOD": "DataMuonEGBv2",
+                # "/MuonEG/Run2017C-PromptReco-v1/MINIAOD": "DataMuonEGCv1",
+                # "/MuonEG/Run2017C-PromptReco-v2/MINIAOD": "DataMuonEGCv2",
+                # "/MuonEG/Run2017C-PromptReco-v3/MINIAOD": "DataMuonEGCv3",
+                # "/MuonEG/Run2017D-PromptReco-v1/MINIAOD": "DataMuonEGD",
+                # "/MuonEG/Run2017E-PromptReco-v1/MINIAOD": "DataMuonEGE",
+                # "/MuonEG/Run2017F-PromptReco-v1/MINIAOD": "DataMuonEGF",
+
+                # "/DoubleMuon/Run2017B-PromptReco-v1/MINIAOD": "DataDoubleMuonBv1",
+                # "/DoubleMuon/Run2017B-PromptReco-v2/MINIAOD": "DataDoubleMuonBv2",
+                # "/DoubleMuon/Run2017C-PromptReco-v1/MINIAOD": "DataDoubleMuonCv1",
+                # "/DoubleMuon/Run2017C-PromptReco-v2/MINIAOD": "DataDoubleMuonCv2",
+                # "/DoubleMuon/Run2017C-PromptReco-v3/MINIAOD": "DataDoubleMuonCv3",
+                # "/DoubleMuon/Run2017D-PromptReco-v1/MINIAOD": "DataDoubleMuonD",
+                # "/DoubleMuon/Run2017E-PromptReco-v1/MINIAOD": "DataDoubleMuonE",
+                # "/DoubleMuon/Run2017F-PromptReco-v1/MINIAOD": "DataDoubleMuonF",
 
             },
 
@@ -114,7 +133,8 @@ baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 # tag = "v1.00_94x_baseline_withos_v3"
 # tag = "v1.00_94x_baseline_withos_v3_2017egid"
 # tag = "v1.02_94x_withos_relaxhits"
-tag = "v1.02_94x_withos_relaxhitsmore"
+# tag = "v1.02_94x_withos_relaxhitsmore"
+tag = "v1.03_os_nmiss1_dileptrig_v1"
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
 dashboard_name = "AutoTwopler_FTbabies"

@@ -1857,19 +1857,26 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   fired_trigger = false;
   if (triggers != 0) {
-    if (ht<400) {
-        // ee 3
-        // mumu 0
-        // emu  1
+
+    // if (ht<400) {
+    //     // ee 3
+    //     // mumu 0
+    //     // emu  1
+    //   if ( hyp_type==0 && ((triggers & 1<<3)==(1<<3) || (triggers & 1<<4)==(1<<4)) ) fired_trigger = true;
+    //   if ( hyp_type==3 && (triggers & 1<<6)==(1<<6) ) fired_trigger = true;
+    //   if ( (hyp_type==1 || hyp_type==2) && ((triggers & 1<<1)==(1<<1) || (triggers & 1<<2)==(1<<2)) ) fired_trigger = true;
+    // }
+    // else {
+    //   if ( hyp_type==0 && (triggers & 1<<7)==(1<<7) ) fired_trigger = true;
+    //   if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger = true;
+    //   if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger = true;
+    // }
+
+    // Pure dilepton triggers for all HT
       if ( hyp_type==0 && ((triggers & 1<<3)==(1<<3) || (triggers & 1<<4)==(1<<4)) ) fired_trigger = true;
       if ( hyp_type==3 && (triggers & 1<<6)==(1<<6) ) fired_trigger = true;
       if ( (hyp_type==1 || hyp_type==2) && ((triggers & 1<<1)==(1<<1) || (triggers & 1<<2)==(1<<2)) ) fired_trigger = true;
-    }
-    else {
-      if ( hyp_type==0 && (triggers & 1<<7)==(1<<7) ) fired_trigger = true;
-      if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger = true;
-      if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger = true;
-    }
+
 
   }
 
