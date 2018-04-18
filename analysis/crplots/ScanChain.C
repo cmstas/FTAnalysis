@@ -5,6 +5,7 @@
 #include "TCut.h"
 #include "TColor.h"
 #include "TCanvas.h"
+#include "TRandom.h"
 #include "TH2F.h"
 #include "TH1.h"
 #include "TChain.h"
@@ -64,9 +65,13 @@ struct HistCol {
 int ScanChain(TChain *ch, TString options=""){
 
     bool doFakes = options.Contains("doFakes");
+    bool useInclusiveSFs = options.Contains("useInclusiveSFs");
 
     // Clear already-seen list
     duplicate_removal::clear_list();
+
+    // Used to determine which "era" a MC even is in
+    TRandom *tr1 = new TRandom();
 
     cout << "Working on " << ch->GetTitle() << endl;
 
@@ -172,9 +177,19 @@ int ScanChain(TChain *ch, TString options=""){
             float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
             if (!ss::is_real_data()) {
-                // weight *= getTruePUw(ss::trueNumInt()[0]);
+                float rand = -1;
+                if (!useInclusiveSFs) {
+                    tr1->SetSeed(ss::event());
+                    tr1->Rndm();
+                }
+                weight *= getTruePUw(ss::trueNumInt()[0]);
+                weight *= leptonScaleFactor(lep1id, ss::lep1_p4().pt(), ss::lep1_p4().eta(), ht, rand);
+                weight *= leptonScaleFactor(lep2id, ss::lep2_p4().pt(), ss::lep2_p4().eta(), ht, rand);
+                if (nleps > 2) {
+                    weight *= leptonScaleFactor(lep3id, ss::lep3_p4().pt(), ss::lep3_p4().eta(), ht, rand);
+                }
+                weight *= ss::weight_btagsf();
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
-                // weight *= ss::weight_btagsf();
             }
 
             bool class6Fake = false;

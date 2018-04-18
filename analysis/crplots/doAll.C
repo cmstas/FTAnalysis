@@ -15,6 +15,7 @@
     /* Options:
      *     doAllHT
      *     useEraBLowHTTriggers
+     *     useInclusiveSFs
      */
     /* TString options = "doAllHT"; */
     TString options = "";
