@@ -215,8 +215,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
             // if (ss::lep1_el_exp_innerlayers() > 1) continue;
             // if (ss::lep2_el_exp_innerlayers() > 1) continue;
-            if (ss::lep1_el_exp_innerlayers() > 0) continue;
-            if (ss::lep2_el_exp_innerlayers() > 0) continue;
+            // if (ss::lep1_el_exp_innerlayers() > 0) continue;
+            // if (ss::lep2_el_exp_innerlayers() > 0) continue;
 
             // Reject duplicates
             if (ss::is_real_data()){
@@ -484,7 +484,6 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     osee_nbtags_data->Write();
     osee_nvtx_MC->Write();
     osee_nvtx_data->Write();
-
 
     f1->Close();
 
