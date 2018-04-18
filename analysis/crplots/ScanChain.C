@@ -20,6 +20,7 @@ using namespace std;
 // using namespace tas;
 
 float lumiAG = getLumi();
+// float lumiAG = 36.3;
 
 struct HistCol {
     map<string, TH1D> ee;
@@ -62,15 +63,15 @@ struct HistCol {
 
 int ScanChain(TChain *ch, TString options=""){
 
-    /* bool doAllHT = options.Contains("doAllHT"); */
-    /* bool useEraBLowHTTriggers = options.Contains("useEraBLowHTTriggers"); */
-
     bool doFakes = options.Contains("doFakes");
+
+    // Clear already-seen list
+    duplicate_removal::clear_list();
 
     cout << "Working on " << ch->GetTitle() << endl;
 
     vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
-                              "crz", "crw", "crw350",         // CRZ, CRW
+                              "crz", "crw",                   // CRZ, CRW
                               "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
                               "isr"};
     HistCol h_met    (regions, "met"   , 15, 0   , 600 );
@@ -104,7 +105,6 @@ int ScanChain(TChain *ch, TString options=""){
         TString filename(currentFile->GetTitle());
 
         for(unsigned int event = 0; event < tree->GetEntriesFast(); ++event) {
-            /* cout << "hello world" << endl; */
 
             samesign.GetEntry(event);
             nEventsTotal++;
@@ -114,7 +114,32 @@ int ScanChain(TChain *ch, TString options=""){
             if (ss::lep1_el_exp_innerlayers() > 0) continue;
             if (ss::lep2_el_exp_innerlayers() > 0) continue;
 
-            if (!ss::fired_trigger()) continue;
+            auto pass_trig = []() {
+                if (ss::is_real_data()) {
+                    if (ss::run() <= 299329 && ss::run() >= 297046) {  // Era B
+                        /* hyp_type
+                         * 0: mu mu
+                         * 1/2: mu e/e mu
+                         * 3: e e
+                         */
+                        int hyp = ss::hyp_type();
+                        unsigned int triggers = ss::triggers();
+                        /* Normally, the below triggers are only used if ht<400, but for Era B, use them
+                         * always. (see `fired_trigger` in helper_babymaker.cc)
+                         */
+                        if (hyp==0             && ((triggers & 1<<3) || (triggers & 1<<4))) return true;
+                        if (hyp==3             &&  (triggers & 1<<6))                       return true;
+                        if ((hyp==1 || hyp==2) && ((triggers & 1<<1) || (triggers & 1<<2))) return true;
+                        return ss::fired_trigger();
+                    } else {
+                        return ss::fired_trigger();
+                    }
+                } else {  // MC
+                    return true;
+                }
+            };
+
+            if (!pass_trig()) continue;
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
@@ -124,24 +149,28 @@ int ScanChain(TChain *ch, TString options=""){
                 if (duplicate_removal::is_duplicate(id)) continue;
             }
 
+            // Save a bunch of event info for quick reference later
             float lep1pt = ss::lep1_coneCorrPt();
             float lep2pt = ss::lep2_coneCorrPt();
             float lep3pt = ss::lep3_coneCorrPt();
             int lep1id = ss::lep1_id();
             int lep2id = ss::lep2_id();
             int lep3id = ss::lep3_id();
+            int lep1good = ss::lep1_passes_id();
+            int lep2good = ss::lep2_passes_id();
+            int lep3good = ss::lep3_passes_id();
             int nleps = (ss::lep3_passes_id() and lep3pt > 20.) ? 3 : 2;
             int njets = ss::njets();
             int nbtags = ss::nbtags();
             int ht = ss::ht();
             int met = ss::met();
-            /* Hyp Class
+            /* hyp_class
              * 1: SS, loose-loose
-             * 2: SS, tight-loose
+             * 2: SS, tight-loose (or loose-tight)
              * 3: SS, tight-tight
              * 4: OS, tight-tight
              * 5: SS, inSituFR
-             * 6: SS, tight-tight and fails Z-veto
+             * 6: SS, tight-tight and fails Z-veto (lies! hyp_class==6 != lep1good and lep2good)
              */
             int hyp_class = ss::hyp_class();
 
@@ -154,25 +183,28 @@ int ScanChain(TChain *ch, TString options=""){
                 // weight *= ss::weight_btagsf();
             }
 
+            bool class6Fake = false;
             if (doFakes) {
                 if (hyp_class == 6) {
-                    if (ss::is_real_data() && (ss::lep3_fo() && !ss::lep3_tight()) && ss::lep1_passes_id() && ss::lep2_passes_id()) {  // lep3 fake
+                    if ((ss::lep3_fo() && !ss::lep3_tight()) && lep1good && lep2good) {  // lep3 fake
                         float fr = fakeRate(lep3id, ss::lep3_p4().pt(), ss::lep3_p4().eta(), ht);
-                        /* isClass6Fake = true; */
+                        class6Fake = true;
                         weight *= fr / (1-fr);
                     }
-                    if (ss::is_real_data() && (ss::lep2_fo() && !ss::lep2_tight()) && ss::lep1_passes_id() && ss::lep3_passes_id()) {  // lep2 fake
+                    if ((ss::lep2_fo() && !ss::lep2_tight()) && lep1good && lep3good) {  // lep2 fake
                         float fr = fakeRate(lep2id, lep2pt, ss::lep2_p4().eta(), ht);
-                        /* isClass6Fake = true; */
+                        class6Fake = true;
                         weight *= fr / (1-fr);
                     }
-                    if (ss::is_real_data() && (ss::lep1_fo() && !ss::lep1_tight()) && ss::lep2_passes_id() && ss::lep3_passes_id()) {  // lep1 fake
+                    if ((ss::lep1_fo() && !ss::lep1_tight()) && lep2good && lep3good) {  // lep1 fake
                         float fr = fakeRate(lep1id, lep1pt, ss::lep1_p4().eta(), ht);
-                        /* isClass6Fake = true; */
+                        class6Fake = true;
                         weight *= fr / (1-fr);
                     }
-                } else {
-                    if (hyp_class != 2 && hyp_class != 1) continue;
+                    if (!class6Fake) {
+                        continue; // No fakes!
+                    }
+                } else if (hyp_class == 1 or hyp_class == 2) {
                     if (ss::lep1_passes_id()==0) {
                         float fr = fakeRate(lep1id, lep1pt, ss::lep1_p4().eta(), ht);
                         weight *= fr/(1.-fr);
@@ -183,12 +215,16 @@ int ScanChain(TChain *ch, TString options=""){
                     }
                     // subtract double FO (why is this?)
                     if (hyp_class == 1) weight *= -1.;
+                    hyp_class = 3; // we've faked a SS Tight-Tight with a SS LL or SS TL
+                                   // Basically just update this so it gets put in the SR
+                } else {
+                    continue; // Not a fakeing hyp_class
                 }
-                hyp_class = 3; // we've faked a SS Tight-Tight with a SS LL or SS TL
             }
 
             auto fill_region = [&](const string& region) {
                 // Fill all observables for a region
+                /* cout << "region: " << region << endl; */
 
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
@@ -220,11 +256,18 @@ int ScanChain(TChain *ch, TString options=""){
               }
             }
 
+            bool ZVeto = false;
+            if (hyp_class == 4 and abs(lep1id) == abs(lep2id) and lep1id*lep2id<0) {
+                float m = (ss::lep1_p4()+ss::lep2_p4()).M();
+                if (m < 12 or abs(m - 91.1) < 15) ZVeto = true;
+            }
 
             if (hyp_class == 6 and
                     lep1pt > 25. and
                     lep2pt > 20. and
-                    ht > 400 and
+                    lep3pt > 20. and
+                    (class6Fake or (lep1good and lep2good and lep3good)) and
+                    ht > 350 and
                     met > 50 and
                     nleps > 2 and
                     nbtags >= 2 and
@@ -233,42 +276,32 @@ int ScanChain(TChain *ch, TString options=""){
             if (hyp_class == 3 and
                     lep1pt > 25. and
                     lep2pt > 20. and
-                    ht > 400 and
+                    ht > 350 and
                     met > 50 and
                     nleps == 2 and
                     nbtags == 2 and
                     njets <= 5) fill_region("crw");
 
-            if (hyp_class == 3 and
-                    lep1pt > 25. and
-                    lep2pt > 20. and
-                    ht > 350 and
-                    met > 50 and
-                    nleps == 2 and
-                    nbtags == 2 and
-                    njets <= 5) fill_region("crw350");
-
-
             if (lep1pt > 25. and
                     lep2pt > 20. and
                     njets >= 2 and
                     met > 50. and
-                    ht > 400) {
-                if (hyp_class == 4 || hyp_class == 6) fill_region("os");
-                if (hyp_class == 2)                   fill_region("tl");
+                    ht > 350) {
+                if (hyp_class == 4 and !ZVeto) fill_region("os");
+                if (hyp_class == 2)            fill_region("tl");
             }
 
             if (hyp_class == 3 and
                     lep1pt >= 25. and
                     lep2pt >= 20. and
                     njets >= 2) {
-                if (nbtags < 2  and ht > 400 and met > 50) fill_region("bdt_nb");   // invert Nb
-                if (nbtags >= 2 and ht < 400 and met > 50) fill_region("bdt_ht");   // invert Ht
-                if (nbtags >= 2 and ht > 400 and met < 50) fill_region("bdt_met");  // invert MET
+                if (nbtags < 2  and ht > 350 and met > 50) fill_region("bdt_nb");   // invert Nb
+                if (nbtags >= 2 and ht < 350 and met > 50) fill_region("bdt_ht");   // invert Ht
+                if (nbtags >= 2 and ht > 350 and met < 50) fill_region("bdt_met");  // invert MET
             }
 
-            if (lep1pt >= 25. and lep2pt >= 20.  and hyp_class != 6 and nleps == 2 and nbtags == 2 and njets >= 2) {
-                if (nbtags < 2  and ht > 400 and met > 50) fill_region("isr");
+            if (lep1pt >= 25. and lep2pt >= 20.  and hyp_class == 4 and !ZVeto and nleps == 2 and nbtags == 2 and njets >= 2) {
+                if (nbtags < 2  and ht > 350 and met > 50) fill_region("isr");
             }
 
         }//event loop
