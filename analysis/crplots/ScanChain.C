@@ -111,29 +111,23 @@ int ScanChain(TChain *ch, TString options=""){
 
             // if (event > 10000) break;
 
-            if (ss::lep1_el_exp_innerlayers() > 0) continue;
-            if (ss::lep2_el_exp_innerlayers() > 0) continue;
+            if (ss::lep1_el_exp_innerlayers() > 1) continue;
+            if (ss::lep2_el_exp_innerlayers() > 1) continue;
 
             auto pass_trig = []() {
                 if (ss::is_real_data()) {
-                    if (ss::run() <= 299329 && ss::run() >= 297046) {  // Era B
-                        /* hyp_type
-                         * 0: mu mu
-                         * 1/2: mu e/e mu
-                         * 3: e e
-                         */
-                        int hyp = ss::hyp_type();
-                        unsigned int triggers = ss::triggers();
-                        /* Normally, the below triggers are only used if ht<400, but for Era B, use them
-                         * always. (see `fired_trigger` in helper_babymaker.cc)
-                         */
-                        if (hyp==0             && ((triggers & 1<<3) || (triggers & 1<<4))) return true;
-                        if (hyp==3             &&  (triggers & 1<<6))                       return true;
-                        if ((hyp==1 || hyp==2) && ((triggers & 1<<1) || (triggers & 1<<2))) return true;
-                        return ss::fired_trigger();
-                    } else {
-                        return ss::fired_trigger();
-                    }
+                    /* hyp_type
+                     * 0: mu mu
+                     * 1/2: mu e/e mu
+                     * 3: e e
+                     */
+                    int hyp = ss::hyp_type();
+                    unsigned int triggers = ss::triggers();
+                    /* Dilepton Triggers */
+                    if (hyp==0             && ((triggers & 1<<3) || (triggers & 1<<4))) return true;
+                    if (hyp==3             &&  (triggers & 1<<6))                       return true;
+                    if ((hyp==1 || hyp==2) && ((triggers & 1<<1) || (triggers & 1<<2))) return true;
+                    return false;
                 } else {  // MC
                     return true;
                 }
