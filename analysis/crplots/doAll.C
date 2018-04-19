@@ -1,24 +1,18 @@
 {
-
-
-    gROOT->ProcessLine(".L ../misc/class_files/v8.02/SS.cc+"); 
-    // gSystem->Load("../../common/CORE/CMS3_CORE.so");
-    // gSystem->Load("../../common/CORE/CMS3_CORE.so");
-    gROOT->ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc++");
+    gROOT->ProcessLine(".L ../misc/class_files/v8.02/SS.cc+");
+    gROOT->ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+");
     gROOT->ProcessLine(".L ScanChain.C+");
 
-
     /* TString tag = "v1.00_94x_baseline_withos_v3"; */
-    TString tag = "v1.02_94x_withos_relaxhitsmore";
+    /* TString tag = "v1.02_94x_withos_relaxhitsmore"; */
+    TString tag = "v1.03_os_nmiss1_dileptrig_v1";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
 
     /* Options:
-     *     doAllHT
-     *     useEraBLowHTTriggers
-     *     useInclusiveSFs
+     *     useInclusiveSFs: use inclusive (ie not era-dependent) lepton scale factors
+     *     doFakes: Run data-driven fake estimate
      */
-    /* TString options = "doAllHT"; */
-    TString options = "";
+    TString options = "useInclusiveSFs";
 
     gSystem->Exec(Form("mkdir -p outputs%s", options.Data()));
 

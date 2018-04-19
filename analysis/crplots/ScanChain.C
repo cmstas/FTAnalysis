@@ -79,20 +79,20 @@ int ScanChain(TChain *ch, TString options=""){
                               "crz", "crw",                   // CRZ, CRW
                               "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
                               "isr"};
-    HistCol h_met    (regions, "met"   , 15, 0   , 600 );
-    HistCol h_ht     (regions, "ht"    , 16, 0   , 1600);
-    HistCol h_mll    (regions, "mll"   , 25, 0   , 300 );
-    HistCol h_mtmin  (regions, "mtmin" , 25, 0   , 300 );
-    HistCol h_njets  (regions, "njets" , 8 , 0   , 8   );
-    HistCol h_nbtags (regions, "nbtags", 5 , 0   , 5   );
-    HistCol h_pt1    (regions, "pt1"   , 25, 0   , 300 );
-    HistCol h_pt2    (regions, "pt2"   , 25, 0   , 300 );
-    HistCol h_eta1   (regions, "eta1"  , 25, -3.2, 3.2 );
-    HistCol h_eta2   (regions, "eta2"  , 25, -3.2, 3.2 );
-    HistCol h_pte    (regions, "pte"   , 25, 0   , 300 );
-    HistCol h_ptm    (regions, "ptm"   , 25, 0   , 300 );
-    HistCol h_type   (regions, "type"  , 3 , 0   , 3   );
-    HistCol h_nvtx   (regions, "nvtx"  , 70, 0   , 70  );
+    HistCol h_met    (regions, "met"   , 15, 0    , 600 );
+    HistCol h_ht     (regions, "ht"    , 16, 50   , 1650);
+    HistCol h_mll    (regions, "mll"   , 25, 0    , 300 );
+    HistCol h_mtmin  (regions, "mtmin" , 25, 0    , 300 );
+    HistCol h_njets  (regions, "njets" , 8 , 0    , 8   );
+    HistCol h_nbtags (regions, "nbtags", 5 , 0    , 5   );
+    HistCol h_pt1    (regions, "pt1"   , 25, 0    , 300 );
+    HistCol h_pt2    (regions, "pt2"   , 25, 0    , 300 );
+    HistCol h_eta1   (regions, "eta1"  , 25, -3.2 , 3.2 );
+    HistCol h_eta2   (regions, "eta2"  , 25, -3.2 , 3.2 );
+    HistCol h_pte    (regions, "pte"   , 25, 0    , 300 );
+    HistCol h_ptm    (regions, "ptm"   , 25, 0    , 300 );
+    HistCol h_type   (regions, "type"  , 3 , 0    , 3   );
+    HistCol h_nvtx   (regions, "nvtx"  , 70, 0    , 70  );
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -114,31 +114,9 @@ int ScanChain(TChain *ch, TString options=""){
             samesign.GetEntry(event);
             nEventsTotal++;
 
-            // if (event > 10000) break;
+            /* if (event > 10000) break; */
 
-            if (ss::lep1_el_exp_innerlayers() > 1) continue;
-            if (ss::lep2_el_exp_innerlayers() > 1) continue;
-
-            auto pass_trig = []() {
-                if (ss::is_real_data()) {
-                    /* hyp_type
-                     * 0: mu mu
-                     * 1/2: mu e/e mu
-                     * 3: e e
-                     */
-                    int hyp = ss::hyp_type();
-                    unsigned int triggers = ss::triggers();
-                    /* Dilepton Triggers */
-                    if (hyp==0             && ((triggers & 1<<3) || (triggers & 1<<4))) return true;
-                    if (hyp==3             &&  (triggers & 1<<6))                       return true;
-                    if ((hyp==1 || hyp==2) && ((triggers & 1<<1) || (triggers & 1<<2))) return true;
-                    return false;
-                } else {  // MC
-                    return true;
-                }
-            };
-
-            if (!pass_trig()) continue;
+            if (!ss::fired_trigger()) continue;
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
@@ -176,11 +154,12 @@ int ScanChain(TChain *ch, TString options=""){
             //Calculate weight
             float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
+            // re-enable weights
             if (!ss::is_real_data()) {
                 float rand = -1;
                 if (!useInclusiveSFs) {
                     tr1->SetSeed(ss::event());
-                    tr1->Rndm();
+                    rand = tr1->Rndm();
                 }
                 weight *= getTruePUw(ss::trueNumInt()[0]);
                 weight *= leptonScaleFactor(lep1id, ss::lep1_p4().pt(), ss::lep1_p4().eta(), ht, rand);
@@ -196,7 +175,7 @@ int ScanChain(TChain *ch, TString options=""){
             if (doFakes) {
                 if (hyp_class == 6) {
                     if ((ss::lep3_fo() && !ss::lep3_tight()) && lep1good && lep2good) {  // lep3 fake
-                        float fr = fakeRate(lep3id, ss::lep3_p4().pt(), ss::lep3_p4().eta(), ht);
+                        float fr = fakeRate(lep3id, lep3pt, ss::lep3_p4().eta(), ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
@@ -233,8 +212,6 @@ int ScanChain(TChain *ch, TString options=""){
 
             auto fill_region = [&](const string& region) {
                 // Fill all observables for a region
-                /* cout << "region: " << region << endl; */
-
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
                 };
@@ -309,12 +286,14 @@ int ScanChain(TChain *ch, TString options=""){
                 if (nbtags >= 2 and ht > 350 and met < 50) fill_region("bdt_met");  // invert MET
             }
 
-            if (lep1pt >= 25. and lep2pt >= 20.  and hyp_class == 4 and !ZVeto and nleps == 2 and nbtags == 2 and njets >= 2) {
-                if (nbtags < 2  and ht > 350 and met > 50) fill_region("isr");
-            }
-
+            if (hyp_class == 4 and !ZVeto and
+                    lep1pt >= 25. and
+                    lep2pt >= 20. and
+                    nbtags == 2 and
+                    njets >= 2 and
+                    ht > 350 and
+                    met > 50) fill_region("isr");
         }//event loop
-
         delete file;
     }//file loop
 
