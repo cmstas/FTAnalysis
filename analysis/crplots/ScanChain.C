@@ -80,7 +80,7 @@ int ScanChain(TChain *ch, TString options=""){
                               "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
                               "isr"};
     HistCol h_met    (regions, "met"   , 15, 0    , 600 );
-    HistCol h_ht     (regions, "ht"    , 16, 50   , 1650);
+    HistCol h_ht     (regions, "ht"    , 16, 0    , 1600);
     HistCol h_mll    (regions, "mll"   , 25, 0    , 300 );
     HistCol h_mtmin  (regions, "mtmin" , 25, 0    , 300 );
     HistCol h_njets  (regions, "njets" , 8 , 0    , 8   );
@@ -253,7 +253,7 @@ int ScanChain(TChain *ch, TString options=""){
                     lep2pt > 20. and
                     lep3pt > 20. and
                     (class6Fake or (lep1good and lep2good and lep3good)) and
-                    ht > 350 and
+                    ht > 300 and
                     met > 50 and
                     nleps > 2 and
                     nbtags >= 2 and
@@ -262,7 +262,7 @@ int ScanChain(TChain *ch, TString options=""){
             if (hyp_class == 3 and
                     lep1pt > 25. and
                     lep2pt > 20. and
-                    ht > 350 and
+                    ht > 300 and
                     met > 50 and
                     nleps == 2 and
                     nbtags == 2 and
@@ -272,7 +272,7 @@ int ScanChain(TChain *ch, TString options=""){
                     lep2pt > 20. and
                     njets >= 2 and
                     met > 50. and
-                    ht > 350) {
+                    ht > 300) {
                 if (hyp_class == 4 and !ZVeto) fill_region("os");
                 if (hyp_class == 2)            fill_region("tl");
             }
@@ -281,9 +281,9 @@ int ScanChain(TChain *ch, TString options=""){
                     lep1pt >= 25. and
                     lep2pt >= 20. and
                     njets >= 2) {
-                if (nbtags < 2  and ht > 350 and met > 50) fill_region("bdt_nb");   // invert Nb
-                if (nbtags >= 2 and ht < 350 and met > 50) fill_region("bdt_ht");   // invert Ht
-                if (nbtags >= 2 and ht > 350 and met < 50) fill_region("bdt_met");  // invert MET
+                if (nbtags < 2  and ht > 300 and met > 50) fill_region("bdt_nb");   // invert Nb
+                if (nbtags >= 2 and ht < 300 and met > 50) fill_region("bdt_ht");   // invert Ht
+                if (nbtags >= 2 and ht > 300 and met < 50) fill_region("bdt_met");  // invert MET
             }
 
             if (hyp_class == 4 and !ZVeto and
@@ -291,7 +291,7 @@ int ScanChain(TChain *ch, TString options=""){
                     lep2pt >= 20. and
                     nbtags == 2 and
                     njets >= 2 and
-                    ht > 350 and
+                    ht > 300 and
                     met > 50) fill_region("isr");
         }//event loop
         delete file;
