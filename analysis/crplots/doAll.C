@@ -11,6 +11,7 @@
     /* Options:
      *     useInclusiveSFs: use inclusive (ie not era-dependent) lepton scale factors
      *     doFakes: Run data-driven fake estimate
+     *     doFlips: Run charge mis-id estimate
      */
     TString options = "useInclusiveSFs";
 
@@ -23,6 +24,10 @@
     TChain *ch_fakes = new TChain("t","fakes");
     ch_fakes->Add(basedir+"Data*.root");
     ScanChain(ch_fakes, options + "doFakes");
+
+    TChain *ch_flips = new TChain("t","flips");
+    ch_flips->Add(basedir+"Data*.root");
+    ScanChain(ch_flips, options + "doFlips");
 
     TChain *ch_ttw = new TChain("t","ttw");
     ch_ttw->Add(basedir+"TTWnlo.root");
