@@ -17,20 +17,20 @@ bool applyThirdLeptonVeto() { return false; }
 #include "lepton_sf_fastsim.h"
 
 float fakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronFakeRate(pt,eta);
-    else if (abs(id)==13) return muonFakeRate(pt,eta);
+    if (abs(id)==11) return electronFakeRate_IsoTrigs(pt,eta);
+    else if (abs(id)==13) return muonFakeRate_IsoTrigs(pt,eta);
     else return 0.;
 }
 
 float fakeRateError(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronFakeRateError(pt,eta);
-    else if (abs(id)==13) return muonFakeRateError(pt,eta);
+    if (abs(id)==11) return electronFakeRateError_IsoTrigs(pt,eta);
+    else if (abs(id)==13) return muonFakeRateError_IsoTrigs(pt,eta);
     else return 0.;
 }
 
 float alternativeFakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronAlternativeFakeRate(pt,eta);
-    else if (abs(id)==13) return muonAlternativeFakeRate(pt,eta);
+    if (abs(id)==11) return electronAlternativeFakeRate_IsoTrigs(pt,eta);
+    else if (abs(id)==13) return muonAlternativeFakeRate_IsoTrigs(pt,eta);
     else return 0.;
 }
 
