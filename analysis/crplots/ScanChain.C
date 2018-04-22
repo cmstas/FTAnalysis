@@ -152,7 +152,7 @@ int ScanChain(TChain *ch, TString options=""){
             int lep1good = ss::lep1_passes_id();
             int lep2good = ss::lep2_passes_id();
             int lep3good = ss::lep3_passes_id();
-            int nleps = (ss::lep3_passes_id() and lep3ccpt > 20.) ? 3 : 2;
+            int nleps = (lep3good and lep3ccpt > 20) ? 3 : 2;
             int njets = ss::njets();
             int nbtags = ss::nbtags();
             int ht = ss::ht();
@@ -254,13 +254,25 @@ int ScanChain(TChain *ch, TString options=""){
               }
             }
 
-            auto mll = [](const Vec4& p1, const Vec4& p2) {return (p1+p2).M();};
-            auto sfos = [](int id1, int id2) {return abs(id1) == abs(id2) and id1*id2<0;};
-            auto z_veto = [](bool sfos, float mll) { return sfos and (mll < 12 or abs(mll - 91.1) < 15); };
-            float m12 = mll(ss::lep1_p4(), ss::lep2_p4());
-            float m13 = mll(ss::lep1_p4(), ss::lep3_p4());
-            float m23 = mll(ss::lep2_p4(), ss::lep3_p4());
-            auto zveto12 = z_veto(sfos(lep1id, lep2id), m12);
+            auto mll = [](const Vec4& p1, const Vec4& p2, float ccpt1=-1, float ccpt2=-1) {
+                /* Calculate dilepton mass with optional rescaling of based on cone-corrected lepton pt */
+                if (ccpt1 == -1) return (p1 + p2).M();
+                else             return (p1*ccpt1/p1.pt() + p2*ccpt2/p2.pt()).M();
+            };
+            float m12 = mll(ss::lep1_p4(), ss::lep2_p4(), lep1ccpt, lep2ccpt);
+            float m13 = mll(ss::lep1_p4(), ss::lep3_p4(), lep1ccpt, lep3ccpt);
+            float m23 = mll(ss::lep2_p4(), ss::lep3_p4(), lep2ccpt, lep3ccpt);
+
+            auto z_cand = [](int id1, int id2, float mll) {
+                return abs(id1) == abs(id2) and  // Same flavor
+                       id1*id2<0 and             // Opposite sign
+                       abs(mll - 91.2) < 15;     // Z-mass
+            };
+            bool zcand12 = z_cand(lep1id, lep2id, m12);
+            bool zcand13 = z_cand(lep1id, lep3id, m13);
+            bool zcand23 = z_cand(lep2id, lep3id, m23);
+            float mllos = fabs(m13 - 91.2) < fabs(m23 - 91.2) ? m13 : m23;
+
 
             auto fill_region = [&](const string& region) {
                 // Fill all observables for a region
@@ -276,9 +288,7 @@ int ScanChain(TChain *ch, TString options=""){
                 do_fill(h_pt1,    lep1ccpt);
                 do_fill(h_pt2,    lep2ccpt);
                 if (nleps > 2) do_fill(h_pt3, lep3pt);
-                if (nleps > 2 and sfos(lep1id, lep3id)) do_fill(h_zmll, m13);
-                if (nleps > 2 and sfos(lep2id, lep3id)) do_fill(h_zmll, m23);
-
+                if (nleps > 2) do_fill(h_zmll, mllos);
                 if (abs(lep1id) == 11) {
                    do_fill(h_pte, lep1ccpt);
                    do_fill(h_etae, lep1eta);
@@ -300,10 +310,10 @@ int ScanChain(TChain *ch, TString options=""){
                 do_fill(h_nvtx,   ss::nGoodVertices());
             };
 
-            if (hyp_class == 6 and
-                    lep1ccpt > 25. and
-                    lep2ccpt > 20. and
-                    lep3ccpt > 20. and
+            if (hyp_class == 6 and (zcand13 or zcand23) and
+                    lep1ccpt > 25 and
+                    lep2ccpt > 20 and
+                    lep3ccpt > 20 and
                     (class6Fake or (lep1good and lep2good and lep3good)) and
                     ht > 300 and
                     met > 50 and
@@ -325,7 +335,7 @@ int ScanChain(TChain *ch, TString options=""){
                     njets >= 2 and
                     met > 50. and
                     ht > 300) {
-                if (hyp_class == 4 and !zveto12) fill_region("os");
+                if (hyp_class == 4 and !zcand12) fill_region("os");
                 if (hyp_class == 2)            fill_region("tl");
             }
 
@@ -338,7 +348,7 @@ int ScanChain(TChain *ch, TString options=""){
                 if (nbtags >= 2 and ht > 300 and met < 50) fill_region("bdt_met");  // invert MET
             }
 
-            if (hyp_class == 4 and !zveto12 and
+            if (hyp_class == 4 and !zcand12 and
                     lep1ccpt >= 25. and
                     lep2ccpt >= 20. and
                     nbtags == 2 and
