@@ -129,8 +129,8 @@ int ScanChain(TChain *ch, TString options=""){
             if (!ss::fired_trigger()) continue;
             if (!ss::passes_met_filters()) continue;
 
-            if (zeroMissingInnerHits and (ss::lep1_el_exp_innerlayers() != 0 or
-                                          ss::lep2_el_exp_innerlayers() != 0)) continue;
+            if (zeroMissingInnerHits and (ss::lep1_el_exp_innerlayers() > 0 or
+                                          ss::lep2_el_exp_innerlayers() > 0)) continue;
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
@@ -251,7 +251,7 @@ int ScanChain(TChain *ch, TString options=""){
 
 
 
-            float weight_no_bsf = 1;
+            float weight_no_bsf = weight;
             if (!ss::is_real_data()) weight_no_bsf = weight / ss::weight_btagsf();
 
             // if all 3 charges are the same, throw the event away
