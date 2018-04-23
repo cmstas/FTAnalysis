@@ -69,6 +69,7 @@ int ScanChain(TChain *ch, TString options=""){
     bool doFakes = options.Contains("doFakes");
     bool doFlips = options.Contains("doFlips");
     bool useInclusiveSFs = options.Contains("useInclusiveSFs");
+    bool zeroMissingInnerHits = options.Contains("zeroMissingInnerHits");
 
     // Clear already-seen list
     duplicate_removal::clear_list();
@@ -79,7 +80,7 @@ int ScanChain(TChain *ch, TString options=""){
     cout << "Working on " << ch->GetTitle() << endl;
 
     vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
-                              "crz", "crw",                   // CRZ, CRW
+                              "crz", "crz_no_bsf", "crw",    // CRZ, CRW
                               "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
                               "isr"};
 
@@ -127,6 +128,9 @@ int ScanChain(TChain *ch, TString options=""){
 
             if (!ss::fired_trigger()) continue;
             if (!ss::passes_met_filters()) continue;
+
+            if (zeroMissingInnerHits and (ss::lep1_el_exp_innerlayers() != 0 or
+                                          ss::lep2_el_exp_innerlayers() != 0)) continue;
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
@@ -182,6 +186,7 @@ int ScanChain(TChain *ch, TString options=""){
                 if (nleps > 2) {
                     weight *= leptonScaleFactor(lep3id, lep3pt, lep3eta, ht, rand);
                 }
+
                 weight *= ss::weight_btagsf();
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
@@ -190,17 +195,17 @@ int ScanChain(TChain *ch, TString options=""){
             if (doFakes) {
                 if (hyp_class == 6) {
                     if ((ss::lep3_fo() && !ss::lep3_tight()) && lep1good && lep2good) {  // lep3 fake
-                        float fr = fakeRate(lep3id, lep3pt, lep3eta, ht);
+                        float fr = fakeRate(lep3id, lep3ccpt, lep3eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
                     if ((ss::lep2_fo() && !ss::lep2_tight()) && lep1good && lep3good) {  // lep2 fake
-                        float fr = fakeRate(lep2id, lep2pt, lep2eta, ht);
+                        float fr = fakeRate(lep2id, lep2ccpt, lep2eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
                     if ((ss::lep1_fo() && !ss::lep1_tight()) && lep2good && lep3good) {  // lep1 fake
-                        float fr = fakeRate(lep1id, lep1pt, lep1eta, ht);
+                        float fr = fakeRate(lep1id, lep1ccpt, lep1eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
@@ -209,11 +214,11 @@ int ScanChain(TChain *ch, TString options=""){
                     }
                 } else if (hyp_class == 1 or hyp_class == 2) {
                     if (ss::lep1_passes_id()==0) {
-                        float fr = fakeRate(lep1id, lep1pt, lep1eta, ht);
+                        float fr = fakeRate(lep1id, lep1ccpt, lep1eta, ht);
                         weight *= fr/(1.-fr);
                     }
                     if (ss::lep2_passes_id()==0) {
-                        float fr = fakeRate(lep2id, lep2pt, lep2eta, ht);
+                        float fr = fakeRate(lep2id, lep2ccpt, lep2eta, ht);
                         weight *= fr/(1.-fr);
                     }
                     // subtract double FO (why is this?)
@@ -244,15 +249,14 @@ int ScanChain(TChain *ch, TString options=""){
                 if (weight == 0.0) continue; // just quit if there are no flips.
             }
 
+
+
+            float weight_no_bsf = 1;
+            if (!ss::is_real_data()) weight_no_bsf = weight / ss::weight_btagsf();
+
             // if all 3 charges are the same, throw the event away
-            if ((lep1id>0) == (lep2id>0) and nleps > 2) {
-              int q1 = 2*(lep1id > 0) - 1;
-              int q3 = 2*(lep3id > 0) - 1;
-              if (q3==q1) {
-                  // cout << "Skipping +++/---" << endl;
-                  continue;
-              }
-            }
+            if (nleps > 2 and ((lep1id>0 and lep2id>0 and lep3id>0) or
+                               (lep1id<0 and lep2id<0 and lep3id<0))) continue;
 
             auto mll = [](const Vec4& p1, const Vec4& p2, float ccpt1=-1, float ccpt2=-1) {
                 /* Calculate dilepton mass with optional rescaling of based on cone-corrected lepton pt */
@@ -274,7 +278,7 @@ int ScanChain(TChain *ch, TString options=""){
             float mllos = fabs(m13 - 91.2) < fabs(m23 - 91.2) ? m13 : m23;
 
 
-            auto fill_region = [&](const string& region) {
+            auto fill_region = [&](const string& region, float weight) {
                 // Fill all observables for a region
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
@@ -319,7 +323,10 @@ int ScanChain(TChain *ch, TString options=""){
                     met > 50 and
                     nleps > 2 and
                     nbtags >= 2 and
-                    njets >= 2) fill_region("crz");
+                    njets >= 2) {
+                fill_region("crz", weight);
+                fill_region("crz_no_bsf", weight_no_bsf);
+            }
 
             if (hyp_class == 3 and
                     lep1ccpt > 25. and
@@ -328,24 +335,24 @@ int ScanChain(TChain *ch, TString options=""){
                     met > 50 and
                     nleps == 2 and
                     nbtags == 2 and
-                    njets <= 5) fill_region("crw");
+                    njets <= 5) fill_region("crw", weight);
 
             if (lep1ccpt > 25. and
                     lep2ccpt > 20. and
                     njets >= 2 and
                     met > 50. and
                     ht > 300) {
-                if (hyp_class == 4 and !zcand12) fill_region("os");
-                if (hyp_class == 2)            fill_region("tl");
+                if (hyp_class == 4 and !zcand12) fill_region("os", weight);
+                if (hyp_class == 2)              fill_region("tl", weight);
             }
 
             if (hyp_class == 3 and
                     lep1ccpt >= 25. and
                     lep2ccpt >= 20. and
                     njets >= 2) {
-                if (nbtags < 2  and ht > 300 and met > 50) fill_region("bdt_nb");   // invert Nb
-                if (nbtags >= 2 and ht < 300 and met > 50) fill_region("bdt_ht");   // invert Ht
-                if (nbtags >= 2 and ht > 300 and met < 50) fill_region("bdt_met");  // invert MET
+                if (nbtags < 2  and ht > 300 and met > 50) fill_region("bdt_nb", weight);   // invert Nb
+                if (nbtags >= 2 and ht < 300 and met > 50) fill_region("bdt_ht", weight);   // invert Ht
+                if (nbtags >= 2 and ht > 300 and met < 50) fill_region("bdt_met", weight);  // invert MET
             }
 
             if (hyp_class == 4 and !zcand12 and
@@ -354,7 +361,7 @@ int ScanChain(TChain *ch, TString options=""){
                     nbtags == 2 and
                     njets >= 2 and
                     ht > 300 and
-                    met > 50) fill_region("isr");
+                    met > 50) fill_region("isr", weight);
         }//event loop
         delete file;
     }//file loop
