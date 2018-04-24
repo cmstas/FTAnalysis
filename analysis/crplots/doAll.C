@@ -14,9 +14,9 @@
      *     doFlips: Run charge mis-id estimate
      *     zeroMissingInnerHits: Require exactly zero missing inner hits
      */
-    TString options = "useInclusiveSFs";
+    TString options = "useInclusiveSFs zeroMissingInnerHits";
 
-    gSystem->Exec(Form("mkdir -p outputs%s", options.Data()));
+    gSystem->Exec("mkdir -p outputs");
 
     // Data
     TChain ch_data("t", "data");
@@ -58,9 +58,5 @@
     TChain ch_tt("t", "tt");
     ch_tt.Add(basedir+"TTBAR*.root");
     ScanChain(&ch_tt, options);
-
-    TChain ch_tt_zeroMissingInnerHits("t", "tt_zeroMissingInnerHits");
-    ch_tt_zeroMissingInnerHits.Add(basedir+"TTBAR*.root");
-    ScanChain(&ch_tt_zeroMissingInnerHits, options + "zeroMissingInnerHits");
 }
 

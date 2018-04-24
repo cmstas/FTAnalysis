@@ -85,24 +85,26 @@ int ScanChain(TChain *ch, TString options=""){
                               "isr"};
 
     vector<HistCol*> registry;
-    HistCol h_met    (regions, "met"   , 15, 0    , 600 , &registry);
-    HistCol h_ht     (regions, "ht"    , 16, 0    , 1600, &registry);
-    HistCol h_mll    (regions, "mll"   , 25, 0    , 300 , &registry);
-    HistCol h_zmll   (regions, "zmll"  , 25, 0    , 300 , &registry);
-    HistCol h_mtmin  (regions, "mtmin" , 25, 0    , 300 , &registry);
-    HistCol h_njets  (regions, "njets" , 8 , 0    , 8   , &registry);
-    HistCol h_nbtags (regions, "nbtags", 5 , 0    , 5   , &registry);
-    HistCol h_pt1    (regions, "pt1"   , 25, 0    , 300 , &registry);
-    HistCol h_pt2    (regions, "pt2"   , 25, 0    , 300 , &registry);
-    HistCol h_pt3    (regions, "pt3"   , 25, 0    , 300 , &registry);
-    HistCol h_eta1   (regions, "eta1"  , 25, -3.2 , 3.2 , &registry);
-    HistCol h_eta2   (regions, "eta2"  , 25, -3.2 , 3.2 , &registry);
-    HistCol h_etae   (regions, "etae"  , 25, -3.2 , 3.2 , &registry);
-    HistCol h_etam   (regions, "etam"  , 25, -3.2 , 3.2 , &registry);
-    HistCol h_pte    (regions, "pte"   , 25, 0    , 300 , &registry);
-    HistCol h_ptm    (regions, "ptm"   , 25, 0    , 300 , &registry);
-    HistCol h_type   (regions, "type"  , 3 , 0    , 3   , &registry);
-    HistCol h_nvtx   (regions, "nvtx"  , 70, 0    , 70  , &registry);
+    HistCol h_met      (regions, "met"     , 15, 0    , 600 , &registry);
+    HistCol h_ht       (regions, "ht"      , 16, 0    , 1600, &registry);
+    HistCol h_mll      (regions, "mll"     , 30, 0    , 300 , &registry);
+    HistCol h_zmll     (regions, "zmll"    , 30, 0    , 300 , &registry);
+    HistCol h_mtmin    (regions, "mtmin"   , 30, 0    , 300 , &registry);
+    HistCol h_njets    (regions, "njets"   , 8 , 0    , 8   , &registry);
+    HistCol h_nisrjets (regions, "nisrjets", 8 , 0    , 8   , &registry);
+    HistCol h_nbtags   (regions, "nbtags"  , 5 , 0    , 5   , &registry);
+    HistCol h_pt1      (regions, "pt1"     , 30, 0    , 300 , &registry);
+    HistCol h_pt2      (regions, "pt2"     , 30, 0    , 300 , &registry);
+    HistCol h_pt3      (regions, "pt3"     , 30, 0    , 300 , &registry);
+    HistCol h_eta1     (regions, "eta1"    , 25, -3.2 , 3.2 , &registry);
+    HistCol h_eta2     (regions, "eta2"    , 25, -3.2 , 3.2 , &registry);
+    HistCol h_etae     (regions, "etae"    , 25, -3.2 , 3.2 , &registry);
+    HistCol h_etam     (regions, "etam"    , 25, -3.2 , 3.2 , &registry);
+    HistCol h_pte      (regions, "pte"     , 30, 0    , 300 , &registry);
+    HistCol h_ptm      (regions, "ptm"     , 30, 0    , 300 , &registry);
+    HistCol h_type     (regions, "type"    , 3 , 0    , 3   , &registry);
+    HistCol h_type3l   (regions, "type3l"  , 4 , 0    , 4   , &registry);
+    HistCol h_nvtx     (regions, "nvtx"    , 70, 0    , 70  , &registry);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -194,17 +196,20 @@ int ScanChain(TChain *ch, TString options=""){
             bool class6Fake = false;
             if (doFakes) {
                 if (hyp_class == 6) {
-                    if ((ss::lep3_fo() && !ss::lep3_tight()) && lep1good && lep2good) {  // lep3 fake
+                    bool lep1_lowpt_veto = lep1pt < (abs(lep1id) == 11 ? 15 : 10);
+                    bool lep2_lowpt_veto = lep2pt < (abs(lep2id) == 11 ? 15 : 10);
+                    bool lep3_lowpt_veto = lep3pt < (abs(lep3id) == 11 ? 15 : 10);
+                    if (ss::lep3_fo() and !ss::lep3_tight() and !lep3_lowpt_veto and lep1good and lep2good) {  // lep3 fake
                         float fr = fakeRate(lep3id, lep3ccpt, lep3eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
-                    if ((ss::lep2_fo() && !ss::lep2_tight()) && lep1good && lep3good) {  // lep2 fake
+                    if (ss::lep2_fo() and !ss::lep2_tight() and !lep2_lowpt_veto and lep1good and lep3good) {  // lep2 fake
                         float fr = fakeRate(lep2id, lep2ccpt, lep2eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
-                    if ((ss::lep1_fo() && !ss::lep1_tight()) && lep2good && lep3good) {  // lep1 fake
+                    if (ss::lep1_fo() and !ss::lep1_tight() and !lep1_lowpt_veto and lep2good and lep3good) {  // lep1 fake
                         float fr = fakeRate(lep1id, lep1ccpt, lep1eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
@@ -285,6 +290,7 @@ int ScanChain(TChain *ch, TString options=""){
                 };
                 do_fill(h_met,    met);
                 do_fill(h_njets,  njets);
+                do_fill(h_nisrjets,  njets - nbtags);
                 do_fill(h_ht,     ht);
                 do_fill(h_nbtags, nbtags);
                 do_fill(h_mll,    ss::dilep_p4().M());
@@ -312,6 +318,12 @@ int ScanChain(TChain *ch, TString options=""){
                 int type = ss::hyp_type();
                 do_fill(h_type,   type>1 ? type-1 : type);
                 do_fill(h_nvtx,   ss::nGoodVertices());
+                if (nleps > 2) {
+                    if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 39) do_fill(h_type3l, 0); // mu mu mu
+                    if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 37) do_fill(h_type3l, 1); // mu mu e
+                    if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 35) do_fill(h_type3l, 2); // mu e e
+                    if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 33) do_fill(h_type3l, 3); // e e e
+                }
             };
 
             if (hyp_class == 6 and (zcand13 or zcand23) and
