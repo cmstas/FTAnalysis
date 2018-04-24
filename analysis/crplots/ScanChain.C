@@ -64,6 +64,14 @@ struct HistCol {
     }
 };
 
+int calc_nisrjets() {
+    int nisrjets = 0;
+    for (int idx=0; idx<ss::njets(); idx++) {
+        if (ss::jets_disc().at(idx)) nisrjets++;
+    }
+    return nisrjets;
+}
+
 int ScanChain(TChain *ch, TString options=""){
 
     bool doFakes = options.Contains("doFakes");
@@ -160,6 +168,7 @@ int ScanChain(TChain *ch, TString options=""){
             int lep3good = ss::lep3_passes_id();
             int nleps = (lep3good and lep3ccpt > 20) ? 3 : 2;
             int njets = ss::njets();
+            int nisrjets = calc_nisrjets();
             int nbtags = ss::nbtags();
             int ht = ss::ht();
             int met = ss::met();
@@ -288,15 +297,15 @@ int ScanChain(TChain *ch, TString options=""){
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
                 };
-                do_fill(h_met,    met);
-                do_fill(h_njets,  njets);
-                do_fill(h_nisrjets,  njets - nbtags);
-                do_fill(h_ht,     ht);
+                do_fill(h_met, met);
+                do_fill(h_njets, njets);
+                do_fill(h_nisrjets, nisrjets);
+                do_fill(h_ht, ht);
                 do_fill(h_nbtags, nbtags);
-                do_fill(h_mll,    ss::dilep_p4().M());
-                do_fill(h_mtmin,  ss::mtmin());
-                do_fill(h_pt1,    lep1ccpt);
-                do_fill(h_pt2,    lep2ccpt);
+                do_fill(h_mll, ss::dilep_p4().M());
+                do_fill(h_mtmin, ss::mtmin());
+                do_fill(h_pt1, lep1ccpt);
+                do_fill(h_pt2, lep2ccpt);
                 if (nleps > 2) do_fill(h_pt3, lep3pt);
                 if (nleps > 2) do_fill(h_zmll, mllos);
                 if (abs(lep1id) == 11) {
