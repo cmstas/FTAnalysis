@@ -34,6 +34,19 @@ float alternativeFakeRate(int id, float pt, float eta, float ht) {
     else return 0.;
 }
 
+float qcdMCFakeRate(int id, float pt, float eta, float ht) { 
+    if (abs(id)==11) return electronQCDMCFakeRate_IsoTrigs(pt,eta);
+    else if (abs(id)==13) return muonQCDMCFakeRate_IsoTrigs(pt,eta);
+    else return 0.;
+}
+
+float qcdMCFakeRateError(int id, float pt, float eta, float ht) { 
+    if (abs(id)==11) return electronQCDMCFakeRateError_IsoTrigs(pt,eta);
+    else if (abs(id)==13) return muonQCDMCFakeRateError_IsoTrigs(pt,eta);
+    else return 0.;
+}
+
+
 // returns A if pt<ptmin, B if pt>ptmax, and linear interpolation between. if pt<10, use C
 float mvacut(float A, float B, float C, float pt_) {
     float ptmin = 15;
