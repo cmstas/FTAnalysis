@@ -14,9 +14,10 @@
      *     doFlips: Run charge mis-id estimate
      *     zeroMissingInnerHits: Require exactly zero missing inner hits
      */
-    TString options = "useInclusiveSFs zeroMissingInnerHits";
+    TString options = "useInclusiveSFs";
+    TString outputdir = "outputs";
 
-    gSystem->Exec("mkdir -p outputs");
+    gSystem->Exec(Form("mkdir -p %s", outputdir.Data()));
 
     // Data
     TChain ch_data("t", "data");

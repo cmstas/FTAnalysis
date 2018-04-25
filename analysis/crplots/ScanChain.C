@@ -64,15 +64,31 @@ struct HistCol {
     }
 };
 
-int calc_nisrjets() {
+tuple<int, int, int, float, float> calc_jet_quants() {
+    float bloose =  0.1522;
+    float bmed = 0.4941;
+    float btight = 0.8001;
+
+    int nlb40 = 0;
+    int ntb40 = 0;
     int nisrjets = 0;
-    for (int idx=0; idx<ss::njets(); idx++) {
-        if (ss::jets_disc().at(idx)) nisrjets++;
+    float mjoverpt = 0.;
+    float htb = 0;
+    for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
+        mjoverpt = std::max(mjoverpt, ss::jets()[ijet].M()/ss::jets()[ijet].pt());
+        float disc = ss::jets_disc().at(ijet);
+
+        if (disc > bloose) nlb40++;
+        if (disc > btight) ntb40++;
+        if (disc < bmed) nisrjets++;
     }
-    return nisrjets;
+    for (size_t ibtag=0; ibtag < ss::btags().size(); ibtag++) {
+        htb += ss::btags().at(ibtag).pt();
+    }
+    return std::make_tuple(nlb40, ntb40, nisrjets, mjoverpt, htb);
 }
 
-int ScanChain(TChain *ch, TString options=""){
+int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     bool doFakes = options.Contains("doFakes");
     bool doFlips = options.Contains("doFlips");
@@ -88,31 +104,54 @@ int ScanChain(TChain *ch, TString options=""){
     cout << "Working on " << ch->GetTitle() << endl;
 
     vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
-                              "crz", "crz_no_bsf", "crw",    // CRZ, CRW
+                              "crz", "crz_no_bsf", "crw",     // CRZ, CRW
                               "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
-                              "isr"};
+                              "isr"                           // ISR Reweighting derivation region
+                              };
 
     vector<HistCol*> registry;
-    HistCol h_met      (regions, "met"     , 15, 0    , 600 , &registry);
-    HistCol h_ht       (regions, "ht"      , 16, 0    , 1600, &registry);
-    HistCol h_mll      (regions, "mll"     , 30, 0    , 300 , &registry);
-    HistCol h_zmll     (regions, "zmll"    , 30, 0    , 300 , &registry);
-    HistCol h_mtmin    (regions, "mtmin"   , 30, 0    , 300 , &registry);
-    HistCol h_njets    (regions, "njets"   , 8 , 0    , 8   , &registry);
-    HistCol h_nisrjets (regions, "nisrjets", 8 , 0    , 8   , &registry);
-    HistCol h_nbtags   (regions, "nbtags"  , 5 , 0    , 5   , &registry);
-    HistCol h_pt1      (regions, "pt1"     , 30, 0    , 300 , &registry);
-    HistCol h_pt2      (regions, "pt2"     , 30, 0    , 300 , &registry);
-    HistCol h_pt3      (regions, "pt3"     , 30, 0    , 300 , &registry);
-    HistCol h_eta1     (regions, "eta1"    , 25, -3.2 , 3.2 , &registry);
-    HistCol h_eta2     (regions, "eta2"    , 25, -3.2 , 3.2 , &registry);
-    HistCol h_etae     (regions, "etae"    , 25, -3.2 , 3.2 , &registry);
-    HistCol h_etam     (regions, "etam"    , 25, -3.2 , 3.2 , &registry);
-    HistCol h_pte      (regions, "pte"     , 30, 0    , 300 , &registry);
-    HistCol h_ptm      (regions, "ptm"     , 30, 0    , 300 , &registry);
-    HistCol h_type     (regions, "type"    , 3 , 0    , 3   , &registry);
-    HistCol h_type3l   (regions, "type3l"  , 4 , 0    , 4   , &registry);
-    HistCol h_nvtx     (regions, "nvtx"    , 70, 0    , 70  , &registry);
+    HistCol h_met         (regions, "met"        , 15, 0   , 600 , &registry);
+    HistCol h_ht          (regions, "ht"         , 16, 0   , 1600, &registry);
+    HistCol h_htb         (regions, "htb"        , 16, 0   , 1600, &registry);
+    HistCol h_mll         (regions, "mll"        , 30, 0   , 300 , &registry);
+    HistCol h_zmll        (regions, "zmll"       , 30, 0   , 300 , &registry);
+    HistCol h_mtmin       (regions, "mtmin"      , 30, 0   , 300 , &registry);
+    HistCol h_njets       (regions, "njets"      , 8 , 0   , 8   , &registry);
+    HistCol h_nisrjets    (regions, "nisrjets"   , 8 , 0   , 8   , &registry);
+    HistCol h_nlb40       (regions, "nlb40"      , 8 , 0   , 8   , &registry);
+    HistCol h_ntb40       (regions, "ntb40"      , 8 , 0   , 8   , &registry);
+    HistCol h_nbtags      (regions, "nbtags"     , 5 , 0   , 5   , &registry);
+    HistCol h_maxmjoverpt (regions, "maxmjoverpt", 30, 0   , 30  , &registry);
+
+    HistCol h_pt1         (regions, "pt1"        , 30, 0   , 300 , &registry);
+    HistCol h_pt2         (regions, "pt2"        , 30, 0   , 300 , &registry);
+    HistCol h_pt3         (regions, "pt3"        , 30, 0   , 300 , &registry);
+    HistCol h_pte         (regions, "pte"        , 30, 0   , 300 , &registry);
+    HistCol h_ptm         (regions, "ptm"        , 30, 0   , 300 , &registry);
+
+    HistCol h_eta1        (regions, "eta1"       , 25, -3.2, 3.2 , &registry);
+    HistCol h_eta2        (regions, "eta2"       , 25, -3.2, 3.2 , &registry);
+    HistCol h_etae        (regions, "etae"       , 25, -3.2, 3.2 , &registry);
+    HistCol h_etam        (regions, "etam"       , 25, -3.2, 3.2 , &registry);
+
+    HistCol h_ptrel1      (regions, "ptrel1"     , 15, 0   , 50  , &registry);
+    HistCol h_ptrel2      (regions, "ptrel2"     , 15, 0   , 50  , &registry);
+    HistCol h_ptrele      (regions, "ptrele"     , 15, 0   , 50  , &registry);
+    HistCol h_ptrelm      (regions, "ptrelm"     , 15, 0   , 50  , &registry);
+
+    HistCol h_ptratio1    (regions, "ptratio1"   , 30, 0   , 1.5 , &registry);
+    HistCol h_ptratio2    (regions, "ptratio2"   , 30, 0   , 1.5 , &registry);
+    HistCol h_ptratioe    (regions, "ptratioe"   , 30, 0   , 1.5 , &registry);
+    HistCol h_ptratiom    (regions, "ptratiom"   , 30, 0   , 1.5 , &registry);
+
+    HistCol h_miniiso1    (regions, "miniiso1"   , 15,  0  , 0.2 , &registry);
+    HistCol h_miniiso2    (regions, "miniiso2"   , 15,  0  , 0.2 , &registry);
+    HistCol h_miniisoe    (regions, "miniisoe"   , 15,  0  , 0.2 , &registry);
+    HistCol h_miniisom    (regions, "miniisom"   , 15,  0  , 0.2 , &registry);
+
+    HistCol h_type        (regions, "type"       , 3  , 0  , 3   , &registry);
+    HistCol h_type3l      (regions, "type3l"     , 4  , 0  , 4   , &registry);
+    HistCol h_nvtx        (regions, "nvtx"       , 70 , 0  , 70  , &registry);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -166,12 +205,21 @@ int ScanChain(TChain *ch, TString options=""){
             int lep1good = ss::lep1_passes_id();
             int lep2good = ss::lep2_passes_id();
             int lep3good = ss::lep3_passes_id();
+            float lep1ptrel = ss::lep1_ptrel_v1();
+            float lep2ptrel = ss::lep2_ptrel_v1();
+            float lep1miniiso = ss::lep1_miniIso();
+            float lep2miniiso = ss::lep2_miniIso();
+            float lep1ptratio = ss::lep1_closeJet().pt() > 0 ? lep1pt/ss::lep1_closeJet().pt() : 1.0;
+            float lep2ptratio = ss::lep2_closeJet().pt() > 0 ? lep2pt/ss::lep2_closeJet().pt() : 1.0;
             int nleps = (lep3good and lep3ccpt > 20) ? 3 : 2;
             int njets = ss::njets();
-            int nisrjets = calc_nisrjets();
             int nbtags = ss::nbtags();
             int ht = ss::ht();
             int met = ss::met();
+            int nlb40, ntb40, nisrjets;
+            float maxmjoverpt, htb;
+            std::tie(nlb40, ntb40, nisrjets, maxmjoverpt, htb) = calc_jet_quants();
+
             /* hyp_class
              * 1: SS, loose-loose
              * 2: SS, tight-loose (or loose-tight)
@@ -284,7 +332,7 @@ int ScanChain(TChain *ch, TString options=""){
             auto z_cand = [](int id1, int id2, float mll) {
                 return abs(id1) == abs(id2) and  // Same flavor
                        id1*id2<0 and             // Opposite sign
-                       abs(mll - 91.2) < 15;     // Z-mass
+                       abs(mll - 91.2) < 15;     // Z-mass window
             };
             bool zcand12 = z_cand(lep1id, lep2id, m12);
             bool zcand13 = z_cand(lep1id, lep3id, m13);
@@ -298,41 +346,54 @@ int ScanChain(TChain *ch, TString options=""){
                     h.Fill(region, lep1id, lep2id, val, weight);
                 };
                 do_fill(h_met, met);
+                do_fill(h_ht, ht);
+                do_fill(h_htb, htb);
+                do_fill(h_mll, ss::dilep_p4().M());
+                if (nleps > 2) do_fill(h_zmll, mllos);
+                do_fill(h_mtmin, ss::mtmin());
                 do_fill(h_njets, njets);
                 do_fill(h_nisrjets, nisrjets);
-                do_fill(h_ht, ht);
+                do_fill(h_nlb40, nlb40);
+                do_fill(h_ntb40, ntb40);
                 do_fill(h_nbtags, nbtags);
-                do_fill(h_mll, ss::dilep_p4().M());
-                do_fill(h_mtmin, ss::mtmin());
+                do_fill(h_maxmjoverpt, maxmjoverpt);
+
                 do_fill(h_pt1, lep1ccpt);
                 do_fill(h_pt2, lep2ccpt);
                 if (nleps > 2) do_fill(h_pt3, lep3pt);
-                if (nleps > 2) do_fill(h_zmll, mllos);
-                if (abs(lep1id) == 11) {
-                   do_fill(h_pte, lep1ccpt);
-                   do_fill(h_etae, lep1eta);
-                } else {
-                   do_fill(h_ptm, lep1ccpt);
-                   do_fill(h_etam, lep1eta);
-                }
-                if (abs(lep2id) == 11) {
-                   do_fill(h_pte, lep2ccpt);
-                   do_fill(h_etae, lep2eta);
-                } else {
-                   do_fill(h_ptm, lep2ccpt);
-                   do_fill(h_etam, lep2eta);
-                }
+                do_fill(abs(lep1id) == 11 ? h_pte      : h_ptm,      lep1ccpt);
+                do_fill(abs(lep2id) == 11 ? h_pte      : h_ptm,      lep2ccpt);
+
                 do_fill(h_eta1,   ss::lep1_p4().eta());
                 do_fill(h_eta2,   ss::lep2_p4().eta());
+                do_fill(abs(lep1id) == 11 ? h_etae     : h_etam,     lep1eta);
+                do_fill(abs(lep2id) == 11 ? h_etae     : h_etam,     lep2eta);
+
+                do_fill(h_ptrel1, lep1ptrel);
+                do_fill(h_ptrel2, lep1ptrel);
+                do_fill(abs(lep1id) == 11 ? h_ptrele   : h_ptrelm,   lep1ptrel);
+                do_fill(abs(lep2id) == 11 ? h_ptrele   : h_ptrelm,   lep2ptrel);
+
+                do_fill(h_ptratio1, lep1ptratio);
+                do_fill(h_ptratio2, lep2ptratio);
+                do_fill(abs(lep1id) == 11 ? h_ptratioe : h_ptratiom, lep1ptratio);
+                do_fill(abs(lep2id) == 11 ? h_ptratioe : h_ptratiom, lep2ptratio);
+
+                do_fill(h_miniiso1, lep1miniiso);
+                do_fill(h_miniiso2, lep2miniiso);
+                do_fill(abs(lep1id) == 11 ? h_miniisoe : h_miniisom, lep1miniiso);
+                do_fill(abs(lep2id) == 11 ? h_miniisoe : h_miniisom, lep2miniiso);
+
+
                 int type = ss::hyp_type();
                 do_fill(h_type,   type>1 ? type-1 : type);
-                do_fill(h_nvtx,   ss::nGoodVertices());
                 if (nleps > 2) {
                     if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 39) do_fill(h_type3l, 0); // mu mu mu
                     if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 37) do_fill(h_type3l, 1); // mu mu e
                     if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 35) do_fill(h_type3l, 2); // mu e e
                     if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 33) do_fill(h_type3l, 3); // e e e
                 }
+                do_fill(h_nvtx,   ss::nGoodVertices());
             };
 
             if (hyp_class == 6 and (zcand13 or zcand23) and
@@ -381,13 +442,12 @@ int ScanChain(TChain *ch, TString options=""){
                     lep2ccpt >= 20. and
                     nbtags == 2 and
                     njets >= 2 and
-                    ht > 300 and
                     met > 50) fill_region("isr", weight);
         }//event loop
         delete file;
     }//file loop
 
-    TFile f1(Form("outputs/histos_%s.root", ch->GetTitle()), "RECREATE");
+    TFile f1(Form("%s/histos_%s.root", outputdir.Data(), ch->GetTitle()), "RECREATE");
     for (HistCol* coll : registry) coll->Write();
     f1.Close();
     return 0;
