@@ -149,9 +149,21 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_miniisoe    (regions, "miniisoe"   , 15,  0  , 0.2 , &registry);
     HistCol h_miniisom    (regions, "miniisom"   , 15,  0  , 0.2 , &registry);
 
+    HistCol h_dphil1l2    (regions, "dphil1l2"   , 15,  0  , 4   , &registry);
+    HistCol h_detal1l2    (regions, "detal1l2"   , 30,  -4 , 4   , &registry);
+    HistCol h_absdetal1l2 (regions, "absdetal1l2", 15,  0  , 4   , &registry);
+
     HistCol h_type        (regions, "type"       , 3  , 0  , 3   , &registry);
+    HistCol h_q1          (regions, "q1"         , 2  , -2 , 2   , &registry);
     HistCol h_type3l      (regions, "type3l"     , 4  , 0  , 4   , &registry);
     HistCol h_nvtx        (regions, "nvtx"       , 70 , 0  , 70  , &registry);
+
+    HistCol h_ptj1        (regions, "ptj1"       , 30 , 0  , 300 , &registry);
+    HistCol h_ptj6        (regions, "ptj6"       , 30 , 0  , 300 , &registry);
+    HistCol h_ptj7        (regions, "ptj7"       , 30 , 0  , 300 , &registry);
+    HistCol h_ptj8        (regions, "ptj8"       , 30 , 0  , 300 , &registry);
+
+    HistCol h_ml1j1       (regions, "ml1j1"      , 30 , 0  , 300 , &registry);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -199,6 +211,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             float lep1eta = ss::lep1_p4().eta();
             float lep2eta = ss::lep2_p4().eta();
             float lep3eta = ss::lep3_p4().eta();
+            float lep1phi = ss::lep1_p4().phi();
+            float lep2phi = ss::lep2_p4().phi();
+            float lep3phi = ss::lep3_p4().phi();
             int lep1id = ss::lep1_id();
             int lep2id = ss::lep2_id();
             int lep3id = ss::lep3_id();
@@ -384,9 +399,14 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(abs(lep1id) == 11 ? h_miniisoe : h_miniisom, lep1miniiso);
                 do_fill(abs(lep2id) == 11 ? h_miniisoe : h_miniisom, lep2miniiso);
 
+                do_fill(h_dphil1l2, lep1phi - lep2phi);
+                do_fill(h_detal1l2, lep1eta - lep2eta);
+                do_fill(h_absdetal1l2, abs(lep1eta - lep2eta));
+
 
                 int type = ss::hyp_type();
                 do_fill(h_type,   type>1 ? type-1 : type);
+                do_fill(h_q1,   lep1id>0 ? -1 : 1);
                 if (nleps > 2) {
                     if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 39) do_fill(h_type3l, 0); // mu mu mu
                     if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 37) do_fill(h_type3l, 1); // mu mu e
@@ -394,6 +414,13 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     if (abs(lep1id) + abs(lep2id) + abs(lep3id) == 33) do_fill(h_type3l, 3); // e e e
                 }
                 do_fill(h_nvtx,   ss::nGoodVertices());
+
+                if (njets >= 1) do_fill(h_ptj1, ss::jets()[0].pt());
+                if (njets >= 6) do_fill(h_ptj6, ss::jets()[5].pt());
+                if (njets >= 7) do_fill(h_ptj7, ss::jets()[6].pt());
+                if (njets >= 8) do_fill(h_ptj8, ss::jets()[7].pt());
+
+                if (njets >= 1) do_fill(h_ml1j1, (ss::jets()[0] + ss::lep1_p4()).M());
             };
 
             if (hyp_class == 6 and (zcand13 or zcand23) and
@@ -441,8 +468,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     lep1ccpt >= 25. and
                     lep2ccpt >= 20. and
                     nbtags == 2 and
-                    njets >= 2 and
-                    met > 50) fill_region("isr", weight);
+                    njets >= 2) fill_region("isr", weight);
         }//event loop
         delete file;
     }//file loop
