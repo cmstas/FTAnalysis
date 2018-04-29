@@ -6,16 +6,15 @@
     gROOT->ProcessLine(".L ../../../common/CORE/Tools/dorky/dorky.cc++");
     gROOT->ProcessLine(".L ScanChain.C+");
 
-    // TString tag = "v1.00_94x_baseline_withos_v3";
-    TString tag = "v1.02_94x_withos_relaxhitsmore";
+    // TString tag = "v1.03_os_nmiss1_dileptrig_v1";
+    TString tag = "v1.04_v1";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
 
     TChain *ch = new TChain("t");
     ch->Add(basedir+"DY_high.root");
     ch->Add(basedir+"DY_low.root");
     ch->Add(basedir+"TTBAR*.root");
-    // ch->Add(basedir+"DataDoubleEG*.root");
-    ch->Add(basedir+"rereco_DataDoubleEG*.root"); // NOTE RERECO!!! XXX
+    ch->Add(basedir+"DataDoubleEG*.root");
 
     TString flipfname = "../derivation/outputs/histos_both.root";
 

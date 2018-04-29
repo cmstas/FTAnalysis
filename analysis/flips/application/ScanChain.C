@@ -209,14 +209,12 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
             float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
             if (!ss::is_real_data()) {
-                // weight *= getTruePUw(ss::trueNumInt()[0]);
+                weight *= getTruePUw(ss::trueNumInt()[0]);
+                weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), -1.);
+                weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), -1.);
+                weight *= ss::weight_btagsf();
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
-
-            // if (ss::lep1_el_exp_innerlayers() > 1) continue;
-            // if (ss::lep2_el_exp_innerlayers() > 1) continue;
-            // if (ss::lep1_el_exp_innerlayers() > 0) continue;
-            // if (ss::lep2_el_exp_innerlayers() > 0) continue;
 
             // Reject duplicates
             if (ss::is_real_data()){
