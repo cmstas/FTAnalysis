@@ -5,7 +5,7 @@
 
     /* TString tag = "v1.00_94x_baseline_withos_v3"; */
     /* TString tag = "v1.02_94x_withos_relaxhitsmore"; */
-    TString tag = "v1.03_os_nmiss1_dileptrig_v1";
+    TString tag = "v1.04_v1";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/", tag.Data());
 
     /* Options:
@@ -14,7 +14,7 @@
      *     doFlips: Run charge mis-id estimate
      *     zeroMissingInnerHits: Require exactly zero missing inner hits
      */
-    TString options = "useInclusiveSFs";
+    TString options = "useInclusiveSFs evaluateBDT";
     TString outputdir = "outputs";
 
     gSystem->Exec(Form("mkdir -p %s", outputdir.Data()));
@@ -59,5 +59,26 @@
     TChain ch_tt("t", "tt");
     ch_tt.Add(basedir+"TTBAR*.root");
     ScanChain(&ch_tt, options);
+
+    TChain ch_vv("t", "vv");
+    ch_vv.Add(basedir+"WZ.root");
+    ch_vv.Add(basedir+"WWDPS.root");
+    ch_vv.Add(basedir+"ZZ.root");
+    ScanChain(&ch_vv, options);
+
+    TChain ch_rares("t", "rares");
+    ch_rares.Add(basedir+"WZG.root");
+    ch_rares.Add(basedir+"WZZ.root");
+    ch_rares.Add(basedir+"ZZZ.root");
+    ch_rares.Add(basedir+"WWZ.root");
+    ch_rares.Add(basedir+"WWW.root");
+    ch_rares.Add(basedir+"TZQ.root");
+    ScanChain(&ch_rares, options);
+
+    TChain ch_singletop("t", "singletop");
+    ch_singletop.Add(basedir+"STtop.root");
+    ch_singletop.Add(basedir+"STantitop.root");
+    ScanChain(&ch_singletop, options);
+
 }
 

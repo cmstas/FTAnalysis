@@ -10,6 +10,7 @@
 #include "TH1.h"
 #include "TChain.h"
 #include "Math/VectorUtil.h"
+#include "TMVA/Reader.h"
 
 #include "../misc/class_files/v8.02/SS.h"
 #include "../../common/CORE/Tools/dorky/dorky.h"
@@ -75,7 +76,8 @@ tuple<int, int, int, float, float> calc_jet_quants() {
     float mjoverpt = 0.;
     float htb = 0;
     for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-        mjoverpt = std::max(mjoverpt, ss::jets()[ijet].M()/ss::jets()[ijet].pt());
+        const auto& jet = ss::jets()[ijet];
+        mjoverpt = std::max(mjoverpt, jet.M()/jet.pt());
         float disc = ss::jets_disc().at(ijet);
 
         if (disc > bloose) nlb40++;
@@ -94,6 +96,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool doFlips = options.Contains("doFlips");
     bool useInclusiveSFs = options.Contains("useInclusiveSFs");
     bool zeroMissingInnerHits = options.Contains("zeroMissingInnerHits");
+    bool evaluateBDT = options.Contains("evaluateBDT");
 
     // Clear already-seen list
     duplicate_removal::clear_list();
@@ -103,9 +106,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     cout << "Working on " << ch->GetTitle() << endl;
 
+
     vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
                               "crz", "crz_no_bsf", "crw",     // CRZ, CRW
-                              "bdt_nb", "bdt_ht", "bdt_met",  // Baseline w/ inverted nbtags/Ht/MET selection
+                              "bdt_nb", "bdt_ht",             // Baseline w/ inverted nbtags/Ht/MET selection
+                              "bdt_met","bdt_met_ht",
                               "isr"                           // ISR Reweighting derivation region
                               };
 
@@ -121,7 +126,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_nlb40       (regions, "nlb40"      , 8 , 0   , 8   , &registry);
     HistCol h_ntb40       (regions, "ntb40"      , 8 , 0   , 8   , &registry);
     HistCol h_nbtags      (regions, "nbtags"     , 5 , 0   , 5   , &registry);
-    HistCol h_maxmjoverpt (regions, "maxmjoverpt", 30, 0   , 30  , &registry);
+    HistCol h_maxmjoverpt (regions, "maxmjoverpt", 50, 0   , 0.35, &registry);
 
     HistCol h_pt1         (regions, "pt1"        , 30, 0   , 300 , &registry);
     HistCol h_pt2         (regions, "pt2"        , 30, 0   , 300 , &registry);
@@ -158,12 +163,82 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_type3l      (regions, "type3l"     , 4  , 0  , 4   , &registry);
     HistCol h_nvtx        (regions, "nvtx"       , 70 , 0  , 70  , &registry);
 
-    HistCol h_ptj1        (regions, "ptj1"       , 30 , 0  , 300 , &registry);
+    HistCol h_ptj1        (regions, "ptj1"       , 50 , 0  , 500 , &registry);
+    HistCol h_ptj2        (regions, "ptj2"       , 50 , 0  , 500 , &registry);
+    HistCol h_ptj3        (regions, "ptj3"       , 50 , 0  , 500 , &registry);
+    HistCol h_ptj4        (regions, "ptj4"       , 50 , 0  , 500 , &registry);
+    HistCol h_ptj5        (regions, "ptj5"       , 50 , 0  , 500 , &registry);
     HistCol h_ptj6        (regions, "ptj6"       , 30 , 0  , 300 , &registry);
     HistCol h_ptj7        (regions, "ptj7"       , 30 , 0  , 300 , &registry);
     HistCol h_ptj8        (regions, "ptj8"       , 30 , 0  , 300 , &registry);
 
-    HistCol h_ml1j1       (regions, "ml1j1"      , 30 , 0  , 300 , &registry);
+    HistCol h_ml1j1       (regions, "ml1j1"      , 50 , 0  , 500 , &registry);
+
+    HistCol h_event_bdt   (regions, "event_bdt"  , 25 , -1 , 1   , &registry);
+
+
+    // Declare a bunch of event variables to be filled below in the loop
+    float lep1ccpt, lep2ccpt, lep3ccpt;
+    float lep1pt,   lep2pt,   lep3pt;
+    float lep1eta,  lep2eta,  lep3eta;
+    float lep1phi,  lep2phi,  lep3phi;
+    int   lep1id,   lep2id,   lep3id;
+    int   lep1q,    lep2q,    lep3q;
+    int   lep1good, lep2good, lep3good;
+
+    float lep1ptrel, lep2ptrel;
+    float lep1miniiso, lep2miniiso;
+    float lep1ptratio, lep2ptratio;
+    float dphil1l2, detal1l2;
+
+    int nleps, njets, nbtags;
+    float ht, htb, met;
+    float maxmjoverpt, ml1j1;
+    int nlb40, ntb40, nisrjets;
+    float ptj1, ptj2, ptj3, ptj4, ptj5, ptj6, ptj7, ptj8;
+
+    int SR;
+    float weight;
+
+    // Because TMVA is dumb, we need also float versions of these variables.
+    float nbtags_f, njets_f, nlb40_f, ntb40_f, nleps_f, lep1q_f, SR_f;
+    auto set_float_vals = [&]() {
+        nbtags_f = nbtags;
+        njets_f = njets;
+        nlb40_f = nlb40;
+        ntb40_f = ntb40;
+        nleps_f = nleps;
+        lep1q_f = lep1q;
+        SR_f = SR;
+    };
+    TMVA::Reader reader("Silent");
+    reader.AddVariable("nbtags",      &nbtags_f);
+    reader.AddVariable("njets",       &njets_f);
+    reader.AddVariable("met",         &met);
+    reader.AddVariable("ptl2",        &lep2ccpt);
+    reader.AddVariable("nlb40",       &nlb40_f);
+    reader.AddVariable("ntb40",       &ntb40_f);
+    reader.AddVariable("nleps",       &nleps_f);
+    reader.AddVariable("htb",         &htb);
+    reader.AddVariable("q1",          &lep1q_f);
+    reader.AddVariable("ptj1",        &ptj1);
+    reader.AddVariable("ptj6",        &ptj6);
+    reader.AddVariable("ptj7",        &ptj7);
+    reader.AddVariable("ml1j1",       &ml1j1);
+    reader.AddVariable("dphil1l2",    &dphil1l2);
+    reader.AddVariable("maxmjoverpt", &maxmjoverpt);
+    reader.AddVariable("ptl1",        &lep1ccpt);
+    reader.AddVariable("detal1l2",    &detal1l2);
+    reader.AddVariable("ptj8",        &ptj8);
+    reader.AddVariable("ptl3",        &lep3ccpt);
+
+    reader.AddSpectator("weight",     &weight);
+    reader.AddSpectator("ptl1",       &lep1ccpt);
+    reader.AddSpectator("ptl2",       &lep2ccpt);
+    reader.AddSpectator("SR",         &SR_f);
+
+    reader.BookMVA("BDT","TMVAClassification_BDT_19vars.xml");
+
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -202,38 +277,51 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             }
 
             // Save a bunch of event info for quick reference later
-            float lep1ccpt = ss::lep1_coneCorrPt();
-            float lep2ccpt = ss::lep2_coneCorrPt();
-            float lep3ccpt = ss::lep3_coneCorrPt();
-            float lep1pt = ss::lep1_p4().pt();
-            float lep2pt = ss::lep2_p4().pt();
-            float lep3pt = ss::lep3_p4().pt();
-            float lep1eta = ss::lep1_p4().eta();
-            float lep2eta = ss::lep2_p4().eta();
-            float lep3eta = ss::lep3_p4().eta();
-            float lep1phi = ss::lep1_p4().phi();
-            float lep2phi = ss::lep2_p4().phi();
-            float lep3phi = ss::lep3_p4().phi();
-            int lep1id = ss::lep1_id();
-            int lep2id = ss::lep2_id();
-            int lep3id = ss::lep3_id();
-            int lep1good = ss::lep1_passes_id();
-            int lep2good = ss::lep2_passes_id();
-            int lep3good = ss::lep3_passes_id();
-            float lep1ptrel = ss::lep1_ptrel_v1();
-            float lep2ptrel = ss::lep2_ptrel_v1();
-            float lep1miniiso = ss::lep1_miniIso();
-            float lep2miniiso = ss::lep2_miniIso();
-            float lep1ptratio = ss::lep1_closeJet().pt() > 0 ? lep1pt/ss::lep1_closeJet().pt() : 1.0;
-            float lep2ptratio = ss::lep2_closeJet().pt() > 0 ? lep2pt/ss::lep2_closeJet().pt() : 1.0;
-            int nleps = (lep3good and lep3ccpt > 20) ? 3 : 2;
-            int njets = ss::njets();
-            int nbtags = ss::nbtags();
-            int ht = ss::ht();
-            int met = ss::met();
-            int nlb40, ntb40, nisrjets;
-            float maxmjoverpt, htb;
+            lep1ccpt = ss::lep1_coneCorrPt();
+            lep2ccpt = ss::lep2_coneCorrPt();
+            lep3ccpt = ss::lep3_coneCorrPt();
+            lep1pt = ss::lep1_p4().pt();
+            lep2pt = ss::lep2_p4().pt();
+            lep3pt = ss::lep3_p4().pt();
+            lep1eta = ss::lep1_p4().eta();
+            lep2eta = ss::lep2_p4().eta();
+            lep3eta = ss::lep3_p4().eta();
+            lep1phi = ss::lep1_p4().phi();
+            lep2phi = ss::lep2_p4().phi();
+            lep3phi = ss::lep3_p4().phi();
+            lep1id = ss::lep1_id();
+            lep2id = ss::lep2_id();
+            lep3id = ss::lep3_id();
+            lep1q = (lep1id > 0) ? -1 : 1;
+            lep2q = (lep2id > 0) ? -1 : 1;
+            lep3q = (lep3id > 0) ? -1 : 1;
+            lep1good = ss::lep1_passes_id();
+            lep2good = ss::lep2_passes_id();
+            lep3good = ss::lep3_passes_id();
+            lep1ptrel = ss::lep1_ptrel_v1();
+            lep2ptrel = ss::lep2_ptrel_v1();
+            lep1miniiso = ss::lep1_miniIso();
+            lep2miniiso = ss::lep2_miniIso();
+            lep1ptratio = ss::lep1_closeJet().pt() > 0 ? lep1pt/ss::lep1_closeJet().pt() : 1.0;
+            lep2ptratio = ss::lep2_closeJet().pt() > 0 ? lep2pt/ss::lep2_closeJet().pt() : 1.0;
+            nleps = (lep3good and lep3ccpt > 20) ? 3 : 2;
+            njets = ss::njets();
+            nbtags = ss::nbtags();
+            ht = ss::ht();
+            met = ss::met();
             std::tie(nlb40, ntb40, nisrjets, maxmjoverpt, htb) = calc_jet_quants();
+
+            ptj1 = (njets >= 1) ? ss::jets()[0].pt() : 0;
+            ptj2 = (njets >= 2) ? ss::jets()[1].pt() : 0;
+            ptj3 = (njets >= 3) ? ss::jets()[2].pt() : 0;
+            ptj4 = (njets >= 4) ? ss::jets()[3].pt() : 0;
+            ptj5 = (njets >= 5) ? ss::jets()[4].pt() : 0;
+            ptj6 = (njets >= 6) ? ss::jets()[5].pt() : 0;
+            ptj7 = (njets >= 7) ? ss::jets()[6].pt() : 0;
+            ptj8 = (njets >= 8) ? ss::jets()[7].pt() : 0;
+
+            ml1j1 = (njets >= 1) ? (ss::jets()[0] + ss::lep1_p4()).M() : 0;
+            set_float_vals();
 
             /* hyp_class
              * 1: SS, loose-loose
@@ -246,7 +334,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             int hyp_class = ss::hyp_class();
 
             //Calculate weight
-            float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
+            weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
             if (!ss::is_real_data()) {
                 float rand = -1;
@@ -415,12 +503,18 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 }
                 do_fill(h_nvtx,   ss::nGoodVertices());
 
-                if (njets >= 1) do_fill(h_ptj1, ss::jets()[0].pt());
-                if (njets >= 6) do_fill(h_ptj6, ss::jets()[5].pt());
-                if (njets >= 7) do_fill(h_ptj7, ss::jets()[6].pt());
-                if (njets >= 8) do_fill(h_ptj8, ss::jets()[7].pt());
+                if (njets >= 1) do_fill(h_ptj1, ptj1);
+                if (njets >= 2) do_fill(h_ptj2, ptj2);
+                if (njets >= 3) do_fill(h_ptj3, ptj3);
+                if (njets >= 4) do_fill(h_ptj4, ptj4);
+                if (njets >= 5) do_fill(h_ptj5, ptj5);
+                if (njets >= 6) do_fill(h_ptj6, ptj6);
+                if (njets >= 7) do_fill(h_ptj7, ptj7);
+                if (njets >= 8) do_fill(h_ptj8, ptj8);
 
-                if (njets >= 1) do_fill(h_ml1j1, (ss::jets()[0] + ss::lep1_p4()).M());
+                if (njets >= 1) do_fill(h_ml1j1, ml1j1);
+
+                if (evaluateBDT) do_fill(h_event_bdt, reader.EvaluateMVA("BDT"));
             };
 
             if (hyp_class == 6 and (zcand13 or zcand23) and
@@ -459,9 +553,15 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     lep1ccpt >= 25. and
                     lep2ccpt >= 20. and
                     njets >= 2) {
-                if (nbtags < 2  and ht > 300 and met > 50) fill_region("bdt_nb", weight);   // invert Nb
-                if (nbtags >= 2 and ht < 300 and met > 50) fill_region("bdt_ht", weight);   // invert Ht
-                if (nbtags >= 2 and ht > 300 and met < 50) fill_region("bdt_met", weight);  // invert MET
+                if (nbtags < 2  and ht > 300 and met > 50) fill_region("bdt_nb", weight);  // invert Nb
+                if (nbtags >= 2 and ht < 300 and met > 50) {                               // invert Ht
+                    fill_region("bdt_ht", weight);
+                    fill_region("bdt_met_ht", weight);
+                }
+                if (nbtags >= 2 and ht > 300 and met < 50) {                               // invert MET
+                    fill_region("bdt_met", weight);
+                    fill_region("bdt_met_ht", weight);
+                }
             }
 
             if (hyp_class == 4 and !zcand12 and
