@@ -1,4 +1,3 @@
-//fixme add systematics from EWK subtraction
 void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float muSF_mt, bool useIsoTrig) {
 
   for(int doMu = 0; doMu < 2; doMu++) {

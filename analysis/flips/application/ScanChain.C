@@ -1,5 +1,10 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
+#include <iostream>
+#include <iomanip>
+#include <stdlib.h>
+#include <fstream>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TCut.h"
@@ -9,6 +14,7 @@
 #include "TH1.h"
 #include "TChain.h"
 #include "Math/VectorUtil.h"
+#include "TRandom.h"
 
 #include "../../misc/class_files/v8.02/SS.h"
 #include "../../../common/CORE/Tools/utils.h"
@@ -16,9 +22,48 @@
 #include "../../misc/common_utils.h"
 #include "../../misc/signal_regions.h"
 
+#include "nvtx_weights.h"
+
 using namespace std;
 
 bool overflow = true;
+bool debugCounter = false;
+
+TH1D * evtCounter = new TH1D("","",1000,0,1000); 
+map<TString, int> evtBinMap;
+int evtBin = 0;
+void initCounter() {
+    evtCounter = new TH1D("","",1000,0,1000); 
+    evtCounter->Sumw2();
+    evtBinMap.clear();
+}
+void addToCounter(TString name, double weight=1.0) {
+    if(evtBinMap.find(name) == evtBinMap.end() ) {
+        evtBinMap[name] = evtBin;
+        evtBin++;
+    }
+    evtCounter->Fill(evtBinMap[name], weight);
+}
+void printCounter(bool file = false) {
+    ofstream outfile;
+    if(file) outfile.open("counter.txt");
+    cout << string(30, '-') << endl << "Counter totals: " << endl;
+    for(map<TString,int>::iterator it = evtBinMap.begin(); it != evtBinMap.end(); it++) {
+        int iBin = (it->second)+1;
+        printf("%-15s %6.2f %6.2f\n",
+                (it->first).Data(),
+                evtCounter->GetBinContent(iBin),
+                evtCounter->GetBinError(iBin) );
+        if(file) outfile << (it->first).Data() << "  " << evtCounter->GetBinContent(iBin) << "  " << evtCounter->GetBinError(iBin) << endl;
+    }
+    cout << string(30, '-') << endl;
+    if(file) outfile.close();
+    if(file) cout << "Wrote counter to counter.txt" << endl;
+}
+void doCounter(TString name, bool isdata, float weight) {
+    if (isdata) weight = 1.0;
+    addToCounter(name + (isdata ? "_data" : "_mc"), weight);
+}
 
 float getFlipFactor(TH2D* rate){
 
@@ -46,6 +91,8 @@ float getFlipFactor(TH2D* rate){
 }
 
 void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root", float minrun=-1, float maxrun=-1, float lumi=-1) {
+    initCounter();
+    TRandom *tr1 = new TRandom();
 
     float lumiAG = getLumi();
     if (lumi > 0) lumiAG = lumi;
@@ -67,24 +114,24 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     TH1F* clos_leppt_MC   = new TH1F("clos_leppt_plot_MC"  , "clos_leppt_plot_MC"  , 20, 0, 100); 
     TH1F* clos_leppt_MCp  = new TH1F("clos_leppt_plot_MCp" , "clos_leppt_plot_MCp" , 20, 0, 100); 
     TH1F* clos_leppt_data = new TH1F("clos_leppt_plot_data", "clos_leppt_plot_data", 20, 0, 100); 
-    TH1F* osee_leppt_MC   = new TH1F("osee_leppt_plot_MC"  , "osee_leppt_plot_MC"  , 20, 0, 100); 
-    TH1F* osee_leppt_data = new TH1F("osee_leppt_plot_data", "osee_leppt_plot_data", 20, 0, 100); 
+    TH1F* osee_leppt_MC   = new TH1F("osee_leppt_plot_MC"  , "osee_leppt_plot_MC"  , 100, 0, 100); 
+    TH1F* osee_leppt_data = new TH1F("osee_leppt_plot_data", "osee_leppt_plot_data", 100, 0, 100); 
     clos_leppt_MC->Sumw2();
     clos_leppt_MCp->Sumw2();
 
     TH1F* clos_lepeta_MC   = new TH1F("clos_lepeta_plot_MC"  , "clos_lepeta_plot_MC"  , 25, -2.5, 2.5); 
     TH1F* clos_lepeta_MCp  = new TH1F("clos_lepeta_plot_MCp" , "clos_lepeta_plot_MCp" , 25, -2.5, 2.5); 
     TH1F* clos_lepeta_data = new TH1F("clos_lepeta_plot_data", "clos_lepeta_plot_data", 25, -2.5, 2.5); 
-    TH1F* osee_lepeta_MC   = new TH1F("osee_lepeta_plot_MC"  , "osee_lepeta_plot_MC"  , 25, -2.5, 2.5); 
-    TH1F* osee_lepeta_data = new TH1F("osee_lepeta_plot_data", "osee_lepeta_plot_data", 25, -2.5, 2.5); 
+    TH1F* osee_lepeta_MC   = new TH1F("osee_lepeta_plot_MC"  , "osee_lepeta_plot_MC"  , 150, -2.5, 2.5); 
+    TH1F* osee_lepeta_data = new TH1F("osee_lepeta_plot_data", "osee_lepeta_plot_data", 150, -2.5, 2.5); 
     clos_lepeta_MC->Sumw2();
     clos_lepeta_MCp->Sumw2();
 
     TH1F* clos_lepphi_MC   = new TH1F("clos_lepphi_plot_MC"  , "clos_lepphi_plot_MC"  , 30, -3.14, 3.14); 
     TH1F* clos_lepphi_MCp  = new TH1F("clos_lepphi_plot_MCp" , "clos_lepphi_plot_MCp" , 30, -3.14, 3.14); 
     TH1F* clos_lepphi_data = new TH1F("clos_lepphi_plot_data", "clos_lepphi_plot_data", 30, -3.14, 3.14); 
-    TH1F* osee_lepphi_MC   = new TH1F("osee_lepphi_plot_MC"  , "osee_lepphi_plot_MC"  , 30, -3.14, 3.14); 
-    TH1F* osee_lepphi_data = new TH1F("osee_lepphi_plot_data", "osee_lepphi_plot_data", 30, -3.14, 3.14); 
+    TH1F* osee_lepphi_MC   = new TH1F("osee_lepphi_plot_MC"  , "osee_lepphi_plot_MC"  , 150, -3.14, 3.14); 
+    TH1F* osee_lepphi_data = new TH1F("osee_lepphi_plot_data", "osee_lepphi_plot_data", 150, -3.14, 3.14); 
     clos_lepphi_MC->Sumw2();
     clos_lepphi_MCp->Sumw2();
 
@@ -99,8 +146,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     TH1F* clos_met_MC   = new TH1F("clos_met_plot_MC"  , "clos_met_plot_MC"  , 15, 0, 150); 
     TH1F* clos_met_MCp  = new TH1F("clos_met_plot_MCp" , "clos_met_plot_MCp" , 15, 0, 150); 
     TH1F* clos_met_data = new TH1F("clos_met_plot_data", "clos_met_plot_data", 15, 0, 150); 
-    TH1F* osee_met_MC   = new TH1F("osee_met_plot_MC"  , "osee_met_plot_MC"  , 15, 0, 150); 
-    TH1F* osee_met_data = new TH1F("osee_met_plot_data", "osee_met_plot_data", 15, 0, 150); 
+    TH1F* osee_met_MC   = new TH1F("osee_met_plot_MC"  , "osee_met_plot_MC"  , 100, 0, 150); 
+    TH1F* osee_met_data = new TH1F("osee_met_plot_data", "osee_met_plot_data", 100, 0, 150); 
     clos_met_MC->Sumw2();
     clos_met_MCp->Sumw2();
 
@@ -194,11 +241,62 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
             SSAG::progress(nEventsTotal, nEventsChain);
 
-            if (!ss::fired_trigger()) continue;
-            if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
-            if (ss::met() > 50.) continue; 
-            if (abs(ss::lep1_id()) != 11 || abs(ss::lep2_id()) != 11) continue;
-            if(ss::nbtags() > 0) continue;
+            if (debugCounter) {
+                int tocheck = 3;
+                doCounter("0_all", ss::is_real_data(), lumiAG*ss::scale1fb());
+                if (!ss::fired_trigger()) continue;
+                doCounter("1_trigger", ss::is_real_data(), lumiAG*ss::scale1fb());
+                if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
+                if (ss::hyp_class() == tocheck) {
+                    doCounter("2_class3", ss::is_real_data(), lumiAG*ss::scale1fb());
+                }
+                if (ss::met() > 50.) continue; 
+                if (ss::hyp_class() == tocheck) {
+                    doCounter("3_met50", ss::is_real_data(), lumiAG*ss::scale1fb());
+                }
+                if (abs(ss::lep1_id()) != 11 || abs(ss::lep2_id()) != 11) continue;
+                if (ss::hyp_class() == tocheck) {
+                    doCounter("4_ee", ss::is_real_data(), lumiAG*ss::scale1fb());
+                }
+                if(ss::nbtags() > 0) continue;
+                if (ss::hyp_class() == tocheck) {
+                    doCounter("5_nb0", ss::is_real_data(), lumiAG*ss::scale1fb());
+                    float mll = (ss::lep1_p4() + ss::lep2_p4()).M();
+                    if (mll > 80 && mll < 100) {
+                        doCounter("6_mll", ss::is_real_data(), lumiAG*ss::scale1fb());
+                        doCounter("7_weightpu", ss::is_real_data(), lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0]));
+                        doCounter("8_weightbtag", ss::is_real_data(), lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0])*ss::weight_btagsf());
+                        float rand = -1.;
+                        // tr1->SetSeed(ss::event());
+                        // float rand = tr1->Rndm();
+                        doCounter("9_weightlep1", ss::is_real_data(), 
+                                lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0])
+                                *ss::weight_btagsf()*leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand)
+                                );
+                        doCounter("10_weightlep2", ss::is_real_data(), 
+                                lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0])
+                                *ss::weight_btagsf()*leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand)
+                                *ss::weight_btagsf()*leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), rand)
+                                );
+                    }
+                }
+            } else {
+                if (!ss::fired_trigger()) continue;
+                if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
+                if (ss::met() > 50.) continue; 
+                if (abs(ss::lep1_id()) != 11 || abs(ss::lep2_id()) != 11) continue;
+                if (ss::nbtags() > 0) continue;
+            }
+
+            // Reject duplicates
+            if (ss::is_real_data()){
+                // duplicate_removal::DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
+                // if (duplicate_removal::is_duplicate(id)) { reject++; continue; }
+
+                if (minrun > 0 && ss::run() < minrun) continue;
+                if (maxrun > 0 && ss::run() > maxrun) continue;
+            }
+
             
             // Figure out if SS
             bool isSS = false;
@@ -209,9 +307,16 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
             float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
             if (!ss::is_real_data()) {
+                float rand = -1.;
+                if (minrun == 297046) rand = 1;
+                if (minrun == 299368) rand = 2;
+                if (minrun == 302030) rand = 3;
+                if (minrun == 303824) rand = 4;
+                if (minrun == 305040) rand = 5;
+                if (rand > 0) weight *= getNvtxWeight(ss::nGoodVertices(), rand);
                 weight *= getTruePUw(ss::trueNumInt()[0]);
-                weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), -1.);
-                weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), -1.);
+                weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand);
+                weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), rand);
                 weight *= ss::weight_btagsf();
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
@@ -485,6 +590,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
     f1->Close();
 
+    printCounter(true);
 
 }
 

@@ -92,16 +92,37 @@ class babyMaker {
     // for btag SFs
     float getBtagEffFromFile(float pt, float eta, int mcFlavour);
     BTagCalibration* calib;
-    BTagCalibration* calib2;
     BTagCalibrationReader* reader_heavy;
     BTagCalibrationReader* reader_heavy_UP;
     BTagCalibrationReader* reader_heavy_DN;
     BTagCalibrationReader* reader_light;
     BTagCalibrationReader* reader_light_UP;
     BTagCalibrationReader* reader_light_DN;
+
+    BTagCalibration* calib2;
+    BTagCalibrationReader* reader_heavy2;
+    BTagCalibrationReader* reader_heavy2_UP;
+    BTagCalibrationReader* reader_heavy2_DN;
     BTagCalibrationReader* reader_light2;
     BTagCalibrationReader* reader_light2_UP;
     BTagCalibrationReader* reader_light2_DN;
+
+    BTagCalibration* calib3;
+    BTagCalibrationReader* reader_heavy3;
+    BTagCalibrationReader* reader_heavy3_UP;
+    BTagCalibrationReader* reader_heavy3_DN;
+    BTagCalibrationReader* reader_light3;
+    BTagCalibrationReader* reader_light3_UP;
+    BTagCalibrationReader* reader_light3_DN;
+
+    BTagCalibration* calib4;
+    BTagCalibrationReader* reader_heavy4;
+    BTagCalibrationReader* reader_heavy4_UP;
+    BTagCalibrationReader* reader_heavy4_DN;
+    BTagCalibrationReader* reader_light4;
+    BTagCalibrationReader* reader_light4_UP;
+    BTagCalibrationReader* reader_light4_DN;
+
     BTagCalibration* calib_fs;
     BTagCalibrationReader* reader_fastsim;
     BTagCalibrationReader* reader_fastsim_UP;
@@ -451,6 +472,12 @@ class babyMaker {
     int nVetoMuons10;
     int nVetoMuons25;
 
+    // from miniaod directly
+    float lep1_ptrel_ma;
+    float lep1_ptratio_ma;
+    float lep2_ptrel_ma;
+    float lep2_ptratio_ma;
+
     //PtRel, v0 and v1 (v1 is lepton-subtracted)
     float lep1_ptrel_v0;
     float lep1_ptrel_v1;
@@ -551,6 +578,12 @@ class babyMaker {
     float weight_btagsf2;
     float weight_btagsf2_UP;
     float weight_btagsf2_DN;
+    float weight_btagsf3;
+    float weight_btagsf3_UP;
+    float weight_btagsf3_DN;
+    float weight_btagsf4;
+    float weight_btagsf4_UP;
+    float weight_btagsf4_DN;
 
     //ISR unc #s - 2015
     LorentzVector gl1_p4;

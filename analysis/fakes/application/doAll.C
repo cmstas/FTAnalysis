@@ -11,7 +11,8 @@
     gROOT->ProcessLine(".L ../../misc/common_utils.h");
     gROOT->ProcessLine(".L ScanChain.C+");
 
-    TString tag = "v1.03_os_nmiss1_dileptrig_v1";
+    // TString tag = "v1.03_os_nmiss1_dileptrig_v1";
+    TString tag = "v1.04_v1";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
 
 
@@ -84,9 +85,9 @@
     TChain *ch = new TChain("t"); 
     if (doLooseEMVA){
 
-        ch->Add(basedir+"WJets*.root");
-        ch->Add(basedir+"W3Jets*.root");
-        ch->Add(basedir+"W4Jets*.root");
+        // ch->Add(basedir+"WJets*.root");
+        // ch->Add(basedir+"W3Jets*.root");
+        // ch->Add(basedir+"W4Jets*.root");
         ch->Add(basedir+"TTBAR*.root");
         ch->Add(basedir+"TTSL*.root");
 

@@ -31,16 +31,15 @@ Do this in a screen since the processes don't get `nohup`'d. This can take up to
 
 ### Extract MT SFs with fits
 
-7. Once they are done, we can extract the mT SFs and plot corrected fake rates. Edit `do_fits.py` to have the correct output directory from the 
-parallel running on line 8 in the `get_fname` function. The output directory for plots is on line 12, `thedir`. Run the script with `python do_fits.py` and note the
+7. Once they are done, we can extract the mT SFs and plot corrected fake rates. Edit `do_fits.py` to have the correct input (`basedir`) and output (`thedir` -- for plots) directories from the 
+parallel running. Run the script with `python do_fits.py` and note the
 four lines at the bottom. These are the mT SFs that you need to copy and paste into `all.C`.
 
 ### Make corrected FRs and dump out maps
 
 8. Edit `all.C` to have the correct output directory from the ScanChain. Also paste in the correct mT SFs from the previous step. Run with
-`root -b -q -l -n all.C` to make the corrected FRs and other plots too, in `pdfs/`. 
+`root -b -q -l -n all.C > fake_rates.h` to make the uncorrected, corrected FRs and other plots too, in `pdfs/`. 
 
-9. Now, edit `dumpFunctions.C` to have the correct ScanChain output near the top, and run `root -b -q -l -n dumpFunctions.C > fake_rates.h`. Clean up 
-the top and the bottom of this header file, and you now have maps that can be placed into (or override) `../../misc/fake_rates.h`.
+9. Clean up the top and the bottom of the `fake_rates.h` header file, and you now have maps that can be placed into (or override) `../../misc/fake_rates.h`.
 
 10. Next, on to the application region after updating the fake rate maps: `cd ../application`

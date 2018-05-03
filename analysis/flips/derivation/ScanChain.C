@@ -93,9 +93,11 @@ void flip(TChain *ch) {
             float weight = ss::is_real_data() ? 1 : scaling*fabs(ss::scale1fb())*lumiAG;
 
             if (!ss::is_real_data()) {
-                // weight *= getTruePUw(ss::trueNumInt()[0]);
+                weight *= getTruePUw(ss::trueNumInt()[0]);
+                weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), -1.);
+                weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), -1.);
+                weight *= ss::weight_btagsf();
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
-                // weight *= ss::weight_btagsf();
             }
 
             if (abs(ss::lep1_id()) == 13 && abs(ss::lep2_id()) == 13) continue;

@@ -18,7 +18,7 @@ def parse_lims(lim_lines, fb=False):
     for line in lim_lines:
         if "Observed" in line: d["obs"] = float(line.split("<")[-1])
         elif "Expected" in line: d["exp_"+line.split("%")[0].replace("Expected","").strip()] = float(line.split("<")[-1])
-        elif "Significance" in line: d["significance"] = float(line.split(":")[-1])
+        elif "Significance:" in line: d["significance"] = float(line.split(":")[-1])
         elif "p-value" in line: d["pvalue"] = float(line.split("=")[-1].replace(")",""))
         elif "Best fit r:" in line:
             parts = line.split(":")[-1].split()
@@ -75,12 +75,12 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
 
     if not os.path.isfile(full_log_name) or (redolimits or redocard):
         extra = "--noFitAsimov"
-        limit_cmd = "combine -M Asymptotic {0} {1}  2>&1 | tee {2}".format(full_card_name, extra, full_log_name)
+        limit_cmd = "combine -M AsymptoticLimits {0} {1}  2>&1 | tee {2}".format(full_card_name, extra, full_log_name)
         if verbose: print ">>> Running combine [{0}]".format(limit_cmd)
         stat, out = commands.getstatusoutput(limit_cmd)
         if dosignificance:
             extra = "-t -1 --expectSignal=1" if not unblinded else ""
-            significance_cmd = "combine -M ProfileLikelihood {0} --significance {1}  2>&1 | tee -a {2}".format(full_card_name, extra, full_log_name)
+            significance_cmd = "combine -M Significance {0} --significance {1}  2>&1 | tee -a {2}".format(full_card_name, extra, full_log_name)
             if verbose: print ">>> Running combine for significance [{0}]".format(significance_cmd)
             stat, out_sig = commands.getstatusoutput(significance_cmd)
             out += out_sig

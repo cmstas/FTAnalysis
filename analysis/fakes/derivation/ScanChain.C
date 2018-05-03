@@ -46,7 +46,7 @@ float computePtRel(LorentzVector lepp4, LorentzVector jetp4, bool subtractLep) {
 }
 
 float getPt(float pt, bool extrPtRel = false) {
-  if(!extrPtRel && pt >= 70.) return 69.;
+  if(!extrPtRel && pt >= 90.) return 89.;
   if(extrPtRel && pt >= 150.) return 149.;
   if(pt < 10.)  return 11.;   //use this if lower FR histo bound is 10.
   return pt;
@@ -122,15 +122,17 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
   // int nptbins = 5;
   // float ptbins[6] = {10., 15., 25., 35., 50., 70.};
-  int nptbins = 6;
-  float ptbins[7] = {10., 15., 20., 25., 35., 50., 70.};
+  // int nptbins = 6;
+  // float ptbins[7] = {10., 15., 20., 25., 35., 50., 70.};
+  int nptbins = 7;
+  float ptbins[8] = {10., 15., 20., 25., 35., 50., 70., 90.};
   int netabins = 3;
   float etabins_mu[4] = {0., 1.2, 2.1, 2.4};
   float etabins_el[4] = {0., 0.8, 1.479, 2.5};
 
   // nominal
   float MTCR_MET_CUT = 30.;
-  float MTCR2_PT_CUT = 25.;
+  float MTCR_PT_CUT = 20.;
 
 
   // int nptbins = 7;
@@ -193,16 +195,27 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   // float sf_HLT_Mu8 = 0.7015;
   // float sf_HLT_IsoMu27 = 1.1041;
 
-  // v6 does not need hacky ZSF
-  float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.4875;
-  float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.4913;
-  float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1871;
-  float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1916;
-  float sf_HLT_Mu17_TrkIsoVVL = 1.0125;
-  float sf_HLT_Mu17 = 1.0121;
-  float sf_HLT_Mu8_TrkIsoVVL = 0.6959;
-  float sf_HLT_Mu8 = 0.7013;
-  float sf_HLT_IsoMu27 = 1.1038;
+  // // v6 and on does not need hacky ZSF
+  // float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.4875;
+  // float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.4913;
+  // float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1871;
+  // float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1916;
+  // float sf_HLT_Mu17_TrkIsoVVL = 1.0125;
+  // float sf_HLT_Mu17 = 1.0121;
+  // float sf_HLT_Mu8_TrkIsoVVL = 0.6959;
+  // float sf_HLT_Mu8 = 0.7013;
+  // float sf_HLT_IsoMu27 = 1.1038;
+
+  // v8
+  float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3675;
+  float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3764;
+  float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1075;
+  float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1171;
+  float sf_HLT_Mu17_TrkIsoVVL = 1.0190;
+  float sf_HLT_Mu17 = 1.0183;
+  float sf_HLT_Mu8_TrkIsoVVL = 0.6985;
+  float sf_HLT_Mu8 = 0.6994;
+  float sf_HLT_IsoMu27 = 1.1062;
   
 
   if (false) {
@@ -248,6 +261,23 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   TH2D *Nl_cone_histo_mu = new TH2D("Nl_cone_histo_mu", "Nl vs Cone Energy, Eta (muons)", nptbins,ptbins,netabins,etabins_mu);
   Nl_cone_histo_mu->SetDirectory(rootdir);
   Nl_cone_histo_mu->Sumw2();
+
+  TH2D *Nt_fine_histo_e = new TH2D("Nt_fine_histo_e", "Nt vs Pt, Eta (electrons)", 30,0,150,10,0,2.5);
+  Nt_fine_histo_e->SetDirectory(rootdir);
+  Nt_fine_histo_e->Sumw2();
+
+  TH2D *Nt_fine_histo_mu = new TH2D("Nt_fine_histo_mu", "Nt vs Pt, Eta (muons)", 75,0,75,5,0,2.5);
+  Nt_fine_histo_mu->SetDirectory(rootdir);
+  Nt_fine_histo_mu->Sumw2();
+
+  TH2D *Nl_fine_cone_histo_e = new TH2D("Nl_fine_cone_histo_e", "Nl vs Cone Energy, Eta (electrons)", 30,0,150,10,0,2.5);
+  Nl_fine_cone_histo_e->SetDirectory(rootdir);
+  Nl_fine_cone_histo_e->Sumw2();
+
+  TH2D *Nl_fine_cone_histo_mu = new TH2D("Nl_fine_cone_histo_mu", "Nl vs Cone Energy, Eta (muons)", 75,0,75,5,0,2.5);
+  Nl_fine_cone_histo_mu->SetDirectory(rootdir);
+  Nl_fine_cone_histo_mu->Sumw2();
+
 
   TH2D *Nt_jet_histo_e = new TH2D("Nt_jet_histo_e", "Nt vs Jet Energy, Eta (electrons)", nptbins,ptbins,netabins,etabins_el);
   Nt_jet_histo_e->SetDirectory(rootdir);
@@ -344,6 +374,14 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   TH1D *miniiso_histo_mu = new TH1D("miniiso_histo_mu", "miniiso (Muons)", 15, 0., 0.3);
   miniiso_histo_mu->SetDirectory(rootdir);
   miniiso_histo_mu->Sumw2();
+
+  TH1D *miniiso_histo_el_loose70 = new TH1D("miniiso_histo_el_loose70", "miniiso (Electrons)", 15, 0., 0.3);
+  miniiso_histo_el_loose70->SetDirectory(rootdir);
+  miniiso_histo_el_loose70->Sumw2();
+
+  TH1D *miniiso_histo_el_tight70 = new TH1D("miniiso_histo_el_tight70", "miniiso (Electrons)", 15, 0., 0.3);
+  miniiso_histo_el_tight70->SetDirectory(rootdir);
+  miniiso_histo_el_tight70->Sumw2();
 
   TH1F *histo_ht = new TH1F("histo_ht", "HT", 20,0,1000);
   histo_ht->SetDirectory(rootdir);
@@ -729,8 +767,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                               TString(currentFile->GetTitle()).Contains("DoubleMu") || TString(currentFile->GetTitle()).Contains("DoubleEG");
     bool isDoubleMuon = TString(currentFile->GetTitle()).Contains("DoubleMu");
     bool isQCD = TString(currentFile->GetTitle()).Contains("QCD");
-    bool isQCDMu = TString(currentFile->GetTitle()).Contains("QCD_Mu");
-    bool isQCDEl = TString(currentFile->GetTitle()).Contains("QCD_El") || TString(currentFile->GetTitle()).Contains("QCD_bcToE");
+    bool isQCDMu = TString(currentFile->GetTitle()).Contains("QCD_M");
+    bool isQCDEl = TString(currentFile->GetTitle()).Contains("QCD_E") || TString(currentFile->GetTitle()).Contains("QCD_bcToE");
     bool isTTbar = TString(currentFile->GetTitle()).Contains("TTbar");
     bool isDY = TString(currentFile->GetTitle()).Contains("DY");
 
@@ -1054,15 +1092,15 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
       if(abs(id()) == 11 && fabs(p4().eta()) > 2.5) continue;
       if(abs(id()) == 13 && fabs(p4().eta()) > 2.4) continue;
 
-      if (doLightonly && abs(id())==11 && p4().pt() < 20.) continue;//because EMEnriched does not go below 20 GeV
+      // if (doLightonly && abs(id())==11 && p4().pt() < 20.) continue;//because EMEnriched does not go below 20 GeV
 
       if (debug) cout << "check sip " << fabs(ip3d()/ip3derr()) << endl;
       if (fabs(ip3d()/ip3derr())>4. ) continue;
 
-      bool passId = passes_SS_tight_v5();
-      bool passFO = passes_SS_fo_v5();
-      bool passId_noiso = passes_SS_tight_noiso_v5();
-      bool passFO_noiso = passes_SS_fo_noiso_v5();
+      bool passId = passes_SS_tight_v6();
+      bool passFO = passes_SS_fo_v6();
+      bool passId_noiso = passes_SS_tight_noiso_v6();
+      bool passFO_noiso = passes_SS_fo_noiso_v6();
       if (useLooseEMVA && abs(id())==11) {
 	bool isEB = true;
 	if ( fabs(etaSC())>1.479 ) isEB = false;
@@ -1088,8 +1126,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 	  float cut_trkIso  = 0.2;
 	  passHltCuts = passHltCuts && ePFIso<cut_ePFIso && hPFIso<cut_hPFIso && trkIso<cut_trkIso;
 	}
-	passFO = passHltCuts && passes_SS_fo_looseMVA_v5();
-	passFO_noiso = passHltCuts && passes_SS_fo_looseMVA_noiso_v5();
+	passFO = passHltCuts && passes_SS_fo_looseMVA_v6();
+	passFO_noiso = passHltCuts && passes_SS_fo_looseMVA_noiso_v6();
       }
 
       // if (useIsoTrigs && abs(id())==13) {
@@ -1105,17 +1143,17 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
       float evt_mt = calculateMt(p4(),evt_met,evt_metPhi);
 
       if (passId_noiso && !passId) {
-          if (evt_met > MTCR_MET_CUT) {
+          if (evt_met > MTCR_MET_CUT && p4().pt()>MTCR_PT_CUT) {
               if (abs(id())==11) {
                   histo_mt_cr_noiso_el->Fill( std::min(evt_mt,float(200.)), weight );
-                  if (p4().pt()>MTCR2_PT_CUT) histo_mt_cr2_noiso_el->Fill( std::min(evt_mt,float(200.)), weight );
+                  if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_noiso_el->Fill( std::min(evt_mt,float(200.)), weight );
                   histo_mt_cr_noiso_pt_el->Fill( p4().pt(), weight );
                   histo_mt_cr_noiso_met_el->Fill( evt_met, weight );
                   histo_mt_cr_noiso_dphi_el->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
               }
               if (abs(id())==13) {
                   histo_mt_cr_noiso_mu->Fill( std::min(evt_mt,float(200.)), weight );
-                  if (p4().pt()>MTCR2_PT_CUT) histo_mt_cr2_noiso_mu->Fill( std::min(evt_mt,float(200.)), weight );
+                  if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_noiso_mu->Fill( std::min(evt_mt,float(200.)), weight );
                   histo_mt_cr_noiso_pt_mu->Fill( p4().pt(), weight );
                   histo_mt_cr_noiso_met_mu->Fill( evt_met, weight );
                   histo_mt_cr_noiso_dphi_mu->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
@@ -1135,21 +1173,21 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 	  if (abs(id())==11) histo_mt_lm_el->Fill( std::min(evt_mt,float(200.)), weight );
 	  if (abs(id())==13) histo_mt_lm_mu->Fill( std::min(evt_mt,float(200.)), weight );
 	}
-	if (evt_met > MTCR_MET_CUT) {
+    if (evt_met > MTCR_MET_CUT && p4().pt()>MTCR_PT_CUT) {
 	  histo_mt_cr->Fill( std::min(evt_mt,float(200.)), weight );
 	  histo_mt_cr_pt->Fill( p4().pt(), weight );
 	  histo_mt_cr_met->Fill( evt_met, weight );
 	  histo_mt_cr_dphi->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
 	  if (abs(id())==11) {
           histo_mt_cr_el->Fill( std::min(evt_mt,float(200.)), weight );
-          if (p4().pt()>MTCR2_PT_CUT) histo_mt_cr2_el->Fill( std::min(evt_mt,float(200.)), weight );
+          if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_el->Fill( std::min(evt_mt,float(200.)), weight );
           histo_mt_cr_pt_el->Fill( p4().pt(), weight );
           histo_mt_cr_met_el->Fill( evt_met, weight );
           histo_mt_cr_dphi_el->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
       }
 	  if (abs(id())==13) {
           histo_mt_cr_mu->Fill( std::min(evt_mt,float(200.)), weight );
-          if (p4().pt()>MTCR2_PT_CUT) histo_mt_cr2_mu->Fill( std::min(evt_mt,float(200.)), weight );
+          if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_mu->Fill( std::min(evt_mt,float(200.)), weight );
           histo_mt_cr_pt_mu->Fill( p4().pt(), weight );
           histo_mt_cr_met_mu->Fill( evt_met, weight );
           histo_mt_cr_dphi_mu->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
@@ -1219,10 +1257,10 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
       if (usePtRatioCor) {
 	if (abs(id())==11) {
 	  float ptratiocor = closejetpt>0. ? p4().pt()*(1+std::max(0.,miniiso()-0.12))/closejetpt : 1.;
-	  passFO = passes_SS_fo_v5() && (ptratiocor > 0.76 || ptrel > 7.2);
+	  passFO = passes_SS_fo_v6() && (ptratiocor > 0.76 || ptrel > 7.2);
 	} else {
 	  float ptratiocor = closejetpt>0. ? p4().pt()*(1+std::max(0.,miniiso()-0.16))/closejetpt : 1.;
-	  passFO = passes_SS_fo_v5() && (ptratiocor > 0.80 || ptrel > 7.2);	      
+	  passFO = passes_SS_fo_v6() && (ptratiocor > 0.80 || ptrel > 7.2);	      
 	}
       }
 
@@ -1313,15 +1351,23 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 	    histo_met->Fill( std::min(evt_met,float(1000.)) );
 	    histo_mt->Fill( std::min(evt_mt,float(1000.)) );
 
-	    if( abs( id() ) == 11 ) pTrelvsIso_histo_el->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
-	    if( abs( id() ) == 13 ) pTrelvsIso_histo_mu->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
-	    if( abs( id() ) == 11 ) pTrel_histo_el->Fill( std::min(ptrel,float(29.9)) );
-	    if( abs( id() ) == 13 ) pTrel_histo_mu->Fill( std::min(ptrel,float(29.9)) );
-	    if( abs( id() ) == 11 ) pTratio_histo_el->Fill( std::min(p4().pt()/closejetpt,float(29.9)) );
-	    if( abs( id() ) == 13 ) pTratio_histo_mu->Fill( std::min(p4().pt()/closejetpt,float(29.9)) );
-	    if( abs( id() ) == 11 ) miniiso_histo_el->Fill( std::min(miniiso(),float(0.29)) );
-	    if( abs( id() ) == 13 ) miniiso_histo_mu->Fill( std::min(miniiso(),float(0.29)) );
-	  }
+        if( abs( id() ) == 11 ) pTrelvsIso_histo_el->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
+        if( abs( id() ) == 13 ) pTrelvsIso_histo_mu->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
+        if( abs( id() ) == 11 ) pTrel_histo_el->Fill( std::min(ptrel,float(29.9)) );
+        if( abs( id() ) == 13 ) pTrel_histo_mu->Fill( std::min(ptrel,float(29.9)) );
+        if( abs( id() ) == 11 ) pTratio_histo_el->Fill( std::min(p4().pt()/closejetpt,float(29.9)) );
+        if( abs( id() ) == 13 ) pTratio_histo_mu->Fill( std::min(p4().pt()/closejetpt,float(29.9)) );
+        if( abs( id() ) == 11 ) {
+            miniiso_histo_el->Fill( std::min(miniiso(),float(0.29)) );
+            if (getPt(p4().pt()*(1+coneptcorr),false) > 70.) {
+                miniiso_histo_el_loose70->Fill( std::min(miniiso(),float(0.29)) );
+                if (passId) {
+                    miniiso_histo_el_tight70->Fill( std::min(miniiso(),float(0.29)) );
+                }
+            }
+        }
+        if( abs( id() ) == 13 ) miniiso_histo_mu->Fill( std::min(miniiso(),float(0.29)) );
+      }
 
 	  if( abs( id() ) == 11 ) // it's an el
 	    {
@@ -1329,6 +1375,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 		{ 
 		  //uncorrected and cone corrected FR
 		  Nt_histo_e->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //
+		  Nt_fine_histo_e->Fill(p4().pt(), fabs(p4().eta()), weight);   //
 
           // NJA
 		  Nt_nvtx_histo_e->Fill(nvtx(), weight);   //
@@ -1346,6 +1393,9 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 		  //cone corrected FR
 		  if( passId ) Nl_cone_histo_e->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //  <-- loose (as opposed to l!t)
 		  else Nl_cone_histo_e->Fill(getPt(p4().pt()*(1+coneptcorr),false), getEta(fabs(p4().eta()),ht,false), weight);
+
+		  if( passId ) Nl_fine_cone_histo_e->Fill(p4().pt(), fabs(p4().eta()), weight);   //  <-- loose (as opposed to l!t)
+		  else Nl_fine_cone_histo_e->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);
 
           // NJA
 		  Nl_cone_nvtx_histo_e->Fill(nvtx(), weight);
@@ -1381,6 +1431,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 		{ 
 		  //uncorrected and cone corrected FR
 		  Nt_histo_mu->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //
+		  Nt_fine_histo_mu->Fill(p4().pt(), fabs(p4().eta()), weight);   //
 
           // NJA
 		  Nt_nvtx_histo_mu->Fill(nvtx(), weight);   //
@@ -1398,6 +1449,9 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 		  //cone corrected FR
 		  if( passId ) Nl_cone_histo_mu->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //  <-- loose (as opposed to l!t)
 		  else Nl_cone_histo_mu->Fill(getPt(p4().pt()*(1+coneptcorr),false), getEta(fabs(p4().eta()),ht,false), weight);
+
+		  if( passId ) Nl_fine_cone_histo_mu->Fill(p4().pt(), fabs(p4().eta()), weight);   //  <-- loose (as opposed to l!t)
+		  else Nl_fine_cone_histo_mu->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);
 
           // NJA
 		  Nl_cone_nvtx_histo_mu->Fill(nvtx(), weight);
@@ -1458,6 +1512,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   TH2D *rate_histo_mu = (TH2D*) Nt_histo_mu->Clone("rate_histo_mu");
   TH2D *rate_cone_histo_e = (TH2D*) Nt_histo_e->Clone("rate_cone_histo_e");
   TH2D *rate_cone_histo_mu = (TH2D*) Nt_histo_mu->Clone("rate_cone_histo_mu");
+  TH2D *rate_fine_cone_histo_e = (TH2D*) Nt_fine_histo_e->Clone("rate_fine_cone_histo_e");
+  TH2D *rate_fine_cone_histo_mu = (TH2D*) Nt_fine_histo_mu->Clone("rate_fine_cone_histo_mu");
   TH2D *rate_jet_histo_e = (TH2D*) Nt_jet_histo_e->Clone("rate_jet_histo_e");
   TH2D *rate_jet_histo_mu = (TH2D*) Nt_jet_histo_mu->Clone("rate_jet_histo_mu");
   TH2D *rate_jet_highpt_histo_e = (TH2D*) Nt_jet_highpt_histo_e->Clone("rate_jet_highpt_histo_e");
@@ -1467,7 +1523,6 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   TH1F *total_BR_histo_e = (TH1F*) NBs_BR_histo_e->Clone("total_BR_histo_e");
   TH1F *total_BR_histo_mu = (TH1F*) NBs_BR_histo_mu->Clone("total_BR_histo_mu");
 
-  // NJA
   TH1D *rate_cone_nvtx_histo_e = (TH1D*) Nt_nvtx_histo_e->Clone("rate_cone_nvtx_histo_e");
   TH1D *rate_cone_nvtx_histo_mu = (TH1D*) Nt_nvtx_histo_mu->Clone("rate_cone_nvtx_histo_mu");
   rate_cone_nvtx_histo_e->Divide(rate_cone_nvtx_histo_e,Nl_cone_nvtx_histo_e);
@@ -1477,6 +1532,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   rate_histo_mu->Divide(rate_histo_mu,Nl_histo_mu,1,1,"B");
   rate_cone_histo_e->Divide(rate_cone_histo_e,Nl_cone_histo_e,1,1,"B");
   rate_cone_histo_mu->Divide(rate_cone_histo_mu,Nl_cone_histo_mu,1,1,"B");
+  rate_fine_cone_histo_e->Divide(rate_fine_cone_histo_e,Nl_fine_cone_histo_e,1,1,"B");
+  rate_fine_cone_histo_mu->Divide(rate_fine_cone_histo_mu,Nl_fine_cone_histo_mu,1,1,"B");
   rate_jet_histo_e->Divide(rate_jet_histo_e,Nl_jet_histo_e,1,1,"B");
   rate_jet_histo_mu->Divide(rate_jet_histo_mu,Nl_jet_histo_mu,1,1,"B");
   rate_jet_highpt_histo_e->Divide(rate_jet_highpt_histo_e,Nl_jet_highpt_histo_e,1,1,"B");
@@ -1564,12 +1621,19 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   Nl_histo_mu->Write();
   Nt_histo_e->Write();
   Nt_histo_mu->Write();
+  Nt_fine_histo_e->Write();
+  Nt_fine_histo_mu->Write();
   rate_histo_e->Write();
   rate_histo_mu->Write();
   Nl_cone_histo_e->Write();
   Nl_cone_histo_mu->Write();
   rate_cone_histo_e->Write();
   rate_cone_histo_mu->Write();
+
+  Nl_fine_cone_histo_e->Write();
+  Nl_fine_cone_histo_mu->Write();
+  rate_fine_cone_histo_e->Write();
+  rate_fine_cone_histo_mu->Write();
 
   // NJA
   rate_cone_nvtx_histo_e->Write();
@@ -1603,6 +1667,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   pTratio_histo_mu->Write();
   miniiso_histo_el->Write();
   miniiso_histo_mu->Write();
+  miniiso_histo_el_loose70->Write();
+  miniiso_histo_el_tight70->Write();
   histo_ht->Write();
   histo_met->Write();
   histo_met_all->Write();

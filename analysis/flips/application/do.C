@@ -25,11 +25,11 @@
     // ch2016->Add("/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/DataDoubleEG*.root");
     // closure(ch2016, flipfname, "outputs/histos_2016.root", -1, -1, 35.9); // Run2016
 
-    // closure(ch, flipfname, "outputs/histos_B.root", 297046, 299329, 4.767); // Run2017B
-    // closure(ch, flipfname, "outputs/histos_C.root", 299368, 302029, 9.583); // Run2017C
-    // closure(ch, flipfname, "outputs/histos_D.root", 302030, 303434, 4.224); // Run2017D
-    // closure(ch, flipfname, "outputs/histos_E.root", 303824, 304797, 9.261); // Run2017E
-    // closure(ch, flipfname, "outputs/histos_F.root", 305040, 306462, 13.463); // Run2017F
+    closure(ch, flipfname, "outputs/histos_B.root", 297046, 299329, 4.767); // Run2017B
+    closure(ch, flipfname, "outputs/histos_C.root", 299368, 302029, 9.583); // Run2017C
+    closure(ch, flipfname, "outputs/histos_D.root", 302030, 303434, 4.224); // Run2017D
+    closure(ch, flipfname, "outputs/histos_E.root", 303824, 304797, 9.261); // Run2017E
+    closure(ch, flipfname, "outputs/histos_F.root", 305040, 306462, 13.463); // Run2017F
     closure(ch, flipfname, "outputs/histos.root");
 
 

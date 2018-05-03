@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-tag="v6"
+tag="v8"
 outfolder=zpeaks/${tag}
 basedirinputs=/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/
 mkdir -p $outfolder
