@@ -90,6 +90,14 @@ tuple<int, int, int, float, float> calc_jet_quants() {
     return std::make_tuple(nlb40, ntb40, nisrjets, mjoverpt, htb);
 }
 
+float isr_reweight(const std::string& proc, int nisrmatch) {
+    std::vector<float> weights = {0.95574998, 0.84294129, 0.8859281, 1.02554868,
+                                  1.35228373, 1.20783354, 1.81862093, 1.49815168};
+    if (proc != "tt") return 1;
+    if (nisrmatch < 0 or nisrmatch >= weights.size()) return 1;
+    return weights[nisrmatch];
+}
+
 int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     bool doFakes = options.Contains("doFakes");
@@ -97,6 +105,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool useInclusiveSFs = options.Contains("useInclusiveSFs");
     bool zeroMissingInnerHits = options.Contains("zeroMissingInnerHits");
     bool evaluateBDT = options.Contains("evaluateBDT");
+    std::string proc = ch->GetTitle();
 
     // Clear already-seen list
     duplicate_removal::clear_list();
@@ -104,14 +113,16 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     // Used to determine which "era" a MC even is in
     TRandom *tr1 = new TRandom();
 
-    cout << "Working on " << ch->GetTitle() << endl;
+    cout << "Working on " << proc << endl;
 
 
     vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
-                              "crz", "crz_no_bsf", "crw",     // CRZ, CRW
+                              "crz", "crw",     // CRZ, CRW
                               "bdt_nb", "bdt_ht",             // Baseline w/ inverted nbtags/Ht/MET selection
                               "bdt_met","bdt_met_ht",
-                              "isr"                           // ISR Reweighting derivation region
+                              "bdt_train",                    // BDT Training region - BR + CRW
+                              "isr",                          // ISR Reweighting derivation region
+                              "isr_reweight_check"
                               };
 
     vector<HistCol*> registry;
@@ -123,6 +134,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_mtmin       (regions, "mtmin"      , 30, 0   , 300 , &registry);
     HistCol h_njets       (regions, "njets"      , 8 , 0   , 8   , &registry);
     HistCol h_nisrjets    (regions, "nisrjets"   , 8 , 0   , 8   , &registry);
+    HistCol h_nisrmatch   (regions, "nisrmatch"  , 8 , 0   , 8   , &registry);
     HistCol h_nlb40       (regions, "nlb40"      , 8 , 0   , 8   , &registry);
     HistCol h_ntb40       (regions, "ntb40"      , 8 , 0   , 8   , &registry);
     HistCol h_nbtags      (regions, "nbtags"     , 5 , 0   , 5   , &registry);
@@ -194,7 +206,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     int nleps, njets, nbtags;
     float ht, htb, met;
     float maxmjoverpt, ml1j1;
-    int nlb40, ntb40, nisrjets;
+    int nlb40, ntb40, nisrjets, nisrmatch;
     float ptj1, ptj2, ptj3, ptj4, ptj5, ptj6, ptj7, ptj8;
 
     int SR;
@@ -310,6 +322,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             ht = ss::ht();
             met = ss::met();
             std::tie(nlb40, ntb40, nisrjets, maxmjoverpt, htb) = calc_jet_quants();
+            nisrmatch = ss::nisrMatch();
 
             ptj1 = (njets >= 1) ? ss::jets()[0].pt() : 0;
             ptj2 = (njets >= 2) ? ss::jets()[1].pt() : 0;
@@ -414,17 +427,12 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 if (weight == 0.0) continue; // just quit if there are no flips.
             }
 
-
-
-            float weight_no_bsf = weight;
-            if (!ss::is_real_data()) weight_no_bsf = weight / ss::weight_btagsf();
-
             // if all 3 charges are the same, throw the event away
             if (nleps > 2 and ((lep1id>0 and lep2id>0 and lep3id>0) or
                                (lep1id<0 and lep2id<0 and lep3id<0))) continue;
 
             auto mll = [](const Vec4& p1, const Vec4& p2, float ccpt1=-1, float ccpt2=-1) {
-                /* Calculate dilepton mass with optional rescaling of based on cone-corrected lepton pt */
+                /* Calculate dilepton mass with optional rescaling based on cone-corrected lepton pt */
                 if (ccpt1 == -1) return (p1 + p2).M();
                 else             return (p1*ccpt1/p1.pt() + p2*ccpt2/p2.pt()).M();
             };
@@ -456,6 +464,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(h_mtmin, ss::mtmin());
                 do_fill(h_njets, njets);
                 do_fill(h_nisrjets, nisrjets);
+                do_fill(h_nisrmatch, nisrmatch);
                 do_fill(h_nlb40, nlb40);
                 do_fill(h_ntb40, ntb40);
                 do_fill(h_nbtags, nbtags);
@@ -517,38 +526,30 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 if (evaluateBDT) do_fill(h_event_bdt, reader.EvaluateMVA("BDT"));
             };
 
-            if (hyp_class == 6 and (zcand13 or zcand23) and
-                    lep1ccpt > 25 and
-                    lep2ccpt > 20 and
-                    lep3ccpt > 20 and
-                    (class6Fake or (lep1good and lep2good and lep3good)) and
-                    ht > 300 and
-                    met > 50 and
-                    nleps > 2 and
-                    nbtags >= 2 and
-                    njets >= 2) {
+            bool BR_lite = lep1ccpt > 25  and lep2ccpt > 20 and
+                           ht > 300       and njets >= 2    and
+                           nbtags >= 2    and met >= 50;
+            bool BR = BR_lite and hyp_class == 3;
+            bool CRW = BR and nleps == 2 and nbtags == 2 and njets <= 5;
+            bool CRZ = BR_lite and hyp_class == 6 and (zcand13 or zcand23) and lep3ccpt > 20 and
+                       (class6Fake or (lep1good and lep2good and lep3good));
+
+            if (CRZ) {
                 fill_region("crz", weight);
-                fill_region("crz_no_bsf", weight_no_bsf);
             }
 
-            if (hyp_class == 3 and
-                    lep1ccpt > 25. and
-                    lep2ccpt > 20. and
-                    ht > 300 and
-                    met > 50 and
-                    nleps == 2 and
-                    nbtags == 2 and
-                    njets <= 5) fill_region("crw", weight);
+            if (CRW) fill_region("crw", weight);
 
             if (lep1ccpt > 25. and
                     lep2ccpt > 20. and
                     njets >= 2 and
                     met > 50. and
                     ht > 300) {
-                if (hyp_class == 4 and !zcand12) fill_region("os", weight);
+                if (hyp_class == 4 and !zcand12) fill_region("os", weight * isr_reweight(proc, nisrmatch));
                 if (hyp_class == 2)              fill_region("tl", weight);
             }
 
+            // BDT Validation Regions
             if (hyp_class == 3 and
                     lep1ccpt >= 25. and
                     lep2ccpt >= 20. and
@@ -564,11 +565,20 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 }
             }
 
+            bool BDT_train = hyp_class == 3 and
+                             lep1ccpt > 15  and lep2ccpt > 15 and
+                             ht > 250       and njets >= 2    and
+                             nbtags >= 1;
+            if ((BDT_train and not BR) or CRW) fill_region("bdt_train", weight);
+
             if (hyp_class == 4 and !zcand12 and
                     lep1ccpt >= 25. and
                     lep2ccpt >= 20. and
                     nbtags == 2 and
-                    njets >= 2) fill_region("isr", weight);
+                    njets >= 2) {
+                fill_region("isr", weight);
+                fill_region("isr_reweight_check", weight * isr_reweight(proc, nisrmatch));
+            }
         }//event loop
         delete file;
     }//file loop
@@ -576,6 +586,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     TFile f1(Form("%s/histos_%s.root", outputdir.Data(), ch->GetTitle()), "RECREATE");
     for (HistCol* coll : registry) coll->Write();
     f1.Close();
+    cout << "\n Done!" << endl;
     return 0;
 }
 
