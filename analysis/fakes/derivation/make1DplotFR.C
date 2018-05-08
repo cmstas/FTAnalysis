@@ -230,12 +230,14 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
         latex.SetTextSize(1.2*0.044*0.75);
         latex.DrawLatex(0.24, 0.91, "Supplementary");
 
-        elf_data->SetBinContent(1,0.);
-        elf_data->SetBinError(1,0.);
-        elf_data_syst->SetBinContent(1,0.);
-        elf_data_syst->SetBinError(1,0.);
-        elf_qcd->SetBinContent(1,0.);
-        elf_qcd->SetBinError(1,0.);
+        if (doPt) {
+            elf_data->SetBinContent(1,0.);
+            elf_data->SetBinError(1,0.);
+            elf_data_syst->SetBinContent(1,0.);
+            elf_data_syst->SetBinError(1,0.);
+            elf_qcd->SetBinContent(1,0.);
+            elf_qcd->SetBinError(1,0.);
+        }
 
         TCanvas c2("c2","c2",600,600);
         if (do_qcd) {

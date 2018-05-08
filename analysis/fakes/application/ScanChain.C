@@ -177,7 +177,7 @@ void GetErrorPlot(TH1F *pred, vector< vector<TH2D*> > pred_err2_mu, vector< vect
 //getPt and getEta need to stay on sync with meas region
 float getPt(float pt, bool extrPtRel = false){
   if(pt < 10.)  return 11.;  
-  if(!extrPtRel && pt >= 70.) return 69.;
+  if(!extrPtRel && pt >= 90.) return 89.;
   if(extrPtRel && pt >= 150.) return 149.;
   return pt;
 }
@@ -308,7 +308,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
   if (lowlow)  nsr = 8;
 
   //Make rate histo (for shape only)
-  float xbins[7] = {10, 15, 20, 25, 35, 50, 250};
+  float xbins[8] = {10, 15, 20, 25, 35, 50, 70, 250};
   float xbins_extr[7] = {10, 15, 25, 35, 50, 70, 1000};
   float xbins_abbrev[5] = {15, 25, 35, 50, 150};
   float ybinse[4] = {0, 0.8, 1.479, 2.5}; 
@@ -419,10 +419,10 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       hists.push_back( histCreator("Npn_histo_L2ETA_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 3,  ybinse) );
       hists.push_back( histCreator("Npn_histo_L2ETA_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 3,  ybinse) );
 
-      hists2.push_back( histCreator2("Npn_histo_PTETA_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 6, xbins, 3,  ybinsm) );
-      hists2.push_back( histCreator2("Npn_histo_PTETA_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 6, xbins, 3,  ybinsm) );
-      hists2.push_back( histCreator2("Npn_histo_PTETA_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 6, xbins, 3,  ybinse) );
-      hists2.push_back( histCreator2("Npn_histo_PTETA_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 6, xbins, 3,  ybinse) );
+      hists2.push_back( histCreator2("Npn_histo_PTETA_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 7, xbins, 3,  ybinsm) );
+      hists2.push_back( histCreator2("Npn_histo_PTETA_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 7, xbins, 3,  ybinsm) );
+      hists2.push_back( histCreator2("Npn_histo_PTETA_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 7, xbins, 3,  ybinse) );
+      hists2.push_back( histCreator2("Npn_histo_PTETA_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 7, xbins, 3,  ybinse) );
 
   }
 
@@ -1515,9 +1515,9 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
   GetErrorPlot(hists[getHist("Npn_histo_NB_pred")], Npn_histo_NB_err2_pred_mu, Npn_histo_NB_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_NB_pred_mu")], Npn_histo_NB_err2_pred_mu, Npn_histo_NB_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_NB_pred_el")], Npn_histo_NB_err2_pred_mu, Npn_histo_NB_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_NB_pred")], getBackgrounds("Npn_histo_NB_obs", -1, filenames), obs_types, "BRs", mc_type+"", Form("--outputName %s --xAxisLabel Baseline Region --noXaxisUnit"+commonOptions, (plotdir+"br_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_NB_pred_mu")], getBackgrounds("Npn_histo_NB_obs", 1, filenames), obs_types, "BRs", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel Baseline Region --noXaxisUnit"+commonOptions, (plotdir+"br_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_NB_pred_el")], getBackgrounds("Npn_histo_NB_obs", 0, filenames), obs_types, "BRs", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel Baseline Region --noXaxisUnit"+commonOptions, (plotdir+"br_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_NB_pred")], getBackgrounds("Npn_histo_NB_obs", -1, filenames), obs_types, "BRs", mc_type+"", Form("--outputName %s --xAxisLabel Baseline Region --noXaxisUnit"+commonOptions, (plotdir+"br_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_NB_pred_mu")], getBackgrounds("Npn_histo_NB_obs", 1, filenames), obs_types, "BRs", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel Baseline Region --noXaxisUnit"+commonOptions, (plotdir+"br_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_NB_pred_el")], getBackgrounds("Npn_histo_NB_obs", 0, filenames), obs_types, "BRs", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel Baseline Region --noXaxisUnit"+commonOptions, (plotdir+"br_el"+option).Data()), {}, {}, colors); 
 
   // //SR plots
   // string typeAG = "HH";
@@ -1537,73 +1537,73 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
   GetErrorPlot(hists[getHist("Npn_histo_HT_pred")], Npn_histo_HT_err2_pred_mu, Npn_histo_HT_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_HT_pred_mu")], Npn_histo_HT_err2_pred_mu, Npn_histo_HT_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_HT_pred_el")], Npn_histo_HT_err2_pred_mu, Npn_histo_HT_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_HT_pred")], getBackgrounds("Npn_histo_HT_obs",-1,filenames), obs_types, "H_{T}", mc_type+"", Form("--outputName %s --xAxisLabel H_{T}"+commonOptions, (plotdir+"HT_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_HT_pred_mu")], getBackgrounds("Npn_histo_HT_obs",1,filenames), obs_types, "H_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel H_{T}"+commonOptions, (plotdir+"HT_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_HT_pred_el")], getBackgrounds("Npn_histo_HT_obs",0,filenames), obs_types, "H_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel H_{T}"+commonOptions, (plotdir+"HT_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_HT_pred")], getBackgrounds("Npn_histo_HT_obs",-1,filenames), obs_types, "H_{T}", mc_type+"", Form("--outputName %s --xAxisLabel H_{T}"+commonOptions, (plotdir+"HT_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_HT_pred_mu")], getBackgrounds("Npn_histo_HT_obs",1,filenames), obs_types, "H_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel H_{T}"+commonOptions, (plotdir+"HT_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_HT_pred_el")], getBackgrounds("Npn_histo_HT_obs",0,filenames), obs_types, "H_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel H_{T}"+commonOptions, (plotdir+"HT_el"+option).Data()), {}, {}, colors); 
 
   //MET plots
   GetErrorPlot(hists[getHist("Npn_histo_MET_pred")], Npn_histo_MET_err2_pred_mu, Npn_histo_MET_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_MET_pred_mu")], Npn_histo_MET_err2_pred_mu, Npn_histo_MET_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_MET_pred_el")], Npn_histo_MET_err2_pred_mu, Npn_histo_MET_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_MET_pred")], getBackgrounds("Npn_histo_MET_obs",-1,filenames), obs_types, "MET", mc_type+"", Form("--outputName %s --xAxisLabel MET"+commonOptions, (plotdir+"MET_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_MET_pred_mu")], getBackgrounds("Npn_histo_MET_obs",1,filenames), obs_types, "MET", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel MET"+commonOptions, (plotdir+"MET_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_MET_pred_el")], getBackgrounds("Npn_histo_MET_obs",0,filenames), obs_types, "MET", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel MET"+commonOptions, (plotdir+"MET_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MET_pred")], getBackgrounds("Npn_histo_MET_obs",-1,filenames), obs_types, "MET", mc_type+"", Form("--outputName %s --xAxisLabel MET"+commonOptions, (plotdir+"MET_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MET_pred_mu")], getBackgrounds("Npn_histo_MET_obs",1,filenames), obs_types, "MET", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel MET"+commonOptions, (plotdir+"MET_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MET_pred_el")], getBackgrounds("Npn_histo_MET_obs",0,filenames), obs_types, "MET", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel MET"+commonOptions, (plotdir+"MET_el"+option).Data()), {}, {}, colors); 
 
   //MTMIN plots
   GetErrorPlot(hists[getHist("Npn_histo_MTMIN_pred")], Npn_histo_MTMIN_err2_pred_mu, Npn_histo_MTMIN_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_MTMIN_pred_mu")], Npn_histo_MTMIN_err2_pred_mu, Npn_histo_MTMIN_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_MTMIN_pred_el")], Npn_histo_MTMIN_err2_pred_mu, Npn_histo_MTMIN_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_MTMIN_pred")], getBackgrounds("Npn_histo_MTMIN_obs",-1,filenames), obs_types, "M_{T}^{min}", mc_type+"", Form("--outputName %s --xAxisLabel M_{T}^{min}"+commonOptions, (plotdir+"MTMIN_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_MTMIN_pred_mu")], getBackgrounds("Npn_histo_MTMIN_obs",1,filenames), obs_types, "M_{T}^{min}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel M_{T}^{min}"+commonOptions, (plotdir+"MTMIN_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_MTMIN_pred_el")], getBackgrounds("Npn_histo_MTMIN_obs",0,filenames), obs_types, "M_{T}^{min}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel M_{T}^{min}"+commonOptions, (plotdir+"MTMIN_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MTMIN_pred")], getBackgrounds("Npn_histo_MTMIN_obs",-1,filenames), obs_types, "M_{T}^{min}", mc_type+"", Form("--outputName %s --xAxisLabel M_{T}^{min}"+commonOptions, (plotdir+"MTMIN_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MTMIN_pred_mu")], getBackgrounds("Npn_histo_MTMIN_obs",1,filenames), obs_types, "M_{T}^{min}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel M_{T}^{min}"+commonOptions, (plotdir+"MTMIN_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MTMIN_pred_el")], getBackgrounds("Npn_histo_MTMIN_obs",0,filenames), obs_types, "M_{T}^{min}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel M_{T}^{min}"+commonOptions, (plotdir+"MTMIN_el"+option).Data()), {}, {}, colors); 
   
   //NJET plots
   GetErrorPlot(hists[getHist("Npn_histo_NJET_pred")], Npn_histo_NJET_err2_pred_mu, Npn_histo_NJET_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_NJET_pred_mu")], Npn_histo_NJET_err2_pred_mu, Npn_histo_NJET_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_NJET_pred_el")], Npn_histo_NJET_err2_pred_mu, Npn_histo_NJET_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_NJET_pred")], getBackgrounds("Npn_histo_NJET_obs",-1,filenames), obs_types, "N_{jet}", mc_type+"", Form("--outputName %s --xAxisLabel N_{jet}"+commonOptions, (plotdir+"NJET_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_NJET_pred_mu")], getBackgrounds("Npn_histo_NJET_obs",1,filenames), obs_types, "N_{jet}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel N_{jet}"+commonOptions, (plotdir+"NJET_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_NJET_pred_el")], getBackgrounds("Npn_histo_NJET_obs",0,filenames), obs_types, "N_{jet}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel N_{jet}"+commonOptions, (plotdir+"NJET_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_NJET_pred")], getBackgrounds("Npn_histo_NJET_obs",-1,filenames), obs_types, "N_{jet}", mc_type+"", Form("--outputName %s --xAxisLabel N_{jet}"+commonOptions, (plotdir+"NJET_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_NJET_pred_mu")], getBackgrounds("Npn_histo_NJET_obs",1,filenames), obs_types, "N_{jet}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel N_{jet}"+commonOptions, (plotdir+"NJET_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_NJET_pred_el")], getBackgrounds("Npn_histo_NJET_obs",0,filenames), obs_types, "N_{jet}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel N_{jet}"+commonOptions, (plotdir+"NJET_el"+option).Data()), {}, {}, colors); 
   
   //MATCH plots
   GetErrorPlot(hists[getHist("Npn_histo_MATCH_pred")], Npn_histo_MATCH_err2_pred_mu, Npn_histo_MATCH_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_MATCH_pred_mu")], Npn_histo_MATCH_err2_pred_mu, Npn_histo_MATCH_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_MATCH_pred_el")], Npn_histo_MATCH_err2_pred_mu, Npn_histo_MATCH_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_MATCH_pred")], getBackgrounds("Npn_histo_MATCH_obs",-1,filenames), obs_types, "match", mc_type+"", Form("--outputName %s --xAxisLabel match"+commonOptions, (plotdir+"MATCH_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_MATCH_pred_mu")], getBackgrounds("Npn_histo_MATCH_obs",1,filenames), obs_types, "match", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel match"+commonOptions, (plotdir+"MATCH_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_MATCH_pred_el")], getBackgrounds("Npn_histo_MATCH_obs",0,filenames), obs_types, "match", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel match"+commonOptions, (plotdir+"MATCH_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MATCH_pred")], getBackgrounds("Npn_histo_MATCH_obs",-1,filenames), obs_types, "match", mc_type+"", Form("--outputName %s --xAxisLabel match"+commonOptions, (plotdir+"MATCH_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MATCH_pred_mu")], getBackgrounds("Npn_histo_MATCH_obs",1,filenames), obs_types, "match", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel match"+commonOptions, (plotdir+"MATCH_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_MATCH_pred_el")], getBackgrounds("Npn_histo_MATCH_obs",0,filenames), obs_types, "match", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel match"+commonOptions, (plotdir+"MATCH_el"+option).Data()), {}, {}, colors); 
 
   //L1PT plots
   GetErrorPlot(hists[getHist("Npn_histo_L1PT_pred")], Npn_histo_L1PT_err2_pred_mu, Npn_histo_L1PT_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_L1PT_pred_mu")], Npn_histo_L1PT_err2_pred_mu, Npn_histo_L1PT_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_L1PT_pred_el")], Npn_histo_L1PT_err2_pred_mu, Npn_histo_L1PT_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_L1PT_pred")], getBackgrounds("Npn_histo_L1PT_obs",-1,filenames), obs_types, "L1 p_{T}", mc_type+"", Form("--outputName %s --xAxisLabel L1 p_{T}"+commonOptions, (plotdir+"L1PT_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_L1PT_pred_mu")], getBackgrounds("Npn_histo_L1PT_obs",1,filenames), obs_types, "L1 p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel L1 p_{T}"+commonOptions, (plotdir+"L1PT_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_L1PT_pred_el")], getBackgrounds("Npn_histo_L1PT_obs",0,filenames), obs_types, "L1 p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel L1 p_{T}"+commonOptions, (plotdir+"L1PT_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_L1PT_pred")], getBackgrounds("Npn_histo_L1PT_obs",-1,filenames), obs_types, "L1 p_{T}", mc_type+"", Form("--outputName %s --xAxisLabel L1 p_{T}"+commonOptions, (plotdir+"L1PT_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_L1PT_pred_mu")], getBackgrounds("Npn_histo_L1PT_obs",1,filenames), obs_types, "L1 p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel L1 p_{T}"+commonOptions, (plotdir+"L1PT_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_L1PT_pred_el")], getBackgrounds("Npn_histo_L1PT_obs",0,filenames), obs_types, "L1 p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel L1 p_{T}"+commonOptions, (plotdir+"L1PT_el"+option).Data()), {}, {}, colors); 
 
   //L2PT plots
   GetErrorPlot(hists[getHist("Npn_histo_L2PT_pred")], Npn_histo_L2PT_err2_pred_mu, Npn_histo_L2PT_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_L2PT_pred_mu")], Npn_histo_L2PT_err2_pred_mu, Npn_histo_L2PT_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_L2PT_pred_el")], Npn_histo_L2PT_err2_pred_mu, Npn_histo_L2PT_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_L2PT_pred")], getBackgrounds("Npn_histo_L2PT_obs",-1,filenames), obs_types, "L2 p_{T}", mc_type+"", Form("--outputName %s --xAxisLabel L2 p_{T}"+commonOptions, (plotdir+"L2PT_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_L2PT_pred_mu")], getBackgrounds("Npn_histo_L2PT_obs",1,filenames), obs_types, "L2 p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel L2 p_{T}"+commonOptions, (plotdir+"L2PT_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_L2PT_pred_el")], getBackgrounds("Npn_histo_L2PT_obs",0,filenames), obs_types, "L2 p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel L2 p_{T}"+commonOptions, (plotdir+"L2PT_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_L2PT_pred")], getBackgrounds("Npn_histo_L2PT_obs",-1,filenames), obs_types, "L2 p_{T}", mc_type+"", Form("--outputName %s --xAxisLabel L2 p_{T}"+commonOptions, (plotdir+"L2PT_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_L2PT_pred_mu")], getBackgrounds("Npn_histo_L2PT_obs",1,filenames), obs_types, "L2 p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --xAxisLabel L2 p_{T}"+commonOptions, (plotdir+"L2PT_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_L2PT_pred_el")], getBackgrounds("Npn_histo_L2PT_obs",0,filenames), obs_types, "L2 p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --xAxisLabel L2 p_{T}"+commonOptions, (plotdir+"L2PT_el"+option).Data()), {}, {}, colors); 
   
   //LTrue plots
   GetErrorPlot(hists[getHist("Npn_histo_LTrue_pred")], Npn_histo_LTrue_err2_pred_mu, Npn_histo_LTrue_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_LTrue_pred_mu")], Npn_histo_LTrue_err2_pred_mu, Npn_histo_LTrue_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_LTrue_pred_el")], Npn_histo_LTrue_err2_pred_mu, Npn_histo_LTrue_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_LTrue_pred")], getBackgrounds("Npn_histo_LTrue_obs",-1,filenames), obs_types, "LTight p_{T}", mc_type+", all", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LTight p_{T} "+commonOptions, (plotdir+"LTrue_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_LTrue_pred_mu")], getBackgrounds("Npn_histo_LTrue_obs",1,filenames), obs_types, "LTight p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LTight p_{T} "+commonOptions, (plotdir+"LTrue_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_LTrue_pred_el")], getBackgrounds("Npn_histo_LTrue_obs",0,filenames), obs_types, "LTight p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LTight p_{T} "+commonOptions, (plotdir+"LTrue_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_LTrue_pred")], getBackgrounds("Npn_histo_LTrue_obs",-1,filenames), obs_types, "LTight p_{T}", mc_type+", all", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LTight p_{T} "+commonOptions, (plotdir+"LTrue_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_LTrue_pred_mu")], getBackgrounds("Npn_histo_LTrue_obs",1,filenames), obs_types, "LTight p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LTight p_{T} "+commonOptions, (plotdir+"LTrue_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_LTrue_pred_el")], getBackgrounds("Npn_histo_LTrue_obs",0,filenames), obs_types, "LTight p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LTight p_{T} "+commonOptions, (plotdir+"LTrue_el"+option).Data()), {}, {}, colors); 
 
   //LFake plots
   GetErrorPlot(hists[getHist("Npn_histo_LFake_pred")], Npn_histo_LFake_err2_pred_mu, Npn_histo_LFake_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_LFake_pred_mu")], Npn_histo_LFake_err2_pred_mu, Npn_histo_LFake_err2_pred_el, inSitu);
   GetErrorPlot(hists[getHist("Npn_histo_LFake_pred_el")], Npn_histo_LFake_err2_pred_mu, Npn_histo_LFake_err2_pred_el, inSitu);
-  dataMCplotMaker(hists[getHist("Npn_histo_LFake_pred")], getBackgrounds("Npn_histo_LFake_obs",-1,filenames), obs_types, "LLoose p_{T}", mc_type+", all", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LLoose p_{T} "+commonOptions, (plotdir+"LFake_all"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_LFake_pred_mu")], getBackgrounds("Npn_histo_LFake_obs",1,filenames), obs_types, "LLoose p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LLoose p_{T} "+commonOptions, (plotdir+"LFake_mu"+option).Data()), {}, {}, colors); 
-  dataMCplotMaker(hists[getHist("Npn_histo_LFake_pred_el")], getBackgrounds("Npn_histo_LFake_obs",0,filenames), obs_types, "LLoose p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LLoose p_{T} "+commonOptions, (plotdir+"LFake_el"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_LFake_pred")], getBackgrounds("Npn_histo_LFake_obs",-1,filenames), obs_types, "LLoose p_{T}", mc_type+", all", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LLoose p_{T} "+commonOptions, (plotdir+"LFake_all"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_LFake_pred_mu")], getBackgrounds("Npn_histo_LFake_obs",1,filenames), obs_types, "LLoose p_{T}", mc_type+", Nonprompt muons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LLoose p_{T} "+commonOptions, (plotdir+"LFake_mu"+option).Data()), {}, {}, colors); 
+  // dataMCplotMaker(hists[getHist("Npn_histo_LFake_pred_el")], getBackgrounds("Npn_histo_LFake_obs",0,filenames), obs_types, "LLoose p_{T}", mc_type+", Nonprompt electrons", Form("--outputName %s --outOfFrame --dataName Data --xAxisLabel LLoose p_{T} "+commonOptions, (plotdir+"LFake_el"+option).Data()), {}, {}, colors); 
 
 
   TH1F *total_NB_histo_e = (TH1F*)  hists[getHist("NBs_NB_histo_e")]->Clone("total_NB_histo_e");
@@ -1630,18 +1630,18 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
   TCanvas c8;
   hists[getHist("pTrel_histo_mu")]->Draw();
-  c8.SaveAs(plotdir+"pTrel_mu"+option+".png");
+  // c8.SaveAs(plotdir+"pTrel_mu"+option+".png");
   hists[getHist("pTrel_histo_el")]->Draw();
-  c8.SaveAs(plotdir+"pTrel_el"+option+".png");
+  // c8.SaveAs(plotdir+"pTrel_el"+option+".png");
   c8.SetLogz();
   pTrelvsIso_histo_mu->Draw("colz");
-  c8.SaveAs(plotdir+"pTrelvsIso_mu"+option+".png");
+  // c8.SaveAs(plotdir+"pTrelvsIso_mu"+option+".png");
   pTrelvsIso_histo_el->Draw("colz");
-  c8.SaveAs(plotdir+"pTrelvsIso_el"+option+".png");
+  // c8.SaveAs(plotdir+"pTrelvsIso_el"+option+".png");
   pTrelvsMiniIso_histo_mu->Draw("colz");
-  c8.SaveAs(plotdir+"pTrelvsMiniIso_mu"+option+".png");
+  // c8.SaveAs(plotdir+"pTrelvsMiniIso_mu"+option+".png");
   pTrelvsMiniIso_histo_el->Draw("colz");
-  c8.SaveAs(plotdir+"pTrelvsMiniIso_el"+option+".png");
+  // c8.SaveAs(plotdir+"pTrelvsMiniIso_el"+option+".png");
     }
 
 

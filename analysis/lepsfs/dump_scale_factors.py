@@ -1,4 +1,5 @@
 import json
+import pprint
 import ROOT as r
 
 def get_first_hist(f1):
@@ -66,12 +67,12 @@ def dump_bins_json(jsname, name, do_err=False):
             else:
                 thing = val
             if ipt != len(d_sane.keys())-1:
-                buff += "  if (pt >= %.0f && pt < %.0f && eta >= %.3f && eta < %.3f) return %.4f;\n" \
+                buff += "  if (pt >= %.0f && pt < %.0f && fabs(eta) >= %.3f && fabs(eta) < %.3f) return %.4f;\n" \
                         % (ptrange[0], ptrange[1], etarange[0], etarange[1], thing)
             else:
-                buff += "  if (pt >= %.0f  && eta >= %.3f && eta < %.3f) return %.4f;\n" \
+                buff += "  if (pt >= %.0f  && fabs(eta) >= %.3f && fabs(eta) < %.3f) return %.4f;\n" \
                         % (ptrange[0], etarange[0], etarange[1], thing)
-    buff += "  return 1.;\n"
+    buff += "  return 0.;\n"
     buff += "}\n"
     return buff
 

@@ -17,25 +17,19 @@ header = """
 
 d_chain_strs = {
         "data_el": """
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017B-PromptReco-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017B-PromptReco-v2_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-PromptReco-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-PromptReco-v2_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-PromptReco-v3_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017D-PromptReco-v3_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017E-PromptReco-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017F-PromptReco-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017B-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017D-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017E-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017F-31Mar2018-v1_LEPTON_{tag_data}/*.root");
   """,
 
       "data_mu": """
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017B-PromptReco-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017B-PromptReco-v2_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-PromptReco-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-PromptReco-v2_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-PromptReco-v3_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017D-PromptReco-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017E-PromptReco-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017F-PromptReco-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017B-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017D-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017E-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017F-31Mar2018-v1_LEPTON_{tag_data}/*.root");
   """,
 
   "wjets": """
@@ -62,14 +56,8 @@ d_chain_strs = {
 }
 
 
-# tag_data = "v1"
-# tag_mc = "v2"
-
-# tag_data = "v3"
-# tag_mc = "v3"
-
-tag_data = "v6"
-tag_mc = "v6"
+tag_data = "v8"
+tag_mc = "v8"
 
 for proc in d_chain_strs.keys():
     for iso in [True,False]:

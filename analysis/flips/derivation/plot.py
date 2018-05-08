@@ -4,8 +4,8 @@ import uproot
 
 import sys
 sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
-from common.matplottery.plotter import plot_2d
-from common.matplottery.utils import Hist2D
+from matplottery.plotter import plot_2d
+from matplottery.utils import Hist2D
 
 # f = uproot.open("outputs/histos_dy.root")
 # f = uproot.open("outputs/histos_tt.root")

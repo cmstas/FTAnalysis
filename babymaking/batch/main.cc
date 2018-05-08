@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
         std::cout << ">>> We're on uafino, so using xrootd!" << std::endl;  
         useXrootd = true;
     }
-    string good_run_file = "goodRunList/Cert_294927-306462_13TeV_PromptReco_Collisions17_snt.txt";
+    string good_run_file = "goodRunList/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
     string jecEra = "Fall17_17Nov2017B_V6";
     std::string jecEraMC = "Fall17_17Nov2017_V6";
 

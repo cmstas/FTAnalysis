@@ -1,5 +1,4 @@
-{
-    TString dir = "outputs_extrapt/";
+void dumpFunctions(TString dir) {
 
     for (int doIso=0;doIso<2;doIso++) {
 
@@ -112,7 +111,5 @@
 
         }
     }
-
-    std::cout << "NOTE MAKE SURE DIR IS CORRECT FOR QCD MC" << std::endl;
 
 }

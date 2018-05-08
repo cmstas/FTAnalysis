@@ -64,22 +64,22 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
         # os.system("ic {}".format(fname))
         print "Wrote {}".format(fname)
 
-        # data = Hist1D(f["osee_{}_plot_data".format(var)], label="Data")
-        # mc = Hist1D(f["osee_{}_plot_MC".format(var)], label="MC", color=(0.4, 0.6, 1.0))
-        # sf_os = data.get_integral() / mc.get_integral()
-        # fname = "{}/{}osee_{}.png".format(outputdir,prefix,var)
-        # plot_stack(data=data, bgs=[mc], title="$\\frac{\\mathrm{data}}{\\mathrm{MC}}=%.2f$" % sf_os, xlabel=xlabel, ylabel="Events",filename=fname,
-        #         cms_type = "Preliminary",
-        #         lumi = "41.3",
-        #         )
-        # # os.system("ic {}".format(fname))
-        # print "Wrote {}".format(fname)
+        data = Hist1D(f["osee_{}_plot_data".format(var)], label="Data")
+        mc = Hist1D(f["osee_{}_plot_MC".format(var)], label="MC", color=(0.4, 0.6, 1.0))
+        sf_os = data.get_integral() / mc.get_integral()
+        fname = "{}/{}osee_{}.png".format(outputdir,prefix,var)
+        plot_stack(data=data, bgs=[mc], title="$\\frac{\\mathrm{data}}{\\mathrm{MC}}=%.2f$" % sf_os, xlabel=xlabel, ylabel="Events",filename=fname,
+                cms_type = "Preliminary",
+                lumi = "41.3",
+                )
+        # os.system("ic {}".format(fname))
+        print "Wrote {}".format(fname)
 
 if __name__ == "__main__":
     make_plots("plots", "outputs/histos.root",   prefix="all_")
-    # make_plots("plots", "outputs/histos_B.root", prefix="Run2017B_")
-    # make_plots("plots", "outputs/histos_C.root", prefix="Run2017C_")
-    # make_plots("plots", "outputs/histos_D.root", prefix="Run2017D_")
-    # make_plots("plots", "outputs/histos_E.root", prefix="Run2017E_")
-    # make_plots("plots", "outputs/histos_F.root", prefix="Run2017F_")
+    make_plots("plots", "outputs/histos_B.root", prefix="Run2017B_")
+    make_plots("plots", "outputs/histos_C.root", prefix="Run2017C_")
+    make_plots("plots", "outputs/histos_D.root", prefix="Run2017D_")
+    make_plots("plots", "outputs/histos_E.root", prefix="Run2017E_")
+    make_plots("plots", "outputs/histos_F.root", prefix="Run2017F_")
             
