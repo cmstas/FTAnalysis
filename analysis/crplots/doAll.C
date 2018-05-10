@@ -3,6 +3,7 @@
     gROOT->ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+");
     gROOT->ProcessLine(".L ScanChain.C+");
 
+
     /* TString tag = "v1.00_94x_baseline_withos_v3"; */
     /* TString tag = "v1.02_94x_withos_relaxhitsmore"; */
     TString tag = "v1.04_v1";
@@ -18,6 +19,11 @@
     TString outputdir = "outputs";
 
     gSystem->Exec(Form("mkdir -p %s", outputdir.Data()));
+
+    std::string command = Form("git show HEAD > %s/git.diff", outputdir.Data());
+    system(command.c_str());
+    command = Form("git diff >> %s/git.diff", outputdir.Data());
+    system(command.c_str());
 
     // Data
     TChain ch_data("t", "data");
@@ -73,6 +79,13 @@
     ch_rares.Add(basedir+"WWZ.root");
     ch_rares.Add(basedir+"WWW.root");
     ch_rares.Add(basedir+"TZQ.root");
+    ch_rares.Add(basedir+"TTZZ.root");
+    ch_rares.Add(basedir+"TTWZ.root");
+    ch_rares.Add(basedir+"TTWW.root");
+    ch_rares.Add(basedir+"TTWH.root");
+    ch_rares.Add(basedir+"TTHH.root");
+    ch_rares.Add(basedir+"TTTW.root");
+    ch_rares.Add(basedir+"TTTJ.root");
     ScanChain(&ch_rares, options);
 
     TChain ch_singletop("t", "singletop");

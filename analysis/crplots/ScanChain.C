@@ -30,6 +30,20 @@ struct HistCol {
     map<string, TH1D> mm;
     map<string, TH1D> in;
 
+
+    HistCol(vector<string> regions, const string& name, int nbins, const float* bins, vector<HistCol*>* registry=nullptr) {
+        for (string region : regions) {
+            string base_name = region + "_" + name;
+            string base_title = region + " " + name;
+            ee.emplace(region, TH1D((base_name + "_ee").c_str(), (base_title + " ee").c_str(), nbins, bins));
+            em.emplace(region, TH1D((base_name + "_em").c_str(), (base_title + " em").c_str(), nbins, bins));
+            mm.emplace(region, TH1D((base_name + "_mm").c_str(), (base_title + " mm").c_str(), nbins, bins));
+            in.emplace(region, TH1D((base_name + "_in").c_str(), (base_title + " in").c_str(), nbins, bins));
+        }
+        if (registry != nullptr)
+            registry->push_back(this);
+    }
+
     HistCol(vector<string> regions, const string& name, int nbins, float low, float high, vector<HistCol*>* registry=nullptr) {
         for (string region : regions) {
             string base_name = region + "_" + name;
@@ -90,12 +104,15 @@ tuple<int, int, int, float, float> calc_jet_quants() {
     return std::make_tuple(nlb40, ntb40, nisrjets, mjoverpt, htb);
 }
 
-float isr_reweight(const std::string& proc, int nisrmatch) {
+float isr_reweight(const std::string& proc, int nisrmatch, bool normalized=true) {
     std::vector<float> weights = {0.95574998, 0.84294129, 0.8859281, 1.02554868,
                                   1.35228373, 1.20783354, 1.81862093, 1.49815168};
+    std::vector<float> weights_norm = {1.04525021, 0.92187767, 0.96888994, 1.12158514,
+                                       1.47891696, 1.32093988, 1.98892384, 1.63844457};
     if (proc != "tt") return 1;
     if (nisrmatch < 0 or nisrmatch >= weights.size()) return 1;
-    return weights[nisrmatch];
+    if (normalized) return weights_norm[nisrmatch];
+    else return weights[nisrmatch];
 }
 
 int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
@@ -116,7 +133,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     cout << "Working on " << proc << endl;
 
 
-    vector<string> regions = {"os", "tl",                     // OS tight-tight and SS tight-loose
+    vector<string> regions = {"os", "os_noisr", "tl",                     // OS tight-tight and SS tight-loose
                               "crz", "crw",     // CRZ, CRW
                               "bdt_nb", "bdt_ht",             // Baseline w/ inverted nbtags/Ht/MET selection
                               "bdt_met","bdt_met_ht",
@@ -186,7 +203,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     HistCol h_ml1j1       (regions, "ml1j1"      , 50 , 0  , 500 , &registry);
 
-    HistCol h_event_bdt   (regions, "event_bdt"  , 25 , -1 , 1   , &registry);
+    /* HistCol h_event_bdt   (regions, "event_bdt"  , 25 , -1 , 1   , &registry); */
+    float bdt_bins[] = {-1.00, -0.48, -0.37, -0.25, -0.14, -0.02, 0.075, 0.21, 0.31, 0.465, 0.60, 0.715, 0.81, 1.00};
+    HistCol h_event_bdt   (regions, "event_bdt"  , 13 , bdt_bins  , &registry);
 
 
     // Declare a bunch of event variables to be filled below in the loop
@@ -323,6 +342,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             met = ss::met();
             std::tie(nlb40, ntb40, nisrjets, maxmjoverpt, htb) = calc_jet_quants();
             nisrmatch = ss::nisrMatch();
+            SR = 0; // Just a dummy for now
 
             ptj1 = (njets >= 1) ? ss::jets()[0].pt() : 0;
             ptj2 = (njets >= 2) ? ss::jets()[1].pt() : 0;
@@ -363,6 +383,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 }
 
                 weight *= ss::weight_btagsf();
+                weight *= isr_reweight(proc, nisrmatch);
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
 
@@ -534,9 +555,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             bool CRZ = BR_lite and hyp_class == 6 and (zcand13 or zcand23) and lep3ccpt > 20 and
                        (class6Fake or (lep1good and lep2good and lep3good));
 
-            if (CRZ) {
-                fill_region("crz", weight);
-            }
+            if (CRZ) fill_region("crz", weight);
 
             if (CRW) fill_region("crw", weight);
 
@@ -545,8 +564,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     njets >= 2 and
                     met > 50. and
                     ht > 300) {
-                if (hyp_class == 4 and !zcand12) fill_region("os", weight * isr_reweight(proc, nisrmatch));
-                if (hyp_class == 2)              fill_region("tl", weight);
+                if (hyp_class == 4 and !zcand12) {
+                    fill_region("os_noisr", weight / isr_reweight(proc, nisrmatch));
+                    fill_region("os", weight);
+                }
+                if (hyp_class == 2) fill_region("tl", weight);  // TL is FUBAR, need to fix!
             }
 
             // BDT Validation Regions
@@ -566,7 +588,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             }
 
             bool BDT_train = hyp_class == 3 and
-                             lep1ccpt > 15  and lep2ccpt > 15 and
+                             lep1ccpt > 25  and lep2ccpt > 20 and
                              ht > 250       and njets >= 2    and
                              nbtags >= 1;
             if ((BDT_train and not BR) or CRW) fill_region("bdt_train", weight);
@@ -576,8 +598,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     lep2ccpt >= 20. and
                     nbtags == 2 and
                     njets >= 2) {
-                fill_region("isr", weight);
-                fill_region("isr_reweight_check", weight * isr_reweight(proc, nisrmatch));
+                fill_region("isr", weight / isr_reweight(proc, nisrmatch));
+                fill_region("isr_reweight_check", weight);
             }
         }//event loop
         delete file;
