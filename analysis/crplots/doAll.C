@@ -18,12 +18,11 @@
     TString options = "useInclusiveSFs evaluateBDT";
     TString outputdir = "outputs";
 
+    gSystem->Exec(Form("rm -rf %s", outputdir.Data()));
     gSystem->Exec(Form("mkdir -p %s", outputdir.Data()));
 
-    std::string command = Form("git show HEAD > %s/git.diff", outputdir.Data());
-    system(command.c_str());
-    command = Form("git diff >> %s/git.diff", outputdir.Data());
-    system(command.c_str());
+    gSystem->Exec(Form("git show HEAD > %s/git.diff", outputdir.Data()));
+    gSystem->Exec(Form("git diff >> %s/git.diff", outputdir.Data()));
 
     // Data
     TChain ch_data("t", "data");
@@ -68,6 +67,7 @@
 
     TChain ch_vv("t", "vv");
     ch_vv.Add(basedir+"WZ.root");
+    ch_vv.Add(basedir+"WW.root");
     ch_vv.Add(basedir+"WWDPS.root");
     ch_vv.Add(basedir+"ZZ.root");
     ScanChain(&ch_vv, options);
