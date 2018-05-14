@@ -114,6 +114,17 @@ float isr_reweight(const std::string& proc, int nisrmatch, bool normalized=true)
     else return weights[nisrmatch];
 }
 
+float btag_reweight(int nbtags) {
+    if (ss::is_real_data()) return 1;
+    if (nbtags == 0) return 1.14;
+    if (nbtags == 1) return 0.979;
+    if (nbtags == 2) return 0.905;
+    if (nbtags == 3) return 1.26;
+    if (nbtags >= 4) return 1.11;
+    return 1;
+}
+
+
 int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     bool doFakes = options.Contains("doFakes");
@@ -132,12 +143,13 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     cout << "Working on " << proc << endl;
 
 
-    vector<string> regions = {"os", "os_noisr", "tl",                     // OS tight-tight and SS tight-loose
-                              "crz", "crw",     // CRZ, CRW
-                              "bdt_nb", "bdt_ht",             // Baseline w/ inverted nbtags/Ht/MET selection
+    vector<string> regions = {"os", "os_noisr", "os_btagreweight", // OS tight-tight and variants
+                              "tl",                                // SS tight-loose
+                              "crz", "crw",                        // CRZ, CRW
+                              "bdt_nb", "bdt_ht",                  // Baseline w/ inverted nbtags/Ht/MET selection
                               "bdt_met","bdt_met_ht",
-                              "bdt_train",                    // BDT Training region - BR + CRW
-                              "isr",                          // ISR Reweighting derivation region
+                              "bdt_train",                         // BDT Training region - BR + CRW
+                              "isr",                               // ISR Reweighting derivation region
                               "isr_reweight_check"
                               };
 
@@ -290,7 +302,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             samesign.GetEntry(event);
             nEventsTotal++;
 
-            /* if (event > 10000) break; */
+            /* if (event > 20) break; */
 
             if (!ss::fired_trigger()) continue;
             if (!ss::passes_met_filters()) continue;
@@ -375,10 +387,10 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     rand = tr1->Rndm();
                 }
                 weight *= getTruePUw(ss::trueNumInt()[0]);
-                weight *= leptonScaleFactor(lep1id, lep1pt, lep1eta, ht, rand);
-                weight *= leptonScaleFactor(lep2id, lep2pt, lep2eta, ht, rand);
+                weight *= leptonScaleFactor(lep1id, lep1ccpt, lep1eta, ht, rand);
+                weight *= leptonScaleFactor(lep2id, lep2ccpt, lep2eta, ht, rand);
                 if (nleps > 2) {
-                    weight *= leptonScaleFactor(lep3id, lep3pt, lep3eta, ht, rand);
+                    weight *= leptonScaleFactor(lep3id, lep3ccpt, lep3eta, ht, rand);
                 }
 
                 weight *= ss::weight_btagsf();
@@ -566,8 +578,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 if (hyp_class == 4 and !zcand12) {
                     fill_region("os_noisr", weight / isr_reweight(proc, nisrmatch));
                     fill_region("os", weight);
+                    fill_region("os_btagreweight", weight * btag_reweight(nbtags));
                 }
-                if (hyp_class == 2) fill_region("tl", weight);  // TL is FUBAR, need to fix!
+                if (hyp_class == 2) fill_region("tl", weight);
             }
 
             // BDT Validation Regions
