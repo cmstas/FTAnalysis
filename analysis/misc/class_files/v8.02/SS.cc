@@ -143,6 +143,11 @@ void SSAG::Init(TTree *tree) {
 		rawmet_branch = tree->GetBranch("rawmet");
 		if (rawmet_branch) {rawmet_branch->SetAddress(&rawmet_);}
 	}
+	calomet_branch = 0;
+	if (tree->GetBranch("calomet") != 0) {
+		calomet_branch = tree->GetBranch("calomet");
+		if (calomet_branch) {calomet_branch->SetAddress(&calomet_);}
+	}
 	rawmetPhi_branch = 0;
 	if (tree->GetBranch("rawmetPhi") != 0) {
 		rawmetPhi_branch = tree->GetBranch("rawmetPhi");
@@ -1573,20 +1578,20 @@ void SSAG::Init(TTree *tree) {
 		lep3_isTrigSafeNoIsov1_branch = tree->GetBranch("lep3_isTrigSafeNoIsov1");
 		if (lep3_isTrigSafeNoIsov1_branch) {lep3_isTrigSafeNoIsov1_branch->SetAddress(&lep3_isTrigSafeNoIsov1_);}
 	}
-	lep3_isTrigSafev1_branch = 0;
-	if (tree->GetBranch("lep3_isTrigSafev1") != 0) {
-		lep3_isTrigSafev1_branch = tree->GetBranch("lep3_isTrigSafev1");
-		if (lep3_isTrigSafev1_branch) {lep3_isTrigSafev1_branch->SetAddress(&lep3_isTrigSafev1_);}
+	lep1_isTrigSafev1_branch = 0;
+	if (tree->GetBranch("lep1_isTrigSafev1") != 0) {
+		lep1_isTrigSafev1_branch = tree->GetBranch("lep1_isTrigSafev1");
+		if (lep1_isTrigSafev1_branch) {lep1_isTrigSafev1_branch->SetAddress(&lep1_isTrigSafev1_);}
 	}
 	lep4_isTrigSafeNoIsov1_branch = 0;
 	if (tree->GetBranch("lep4_isTrigSafeNoIsov1") != 0) {
 		lep4_isTrigSafeNoIsov1_branch = tree->GetBranch("lep4_isTrigSafeNoIsov1");
 		if (lep4_isTrigSafeNoIsov1_branch) {lep4_isTrigSafeNoIsov1_branch->SetAddress(&lep4_isTrigSafeNoIsov1_);}
 	}
-	lep4_isTrigSafev1_branch = 0;
-	if (tree->GetBranch("lep4_isTrigSafev1") != 0) {
-		lep4_isTrigSafev1_branch = tree->GetBranch("lep4_isTrigSafev1");
-		if (lep4_isTrigSafev1_branch) {lep4_isTrigSafev1_branch->SetAddress(&lep4_isTrigSafev1_);}
+	lep2_isTrigSafev1_branch = 0;
+	if (tree->GetBranch("lep2_isTrigSafev1") != 0) {
+		lep2_isTrigSafev1_branch = tree->GetBranch("lep2_isTrigSafev1");
+		if (lep2_isTrigSafev1_branch) {lep2_isTrigSafev1_branch->SetAddress(&lep2_isTrigSafev1_);}
 	}
   tree->SetMakeClass(0);
 }
@@ -1604,6 +1609,7 @@ void SSAG::GetEntry(unsigned int idx)
 		filenumber_isLoaded = false;
 		metPhi_isLoaded = false;
 		rawmet_isLoaded = false;
+		calomet_isLoaded = false;
 		rawmetPhi_isLoaded = false;
 		event_isLoaded = false;
 		lumi_isLoaded = false;
@@ -1908,9 +1914,9 @@ void SSAG::GetEntry(unsigned int idx)
 		lep4_mu_dzPV_isLoaded = false;
 		lep4_mu_ptErr_isLoaded = false;
 		lep3_isTrigSafeNoIsov1_isLoaded = false;
-		lep3_isTrigSafev1_isLoaded = false;
+		lep1_isTrigSafev1_isLoaded = false;
 		lep4_isTrigSafeNoIsov1_isLoaded = false;
-		lep4_isTrigSafev1_isLoaded = false;
+		lep2_isTrigSafev1_isLoaded = false;
 	}
 
 void SSAG::LoadAllBranches() 
@@ -1926,6 +1932,7 @@ void SSAG::LoadAllBranches()
 	if (filenumber_branch != 0) filenumber();
 	if (metPhi_branch != 0) metPhi();
 	if (rawmet_branch != 0) rawmet();
+	if (calomet_branch != 0) calomet();
 	if (rawmetPhi_branch != 0) rawmetPhi();
 	if (event_branch != 0) event();
 	if (lumi_branch != 0) lumi();
@@ -2230,9 +2237,9 @@ void SSAG::LoadAllBranches()
 	if (lep4_mu_dzPV_branch != 0) lep4_mu_dzPV();
 	if (lep4_mu_ptErr_branch != 0) lep4_mu_ptErr();
 	if (lep3_isTrigSafeNoIsov1_branch != 0) lep3_isTrigSafeNoIsov1();
-	if (lep3_isTrigSafev1_branch != 0) lep3_isTrigSafev1();
+	if (lep1_isTrigSafev1_branch != 0) lep1_isTrigSafev1();
 	if (lep4_isTrigSafeNoIsov1_branch != 0) lep4_isTrigSafeNoIsov1();
-	if (lep4_isTrigSafev1_branch != 0) lep4_isTrigSafev1();
+	if (lep2_isTrigSafev1_branch != 0) lep2_isTrigSafev1();
 }
 
 	const bool &SSAG::lep1_isPrompt()
@@ -2364,6 +2371,19 @@ void SSAG::LoadAllBranches()
 			rawmet_isLoaded = true;
 		}
 		return rawmet_;
+	}
+	const float &SSAG::calomet()
+	{
+		if (not calomet_isLoaded) {
+			if (calomet_branch != 0) {
+				calomet_branch->GetEntry(index);
+			} else { 
+				printf("branch calomet_branch does not exist!\n");
+				exit(1);
+			}
+			calomet_isLoaded = true;
+		}
+		return calomet_;
 	}
 	const float &SSAG::rawmetPhi()
 	{
@@ -6317,18 +6337,18 @@ void SSAG::LoadAllBranches()
 		}
 		return lep3_isTrigSafeNoIsov1_;
 	}
-	const bool &SSAG::lep3_isTrigSafev1()
+	const bool &SSAG::lep1_isTrigSafev1()
 	{
-		if (not lep3_isTrigSafev1_isLoaded) {
-			if (lep3_isTrigSafev1_branch != 0) {
-				lep3_isTrigSafev1_branch->GetEntry(index);
+		if (not lep1_isTrigSafev1_isLoaded) {
+			if (lep1_isTrigSafev1_branch != 0) {
+				lep1_isTrigSafev1_branch->GetEntry(index);
 			} else { 
-				printf("branch lep3_isTrigSafev1_branch does not exist!\n");
+				printf("branch lep1_isTrigSafev1_branch does not exist!\n");
 				exit(1);
 			}
-			lep3_isTrigSafev1_isLoaded = true;
+			lep1_isTrigSafev1_isLoaded = true;
 		}
-		return lep3_isTrigSafev1_;
+		return lep1_isTrigSafev1_;
 	}
 	const bool &SSAG::lep4_isTrigSafeNoIsov1()
 	{
@@ -6343,18 +6363,18 @@ void SSAG::LoadAllBranches()
 		}
 		return lep4_isTrigSafeNoIsov1_;
 	}
-	const bool &SSAG::lep4_isTrigSafev1()
+	const bool &SSAG::lep2_isTrigSafev1()
 	{
-		if (not lep4_isTrigSafev1_isLoaded) {
-			if (lep4_isTrigSafev1_branch != 0) {
-				lep4_isTrigSafev1_branch->GetEntry(index);
+		if (not lep2_isTrigSafev1_isLoaded) {
+			if (lep2_isTrigSafev1_branch != 0) {
+				lep2_isTrigSafev1_branch->GetEntry(index);
 			} else { 
-				printf("branch lep4_isTrigSafev1_branch does not exist!\n");
+				printf("branch lep2_isTrigSafev1_branch does not exist!\n");
 				exit(1);
 			}
-			lep4_isTrigSafev1_isLoaded = true;
+			lep2_isTrigSafev1_isLoaded = true;
 		}
-		return lep4_isTrigSafev1_;
+		return lep2_isTrigSafev1_;
 	}
 
 std::chrono::time_point<std::chrono::system_clock> t_old = std::chrono::system_clock::now();
@@ -6391,6 +6411,7 @@ namespace ss {
 	const int &filenumber() { return samesign.filenumber(); }
 	const float &metPhi() { return samesign.metPhi(); }
 	const float &rawmet() { return samesign.rawmet(); }
+	const float &calomet() { return samesign.calomet(); }
 	const float &rawmetPhi() { return samesign.rawmetPhi(); }
 	const unsigned long long &event() { return samesign.event(); }
 	const int &lumi() { return samesign.lumi(); }
@@ -6695,7 +6716,7 @@ namespace ss {
 	const bool &lep4_mu_dzPV() { return samesign.lep4_mu_dzPV(); }
 	const bool &lep4_mu_ptErr() { return samesign.lep4_mu_ptErr(); }
 	const bool &lep3_isTrigSafeNoIsov1() { return samesign.lep3_isTrigSafeNoIsov1(); }
-	const bool &lep3_isTrigSafev1() { return samesign.lep3_isTrigSafev1(); }
+	const bool &lep1_isTrigSafev1() { return samesign.lep1_isTrigSafev1(); }
 	const bool &lep4_isTrigSafeNoIsov1() { return samesign.lep4_isTrigSafeNoIsov1(); }
-	const bool &lep4_isTrigSafev1() { return samesign.lep4_isTrigSafev1(); }
+	const bool &lep2_isTrigSafev1() { return samesign.lep2_isTrigSafev1(); }
 }

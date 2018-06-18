@@ -55,6 +55,9 @@ protected:
 	float    rawmet_;
 	TBranch *rawmet_branch;
 	bool     rawmet_isLoaded;
+	float    calomet_;
+	TBranch *calomet_branch;
+	bool     calomet_isLoaded;
 	float    rawmetPhi_;
 	TBranch *rawmetPhi_branch;
 	bool     rawmetPhi_isLoaded;
@@ -967,15 +970,15 @@ protected:
 	bool     lep3_isTrigSafeNoIsov1_;
 	TBranch *lep3_isTrigSafeNoIsov1_branch;
 	bool     lep3_isTrigSafeNoIsov1_isLoaded;
-	bool     lep3_isTrigSafev1_;
-	TBranch *lep3_isTrigSafev1_branch;
-	bool     lep3_isTrigSafev1_isLoaded;
+	bool     lep1_isTrigSafev1_;
+	TBranch *lep1_isTrigSafev1_branch;
+	bool     lep1_isTrigSafev1_isLoaded;
 	bool     lep4_isTrigSafeNoIsov1_;
 	TBranch *lep4_isTrigSafeNoIsov1_branch;
 	bool     lep4_isTrigSafeNoIsov1_isLoaded;
-	bool     lep4_isTrigSafev1_;
-	TBranch *lep4_isTrigSafev1_branch;
-	bool     lep4_isTrigSafev1_isLoaded;
+	bool     lep2_isTrigSafev1_;
+	TBranch *lep2_isTrigSafev1_branch;
+	bool     lep2_isTrigSafev1_isLoaded;
 public: 
 void Init(TTree *tree);
 void GetEntry(unsigned int idx); 
@@ -990,6 +993,7 @@ void LoadAllBranches();
 	const int &filenumber();
 	const float &metPhi();
 	const float &rawmet();
+	const float &calomet();
 	const float &rawmetPhi();
 	const unsigned long long &event();
 	const int &lumi();
@@ -1294,9 +1298,9 @@ void LoadAllBranches();
 	const bool &lep4_mu_dzPV();
 	const bool &lep4_mu_ptErr();
 	const bool &lep3_isTrigSafeNoIsov1();
-	const bool &lep3_isTrigSafev1();
+	const bool &lep1_isTrigSafev1();
 	const bool &lep4_isTrigSafeNoIsov1();
-	const bool &lep4_isTrigSafev1();
+	const bool &lep2_isTrigSafev1();
 
   static void progress( int curr, int tot, int period=10000, unsigned int smoothing=250 );
 };
@@ -1316,6 +1320,7 @@ namespace ss {
 	const int &filenumber();
 	const float &metPhi();
 	const float &rawmet();
+	const float &calomet();
 	const float &rawmetPhi();
 	const unsigned long long &event();
 	const int &lumi();
@@ -1620,8 +1625,8 @@ namespace ss {
 	const bool &lep4_mu_dzPV();
 	const bool &lep4_mu_ptErr();
 	const bool &lep3_isTrigSafeNoIsov1();
-	const bool &lep3_isTrigSafev1();
+	const bool &lep1_isTrigSafev1();
 	const bool &lep4_isTrigSafeNoIsov1();
-	const bool &lep4_isTrigSafev1();
+	const bool &lep2_isTrigSafev1();
 }
 #endif
