@@ -128,7 +128,7 @@ float btag_reweight(int nbtags) {
 }
 
 
-int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
+int ScanChain(TChain *ch, int year, TString options="", TString outputdir="outputs"){
 
     bool doFakes = options.Contains("doFakes");
     bool doFlips = options.Contains("doFlips");
@@ -152,10 +152,27 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     if (year == 2018) lumiAG = 14.383;
     // if (year == 2018) lumiAG = 555.01 / 1000.0;
 
+    bool is2016 = year == 2016;
+    bool is2017 = year == 2017;
+    bool is2018 = year == 2018;
+
+    if (is2016) {
+        lumiAG = 35.87;
+    } else if (is2017) {
+        if (useNonIsoTriggers) {
+            lumiAG = 36.529;
+        } else{
+            lumiAG = 41.3;
+        }
+    } else {
+        cout << "Year not Implemented: " << year << endl;
+        return -1;
+    }
+
     // Clear already-seen list
     duplicate_removal::clear_list();
 
-    // Used to determine which "era" a MC even is in
+    // Used to determine which "era" a MC event is in
     TRandom *tr1 = new TRandom();
 
     if (!quiet) cout << "Working on " << proc << endl;
@@ -165,6 +182,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                                 "osloose",
                                 "os",
                               "os_noisr", "os_btagreweight", // OS tight-tight and variants
+                              "os_highbdt", "os_lowbdt",
                               "tl",                                // SS tight-loose
                               "crz", 
                               "bdt_nb", "bdt_ht",                  // Baseline w/ inverted nbtags/Ht/MET selection
@@ -247,6 +265,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_ptj8        (regions, "ptj8"       , 30 , 0  , 300 , &registry);
 
     HistCol h_ml1j1       (regions, "ml1j1"      , 50 , 0  , 500 , &registry);
+    HistCol h_matchtype   (regions, "matchtype"  , 4  , 0  , 4   , &registry);
 
     HistCol h_matchtype       (regions, "matchtype"      , 4 , 0  , 4 , &registry);
 
@@ -349,7 +368,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
             /* if (event > 20) break; */
 
-
             // Simple cuts first to speed things up
             lep1ccpt = ss::lep1_coneCorrPt();
             lep2ccpt = ss::lep2_coneCorrPt();
@@ -400,7 +418,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             if (!pass_trig) continue;
 
             if (!ss::passes_met_filters()) continue;
-
             if (zeroMissingInnerHits and (ss::lep1_el_exp_innerlayers() > 0 or
                                           ss::lep2_el_exp_innerlayers() > 0)) continue;
 
@@ -477,6 +494,25 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             ml1j1 = (njets >= 1) ? (ss::jets()[0] + ss::lep1_p4()).M() : 0;
             set_float_vals();
 
+            matchtype = 0;
+            if (doTruthFake) {
+                int nbadlegs = (ss::lep1_motherID() <= 0) + (ss::lep2_motherID() <= 0);
+                int ngoodlegs = (ss::lep1_motherID() == 1) + (ss::lep2_motherID() == 1);
+                // skip the event if it's truth matched to be prompt prompt.
+                // We only want reco tight-tight events that are prompt-nonprompt (or nonprompt nonprompt)
+                if (ngoodlegs == 2) continue;
+
+                //consider only prompt or lights
+                if ((ss::lep2_motherID()==1 || ss::lep2_motherID()==0) and
+                    (ss::lep1_motherID()==1 || ss::lep1_motherID()==0)) matchtype = 0;
+                //consider only prompt or bs
+                if ((ss::lep2_motherID()==1 || ss::lep2_motherID()==-1) and
+                    (ss::lep1_motherID()==1 || ss::lep1_motherID()==-1)) matchtype = 1;
+                //consider only prompt or cs
+                if ((ss::lep2_motherID()==1 || ss::lep2_motherID()==-2) and
+                    (ss::lep1_motherID()==1 || ss::lep1_motherID()==-2)) matchtype = 2;
+            }
+
             /* hyp_class
              * 1: SS, loose-loose
              * 2: SS, tight-loose (or loose-tight)
@@ -525,6 +561,13 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
             bool class6Fake = false;
             if (doFakes) {
+                auto yearly_fake_rate = [&](int id, float pt, float eta) {
+                    if (is2016) return fakeRate_2016(id, pt, eta, ht);
+                    if (is2017) return fakeRate(id, pt, eta, ht);
+                    if (is2018) return fakeRate(id, pt, eta, ht);  // Just use 2017 for now
+                    return 0.0f;
+                };
+
                 if (hyp_class == 6) {
                     bool lep1_lowpt_veto = lep1pt < (abs(lep1id) == 11 ? 15 : 10);
                     bool lep2_lowpt_veto = lep2pt < (abs(lep2id) == 11 ? 15 : 10);
@@ -567,7 +610,12 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
 
             if (doFlips) {
-                /* if (hyp_class != 4 && hyp_class != 6) continue; */
+                auto yearly_flip_rate = [&](float pt, float eta) {
+                    if (is2016) return flipRate_2016(pt, eta);
+                    if (is2017) return flipRate(pt, eta);
+                    if (is2018) return flipRate(pt, eta);  // Just use 2017 for now
+                    return 0.0f;
+                };
                 if (hyp_class == 4) hyp_class = 3; // we've flipped an OS to a SS
                 else if (hyp_class == 6) class6Fake = true;
                 else continue;
@@ -607,8 +655,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             bool zcand23 = z_cand(lep2id, lep3id, m23);
             float mllos = fabs(m13 - 91.2) < fabs(m23 - 91.2) ? m13 : m23;
 
+            float event_bdt = (evaluateBDT) ? reader.EvaluateMVA("BDT") : 0;
 
+            cout << "Made it to region definitions" << endl;
             auto fill_region = [&](const string& region, float weight) {
+                cout << "Filling Region: " << region << endl;
                 // Fill all observables for a region
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
@@ -703,11 +754,10 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
                 if (njets >= 1) do_fill(h_ml1j1, ml1j1);
 
-                if (evaluateBDT) do_fill(h_event_bdt, reader.EvaluateMVA("BDT"));
+                do_fill(h_event_bdt, event_bdt);
             };
 
-            bool BR_lite = lep1ccpt > 25  and lep2ccpt > 20 and
-                           ht > 300       and njets >= 2    and
+            bool BR_lite = ht > 300       and njets >= 2 and
                            nbtags >= 2    and met >= 50;
             bool BR = BR_lite and hyp_class == 3;
             bool CRW = BR and nleps == 2 and nbtags == 2 and njets <= 5;
@@ -734,14 +784,19 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     fill_region("os_noisr", weight / isr_reweight(proc, nisrmatch));
                     fill_region("os", weight);
                     fill_region("os_btagreweight", weight * btag_reweight(nbtags));
+                    if (evaluateBDT) {
+                        if (event_bdt > 0.21) {
+                            fill_region("os_highbdt", weight);
+                        } else {
+                            fill_region("os_lowbdt", weight);
+                        }
+                    }
                 }
                 if (hyp_class == 2) fill_region("tl", weight);
             }
 
             // BDT Validation Regions
             if (hyp_class == 3 and
-                    lep1ccpt >= 25. and
-                    lep2ccpt >= 20. and
                     njets >= 2) {
                 if (nbtags == 1 and met > 50) fill_region("htnb1", weight);  // invert Nb
                 if (nbtags < 2  and ht > 300 and met > 50) fill_region("bdt_nb", weight);  // invert Nb
@@ -756,14 +811,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             }
 
             bool BDT_train = hyp_class == 3 and
-                             lep1ccpt > 25  and lep2ccpt > 20 and
                              ht > 250       and njets >= 2    and
                              nbtags >= 1;
             if ((BDT_train and not BR) or CRW) fill_region("bdt_train", weight);
 
             if (hyp_class == 4 and !zcand12 and
-                    lep1ccpt >= 25. and
-                    lep2ccpt >= 20. and
                     nbtags == 2 and
                     njets >= 2) {
                 fill_region("isr", weight / isr_reweight(proc, nisrmatch));
