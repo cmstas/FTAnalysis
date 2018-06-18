@@ -424,7 +424,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.btag = "1"
     TTZ.pu = "1"
     # TTH.TTH          = "1.0"
-    TTH.TTH          = "1.5"
+    TTH.TTH          = "1.3"
     # TTH.TTH          = "0.936/1.099" # FIXME FIXME FIXME
     TTH.lumi          = lumiunc
     TTH.bb  = "1"

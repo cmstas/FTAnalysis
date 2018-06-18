@@ -124,10 +124,13 @@ def main():
     yvals = [1., 4.0]
 
 
-    scalePOI = 9.2
-    xaxis_name = "#sigma [fb]"
-    label_name = "#sigma"
-    unit = "fb"
+    # scalePOI = 11.97
+    # xaxis_name = "#sigma [fb]"
+    # label_name = "#sigma"
+    # unit = "fb"
+
+    scalePOI = 1.
+    unit = ""
 
     main_scan = BuildScan(args.output, "{0}*{1}".format(scalePOI,args.POI), [args.main], args.main_color, yvals, args.y_cut)
 
@@ -199,7 +202,7 @@ def main():
     val_nom = main_scan['val']
     val_2sig = main_scan['val_2sig']
 
-    textfit = '%s = %.1f{}^{#plus %.1f}_{#minus %.1f} %s' % (label_name, val_nom[0], val_nom[1], abs(val_nom[2]), unit)
+    textfit = '%s = %.3f{}^{#plus %.3f}_{#minus %.3f} %s' % (label_name, val_nom[0], val_nom[1], abs(val_nom[2]), unit)
 
 
     pt = ROOT.TPaveText(0.59, 0.82 - len(other_scans)*0.08, 0.95, 0.91, 'NDCNB')

@@ -8,7 +8,6 @@ to_correlate = [
         "scale",
         "pdf",
         "alphas",
-
         "bb",
         "TTH",
         "TTWSF",
@@ -17,9 +16,8 @@ to_correlate = [
         "XG",
         "TTVV",
         "fakes",
-
-
         ]
+correlate_all = False
 
 region = "srcr"
 
@@ -27,7 +25,8 @@ region = "srcr"
 # years = [2017]
 # procs = ["tttt"]
 
-basedirs = ["v1.00_2016_35p9_v1","v1.04_baseline"]
+# basedirs = ["v1.00_2016_35p9_v1","v1.04_baseline"]
+basedirs = ["v1.00_2016_35p9_18bins_v1","v1.04_baseline_v2_41p3_18bins"]
 years = [2016,2017]
 procs = ["data", "fakes", "fakes_mc", "flips", "rares", "tth", "tttt", "ttvv", "ttw", "ttz", "xg"]
 
@@ -48,6 +47,8 @@ for basedir,year in zip(basedirs,years):
         keys = [x.GetName() for x in fin.GetListOfKeys()]
         for key in keys:
             do_correlate = any(tc+"Up"==key or tc+"Down"==key for tc in to_correlate)
+            if correlate_all:
+                do_correlate = True
             new_name = key[:]
 
             # don't rename the main sr histograms to 2017_sr, 2016_sr, so pretend it's correlated
@@ -72,6 +73,15 @@ for basedir,year in zip(basedirs,years):
     with open("{}/{}".format(basedir,card_basename),"r") as fhin:
         with open("{}/{}".format(new_basedir,card_basename),"w") as fhout:
             for line in fhin:
+                if not line.strip(): continue
+
+                parts = line.split()
+                if len(parts) > 1 and parts[1] == "lnN":
+                    if parts[0] not in to_correlate and not correlate_all:
+                        new_name = "y{}_{}".format(year,parts[0])
+                        line = line.replace(parts[0],new_name,1)
+                        line = line.replace(" "*(len(new_name)-len(parts[0])),"",1)
+
                 for key,val in nuisance_map.items():
                     # all the nuisances in the cards do not have Up and Down, as the histograms do
                     key_noupdown = key.replace("Up","").replace("Down","")
@@ -85,16 +95,17 @@ for basedir,year in zip(basedirs,years):
                             line = line.replace(" "*(len(val_noupdown)-len(key_noupdown)),"",1)
                         break
 
-                    if line.split()[0] == "shapes":
-                        # replace line like
-                        #     shapes tttt * v1.00_2016_35p9_v1/tttt_histos_srcr_35.9ifb.root sr $SYSTEMATIC
-                        # with
-                        #     shapes tttt * tttt_histos_srcr_35.9ifb.root sr $SYSTEMATIC
-                        # (strip out first directory, because when we use combineCards.py, combine adds
-                        # in the directory automatically, so we don't want double)
-                        parts = line.strip().split()
-                        parts[3] = parts[3].split("/",1)[-1].lstrip("/")
-                        line = " ".join(parts) + "\n"
+                if line.split()[0] == "shapes":
+                    # replace line like
+                    #     shapes tttt * v1.00_2016_35p9_v1/tttt_histos_srcr_35.9ifb.root sr $SYSTEMATIC
+                    # with
+                    #     shapes tttt * tttt_histos_srcr_35.9ifb.root sr $SYSTEMATIC
+                    # (strip out first directory, because when we use combineCards.py, combine adds
+                    # in the directory automatically, so we don't want double)
+                    parts = line.strip().split()
+                    parts[3] = parts[3].split("/",1)[-1].lstrip("/")
+                    line = " ".join(parts) + "\n"
+
                 fhout.write(line)
 
 
