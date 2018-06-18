@@ -17,20 +17,23 @@
 #include "TPaveText.h"
 
 #include "../../../common/CORE/SSSelections.h"
-#include "../../../common/CORE/IsolationTools.h"
-#include "../../../common/CORE/MCSelections.h"
+// #include "../../../common/CORE/IsolationTools.h"
+// #include "../../../common/CORE/MCSelections.h"
 
 
 #include "../../../common/CORE/Tools/utils.h"
-#include "../../../common/CORE/Tools/dorky/dorky.cc"
-#include "../../../common/Software/dataMCplotMaker/PlotMaker2D.h"
-#include "../../../common/Software/dataMCplotMaker/dataMCplotMaker.h"
+// #include "../../../common/CORE/Tools/dorky/dorky.cc"
+// #include "../../../common/Software/dataMCplotMaker/PlotMaker2D.h"
+// #include "../../../common/Software/dataMCplotMaker/dataMCplotMaker.h"
 #include "../../misc/common_utils.h"
 #include "../../misc/class_files/v8.02/SS.h"
 
 using namespace std;
-using namespace duplicate_removal;
+// using namespace duplicate_removal;
 
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar.h"
+#include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar_highmet.h"
+#include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/rw_ttbar.h"
 
 bool doLatex = true;
 bool doRatio = false;
@@ -116,6 +119,13 @@ int number = 0;
 
 float getFakeRate(int id, float pt, float eta, float ht, bool extrPtRel = false, bool doData = false, bool doInSitu = false){
     if (inclHT) ht = -1; // negative ht means use inclusive ht in commonUtils // FIXME
+
+    // FIXME FIXME
+    if (abs(id) == 13) {
+        float rw = 1.;
+        // float rw = muonTTbarMCReweightToMeas_IsoTrigs(pt,eta);
+        return rw*muonTTbarMCFakeRate_IsoTrigs(pt,eta);
+    }
 
     return qcdMCFakeRate(id, pt, eta, ht);
 
@@ -665,6 +675,10 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
   // File Loop
   vector<TString> filenames;
   TString prevFilename = "";
+
+  TH2F *hnumer = new TH2F("hnumer","", 20,25,125,5,0,2.5);
+  TH2F *hdenom = new TH2F("hdenom","", 20,25,125,5,0,2.5);
+
   while ( (currentFile = (TFile*)fileIter.Next()) ) {
 
     
@@ -710,10 +724,25 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       // Progress
       SSAG::progress(nEventsTotal, nEventsChain);
 
-      if (ss::is_real_data() ) {
-          DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
-          if(is_duplicate(id)) continue;
+      if (ss::hyp_class() == 2) {
+          if (fabs(ss::lep1_id()) == 13 && isFakeLeg(1)) {
+              hdenom->Fill(ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()), ss::scale1fb());
+              if (ss::lep1_passes_id()) {
+                  hnumer->Fill(ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()), ss::scale1fb());
+              }
+          }
+          if (fabs(ss::lep2_id()) == 13 && isFakeLeg(2)) {
+              hdenom->Fill(ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()), ss::scale1fb());
+              if (ss::lep2_passes_id()) {
+                  hnumer->Fill(ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()), ss::scale1fb());
+              }
+          }
       }
+
+      // if (ss::is_real_data() ) {
+      //     DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
+      //     if(is_duplicate(id)) continue;
+      // }
 
       // Analysis Code
       float weight = ss::is_real_data() ? 1.0 : ss::scale1fb()*luminosity;
@@ -777,8 +806,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
       float lep1_ptrel_v1 = ss::lep1_ptrel_v1();
       float lep2_ptrel_v1 = ss::lep2_ptrel_v1();
-      assert(fabs(lep1_ptrel_v1 - computePtRel(ss::lep1_p4(),ss::jet_close_lep1(), true))<0.0001);
-      assert(fabs(lep2_ptrel_v1 - computePtRel(ss::lep2_p4(),ss::jet_close_lep2(), true))<0.0001);
+      // assert(fabs(lep1_ptrel_v1 - computePtRel(ss::lep1_p4(),ss::jet_close_lep1(), true))<0.0001);
+      // assert(fabs(lep2_ptrel_v1 - computePtRel(ss::lep2_p4(),ss::jet_close_lep2(), true))<0.0001);
       float lep1_closejetpt = ss::jet_close_lep1().pt();
       float lep2_closejetpt = ss::jet_close_lep2().pt();
 
@@ -792,46 +821,20 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
 
       if (coneCorr){
-        if (abs(ss::lep1_id())==11){
-          if (lep1_ptrel_v1>7.2) lep1_pT = ss::lep1_p4().pt()*(1+std::max(0.,ss::lep1_miniIso()-0.12));
-          else lep1_pT = std::max(ss::lep1_p4().pt(),ss::jet_close_lep1().pt()*float(0.80));
-        } 
-        else {
-          if (lep1_ptrel_v1>7.2) lep1_pT = ss::lep1_p4().pt()*(1+std::max(0.,ss::lep1_miniIso()-0.16));
-          else lep1_pT = std::max(ss::lep1_p4().pt(),ss::jet_close_lep1().pt()*float(0.76));
-        }
-        if (abs(ss::lep2_id())==11) {
-          if (lep2_ptrel_v1>7.2) lep2_pT = ss::lep2_p4().pt()*(1+std::max(0.,ss::lep2_miniIso()-0.12));
-          else lep2_pT = std::max(ss::lep2_p4().pt(),ss::jet_close_lep2().pt()*float(0.80));
-        } 
-        else {
-          if (lep2_ptrel_v1>7.2) lep2_pT = ss::lep2_p4().pt()*(1+std::max(0.,ss::lep2_miniIso()-0.16));
-          else lep2_pT = std::max(ss::lep2_p4().pt(),ss::jet_close_lep2().pt()*float(0.76));
-        }
+          lep1_pT = ss::lep1_coneCorrPt();
+          lep2_pT = ss::lep2_coneCorrPt();
       }
       if (jetCorr){
-        lep1_pT = ss::jet_close_lep1().pt();
-        lep2_pT = ss::jet_close_lep2().pt();
+          lep1_pT = ss::jet_close_lep1().pt();
+          lep2_pT = ss::jet_close_lep2().pt();
       }
 
-      if (lep1_pT < 25 || lep2_pT < 20) continue;
+      if (lep1_pT < 25 || lep2_pT < 25) continue;
 
       if (abs(ss::lep1_id())==11 && lep1_pT<15.) continue;
       if (abs(ss::lep2_id())==11 && lep2_pT<15.) continue;
 
-      assert(fabs(lep1_pT - ss::lep1_coneCorrPt())<0.0001);
-      assert(fabs(lep2_pT - ss::lep2_coneCorrPt())<0.0001);
-
       bool verbose = false;
-      // if (ss::lumi() != 144401 || ss::event() != 23132887) continue;
-      // if (ss::lumi() != 204117 || ss::event() != 32699566) continue;
-      // if (ss::lumi() != 228769 || ss::event() != 36648858) continue;
-      // if (ss::lumi() != 247804 || ss::event() != 39698163) continue;
-      // if (ss::lumi() != 319965 || ss::event() != 51258393) continue;
-      // if (ss::lumi() != 402409 || ss::event() != 64465899) continue;
-      // if (ss::lumi() != 447023 || ss::event() != 71613202) continue;
-      // if (ss::lumi() != 477223 || ss::event() != 76451090) continue;
-
 
       //Determine passes ID
       bool lep1_passes_id = ss::lep1_passes_id();
@@ -847,21 +850,21 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           std::cout << " lep1prompt: " << lep1prompt << " lep2prompt: " << lep2prompt << " lep1nonprompt: " << lep1nonprompt << " lep2nonprompt: " << lep2nonprompt << std::endl;
       }
 
-      if(!testMVA) {
-          if (true) {
-              //Skip if does not pass FO for isolated triggers
+      // if(!testMVA) {
+      //     if (true) {
+      //         //Skip if does not pass FO for isolated triggers
               if (!passIsolatedFO(ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA(), ss::lep1_p4().pt())) continue;
               if (!passIsolatedFO(ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA(), ss::lep2_p4().pt())) continue;
-          } 
-      } else {
-          if (ss::ht()<300.) { // isolated
-              if(!AN_MVA(1, ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA())) continue;
-              if(!AN_MVA(1, ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA())) continue;
-          } else { // non isolated
-              if(!AN_MVA(2, ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA())) continue;
-              if(!AN_MVA(2, ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA())) continue;
-          }
-      }
+          // } 
+      // } else {
+          // if (ss::ht()<300.) { // isolated
+          //     if(!AN_MVA(1, ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA())) continue;
+          //     if(!AN_MVA(1, ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA())) continue;
+          // } else { // non isolated
+          //     if(!AN_MVA(2, ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA())) continue;
+          //     if(!AN_MVA(2, ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA())) continue;
+          // }
+      // }
 
 
       //Determine mtMin
@@ -1010,8 +1013,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             hists[getHist("Npn_histo_LFakerebin_obs_mu"+fname) ]->Fill(min(coneCorr ? lep2_pT : ss::lep2_p4().pt(),69.F), weight);
 
             addToCounter(filename+Form("_obs_mu_NB%i", br), weight);
-            if (fabs(ss::lep2_p4().eta()) < 1.2 && lep2_pT >= 50) {
-                addToCounter(filename+"_obs_mu_pteta2", 1);
+            if (fabs(ss::lep2_p4().eta()) < 1.2 && lep2_pT >= 50 && lep2_pT < 70) {
+                addToCounter(filename+"_obs_mu_pteta2", weight);
                 // addToCounter(Form("%i:%llu",ss::lumi(), ss::event()));
             }
 
@@ -1083,7 +1086,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             hists[getHist("Npn_histo_LTrue_obs_mu"+fname) ]->Fill(coneCorr ? lep2_pT : ss::lep2_p4().pt(), weight);
 
             addToCounter(filename+Form("_obs_mu_NB%i", br), weight);
-            if (fabs(ss::lep1_p4().eta()) < 1.2 && lep1_pT >= 50) addToCounter(filename+"_obs_mu_pteta1", 1);
+            if (fabs(ss::lep1_p4().eta()) < 1.2 && lep1_pT >= 50 && lep1_pT < 70) addToCounter(filename+"_obs_mu_pteta1", weight);
           }
         }
 
@@ -1143,12 +1146,12 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
         if (nbjets > 3) nbjets = 3; 
 
         //0) InSituFR variables
-      float ptrel_cut_1    = (abs(ss::lep1_id()) == 11 ? 7.20 : 7.20);
-      float ptrel_cut_2    = (abs(ss::lep2_id()) == 11 ? 7.20 : 7.20);
-      float ptratio_cut_1  = (abs(ss::lep1_id()) == 11 ? 0.80 : 0.76);
-      float ptratio_cut_2  = (abs(ss::lep2_id()) == 11 ? 0.80 : 0.76);
-      float mini_cut_1     = (abs(ss::lep1_id()) == 11 ? 0.12 : 0.16);
-      float mini_cut_2     = (abs(ss::lep2_id()) == 11 ? 0.12 : 0.16);
+      float ptrel_cut_1    = (abs(ss::lep1_id()) == 11 ? 9.20 : 7.50);
+      float ptrel_cut_2    = (abs(ss::lep2_id()) == 11 ? 9.20 : 7.50);
+      float ptratio_cut_1  = (abs(ss::lep1_id()) == 11 ? 0.85 : 0.80);
+      float ptratio_cut_2  = (abs(ss::lep2_id()) == 11 ? 0.85 : 0.80);
+      float mini_cut_1     = (abs(ss::lep1_id()) == 11 ? 0.09 : 0.12);
+      float mini_cut_2     = (abs(ss::lep2_id()) == 11 ? 0.09 : 0.12);
       bool lep1_denom_iso  = ((ss::lep1_miniIso() < 0.4) && ((ss::lep1_ptrel_v1() > ptrel_cut_1) || ((ss::lep1_closeJet().pt()/ss::lep1_p4().pt()) < (1.0/ptratio_cut_1 + ss::lep1_miniIso()))));
       bool lep2_denom_iso  = ((ss::lep2_miniIso() < 0.4) && ((ss::lep2_ptrel_v1() > ptrel_cut_2) || ((ss::lep2_closeJet().pt()/ss::lep2_p4().pt()) < (1.0/ptratio_cut_2 + ss::lep2_miniIso()))));
       // bool lep1_denom_iso  = (ss::lep1_miniIso() < 0.4) ; // && ((ss::lep1_ptrel_v1() > ptrel_cut_1) || ((ss::lep1_closeJet().pt()/ss::lep1_p4().pt()) < (1.0/ptratio_cut_1 + ss::lep1_miniIso()))));
@@ -1202,7 +1205,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
             addToCounter(filename+Form("_pred_el_NB%i", br), w);
             if (fabs(ss::lep2_p4().eta()) < 0.8 && lep2_pT >= 70) addToCounter(filename+"_pred_el_pteta2", w);
-            if (fabs(ss::lep2_p4().eta()) < 0.8 && lep2_pT >= 70) addToCounter(filename+"_prednotf_el_pteta2", 1);
+            if (fabs(ss::lep2_p4().eta()) < 0.8 && lep2_pT >= 70) addToCounter(filename+"_prednotf_el_pteta2", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_el")]   ->Fill(sr, w);
             hists[getHist("Npn_histo_NB_pred_el")]   ->Fill(br, w);
@@ -1246,8 +1249,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             if(subtractContamination) w = mult*weight;
 
             addToCounter(filename+Form("_pred_mu_NB%i", br), w);
-            if (fabs(ss::lep2_p4().eta()) < 1.2 && lep2_pT >= 50) addToCounter(filename+"_pred_mu_pteta2", w);
-            if (fabs(ss::lep2_p4().eta()) < 1.2 && lep2_pT >= 50) addToCounter(filename+"_prednotf_mu_pteta2", 1);
+            if (fabs(ss::lep2_p4().eta()) < 1.2 && lep2_pT >= 50 && lep2_pT < 70) addToCounter(filename+"_pred_mu_pteta2", w);
+            if (fabs(ss::lep2_p4().eta()) < 1.2 && lep2_pT >= 50 && lep2_pT < 70) addToCounter(filename+"_prednotf_mu_pteta2", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_mu")]->Fill(sr, w);
             hists[getHist("Npn_histo_NB_pred_mu")]->Fill(br, w);
@@ -1331,7 +1334,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
             addToCounter(filename+Form("_pred_el_NB%i", br), w);
             if (fabs(ss::lep1_p4().eta()) < 0.8 && lep1_pT >= 70) addToCounter(filename+"_pred_el_pteta1", w);
-            if (fabs(ss::lep1_p4().eta()) < 0.8 && lep1_pT >= 70) addToCounter(filename+"_prednotf_el_pteta1", 1);
+            if (fabs(ss::lep1_p4().eta()) < 0.8 && lep1_pT >= 70) addToCounter(filename+"_prednotf_el_pteta1", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_el")]   ->Fill(sr, w);
             hists[getHist("Npn_histo_NB_pred_el")]   ->Fill(br, w);
@@ -1376,8 +1379,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             if(subtractContamination) w = mult*weight;
 
             addToCounter(filename+Form("_pred_mu_NB%i", br), w);
-            if (fabs(ss::lep1_p4().eta()) < 1.2 && lep1_pT >= 50) addToCounter(filename+"_pred_mu_pteta1", w);
-            if (fabs(ss::lep1_p4().eta()) < 1.2 && lep1_pT >= 50) addToCounter(filename+"_prednotf_mu_pteta1", 1);
+            if (fabs(ss::lep1_p4().eta()) < 1.2 && lep1_pT >= 50 && lep1_pT < 70) addToCounter(filename+"_pred_mu_pteta1", w);
+            if (fabs(ss::lep1_p4().eta()) < 1.2 && lep1_pT >= 50 && lep1_pT < 70) addToCounter(filename+"_prednotf_mu_pteta1", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_mu")]->Fill(sr, w);
             hists[getHist("Npn_histo_NB_pred_mu")]->Fill(br, w);
@@ -1654,6 +1657,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
   for (unsigned int i = 0; i < hists2.size(); i++){
       hists2[i]->Write();
   }
+  hnumer->Write();
+  hdenom->Write();
   file->Close();
 
   printCounter(true);

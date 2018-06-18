@@ -4,15 +4,17 @@
     gSystem->Exec("mkdir -p outputs");
 
     gSystem->Load("../../../common/CORE/CMS3_CORE.so");
-    gROOT->ProcessLine(".L ../../../common/Software/dataMCplotMaker/PlotMaker2D.cc+");
-    gROOT->ProcessLine(".L ../../../common/Software/dataMCplotMaker/dataMCplotMaker.cc+");
+    // gROOT->ProcessLine(".L ../../../common/Software/dataMCplotMaker/PlotMaker2D.cc+");
+    // gROOT->ProcessLine(".L ../../../common/Software/dataMCplotMaker/dataMCplotMaker.cc+");
     // gSystem->Load("../../../common/Software/tableMaker/libSimpleTable.so");
     gROOT->ProcessLine(".L ../../misc/class_files/v8.02/SS.cc+"); 
     gROOT->ProcessLine(".L ../../misc/common_utils.h");
     gROOT->ProcessLine(".L ScanChain.C+");
 
     // TString tag = "v1.03_os_nmiss1_dileptrig_v1";
-    TString tag = "v1.04_v1";
+    // TString tag = "v1.04_v1";
+    // TString tag = "v1.05_v1";
+    TString tag = "v1.06_v1";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
 
 
@@ -86,9 +88,9 @@
     if (doLooseEMVA){
 
         // ch->Add(basedir+"WJets*.root");
-        // ch->Add(basedir+"W3Jets*.root");
-        // ch->Add(basedir+"W4Jets*.root");
-        ch->Add(basedir+"TTBAR*.root");
+        ch->Add(basedir+"W3Jets*.root");
+        ch->Add(basedir+"W4Jets*.root");
+        // ch->Add(basedir+"TTBAR*.root");
         ch->Add(basedir+"TTSL*.root");
 
     }

@@ -59,12 +59,12 @@ for flav in ["_el","_mu"]:
 for var in varnames:
     for flav in flavs:
         obs_ttbar = Hist1D(f["Npn_histo_{}_obs{}TTBAR;1".format(var,flav)], color=(1.0,1.0,0.04), label="$t\\bar{t}$")
-        # obs_wjets = Hist1D(f["Npn_histo_{}_obs{}WJets;1".format(var,flav)], color=(1.0,0.76,0.04), label="W+jets")
+        obs_wjets = Hist1D(f["Npn_histo_{}_obs{}WJets;1".format(var,flav)], color=(1.0,0.76,0.04), label="W+jets")
         pred = Hist1D(f["Npn_histo_{}_pred{};1".format(var,flav)],label="Prediction")
 
 
-        # for h in [obs_ttbar,obs_wjets,pred]:
-        for h in [obs_ttbar,pred]:
+        for h in [obs_ttbar,obs_wjets,pred]:
+        # for h in [obs_ttbar,pred]:
             h.set_attr("label", "{} [{:.1f}]".format(h.get_attr("label"),h.get_integral()))
 
         xticks = []
@@ -74,8 +74,8 @@ for var in varnames:
         # for ext in ["png","pdf"]:
         for ext in ["png"]:
             fname = "plots/{}{}.{}".format(var,flav,ext)
-            # plot_stack(bgs=[obs_ttbar,obs_wjets], data=pred, title="",
-            plot_stack(bgs=[obs_ttbar], data=pred, title="",
+            plot_stack(bgs=[obs_ttbar,obs_wjets], data=pred, title="",
+            # plot_stack(bgs=[obs_ttbar], data=pred, title="",
                     xlabel="{}".format(var),
                     ylabel="Entries",
                     filename=fname,
@@ -94,6 +94,8 @@ for var in varnames:
 
                     
 
-os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Apr30")
+# os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Apr30")
+# os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun12")
+os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun17")
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosureextrapt_Apr24")
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosurenolooseemva_Apr22")
