@@ -10,6 +10,9 @@ instructions = []
 types = ["backgrounds","data"]
 for typ in types:
     for ds in ft.d_ds2name[typ].keys():
+
+        # if "DYJets" not in ds and "DoubleEG" not in ds and "/WW_Tune" not in ds: continue
+        # if "DYJets" not in ds and "DoubleEG" not in ds and "TTJets" not in ds: continue
         instructions.append({"executable": ft.executable, "package": ft.package, "analysis": "FT", "dataset": ds, "baby_tag": ft.tag, "type": "BABY", "extra": ""})
 
 p.dataset_to_shortname = ft.dataset_to_shortname

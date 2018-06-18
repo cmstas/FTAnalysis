@@ -1082,15 +1082,17 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_iso = abs(lep2_id) == 11 ? eleRelIso03(lep2_idx, SS) :  muRelIso03(lep2_idx, SS);
   lep1_tkIso = abs(lep1_id) == 11 ? els_tkIso().at(lep1_idx)/lep1_p4.pt() : mus_iso03_sumPt().at(lep1_idx)/lep1_p4.pt();
   lep2_tkIso = abs(lep2_id) == 11 ? els_tkIso().at(lep2_idx)/lep2_p4.pt() : mus_iso03_sumPt().at(lep2_idx)/lep2_p4.pt();
-  lep1_multiIso = abs(lep1_id) == 11 ? passMultiIso(11, lep1_idx, 0.12, 0.80, 7.2, ssEAversion, 2) : passMultiIso(13, lep1_idx, 0.16, 0.76, 7.2, ssEAversion, 2);
-  lep2_multiIso = abs(lep2_id) == 11 ? passMultiIso(11, lep2_idx, 0.12, 0.80, 7.2, ssEAversion, 2) : passMultiIso(13, lep2_idx, 0.16, 0.76, 7.2, ssEAversion, 2);
+  // lep1_multiIso = abs(lep1_id) == 11 ? passMultiIso(11, lep1_idx, 0.12, 0.80, 7.2, ssEAversion, 2) : passMultiIso(13, lep1_idx, 0.16, 0.76, 7.2, ssEAversion, 2);
+  // lep2_multiIso = abs(lep2_id) == 11 ? passMultiIso(11, lep2_idx, 0.12, 0.80, 7.2, ssEAversion, 2) : passMultiIso(13, lep2_idx, 0.16, 0.76, 7.2, ssEAversion, 2);
+  lep1_multiIso = abs(lep1_id) == 11 ? passMultiIso(11, lep1_idx, 0.09, 0.85, 9.2, ssEAversion, 2) : passMultiIso(13, lep1_idx, 0.12, 0.80, 7.5, ssEAversion, 2);
+  lep2_multiIso = abs(lep2_id) == 11 ? passMultiIso(11, lep2_idx, 0.09, 0.85, 9.2, ssEAversion, 2) : passMultiIso(13, lep2_idx, 0.12, 0.80, 7.5, ssEAversion, 2);
   lep1_sip = abs(lep1_id) == 11 ? fabs(els_ip3d().at(lep1_idx))/els_ip3derr().at(lep1_idx) : fabs(mus_ip3d().at(lep1_idx))/mus_ip3derr().at(lep1_idx);
   lep2_sip = abs(lep2_id) == 11 ? fabs(els_ip3d().at(lep2_idx))/els_ip3derr().at(lep2_idx) : fabs(mus_ip3d().at(lep2_idx))/mus_ip3derr().at(lep2_idx);
   dilep_p4 = lep1_p4 + lep2_p4;
   lep1_passes_id = isGoodLepton(lep1_id, lep1_idx);
   lep2_passes_id = isGoodLepton(lep2_id, lep2_idx);
-  lep1_MVA = abs(lep1_id) == 11 ? getMVAoutput(lep1_idx) : -9999;
-  lep2_MVA = abs(lep2_id) == 11 ? getMVAoutput(lep2_idx) : -9999;
+  lep1_MVA = abs(lep1_id) == 11 ? getMVAoutput(lep1_idx,true) : -9999;
+  lep2_MVA = abs(lep2_id) == 11 ? getMVAoutput(lep2_idx,true) : -9999;
   lep1_MVA_miniaod = abs(lep1_id) == 11 ? els_VIDFall17NoIsoMvaValue().at(lep1_idx) : -9999;
   lep2_MVA_miniaod = abs(lep2_id) == 11 ? els_VIDFall17NoIsoMvaValue().at(lep2_idx) : -9999;
 
@@ -1165,7 +1167,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         lep3_el_dxyPV            = (fabs(els_dxyPV().at(lep3_idx)) <= 0.05);
         lep3_el_ip3d             = (fabs(els_ip3d().at(lep3_idx))/els_ip3derr().at(lep3_idx) < 4);
         lep3_el_dzPV             = (fabs(els_dzPV().at(lep3_idx)) < 0.1);
-        lep3_el_MVA_value        = getMVAoutput(lep3_idx);
+        lep3_el_MVA_value        = getMVAoutput(lep3_idx,true);
         // lep3_el_MVA              = ((etaSC < 0.8) ? (lep3_el_MVA_value > 0.87) : ((etaSC <= 1.479) ? (lep3_el_MVA_value > 0.60) : (lep3_el_MVA_value > 0.17)));
         lep3_el_MVA = (etaSC < 0.8) ? (lep3_el_MVA_value > mvacut(0.77,0.52,0.77,elpt)) : ((etaSC >= 0.8 && etaSC <= 1.479) ? lep3_el_MVA_value > mvacut(0.56,0.11,0.56,elpt) : lep3_el_MVA_value > mvacut(0.48,-0.01,0.48,elpt));
         lep3_iso_RA5             = passMultiIso(11, lep3_idx, 0.12, 0.80, 7.2, ssEAversion, 2);
@@ -1208,7 +1210,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         lep4_el_dxyPV            = (fabs(els_dxyPV().at(lep4_idx)) <= 0.05);
         lep4_el_ip3d             = (fabs(els_ip3d().at(lep4_idx))/els_ip3derr().at(lep4_idx) < 4);
         lep4_el_dzPV             = (fabs(els_dzPV().at(lep4_idx)) < 0.1);
-        lep4_el_MVA_value        = getMVAoutput(lep4_idx);
+        lep4_el_MVA_value        = getMVAoutput(lep4_idx,true);
         lep4_el_MVA              = ((etaSC < 0.8) ? (lep4_el_MVA_value > 0.87) : ((etaSC <= 1.479) ? (lep4_el_MVA_value > 0.60) : (lep4_el_MVA_value > 0.17)));
         lep4_iso_RA5             = passMultiIso(11, lep4_idx, 0.16, 0.76, 7.2, ssEAversion, 2);
         // lep4_iso_RA7             = passMultiIso(11, lep4_idx, 0.12, 0.80, 7.2, 1, 2);
@@ -1238,6 +1240,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep2_mc3idx                                             = lep2_parentage.second;
     lep1_mc_id                                              = (lep1_mc3idx < 0) ? 0 : tas::genps_id().at(lep1_mc3idx);
     lep2_mc_id                                              = (lep2_mc3idx < 0) ? 0 : tas::genps_id().at(lep2_mc3idx);
+    lep1_p4_gen                                              = (lep1_mc3idx < 0) ? LorentzVector(0,0,0,0) : tas::genps_p4().at(lep1_mc3idx);
+    lep2_p4_gen                                              = (lep2_mc3idx < 0) ? LorentzVector(0,0,0,0) : tas::genps_p4().at(lep2_mc3idx);
     lep1_mc_motherid                                              = (lep1_mc3idx < 0) ? 0 : tas::genps_id_mother().at(lep1_mc3idx);
     lep2_mc_motherid                                              = (lep2_mc3idx < 0) ? 0 : tas::genps_id_mother().at(lep2_mc3idx);
     lep1_isPrompt                                           = (lep1_mc3idx < 0) ? 0 : tas::genps_isPromptFinalState().at(lep1_mc3idx);
@@ -1453,7 +1457,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   //Reject events that fail trigger matching
   if (verbose) cout << "ht: " << ht << endl;
-  if (ht < 400 && hyp_type != 0){
+  // if (ht < 400 && hyp_type != 0){
+  if (hyp_type != 0){
     if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
     if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
   }
