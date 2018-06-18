@@ -151,6 +151,15 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     clos_met_MC->Sumw2();
     clos_met_MCp->Sumw2();
 
+    TH1F* clos_rawmet_MC   = new TH1F("clos_rawmet_plot_MC"  , "clos_rawmet_plot_MC"  , 15, 0, 150); 
+    TH1F* clos_rawmet_MCp  = new TH1F("clos_rawmet_plot_MCp" , "clos_rawmet_plot_MCp" , 15, 0, 150); 
+    TH1F* clos_rawmet_data = new TH1F("clos_rawmet_plot_data", "clos_rawmet_plot_data", 15, 0, 150); 
+    TH1F* osee_rawmet_MC   = new TH1F("osee_rawmet_plot_MC"  , "osee_rawmet_plot_MC"  , 100, 0, 150); 
+    TH1F* osee_rawmet_data = new TH1F("osee_rawmet_plot_data", "osee_rawmet_plot_data", 100, 0, 150); 
+    clos_rawmet_MC->Sumw2();
+    clos_rawmet_MCp->Sumw2();
+
+
     TH1F* clos_njets_MC   = new TH1F("clos_njets_plot_MC"  , "clos_njets_plot_MC"  , 6, 0, 6); 
     TH1F* clos_njets_MCp  = new TH1F("clos_njets_plot_MCp" , "clos_njets_plot_MCp" , 6, 0, 6); 
     TH1F* clos_njets_data = new TH1F("clos_njets_plot_data", "clos_njets_plot_data", 6, 0, 6); 
@@ -350,6 +359,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         clos_lepphi_data->Fill(ss::lep2_p4().phi(), weight);  
                         clos_ht_data->Fill(ss::ht(), weight); 
                         clos_met_data->Fill(ss::met(), weight); 
+                        clos_rawmet_data->Fill(ss::rawmet(), weight); 
                         clos_njets_data->Fill(ss::njets(), weight); 
                         clos_nbtags_data->Fill(ss::nbtags(), weight); 
                         clos_nvtx_data->Fill(ss::nGoodVertices(), weight); 
@@ -370,6 +380,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         clos_lepphi_MCp->Fill(ss::lep2_p4().phi(), weight); 
                         clos_ht_MCp->Fill(ss::ht(), weight); 
                         clos_met_MCp->Fill(ss::met(), weight); 
+                        clos_rawmet_MCp->Fill(ss::rawmet(), weight); 
                         clos_njets_MCp->Fill(ss::njets(), weight); 
                         clos_nbtags_MCp->Fill(ss::nbtags(), weight); 
                         clos_nvtx_MCp->Fill(ss::nGoodVertices(), weight); 
@@ -413,6 +424,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_lepphi_data->Fill(ss::lep2_p4().phi(), weight); 
                     osee_ht_data->Fill(ss::ht(), weight); 
                     osee_met_data->Fill(ss::met(), weight); 
+                    osee_rawmet_data->Fill(ss::rawmet(), weight); 
                     osee_njets_data->Fill(ss::njets(), weight); 
                     osee_nbtags_data->Fill(ss::nbtags(), weight); 
                     osee_nvtx_data->Fill(ss::nGoodVertices(), weight); 
@@ -426,6 +438,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     clos_lepphi_MC->Fill(ss::lep2_p4().phi(), ff*weight); 
                     clos_ht_MC->Fill(ss::ht(), ff*weight); 
                     clos_met_MC->Fill(ss::met(), ff*weight); 
+                    clos_rawmet_MC->Fill(ss::rawmet(), ff*weight); 
                     clos_njets_MC->Fill(ss::njets(), ff*weight); 
                     clos_nbtags_MC->Fill(ss::nbtags(), ff*weight); 
                     clos_nvtx_MC->Fill(ss::nGoodVertices(), ff*weight); 
@@ -467,6 +480,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_lepphi_MC->Fill(ss::lep2_p4().phi(), weight); 
                     osee_ht_MC->Fill(ss::ht(), weight); 
                     osee_met_MC->Fill(ss::met(), weight); 
+                    osee_rawmet_MC->Fill(ss::rawmet(), weight); 
                     osee_njets_MC->Fill(ss::njets(), weight); 
                     osee_nbtags_MC->Fill(ss::nbtags(), weight); 
                     osee_nvtx_MC->Fill(ss::nGoodVertices(), weight); 
@@ -559,6 +573,9 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     clos_met_data->Write();
     clos_met_MC->Write();
     clos_met_MCp->Write();
+    clos_rawmet_data->Write();
+    clos_rawmet_MC->Write();
+    clos_rawmet_MCp->Write();
     clos_njets_data->Write();
     clos_njets_MC->Write();
     clos_njets_MCp->Write();
@@ -580,7 +597,9 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     osee_ht_MC->Write();
     osee_ht_data->Write();
     osee_met_MC->Write();
+    osee_rawmet_MC->Write();
     osee_met_data->Write();
+    osee_rawmet_data->Write();
     osee_njets_MC->Write();
     osee_njets_data->Write();
     osee_nbtags_MC->Write();

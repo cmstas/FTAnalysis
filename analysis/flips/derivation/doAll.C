@@ -6,7 +6,8 @@
     gROOT->ProcessLine(".L ScanChain.C+");
 
     // TString tag = "v1.03_os_nmiss1_dileptrig_v1";
-    TString tag = "v1.04_v1";
+    // TString tag = "v1.04_v1";
+    TString tag = "v1.04_v2";
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
 
     TChain *ch_both = new TChain("t","both");

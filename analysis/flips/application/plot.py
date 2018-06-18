@@ -27,6 +27,7 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
     title = "[pred scaled by {:.2f}]".format(sf)
     for var, xlabel in [
             ["met", MET_LATEX],
+            ["rawmet", "raw "+MET_LATEX],
             ["ht", "$H_{T}$"],
             ["njets", "Njets"],
             ["nbtags", "Nbtags"],
@@ -71,6 +72,7 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
         plot_stack(data=data, bgs=[mc], title="$\\frac{\\mathrm{data}}{\\mathrm{MC}}=%.2f$" % sf_os, xlabel=xlabel, ylabel="Events",filename=fname,
                 cms_type = "Preliminary",
                 lumi = "41.3",
+                    ratio_range=[0.5,1.5],
                 )
         # os.system("ic {}".format(fname))
         print "Wrote {}".format(fname)
