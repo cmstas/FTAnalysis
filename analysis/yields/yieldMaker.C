@@ -35,6 +35,7 @@ int nsrdisc = 13;
 
 bool doCustomSelection = false;
 float scaleLumi = 1; // 75/35.87
+// float scaleLumi = 1.869; // (35.9+41.3)/41.3 // FIXME
 // float scaleLumi = 1;
 
 bool doTTWISR = true;
@@ -65,7 +66,7 @@ bool makeGenVariationsMC = true;
 // TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
 
 float metcut = 50;
-bool doData = false;
+bool doData = true;
 // TString dir = "v1.00_baseline_full_bdtcrz13bins";
 // /nfs-7/userdata/namin/tupler_babies/merged/FT/v1.00_80x_baseline_full_v2/output/
 
@@ -83,15 +84,15 @@ bool doData = false;
 // TString dir = "v1.03_baseline";
 
 // 40,25
-TString tag = "v1.04_v1";
+TString tag = "v1.05_v1";
 TString tag2 = "v1.00_80x_baseline_full_v2";
-TString dir = "v1.04_baseline";
+TString dir = "v1.05_baseline_v2_41p3_18bins";
 
 // // 20,20
 // TString tag = "v1.0.5_bJetPtCut20JetPtCut20";
 // TString dir = "v1.00_baseline_2020_toptag_bdtout";
 
-TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v1.04_v1/output/";
+TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v1.05_v1/output/";
 bool doTTTTisrfsr = true;
 bool doRares = true;
 
@@ -207,6 +208,7 @@ struct plots_t  {
     triple_t h_l2pt;
     triple_t h_l3pt;
     triple_t h_type;
+    triple_t h_nvtx;
     triple_t h_charge;
     triple_t h_charge3;
     triple_t h_nleps;
@@ -216,6 +218,7 @@ struct plots_t  {
     triple_t h_mu_l3pt;
     triple_t h_el_l2pt;
     triple_t h_el_l3pt;
+    triple_t h_el_nmiss;
     triple_t h_disc;
     triple_t h_disc2;
     triple_t h_mid1;
@@ -481,11 +484,11 @@ void getyields(){
         fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
         fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx2.Data()));
     }
-    // //tightfake
-    // tightfake_chain  ->Add(Form("%s/TTHtoNonBB.root"                   , pfx.Data()));
-    // tightfake_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
-    // tightfake_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    // tightfake_chain  ->Add(Form("%s/TTBAR_*.root"            , pfx.Data()));
+    //tightfake
+    tightfake_chain  ->Add(Form("%s/TTHtoNonBB.root"                   , pfx.Data()));
+    tightfake_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
+    tightfake_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
+    tightfake_chain  ->Add(Form("%s/TTBAR_*.root"            , pfx.Data()));
     
     extra_chain  ->Add(Form("%s/TWZ.root"            , pfx2.Data()));
 
@@ -573,9 +576,11 @@ void getyields(){
     WRITE(h_topdisc1.sr)  ; 
     WRITE(h_topdisc2.sr)  ; 
     WRITE(h_ntopness.sr)  ; 
+    WRITE(h_nvtx.br)  ; 
 
     WRITE(h_bjetpt.br)  ; WRITE(h_bjetpt.sr)  ; 
     WRITE(h_jetpt.br)  ; WRITE(h_jetpt.sr)  ; 
+    WRITE(h_el_nmiss.br)  ;
 
     WRITE(h_mva.br)               ;   WRITE(h_mva.sr);
     WRITE(h_mu_sip3d_lep1.br)     ;   WRITE(h_mu_sip3d_lep1.sr);
@@ -846,6 +851,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     p_result.h_mtvis.br      = new TH1F(Form("br_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
     p_result.h_bjetpt.br      = new TH1F(Form("br_bjetpt_%s"        , chainTitleCh) , Form("bjetpt_%s"        , chainTitleCh) , 16      , 0., 200.);
     p_result.h_jetpt.br      = new TH1F(Form("br_jetpt_%s"        , chainTitleCh) , Form("jetpt_%s"        , chainTitleCh) , 20      , 0., 200.);
+    p_result.h_el_nmiss.br  = new TH1F(Form("br_el_nmiss_%s"    , chainTitleCh) , Form("el_nmiss_%s"    , chainTitleCh) , 2      , 0    , 2);
+    p_result.h_nvtx.br     = new TH1F(Form("br_nvtx_%s"       , chainTitleCh) , Form("nvtx_%s"       , chainTitleCh) , 20       , 0    , 80);
 
     // p_result.h_metnm1.br      = new TH1F(Form("br_metnm1_%s"        , chainTitleCh) , Form("metnm1_%s"        , chainTitleCh) , 80      , 0    , 400);
     p_result.h_metnm1.br      = new TH1F(Form("br_metnm1_%s"        , chainTitleCh) , Form("metnm1_%s"        , chainTitleCh) , 40      , 0    , 400);
@@ -1231,6 +1238,9 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
 
+            // if (isttH) {
+            //     weight *= 1.26;
+            // }
             if (istttt) {
                 // new xsec is 11.97
                 weight *= 11.97 / fabs(1000.0*ss::xsec());
@@ -1295,6 +1305,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (ss::extragenb() == 2) {
                     float scaleamt = 0.7;
                     weight_bb_up_alt = (0.5*scaleamt+1)*weight;
+                    // weight_bb_up_alt = (1.0*scaleamt+1)*weight;
                     weight *= 1.0;
                     // float scaleamt = 1.7;
                     // weight_bb_up_alt = weight*scaleamt*scaleamt;
@@ -1380,10 +1391,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (tightfake) {
                 if (ss::hyp_class() != ssclass) continue;
                 int nbadlegs = (ss::lep1_motherID() <= 0) + (ss::lep2_motherID() <= 0);
+                int ngoodlegs = (ss::lep1_motherID() == 1) + (ss::lep2_motherID() == 1);
                 // if it's MC and we're tightfake, then skip the event if it's 
                 // truth matched to be prompt prompt. we only want reco tight-tight
                 // events that are prompt-nonprompt (or nonprompt nonprompt)
-                if (!isData && nbadlegs == 0) continue;
+                if (!isData && (nbadlegs != 1 || ngoodlegs != 1)) continue;
             }
 
             //QCD Fakes
@@ -1597,6 +1609,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             float mvavalue = -10.;
             float mvavalueup = -10.;
             float mvavaluedn = -10.;
+            float mvavalueJERup = -10.;
+            float mvavalueJERdn = -10.;
             float pred = -1.;
             // if ((doBDT || outputTrainingBDT) && (!isData)) {
             if (doBDT || outputTrainingBDT) {
@@ -1744,6 +1758,19 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 tree_mt2 = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
                 mvavaluedn = reader->EvaluateMVA("BDT");
 
+
+                tree_njets = ss::njets_JER_up();
+                tree_nbtags = ss::nbtags_JER_up();
+                tree_met = ss::met_JER_up();
+                tree_ht = ss::ht_JER_up();
+                mvavalueJERup = reader->EvaluateMVA("BDT");
+
+                tree_njets = ss::njets_JER_dn();
+                tree_nbtags = ss::nbtags_JER_dn();
+                tree_met = ss::met_JER_dn();
+                tree_ht = ss::ht_JER_dn();
+                mvavalueJERdn = reader->EvaluateMVA("BDT");
+
                 // transform preds
                 pred = min(pred,0.79F);
                 p_result.h_disc2.br->Fill(pred,weight); //  0. 0.25 0.35 0.65
@@ -1757,27 +1784,31 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             int SRdisc = 1;
             int SRdiscup = 1;
             int SRdiscdn = 1;
+            int SRdiscJERup = 1;
+            int SRdiscJERdn = 1;
 
             SRdisc = getBDTBin(mvavalue, isClass6);
             SRdiscup = getBDTBin(mvavalueup, isClass6);
             SRdiscdn = getBDTBin(mvavaluedn, isClass6);
+            SRdiscJERup = getBDTBin(mvavalueJERup, isClass6);
+            SRdiscJERdn = getBDTBin(mvavalueJERdn, isClass6);
 
             int SRdisc_unc_up = SRdiscup;
             int SRdisc_unc_dn = SRdiscdn;
-            int SRdisc_JER_up = SRdisc;
-            int SRdisc_JER_dn = SRdisc;
+            int SRdisc_JER_up = SRdiscJERup;
+            int SRdisc_JER_dn = SRdiscJERdn;
 
-            if (isData  == 0 && SR_unc_up > 0)            p_jes_alt_up.SRCR.TOTAL->Fill(SR_unc_up, weight);
-            if (isData  == 0 && SR_unc_dn > 0)            p_jes_alt_dn.SRCR.TOTAL->Fill(SR_unc_dn, weight);
+            if (isData  == 0 && SR >= 0 && SR_unc_up > 0)            p_jes_alt_up.SRCR.TOTAL->Fill(SR_unc_up, weight);
+            if (isData  == 0 && SR >= 0 && SR_unc_dn > 0)            p_jes_alt_dn.SRCR.TOTAL->Fill(SR_unc_dn, weight);
 
-            if (isData  == 0 && SR_JER_up > 0)            p_jer_alt_up.SRCR.TOTAL->Fill(SR_JER_up, weight);
-            if (isData  == 0 && SR_JER_dn > 0)            p_jer_alt_dn.SRCR.TOTAL->Fill(SR_JER_dn, weight);
+            if (isData  == 0 && SR >= 0 && SR_JER_up > 0)            p_jer_alt_up.SRCR.TOTAL->Fill(SR_JER_up, weight);
+            if (isData  == 0 && SR >= 0 && SR_JER_dn > 0)            p_jer_alt_dn.SRCR.TOTAL->Fill(SR_JER_dn, weight);
 
-            if (isData  == 0 && SRdisc_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
-            if (isData  == 0 && SRdisc_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
 
-            if (isData  == 0 && SRdisc_JER_up > 0)            p_jer_alt_up.SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
-            if (isData  == 0 && SRdisc_JER_dn > 0)            p_jer_alt_dn.SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_JER_up > 0)            p_jer_alt_up.SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_JER_dn > 0)            p_jer_alt_dn.SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
 
             // require SRs+CR (= ttZ CR + ttW CR + SRs)
             if (!outputTrainingBDT) {
@@ -1880,6 +1911,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_njets.br->Fill(ss::njets() , weight);
                 p_result.h_nbtags.br->Fill(ss::nbtags() , weight);
                 p_result.h_type.br->Fill(mytype , weight);
+                p_result.h_nvtx.br->Fill(ss::nGoodVertices() , weight);
                 p_result.h_charge.br->Fill(ss::lep1_id() > 0 ? -0.5: 0.5 , weight);
                 p_result.h_nleps.br->Fill(nleps , weight);
                 p_result.h_ht.br->Fill(ss::ht() , weight);
@@ -1892,6 +1924,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_l2pt.br->Fill(pto2, weight);
                 (abs(ss::lep1_id()) == 11) ? p_result.h_el_l1pt.br->Fill(pto1, weight) : p_result.h_mu_l1pt.br->Fill(pto1, weight);
                 (abs(ss::lep2_id()) == 11) ? p_result.h_el_l2pt.br->Fill(pto2, weight) : p_result.h_mu_l2pt.br->Fill(pto2, weight);
+                if (abs(ss::lep1_id()) == 11) p_result.h_el_nmiss.br->Fill(ss::lep1_el_exp_innerlayers(), weight);
+                if (abs(ss::lep2_id()) == 11) p_result.h_el_nmiss.br->Fill(ss::lep2_el_exp_innerlayers(), weight);
                 if (plotlep3) {
                     p_result.h_l3pt.br->Fill(pto3, weight);
                     (abs(ss::lep3_id()) == 11) ? p_result.h_el_l3pt.br->Fill(pto3, weight) : p_result.h_mu_l3pt.br->Fill(pto3, weight);
@@ -2009,11 +2043,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_mtvis.sr->Fill(mtvis , weight);
                 auto firsttwotops = getFirstTwoTops();
 
-                auto trijet_discpair = getTrijetDiscs(reader_toptag);
-                p_result.h_topdisc1.sr->Fill(trijet_discpair.first, weight);
-                p_result.h_topdisc2.sr->Fill(trijet_discpair.second, weight);
-                tree_topdisc1 = trijet_discpair.first;
-                tree_topdisc2 = trijet_discpair.second;
+                if (false) {
+                    auto trijet_discpair = getTrijetDiscs(reader_toptag);
+                    p_result.h_topdisc1.sr->Fill(trijet_discpair.first, weight);
+                    p_result.h_topdisc2.sr->Fill(trijet_discpair.second, weight);
+                    tree_topdisc1 = trijet_discpair.first;
+                    tree_topdisc2 = trijet_discpair.second;
+                }
 
                 // auto ntopinfo = getNtops();
                 // p_result.h_ntops.sr->Fill(ntopinfo.first , weight);
@@ -2267,6 +2303,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 TH1F* hinput_isrdn = (TH1F*) file_isrdn->Get("sr");
                 TH1F* hinput_fsrdn = (TH1F*) file_fsrdn->Get("sr");
                 
+                hinput_isrup->Scale((h_sr->Integral())/(hinput_isrup->Integral()));
+                hinput_fsrup->Scale((h_sr->Integral())/(hinput_fsrup->Integral()));
+                hinput_isrdn->Scale((h_sr->Integral())/(hinput_isrdn->Integral()));
+                hinput_fsrdn->Scale((h_sr->Integral())/(hinput_fsrdn->Integral()));
+
                 for (int bin=1;bin<=h_isrup->GetNbinsX();++bin) {
                     h_isrup->SetBinContent(bin,hinput_isrup->GetBinContent(bin));
                     h_isrdn->SetBinContent(bin,hinput_isrdn->GetBinContent(bin));
