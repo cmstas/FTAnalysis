@@ -8,7 +8,7 @@ import itertools
 do_prompt_sub = False # when using QCD MC template, don't subtract
 include_ttjets = True
 basedir = "outputs/"
-thedir = "plots_fit_test"
+thedir = "plots_fit_Jun11"
 d_postfits = {}
 d_sfs = {}
 
@@ -106,7 +106,6 @@ for flavstr,iso,extra,use_postfit,use_inviso_data_template in itertools.product(
     else:
 
         if use_postfit and (flavstr,iso,use_inviso_data_template) in d_postfits:
-            print "HERE"
             scales = d_postfits[(flavstr,iso,use_inviso_data_template)]
         else:
             scales = np.ones(2)

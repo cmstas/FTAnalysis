@@ -6,5 +6,5 @@ for fname in `ls .parallel*C`; do
     logname=$(echo $fname | sed 's/\.C/.log/')
     echo "$fname --> $logname"
     root -b -q -l ${fname} >& ${logname} &
-    sleep 1m
+    sleep 30s
 done

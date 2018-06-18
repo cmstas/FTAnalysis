@@ -10,7 +10,8 @@ header = """
   gROOT->ProcessLine(".L ../../misc/common_utils.h");
   gSystem->Load("../../../common/CORE/CMS3_CORE.so");
 
-  gROOT->ProcessLine(".L ScanChain.C+");
+  // gROOT->ProcessLine(".L ScanChain.C+");
+  gROOT->ProcessLine(".L ScanChain_fast.C+");
 
   TChain *ch = new TChain("t");
 """
@@ -56,8 +57,14 @@ d_chain_strs = {
 }
 
 
-tag_data = "v8"
-tag_mc = "v8"
+# tag_data = "v8"
+# tag_mc = "v8"
+# tag_data = "v9"
+# tag_mc = "v9"
+# tag_data = "v13"
+# tag_mc = "v13"
+tag_data = "v15"
+tag_mc = "v15"
 
 for proc in d_chain_strs.keys():
     for iso in [True,False]:

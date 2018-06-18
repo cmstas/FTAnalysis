@@ -38,11 +38,24 @@
     // float mt_sf_mu_iso =    1.178;
     // float mt_sf_mu_noniso = 1.182;
 
+    // TString dir = "outputs/";
+    // float mt_sf_el_iso =    1.0;
+    // float mt_sf_el_noniso = 1.0;
+    // float mt_sf_mu_iso =    1.0;
+    // float mt_sf_mu_noniso = 1.0;
+
+    // TString dir = "outputs/";
+    // float mt_sf_el_iso =    1.268;
+    // float mt_sf_el_noniso = 1.270;
+    // float mt_sf_mu_iso =    1.112;
+    // float mt_sf_mu_noniso = 1.117;
+
     TString dir = "outputs/";
-    float mt_sf_el_iso =    1.0;
-    float mt_sf_el_noniso = 1.0;
-    float mt_sf_mu_iso =    1.0;
-    float mt_sf_mu_noniso = 1.0;
+    float mt_sf_el_iso =    1.377;
+    float mt_sf_el_noniso = 1.381;
+    float mt_sf_mu_iso =    1.209;
+    float mt_sf_mu_noniso = 1.209;
+
 
     plotFR(dir);
 
