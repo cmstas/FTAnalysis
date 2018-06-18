@@ -32,6 +32,11 @@ void LeptonTree::Init(TTree *tree) {
 		mc_motherp4_branch = tree->GetBranch("mc_motherp4");
 		if (mc_motherp4_branch) {mc_motherp4_branch->SetAddress(&mc_motherp4_);}
 	}
+	close_jet_v5_branch = 0;
+	if (tree->GetBranch("close_jet_v5") != 0) {
+		close_jet_v5_branch = tree->GetBranch("close_jet_v5");
+		if (close_jet_v5_branch) {close_jet_v5_branch->SetAddress(&close_jet_v5_);}
+	}
 	jet_close_lep_branch = 0;
 	if (tree->GetBranch("jet_close_lep") != 0) {
 		jet_close_lep_branch = tree->GetBranch("jet_close_lep");
@@ -568,6 +573,21 @@ void LeptonTree::Init(TTree *tree) {
 		ptrelv1_branch = tree->GetBranch("ptrelv1");
 		if (ptrelv1_branch) {ptrelv1_branch->SetAddress(&ptrelv1_);}
 	}
+	trueNumInt_branch = 0;
+	if (tree->GetBranch("trueNumInt") != 0) {
+		trueNumInt_branch = tree->GetBranch("trueNumInt");
+		if (trueNumInt_branch) {trueNumInt_branch->SetAddress(&trueNumInt_);}
+	}
+	ptratio_v5_branch = 0;
+	if (tree->GetBranch("ptratio_v5") != 0) {
+		ptratio_v5_branch = tree->GetBranch("ptratio_v5");
+		if (ptratio_v5_branch) {ptratio_v5_branch->SetAddress(&ptratio_v5_);}
+	}
+	coneCorrPt_branch = 0;
+	if (tree->GetBranch("coneCorrPt") != 0) {
+		coneCorrPt_branch = tree->GetBranch("coneCorrPt");
+		if (coneCorrPt_branch) {coneCorrPt_branch->SetAddress(&coneCorrPt_);}
+	}
 	miniiso_branch = 0;
 	if (tree->GetBranch("miniiso") != 0) {
 		miniiso_branch = tree->GetBranch("miniiso");
@@ -692,6 +712,21 @@ void LeptonTree::Init(TTree *tree) {
 	if (tree->GetBranch("exp_outerlayers") != 0) {
 		exp_outerlayers_branch = tree->GetBranch("exp_outerlayers");
 		if (exp_outerlayers_branch) {exp_outerlayers_branch->SetAddress(&exp_outerlayers_);}
+	}
+	njets_recoil_branch = 0;
+	if (tree->GetBranch("njets_recoil") != 0) {
+		njets_recoil_branch = tree->GetBranch("njets_recoil");
+		if (njets_recoil_branch) {njets_recoil_branch->SetAddress(&njets_recoil_);}
+	}
+	isTriggerSafe_branch = 0;
+	if (tree->GetBranch("isTriggerSafe") != 0) {
+		isTriggerSafe_branch = tree->GetBranch("isTriggerSafe");
+		if (isTriggerSafe_branch) {isTriggerSafe_branch->SetAddress(&isTriggerSafe_);}
+	}
+	isTriggerSafenoIso_branch = 0;
+	if (tree->GetBranch("isTriggerSafenoIso") != 0) {
+		isTriggerSafenoIso_branch = tree->GetBranch("isTriggerSafenoIso");
+		if (isTriggerSafenoIso_branch) {isTriggerSafenoIso_branch->SetAddress(&isTriggerSafenoIso_);}
 	}
 	tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg_branch = 0;
 	if (tree->GetBranch("tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg") != 0) {
@@ -1676,6 +1711,9 @@ void LeptonTree::GetEntry(unsigned int idx)
 		mt_isLoaded = false;
 		ptrelv0_isLoaded = false;
 		ptrelv1_isLoaded = false;
+		trueNumInt_isLoaded = false;
+		ptratio_v5_isLoaded = false;
+		coneCorrPt_isLoaded = false;
 		miniiso_isLoaded = false;
 		miniisoDB_isLoaded = false;
 		reliso04_isLoaded = false;
@@ -1687,6 +1725,7 @@ void LeptonTree::GetEntry(unsigned int idx)
 		iso03hadEt_isLoaded = false;
 		jet_close_lep_idx_isLoaded = false;
 		jet_close_lep_isLoaded = false;
+		close_jet_v5_isLoaded = false;
 		jet_close_lep_undoJEC_isLoaded = false;
 		jet_close_lep_area_isLoaded = false;
 		jet_close_L1_isLoaded = false;
@@ -1702,6 +1741,9 @@ void LeptonTree::GetEntry(unsigned int idx)
 		tag_HLTLeadingLeg_isLoaded = false;
 		exp_innerlayers_isLoaded = false;
 		exp_outerlayers_isLoaded = false;
+		njets_recoil_isLoaded = false;
+		isTriggerSafe_isLoaded = false;
+		isTriggerSafenoIso_isLoaded = false;
 		tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg_isLoaded = false;
 		tag_HLT_Ele25WP60_SC4_Mass55_LeadingLeg_isLoaded = false;
 		tag_HLT_Ele33_CaloIdL_TrackIdL_IsoVL_PFJet30_ElectronLeg_isLoaded = false;
@@ -1992,6 +2034,9 @@ void LeptonTree::LoadAllBranches()
 	if (mt_branch != 0) mt();
 	if (ptrelv0_branch != 0) ptrelv0();
 	if (ptrelv1_branch != 0) ptrelv1();
+	if (trueNumInt_branch != 0) trueNumInt();
+	if (ptratio_v5_branch != 0) ptratio_v5();
+	if (coneCorrPt_branch != 0) coneCorrPt();
 	if (miniiso_branch != 0) miniiso();
 	if (miniisoDB_branch != 0) miniisoDB();
 	if (reliso04_branch != 0) reliso04();
@@ -2003,6 +2048,7 @@ void LeptonTree::LoadAllBranches()
 	if (iso03hadEt_branch != 0) iso03hadEt();
 	if (jet_close_lep_idx_branch != 0) jet_close_lep_idx();
 	if (jet_close_lep_branch != 0) jet_close_lep();
+	if (close_jet_v5_branch != 0) close_jet_v5();
 	if (jet_close_lep_undoJEC_branch != 0) jet_close_lep_undoJEC();
 	if (jet_close_lep_area_branch != 0) jet_close_lep_area();
 	if (jet_close_L1_branch != 0) jet_close_L1();
@@ -2018,6 +2064,9 @@ void LeptonTree::LoadAllBranches()
 	if (tag_HLTLeadingLeg_branch != 0) tag_HLTLeadingLeg();
 	if (exp_innerlayers_branch != 0) exp_innerlayers();
 	if (exp_outerlayers_branch != 0) exp_outerlayers();
+	if (njets_recoil_branch != 0) njets_recoil();
+	if (isTriggerSafe_branch != 0) isTriggerSafe();
+	if (isTriggerSafenoIso_branch != 0) isTriggerSafenoIso();
 	if (tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg_branch != 0) tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg();
 	if (tag_HLT_Ele25WP60_SC4_Mass55_LeadingLeg_branch != 0) tag_HLT_Ele25WP60_SC4_Mass55_LeadingLeg();
 	if (tag_HLT_Ele33_CaloIdL_TrackIdL_IsoVL_PFJet30_ElectronLeg_branch != 0) tag_HLT_Ele33_CaloIdL_TrackIdL_IsoVL_PFJet30_ElectronLeg();
@@ -3649,6 +3698,45 @@ void LeptonTree::LoadAllBranches()
 		}
 		return ptrelv1_;
 	}
+	const float &LeptonTree::trueNumInt()
+	{
+		if (not trueNumInt_isLoaded) {
+			if (trueNumInt_branch != 0) {
+				trueNumInt_branch->GetEntry(index);
+			} else { 
+				printf("branch trueNumInt_branch does not exist!\n");
+				exit(1);
+			}
+			trueNumInt_isLoaded = true;
+		}
+		return trueNumInt_;
+	}
+	const float &LeptonTree::ptratio_v5()
+	{
+		if (not ptratio_v5_isLoaded) {
+			if (ptratio_v5_branch != 0) {
+				ptratio_v5_branch->GetEntry(index);
+			} else { 
+				printf("branch ptratio_v5_branch does not exist!\n");
+				exit(1);
+			}
+			ptratio_v5_isLoaded = true;
+		}
+		return ptratio_v5_;
+	}
+	const float &LeptonTree::coneCorrPt()
+	{
+		if (not coneCorrPt_isLoaded) {
+			if (coneCorrPt_branch != 0) {
+				coneCorrPt_branch->GetEntry(index);
+			} else { 
+				printf("branch coneCorrPt_branch does not exist!\n");
+				exit(1);
+			}
+			coneCorrPt_isLoaded = true;
+		}
+		return coneCorrPt_;
+	}
 	const float &LeptonTree::miniiso()
 	{
 		if (not miniiso_isLoaded) {
@@ -3791,6 +3879,19 @@ void LeptonTree::LoadAllBranches()
 			jet_close_lep_isLoaded = true;
 		}
 		return *jet_close_lep_;
+	}
+	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &LeptonTree::close_jet_v5()
+	{
+		if (not close_jet_v5_isLoaded) {
+			if (close_jet_v5_branch != 0) {
+				close_jet_v5_branch->GetEntry(index);
+			} else { 
+				printf("branch close_jet_v5_branch does not exist!\n");
+				exit(1);
+			}
+			close_jet_v5_isLoaded = true;
+		}
+		return *close_jet_v5_;
 	}
 	const float &LeptonTree::jet_close_lep_undoJEC()
 	{
@@ -3974,6 +4075,32 @@ void LeptonTree::LoadAllBranches()
 		}
 		return exp_innerlayers_;
 	}
+	const int &LeptonTree::isTriggerSafe()
+	{
+		if (not isTriggerSafe_isLoaded) {
+			if (isTriggerSafe_branch != 0) {
+				isTriggerSafe_branch->GetEntry(index);
+			} else { 
+				printf("branch isTriggerSafe_branch does not exist!\n");
+				exit(1);
+			}
+			isTriggerSafe_isLoaded = true;
+		}
+		return isTriggerSafe_;
+	}
+	const int &LeptonTree::isTriggerSafenoIso()
+	{
+		if (not isTriggerSafenoIso_isLoaded) {
+			if (isTriggerSafenoIso_branch != 0) {
+				isTriggerSafenoIso_branch->GetEntry(index);
+			} else { 
+				printf("branch isTriggerSafenoIso_branch does not exist!\n");
+				exit(1);
+			}
+			isTriggerSafenoIso_isLoaded = true;
+		}
+		return isTriggerSafenoIso_;
+	}
 	const int &LeptonTree::exp_outerlayers()
 	{
 		if (not exp_outerlayers_isLoaded) {
@@ -3986,6 +4113,19 @@ void LeptonTree::LoadAllBranches()
 			exp_outerlayers_isLoaded = true;
 		}
 		return exp_outerlayers_;
+	}
+	const int &LeptonTree::njets_recoil()
+	{
+		if (not njets_recoil_isLoaded) {
+			if (njets_recoil_branch != 0) {
+				njets_recoil_branch->GetEntry(index);
+			} else { 
+				printf("branch njets_recoil_branch does not exist!\n");
+				exit(1);
+			}
+			njets_recoil_isLoaded = true;
+		}
+		return njets_recoil_;
 	}
 	const int &LeptonTree::tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg()
 	{
@@ -6370,6 +6510,9 @@ namespace lepton_tree {
 	const float &mt() { return lepton_tree_obj.mt(); }
 	const float &ptrelv0() { return lepton_tree_obj.ptrelv0(); }
 	const float &ptrelv1() { return lepton_tree_obj.ptrelv1(); }
+	const float &trueNumInt() { return lepton_tree_obj.trueNumInt(); }
+	const float &ptratio_v5() { return lepton_tree_obj.ptratio_v5(); }
+	const float &coneCorrPt() { return lepton_tree_obj.coneCorrPt(); }
 	const float &miniiso() { return lepton_tree_obj.miniiso(); }
 	const float &miniisoDB() { return lepton_tree_obj.miniisoDB(); }
 	const float &reliso04() { return lepton_tree_obj.reliso04(); }
@@ -6381,6 +6524,7 @@ namespace lepton_tree {
 	const float &iso03hadEt() { return lepton_tree_obj.iso03hadEt(); }
 	const int &jet_close_lep_idx() { return lepton_tree_obj.jet_close_lep_idx(); }
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &jet_close_lep() { return lepton_tree_obj.jet_close_lep(); }
+	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &close_jet_v5() { return lepton_tree_obj.close_jet_v5(); }
 	const float &jet_close_lep_undoJEC() { return lepton_tree_obj.jet_close_lep_undoJEC(); }
 	const float &jet_close_lep_area() { return lepton_tree_obj.jet_close_lep_area(); }
 	const float &jet_close_L1() { return lepton_tree_obj.jet_close_L1(); }
@@ -6396,6 +6540,9 @@ namespace lepton_tree {
 	const bool &tag_HLTLeadingLeg() { return lepton_tree_obj.tag_HLTLeadingLeg(); }
 	const int &exp_innerlayers() { return lepton_tree_obj.exp_innerlayers(); }
 	const int &exp_outerlayers() { return lepton_tree_obj.exp_outerlayers(); }
+	const int &njets_recoil() { return lepton_tree_obj.njets_recoil(); }
+	const int &isTriggerSafe() { return lepton_tree_obj.isTriggerSafe(); }
+	const int &isTriggerSafenoIso() { return lepton_tree_obj.isTriggerSafenoIso(); }
 	const int &tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg() { return lepton_tree_obj.tag_HLT_Ele25WP60_Ele8_Mass55_LeadingLeg(); }
 	const int &tag_HLT_Ele25WP60_SC4_Mass55_LeadingLeg() { return lepton_tree_obj.tag_HLT_Ele25WP60_SC4_Mass55_LeadingLeg(); }
 	const int &tag_HLT_Ele33_CaloIdL_TrackIdL_IsoVL_PFJet30_ElectronLeg() { return lepton_tree_obj.tag_HLT_Ele33_CaloIdL_TrackIdL_IsoVL_PFJet30_ElectronLeg(); }

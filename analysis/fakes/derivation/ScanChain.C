@@ -206,16 +206,38 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   // float sf_HLT_Mu8 = 0.7013;
   // float sf_HLT_IsoMu27 = 1.1038;
 
-  // v8
-  float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3675;
+  // // v8
+  // float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3675;
+  // float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3764;
+  // float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1075;
+  // float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1171;
+  // float sf_HLT_Mu17_TrkIsoVVL = 1.0190;
+  // float sf_HLT_Mu17 = 1.0183;
+  // float sf_HLT_Mu8_TrkIsoVVL = 0.6985;
+  // float sf_HLT_Mu8 = 0.6994;
+  // float sf_HLT_IsoMu27 = 1.1062;
+
+  // // v9
+  // float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3575;
+  // float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3654;
+  // float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.0994;
+  // float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1094;
+  // float sf_HLT_Mu17_TrkIsoVVL = 1.0190;
+  // float sf_HLT_Mu17 = 1.0183;
+  // float sf_HLT_Mu8_TrkIsoVVL = 0.6985;
+  // float sf_HLT_Mu8 = 0.6994;
+  // float sf_HLT_IsoMu27 = 1.1062;
+
+  // v13 - correct rho, latest fake WPs for 2017
+  float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3700;
   float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3764;
-  float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1075;
-  float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1171;
-  float sf_HLT_Mu17_TrkIsoVVL = 1.0190;
-  float sf_HLT_Mu17 = 1.0183;
-  float sf_HLT_Mu8_TrkIsoVVL = 0.6985;
-  float sf_HLT_Mu8 = 0.6994;
-  float sf_HLT_IsoMu27 = 1.1062;
+  float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1107;
+  float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1203;
+  float sf_HLT_Mu17_TrkIsoVVL = 1.0232;
+  float sf_HLT_Mu17 = 1.0227;
+  float sf_HLT_Mu8_TrkIsoVVL = 0.6999;
+  float sf_HLT_Mu8 = 0.7015;
+  float sf_HLT_IsoMu27 = 1.1110;
   
 
   if (false) {
@@ -660,21 +682,26 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   njets40_histo->Sumw2();
 
   // NJA
-  TH1D *Nt_nvtx_histo_e = new TH1D("Nt_nvtx_histo_e", "", 20, 0, 40);
+  TH1D *Nt_nvtx_histo_e = new TH1D("Nt_nvtx_histo_e", "", 20, 0, 60);
   Nt_nvtx_histo_e->SetDirectory(rootdir);
   Nt_nvtx_histo_e->Sumw2();
 
-  TH1D *Nt_nvtx_histo_mu = new TH1D("Nt_nvtx_histo_mu", "", 20, 0, 40);
+  TH1D *Nt_nvtx_histo_mu = new TH1D("Nt_nvtx_histo_mu", "", 20, 0, 60);
   Nt_nvtx_histo_mu->SetDirectory(rootdir);
   Nt_nvtx_histo_mu->Sumw2();
 
-  TH1D *Nl_cone_nvtx_histo_e = new TH1D("Nl_cone_nvtx_histo_e", "", 20, 0, 40);
+  TH1D *Nl_cone_nvtx_histo_e = new TH1D("Nl_cone_nvtx_histo_e", "", 20, 0, 60);
   Nl_cone_nvtx_histo_e->SetDirectory(rootdir);
   Nl_cone_nvtx_histo_e->Sumw2();
 
-  TH1D *Nl_cone_nvtx_histo_mu = new TH1D("Nl_cone_nvtx_histo_mu", "", 20, 0, 40);
+  TH1D *Nl_cone_nvtx_histo_mu = new TH1D("Nl_cone_nvtx_histo_mu", "", 20, 0, 60);
   Nl_cone_nvtx_histo_mu->SetDirectory(rootdir);
   Nl_cone_nvtx_histo_mu->Sumw2();
+
+  TH2D *hdenom = new TH2D("hdenom","", 20,25,125,5,0,2.5);
+  hdenom->SetDirectory(rootdir);
+  hdenom->Sumw2();
+
   //----------------------
 
   //e determination
@@ -769,7 +796,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     bool isQCD = TString(currentFile->GetTitle()).Contains("QCD");
     bool isQCDMu = TString(currentFile->GetTitle()).Contains("QCD_M");
     bool isQCDEl = TString(currentFile->GetTitle()).Contains("QCD_E") || TString(currentFile->GetTitle()).Contains("QCD_bcToE");
-    bool isTTbar = TString(currentFile->GetTitle()).Contains("TTbar");
+    bool isTTbar = TString(currentFile->GetTitle()).Contains("TTJets") || TString(currentFile->GetTitle()).Contains("output_tt_");
     bool isDY = TString(currentFile->GetTitle()).Contains("DY");
 
     // bool doTrig = isQCD;
@@ -819,9 +846,6 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
       //cout << "pt=" << p4().pt() << " iso=" << RelIso03EA() << endl;
       if (debug) cout << "lepp4=" << p4() << " pt=" << p4().pt() << " eta=" << p4().eta() << " phi=" << p4().phi() << " jetp4=" << jet_close_lep() << endl;
 
-      if (isTTbar) {
-          if (motherID() > 0) continue;
-      }
 
       vector<LorentzVector> jets_recorr;
       for(unsigned int i=0; i<jets().size(); i++)  {
@@ -860,7 +884,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
 
       bool isEWK = false;
-      if (TString(currentFile->GetTitle()).Contains("WJets") || isDY) isEWK = true;
+      if (TString(currentFile->GetTitle()).Contains("WJets") || isDY || isTTbar) isEWK = true;
 
       bool isData = evt_isRealData();
       bool noMCMatch = false;
@@ -872,6 +896,11 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 	if ( isDoubleMuon && abs(id())!=13) continue;
 	if (!isDoubleMuon && abs(id())!=11) continue;
       }
+
+      // // FIXME remove this
+      // if (isTTbar) {
+      //     noMCMatch = false;
+      // }
 
       // Analysis Code
       float lumi = getLumi();//in /fb
@@ -933,9 +962,64 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
       
       LorentzVector closejet = (jet_close_lep_p4*jet_close_lep_undoJEC()*jet_close_L1() - p4())*jet_close_L2L3() + p4(); // V5
       float ptrel =  computePtRel(p4(),closejet,true);//ptrelv1();
+
+
       // cout << ptrel << " " << computePtRel(p4(),jet_close_lep(),true) << endl;
       // float closejetpt = jet_close_lep_p4.pt()*jet_close_lep_undoJEC()*jet_close_L1ncmc(); // V4
       float closejetpt = closejet.pt(); // V5
+
+      // float testcc = 0.;
+      // if (abs(id())==11) {
+      //     if (ptrel>9.2) {
+      //         testcc = std::max(0.,miniiso()-0.09);
+      //     } else {
+      //         testcc = max(double(0.),(closejetpt*0.85/p4().pt()-1.));
+      //     }
+      // } else {
+      //     if (ptrel>7.5) {
+      //         testcc = std::max(0.,miniiso()-0.12);
+      //     } else {
+      //         testcc = max(double(0.),(closejetpt*0.80/p4().pt()-1.));
+      //     }
+      // }
+      // auto djets = njets40-njets_recoil();
+      // auto dptratio = p4().pt()/closejetpt-ptratio_v5();
+      // auto dccpt = p4().pt()*(1+testcc)-coneCorrPt();
+      // auto dptrel = ptrel-ptrelv1();
+      // id() evt_event() p4().pt() dptratio dccpt p4().pt()/closejetpt ptratio_v5() 
+      // std::cout <<  " id(): " << id() <<  " evt_event(): " << evt_event() <<  " p4().pt(): " << p4().pt() <<  " p4().pt()*(1+testcc): " << p4().pt()*(1+testcc) <<  " ptrel: " << ptrel <<  " miniiso(): " << miniiso() <<  " p4().pt()/closejetpt: " << p4().pt()/closejetpt <<  std::endl;
+      // {
+      //     if (useLooseEMVA && abs(id())==11) {
+      //         bool isEB = true;
+      //         if ( fabs(etaSC())>1.479 ) isEB = false;
+      //         float sIeIe = sigmaIEtaIEta_full5x5();
+      //         float hoe = hOverE();
+      //         float deta = fabs(dEtaIn());
+      //         float dphi = fabs(dPhiIn());
+      //         float invep = fabs(1./ecalEnergy() - 1./p4().P());
+      //         float cut_sIeIe = isEB ? 0.011 : 0.031;
+      //         float cut_hoe   = 0.08;
+      //         float cut_deta  = 0.01;
+      //         float cut_dphi  = isEB ? 0.04 : 0.08;
+      //         float cut_invep = 0.01;
+      //         bool passHltCuts = ( sIeIe<cut_sIeIe && hoe<cut_hoe && deta<cut_deta && dphi<cut_dphi && invep<cut_invep );
+      //         std::cout <<  " passHltCuts: " << passHltCuts <<  " isTriggerSafenoIso(): " << isTriggerSafenoIso() <<  std::endl;
+      //         if (useIsoTrigs) {
+      //             if (debug) cout << "check iso FO" << endl;
+      //             if (passIsolatedFO(id(),etaSC(),mva_25ns(),p4().pt())) {
+      //                 float ePFIso = ecalPFClusterIso()/p4().pt();
+      //                 float hPFIso = hcalPFClusterIso()/p4().pt();
+      //                 float trkIso = tkIso()/p4().pt();
+      //                 float cut_ePFIso = 0.45;
+      //                 float cut_hPFIso = 0.25;
+      //                 float cut_trkIso  = 0.2;
+      //                 passHltCuts = passHltCuts && ePFIso<cut_ePFIso && hPFIso<cut_hPFIso && trkIso<cut_trkIso;
+      //                 std::cout <<  " passHltCuts: " << passHltCuts <<  " isTriggerSafe(): " << isTriggerSafe() <<  std::endl;
+      //             }
+      //         }
+      //     }
+      // }
+
       //float miniIso = miniiso();
       float relIso = RelIso03EA();
       if (debug) cout << "close jet raw p4=" << jet_close_lep_p4*jet_close_lep_undoJEC()
@@ -1125,6 +1209,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 	  float cut_hPFIso = 0.25;
 	  float cut_trkIso  = 0.2;
 	  passHltCuts = passHltCuts && ePFIso<cut_ePFIso && hPFIso<cut_hPFIso && trkIso<cut_trkIso;
+
 	}
 	passFO = passHltCuts && passes_SS_fo_looseMVA_v6();
 	passFO_noiso = passHltCuts && passes_SS_fo_looseMVA_noiso_v6();
@@ -1256,26 +1341,26 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
       if (usePtRatioCor) {
 	if (abs(id())==11) {
-	  float ptratiocor = closejetpt>0. ? p4().pt()*(1+std::max(0.,miniiso()-0.12))/closejetpt : 1.;
-	  passFO = passes_SS_fo_v6() && (ptratiocor > 0.76 || ptrel > 7.2);
+	  float ptratiocor = closejetpt>0. ? p4().pt()*(1+std::max(0.,miniiso()-0.09))/closejetpt : 1.;
+	  passFO = passes_SS_fo_v6() && (ptratiocor > 0.85 || ptrel > 9.2);
 	} else {
-	  float ptratiocor = closejetpt>0. ? p4().pt()*(1+std::max(0.,miniiso()-0.16))/closejetpt : 1.;
-	  passFO = passes_SS_fo_v6() && (ptratiocor > 0.80 || ptrel > 7.2);	      
+	  float ptratiocor = closejetpt>0. ? p4().pt()*(1+std::max(0.,miniiso()-0.12))/closejetpt : 1.;
+	  passFO = passes_SS_fo_v6() && (ptratiocor > 0.80 || ptrel > 7.5);	      
 	}
       }
 
       float coneptcorr = 0.;
       if (abs(id())==11) {
-	if (ptrel>7.2) {
+	if (ptrel>9.2) {
+	  coneptcorr = std::max(0.,miniiso()-0.09);
+	} else {
+	  coneptcorr = max(double(0.),(closejetpt*0.85/p4().pt()-1.));
+	}
+      } else {
+	if (ptrel>7.5) {
 	  coneptcorr = std::max(0.,miniiso()-0.12);
 	} else {
 	  coneptcorr = max(double(0.),(closejetpt*0.80/p4().pt()-1.));
-	}
-      } else {
-	if (ptrel>7.2) {
-	  coneptcorr = std::max(0.,miniiso()-0.16);
-	} else {
-	  coneptcorr = max(double(0.),(closejetpt*0.76/p4().pt()-1.));
 	}
       }
       if (useRelIso) {
@@ -1396,6 +1481,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
 		  if( passId ) Nl_fine_cone_histo_e->Fill(p4().pt(), fabs(p4().eta()), weight);   //  <-- loose (as opposed to l!t)
 		  else Nl_fine_cone_histo_e->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);
+
+          hdenom->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);
 
           // NJA
 		  Nl_cone_nvtx_histo_e->Fill(nvtx(), weight);
@@ -1638,6 +1725,10 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   // NJA
   rate_cone_nvtx_histo_e->Write();
   rate_cone_nvtx_histo_mu->Write();
+  Nl_cone_nvtx_histo_e->Write();
+  Nl_cone_nvtx_histo_mu->Write();
+  Nt_nvtx_histo_e->Write();
+  Nt_nvtx_histo_mu->Write();
 
   Nl_jet_histo_e->Write();
   Nl_jet_histo_mu->Write();
@@ -1740,6 +1831,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   histo_pt_el8->Write();
   histo_pt_el->Write();
   njets40_histo->Write();
+  hdenom->Write();
   OutputFile->Close();
 
   // delete jet_corrector_25ns_MC_pfL1; 
