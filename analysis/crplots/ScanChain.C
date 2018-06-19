@@ -128,7 +128,7 @@ float btag_reweight(int nbtags) {
 }
 
 
-int ScanChain(TChain *ch, int year, TString options="", TString outputdir="outputs"){
+int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     bool doFakes = options.Contains("doFakes");
     bool doFlips = options.Contains("doFlips");
@@ -159,7 +159,7 @@ int ScanChain(TChain *ch, int year, TString options="", TString outputdir="outpu
     if (is2016) {
         lumiAG = 35.87;
     } else if (is2017) {
-        if (useNonIsoTriggers) {
+        if (useNonIsoTriggers2017) {
             lumiAG = 36.529;
         } else{
             lumiAG = 41.3;
@@ -181,6 +181,7 @@ int ScanChain(TChain *ch, int year, TString options="", TString outputdir="outpu
     vector<string> regions = {
                                 "osloose",
                                 "os",
+                              "htnb1"                                // Baseline without Ht, with Nb==1
                               "os_noisr", "os_btagreweight", // OS tight-tight and variants
                               "os_highbdt", "os_lowbdt",
                               "tl",                                // SS tight-loose
@@ -191,7 +192,6 @@ int ScanChain(TChain *ch, int year, TString options="", TString outputdir="outpu
                               "isr",                               // ISR Reweighting derivation region
                               "isr_reweight_check",
                               "crw",                        // CRZ, CRW
-                              "htnb1"                                // Baseline without Ht, with Nb==1
                               };
 
     vector<HistCol*> registry;
@@ -266,8 +266,6 @@ int ScanChain(TChain *ch, int year, TString options="", TString outputdir="outpu
 
     HistCol h_ml1j1       (regions, "ml1j1"      , 50 , 0  , 500 , &registry);
     HistCol h_matchtype   (regions, "matchtype"  , 4  , 0  , 4   , &registry);
-
-    HistCol h_matchtype       (regions, "matchtype"      , 4 , 0  , 4 , &registry);
 
     /* HistCol h_event_bdt   (regions, "event_bdt"  , 25 , -1 , 1   , &registry); */
     float bdt_bins[] = {-1.00, -0.48, -0.37, -0.25, -0.14, -0.02, 0.075, 0.21, 0.31, 0.465, 0.60, 0.715, 0.81, 1.00};
@@ -657,9 +655,9 @@ int ScanChain(TChain *ch, int year, TString options="", TString outputdir="outpu
 
             float event_bdt = (evaluateBDT) ? reader.EvaluateMVA("BDT") : 0;
 
-            cout << "Made it to region definitions" << endl;
+            // cout << "Made it to region definitions" << endl;
             auto fill_region = [&](const string& region, float weight) {
-                cout << "Filling Region: " << region << endl;
+                // cout << "Filling Region: " << region << endl;
                 // Fill all observables for a region
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
