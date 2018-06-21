@@ -634,7 +634,13 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 return _event_bdt;
             };
 
+<<<<<<< HEAD
             auto fill_region = [&](const string& region, float weight) {
+=======
+            // cout << "Made it to region definitions" << endl;
+            auto fill_region = [&](const string& region, float weight) {
+                // cout << "Filling Region: " << region << endl;
+>>>>>>> 8d043b9d72ad250065d3a60ca57cb707c57298ba
                 // Fill all observables for a region
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
