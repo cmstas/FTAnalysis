@@ -61,7 +61,7 @@ chs = {
             "ttfake": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]+ "doTruthFake"),
             "vv": make_objs([
                 basedirs[2017]+"WZ.root",
-                basedirs[2017]+"WW.root",
+                # basedirs[2017]+"WW.root",
                 basedirs[2017]+"WWDPS.root",
                 basedirs[2017]+"ZZ.root",
                 ],options=options[2017]),
