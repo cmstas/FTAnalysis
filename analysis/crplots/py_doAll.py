@@ -1,4 +1,4 @@
-
+import os
 import pyrun
 import ROOT as r
 r.gROOT.SetBatch()
@@ -8,18 +8,37 @@ r.gROOT.ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+")
 r.gROOT.ProcessLine(".L ScanChain.C+")
 
 
+years_to_consider = [
+        # 2016,
+        2017,
+        2018,
+        ]
+# outputdir = "outputs_20172018_newWP_newmet"
+# outputdir = "outputs_2017_oldmet"
+# outputdir = "outputs_2017_newmet"
+
+
 basedirs ={
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.00_80x_baseline_full_v3"),
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.04_v1"),  # old multiiso WP
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.03"),
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.00_80x_baseline_full_v5"),
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.04_v1"),  # old multiiso WP
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.06_v2"),  # new multiiso WP, old,new met
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.03"),
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.04"), # new multiiso WP, old,new met
         }
 
+# outputdir = "outputs_20172018_newWP_oldmet"
+# options = {
+#         2016: "useIsoTriggers2016 useInclusiveSFs Data2016 quiet ",
+#         2017: "useInclusiveSFs Data2017 quiet ",
+#         2018: "useInclusiveSFs Data2018 quiet ",
+#         }
+
+outputdir = "outputs_20172018_newWP_newmet"
 options = {
-        2016: "useIsoTriggers2016 useInclusiveSFs Data2016 quiet ",
-        2017: "useInclusiveSFs Data2017 quiet ",
-        2018: "useInclusiveSFs Data2018 quiet ",
+        2016: "useIsoTriggers2016 useInclusiveSFs Data2016 useNewMET quiet ",
+        2017: "useInclusiveSFs Data2017 useNewMET quiet ",
+        2018: "useInclusiveSFs Data2018 useNewMET quiet ",
         }
-outputdir = "outputs_all"
 
 def make_objs(fpatts=[],options="",treename="t"):
     if type(fpatts) == str: fpatts = [fpatts]
@@ -36,7 +55,7 @@ chs = {
             "ttw": make_objs(basedirs[2017]+"TTWnlo.root", options=options[2017]),
             "ttz": make_objs(basedirs[2017]+"TTZnlo.root", options=options[2017]),
             "tth": make_objs(basedirs[2017]+"TTHtoNonBB.root", options=options[2017]),
-            "dy": make_objs(basedirs[2017]+"DY_*.root", options=options[2017]),
+            "dy": make_objs(basedirs[2017]+"DY_high.root", options=options[2017]),
             "wjets": make_objs(basedirs[2017]+"WJets*.root", options=options[2017]),
             "tt": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]),
             "ttfake": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]+ "doTruthFake"),
@@ -73,7 +92,7 @@ chs = {
             "ttw": make_objs(options=options[2018]),
             "ttz": make_objs(options=options[2018]),
             "tth": make_objs(options=options[2018]),
-            "dy": make_objs(basedirs[2018]+"DY_high*.root", options=options[2018]),
+            "dy": make_objs(basedirs[2018]+"DY_high.root", options=options[2018]),
             "wjets": make_objs(options=options[2018]),
             "tt": make_objs(basedirs[2018]+"TTDilep*.root", options=options[2018]),
             "ttfake": make_objs(basedirs[2018]+"TTDilep*.root", options=options[2018]+ "doTruthFake"),
@@ -94,12 +113,14 @@ def run_chain((index,info)):
     return index, ret
 
 to_run = []
-for year in chs:
+for year in years_to_consider:
     for proc,obj in chs[year].items():
         to_run.append([obj["ch"], obj["options"], outputdir])
 
 # for tr in to_run:
 #     print tr
+
+os.system("mkdir -p {}".format(outputdir))
 
 runner = pyrun.Runner(nproc=10, func=run_chain)
 runner.add_args(to_run)

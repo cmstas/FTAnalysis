@@ -140,6 +140,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool useIsoTriggers2016 = options.Contains("useIsoTriggers2016");
     bool doHighHT = options.Contains("doHighHT");
     bool doTruthFake = options.Contains("doTruthFake");
+    bool useNewMET = options.Contains("useNewMET");
     bool quiet = options.Contains("quiet");
     std::string proc = ch->GetTitle();
     int year = 2017;
@@ -148,6 +149,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     if (options.Contains("Data2018")) year = 2018;
 
     if (year == 2016) lumiAG = 35.87;
+    if ((year == 2017) && !useNonIsoTriggers2017) lumiAG = 41.3;
     if ((year == 2017) && useNonIsoTriggers2017) lumiAG = 36.529;
     if (year == 2018) lumiAG = 14.383;
     // if (year == 2018) lumiAG = 555.01 / 1000.0;
@@ -155,19 +157,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool is2016 = year == 2016;
     bool is2017 = year == 2017;
     bool is2018 = year == 2018;
-
-    if (is2016) {
-        lumiAG = 35.87;
-    } else if (is2017) {
-        if (useNonIsoTriggers2017) {
-            lumiAG = 36.529;
-        } else{
-            lumiAG = 41.3;
-        }
-    } else {
-        cout << "Year not Implemented: " << year << endl;
-        return -1;
-    }
 
     // Clear already-seen list
     duplicate_removal::clear_list();
@@ -371,8 +360,13 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             lep2ccpt = ss::lep2_coneCorrPt();
             njets = ss::njets();
             nbtags = ss::nbtags();
-            met = ss::met();
-            metphi = ss::metPhi();
+            if (useNewMET) {
+                met = ss::modmet();
+                metphi = ss::modmetPhi();
+            } else {
+                met = ss::met();
+                metphi = ss::metPhi();
+            }
             rawmet = ss::rawmet();
             calomet = ss::calomet();
             lep1id = ss::lep1_id();
