@@ -202,7 +202,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     };
 
     vector<HistCol*> registry;
-    HistCol h_met         (regions, "met"        , 15, 0   , 600 , &registry);
+    HistCol h_met         (regions, "met"        , 30, 0   , 600 , &registry);
     HistCol h_metphi      (regions, "metphi"     , 60, -3.2, 3.2 , &registry);
     HistCol h_rawmet      (regions, "rawmet"     , 60, 0   , 600 , &registry);
     HistCol h_calomet     (regions, "calomet"    , 60, 0   , 600 , &registry);
@@ -261,7 +261,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_type        (regions, "type"       , 3 , -0.5, 2.5 , &registry);
     HistCol h_q1          (regions, "q1"         , 2 , -2  , 2   , &registry);
     HistCol h_type3l      (regions, "type3l"     , 4 , -0.5, 3.5 , &registry);
-    HistCol h_nvtx        (regions, "nvtx"       , 70, -0.5, 69.5, &registry);
+    HistCol h_nvtx        (regions, "nvtx"       , 14, -0.5, 69.5, &registry);
 
     HistCol h_ptj1        (regions, "ptj1"       , 50, 0   , 500 , &registry);
     HistCol h_ptj2        (regions, "ptj2"       , 50, 0   , 500 , &registry);

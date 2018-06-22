@@ -23,22 +23,22 @@ basedirs ={
         # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.04_v1"),  # old multiiso WP
         2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.06_v2"),  # new multiiso WP, old,new met
         # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.03"),
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.04"), # new multiiso WP, old,new met
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.04"),  # new multiiso WP, old,new met
         }
 
-# outputdir = "outputs_20172018_newWP_oldmet"
-# options = {
-#         2016: "useIsoTriggers2016 useInclusiveSFs Data2016 quiet ",
-#         2017: "useInclusiveSFs Data2017 quiet ",
-#         2018: "useInclusiveSFs Data2018 quiet ",
-#         }
-
-outputdir = "outputs_20172018_newWP_newmet"
+outputdir = "outputs_20172018_newWP_oldmet"
 options = {
-        2016: "useIsoTriggers2016 useInclusiveSFs Data2016 useNewMET quiet ",
-        2017: "useInclusiveSFs Data2017 useNewMET quiet ",
-        2018: "useInclusiveSFs Data2018 useNewMET quiet ",
+        2016: "useIsoTriggers2016 useInclusiveSFs Data2016 quiet ",
+        2017: "useInclusiveSFs Data2017 quiet ",
+        2018: "useInclusiveSFs Data2018 quiet ",
         }
+
+# outputdir = "outputs_20172018_newWP_newmet"
+# options = {
+#         2016: "useIsoTriggers2016 useInclusiveSFs Data2016 useNewMET quiet ",
+#         2017: "useInclusiveSFs Data2017 useNewMET quiet ",
+#         2018: "useInclusiveSFs Data2018 useNewMET quiet ",
+#         }
 
 def make_objs(fpatts=[],options="",treename="t"):
     if type(fpatts) == str: fpatts = [fpatts]
