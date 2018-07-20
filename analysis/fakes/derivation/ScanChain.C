@@ -1537,6 +1537,13 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 		  if( passId ) Nl_cone_histo_mu->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //  <-- loose (as opposed to l!t)
 		  else Nl_cone_histo_mu->Fill(getPt(p4().pt()*(1+coneptcorr),false), getEta(fabs(p4().eta()),ht,false), weight);
 
+          auto pt = getPt(p4().pt()*(1+coneptcorr),false);
+          auto eta = getEta(fabs(p4().eta()),ht,false);
+          if (pt > 35 && pt < 50 && eta < 2.1 && eta > 1.2) {
+              cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %6.0f",
+                      (unsigned long long)evt_event() , p4().pt(),pt,eta,miniiso(),p4().pt()/closejetpt,ptrel,passId,motherID(),evt_met,evt_mt,weight) << endl;
+          }
+
 		  if( passId ) Nl_fine_cone_histo_mu->Fill(p4().pt(), fabs(p4().eta()), weight);   //  <-- loose (as opposed to l!t)
 		  else Nl_fine_cone_histo_mu->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);
 

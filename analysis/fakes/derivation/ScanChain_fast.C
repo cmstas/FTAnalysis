@@ -61,6 +61,10 @@ float DeltaPhi(float phi1, float phi2){
     return fabs(dPhi);
 }
 
+bool isFake() {
+    return (motherID() <= 0 && motherID() != -3);
+}
+
 bool STOP_REQUESTED = false;
 
 int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = true, int nEvents = -1) {//, string skimFilePrefix = "test") {
@@ -75,8 +79,26 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     bool useLooseEMVA = false;
     if (option.Contains("useLooseEMVA")) useLooseEMVA = true;
 
-    bool overrideMCMatch = false;
-    if (option.Contains("overrideMCMatch")) overrideMCMatch = true;
+    bool requireMCMatch = false;
+    if (option.Contains("requireMCMatch")) requireMCMatch = true;
+    
+    bool doAbove25 = false;
+    if (option.Contains("doAbove25")) doAbove25 = true;
+
+    bool doMu18Only = false;
+    if (option.Contains("doMu18Only")) doMu18Only = true;
+
+    bool noPUweight = false;
+    if (option.Contains("noPUweight")) noPUweight = true;
+
+    bool absweight = false;
+    if (option.Contains("absweight")) absweight = true;
+
+    bool noConeCorr = false;
+    if (option.Contains("noConeCorr")) noConeCorr = true;
+
+    bool newPrescription = false;
+    if (option.Contains("newPrescription")) newPrescription = true;
 
     bool usePtRatioCor = false;
     if (option.Contains("usePtRatioCor")) usePtRatioCor = true;
@@ -99,7 +121,31 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     bool doHighMET = false;
     if (option.Contains("doHighMET")) doHighMET = true;
 
-    float anyPt = false;
+    bool bypassLowMET = false;
+    if (option.Contains("bypassLowMET")) bypassLowMET = true;
+
+    bool bypassTriggers = false;
+    if (option.Contains("bypassTriggers")) bypassTriggers = true;
+
+    bool allowMoreFO = false;
+    if (option.Contains("allowMoreFO")) allowMoreFO = true;
+
+    bool requireTwoJets = false;
+    if (option.Contains("requireTwoJets")) requireTwoJets = true;
+
+    bool requireTag = false;
+    if (option.Contains("requireTag")) requireTag = true;
+
+    bool twoFO = false;
+    if (option.Contains("twoFO")) twoFO = true;
+
+    bool doubleHadronic = false;
+    if (option.Contains("doubleHadronic")) doubleHadronic = true;
+
+    bool singleHadronic = false;
+    if (option.Contains("singleHadronic")) singleHadronic = true;
+
+    bool anyPt = false;
 
     bool doJEC = false;
 
@@ -111,9 +157,19 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     float etabins_mu[4] = {0., 1.2, 2.1, 2.4};
     float etabins_el[4] = {0., 0.8, 1.479, 2.5};
 
+    int fine_nptbins = 11;
+    float fine_ptbins[12] = {10., 15., 20., 25., 30., 35., 45., 55., 70., 90., 120., 150.};
+    int fine_netabins_el = 5;
+    float fine_etabins_el[6] = {0., 0.5, 1.0, 1.5, 2.0, 2.5};
+    int fine_netabins_mu = 5;
+    float fine_etabins_mu[6] = {0., 0.5, 1.0, 1.5, 2.0, 2.4};
+
     // nominal
     float MTCR_MET_CUT = 30.;
     float MTCR_PT_CUT = 20.;
+
+
+
 
 
     // handmade "prescales" from normalizeToZPeak.C
@@ -173,19 +229,36 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     Nl_cone_histo_mu->SetDirectory(rootdir);
     Nl_cone_histo_mu->Sumw2();
 
-    TH2D *Nt_fine_histo_e = new TH2D("Nt_fine_histo_e", "Nt vs Pt, Eta (electrons)", 30,0,150,10,0,2.5);
+    TH2D *Nl_conevsraw_histo_e = new TH2D("Nl_conevsraw_histo_e", "Nl Cone pT vs Raw pT, Eta (electrons)", nptbins,ptbins,nptbins,ptbins);
+    Nl_conevsraw_histo_e->SetDirectory(rootdir);
+    Nl_conevsraw_histo_e->Sumw2();
+    TH2D *Nl_conevsraw_histo_mu = new TH2D("Nl_conevsraw_histo_mu", "Nl Cone pT vs Raw pT, Eta (muons)", nptbins,ptbins,nptbins,ptbins);
+    Nl_conevsraw_histo_mu->SetDirectory(rootdir);
+    Nl_conevsraw_histo_mu->Sumw2();
+    TH2D *Nt_conevsraw_histo_e = new TH2D("Nt_conevsraw_histo_e", "Nt Cone pT vs Raw pT, Eta (electrons)", nptbins,ptbins,nptbins,ptbins);
+    Nt_conevsraw_histo_e->SetDirectory(rootdir);
+    Nt_conevsraw_histo_e->Sumw2();
+    TH2D *Nt_conevsraw_histo_mu = new TH2D("Nt_conevsraw_histo_mu", "Nt Cone pT vs Raw pT, Eta (muons)", nptbins,ptbins,nptbins,ptbins);
+    Nt_conevsraw_histo_mu->SetDirectory(rootdir);
+    Nt_conevsraw_histo_mu->Sumw2();
+
+
+
+    // TH2D *Nt_fine_histo_e = new TH2D("Nt_fine_histo_e", "Nt vs Pt, Eta (electrons)", 30,0,150,10,0,2.5);
+    TH2D *Nt_fine_histo_e = new TH2D("Nt_fine_histo_e", "Nt vs Pt, Eta (electrons)", fine_nptbins,fine_ptbins,fine_netabins_el,fine_etabins_el);
     Nt_fine_histo_e->SetDirectory(rootdir);
     Nt_fine_histo_e->Sumw2();
 
-    TH2D *Nt_fine_histo_mu = new TH2D("Nt_fine_histo_mu", "Nt vs Pt, Eta (muons)", 25,0,75,5,0,2.5);
-    Nt_fine_histo_mu->SetDirectory(rootdir);
-    Nt_fine_histo_mu->Sumw2();
-
-    TH2D *Nl_fine_cone_histo_e = new TH2D("Nl_fine_cone_histo_e", "Nl vs Cone Energy, Eta (electrons)", 30,0,150,10,0,2.5);
+    // TH2D *Nl_fine_cone_histo_e = new TH2D("Nl_fine_cone_histo_e", "Nl vs Cone Energy, Eta (electrons)", 30,0,150,10,0,2.5);
+    TH2D *Nl_fine_cone_histo_e = new TH2D("Nl_fine_cone_histo_e", "Nl vs Cone Energy, Eta (electrons)", fine_nptbins,fine_ptbins,fine_netabins_el,fine_etabins_el);
     Nl_fine_cone_histo_e->SetDirectory(rootdir);
     Nl_fine_cone_histo_e->Sumw2();
 
-    TH2D *Nl_fine_cone_histo_mu = new TH2D("Nl_fine_cone_histo_mu", "Nl vs Cone Energy, Eta (muons)", 25,0,75,5,0,2.5);
+    TH2D *Nt_fine_histo_mu = new TH2D("Nt_fine_histo_mu", "Nt vs Pt, Eta (muons)", fine_nptbins,fine_ptbins,fine_netabins_mu,fine_etabins_mu);
+    Nt_fine_histo_mu->SetDirectory(rootdir);
+    Nt_fine_histo_mu->Sumw2();
+
+    TH2D *Nl_fine_cone_histo_mu = new TH2D("Nl_fine_cone_histo_mu", "Nl vs Cone Energy, Eta (muons)", fine_nptbins,fine_ptbins,fine_netabins_mu,fine_etabins_mu);
     Nl_fine_cone_histo_mu->SetDirectory(rootdir);
     Nl_fine_cone_histo_mu->Sumw2();
 
@@ -637,8 +710,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
         // Get File Content
         TFile *file = new TFile( currentFile->GetTitle() );
         TTree *tree = (TTree*)file->Get("t");
-        // if(fast) TTreeCache::SetLearnEntries(10);
-        // if(fast) tree->SetCacheSize(128*1024*1024);
+        if(fast) TTreeCache::SetLearnEntries(10);
+        if(fast) tree->SetCacheSize(128*1024*1024);
         lepton_tree_obj.Init(tree);
 
         bool isSyncFile = TString(currentFile->GetTitle()).Contains("Sync");
@@ -669,7 +742,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
             // Get Event Content
             if( nEventsTotal >= nEventsChain ) continue;
-            // if(fast) tree->LoadTree(event);
+            tree->LoadTree(event);
             lepton_tree_obj.GetEntry(event);
             ++nEventsTotal;
 
@@ -690,7 +763,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
             bool noMCMatch = false;
             if (isData || isEWK) noMCMatch = true;
 
-            if (!isData && overrideMCMatch) noMCMatch = false;
+            if (!isData && requireMCMatch) noMCMatch = false;
 
             //reject electrons from DoubleMu and muons from DoubleEG
             if (debug) cout << "check dataset" << endl;
@@ -699,27 +772,41 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                 if (!isDoubleMuon && abs(id())!=11) continue;
             }
 
+            if (doAbove25) {
+                if (p4().pt() < 25.) continue;
+                if (coneCorrPt() < 25.) continue;
+            }
+
+            if (doMu18Only) {
+                if (p4().pt() < 18.) continue;
+                if (coneCorrPt() < 18.) continue;
+                anyPt = true; // don't require raw>25 for trigger
+            }
+
 
             if (isData==0 && isEWK==0) {
                 if (isQCDMu && abs(id())!=13) continue;
                 if (isQCDEl && abs(id())!=11) continue;
             }
 
-            //trigger selection
-            if (abs(id())==11) {
-                if (useIsoTrigs) {
-                    if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
-                } else {
-                    if (HLT_Ele8_CaloIdM_TrackIdM_PFJet30()<=0 && HLT_Ele17_CaloIdM_TrackIdM_PFJet30()<=0) continue;
+
+            if (!bypassTriggers) {
+                //trigger selection
+                if (abs(id())==11) {
+                    if (useIsoTrigs) {
+                        if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
+                    } else {
+                        if (HLT_Ele8_CaloIdM_TrackIdM_PFJet30()<=0 && HLT_Ele17_CaloIdM_TrackIdM_PFJet30()<=0) continue;
+                    }
                 }
+                if (abs(id())==13) {
+                    if (useIsoTrigs) {
+                        if (HLT_Mu8_TrkIsoVVL()<=0 && HLT_Mu17_TrkIsoVVL()<=0) continue;
+                    } else {
+                        if (HLT_Mu8()<=0 && HLT_Mu17()<=0) continue;
+                    }
+                }	
             }
-            if (abs(id())==13) {
-                if (useIsoTrigs) {
-                    if (HLT_Mu8_TrkIsoVVL()<=0 && HLT_Mu17_TrkIsoVVL()<=0) continue;
-                } else {
-                    if (HLT_Mu8()<=0 && HLT_Mu17()<=0) continue;
-                }
-            }	
 
 
             float ht = ht_SS();
@@ -727,8 +814,30 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
             bool jetptcut = (njets40 > 0) && (ht > 40);
             int nbtags = 0;
 
-            if (!jetptcut) continue;
-            if (nFOs_SS() > 1) continue;
+            if (!requireTwoJets) {
+                if (!jetptcut) continue;
+            } else {
+                if (njets() < 2) continue;
+            }
+
+            if (requireTag) {
+                if (tag_p4().pt() < 25) continue;
+            }
+
+            if (twoFO) {
+                if (nFOs_SS() < 2) continue;
+            } else if (!allowMoreFO) {
+                if (nFOs_SS() > 1) continue;
+            }
+
+            if (singleHadronic) {
+                if (nhadronicW() != 1) continue;
+            }
+
+            if (doubleHadronic) {
+                if (nhadronicW() != 2) continue;
+            }
+
             if (abs(id()) == 11 && p4().pt() < 15.) continue;
             if (abs(id()) == 13 && p4().pt() < 10.) continue;
             if (abs(id()) == 11 && fabs(p4().eta()) > 2.5) continue;
@@ -737,14 +846,39 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
             float weight = 1;
             // if (!isDataFromFileName) weight = getTruePUw(trueNumInt())*scale1fb()*getLumi();
-            if (!isDataFromFileName) weight = puweight()*scale1fb()*getLumi();
+            if (!isDataFromFileName) {
+                // if (noPUweight) weight = scale1fb()*getLumi();
+                // else weight = puweight()*scale1fb()*getLumi();
+                if (absweight) {
+                    if (noPUweight) weight = fabs(scale1fb())*getLumi();
+                    else weight = puweight()*fabs(scale1fb())*getLumi();
+                } else {
+                    if (noPUweight) weight = (scale1fb())*getLumi();
+                    else weight = puweight()*(scale1fb())*getLumi();
+                }
+            }
 
 
             LorentzVector closejet = close_jet_v5();
             float ptrel =  ptrelv1();
             float coneptcorr = coneCorrPt() / p4().pt() - 1;
+            if (noConeCorr) {
+                coneptcorr = 0.;
+            }
             float closejetpt = closejet.pt(); // V5
             float ptratio = ptratio_v5();
+
+            if (newPrescription) {
+                // From Gio: So a realistic proposal in the "not extrapolating" setup would be to have pT bins: [20, 25] (with pTraw>20), [25, 35] (with pTraw>25), and require pTraw>25 for all higher bins.
+                // I would suggest to see what FR values we would get with this, in 2D, compare with the map with pT>18, check the closures, and then decide.
+                if (coneCorrPt() < 25. && coneCorrPt() >= 20.0) {
+                    if (p4().pt() < 20) continue;
+                } else if (coneCorrPt() < 35. && coneCorrPt() >= 25.0) {
+                    if (p4().pt() < 25) continue;
+                } else if (coneCorrPt() >= 35.0) {
+                    if (p4().pt() < 25) continue;
+                }
+            }
 
 
             bool passes_low = false;
@@ -752,67 +886,69 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
             //check prescales, apply cuts on the pT range depending on the trigger
             int prescale = -1;
-            if (abs(id())==11) {
-                if (useIsoTrigs) {
-                    if (p4().pt() >= 10 && p4().pt() < 25 && HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) { 
-                        passes_low = true;
-                        prescale = HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30();
-                        if (isData) prescale *= sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30;
+            if (!bypassTriggers) {
+                if (abs(id())==11) {
+                    if (useIsoTrigs) {
+                        if (p4().pt() >= 10 && p4().pt() < 25 && HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) { 
+                            passes_low = true;
+                            prescale = HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30();
+                            if (isData) prescale *= sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30;
+                        }
+                        if ((anyPt || p4().pt() >= 25) && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
+                            passes_high = true;
+                            prescale = HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30();
+                            if (isData) prescale *= sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30;
+                        }
+                        if (prescale>0) weight *= prescale;
+                        else continue;	  
+                    } else {
+                        if (p4().pt() >= 10 && p4().pt() < 25 && HLT_Ele8_CaloIdM_TrackIdM_PFJet30()>0) { 
+                            passes_low = true;
+                            prescale = HLT_Ele8_CaloIdM_TrackIdM_PFJet30();
+                            if (isData) prescale *= sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30;
+                        }
+                        if ((anyPt || p4().pt() >= 25) && HLT_Ele17_CaloIdM_TrackIdM_PFJet30()>0) {
+                            passes_high = true;
+                            prescale = HLT_Ele17_CaloIdM_TrackIdM_PFJet30();
+                            if (isData) prescale *= sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30;
+                        }
+                        if (prescale>0) weight *= prescale;
+                        else continue;	  
                     }
-                    if ((anyPt || p4().pt() >= 25) && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
-                        passes_high = true;
-                        prescale = HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30();
-                        if (isData) prescale *= sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30;
-                    }
-                    if (prescale>0) weight *= prescale;
-                    else continue;	  
-                } else {
-                    if (p4().pt() >= 10 && p4().pt() < 25 && HLT_Ele8_CaloIdM_TrackIdM_PFJet30()>0) { 
-                        passes_low = true;
-                        prescale = HLT_Ele8_CaloIdM_TrackIdM_PFJet30();
-                        if (isData) prescale *= sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30;
-                    }
-                    if ((anyPt || p4().pt() >= 25) && HLT_Ele17_CaloIdM_TrackIdM_PFJet30()>0) {
-                        passes_high = true;
-                        prescale = HLT_Ele17_CaloIdM_TrackIdM_PFJet30();
-                        if (isData) prescale *= sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30;
-                    }
-                    if (prescale>0) weight *= prescale;
-                    else continue;	  
                 }
-            }
-            if (abs(id())==13) {	
-                // use mu8+mu17
-                if (useIsoTrigs) {
-                    if (p4().pt()>=10 && p4().pt()<25 && HLT_Mu8_TrkIsoVVL()>0) { 
-                        passes_low = true;
-                        prescale = HLT_Mu8_TrkIsoVVL();
-                        if (isData) prescale *= sf_HLT_Mu8_TrkIsoVVL;
-                    }
+                if (abs(id())==13) {	
+                    // use mu8+mu17
+                    if (useIsoTrigs) {
+                        if (p4().pt()>=10 && p4().pt()<25 && HLT_Mu8_TrkIsoVVL()>0) { 
+                            passes_low = true;
+                            prescale = HLT_Mu8_TrkIsoVVL();
+                            if (isData) prescale *= sf_HLT_Mu8_TrkIsoVVL;
+                        }
 
-                    if ((anyPt || p4().pt()>=25) && HLT_Mu17_TrkIsoVVL()>0) {
-                        passes_high = true;
-                        prescale = HLT_Mu17_TrkIsoVVL();
-                        if (isData) prescale *= sf_HLT_Mu17_TrkIsoVVL;
-                    }
+                        if ((anyPt || p4().pt()>=25) && HLT_Mu17_TrkIsoVVL()>0) {
+                            passes_high = true;
+                            prescale = HLT_Mu17_TrkIsoVVL();
+                            if (isData) prescale *= sf_HLT_Mu17_TrkIsoVVL;
+                        }
 
-                    if (prescale>0) weight *= prescale;
-                    else continue;
-                } else {
-                    if (p4().pt()>=10 && p4().pt()<25 && HLT_Mu8()>0) {
-                        passes_low = true;
-                        prescale = HLT_Mu8();
-                        if (isData) prescale *= sf_HLT_Mu8;
-                    }
+                        if (prescale>0) weight *= prescale;
+                        else continue;
+                    } else {
+                        if (p4().pt()>=10 && p4().pt()<25 && HLT_Mu8()>0) {
+                            passes_low = true;
+                            prescale = HLT_Mu8();
+                            if (isData) prescale *= sf_HLT_Mu8;
+                        }
 
-                    if ((anyPt || p4().pt() >= 25) && HLT_Mu17()>0) {
-                        passes_high = true;
-                        prescale = HLT_Mu17();
-                        if (isData) prescale *= sf_HLT_Mu17;
-                    }
+                        if ((anyPt || p4().pt() >= 25) && HLT_Mu17()>0) {
+                            passes_high = true;
+                            prescale = HLT_Mu17();
+                            if (isData) prescale *= sf_HLT_Mu17;
+                        }
 
-                    if (prescale>0) weight *= prescale;
-                    else continue;
+                        if (prescale>0) weight *= prescale;
+                        else continue;
+                    }
                 }
             }
 
@@ -911,8 +1047,10 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
             if (doHighMET) {
                 if (evt_met < 50) continue;
             } else {
-                if( !(evt_met < 20. && evt_mt < 20) ) {
-                    continue;
+                if (!bypassLowMET) {
+                    if( !(evt_met < 20. && evt_mt < 20) ) {
+                        continue;
+                    }
                 }
             }
 
@@ -938,11 +1076,12 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
             //Using gen level info to see if prompt -> no prompt contamination in measurement region
             //everything else is RECO (p4, id, passes_id, FO, etc.)
 
-            if( noMCMatch || (motherID() <= 0 && (doBonly==0 || motherID() == -1) && (doConly==0 || motherID() == -2) && (doLightonly==0 || motherID() == 0) ) )  //if lep is nonprompt
+            if( noMCMatch || (isFake() && (doBonly==0 || motherID() == -1) && (doConly==0 || motherID() == -2) && (doLightonly==0 || motherID() == 0) ) )  //if lep is nonprompt
             {
 
                 if( abs( id() ) == 11 ) //it's an el
                 {
+                    // std::cout <<  " noMCMatch: " << noMCMatch <<  " motherID(): " << motherID() <<  " passFO: " << passFO <<  " passId: " << passId <<  std::endl;
                     if( passId )  //if el is tight
                     { 
                         Nt = Nt + weight;
@@ -982,7 +1121,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
             //everything else is RECO (p4, id, passes_id, FO, etc.)
 
 
-            if( noMCMatch || (motherID() <= 0 && (doBonly==0 || motherID() == -1) && (doConly==0 || motherID() == -2) && (doLightonly==0 || motherID() == 0) ) )  //if el is nonprompt (GEN info)
+            if( noMCMatch || (isFake() && (doBonly==0 || motherID() == -1) && (doConly==0 || motherID() == -2) && (doLightonly==0 || motherID() == 0) ) )  //if el is nonprompt (GEN info)
             {
 
                 if (passFO) {
@@ -1015,6 +1154,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                         //uncorrected and cone corrected FR
                         Nt_histo_e->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //
                         Nt_fine_histo_e->Fill(p4().pt(), fabs(p4().eta()), weight);   //
+                        Nt_conevsraw_histo_e->Fill(p4().pt(),getPt(p4().pt(),false), weight);   //  cone vs raw pT
 
                         Nt_nvtx_histo_e->Fill(nvtx(), weight);   //
 
@@ -1031,6 +1171,8 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                         //cone corrected FR
                         if( passId ) Nl_cone_histo_e->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //  <-- loose (as opposed to l!t)
                         else Nl_cone_histo_e->Fill(getPt(p4().pt()*(1+coneptcorr),false), getEta(fabs(p4().eta()),ht,false), weight);
+
+                        Nl_conevsraw_histo_e->Fill(p4().pt(),getPt(p4().pt()*(1+coneptcorr),false), weight);   //  cone vs raw pT
 
                         if( passId ) Nl_fine_cone_histo_e->Fill(p4().pt(), fabs(p4().eta()), weight);   //  <-- loose (as opposed to l!t)
                         else Nl_fine_cone_histo_e->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);
@@ -1069,6 +1211,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                         //uncorrected and cone corrected FR
                         Nt_histo_mu->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //
                         Nt_fine_histo_mu->Fill(p4().pt(), fabs(p4().eta()), weight);   //
+                        Nt_conevsraw_histo_mu->Fill(p4().pt(),getPt(p4().pt(),false), weight);   //  cone vs raw pT
 
                         Nt_nvtx_histo_mu->Fill(nvtx(), weight);   //
 
@@ -1085,6 +1228,18 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                         //cone corrected FR
                         if( passId ) Nl_cone_histo_mu->Fill(getPt(p4().pt(),false), getEta(fabs(p4().eta()),ht,false), weight);   //  <-- loose (as opposed to l!t)
                         else Nl_cone_histo_mu->Fill(getPt(p4().pt()*(1+coneptcorr),false), getEta(fabs(p4().eta()),ht,false), weight);
+
+                        Nl_conevsraw_histo_mu->Fill(p4().pt(),getPt(p4().pt()*(1+coneptcorr),false), weight);   //  cone vs raw pT
+
+                        auto pt = getPt(p4().pt()*(1+coneptcorr),false);
+                        auto eta = getEta(fabs(p4().eta()),ht,false);
+
+                        if (pt > 35 && pt < 50 && eta < 2.1 && eta > 1.2) {
+                            cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %7.3f %2i",
+                                    (unsigned long long)evt_event() , p4().pt(),pt,eta,miniiso(),p4().pt()/closejetpt,ptrel,passId,motherID(),evt_met,evt_mt,weight,
+                                    tag_p4().pt(),hyp_class()
+                                    ) << endl;
+                        }
 
                         if( passId ) Nl_fine_cone_histo_mu->Fill(p4().pt(), fabs(p4().eta()), weight);   //  <-- loose (as opposed to l!t)
                         else Nl_fine_cone_histo_mu->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);
@@ -1381,6 +1536,10 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     histo_pt_el->Write();
     njets40_histo->Write();
     hdenom->Write();
+    Nl_conevsraw_histo_e->Write();
+    Nl_conevsraw_histo_mu->Write();
+    Nt_conevsraw_histo_e->Write();
+    Nt_conevsraw_histo_mu->Write();
     OutputFile->Close();
 
     // delete jet_corrector_25ns_MC_pfL1; 

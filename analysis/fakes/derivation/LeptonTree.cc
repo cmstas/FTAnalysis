@@ -168,10 +168,20 @@ void LeptonTree::Init(TTree *tree) {
 		gen_metPhi_branch = tree->GetBranch("gen_metPhi");
 		if (gen_metPhi_branch) {gen_metPhi_branch->SetAddress(&gen_metPhi_);}
 	}
+	hyp_class_branch = 0;
+	if (tree->GetBranch("hyp_class") != 0) {
+		hyp_class_branch = tree->GetBranch("hyp_class");
+		if (hyp_class_branch) {hyp_class_branch->SetAddress(&hyp_class_);}
+	}
 	njets_branch = 0;
 	if (tree->GetBranch("njets") != 0) {
 		njets_branch = tree->GetBranch("njets");
 		if (njets_branch) {njets_branch->SetAddress(&njets_);}
+	}
+	nhadronicW_branch = 0;
+	if (tree->GetBranch("nhadronicW") != 0) {
+		nhadronicW_branch = tree->GetBranch("nhadronicW");
+		if (nhadronicW_branch) {nhadronicW_branch->SetAddress(&nhadronicW_);}
 	}
 	ht_branch = 0;
 	if (tree->GetBranch("ht") != 0) {
@@ -1625,6 +1635,8 @@ void LeptonTree::GetEntry(unsigned int idx)
 		gen_met_isLoaded = false;
 		gen_metPhi_isLoaded = false;
 		njets_isLoaded = false;
+		hyp_class_isLoaded = false;
+		nhadronicW_isLoaded = false;
 		ht_isLoaded = false;
 		ht_SS_isLoaded = false;
 		jets_isLoaded = false;
@@ -1948,6 +1960,8 @@ void LeptonTree::LoadAllBranches()
 	if (gen_met_branch != 0) gen_met();
 	if (gen_metPhi_branch != 0) gen_metPhi();
 	if (njets_branch != 0) njets();
+	if (hyp_class_branch != 0) hyp_class();
+	if (nhadronicW_branch != 0) nhadronicW();
 	if (ht_branch != 0) ht();
 	if (ht_SS_branch != 0) ht_SS();
 	if (jets_branch != 0) jets();
@@ -2567,7 +2581,20 @@ void LeptonTree::LoadAllBranches()
 		}
 		return gen_metPhi_;
 	}
-	const float &LeptonTree::njets()
+	const int &LeptonTree::nhadronicW()
+	{
+		if (not nhadronicW_isLoaded) {
+			if (nhadronicW_branch != 0) {
+				nhadronicW_branch->GetEntry(index);
+			} else { 
+				printf("branch nhadronicW_branch does not exist!\n");
+				exit(1);
+			}
+			nhadronicW_isLoaded = true;
+		}
+		return nhadronicW_;
+	}
+	const int &LeptonTree::njets()
 	{
 		if (not njets_isLoaded) {
 			if (njets_branch != 0) {
@@ -2579,6 +2606,19 @@ void LeptonTree::LoadAllBranches()
 			njets_isLoaded = true;
 		}
 		return njets_;
+	}
+	const int &LeptonTree::hyp_class()
+	{
+		if (not hyp_class_isLoaded) {
+			if (hyp_class_branch != 0) {
+				hyp_class_branch->GetEntry(index);
+			} else { 
+				printf("branch hyp_class_branch does not exist!\n");
+				exit(1);
+			}
+			hyp_class_isLoaded = true;
+		}
+		return hyp_class_;
 	}
 	const float &LeptonTree::ht()
 	{
@@ -6423,7 +6463,9 @@ namespace lepton_tree {
 	const float &evt_kfactor() { return lepton_tree_obj.evt_kfactor(); }
 	const float &gen_met() { return lepton_tree_obj.gen_met(); }
 	const float &gen_metPhi() { return lepton_tree_obj.gen_metPhi(); }
-	const float &njets() { return lepton_tree_obj.njets(); }
+	const int &njets() { return lepton_tree_obj.njets(); }
+	const int &hyp_class() { return lepton_tree_obj.hyp_class(); }
+	const int &nhadronicW() { return lepton_tree_obj.nhadronicW(); }
 	const float &ht() { return lepton_tree_obj.ht(); }
 	const float &ht_SS() { return lepton_tree_obj.ht_SS(); }
 	const vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > &jets() { return lepton_tree_obj.jets(); }

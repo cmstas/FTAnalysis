@@ -7,12 +7,12 @@
 2. We need Z normalization factors for the various triggers. Normally this is done with a scan statement over all the data
 and DY MC, but this takes many hours. Luckily when we made the lepton tree babies in step 1, we also made histograms from them using
 Metis. These histograms have the mll distributions we need to normalize, so hadd them with `. do_hadd.sh` after editing in the correct path
-and tag. Then run `python get_zsfs.py` to make plots of the Z peaks and spit out C++ code for normalization in `ScanChain.C`. Copy in these lines
-over the previous lines in `ScanChain.C`.
+and tag. Then run `python get_zsfs.py` to make plots of the Z peaks and spit out C++ code for normalization in `ScanChain_fast.C`. Copy in these lines
+over the previous lines in `ScanChain_fast.C`.
 
 ### Run looper to compute fake rate
 
-3. Edit `ScanChain.C` with appropriate logic/information.
+3. Edit `ScanChain_fast.C` with appropriate logic/information.
 
 4. Some setup:
 ```
