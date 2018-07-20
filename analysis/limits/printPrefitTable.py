@@ -10,7 +10,7 @@ import ROOT as r
 import numpy as np
 import pprint
 
-def get_yields(card, regions="srcr",stats_only=False):
+def get_yields(card, regions="srcr",stats_only=False,blinded=False):
 
     if ".txt" not in card:
         card += "/card_tttt_{0}.txt".format(regions)
@@ -105,6 +105,8 @@ def get_yields(card, regions="srcr",stats_only=False):
     fdata = r.TFile(data_rootfile)
     d_yields["data"] = {}
     d_yields["data"]["central"] = np.array(list(fdata.Get(data_hname))[1:-1])
+    if blinded:
+        d_yields["data"]["central"] *= 0
     d_yields["data"]["error"] = d_yields["data"]["central"]**0.5
 
     return  d_yields
@@ -115,7 +117,8 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
     # procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
     colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Fakes","Total","Data","$\\tttt$"]
-    procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
+    # procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
+    procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes","bgtot","data","tttt"]
     if slim:
         # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Fakes MC","Total","$\\tttt$"]
         # procs = ["ttw","ttz","tth","fakes_mc","bgtot","tttt"]
@@ -157,6 +160,7 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
         from pytable import Table
         tab = Table()
         tab.set_column_names([cname.replace("$","").replace("\\","") for cname in colnames])
+        tab.set_theme_basic()
         sep = u"\u00B1".encode("utf-8")
         # sep = "+-"
         if len(srnames)+1 == len(d_yields[d_yields.keys()[0]]["central"]):
@@ -186,12 +190,14 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits", default="srcr")
     parser.add_argument("-o", "--stats_only", help="only statistical errors", action="store_true")
     parser.add_argument("-n", "--precision", help="number of decimal places", default=2)
+    parser.add_argument("-b", "--blinded", help="blinded?", action="store_true")
     args = parser.parse_args()
 
     d_yields = get_yields(
             card=args.card,
             regions=args.regions,
             stats_only=args.stats_only,
+            blinded=args.blinded,
             )
 
     if args.denominator:
@@ -200,6 +206,7 @@ if __name__ == "__main__":
                 card=args.denominator,
                 regions=args.regions,
                 stats_only=args.stats_only,
+                blinded=args.blinded,
                 )
 
         for proc in d_yields.keys():
