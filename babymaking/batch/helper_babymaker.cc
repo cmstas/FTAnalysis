@@ -24,7 +24,9 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_isDirectPrompt"                                     , &lep2_isDirectPrompt                                     );
   BabyTree->Branch("lep2_isStat3"                                            , &lep2_isStat3                                            );
   BabyTree->Branch("met"                                                     , &met                                                     );
+  BabyTree->Branch("modmet"                                                     , &modmet                                                     );
   BabyTree->Branch("metPhi"                                                  , &metPhi                                                  );
+  BabyTree->Branch("modmetPhi"                                                  , &modmetPhi                                                  );
   BabyTree->Branch("rawmet"                                                  , &rawmet                                                  );
   BabyTree->Branch("rawmetPhi"                                               , &rawmetPhi                                               );
   BabyTree->Branch("calomet"                                                  , &calomet                                                  );
@@ -338,6 +340,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   //Triggers
   BabyTree->Branch("fired_trigger"                                           , &fired_trigger                                                                           );
   BabyTree->Branch("triggers"                                                , &triggers                                                                                );
+  BabyTree->Branch("triggers1lep"                                                , &triggers1lep                                                                                );
   BabyTree->Branch("weight_btagsf"                                           , &weight_btagsf                                                                           );
   BabyTree->Branch("weight_btagsf_UP"                                        , &weight_btagsf_UP                                                                        );
   BabyTree->Branch("weight_btagsf_DN"                                        , &weight_btagsf_DN                                                                        );
@@ -523,6 +526,8 @@ void babyMaker::InitBabyNtuple(){
     calometPhi = -1;
     met = -1;
     metPhi = -1;
+    modmet = -1;
+    modmetPhi = -1;
     event = -1;
     lumi = -1;
     run = -1;
@@ -766,6 +771,7 @@ void babyMaker::InitBabyNtuple(){
     lep2_trigMatch_isoReq = 0;
     fired_trigger = 0;
     triggers = 0;
+    triggers1lep = 0;
     // met3p0 = 0;
     // metphi3p0 = 0;
     passes_met_filters = 0;
@@ -991,6 +997,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   pair <float, float> T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
   met = T1CHSMET.first;
   metPhi = T1CHSMET.second;
+
+  auto modmetpair = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, 2);
+  modmet = modmetpair.first;
+  modmetPhi = modmetpair.second;
+
+  // std::cout <<  " met: " << met <<  " modmet: " << modmet <<  " met-modmet: " << met-modmet <<  std::endl;
 
   if (!is_real_data){
     float sgnMCweight = ((tas::genps_weight() > 0) - (tas::genps_weight() < 0));
@@ -1424,6 +1436,16 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets.push_back(jet_results.first.at(i).p4());
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_flavor.push_back(jet_results.first.at(i).mcFlavor()); // NJA
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_disc.push_back(jet_results.first.at(i).csv());
+
+  // for (unsigned int i = 0; i < jet_results.first.size(); i++) {
+  //     int idx = jet_results.first.at(i).idx();
+  //     jets_deepcsv_b.push_back( tas::getbtagvalue("pfDeepCSVJetTags:probb",i)+tas::getbtagvalue("pfDeepCSVJetTags:probbb",i) );
+  //     jets_deepcsv_c.push_back( tas::getbtagvalue("pfDeepCSVJetTags:probc",i) );
+  //     jets_deepflavor_b.push_back( tas::getbtagvalue("pfDeepFlavourJetTags:probb",i)+tas::getbtagvalue("pfDeepFlavourJetTags:probbb",i) );
+  //     jets_deepflavor_c.push_back( tas::getbtagvalue("pfDeepFlavourJetTags:probc",i) );
+  //     jets_deepflavor_lepb.push_back( tas::getbtagvalue("pfDeepFlavourJetTags:problepb",i) );
+  // }
+
   // for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_disc_mva.push_back(jet_results.first.at(i).csvmva());
   // for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_disc_ivf.push_back(jet_results.first.at(i).csvivf());
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_JEC.push_back(jet_results.first.at(i).jec());
@@ -1886,6 +1908,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
   if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v")))    (triggers |= 1<<5);
   if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
+
+  if (passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_v")))                      (triggers1lep |= 1<<0);
+  if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_v")))                      (triggers1lep |= 1<<1);
+  if (passHLTTrigger(triggerName("HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30_v")))                      (triggers1lep |= 1<<2);
+  if (passHLTTrigger(triggerName("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v")))                      (triggers1lep |= 1<<3);
 
 
   fired_trigger = false;
