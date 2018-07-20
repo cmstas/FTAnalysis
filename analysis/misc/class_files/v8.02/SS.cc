@@ -123,6 +123,11 @@ void SSAG::Init(TTree *tree) {
 		lep2_isStat3_branch = tree->GetBranch("lep2_isStat3");
 		if (lep2_isStat3_branch) {lep2_isStat3_branch->SetAddress(&lep2_isStat3_);}
 	}
+	modmet_branch = 0;
+	if (tree->GetBranch("modmet") != 0) {
+		modmet_branch = tree->GetBranch("modmet");
+		if (modmet_branch) {modmet_branch->SetAddress(&modmet_);}
+	}
 	met_branch = 0;
 	if (tree->GetBranch("met") != 0) {
 		met_branch = tree->GetBranch("met");
@@ -137,6 +142,11 @@ void SSAG::Init(TTree *tree) {
 	if (tree->GetBranch("metPhi") != 0) {
 		metPhi_branch = tree->GetBranch("metPhi");
 		if (metPhi_branch) {metPhi_branch->SetAddress(&metPhi_);}
+	}
+	modmetPhi_branch = 0;
+	if (tree->GetBranch("modmetPhi") != 0) {
+		modmetPhi_branch = tree->GetBranch("modmetPhi");
+		if (modmetPhi_branch) {modmetPhi_branch->SetAddress(&modmetPhi_);}
 	}
 	rawmet_branch = 0;
 	if (tree->GetBranch("rawmet") != 0) {
@@ -1338,6 +1348,11 @@ void SSAG::Init(TTree *tree) {
 		triggers_branch = tree->GetBranch("triggers");
 		if (triggers_branch) {triggers_branch->SetAddress(&triggers_);}
 	}
+	triggers1lep_branch = 0;
+	if (tree->GetBranch("triggers1lep") != 0) {
+		triggers1lep_branch = tree->GetBranch("triggers1lep");
+		if (triggers1lep_branch) {triggers1lep_branch->SetAddress(&triggers1lep_);}
+	}
 	weight_btagsf_branch = 0;
 	if (tree->GetBranch("weight_btagsf") != 0) {
 		weight_btagsf_branch = tree->GetBranch("weight_btagsf");
@@ -1367,6 +1382,11 @@ void SSAG::Init(TTree *tree) {
 	if (tree->GetBranch("nisrMatch") != 0) {
 		nisrMatch_branch = tree->GetBranch("nisrMatch");
 		if (nisrMatch_branch) {nisrMatch_branch->SetAddress(&nisrMatch_);}
+	}
+	nhadronicW_branch = 0;
+	if (tree->GetBranch("nhadronicW") != 0) {
+		nhadronicW_branch = tree->GetBranch("nhadronicW");
+		if (nhadronicW_branch) {nhadronicW_branch->SetAddress(&nhadronicW_);}
 	}
 	extragenb_branch = 0;
 	if (tree->GetBranch("extragenb") != 0) {
@@ -1606,8 +1626,10 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_isDirectPrompt_isLoaded = false;
 		lep2_isStat3_isLoaded = false;
 		met_isLoaded = false;
+		modmet_isLoaded = false;
 		filenumber_isLoaded = false;
 		metPhi_isLoaded = false;
+		modmetPhi_isLoaded = false;
 		rawmet_isLoaded = false;
 		calomet_isLoaded = false;
 		rawmetPhi_isLoaded = false;
@@ -1864,6 +1886,7 @@ void SSAG::GetEntry(unsigned int idx)
 		passed_id_inSituFR_lep2_isLoaded = false;
 		fired_trigger_isLoaded = false;
 		triggers_isLoaded = false;
+		triggers1lep_isLoaded = false;
 		weight_btagsf_isLoaded = false;
 		weight_btagsf_UP_isLoaded = false;
 		weight_btagsf_DN_isLoaded = false;
@@ -1872,6 +1895,7 @@ void SSAG::GetEntry(unsigned int idx)
 		decayWSF_isLoaded = false;
 		isr_unc_isLoaded = false;
 		nisrMatch_isLoaded = false;
+		nhadronicW_isLoaded = false;
 		extragenb_isLoaded = false;
 		weight_isr_isLoaded = false;
 		weight_isr_UP_isLoaded = false;
@@ -1929,8 +1953,10 @@ void SSAG::LoadAllBranches()
 	if (lep2_isDirectPrompt_branch != 0) lep2_isDirectPrompt();
 	if (lep2_isStat3_branch != 0) lep2_isStat3();
 	if (met_branch != 0) met();
+	if (modmet_branch != 0) modmet();
 	if (filenumber_branch != 0) filenumber();
 	if (metPhi_branch != 0) metPhi();
+	if (modmetPhi_branch != 0) modmetPhi();
 	if (rawmet_branch != 0) rawmet();
 	if (calomet_branch != 0) calomet();
 	if (rawmetPhi_branch != 0) rawmetPhi();
@@ -2187,6 +2213,7 @@ void SSAG::LoadAllBranches()
 	if (passed_id_inSituFR_lep2_branch != 0) passed_id_inSituFR_lep2();
 	if (fired_trigger_branch != 0) fired_trigger();
 	if (triggers_branch != 0) triggers();
+	if (triggers1lep_branch != 0) triggers1lep();
 	if (weight_btagsf_branch != 0) weight_btagsf();
 	if (weight_btagsf_UP_branch != 0) weight_btagsf_UP();
 	if (weight_btagsf_DN_branch != 0) weight_btagsf_DN();
@@ -2195,6 +2222,7 @@ void SSAG::LoadAllBranches()
 	if (decayWSF_branch != 0) decayWSF();
 	if (isr_unc_branch != 0) isr_unc();
 	if (nisrMatch_branch != 0) nisrMatch();
+	if (nhadronicW_branch != 0) nhadronicW();
 	if (extragenb_branch != 0) extragenb();
 	if (weight_isr_branch != 0) weight_isr();
 	if (weight_isr_UP_branch != 0) weight_isr_UP();
@@ -2333,6 +2361,19 @@ void SSAG::LoadAllBranches()
 		}
 		return met_;
 	}
+	const float &SSAG::modmet()
+	{
+		if (not modmet_isLoaded) {
+			if (modmet_branch != 0) {
+				modmet_branch->GetEntry(index);
+			} else { 
+				printf("branch modmet_branch does not exist!\n");
+				exit(1);
+			}
+			modmet_isLoaded = true;
+		}
+		return modmet_;
+	}
 	const int &SSAG::filenumber()
 	{
 		if (not filenumber_isLoaded) {
@@ -2358,6 +2399,19 @@ void SSAG::LoadAllBranches()
 			metPhi_isLoaded = true;
 		}
 		return metPhi_;
+	}
+	const float &SSAG::modmetPhi()
+	{
+		if (not modmetPhi_isLoaded) {
+			if (modmetPhi_branch != 0) {
+				modmetPhi_branch->GetEntry(index);
+			} else { 
+				printf("branch modmetPhi_branch does not exist!\n");
+				exit(1);
+			}
+			modmetPhi_isLoaded = true;
+		}
+		return modmetPhi_;
 	}
 	const float &SSAG::rawmet()
 	{
@@ -5687,6 +5741,19 @@ void SSAG::LoadAllBranches()
 		}
 		return triggers_;
 	}
+	const unsigned int &SSAG::triggers1lep()
+	{
+		if (not triggers1lep_isLoaded) {
+			if (triggers1lep_branch != 0) {
+				triggers1lep_branch->GetEntry(index);
+			} else { 
+				printf("branch triggers1lep_branch does not exist!\n");
+				exit(1);
+			}
+			triggers1lep_isLoaded = true;
+		}
+		return triggers1lep_;
+	}
 	const float &SSAG::weight_btagsf()
 	{
 		if (not weight_btagsf_isLoaded) {
@@ -5790,6 +5857,19 @@ void SSAG::LoadAllBranches()
 			nisrMatch_isLoaded = true;
 		}
 		return nisrMatch_;
+	}
+	const int &SSAG::nhadronicW()
+	{
+		if (not nhadronicW_isLoaded) {
+			if (nhadronicW_branch != 0) {
+				nhadronicW_branch->GetEntry(index);
+			} else { 
+				printf("branch nhadronicW_branch does not exist!\n");
+				exit(1);
+			}
+			nhadronicW_isLoaded = true;
+		}
+		return nhadronicW_;
 	}
 	const int &SSAG::extragenb()
 	{
@@ -6408,8 +6488,10 @@ namespace ss {
 	const bool &lep2_isDirectPrompt() { return samesign.lep2_isDirectPrompt(); }
 	const bool &lep2_isStat3() { return samesign.lep2_isStat3(); }
 	const float &met() { return samesign.met(); }
+	const float &modmet() { return samesign.modmet(); }
 	const int &filenumber() { return samesign.filenumber(); }
 	const float &metPhi() { return samesign.metPhi(); }
+	const float &modmetPhi() { return samesign.modmetPhi(); }
 	const float &rawmet() { return samesign.rawmet(); }
 	const float &calomet() { return samesign.calomet(); }
 	const float &rawmetPhi() { return samesign.rawmetPhi(); }
@@ -6666,6 +6748,7 @@ namespace ss {
 	const bool &passed_id_inSituFR_lep2() { return samesign.passed_id_inSituFR_lep2(); }
 	const bool &fired_trigger() { return samesign.fired_trigger(); }
 	const unsigned int &triggers() { return samesign.triggers(); }
+	const unsigned int &triggers1lep() { return samesign.triggers1lep(); }
 	const float &weight_btagsf() { return samesign.weight_btagsf(); }
 	const float &weight_btagsf_UP() { return samesign.weight_btagsf_UP(); }
 	const float &weight_btagsf_DN() { return samesign.weight_btagsf_DN(); }
@@ -6674,6 +6757,7 @@ namespace ss {
 	const float &decayWSF() { return samesign.decayWSF(); }
 	const float &isr_unc() { return samesign.isr_unc(); }
 	const int &nisrMatch() { return samesign.nisrMatch(); }
+	const int &nhadronicW() { return samesign.nhadronicW(); }
 	const int &extragenb() { return samesign.extragenb(); }
 	const float &weight_isr() { return samesign.weight_isr(); }
 	const float &weight_isr_UP() { return samesign.weight_isr_UP(); }
