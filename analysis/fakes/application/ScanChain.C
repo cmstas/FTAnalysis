@@ -21,7 +21,7 @@
 // #include "../../../common/CORE/MCSelections.h"
 
 
-#include "../../../common/CORE/Tools/utils.h"
+// #include "../../../common/CORE/Tools/utils.h"
 // #include "../../../common/CORE/Tools/dorky/dorky.cc"
 // #include "../../../common/Software/dataMCplotMaker/PlotMaker2D.h"
 // #include "../../../common/Software/dataMCplotMaker/dataMCplotMaker.h"
@@ -32,12 +32,38 @@ using namespace std;
 // using namespace duplicate_removal;
 
 // #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar.h"
-#include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar_highmet.h"
-#include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/rw_ttbar.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar_highmet.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar_highmet_allnfo.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar_nom_full.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/fr_ttbar_nom_full_fine.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/rw_ttbar.h"
+//
+// 
 
-bool doLatex = true;
-bool doRatio = false;
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_nometmt.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2_fine.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v3_fine.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2_above25.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2_noconecorr.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2_mu18.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2_newp.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_ttbartest25.h"
+#include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_ttbartest25_mid3.h"
+
 bool inclHT = false;
+
+bool doNew = true;
+bool doQCD = false; // XXX
+bool doHadFR = false;
+bool doHadApp = true; // XXX
+bool onlyMuMu = false;
+bool doAbove18 = false;
+bool doNewP = false;
+bool doAbove25 = true; // XXX
+bool bypassTrigger = false;
+bool absweight = true; // XXX
+bool ignoreConeCorr = false;
 
 TH1D * evtCounter = new TH1D("","",1000,0,1000); 
 map<TString, int> evtBinMap;
@@ -71,10 +97,14 @@ void printCounter(bool file = false) {
     if(file) cout << "Wrote counter to counter.txt" << endl;
 }
 
+float MT(float pt1, float phi1, float pt2, float phi2){
+  return sqrt( 2 * pt1 * pt2 * ( 1 - cos( phi1 - phi2 ) ) );
+}
+
 bool isFakeLeg(int lep, bool doData=false){
   if (doData) return true;
-  if (lep == 1) return (ss::lep1_motherID() <= 0);
-  if (lep == 2) return (ss::lep2_motherID() <= 0);
+  if (lep == 1) return (ss::lep1_motherID() <= 0 && ss::lep1_motherID() != -3);
+  if (lep == 2) return (ss::lep2_motherID() <= 0 && ss::lep2_motherID() != -3);
   return 0;
 }
 
@@ -83,27 +113,6 @@ bool isGoodLeg(int lep, bool doData=false){
   if (lep == 1) return (ss::lep1_motherID() == 1);
   if (lep == 2) return (ss::lep2_motherID() == 1);
   return 0;
-}
-
-bool AN_MVA(int level, int lep_id, float lep_etaSC, float lep_MVA){
-    // level == 1 for Iso and 2 for noniso
-    lep_etaSC = fabs(lep_etaSC);
-    if (abs(lep_id) != 11) return true;
-
-    // http://uaf-8.t2.ucsd.edu/~namin/dump/ssan.pdf#page=55
-    //    - Isolated trigger denominator: (0.05, -0.26, -0.40)
-    //    - Non-isolated trigger denominator: (-0.36,-0.58,-0.62)
-    //       - will need to bypass the passIsolatedFO stuff in order to use this since this is looser than that
-    if (level == 1) {
-        if (lep_etaSC < 0.8) return lep_MVA > 0.05;
-        if ((lep_etaSC >= 0.8 && lep_etaSC <= 1.479)) return lep_MVA > -0.26;
-        if (lep_etaSC > 1.479) return lep_MVA > -0.40;
-    } else if (level == 2) {
-        if (lep_etaSC < 0.8) return lep_MVA > -0.36;
-        if ((lep_etaSC >= 0.8 && lep_etaSC <= 1.479)) return lep_MVA > -0.58;
-        if (lep_etaSC > 1.479) return lep_MVA > -0.62;
-    }
-    return false;
 }
 
 float computePtRel(LorentzVector lepp4, LorentzVector jetp4, bool subtractLep){
@@ -120,14 +129,72 @@ int number = 0;
 float getFakeRate(int id, float pt, float eta, float ht, bool extrPtRel = false, bool doData = false, bool doInSitu = false){
     if (inclHT) ht = -1; // negative ht means use inclusive ht in commonUtils // FIXME
 
-    // FIXME FIXME
-    if (abs(id) == 13) {
-        float rw = 1.;
-        // float rw = muonTTbarMCReweightToMeas_IsoTrigs(pt,eta);
-        return rw*muonTTbarMCFakeRate_IsoTrigs(pt,eta);
-    }
+    float fact = 0.;
 
-    return qcdMCFakeRate(id, pt, eta, ht);
+    // // FIXME FIXME
+    // if (abs(id) == 13) {
+    //     float rw = 1.;
+    //     // float rw = muonTTbarMCReweightToMeas_IsoTrigs(pt,eta);
+    //     return rw*muonTTbarMCFakeRate_IsoTrigs(pt,eta);
+    // }
+
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRate_new(pt,eta) : electronTTbarMCFakeRate_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_notrig_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_notrig_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_new(pt,eta) : electronTTbarMCFakeRatehad1_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_new(pt,eta) : electronTTbarMCFakeRatehad2_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1bonly_new(pt,eta) : electronTTbarMCFakeRatehad1bonly_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_bonly_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_bonly_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRate_bonly_new(pt,eta) : electronTTbarMCFakeRate_bonly_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_bonly_new(pt,eta) : electronTTbarMCFakeRatehad2_bonly_new(pt,eta);
+
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_abs_fogeq2_new(pt,eta) : electronTTbarMCFakeRatehad1_abs_fogeq2_new(pt,eta);
+    fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_abs_new(pt,eta) : electronTTbarMCFakeRatehad2_abs_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_abs_fogeq2_bonly_new(pt,eta) : electronTTbarMCFakeRatehad1_abs_fogeq2_bonly_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_abs_bonly_new(pt,eta) : electronTTbarMCFakeRatehad2_abs_bonly_new(pt,eta);
+
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_bonly_newFine(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_bonly_newFine(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_newFine(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_newFine(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fix_new(pt,eta) : electronTTbarMCFakeRatehad1_fix_new(pt,eta);
+    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_fix_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_fix_new(pt,eta);
+
+    if (fact > 0.8) fact = 0.8;
+    if (fact < 0.) fact = 0.;
+
+    // if (abs(id) == 13) {
+    //     if (doQCD) {
+    //         if (doNew) fact = muonQCDMCFakeRate_new(pt,eta);
+    //         else fact = muonQCDMCFakeRate_old(pt,eta);
+    //     } else {
+    //         if (doHadFR) {
+    //             if (doNew) fact = muonTTbarMCFakeRatehad_new(pt,eta);
+    //             else fact = muonTTbarMCFakeRatehad_old(pt,eta);
+    //         } else {
+    //             if (doNew) fact = muonTTbarMCFakeRate_new(pt,eta);
+    //             else fact = muonTTbarMCFakeRate_old(pt,eta);
+    //         }
+    //     }
+    //     if (fact > 0.99) fact = 0.8;
+    // } else {
+    //     if (doQCD) {
+    //         if (doNew) fact = electronQCDMCFakeRate_new(pt,eta);
+    //         else fact = electronQCDMCFakeRate_old(pt,eta);
+    //     } else {
+    //         if (doHadFR) {
+    //             if (doNew) fact = electronTTbarMCFakeRatehad_new(pt,eta);
+    //             else fact = electronTTbarMCFakeRatehad_old(pt,eta);
+    //         } else {
+    //             if (doNew) fact = electronTTbarMCFakeRate_new(pt,eta);
+    //             else fact = electronTTbarMCFakeRate_old(pt,eta);
+    //         }
+    //     }
+    //     if (fact > 0.9) fact = 0.9;
+    // }
+
+    return fact;
+
+
+    // return qcdMCFakeRate(id, pt, eta, ht);
 
     // if (doInSitu) return fakeRateInSitu(id, pt, eta, ht);
     // else if (doData ) return fakeRate(id, pt, eta, ht);
@@ -243,7 +310,6 @@ std::vector<std::pair<TH1F*, TH1F*> > getBackgrounds(std::string type, int isMu,
       if(isMu == 0) histname += "_el";
       else if(isMu == 1) histname += "_mu";
       histname += filenames[i].Data();
-      // if(TString(histname).Contains("_obs")) continue; // FIXME - remove when not doing data
       pairs.push_back( make_pair(hists[getHist(histname)],hists[getHist(histname)]) );
   }
   return pairs;
@@ -257,7 +323,8 @@ void printClosureNumbers(std::vector<TString> filenames) {
 
         std::cout << "-- Closure for " << (imu >= 0 ? (imu == 1 ? "MU" : "EL" ) : "TOTAL") << " -- " << std::endl;
         float val_pred = hists[getHist("Npn_histo_sr_pred"+musuffix)]->Integral();
-        std::cout << "  pred: " << val_pred << std::endl;
+        float val_pred_unw = hists[getHist("Npn_histo_sr_pred_unw"+musuffix)]->Integral();
+        std::cout << "  pred: " << val_pred << " (unweighted/T!L = " << val_pred_unw << ")" << std::endl;
         std::vector<std::pair<TH1F*,TH1F*> > vobs = getBackgrounds("Npn_histo_sr_obs",imu,filenames);
         float tot_obs = 0.;
         for(unsigned int ifile = 0; ifile < filenames.size(); ifile++) {
@@ -266,6 +333,32 @@ void printClosureNumbers(std::vector<TString> filenames) {
             std::cout << "   " << filenames[ifile] << " obs: " << val_obs << std::endl;
         }
         std::cout << "  --> pred/obs: " << val_pred/tot_obs << std::endl;
+
+        // std::string tag = "muonTTbarMCFakeRate_new";
+        // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_new";
+        // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_notrig_new";
+        // std::string tag = "muonTTbarMCFakeRatehad1_new";
+        // std::string tag = "muonTTbarMCFakeRatehad2_new";
+        // std::string tag = "muonTTbarMCFakeRatehad1bonly_new";
+        // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_bonly_new";
+        // std::string tag = "muonTTbarMCFakeRate_bonly_new";
+        // std::string tag = "muonTTbarMCFakeRatehad2_bonly_new";
+        
+        // std::string tag = "muonTTbarMCFakeRatehad1_abs_fogeq2_new";
+        std::string tag = "muonTTbarMCFakeRatehad2_abs_new";
+        // std::string tag = "muonTTbarMCFakeRatehad1_abs_fogeq2_bonly_new";
+        // std::string tag = "muonTTbarMCFakeRatehad2_abs_bonly_new";
+
+        // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_newFine";
+        // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_bonly_newFine";
+        // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_fix_new";
+        // std::string tag = "muonTTbarMCFakeRatehad1_fix_new";
+        if (imu >= 0) {
+            std::cout << ((imu == 1) ? "MU" : "EL" )
+                << "GREP (L!T, pred, obs, pred/obs) " << tag << " "
+                << val_pred_unw << " " << val_pred 
+                << " " << tot_obs << " " << val_pred/tot_obs << std::endl;
+        }
         std::cout << std::endl;
     }
 }
@@ -346,10 +439,13 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       hists.push_back( histCreator("Npn_histo_NB_pred_el"           , "Predicted Prompt-NonPrompt Background (Single el)" ,  4, 0,    4) );
       hists.push_back( histCreator("Npn_histo_sr_obs"        + fname, "Observed Prompt-NonPrompt Background"              , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_sr_pred"              , "Predicted Prompt-NonPrompt Background"             , nsr, 0.5,   nsr+0.5) );
+      hists.push_back( histCreator("Npn_histo_sr_pred_unw"              , "Predicted Prompt-NonPrompt Background"             , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_sr_obs_mu"     + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_sr_pred_mu"           , "Predicted Prompt-NonPrompt Background (Single mu)" , nsr, 0.5,   nsr+0.5) );
+      hists.push_back( histCreator("Npn_histo_sr_pred_unw_mu"           , "Predicted Prompt-NonPrompt Background (Single mu)" , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_sr_obs_el"     + fname, "Observed Prompt-NonPrompt Background (Single el)"  , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_sr_pred_el"           , "Predicted Prompt-NonPrompt Background (Single el)" , nsr, 0.5,   nsr+0.5) );
+      hists.push_back( histCreator("Npn_histo_sr_pred_unw_el"           , "Predicted Prompt-NonPrompt Background (Single el)" , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_HT_obs"        + fname, "Observed Prompt-NonPrompt Background"              , 15, 0, 800) );
       hists.push_back( histCreator("Npn_histo_HT_pred"              , "Predicted Prompt-NonPrompt Background"             , 15, 0, 800) );
       hists.push_back( histCreator("Npn_histo_HT_obs_mu"     + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0, 800) );
@@ -374,12 +470,12 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       hists.push_back( histCreator("Npn_histo_NJET_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 8, 0,   8) );
       hists.push_back( histCreator("Npn_histo_NJET_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 8, 0,   8) );
       hists.push_back( histCreator("Npn_histo_NJET_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 8, 0,   8) );
-      hists.push_back( histCreator("Npn_histo_MATCH_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 3, 0,   3) );
-      hists.push_back( histCreator("Npn_histo_MATCH_pred"           , "Predicted Prompt-NonPrompt Background"             , 3, 0,   3) );
-      hists.push_back( histCreator("Npn_histo_MATCH_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 3, 0,   3) );
-      hists.push_back( histCreator("Npn_histo_MATCH_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 3, 0,   3) );
-      hists.push_back( histCreator("Npn_histo_MATCH_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 3, 0,   3) );
-      hists.push_back( histCreator("Npn_histo_MATCH_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 3, 0,   3) );
+      hists.push_back( histCreator("Npn_histo_MATCH_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 5, 0,   5) );
+      hists.push_back( histCreator("Npn_histo_MATCH_pred"           , "Predicted Prompt-NonPrompt Background"             , 5, 0,   5) );
+      hists.push_back( histCreator("Npn_histo_MATCH_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 5, 0,   5) );
+      hists.push_back( histCreator("Npn_histo_MATCH_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 5, 0,   5) );
+      hists.push_back( histCreator("Npn_histo_MATCH_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 5, 0,   5) );
+      hists.push_back( histCreator("Npn_histo_MATCH_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 5, 0,   5) );
       hists.push_back( histCreator("Npn_histo_L1PT_obs"      + fname, "Observed Prompt-NonPrompt Background"              , 15, 0,   200) );
       hists.push_back( histCreator("Npn_histo_L1PT_pred"            , "Predicted Prompt-NonPrompt Background"             , 15, 0,   200) );
       hists.push_back( histCreator("Npn_histo_L1PT_obs_mu"   + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0,   200) );
@@ -701,6 +797,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
     else if(fname.Contains("/WZ3L"))  { fname = "WZ";     }
     else if(fname.Contains("/Data"))  { fname = "Data";   }
     else if(fname.Contains("/output.root"))  { fname = "TTBAR";   }
+    else if(fname.Contains("/output_"))  { fname = "TTBAR";   }
     std::cout <<  " fname: " << fname <<  std::endl;
 
     if(fname != prevFilename) {
@@ -724,20 +821,41 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       // Progress
       SSAG::progress(nEventsTotal, nEventsChain);
 
-      if (ss::hyp_class() == 2) {
-          if (fabs(ss::lep1_id()) == 13 && isFakeLeg(1)) {
-              hdenom->Fill(ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()), ss::scale1fb());
-              if (ss::lep1_passes_id()) {
-                  hnumer->Fill(ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()), ss::scale1fb());
-              }
-          }
-          if (fabs(ss::lep2_id()) == 13 && isFakeLeg(2)) {
-              hdenom->Fill(ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()), ss::scale1fb());
-              if (ss::lep2_passes_id()) {
-                  hnumer->Fill(ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()), ss::scale1fb());
-              }
-          }
-      }
+      // if (ss::hyp_class() == 2) {
+      //     if (fabs(ss::lep1_id()) == 13 && isFakeLeg(1)) {
+      //         hdenom->Fill(ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()), ss::scale1fb());
+      //         if (ss::lep1_passes_id()) {
+      //             hnumer->Fill(ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()), ss::scale1fb());
+      //         }
+      //     }
+      //     if (fabs(ss::lep2_id()) == 13 && isFakeLeg(2)) {
+      //         hdenom->Fill(ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()), ss::scale1fb());
+      //         if (ss::lep2_passes_id()) {
+      //             hnumer->Fill(ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()), ss::scale1fb());
+      //         }
+      //     }
+      // }
+
+      // if (ss::hyp_class() == 2 && ss::met() > 50) {
+      //     if (ss::lep1_passes_id() && fabs(ss::lep2_id())==13) {
+      //         if (ss::lep2_coneCorrPt() > 35 && ss::lep2_coneCorrPt() < 50 && fabs(ss::lep2_p4().eta()) < 2.1 && fabs(ss::lep2_p4().eta()) > 1.2) {
+      //             cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f",
+      //                     (unsigned long long)ss::event() , ss::lep2_p4().pt(),ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()),ss::lep2_miniIso(),
+      //                     ss::lep2_p4().pt()/ss::jet_close_lep2().pt(),ss::lep2_ptrel_v1(),ss::lep2_passes_id(),ss::lep2_motherID(),
+      //                     ss::met(),ss::mt(),41.3*ss::scale1fb()) << endl;
+      //         }
+      //     } 
+      //     if (ss::lep2_passes_id() && fabs(ss::lep1_id())==13) {
+      //         if (ss::lep1_coneCorrPt() > 35 && ss::lep1_coneCorrPt() < 50 && fabs(ss::lep1_p4().eta()) < 2.1 && fabs(ss::lep1_p4().eta()) > 1.2) {
+      //             cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f",
+      //                     (unsigned long long)ss::event() , ss::lep1_p4().pt(),ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()),ss::lep1_miniIso(),
+      //                     ss::lep1_p4().pt()/ss::jet_close_lep1().pt(),ss::lep1_ptrel_v1(),ss::lep1_passes_id(),ss::lep1_motherID(),
+      //                     ss::met(),ss::mt(),41.3*ss::scale1fb()) << endl;
+      //         }
+      //     }
+      // }
+
+
 
       // if (ss::is_real_data() ) {
       //     DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
@@ -745,7 +863,12 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       // }
 
       // Analysis Code
-      float weight = ss::is_real_data() ? 1.0 : ss::scale1fb()*luminosity;
+      float weight = 1.0; 
+      if (absweight) {
+          weight = ss::is_real_data() ? 1.0 : fabs(ss::scale1fb())*luminosity;
+      } else {
+          weight = ss::is_real_data() ? 1.0 : ss::scale1fb()*luminosity;
+      }
 
       if (!ss::is_real_data()) {
           weight *= getTruePUw(ss::trueNumInt()[0]);
@@ -764,7 +887,9 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
 
       //require triggers
-      if (!ss::fired_trigger()) continue;
+      if (!bypassTrigger) {
+          if (!ss::fired_trigger()) continue;
+      }
       if (doLowHT) {
           if (ss::ht()>300.) continue;
       }
@@ -780,6 +905,9 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       if ((ss::lep2_motherID()==1 || ss::lep2_motherID()==-1) && (ss::lep1_motherID()==1 || ss::lep1_motherID()==-1)) match_type = 1;
       //consider only prompt or cs
       if ((ss::lep2_motherID()==1 || ss::lep2_motherID()==-2) && (ss::lep1_motherID()==1 || ss::lep1_motherID()==-2)) match_type = 2;
+      // https://github.com/cmstas/CORE/blob/master/SSSelections.cc#L1207
+      if ((ss::lep2_motherID()==1 || ss::lep2_motherID()==-3) && (ss::lep1_motherID()==1 || ss::lep1_motherID()==-3)) match_type = 3;
+      if ((ss::lep2_motherID()==1 || ss::lep2_motherID()==-4) && (ss::lep1_motherID()==1 || ss::lep1_motherID()==-4)) match_type = 4;
 
       if (doBonly) {
         //consider only prompt or bs
@@ -818,11 +946,15 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       float lep1_pT = ss::lep1_p4().pt();
       float lep2_pT = ss::lep2_p4().pt();
 
-
+      if (doHadApp) {
+          if (ss::nhadronicW() != 1) continue;
+      }
 
       if (coneCorr){
-          lep1_pT = ss::lep1_coneCorrPt();
-          lep2_pT = ss::lep2_coneCorrPt();
+          if (!ignoreConeCorr) {
+              lep1_pT = ss::lep1_coneCorrPt();
+              lep2_pT = ss::lep2_coneCorrPt();
+          }
       }
       if (jetCorr){
           lep1_pT = ss::jet_close_lep1().pt();
@@ -843,8 +975,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       if (verbose) {
           bool lep1prompt = ss::lep1_motherID()==1;
           bool lep2prompt = ss::lep2_motherID()==1;
-          bool lep1nonprompt = ss::lep1_motherID()<=0;
-          bool lep2nonprompt = ss::lep2_motherID()<=0;
+          bool lep1nonprompt = isFakeLeg(1);
+          bool lep2nonprompt = isFakeLeg(2);
           std::cout << " ss::lep1_passes_id(): " << ss::lep1_passes_id() << " ss::lep2_passes_id(): " << ss::lep2_passes_id() << std::endl;
           std::cout << " lep1_pT: " << lep1_pT << " lep2_pT: " << lep2_pT << std::endl;
           std::cout << " lep1prompt: " << lep1prompt << " lep2prompt: " << lep2prompt << " lep1nonprompt: " << lep1nonprompt << " lep2nonprompt: " << lep2nonprompt << std::endl;
@@ -870,9 +1002,11 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       //Determine mtMin
       float mtmin = ss::mt() > ss::mt_l2() ? ss::mt_l2() : ss::mt();
       if (coneCorr){
-        float mtl1 = MT(lep1_pT, ss::lep1_p4().phi(), ss::met(), ss::metPhi());
-        float mtl2 = MT(lep2_pT, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
-        mtmin = mtl1 > mtl2 ? mtl2 : mtl1;
+          if (!ignoreConeCorr) {
+              float mtl1 = MT(lep1_pT, ss::lep1_p4().phi(), ss::met(), ss::metPhi());
+              float mtl2 = MT(lep2_pT, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
+              mtmin = mtl1 > mtl2 ? mtl2 : mtl1;
+          }
       }
 
       //Determine SR and BR
@@ -893,11 +1027,97 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       if (abs(ss::lep1_id())==13 && ss::lep1_p4().pt()<10.) continue;
       if (abs(ss::lep2_id())==13 && ss::lep2_p4().pt()<10.) continue;
 
+      if (onlyMuMu && (ss::hyp_type() != 0)) continue;
+      if (doAbove25) {
+          if (ss::lep1_p4().pt() < 25) continue;
+          if (ss::lep2_p4().pt() < 25) continue;
+          if (!ignoreConeCorr) {
+              if (ss::lep1_coneCorrPt() < 25) continue;
+              if (ss::lep2_coneCorrPt() < 25) continue;
+          }
+      }
+      if (doAbove18) {
+          if (ss::lep1_p4().pt() < 18) continue;
+          if (ss::lep2_p4().pt() < 18) continue;
+          if (ss::lep1_coneCorrPt() < 18) continue;
+          if (ss::lep2_coneCorrPt() < 18) continue;
+      }
+
+      if (doNewP) {
+          // if (ss::lep1_p4().pt() < 20) continue;
+          // if (ss::lep2_p4().pt() < 20) continue;
+          // if (ss::lep1_coneCorrPt() < 20) continue;
+          // if (ss::lep2_coneCorrPt() < 20) continue;
+
+          if (ss::lep1_coneCorrPt() < 25. && ss::lep1_coneCorrPt() >= 20.0) {
+              if (ss::lep1_p4().pt() < 20) continue;
+          } else if (ss::lep1_coneCorrPt() < 35. && ss::lep1_coneCorrPt() >= 25.0) {
+              if (ss::lep1_p4().pt() < 25) continue;
+          } else if (ss::lep1_coneCorrPt() >= 35.0) {
+              if (ss::lep1_p4().pt() < 25) continue;
+          }
+
+          if (ss::lep2_coneCorrPt() < 25. && ss::lep2_coneCorrPt() >= 20.0) {
+              if (ss::lep2_p4().pt() < 20) continue;
+          } else if (ss::lep2_coneCorrPt() < 35. && ss::lep2_coneCorrPt() >= 25.0) {
+              if (ss::lep2_p4().pt() < 25) continue;
+          } else if (ss::lep2_coneCorrPt() >= 35.0) {
+              if (ss::lep2_p4().pt() < 25) continue;
+          }
+
+      }
+
+      // // FOR SELF SYNCH JULY
+      // if ((ss::hyp_class() == 3) && ss::met() > 50 && ss::njets() >= 2) {
+      //     if (fabs(ss::lep2_id())==13 && isFakeLeg(2)) {
+      //         if (ss::lep2_coneCorrPt() > 35 && ss::lep2_coneCorrPt() < 50 && fabs(ss::lep2_p4().eta()) < 2.1 && fabs(ss::lep2_p4().eta()) > 1.2) {
+      //             if (ss::lep2_p4().pt() > 25.)
+      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
+      //                         (unsigned long long)ss::event() , ss::lep2_p4().pt(),ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()),ss::lep2_miniIso(),
+      //                         ss::lep2_p4().pt()/ss::jet_close_lep2().pt(),ss::lep2_ptrel_v1(),ss::lep2_passes_id(),ss::lep2_motherID(),
+      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
+      //                         ss::triggers1lep() & (1<<1)) << endl;
+      //         }
+      //     } 
+      //     if (fabs(ss::lep1_id())==13 && isFakeLeg(1)) {
+      //         if (ss::lep1_coneCorrPt() > 35 && ss::lep1_coneCorrPt() < 50 && fabs(ss::lep1_p4().eta()) < 2.1 && fabs(ss::lep1_p4().eta()) > 1.2) {
+      //             if (ss::lep1_p4().pt() > 25.)
+      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
+      //                         (unsigned long long)ss::event() , ss::lep1_p4().pt(),ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()),ss::lep1_miniIso(),
+      //                         ss::lep1_p4().pt()/ss::jet_close_lep1().pt(),ss::lep1_ptrel_v1(),ss::lep1_passes_id(),ss::lep1_motherID(),
+      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
+      //                         ss::triggers1lep() & (1<<1)) << endl;
+      //         }
+      //     }
+      // }
+      // if ((ss::hyp_class() == 2) && ss::met() > 50 && ss::njets() >= 2) {
+      //     if (fabs(ss::lep2_id())==13 && !ss::lep2_passes_id()) {
+      //         if (ss::lep2_coneCorrPt() > 35 && ss::lep2_coneCorrPt() < 50 && fabs(ss::lep2_p4().eta()) < 2.1 && fabs(ss::lep2_p4().eta()) > 1.2) {
+      //             if (ss::lep2_p4().pt() > 25.)
+      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
+      //                         (unsigned long long)ss::event() , ss::lep2_p4().pt(),ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()),ss::lep2_miniIso(),
+      //                         ss::lep2_p4().pt()/ss::jet_close_lep2().pt(),ss::lep2_ptrel_v1(),ss::lep2_passes_id(),ss::lep2_motherID(),
+      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
+      //                         ss::triggers1lep() & (1<<1)) << endl;
+      //         }
+      //     } 
+      //     if (fabs(ss::lep1_id())==13 && !ss::lep1_passes_id()) {
+      //         if (ss::lep1_coneCorrPt() > 35 && ss::lep1_coneCorrPt() < 50 && fabs(ss::lep1_p4().eta()) < 2.1 && fabs(ss::lep1_p4().eta()) > 1.2) {
+      //             if (ss::lep1_p4().pt() > 25.)
+      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
+      //                         (unsigned long long)ss::event() , ss::lep1_p4().pt(),ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()),ss::lep1_miniIso(),
+      //                         ss::lep1_p4().pt()/ss::jet_close_lep1().pt(),ss::lep1_ptrel_v1(),ss::lep1_passes_id(),ss::lep1_motherID(),
+      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
+      //                         ss::triggers1lep() & (1<<1)) << endl;
+      //         }
+      //     }
+      // }
+
       //pTrel plots
       if(!ss::is_real_data()) {
         if ( (lep1_pT > 25. && lep2_pT > 25.) ){
           if( ss::lep1_id()*ss::lep2_id() > 0 ) {
-            if (  (ss::lep1_motherID()<=0 && /*ss::lep1_iso()>0.1 &&*/ fabs(ss::lep1_ip3d()/ss::lep1_ip3d_err())<4. && ss::lep2_motherID()==1)
+            if (  (isFakeLeg(1) && /*ss::lep1_iso()>0.1 &&*/ fabs(ss::lep1_ip3d()/ss::lep1_ip3d_err())<4. && ss::lep2_motherID()==1)
                || (!lep1_passes_id && fabs(ss::lep1_ip3d()/ss::lep1_ip3d_err())<4. && lep2_passes_id ) ) {
               if (abs(ss::lep1_id())==11){
                 pTrelvsIso_histo_el->Fill( std::min(ss::lep1_iso(),float(0.99)), std::min(lep1_ptrel_v1,float(29.9)) );
@@ -910,7 +1130,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
                 hists[getHist("pTrel_histo_mu")]->Fill(std::min(lep1_ptrel_v1,float(29.9)) );
               }
             }
-            if (  (ss::lep2_motherID()<=0 && /*ss::lep2_iso()>0.1 &&*/ fabs(ss::lep2_ip3d()/ss::lep2_ip3d_err())<4. && ss::lep1_motherID()==1) 
+            if (  (isFakeLeg(2) && /*ss::lep2_iso()>0.1 &&*/ fabs(ss::lep2_ip3d()/ss::lep2_ip3d_err())<4. && ss::lep1_motherID()==1) 
                || (lep1_passes_id && fabs(ss::lep2_ip3d()/ss::lep2_ip3d_err())<4. && !lep2_passes_id ) ) {
               if (abs(ss::lep2_id())==11) {
                 pTrelvsIso_histo_el->Fill( std::min(ss::lep2_iso(),float(0.99)), std::min(lep2_ptrel_v1,float(29.9)) );
@@ -938,8 +1158,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
           bool isLep1Prompt = ss::lep1_motherID()==1;
           bool isLep2Prompt = ss::lep2_motherID()==1;
-          bool isLep1NonPrompt = ss::lep1_motherID()<=0;
-          bool isLep2NonPrompt = ss::lep2_motherID()<=0;
+          bool isLep1NonPrompt = isFakeLeg(1);
+          bool isLep2NonPrompt = isFakeLeg(2);
 
         //Counters
         counter++;
@@ -1102,11 +1322,11 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             NpromptL1_gen += weight;
             NpromptL2_gen += weight;
           }
-          else if( ss::lep1_motherID()==1 && ss::lep2_motherID()<=0 ){
+          else if( ss::lep1_motherID()==1 && isFakeLeg(2) ){
             prompt1_gen += weight;
             NpromptL1_gen += weight;
           }
-          else if( ss::lep1_motherID()<=0 && ss::lep2_motherID()==1 ){
+          else if( isFakeLeg(1) && ss::lep2_motherID()==1 ){
             prompt1_gen += weight;
             NpromptL2_gen += weight;
           }
@@ -1208,6 +1428,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             if (fabs(ss::lep2_p4().eta()) < 0.8 && lep2_pT >= 70) addToCounter(filename+"_prednotf_el_pteta2", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_el")]   ->Fill(sr, w);
+            if(sr > 0) hists[getHist("Npn_histo_sr_pred_unw_el")]   ->Fill(sr, weight);
             hists[getHist("Npn_histo_NB_pred_el")]   ->Fill(br, w);
             hists[getHist("Npn_histo_HT_pred_el")]   ->Fill(ss::ht(), w);
             hists[getHist("Npn_histo_MET_pred_el")]  ->Fill(ss::met(), w);
@@ -1253,6 +1474,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             if (fabs(ss::lep2_p4().eta()) < 1.2 && lep2_pT >= 50 && lep2_pT < 70) addToCounter(filename+"_prednotf_mu_pteta2", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_mu")]->Fill(sr, w);
+            if(sr > 0) hists[getHist("Npn_histo_sr_pred_unw_mu")]->Fill(sr, weight);
             hists[getHist("Npn_histo_NB_pred_mu")]->Fill(br, w);
             hists[getHist("Npn_histo_HT_pred_mu")]->Fill(ss::ht(), w);
             hists[getHist("Npn_histo_MET_pred_mu")]->Fill(ss::met(), w);
@@ -1288,6 +1510,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           Npn = Npn + w;
           if (ss::lep2_motherID()==1) Npn_s = Npn_s + w;
           if(sr > 0) hists[getHist("Npn_histo_sr_pred")]->Fill(sr, w);
+          if(sr > 0) hists[getHist("Npn_histo_sr_pred_unw")]->Fill(sr, weight);
           hists[getHist("Npn_histo_NB_pred")]->Fill(br, w);
           hists[getHist("Npn_histo_HT_pred")]->Fill(ss::ht(), w);
           hists[getHist("Npn_histo_MET_pred")]->Fill(ss::met(), w);
@@ -1337,6 +1560,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             if (fabs(ss::lep1_p4().eta()) < 0.8 && lep1_pT >= 70) addToCounter(filename+"_prednotf_el_pteta1", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_el")]   ->Fill(sr, w);
+            if(sr > 0) hists[getHist("Npn_histo_sr_pred_unw_el")]   ->Fill(sr, weight);
             hists[getHist("Npn_histo_NB_pred_el")]   ->Fill(br, w);
             hists[getHist("Npn_histo_HT_pred_el")]   ->Fill(ss::ht(), w);
             hists[getHist("Npn_histo_MET_pred_el")]  ->Fill(ss::met(), w);
@@ -1383,6 +1607,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
             if (fabs(ss::lep1_p4().eta()) < 1.2 && lep1_pT >= 50 && lep1_pT < 70) addToCounter(filename+"_prednotf_mu_pteta1", weight);
 
             if(sr > 0) hists[getHist("Npn_histo_sr_pred_mu")]->Fill(sr, w);
+            if(sr > 0) hists[getHist("Npn_histo_sr_pred_unw_mu")]->Fill(sr, weight);
             hists[getHist("Npn_histo_NB_pred_mu")]->Fill(br, w);
             hists[getHist("Npn_histo_HT_pred_mu")]->Fill(ss::ht(), w);
             hists[getHist("Npn_histo_MET_pred_mu")]->Fill(ss::met(), w);
@@ -1420,6 +1645,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           Npn = Npn + w;
           if (ss::lep1_motherID()==1) Npn_s = Npn_s + w;
           if(sr > 0) hists[getHist("Npn_histo_sr_pred")]->Fill(sr, w);
+          if(sr > 0) hists[getHist("Npn_histo_sr_pred_unw")]->Fill(sr, weight);
           hists[getHist("Npn_histo_NB_pred")]->Fill(br, w);
           hists[getHist("Npn_histo_HT_pred")]->Fill(ss::ht(), w);
           hists[getHist("Npn_histo_MET_pred")]->Fill(ss::met(), w);

@@ -69,7 +69,8 @@ for var in varnames:
 
         xticks = []
         if "MATCH" in var:
-            xticks = ["unmatched/light","b","c"]
+            # xticks = ["unmatched","b","c","photon","light"]
+            xticks = ["unmatched (0)","b (-1)","c (-2)","photon (-3)","light (-4)"]
 
         # for ext in ["png","pdf"]:
         for ext in ["png"]:
@@ -96,6 +97,9 @@ for var in varnames:
 
 # os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Apr30")
 # os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun12")
-os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun17")
+# os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun17")
+# os.system("NOCONVERT=true niceplots plots plots_fakerateclosurecheck_Jul2") # old WPs for QCD FR applied to tt1l (v1.06_v2_oldiso)
+os.system("NOCONVERT=true niceplots plots plots_fakeclosure1wnfo2_Jul6") # new WPs for QCD FR applied to inclusive tt (v1.06_v2)
+# os.system("NOCONVERT=true niceplots plots plots_fakeclosure1wnfo1_Jul6") # new WPs for QCD FR applied to inclusive tt (v1.06_v2)
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosureextrapt_Apr24")
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosurenolooseemva_Apr22")
