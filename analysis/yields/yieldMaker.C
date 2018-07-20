@@ -35,7 +35,7 @@ int nsrdisc = 13;
 
 bool doCustomSelection = false;
 float scaleLumi = 1; // 75/35.87
-// float scaleLumi = 1.869; // (35.9+41.3)/41.3 // FIXME
+// float scaleLumi = 3.632; // 150/41.3
 // float scaleLumi = 1;
 
 bool doTTWISR = true;
@@ -84,9 +84,10 @@ bool doData = true;
 // TString dir = "v1.03_baseline";
 
 // 40,25
-TString tag = "v1.05_v1";
+TString tag = "v1.06_v2";
 TString tag2 = "v1.00_80x_baseline_full_v2";
-TString dir = "v1.05_baseline_v2_41p3_18bins";
+// TString dir = "v1.05_baseline_v2_41p3_18bins";
+TString dir = "v1.06_baseline_v2_150ifb_18bins";
 
 // // 20,20
 // TString tag = "v1.0.5_bJetPtCut20JetPtCut20";
@@ -1906,6 +1907,12 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (isData  == 0 )            p_lep_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_lep_up_alt);
 
             bool plotlep3 = ss::lep3_passes_id() && lep3_pt > 20.;
+
+            if ((ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3) && !isGamma) {
+                // NOTE we will need to get rid of these few events
+                // since it's wrong that we take -3 from non x-gamma
+                std::cout <<  " ss::lep1_motherID(): " << ss::lep1_motherID() <<  " ss::lep2_motherID(): " << ss::lep2_motherID() <<  " chainTitle: " << chainTitle <<  std::endl;
+            }
 
             if (SR > 1) { // non ttZ CR
                 p_result.h_njets.br->Fill(ss::njets() , weight);
