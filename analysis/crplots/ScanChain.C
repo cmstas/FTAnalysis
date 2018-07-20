@@ -170,7 +170,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         year = 2017;
         is2017 = true;
     } else if (options.Contains("Data2018")) {
-        lumiAG = 14.383;
+        lumiAG = 16.594;
         year = 2018;
         is2018 = true;
     } else {
@@ -187,18 +187,19 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
 
     vector<string> regions = {
-        "os",                          // OS tight-tight and variants
+        // "os",                          // OS tight-tight and variants
         // "os_noisr", "os_btagreweight", // |
         // "os_highbdt", "os_lowbdt",     // |
-        "osloose",                    // DY dominated CR
+        // "osloose",                    // DY dominated CR
         // "tl",                          // SS tight-loose
+        "br",
         // "crw", "crz",                  // CRZ, CRW
         // "bdt_nb", "bdt_ht",            // Baseline w/ inverted nbtags/Ht/MET selection
         // "bdt_met","bdt_met_ht",        // |
         // "bdt_train",                   // BDT Training region - BR + CRW
         // "tt_isr",                      // TTBar ISR Reweighting derivation region
         // "tt_isr_reweight_check",       // |
-        "htnb1"                        // fake-dominated CR
+        // "htnb1"                        // fake-dominated CR
     };
 
     vector<HistCol*> registry;
@@ -766,6 +767,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             if (CRZ) fill_region("crz", weight);
 
             if (CRW) fill_region("crw", weight);
+
+            if (BR) fill_region("br", weight);
 
             if (hyp_class == 4) fill_region("osloose", weight);
 
