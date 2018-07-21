@@ -141,6 +141,8 @@ class babyMaker {
     //MET
     float met;
     float metPhi;
+    float modmet;
+    float modmetPhi;
     float rawmet;
     float rawmetPhi;
     float calomet;
@@ -542,6 +544,7 @@ class babyMaker {
     //Trigger matching
     bool fired_trigger;
     unsigned int triggers;
+    unsigned int triggers1lep;
     bool lep1_trigMatch_noIsoReq;
     bool lep1_trigMatch_isoReq;
     bool lep2_trigMatch_noIsoReq;
