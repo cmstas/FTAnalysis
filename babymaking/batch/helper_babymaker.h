@@ -456,10 +456,6 @@ class babyMaker {
     float lep1_miniIso;
     float lep2_miniIso;
 
-    //Closest Jet
-    LorentzVector jet_close_lep1;
-    LorentzVector jet_close_lep2;
-
     //Electron ID variables
     vector <int>   eleID_kfhits;
     vector <float> eleID_oldsigmaietaieta;

@@ -180,8 +180,6 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_ptratio"                                           , &lep2_ptratio                                           );
   BabyTree->Branch("lep1_miniIso"                                            , &lep1_miniIso                                            );
   BabyTree->Branch("lep2_miniIso"                                            , &lep2_miniIso                                            );
-  BabyTree->Branch("jet_close_lep1"                                          , &jet_close_lep1                                          );
-  BabyTree->Branch("jet_close_lep2"                                          , &jet_close_lep2                                          );
   BabyTree->Branch("trueNumInt"                                              , &trueNumInt                                              );
   BabyTree->Branch("nGoodVertices"                                           , &nGoodVertices                                           );
   BabyTree->Branch("lep1_trigMatch_noIsoReq"                                 , &lep1_trigMatch_noIsoReq                                 );
@@ -651,8 +649,6 @@ void babyMaker::InitBabyNtuple(){
     lep2_ptratio = -1;
     lep1_miniIso = -1;
     lep2_miniIso = -1;
-    jet_close_lep1 = LorentzVector(0,0,0,0);
-    jet_close_lep2 = LorentzVector(0,0,0,0);
     lep1_p4 = LorentzVector(0,0,0,0);
     lep2_p4 = LorentzVector(0,0,0,0);
     lep3_p4 = LorentzVector(0,0,0,0);
@@ -924,9 +920,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     nPUvertices = puInfo_nPUvertices();
     gen_met = tas::gen_met();
     gen_met_phi = tas::gen_metPhi();
-    // FIXME for non tttt we don't need genweights, right?
-    genweights = tas::genweights();  // These two are 20% of the ntuple size
-    genweightsID = tas::genweightsID();
+    // XXX for non tttt we don't need genweights, right?
+    if (filename.find("TTTT") != std::string::npos) {
+        genweights = tas::genweights();  // These two are 20% of the ntuple size
+        genweightsID = tas::genweightsID();
+    }
     scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     kfactor = tas::evt_kfactor();
@@ -944,7 +942,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
         }
     }
-
 
   }
 
@@ -1798,10 +1795,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     cout << "Printing Jets: " << endl;
     for (unsigned int i = 0; i < jets.size(); i++) cout << i << " " << jets[i].pt() << " " << jets[i].eta() << endl;
   }
-
-  // //Closest Jet
-  jet_close_lep1 = closestJet(lep1_p4, 0.4, 3.0, ssWhichCorr);
-  jet_close_lep2 = closestJet(lep2_p4, 0.4, 3.0, ssWhichCorr);
 
   //MT variables
   mt    = MT(lep1_p4.pt(), lep1_p4.phi(), met, metPhi);
