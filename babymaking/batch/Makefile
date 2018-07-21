@@ -25,6 +25,7 @@ CMSROOT = ./
 INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
 # CFLAGS = -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
 CFLAGS =  -Wall -Wno-unused-function -g -O0 -fPIC -Wno-sign-compare -Wno-unused-variable $(INCLUDE) $(EXTRACFLAGS)
+# CFLAGS =  -Wall -g -O0 -fPIC $(INCLUDE) $(EXTRACFLAGS) -Wall -Wextra
 # CFLAGS = -Wall -Wno-unused-function -g -O0 -fPIC  $(INCLUDE) $(EXTRACFLAGS) # default
 # CFLAGS = -Wall -Wno-unused-function -g -O1 -fPIC $(INCLUDE) $(EXTRACFLAGS)
 ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector

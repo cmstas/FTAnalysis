@@ -447,10 +447,10 @@ class babyMaker {
     float lep2_ptratio_ma;
 
     //PtRel, v0 and v1 (v1 is lepton-subtracted)
-    float lep1_ptrel_v0;
     float lep1_ptrel_v1;
-    float lep2_ptrel_v0;
     float lep2_ptrel_v1;
+    float lep1_ptratio;
+    float lep2_ptratio;
 
     //MiniIso
     float lep1_miniIso;
