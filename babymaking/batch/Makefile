@@ -40,6 +40,7 @@ DIR = ./
 
 CORESOURCES=$(DIR)/$(COREDIR)/CMS3.cc \
  $(DIR)/$(COREDIR)/Base.cc \
+ $(DIR)/$(COREDIR)/Config.cc \
  $(DIR)/$(COREDIR)/ElectronSelections.cc \
  $(DIR)/$(COREDIR)/MuonSelections.cc \
  $(DIR)/$(COREDIR)/JetSelections.cc \

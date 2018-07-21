@@ -9,6 +9,7 @@
 #include "TH2.h"
 #include "Math/VectorUtil.h"
 #include "CORE/CMS3.h"
+#include "CORE/Config.h"
 #include "CORE/Tools/utils.h"
 #include "CORE/Tools/JetCorrector.h"
 #include "CORE/Tools/MT2/MT2.h"
@@ -91,47 +92,24 @@ class babyMaker {
 
     // for btag SFs
     float getBtagEffFromFile(float pt, float eta, int mcFlavour);
-    BTagCalibration* calib;
-    BTagCalibrationReader* reader_heavy;
-    BTagCalibrationReader* reader_heavy_UP;
-    BTagCalibrationReader* reader_heavy_DN;
-    BTagCalibrationReader* reader_light;
-    BTagCalibrationReader* reader_light_UP;
-    BTagCalibrationReader* reader_light_DN;
 
+    BTagCalibration* calib1;
     BTagCalibration* calib2;
-    BTagCalibrationReader* reader_heavy2;
-    BTagCalibrationReader* reader_heavy2_UP;
-    BTagCalibrationReader* reader_heavy2_DN;
-    BTagCalibrationReader* reader_light2;
-    BTagCalibrationReader* reader_light2_UP;
-    BTagCalibrationReader* reader_light2_DN;
-
     BTagCalibration* calib3;
-    BTagCalibrationReader* reader_heavy3;
-    BTagCalibrationReader* reader_heavy3_UP;
-    BTagCalibrationReader* reader_heavy3_DN;
-    BTagCalibrationReader* reader_light3;
-    BTagCalibrationReader* reader_light3_UP;
-    BTagCalibrationReader* reader_light3_DN;
-
     BTagCalibration* calib4;
-    BTagCalibrationReader* reader_heavy4;
-    BTagCalibrationReader* reader_heavy4_UP;
-    BTagCalibrationReader* reader_heavy4_DN;
-    BTagCalibrationReader* reader_light4;
-    BTagCalibrationReader* reader_light4_UP;
-    BTagCalibrationReader* reader_light4_DN;
-
     BTagCalibration* calib_fs;
-    BTagCalibrationReader* reader_fastsim;
-    BTagCalibrationReader* reader_fastsim_UP;
-    BTagCalibrationReader* reader_fastsim_DN;
+
+    BTagCalibrationReader* btcr1;
+    BTagCalibrationReader* btcr2;
+    BTagCalibrationReader* btcr3;
+    BTagCalibrationReader* btcr4;
+    BTagCalibrationReader* btcr_fs;
+
     TH2D* h_btag_eff_b;
     TH2D* h_btag_eff_c;
     TH2D* h_btag_eff_udsg;
 
-    // DatasetInfo
+    // JER
   JetResolution res;  
 
     // DatasetInfo
@@ -261,12 +239,6 @@ class babyMaker {
     float metPhi_JER_up;
     float metPhi_JER_dn;
 
-    //Hyp Class -- in this order
-       //3 for num-num SS leptons
-       //2 for num-den SS leptons
-       //1 for den-den SS leptons
-       //4 for num-num OS leptons
-       //0 otherwise (not saved)
     int hyp_class;
 
     //Gen flags
@@ -310,10 +282,6 @@ class babyMaker {
     int lep1_motherID;
     int lep2_motherID;
 
-    //Lepton Truth ID
-      //From src/MatchUtilities/matchCandToGen function
-      //delta-R matches to nearest particle other than neutrino or LSP
-      //must be within 0.2
     int lep1_mc_id;
     int lep2_mc_id;
     int lep1_mc_motherid;
