@@ -969,8 +969,16 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //Debug mode
   if (verbose && evt_cut>0 && tas::evt_event() != evt_cut) return babyErrorStruct;
 
-  verbose = false;
-  // if (tas::evt_event() != 1995735) return babyErrorStruct;
+  // if (!(tas::evt_event() == 2483003 || tas::evt_event() == 2483151 ||
+  //             tas::evt_event() == 2483321 || tas::evt_event() == 2483482 ||
+  //             tas::evt_event() == 2483518 || tas::evt_event() == 2483824 ||
+  //             tas::evt_event() == 2483839 || tas::evt_event() == 2483907 ||
+  //             tas::evt_event() == 2484034 || tas::evt_event() == 2484084 ||
+  //             tas::evt_event() == 2484103 || tas::evt_event() == 2484107 ||
+  //             tas::evt_event() == 2484124 || tas::evt_event() == 2484128 ||
+  //             tas::evt_event() == 2484458 || tas::evt_event() == 2484551 ||
+  //             tas::evt_event() == 2484586)) return babyErrorStruct;
+  // verbose = true;
 
   //Preliminary stuff
   if (tas::hyp_type().size() < 1) return babyErrorStruct;
@@ -1352,12 +1360,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_closeJet = closestJet(lep2_p4, 0.4, 3.0, ssWhichCorr);
 
   if (verbose){
-    cout << "lep1 ratio: " << lep1_p4.pt()/lep1_closeJet.pt() << endl;
-    cout << "lep2 ratio: " << lep2_p4.pt()/lep2_closeJet.pt() << endl;
-    std::cout << " lep1_passes_id: " << lep1_passes_id << " lep2_passes_id: " << lep2_passes_id << " lep3_passes_id: " << lep3_passes_id << std::endl;
-    std::cout << " isGoodLepton(lep3_id,lep3_idx): " << isGoodLepton(lep3_id,lep3_idx) << " lep3_tight: " << lep3_tight << " lep3_veto: " << lep3_veto << " lep3_fo: " << lep3_fo << std::endl;
-    // muonID(lep3_idx,SS_tight_noiso_v5) muonID(lep3_idx,SS_tight_v5) muonID(lep3_idx,SS_fo_noiso_v5) muonID(lep3_idx,SS_veto_noiso_v5) isMediumMuonPOG(lep3_idx) isLooseMuonPOG(lep3_idx)
-    std::cout << " muonID(lep3_idx,SS_tight_noiso_v5): " << muonID(lep3_idx,SS_tight_noiso_v5) << " muonID(lep3_idx,SS_tight_v5): " << muonID(lep3_idx,SS_tight_v5) << " muonID(lep3_idx,SS_fo_noiso_v5): " << muonID(lep3_idx,SS_fo_noiso_v5) << " muonID(lep3_idx,SS_veto_noiso_v5): " << muonID(lep3_idx,SS_veto_noiso_v5) << " isMediumMuonPOG(lep3_idx): " << isMediumMuonPOG(lep3_idx) << " isLooseMuonPOG(lep3_idx): " << isLooseMuonPOG(lep3_idx) << std::endl;
+    cout << "lep1 ptratio: " << lep1_p4.pt()/lep1_closeJet.pt() << endl;
+    cout << "lep2 ptratio: " << lep2_p4.pt()/lep2_closeJet.pt() << endl;
 
   }
 
@@ -2084,7 +2088,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
   if (gconf.year == 2016) {
-      passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data);
+      passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*FIXME ignorechargedcandfilter=*/true);
   } else if (gconf.year == 2017) {
       passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2017(is_real_data);
   } else if (gconf.year == 2018) {

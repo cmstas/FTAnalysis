@@ -65,6 +65,7 @@ int main(int argc, char *argv[]){
 
     if (year < 0) {
         std::cout << ">>> [!] Couldn't figure out year, so setting it to 2017. Make sure this is what you want!" << std::endl;
+        year = 2017;
     } else {
         std::cout << ">>> Figured out that the year is " << year << "." << std::endl;
     }
@@ -102,8 +103,6 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_ptratio = 0.80;
         gconf.multiiso_mu_ptrel = 7.5;
     }
-
-
 
     if (filename.Contains("/SMS")) {
         if (filename.Contains("SMS-T1tttt_Tune")) isSignal = 1;
@@ -155,15 +154,15 @@ int main(int argc, char *argv[]){
     std::string jecEraMC = "Summer16_23Sep2016V3";
 
     if (gconf.year == 2017) {
-        string good_run_file = "goodRunList/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
-        string jecEra = "Fall17_17Nov2017B_V6";
-        std::string jecEraMC = "Fall17_17Nov2017_V6";
+        good_run_file = "goodRunList/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
+        jecEra = "Fall17_17Nov2017B_V6";
+        jecEraMC = "Fall17_17Nov2017_V6";
     }
 
     if (gconf.year == 2018) {
-        string good_run_file = "goodRunList/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON_snt.txt";
-        string jecEra = "Fall17_17Nov2017C_V6";
-        std::string jecEraMC = "Fall17_17Nov2017_V6";
+        good_run_file = "goodRunList/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+        jecEra = "Fall17_17Nov2017C_V6";
+        jecEraMC = "Fall17_17Nov2017_V6";
     }
 
     //Add good run list
@@ -304,10 +303,10 @@ int main(int argc, char *argv[]){
         //Progress bar
         CMS3::progress(nEventsTotal, nEvents);
 
-        if (nEventsTotal % 500 == 0) {
+        if (nEventsTotal % 5000 == 0) {
             auto t1 = std::chrono::steady_clock::now();
             float duration = 0.001*(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - tlast)).count();
-            std::cout << "Begin processing entry " << nEventsTotal << " at " << time(0) << " (" << 0.001*round(nEventsTotal/duration) << " kHz)." << std::endl;
+            std::cout << "Begin processing entry " << nEventsTotal << " at " << time(0) << " (" << 0.001*round(5000/duration) << " kHz)." << std::endl;
             tlast = t1;
         }
 
