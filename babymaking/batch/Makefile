@@ -6,7 +6,7 @@ all:
 	@echo "ROOTSYS is not set. Please set ROOT environment properly"; echo
 else
 
-all: 	build
+all: build
 help:
 	@echo "Available Targets:";\
 	cat Makefile | perl -ne 'printf("\t%-15s %s\n",$$1,$$2) if(/^(\S+):[^#]+(#.*)$$/)'
@@ -20,6 +20,7 @@ endif
 #	ROOFITINCLUDE = $(shell scramv1 tool info roofitcore | grep INCLUDE | sed 's/^INCLUDE=/-I/')
 #endif
 
+
 CC = g++
 CMSROOT = ./
 INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
@@ -30,6 +31,9 @@ CFLAGS =  -Wall -Wno-unused-function -g -O0 -fPIC -Wno-sign-compare -Wno-unused-
 # CFLAGS = -Wall -Wno-unused-function -g -O1 -fPIC $(INCLUDE) $(EXTRACFLAGS)
 ROOTLIBS = $(shell root-config --ldflags --cflags --libs) -lTMVA #-lEG -lGenVector
 COREDIR = CORE
+
+# SimpleJetCorrector.icc is horribly coded, so need to force it to be optimized
+$(COREDIR)/Tools/JetCorrector.o : CFLAGS+=-O3
 
 DICTINCLUDE = $(ROOTSYS)/include/Math/QuantFuncMathCore.h $(ROOTSYS)/include/TLorentzVector.h $(ROOTSYS)/include/Math/Vector4D.h
 
@@ -116,6 +120,7 @@ build:  $(EXE)
 
 b: build
 
+
 loopclean:
 	rm -f \
 	*_out.*	 \
@@ -128,8 +133,9 @@ clean: loopclean
 	rm -f \
 	$(CORELIB) \
 	./$(COREDIR)/*.o \
-	./Tools/MT2/*.o \
-	./Tools/*.o \
-	./Tools/JetResolution/*.o \
+	./$(COREDIR)/Tools/MT2/*.o \
+	./$(COREDIR)/Tools/*.o \
+	./$(COREDIR)/Tools/btagsf/*.o \
+	./$(COREDIR)/Tools/JetResolution/*.o \
 
 endif
