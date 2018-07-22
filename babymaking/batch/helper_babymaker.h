@@ -79,6 +79,8 @@ class babyMaker {
     void CloseBabyNtuple () { BabyFile->cd(); BabyTree->Write(); BabyFile->Close(); }
     csErr_t ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty *jetUnc, int isFastsim = 0);
 
+    bool ignore_scale1fb = false;
+
   protected:
     TFile* BabyFile;
     TTree* BabyTree;
@@ -89,6 +91,7 @@ class babyMaker {
     TString path;
     bool verbose;
     unsigned int evt_cut;
+
 
     // for btag SFs
     float getBtagEffFromFile(float pt, float eta, int mcFlavour);
@@ -132,6 +135,7 @@ class babyMaker {
     bool is_fastsim;
     bool is_miniaodv1_80X;
     float scale1fb;
+    float genps_weight;
     float xsec;
     float xsec_error;
     float xsec_ps;

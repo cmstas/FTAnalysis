@@ -39,6 +39,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("filt_trkfail"                                            , &filt_trkfail                                            );
   BabyTree->Branch("is_real_data"                                            , &is_real_data                                            );
   BabyTree->Branch("scale1fb"                                                , &scale1fb                                                );
+  BabyTree->Branch("genps_weight"                                                , &genps_weight                                                );
   BabyTree->Branch("xsec"                                                    , &xsec                                                    );
   BabyTree->Branch("xsec_ps"                                                    , &xsec_ps                                                    );
   BabyTree->Branch("sparmNames"                                              , &sparmNames                                              );
@@ -482,6 +483,7 @@ void babyMaker::InitBabyNtuple(){
     lep2_isStat3        = 0;
     is_real_data = 0;
     scale1fb = 1;
+    genps_weight = 1;
     xsec = -1;
     xsec_ps = -1;
     kfactor = -1;
@@ -905,6 +907,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   if (!is_real_data){
     float sgnMCweight = ((tas::genps_weight() > 0) - (tas::genps_weight() < 0));
+    genps_weight = tas::genps_weight();
     trueNumInt = tas::puInfo_trueNumInteractions();
     nPUvertices = puInfo_nPUvertices();
     gen_met = tas::gen_met();
@@ -928,8 +931,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         }
 
     }
-    scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
-    xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+    if (!ignore_scale1fb) {
+        scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+        xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+    }
     kfactor = tas::evt_kfactor();
 
     int higgs_scan = 0;

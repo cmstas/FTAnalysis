@@ -51,16 +51,23 @@ int main(int argc, char *argv[]){
     int isSignal = 0; 
     int year = -1;
     if (
-            filename.Contains("Run2016") || filename.Contains("Moriond17")
+            filename.Contains("Run2016")
+            || filename.Contains("Moriond17")
             || filename.Contains("RunIISummer16")
+            || filename.Contains("run2_data2016")
+            || filename.Contains("run2_moriond17")
        ) year = 2016;
     if (
-            filename.Contains("Run2017") || filename.Contains("RunIIFall17")
+            filename.Contains("Run2017")
+            || filename.Contains("RunIIFall17")
             || filename.Contains("_mc2017_")
+            || filename.Contains("run2_mc2017")
        ) year = 2017;
     if (
-            filename.Contains("Run2018") || filename.Contains("RunIISpring18")
+            filename.Contains("Run2018")
+            || filename.Contains("RunIISpring18")
             || filename.Contains("RunIISummer18")
+            || filename.Contains("run2_mc2018")
        ) year = 2018;
 
     if (year < 0) {
@@ -124,6 +131,10 @@ int main(int argc, char *argv[]){
     //Set up file and tree
     babyMaker *mylooper = new babyMaker();
     mylooper->MakeBabyNtuple(outname.Data(), isSignal);
+
+    if (std::getenv("noscale1fb")) {
+        mylooper->ignore_scale1fb = true;
+    }
 
     TFile *f;
     if (useXrootd) {
