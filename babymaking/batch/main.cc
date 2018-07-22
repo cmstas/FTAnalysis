@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
 
     if (argc <= 1) { 
         std::cout << ">>> [!] Not enough arguments!" << std::endl;  
-        return 0;
+        return 1;
     }
 
 
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
         else if (filename.Contains("SMS-T5ttcc_Tune")) isSignal = 4;
         else {
             std::cout << ">>> [!] Can't figure out which signal sample this is!" << std::endl;
-            return 0;
+            return 1;
         }
     }
     // if (filename.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
     }
     if (!f) {
         std::cout << ">>> [!] File does not exist or is bad!" << std::endl;  
-        return 0;
+        return 1;
     }
     std::cout << ">>> File opened" << std::endl;  
     TTree *tree = (TTree*)f->Get("Events");
