@@ -879,10 +879,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   bool get_parentage = true;
 
-  int higgs_scan = 0;
-  if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
-  if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
-  if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
 
   //Fill lepton variables
   hyp_result_t best_hyp_info = chooseBestHyp(verbose);
@@ -900,13 +896,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   if (verbose) cout << "chose hyp: " << best_hyp << " of class" << hyp_class << endl;
   if (hyp_class == 0 || hyp_class == -1) return babyErrorStruct;
 
-  //These c-s errors
-  if (!is_real_data && tas::genweights().size()>110) {
-    babyErrorStruct.cs_scale_no += tas::genweights().at(0);
-    babyErrorStruct.cs_scale_up += tas::genweights().at(4);
-    babyErrorStruct.cs_scale_dn += tas::genweights().at(8);
-    for (int i = 0; i < 100; i++) babyErrorStruct.cs_pdf[i] = tas::genweights().at(i+10);
-  }
 
   //Corrected MET
   int use_cleaned_met = tas::evt_isRealData() and (filename.find("-03Feb2017-") != std::string::npos);
@@ -921,13 +910,32 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     gen_met = tas::gen_met();
     gen_met_phi = tas::gen_metPhi();
     // XXX for non tttt we don't need genweights, right?
-    if (filename.find("TTTT") != std::string::npos) {
+    if (
+            (filename.find("/TTTT") != std::string::npos)
+            || (filename.find("/TTW") != std::string::npos)
+            || (filename.find("/TTZ") != std::string::npos)
+            || (filename.find("/ttH") != std::string::npos)
+            ) {
         genweights = tas::genweights();  // These two are 20% of the ntuple size
         genweightsID = tas::genweightsID();
+
+        //These c-s errors
+        if (!is_real_data && tas::genweights().size()>110) {
+            babyErrorStruct.cs_scale_no += tas::genweights().at(0);
+            babyErrorStruct.cs_scale_up += tas::genweights().at(4);
+            babyErrorStruct.cs_scale_dn += tas::genweights().at(8);
+            for (int i = 0; i < 100; i++) babyErrorStruct.cs_pdf[i] = tas::genweights().at(i+10);
+        }
+
     }
     scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     kfactor = tas::evt_kfactor();
+
+    int higgs_scan = 0;
+    if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
+    if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
+    if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
 
     if (higgs_scan > 0) {
         for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
