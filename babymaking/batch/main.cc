@@ -136,6 +136,10 @@ int main(int argc, char *argv[]){
         mylooper->ignore_scale1fb = true;
         std::cout << ">>> [!] Ignoring scale1fb text file!" << std::endl;
     }
+    if (std::getenv("noos")) {
+        mylooper->ignore_os = true;
+        std::cout << ">>> [!] Skipping OS events for MC!" << std::endl;
+    }
 
     TFile *f;
     if (useXrootd) {

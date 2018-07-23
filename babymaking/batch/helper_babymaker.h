@@ -80,6 +80,7 @@ class babyMaker {
     csErr_t ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty *jetUnc, int isFastsim = 0);
 
     bool ignore_scale1fb = false;
+    bool ignore_os = false;
 
   protected:
     TFile* BabyFile;

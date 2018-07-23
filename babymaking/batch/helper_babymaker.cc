@@ -889,7 +889,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   // FIXME, don't care about in situ for now, or even nondata OS
   if (                 hyp_class == 5) return babyErrorStruct;
-  // if (!is_real_data && hyp_class == 4) return babyErrorStruct;
+  if (ignore_os) {
+      if (!is_real_data && hyp_class == 4) return babyErrorStruct;
+  }
 
   if (hyp_class == 6){
     madeExtraZ = makesExtraZ(best_hyp).result;
