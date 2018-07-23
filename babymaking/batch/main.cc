@@ -134,6 +134,7 @@ int main(int argc, char *argv[]){
 
     if (std::getenv("noscale1fb")) {
         mylooper->ignore_scale1fb = true;
+        std::cout << ">>> [!] Ignoring scale1fb text file!" << std::endl;
     }
 
     TFile *f;

@@ -48,7 +48,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("kfactor"                                                 , &kfactor                                                 );
   BabyTree->Branch("gen_met"                                                 , &gen_met                                                 );
   BabyTree->Branch("genweights"                                              , &genweights                                              );
-  BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
+  // BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
   BabyTree->Branch("gen_met_phi"                                             , &gen_met_phi                                             );
   BabyTree->Branch("njets"                                                   , &njets                                                   );
   BabyTree->Branch("njetsAG"                                                   , &njetsAG                                                   );
@@ -489,7 +489,7 @@ void babyMaker::InitBabyNtuple(){
     kfactor = -1;
     gen_met = -1;
     genweights.clear();
-    genweightsID.clear();
+    // genweightsID.clear();
     gen_met_phi = -1;
     njets = -1;
     njetsAG = -1;
@@ -920,7 +920,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             || (filename.find("/ttH") != std::string::npos)
             ) {
         genweights = tas::genweights();  // These two are 20% of the ntuple size
-        genweightsID = tas::genweightsID();
+        // genweightsID = tas::genweightsID(); // do we even need the IDs? they are just numbers from 1...N
 
         //These c-s errors
         if (!is_real_data && tas::genweights().size()>110) {
@@ -1812,7 +1812,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //MT variables
   mt    = MT(lep1_p4.pt(), lep1_p4.phi(), met, metPhi);
   mt_l2 = MT(lep2_p4.pt(), lep2_p4.phi(), met, metPhi);
-  mt2   = MT2(met, metPhi, lep1_p4, lep2_p4);
+  // mt2   = MT2(met, metPhi, lep1_p4, lep2_p4);
   mtmin = mt > mt_l2 ? mt_l2 : mt;
 
   //Ht and MET
