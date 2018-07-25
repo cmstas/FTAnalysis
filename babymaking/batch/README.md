@@ -7,8 +7,8 @@
 # Note that this will also copy stuff inside myCORE/ over CORE/
 ./copy_files.sh
 # Edit the babymaker source files or whatever
-# Compile
-./make -j10
+# Compile with optimized flags
+./make opt -j10
 # Test? Or don't, actually. We don't make mistakes.
 ./test_babymaker.sh
 # Make a tar file to ship to the worker nodes
