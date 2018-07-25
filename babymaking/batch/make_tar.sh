@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "Did you do 'make opt' instead of 'make'? It will be much faster"
+
 final_dir="inputs"
 files="
 package.tar.gz 

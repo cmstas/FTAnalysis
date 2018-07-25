@@ -15,6 +15,9 @@ ifndef VERBOSE
   QUIET := @
 endif
 
+opt: CFLAGS+=-O2
+debug: CFLAGS+=-g -O0
+
 #ROOFITINCLUDE = 
 #ifdef CMSSW_VERSION
 #	ROOFITINCLUDE = $(shell scramv1 tool info roofitcore | grep INCLUDE | sed 's/^INCLUDE=/-I/')
@@ -25,7 +28,8 @@ CC = g++
 CMSROOT = ./
 INCLUDE = $(shell root-config --cflags) -I$(CMSROOT) -I$(CMSROOT)/CORE
 # CFLAGS = -Wall -Wno-unused-function -g -O2 -fPIC $(INCLUDE) $(EXTRACFLAGS)
-CFLAGS =  -Wall -Wno-unused-function -g -O0 -fPIC -Wno-sign-compare -Wno-unused-variable $(INCLUDE) $(EXTRACFLAGS)
+CFLAGS =  -Wall -Wno-unused-function -fPIC -Wno-sign-compare -Wno-unused-variable $(INCLUDE) $(EXTRACFLAGS)
+# CFLAGS =  -Wall -Wno-unused-function -g -O1 -fPIC -Wno-sign-compare -Wno-unused-variable $(INCLUDE) $(EXTRACFLAGS)
 # CFLAGS =  -Wall -g -O0 -fPIC $(INCLUDE) $(EXTRACFLAGS) -Wall -Wextra
 # CFLAGS = -Wall -Wno-unused-function -g -O0 -fPIC  $(INCLUDE) $(EXTRACFLAGS) # default
 # CFLAGS = -Wall -Wno-unused-function -g -O1 -fPIC $(INCLUDE) $(EXTRACFLAGS)
@@ -120,6 +124,8 @@ build:  $(EXE)
 
 b: build
 
+opt: all
+debug: all
 
 loopclean:
 	rm -f \
