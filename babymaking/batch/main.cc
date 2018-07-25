@@ -14,6 +14,22 @@
 
 int main(int argc, char *argv[]){
 
+    // FactorizedJetCorrector * jc = makeJetCorrector({
+    //         "CORE/Tools/jetcorr/data/run2_25ns/Fall17_17Nov2017_V6_MC/Fall17_17Nov2017_V6_MC_L1FastJet_AK4PFchs.txt",
+    //         "CORE/Tools/jetcorr/data/run2_25ns/Fall17_17Nov2017_V6_MC/Fall17_17Nov2017_V6_MC_L2Relative_AK4PFchs.txt",
+    //         "CORE/Tools/jetcorr/data/run2_25ns/Fall17_17Nov2017_V6_MC/Fall17_17Nov2017_V6_MC_L3Absolute_AK4PFchs.txt",
+    //         });
+    // jc->setRho(23.2);
+    // jc->setJetA(0.5);
+    // jc->setJetPt(157.2);
+    // jc->setJetEta(-1.4);
+    // float corr = jc->getCorrection();
+    // std::cout <<  " corr: " << corr <<  std::endl;
+    // // for (auto c : corrs) {
+    // //     std::cout <<  " c: " << c <<  std::endl;
+    // // }
+    // return 0;
+
     TString filename;
     TString outname = "output.root";
     unsigned int nevents_max = 0;
@@ -87,6 +103,9 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_minireliso = 0.16;
         gconf.multiiso_mu_ptratio = 0.76;
         gconf.multiiso_mu_ptrel = 7.2;
+        if (filename.Contains("-17Jul2018-")) {
+            gconf.cmssw_ver = 94;
+        }
     }
     if (year == 2017) {
         gconf.year = year;

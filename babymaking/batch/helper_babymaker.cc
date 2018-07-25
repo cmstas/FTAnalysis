@@ -901,11 +901,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   if (hyp_class == 0 || hyp_class == -1) return babyErrorStruct;
 
 
-  //Corrected MET
-  int use_cleaned_met = tas::evt_isRealData() and (filename.find("-03Feb2017-") != std::string::npos);
-  pair <float, float> T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
-  met = T1CHSMET.first;
-  metPhi = T1CHSMET.second;
 
   if (!is_real_data){
     float sgnMCweight = ((tas::genps_weight() > 0) - (tas::genps_weight() < 0));
@@ -1030,6 +1025,31 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_MVA = abs(lep2_id) == 11 ? getMVAoutput(lep2_idx,true) : -9999;
   lep1_MVA_miniaod = lep1_MVA;
   lep2_MVA_miniaod = lep2_MVA;
+
+  //Reject events that fail trigger matching
+  if (gconf.year == 2016) {
+      if (ht < 300 && hyp_type != 0){
+          if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
+          if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
+      }
+  } else if (gconf.year == 2017) {
+      if (hyp_type != 0){
+          if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
+          if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
+      }
+  } else if (gconf.year == 2018) {
+      if (hyp_type != 0){
+          if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
+          if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
+      }
+  }
+  if (verbose) cout << "passed trigger safety" << endl;
+
+  //Corrected MET
+  int use_cleaned_met = tas::evt_isRealData() and (filename.find("-03Feb2017-") != std::string::npos);
+  pair <float, float> T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
+  met = T1CHSMET.first;
+  metPhi = T1CHSMET.second;
 
   //More First lepton stuff
   if (abs(lep1_id) == 11 || abs(lep1_id) == 13){
@@ -1342,25 +1362,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
      ht += jets.at(i).pt()*jets_undoJEC.at(i)*jets_JEC.at(i);
   }
 
-  //Reject events that fail trigger matching
   if (verbose) cout << "ht: " << ht << endl;
-  if (gconf.year == 2016) {
-      if (ht < 300 && hyp_type != 0){
-          if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
-          if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
-      }
-  } else if (gconf.year == 2017) {
-      if (hyp_type != 0){
-          if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
-          if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
-      }
-  } else if (gconf.year == 2018) {
-      if (hyp_type != 0){
-          if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
-          if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
-      }
-  }
-  if (verbose) cout << "passed trigger safety" << endl;
+
 
   //now look at jets for get the btag scale factor (need to save down to 25 GeV corrected)
   // for applying btagging SFs, using Method 1a from the twiki below:
@@ -1921,7 +1924,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
   if (gconf.year == 2016) {
-      passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*FIXME ignorechargedcandfilter=*/true);
+      if (gconf.cmssw_ver == 94) {
+          passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*ignorechargedcandfilter=*/true, /*ignorebadmuonfilter=*/true);
+      } else {
+          passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*ignorechargedcandfilter=*/true);
+      }
   } else if (gconf.year == 2017) {
       passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2017(is_real_data);
   } else if (gconf.year == 2018) {

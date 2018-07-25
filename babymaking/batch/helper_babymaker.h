@@ -17,6 +17,7 @@
 #include "CORE/ElectronSelections.h"
 #include "CORE/IsolationTools.h"
 #include "CORE/JetSelections.h"
+#include "CORE/MetSelections.h"
 #include "CORE/MCSelections.h"
 #include "CORE/Tools/goodrun.h"
 #include "CORE/Tools/JetResolution/JetResolution.h"
