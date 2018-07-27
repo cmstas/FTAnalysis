@@ -109,7 +109,7 @@ int main(int argc, char *argv[]){
     }
     if (year == 2017) {
         gconf.year = year;
-        gconf.ea_version = 3;
+        gconf.ea_version = 4;
         gconf.btag_disc_wp = 0.4941;
         gconf.multiiso_el_minireliso = 0.09;
         gconf.multiiso_el_ptratio = 0.85;
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
     }
     if (year == 2018) {
         gconf.year = year;
-        gconf.ea_version = 3;
+        gconf.ea_version = 4;
         gconf.btag_disc_wp = 0.4941;
         gconf.multiiso_el_minireliso = 0.09;
         gconf.multiiso_el_ptratio = 0.85;
