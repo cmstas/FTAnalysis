@@ -26,10 +26,15 @@
 #include "CORE/Tools/datasetinfo/getDatasetInfo.h"
 // #include "signal_regions.h"
 #include "TROOT.h"
-#include <vector>
-#include <algorithm>
 #include "Math/Vector4D.h"
 #include "Math/LorentzVector.h"
+
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __MAKECINT__
 #pragma link C++ class ROOT::Math::PxPyPzE4D<float>+;
@@ -77,7 +82,11 @@ class babyMaker {
     }
     void MakeBabyNtuple(const char* output_name, int isFastsim);
     void InitBabyNtuple();
-    void CloseBabyNtuple () { BabyFile->cd(); BabyTree->Write(); BabyFile->Close(); }
+    void CloseBabyNtuple () {
+        BabyFile->cd();
+        BabyTree->Write();
+        BabyFile->Close();
+    }
     csErr_t ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty *jetUnc, int isFastsim = 0);
 
     bool ignore_scale1fb = false;

@@ -376,10 +376,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     // setup btag calibration readers
     // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation94X
       // calib1 should be period1, calib2 - period2, calib3 - period3, calib4 - INCLUSIVE
-    calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V2_B.csv");
-    calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V2_C_E.csv");
-    calib3 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V2_E_F.csv");
-    calib4 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V2_B_F.csv");
+    calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_B.csv");
+    calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_C_E.csv");
+    calib3 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_E_F.csv");
+    calib4 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_B_F.csv");
 
     if (gconf.year == 2016) {
         calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
@@ -888,7 +888,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   int best_hyp = best_hyp_info.best_hyp;
 
   // FIXME, don't care about in situ for now, or even nondata OS
-  if (                 hyp_class == 5) return babyErrorStruct;
+  if (hyp_class == 5 || hyp_class == 7) return babyErrorStruct;
   if (ignore_os) {
       if (!is_real_data && hyp_class == 4) return babyErrorStruct;
   }
@@ -955,7 +955,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   }
 
-  if (hyp_class == 7) return babyErrorStruct;
   lep1_p4 = (tas::hyp_ll_p4().at(best_hyp).pt() > tas::hyp_lt_p4().at(best_hyp).pt()) ? tas::hyp_ll_p4().at(best_hyp) : tas::hyp_lt_p4().at(best_hyp);
   lep2_p4 = (tas::hyp_ll_p4().at(best_hyp).pt() <= tas::hyp_lt_p4().at(best_hyp).pt()) ? tas::hyp_ll_p4().at(best_hyp) : tas::hyp_lt_p4().at(best_hyp);
   lep1_id = (tas::hyp_ll_p4().at(best_hyp).pt() > tas::hyp_lt_p4().at(best_hyp).pt()) ? tas::hyp_ll_id().at(best_hyp) : tas::hyp_lt_id().at(best_hyp);
@@ -1221,7 +1220,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_closeJet = closestJet(lep2_p4, 0.4, 3.0, ssWhichCorr);
 
   lep1_ptratio = lep1_p4.pt()/lep1_closeJet.pt();
-  lep1_ptratio = lep2_p4.pt()/lep2_closeJet.pt();
+  lep2_ptratio = lep2_p4.pt()/lep2_closeJet.pt();
 
   //MiniIso
   lep1_miniIso = abs(lep1_id)==11 ? elMiniRelIsoCMS3_EA(lep1_idx, gconf.ea_version) : muMiniRelIsoCMS3_EA(lep1_idx, gconf.ea_version);
