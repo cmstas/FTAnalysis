@@ -162,6 +162,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_MVA"                                                , &lep2_MVA                                                );
   BabyTree->Branch("lep1_MVA_miniaod"                                        , &lep1_MVA_miniaod                                        );
   BabyTree->Branch("lep2_MVA_miniaod"                                        , &lep2_MVA_miniaod                                        );
+  BabyTree->Branch("lep1_passes_MVA"                                        , &lep1_passes_MVA                                        );
+  BabyTree->Branch("lep2_passes_MVA"                                        , &lep2_passes_MVA                                        );
   BabyTree->Branch("lep1_ip3d_err"                                           , &lep1_ip3d_err                                           );
   BabyTree->Branch("lep2_ip3d_err"                                           , &lep2_ip3d_err                                           );
   BabyTree->Branch("nVetoElectrons7"                                         , &nVetoElectrons7                                         );
@@ -607,6 +609,8 @@ void babyMaker::InitBabyNtuple(){
     lep2_MVA = -999998;
     lep1_MVA_miniaod = -999998;
     lep2_MVA_miniaod = -999998;
+    lep1_passes_MVA = false;
+    lep2_passes_MVA = false;
     lep1_ip3d_err = -999998;
     lep2_ip3d_err = -999998;
     lep1_el_conv_vtx_flag = 0;
@@ -1013,8 +1017,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_iso = abs(lep2_id) == 11 ? eleRelIso03(lep2_idx, SS) :  muRelIso03(lep2_idx, SS);
   lep1_tkIso = abs(lep1_id) == 11 ? els_tkIso().at(lep1_idx)/lep1_p4.pt() : mus_iso03_sumPt().at(lep1_idx)/lep1_p4.pt();
   lep2_tkIso = abs(lep2_id) == 11 ? els_tkIso().at(lep2_idx)/lep2_p4.pt() : mus_iso03_sumPt().at(lep2_idx)/lep2_p4.pt();
-  lep1_multiIso = abs(lep1_id) == 11 ? passMultiIso(11, lep1_idx, 0.09, 0.85, 9.2, gconf.ea_version, 2) : passMultiIso(13, lep1_idx, 0.12, 0.80, 7.5, gconf.ea_version, 2);
-  lep2_multiIso = abs(lep2_id) == 11 ? passMultiIso(11, lep2_idx, 0.09, 0.85, 9.2, gconf.ea_version, 2) : passMultiIso(13, lep2_idx, 0.12, 0.80, 7.5, gconf.ea_version, 2);
+  lep1_multiIso = abs(lep1_id) == 11 ? passMultiIso(11, lep1_idx, gconf.multiiso_el_minireliso, gconf.multiiso_el_ptratio, gconf.multiiso_el_ptrel, gconf.ea_version, 2) : passMultiIso(13, lep1_idx, gconf.multiiso_mu_minireliso, gconf.multiiso_mu_ptratio, gconf.multiiso_mu_ptrel, gconf.ea_version, 2);
+  lep2_multiIso = abs(lep2_id) == 11 ? passMultiIso(11, lep2_idx, gconf.multiiso_el_minireliso, gconf.multiiso_el_ptratio, gconf.multiiso_el_ptrel, gconf.ea_version, 2) : passMultiIso(13, lep2_idx, gconf.multiiso_mu_minireliso, gconf.multiiso_mu_ptratio, gconf.multiiso_mu_ptrel, gconf.ea_version, 2);
   lep1_sip = abs(lep1_id) == 11 ? fabs(els_ip3d().at(lep1_idx))/els_ip3derr().at(lep1_idx) : fabs(mus_ip3d().at(lep1_idx))/mus_ip3derr().at(lep1_idx);
   lep2_sip = abs(lep2_id) == 11 ? fabs(els_ip3d().at(lep2_idx))/els_ip3derr().at(lep2_idx) : fabs(mus_ip3d().at(lep2_idx))/mus_ip3derr().at(lep2_idx);
   dilep_p4 = lep1_p4 + lep2_p4;
@@ -1024,6 +1028,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_MVA = abs(lep2_id) == 11 ? getMVAoutput(lep2_idx,true) : -9999;
   lep1_MVA_miniaod = lep1_MVA;
   lep2_MVA_miniaod = lep2_MVA;
+
+  lep1_passes_MVA = abs(lep1_id) == 11 ? passesMVAforID(lep1_idx, SS_medium_noiso_v6) : true;
+  lep2_passes_MVA = abs(lep2_id) == 11 ? passesMVAforID(lep2_idx, SS_medium_noiso_v6) : true;
 
   //Reject events that fail trigger matching
   if (gconf.year == 2016) {

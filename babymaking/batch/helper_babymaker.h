@@ -431,6 +431,9 @@ class babyMaker {
     bool lep4_veto;
     bool lep4_fo;
 
+    bool lep1_passes_MVA;
+    bool lep2_passes_MVA;
+
     //Imparct parameter
     float lep1_dxyPV;
     float lep2_dxyPV;
