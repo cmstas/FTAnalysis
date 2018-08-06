@@ -18,6 +18,20 @@
 ### So you want to make some babies?
 I know this guy -- great guy -- the best. He uses condor to deliver his babies instead of storks.
 I'm going to let you in on a secret...
+
+#### (new) ProjectMetis
+```bash
+# Edit submetis.py with samples and logic you want and also increment tag
+# Open up a screen before proceeding
+# Get environment
+cd ProjectMetis
+. setup.sh
+cd -
+# Submit
+python submetis.py
+```
+
+#### (old) AutoTwopler
 ```bash
 # Edit four_top.py with samples you want and increment tag near the bottom
 # Edit ducks.py to build instructions with appropriate samples
