@@ -4,7 +4,7 @@ echo "Did you do 'make opt' instead of 'make'? It will be much faster"
 
 final_dir="inputs"
 files="
-package.tar.gz
+package.tar.xz
 main.exe
 liblooperBatch.so
 CORE
@@ -13,7 +13,8 @@ goodRunList
 "
 
 mkdir -p $final_dir
-tar -cz --exclude='CORE/data' --exclude-vcs -f $files
-mv package.tar.gz  $final_dir
+# tar -cz --exclude='CORE/data' --exclude='*.cc' --exclude='*.h' --exclude='*.C' --exclude '*.cxx' --exclude-vcs -f $files
+XZ_OPT=-5 tar -Jc --exclude='CORE/data' --exclude='*.cc' --exclude='*.h' --exclude='*.C' --exclude '*.cxx' --exclude-vcs -f $files
+mv package.tar.xz  $final_dir
 echo "I put stuff into $final_dir!"
 

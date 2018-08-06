@@ -35,5 +35,6 @@ python ducks.py
 That pesky scale1fb text file makes it annoying to just run on an arbitrary file. Sometimes
 we just want to check something simple. Luckily we can bypass all that with
 ```bash
-noscale1fb=true ./main.exe /hadoop/cms/store/user/namin/run2_moriond17_cms4/ProjectMetis/tttt-LOytscan_kt-2p1_v2_CMS4_CMS4_V00-00-02_2017Sep27/merged_ntuple_1.root
+noscale1fb=1 ./main.exe /hadoop/cms/store/user/namin/run2_moriond17_cms4/ProjectMetis/tttt-LOytscan_kt-2p1_v2_CMS4_CMS4_V00-00-02_2017Sep27/merged_ntuple_1.root
 ```
+Also, can skip opposite sign events in MC with `noos=1`.
