@@ -9,7 +9,7 @@ def dump_bins(h2s, name, transpose=False, nofabseta=False, default1=False, do_er
     buff = "float %s(float pt, float eta) {\n" % name
     if type(h2s) is not list:
         h2s = [h2s]
-    for h2 in h2s:
+    for ih2,h2 in enumerate(h2s):
         if transpose:
             for iy in range(1,h2.GetNbinsY()+1):
                 for ix in range(1,h2.GetNbinsX()+1):
@@ -17,7 +17,7 @@ def dump_bins(h2s, name, transpose=False, nofabseta=False, default1=False, do_er
                         val = h2.GetBinError(ix,iy)
                     else:
                         val = h2.GetBinContent(ix,iy)
-                    if iy != h2.GetNbinsY():
+                    if iy != h2.GetNbinsY() or h2.GetNbinsY() == 1:
                         buff += "  if (pt >= %.0f && pt < %.0f && eta >= %.3f && eta < %.3f) return %.4f;\n" \
                                 % (h2.GetYaxis().GetBinLowEdge(iy), h2.GetYaxis().GetBinUpEdge(iy), h2.GetXaxis().GetBinLowEdge(ix), h2.GetXaxis().GetBinUpEdge(ix), val)
                     else:
@@ -30,7 +30,7 @@ def dump_bins(h2s, name, transpose=False, nofabseta=False, default1=False, do_er
                         val = h2.GetBinError(ix,iy)
                     else:
                         val = h2.GetBinContent(ix,iy)
-                    if ix != h2.GetNbinsX():
+                    if ix != h2.GetNbinsX() or h2.GetNbinsX() == 1:
                         buff += "  if (pt >= %.0f && pt < %.0f && fabs(eta) >= %.3f && fabs(eta) < %.3f) return %.4f;\n" \
                                 % (h2.GetXaxis().GetBinLowEdge(ix), h2.GetXaxis().GetBinUpEdge(ix), h2.GetYaxis().GetBinLowEdge(iy), h2.GetYaxis().GetBinUpEdge(iy), val)
                     else:
@@ -80,24 +80,47 @@ if __name__ == "__main__":
     # from: https://twiki.cern.ch/twiki/bin/viewauth/CMS/Egamma2017DataRecommendations
 
 
-    # for X in ["B","C","D","E","F","BCDEF"]:
-    #     f_el_medium_runX = r.TFile("rootfiles/egammaEffi.txt_EGM2D_run{}_passingMedium94X.root".format(X))
-    #     h_el_medium_runX = f_el_medium_runX.Get("EGamma_SF2D")
-    #     print dump_bins(h_el_medium_runX, "electronScaleFactor_Run{}".format(X), transpose=True)
-    #     print dump_bins(h_el_medium_runX, "electronScaleFactorError_Run{}".format(X), transpose=True, do_err=True)
+    # Run2017_MVATightIP2D3DIDEmu
 
+    # nmiss1:
+    #     Run2017_ConvIHit1_wrtMVATightTightIP2D3DIDEmu
+    #     Run2017_3Qagree2
+    # nmiss0:
+    #     Run2017_ConvIHit0
+    #     Run2017_3Qagree
 
-    # f_el_reco_low = r.TFile("rootfiles/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root")
-    # h_el_reco_low = f_el_reco_low.Get("EGamma_SF2D")
-    # for X in ["B","C","D","E","F","BCDEF"]:
-    #     f_el_reco_high_runX = r.TFile("rootfiles/egammaEffi.txt_EGM2D_run{}_passingRECO.root".format(X))
-    #     h_el_reco_high_runX = f_el_reco_high_runX.Get("EGamma_SF2D")
-    #     print dump_bins([h_el_reco_low,h_el_reco_high_runX], "electronScaleFactorReco_Run{}".format(X), transpose=True)
-    #     print dump_bins([h_el_reco_low,h_el_reco_high_runX], "electronScaleFactorRecoError_Run{}".format(X), transpose=True, do_err=True)
+    # Run2017_MultiIsoNew
+
+    # https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#2017_and_or_Late_2016_data_analy
+    # https://indico.cern.ch/event/732975/contributions/3082298/attachments/1693028/2724384/SUSY_SF_2017_EGMappr.pdf
+    nmiss = 1
+    f_el = r.TFile("rootfiles/ElectronScaleFactors_Run2017.root")
+    for X in ["BCDEF"]:
+        h_el_mvatight = f_el.Get("Run2017_MVATightIP2D3DIDEmu")
+        if nmiss != 0:
+            # hit <= 1
+            h_el_convhit = f_el.Get("Run2017_ConvIHit1_wrtMVATightTightIP2D3DIDEmu")
+            h_el_3charge = f_el.Get("Run2017_3Qagree2")
+        else:
+            # hit == 0
+            h_el_convhit = f_el.Get("Run2017_ConvIHit0")
+            h_el_3charge = f_el.Get("Run2017_3Qagree")
+        h_el_mvatight.Multiply(h_el_convhit)
+        h_el_mvatight.Multiply(h_el_3charge)
+        print dump_bins(h_el_mvatight, "electronScaleFactor_Run{}".format(X), transpose=True)
+        print dump_bins(h_el_mvatight, "electronScaleFactorError_Run{}".format(X), transpose=True, do_err=True)
+
+    f_el_reco_low = r.TFile("rootfiles/egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root")
+    h_el_reco_low = f_el_reco_low.Get("EGamma_SF2D")
+    for X in ["B","C","D","E","F","BCDEF"]:
+        f_el_reco_high_runX = r.TFile("rootfiles/egammaEffi.txt_EGM2D_run{}_passingRECO.root".format(X))
+        h_el_reco_high_runX = f_el_reco_high_runX.Get("EGamma_SF2D")
+        print dump_bins([h_el_reco_low,h_el_reco_high_runX], "electronScaleFactorReco_Run{}".format(X), transpose=True)
+        print dump_bins([h_el_reco_low,h_el_reco_high_runX], "electronScaleFactorRecoError_Run{}".format(X), transpose=True, do_err=True)
 
 
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffs2017
 
-    for X in ["BC","DE","F","BCDEF"]:
-        print dump_bins_json("jsons/Run{}_SF_ID.json".format(X), "muonScaleFactor_Run{}".format(X))
-        print dump_bins_json("jsons/Run{}_SF_ID.json".format(X), "muonScaleFactorError_Run{}".format(X), do_err=True)
+    # for X in ["BC","DE","F","BCDEF"]:
+    #     print dump_bins_json("jsons/Run{}_SF_ID.json".format(X), "muonScaleFactor_Run{}".format(X))
+    #     print dump_bins_json("jsons/Run{}_SF_ID.json".format(X), "muonScaleFactorError_Run{}".format(X), do_err=True)
