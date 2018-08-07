@@ -73,7 +73,7 @@ COREOBJECTS=$(COREOBJECTSTMP:.cxx=.o) # replace .cxx with .o
 # $(info COREOBJECTS="$(COREOBJECTS)") # print out
 CORELIB=libCMS3CORE.so
 
-SOURCES = $(wildcard $(DIR)/*.cc)
+SOURCES = $(wildcard $(DIR)/*.cc) fastsim/xsec.cc
 OBJECTS = $(SOURCES:.cc=.o) 
 LIB = liblooperBatch.so
 

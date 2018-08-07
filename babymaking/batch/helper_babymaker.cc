@@ -439,7 +439,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
         f_btag_eff->Close();
     }
     if (isFastsim >  0 ) {
-        f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__fastsim_ttH.root");
+        f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1bbbb-T1qqqq_fastsim.root");
         TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
         TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
         TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
@@ -451,9 +451,17 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     }
   }
 
-    // Jet Resolution ... :sad:
-  res.loadResolutionFile("CORE/Tools/JetResolution/data/Spring16_25nsV10_MC/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
-  res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Spring16_25nsV10_MC/Spring16_25nsV10_MC_SF_AK4PFchs.txt");
+  // Jet Resolution ... :sad:
+  if (gconf.year == 2016) {
+      res.loadResolutionFile("CORE/Tools/JetResolution/data/Summer16_25nsV1_MC_PtResolution_AK8PFchs.txt");
+      res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Summer16_25nsV1_MC_SF_AK4PFchs.txt");
+  } else if (gconf.year == 2017) {
+      res.loadResolutionFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_PtResolution_AK4PFchs.txt");
+      res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_SF_AK4PFchs.txt");
+  } else if (gconf.year == 2018) {
+      res.loadResolutionFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_PtResolution_AK4PFchs.txt");
+      res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_SF_AK4PFchs.txt");
+  }
 
   // Load scale1fbs/xsecs from file
   df.loadFromFile("CORE/Tools/datasetinfo/scale1fbs.txt");
@@ -892,7 +900,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   int best_hyp = best_hyp_info.best_hyp;
 
   // FIXME, don't care about in situ for now, or even nondata OS
-  if (hyp_class == 5 || hyp_class == 7) return babyErrorStruct;
+  if (hyp_class == 5) return babyErrorStruct;
+  if (hyp_class == 7) return babyErrorStruct;
   if (ignore_os) {
       if (!is_real_data && hyp_class == 4) return babyErrorStruct;
   }
@@ -932,9 +941,21 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         }
 
     }
-    if (!ignore_scale1fb) {
+    if (!ignore_scale1fb && !isFastsim) {
         scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
         xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+    }
+    if (isFastsim > 0){
+        sparms = tas::sparm_values();
+
+        // T1tttt, T5qqqqVV, T5tttt, T5ttcc
+        if (isFastsim <= 6) xsec = go_xsec(sparms[0]).xsec;
+        if (isFastsim <= 6) xsec_error = go_xsec(sparms[0]).percErr;
+        // T6ttWW
+        if (isFastsim == 10) xsec = stop_xsec(sparms[0]).xsec;
+        if (isFastsim == 10) xsec_error = stop_xsec(sparms[0]).percErr;
+        // if (isFastsim <  100) scale1fb = 1000*xsec/nPoints(isFastsim, sparms[0], sparms[1]);
+        is_fastsim = 1;
     }
     kfactor = tas::evt_kfactor();
 
@@ -1833,24 +1854,26 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //Make sure one of our triggers fired
 
   if (gconf.year == 2016) {
-      if (isRunH) {
-          if (passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
-                  passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
-          if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v")))              (triggers |= 1<<3);
-          if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v")))            (triggers |= 1<<4);
-      } else {
-          if (passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v"))  ||
-                  passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v")))   (triggers |= 1<<2);
-          if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v")))              (triggers |= 1<<3);
-          if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v")))            (triggers |= 1<<4);
+      if (isFastsim == 0) {
+          if (isRunH) {
+              if (passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
+                      passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
+              if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v")))              (triggers |= 1<<3);
+              if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v")))            (triggers |= 1<<4);
+          } else {
+              if (passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v"))  ||
+                      passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v")))   (triggers |= 1<<2);
+              if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v")))              (triggers |= 1<<3);
+              if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v")))            (triggers |= 1<<4);
+          }
+          if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")))        (triggers |= 1<<6);
+          if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v")))      (triggers |= 1<<0);
+          if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v")))    (triggers |= 1<<5);
+          if (passHLTTrigger(triggerName("HLT_DoubleMu8_Mass8_PFHT300_v")))                      (triggers |= 1<<7);
+          // JetHT triggers
+          if (passHLTTrigger(triggerName("HLT_AK8PFJet450")))                      (triggers |= 1<<8);
+          if (passHLTTrigger(triggerName("HLT_PFJet450")))                         (triggers |= 1<<9);
       }
-      if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")))        (triggers |= 1<<6);
-      if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v")))      (triggers |= 1<<0);
-      if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v")))    (triggers |= 1<<5);
-      if (passHLTTrigger(triggerName("HLT_DoubleMu8_Mass8_PFHT300_v")))                      (triggers |= 1<<7);
-      // JetHT triggers
-      if (passHLTTrigger(triggerName("HLT_AK8PFJet450")))                      (triggers |= 1<<8);
-      if (passHLTTrigger(triggerName("HLT_PFJet450")))                         (triggers |= 1<<9);
       fired_trigger = false;
       if (triggers != 0) {
           if (ht<300) {

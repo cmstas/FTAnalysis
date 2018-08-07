@@ -28,6 +28,7 @@
 #include "TROOT.h"
 #include "Math/Vector4D.h"
 #include "Math/LorentzVector.h"
+#include "fastsim/xsec.h"
 
 #include <vector>
 #include <algorithm>
@@ -92,9 +93,11 @@ class babyMaker {
     bool ignore_scale1fb = false;
     bool ignore_os = false;
 
-  protected:
     TFile* BabyFile;
     TTree* BabyTree;
+
+  protected:
+    //
 
   private:
 
