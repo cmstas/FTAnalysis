@@ -15,6 +15,9 @@ export LD_LIBRARY_PATH=$PWD/babymaking/batch/:$LD_LIBRARY_PATH
 export PYTHONPATH=$PWD/:$PYTHONPATH
 export PYTHONPATH=$PWD/common/matplottery:$PYTHONPATH
 
+# bash PS1 gets mangled because CMSSW overrides this to LANG=C :(, so switch it back.
+export LANG=en_US.UTF-8
+
 # export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/lib/python2.7/site-packages/:$PYTHONPATH
 # export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/:$PYTHONPATH
 # export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages/:$PYTHONPATH
