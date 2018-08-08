@@ -1368,6 +1368,56 @@ void SSAG::Init(TTree *tree) {
 		weight_btagsf_DN_branch = tree->GetBranch("weight_btagsf_DN");
 		if (weight_btagsf_DN_branch) {weight_btagsf_DN_branch->SetAddress(&weight_btagsf_DN_);}
 	}
+	weight_scale_UP_branch = 0;
+	if (tree->GetBranch("weight_scale_UP") != 0) {
+		weight_scale_UP_branch = tree->GetBranch("weight_scale_UP");
+		if (weight_scale_UP_branch) {weight_scale_UP_branch->SetAddress(&weight_scale_UP_);}
+	}
+	weight_scale_DN_branch = 0;
+	if (tree->GetBranch("weight_scale_DN") != 0) {
+		weight_scale_DN_branch = tree->GetBranch("weight_scale_DN");
+		if (weight_scale_DN_branch) {weight_scale_DN_branch->SetAddress(&weight_scale_DN_);}
+	}
+	weight_fsrvar_UP_branch = 0;
+	if (tree->GetBranch("weight_fsrvar_UP") != 0) {
+		weight_fsrvar_UP_branch = tree->GetBranch("weight_fsrvar_UP");
+		if (weight_fsrvar_UP_branch) {weight_fsrvar_UP_branch->SetAddress(&weight_fsrvar_UP_);}
+	}
+	weight_fsrvar_DN_branch = 0;
+	if (tree->GetBranch("weight_fsrvar_DN") != 0) {
+		weight_fsrvar_DN_branch = tree->GetBranch("weight_fsrvar_DN");
+		if (weight_fsrvar_DN_branch) {weight_fsrvar_DN_branch->SetAddress(&weight_fsrvar_DN_);}
+	}
+	weight_isrvar_UP_branch = 0;
+	if (tree->GetBranch("weight_isrvar_UP") != 0) {
+		weight_isrvar_UP_branch = tree->GetBranch("weight_isrvar_UP");
+		if (weight_isrvar_UP_branch) {weight_isrvar_UP_branch->SetAddress(&weight_isrvar_UP_);}
+	}
+	weight_isrvar_DN_branch = 0;
+	if (tree->GetBranch("weight_isrvar_DN") != 0) {
+		weight_isrvar_DN_branch = tree->GetBranch("weight_isrvar_DN");
+		if (weight_isrvar_DN_branch) {weight_isrvar_DN_branch->SetAddress(&weight_isrvar_DN_);}
+	}
+	weight_alphas_UP_branch = 0;
+	if (tree->GetBranch("weight_alphas_UP") != 0) {
+		weight_alphas_UP_branch = tree->GetBranch("weight_alphas_UP");
+		if (weight_alphas_UP_branch) {weight_alphas_UP_branch->SetAddress(&weight_alphas_UP_);}
+	}
+	weight_alphas_DN_branch = 0;
+	if (tree->GetBranch("weight_alphas_DN") != 0) {
+		weight_alphas_DN_branch = tree->GetBranch("weight_alphas_DN");
+		if (weight_alphas_DN_branch) {weight_alphas_DN_branch->SetAddress(&weight_alphas_DN_);}
+	}
+	weight_pdf_UP_branch = 0;
+	if (tree->GetBranch("weight_pdf_UP") != 0) {
+		weight_pdf_UP_branch = tree->GetBranch("weight_pdf_UP");
+		if (weight_pdf_UP_branch) {weight_pdf_UP_branch->SetAddress(&weight_pdf_UP_);}
+	}
+	weight_pdf_DN_branch = 0;
+	if (tree->GetBranch("weight_pdf_DN") != 0) {
+		weight_pdf_DN_branch = tree->GetBranch("weight_pdf_DN");
+		if (weight_pdf_DN_branch) {weight_pdf_DN_branch->SetAddress(&weight_pdf_DN_);}
+	}
 	decayWSF_branch = 0;
 	if (tree->GetBranch("decayWSF") != 0) {
 		decayWSF_branch = tree->GetBranch("decayWSF");
@@ -1890,6 +1940,16 @@ void SSAG::GetEntry(unsigned int idx)
 		weight_btagsf_isLoaded = false;
 		weight_btagsf_UP_isLoaded = false;
 		weight_btagsf_DN_isLoaded = false;
+		weight_scale_UP_isLoaded = false;
+		weight_scale_DN_isLoaded = false;
+		weight_fsrvar_UP_isLoaded = false;
+		weight_fsrvar_DN_isLoaded = false;
+		weight_isrvar_UP_isLoaded = false;
+		weight_isrvar_DN_isLoaded = false;
+		weight_alphas_UP_isLoaded = false;
+		weight_alphas_DN_isLoaded = false;
+		weight_pdf_UP_isLoaded = false;
+		weight_pdf_DN_isLoaded = false;
 		gl1_p4_isLoaded = false;
 		gl2_p4_isLoaded = false;
 		decayWSF_isLoaded = false;
@@ -2217,6 +2277,16 @@ void SSAG::LoadAllBranches()
 	if (weight_btagsf_branch != 0) weight_btagsf();
 	if (weight_btagsf_UP_branch != 0) weight_btagsf_UP();
 	if (weight_btagsf_DN_branch != 0) weight_btagsf_DN();
+	if (weight_scale_UP_branch != 0) weight_scale_UP();
+	if (weight_scale_DN_branch != 0) weight_scale_DN();
+	if (weight_fsrvar_UP_branch != 0) weight_fsrvar_UP();
+	if (weight_fsrvar_DN_branch != 0) weight_fsrvar_DN();
+	if (weight_isrvar_UP_branch != 0) weight_isrvar_UP();
+	if (weight_isrvar_DN_branch != 0) weight_isrvar_DN();
+	if (weight_alphas_UP_branch != 0) weight_alphas_UP();
+	if (weight_alphas_DN_branch != 0) weight_alphas_DN();
+	if (weight_pdf_UP_branch != 0) weight_pdf_UP();
+	if (weight_pdf_DN_branch != 0) weight_pdf_DN();
 	if (gl1_p4_branch != 0) gl1_p4();
 	if (gl2_p4_branch != 0) gl2_p4();
 	if (decayWSF_branch != 0) decayWSF();
@@ -5793,6 +5863,136 @@ void SSAG::LoadAllBranches()
 		}
 		return weight_btagsf_DN_;
 	}
+	const float &SSAG::weight_scale_UP()
+	{
+		if (not weight_scale_UP_isLoaded) {
+			if (weight_scale_UP_branch != 0) {
+				weight_scale_UP_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_scale_UP_branch does not exist!\n");
+				exit(1);
+			}
+			weight_scale_UP_isLoaded = true;
+		}
+		return weight_scale_UP_;
+	}
+	const float &SSAG::weight_scale_DN()
+	{
+		if (not weight_scale_DN_isLoaded) {
+			if (weight_scale_DN_branch != 0) {
+				weight_scale_DN_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_scale_DN_branch does not exist!\n");
+				exit(1);
+			}
+			weight_scale_DN_isLoaded = true;
+		}
+		return weight_scale_DN_;
+	}
+	const float &SSAG::weight_fsrvar_UP()
+	{
+		if (not weight_fsrvar_UP_isLoaded) {
+			if (weight_fsrvar_UP_branch != 0) {
+				weight_fsrvar_UP_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_fsrvar_UP_branch does not exist!\n");
+				exit(1);
+			}
+			weight_fsrvar_UP_isLoaded = true;
+		}
+		return weight_fsrvar_UP_;
+	}
+	const float &SSAG::weight_fsrvar_DN()
+	{
+		if (not weight_fsrvar_DN_isLoaded) {
+			if (weight_fsrvar_DN_branch != 0) {
+				weight_fsrvar_DN_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_fsrvar_DN_branch does not exist!\n");
+				exit(1);
+			}
+			weight_fsrvar_DN_isLoaded = true;
+		}
+		return weight_fsrvar_DN_;
+	}
+	const float &SSAG::weight_isrvar_UP()
+	{
+		if (not weight_isrvar_UP_isLoaded) {
+			if (weight_isrvar_UP_branch != 0) {
+				weight_isrvar_UP_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_isrvar_UP_branch does not exist!\n");
+				exit(1);
+			}
+			weight_isrvar_UP_isLoaded = true;
+		}
+		return weight_isrvar_UP_;
+	}
+	const float &SSAG::weight_isrvar_DN()
+	{
+		if (not weight_isrvar_DN_isLoaded) {
+			if (weight_isrvar_DN_branch != 0) {
+				weight_isrvar_DN_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_isrvar_DN_branch does not exist!\n");
+				exit(1);
+			}
+			weight_isrvar_DN_isLoaded = true;
+		}
+		return weight_isrvar_DN_;
+	}
+	const float &SSAG::weight_alphas_UP()
+	{
+		if (not weight_alphas_UP_isLoaded) {
+			if (weight_alphas_UP_branch != 0) {
+				weight_alphas_UP_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_alphas_UP_branch does not exist!\n");
+				exit(1);
+			}
+			weight_alphas_UP_isLoaded = true;
+		}
+		return weight_alphas_UP_;
+	}
+	const float &SSAG::weight_alphas_DN()
+	{
+		if (not weight_alphas_DN_isLoaded) {
+			if (weight_alphas_DN_branch != 0) {
+				weight_alphas_DN_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_alphas_DN_branch does not exist!\n");
+				exit(1);
+			}
+			weight_alphas_DN_isLoaded = true;
+		}
+		return weight_alphas_DN_;
+	}
+	const float &SSAG::weight_pdf_UP()
+	{
+		if (not weight_pdf_UP_isLoaded) {
+			if (weight_pdf_UP_branch != 0) {
+				weight_pdf_UP_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_pdf_UP_branch does not exist!\n");
+				exit(1);
+			}
+			weight_pdf_UP_isLoaded = true;
+		}
+		return weight_pdf_UP_;
+	}
+	const float &SSAG::weight_pdf_DN()
+	{
+		if (not weight_pdf_DN_isLoaded) {
+			if (weight_pdf_DN_branch != 0) {
+				weight_pdf_DN_branch->GetEntry(index);
+			} else { 
+				printf("branch weight_pdf_DN_branch does not exist!\n");
+				exit(1);
+			}
+			weight_pdf_DN_isLoaded = true;
+		}
+		return weight_pdf_DN_;
+	}
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &SSAG::gl1_p4()
 	{
 		if (not gl1_p4_isLoaded) {
@@ -6752,6 +6952,16 @@ namespace ss {
 	const float &weight_btagsf() { return samesign.weight_btagsf(); }
 	const float &weight_btagsf_UP() { return samesign.weight_btagsf_UP(); }
 	const float &weight_btagsf_DN() { return samesign.weight_btagsf_DN(); }
+	const float &weight_scale_UP() { return samesign.weight_scale_UP(); }
+	const float &weight_scale_DN() { return samesign.weight_scale_DN(); }
+	const float &weight_fsrvar_UP() { return samesign.weight_fsrvar_UP(); }
+	const float &weight_fsrvar_DN() { return samesign.weight_fsrvar_DN(); }
+	const float &weight_isrvar_UP() { return samesign.weight_isrvar_UP(); }
+	const float &weight_isrvar_DN() { return samesign.weight_isrvar_DN(); }
+	const float &weight_alphas_UP() { return samesign.weight_alphas_UP(); }
+	const float &weight_alphas_DN() { return samesign.weight_alphas_DN(); }
+	const float &weight_pdf_UP() { return samesign.weight_pdf_UP(); }
+	const float &weight_pdf_DN() { return samesign.weight_pdf_DN(); }
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &gl1_p4() { return samesign.gl1_p4(); }
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &gl2_p4() { return samesign.gl2_p4(); }
 	const float &decayWSF() { return samesign.decayWSF(); }
