@@ -41,6 +41,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("scale1fb"                                                , &scale1fb                                                );
   BabyTree->Branch("genps_weight"                                                , &genps_weight                                                );
   BabyTree->Branch("xsec"                                                    , &xsec                                                    );
+  BabyTree->Branch("neventstotal"                                                    , &neventstotal                                                    );
   BabyTree->Branch("xsec_ps"                                                    , &xsec_ps                                                    );
   BabyTree->Branch("sparmNames"                                              , &sparmNames                                              );
   BabyTree->Branch("sparms"                                                  , &sparms                                                  );
@@ -50,6 +51,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("genweights"                                              , &genweights                                              );
   // BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
   BabyTree->Branch("gen_met_phi"                                             , &gen_met_phi                                             );
+  BabyTree->Branch("skim"                                                   , &skim                                                   );
   BabyTree->Branch("njets"                                                   , &njets                                                   );
   BabyTree->Branch("njetsAG"                                                   , &njetsAG                                                   );
   BabyTree->Branch("nbtagsAG"                                                   , &nbtagsAG                                                   );
@@ -506,13 +508,14 @@ void babyMaker::InitBabyNtuple(){
     is_real_data = 0;
     scale1fb = 1;
     genps_weight = 1;
-    xsec = -1;
+    neventstotal = -1;
     xsec_ps = -1;
     kfactor = -1;
     gen_met = -1;
     genweights.clear();
     // genweightsID.clear();
     gen_met_phi = -1;
+    skim = 0;
     njets = -1;
     njetsAG = -1;
     nbtagsAG = -1;
@@ -791,11 +794,6 @@ void babyMaker::InitBabyNtuple(){
     met_unc_dn = 0;
     metPhi_unc_up = 0;
     metPhi_unc_dn = 0;
-    njets_JER = 0;
-    ht_JER = 0;
-    nbtags_JER = 0;
-    met_JER = 0;
-    metPhi_JER = 0;
     njets_JER_up = 0;
     njets_JER_dn = 0;
     ht_JER_up = 0;
@@ -928,6 +926,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       if (!is_real_data && hyp_class == 4) return babyErrorStruct;
   }
 
+  // if MC and not DY or ttbar, skip opposite sign
+  if ( !is_real_data && !((filename.find("/DY") != std::string::npos) || (filename.find("/TT_") != std::string::npos) || (filename.find("/TTJets") != std::string::npos)) ) {
+      if (hyp_class == 4) return babyErrorStruct;
+  }
+      
+
   if (hyp_class == 6){
     madeExtraZ = makesExtraZ(best_hyp).result;
     madeExtraG = makesExtraGammaStar(best_hyp);
@@ -995,6 +999,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (!ignore_scale1fb && !isFastsim) {
         scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
         xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+        neventstotal = sgnMCweight*df.getnEventsTotalFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
     }
     if (isFastsim > 0){
         sparms = tas::sparm_values();
@@ -2176,6 +2181,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
 
   }
+
+  skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
+         (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50);
+
 
 
   //Fill Baby

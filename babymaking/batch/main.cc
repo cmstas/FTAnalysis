@@ -253,12 +253,7 @@ int main(int argc, char *argv[]){
         gconf.jet_corrector_L2L3 = jetCorrAG_L2L3;
     }
 
-    ////Histograms for cross-section calculation
-    //struct csErr_info_t { TH1F* cs; float cs_scale_up; float cs_scale_dn; float cs_pdf[102]; TH1F* results; int nEntries; int mGluino; int mLSP;}; 
-    //vector <csErr_info_t> csErr_info_v; 
     TH2F* count_hist = new TH2F("counts","",500,0,2500,500,0,2500);
-
-    // bool haveMadeErrStruct = false;
 
     auto t0 = std::chrono::steady_clock::now();
     auto tlast = std::chrono::steady_clock::now();
@@ -379,31 +374,10 @@ int main(int argc, char *argv[]){
                 if (sparms.size() > 0) s1 = sparms[0];
                 if (sparms.size() > 1) s2 = sparms[1];
                 count_hist->Fill(s1,s2);
+            } else {
+                count_hist->Fill(1,1);
             }
             
-            ////c-s error variables
-            //if (isSignal > 0 || haveMadeErrStruct){
-            //    if (haveMadeErrStruct) idx = 0;
-            //    csErr_info_v[idx].results->Fill(0.5, 1);  
-            //    csErr_info_v[idx].results->Fill(3.5, csErr.cs_scale_up); 
-            //    csErr_info_v[idx].results->Fill(4.5, csErr.cs_scale_dn); 
-            //    if (SR > 0 && isGood) csErr_info_v[idx].results->Fill(200+SR-0.5, csErr.cs_scale_no); 
-            //    if (SR > 0 && isGood) csErr_info_v[idx].results->Fill(400+SR-0.5, csErr.cs_scale_up); 
-            //    if (SR > 0 && isGood) csErr_info_v[idx].results->Fill(600+SR-0.5, csErr.cs_scale_dn); 
-            //    for (unsigned int i = 0; i < 100; i++){
-            //        if (SR > 0 && isGood) csErr_info_v[idx].results->Fill(1000+100*(SR-1)+i-0.5, csErr.cs_pdf[i]);
-            //        csErr_info_v[idx].results->Fill(6+i-0.5, csErr.cs_pdf[i]); 
-            //    }
-            //    if (SR > 0 && isGood) csErr_info_v[idx].results->Fill(15600+SR-0.5, csErr.cs_pdf[100]); 
-            //    if (SR > 0 && isGood) csErr_info_v[idx].results->Fill(15700+SR-0.5, csErr.cs_pdf[101]); 
-            //    vector<float> sparms = tas::sparm_values();
-            //    float s1 = 1.;
-            //    float s2 = 1.;
-            //    if (sparms.size() > 0) s1 = sparms[0];
-            //    if (sparms.size() > 1) s1 = sparms[1];
-            //    count_hist->Fill(s1,s2);
-            //}
-
         } // event loop 
 
         // // XXX hmm, these 2 lines cause segfaults. why? maybe ROOT garbage collection already
@@ -415,27 +389,6 @@ int main(int argc, char *argv[]){
 
     } // file loop
 
-    //if (isSignal > 0 || haveMadeErrStruct){
-    //    for (unsigned int j = 0; j < csErr_info_v.size(); j++){
-    //        //bin 1: nEntries
-    //        //bin 2: cross-section
-    //        csErr_info_v[j].results->SetBinContent(2, csErr_info_v[j].cs->Integral()); 
-    //        //bin 3: cross-section stat err
-    //        csErr_info_v[j].results->SetBinError(3, csErr_info_v[j].cs->GetBinError(1)); 
-    //        //bin 4: cross-section scale up
-    //        //bin 5: cross-section scale dn
-    //        //bin 6-107: cross-section PDF error
-    //        //bin 201-266: yield in each SR (for cross-check)
-    //        //bin 401-466: scale up in each SR
-    //        //bin 601-666: scale dn in each SR 
-    //        //bin 1000-1099: SR1 PDF weights
-    //        //bin 1100-1199: SR2 PDF weights
-    //        //bin 7500-7599: SR66 PDF weights
-    //        //bin 15600-15666: alpha_s up in each SR
-    //        //bin 15700-15766: alpha_s dn in each SR
-    //    }
-    //}
-
     auto t1 = std::chrono::steady_clock::now();
     float duration = 0.001*(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0)).count();
     std::cout << "Processed " << nEventsTotal << " events in " << duration << " seconds @ " << 0.001*round(nEventsTotal/duration) << " kHz" << std::endl;
@@ -445,7 +398,6 @@ int main(int argc, char *argv[]){
     mylooper->BabyTree->Write();
     count_hist->Write();
     mylooper->BabyFile->Close();
-    // mylooper->CloseBabyNtuple();
 
     ////Open the baby file again
     //TFile* BabyFile = new TFile(outname, "UPDATE");

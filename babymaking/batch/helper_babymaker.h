@@ -151,6 +151,7 @@ class babyMaker {
     float scale1fb;
     float genps_weight;
     float xsec;
+    int neventstotal;
     float xsec_error;
     float xsec_ps;
     vector <TString> sparmNames;
@@ -176,6 +177,8 @@ class babyMaker {
     //Gen MET
     float gen_met;
     float gen_met_phi;
+
+    bool skim;
 
     int extragenb;
     int ngenjets;
