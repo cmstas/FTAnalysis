@@ -304,6 +304,18 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("weight_btagsf4_UP"                                        , &weight_btagsf4_UP                                                                        );
   BabyTree->Branch("weight_btagsf4_DN"                                        , &weight_btagsf4_DN                                                                        );
 
+  // MC syst stuff
+  BabyTree->Branch("weight_scale_UP"                                        , &weight_scale_UP                                                                        );
+  BabyTree->Branch("weight_scale_DN"                                        , &weight_scale_DN                                                                        );
+  BabyTree->Branch("weight_pdf_UP"                                        , &weight_pdf_UP                                                                        );
+  BabyTree->Branch("weight_pdf_DN"                                        , &weight_pdf_DN                                                                        );
+  BabyTree->Branch("weight_alphas_UP"                                        , &weight_alphas_UP                                                                        );
+  BabyTree->Branch("weight_alphas_DN"                                        , &weight_alphas_DN                                                                        );
+  BabyTree->Branch("weight_isrvar_UP"                                        , &weight_isrvar_UP                                                                        );
+  BabyTree->Branch("weight_isrvar_DN"                                        , &weight_isrvar_DN                                                                        );
+  BabyTree->Branch("weight_fsrvar_UP"                                        , &weight_fsrvar_UP                                                                        );
+  BabyTree->Branch("weight_fsrvar_DN"                                        , &weight_fsrvar_DN                                                                        );
+
   //SUSY stuff
   BabyTree->Branch("gl1_p4" , &gl1_p4 );
   BabyTree->Branch("gl2_p4" , &gl2_p4 );
@@ -752,6 +764,16 @@ void babyMaker::InitBabyNtuple(){
     weight_isr_tt  = -9999.;
     weight_isr_UP = -9999.;
     weight_isr_DN = -9999.;
+    weight_scale_UP = -9999.;
+    weight_scale_DN = -9999.;
+    weight_pdf_UP = -9999.;
+    weight_pdf_DN = -9999.;
+    weight_alphas_UP = -9999.;
+    weight_alphas_DN = -9999.;
+    weight_isrvar_UP = -9999.;
+    weight_isrvar_DN = -9999.;
+    weight_fsrvar_UP = -9999.;
+    weight_fsrvar_DN = -9999.;
     mostJets_rawp4.clear();
     mostJets_disc.clear();
     mostJets_unc.clear();
@@ -933,11 +955,40 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         // genweightsID = tas::genweightsID(); // do we even need the IDs? they are just numbers from 1...N
 
         //These c-s errors
-        if (!is_real_data && tas::genweights().size()>110) {
-            babyErrorStruct.cs_scale_no += tas::genweights().at(0);
-            babyErrorStruct.cs_scale_up += tas::genweights().at(4);
-            babyErrorStruct.cs_scale_dn += tas::genweights().at(8);
-            for (int i = 0; i < 100; i++) babyErrorStruct.cs_pdf[i] = tas::genweights().at(i+10);
+        int nweights = genweights.size();
+        if (!is_real_data && nweights>110) {
+            float nom = genweights[0];
+            float sum_pdf = 0.;
+            float sum2_pdf = 0.;
+            int N = 100;
+            for (int ipdf = 9; ipdf < 9+N; ipdf++) {
+                sum_pdf += fabs(genweights[ipdf]);
+                sum2_pdf += pow(genweights[ipdf],2);
+            }
+            float rms = sqrt(sum2_pdf/N - pow(sum_pdf/N,2));
+            weight_scale_UP = genweights[4] / nom;
+            weight_scale_DN = genweights[8] / nom;
+            weight_alphas_UP = genweights[110] / nom;
+            weight_alphas_DN = genweights[109] / nom;
+            weight_pdf_UP = (sum_pdf/N+rms) / fabs(nom);
+            weight_pdf_DN = (sum_pdf/N-rms) / fabs(nom);
+            if (nweights > 1000 and gconf.year == 2017 and filename.find("PSweights") != std::string::npos) {
+                // 14 extra weights in PSweights samples (2+3*4)
+                // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopModGen#Event_Generation
+                // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
+                // go to https://twiki.cern.ch/twiki/pub/CMS/TopModGen/pwg-rwl.txt and grep for <weight id ... there should be ~1080
+                float ps_nom = genweights[nweights-14];
+                if (fabs(ps_nom - nom) < 0.05) {
+                    weight_fsrvar_UP = genweights[nweights-11]; // reduced (by sqrt(2) according to recommendation in second link above)
+                    weight_fsrvar_DN = genweights[nweights-9];
+                    weight_isrvar_UP = genweights[nweights-8]; // default
+                    weight_isrvar_DN = genweights[nweights-6];
+                }
+                weight_alphas_UP = genweights[119] / genweights[117];
+                weight_alphas_DN = genweights[114] / genweights[117];
+            }
+            // kill extra crap
+            genweights.resize(120);
         }
 
     }

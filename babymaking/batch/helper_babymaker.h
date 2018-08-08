@@ -570,6 +570,17 @@ class babyMaker {
     float weight_btagsf4_UP;
     float weight_btagsf4_DN;
 
+    float weight_scale_UP;
+    float weight_scale_DN;
+    float weight_pdf_UP;
+    float weight_pdf_DN;
+    float weight_alphas_UP;
+    float weight_alphas_DN;
+    float weight_isrvar_UP;
+    float weight_isrvar_DN;
+    float weight_fsrvar_UP;
+    float weight_fsrvar_DN;
+
     //ISR unc #s - 2015
     LorentzVector gl1_p4;
     LorentzVector gl2_p4;
