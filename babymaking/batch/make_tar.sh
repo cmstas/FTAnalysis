@@ -14,7 +14,7 @@ goodRunList
 
 mkdir -p $final_dir
 # tar -cz --exclude='CORE/data' --exclude='*.cc' --exclude='*.h' --exclude='*.C' --exclude '*.cxx' --exclude-vcs -f $files
-XZ_OPT=-5 tar -Jc --exclude='CORE/data' --exclude='*.cc' --exclude='*.h' --exclude='*.C' --exclude '*.cxx' --exclude-vcs -f $files
+XZ_OPT=-9 tar -Jc --exclude='CORE/data' --exclude='*.cc' --exclude='*.h' --exclude='*.C' --exclude '*.cxx' --exclude-vcs -f $files
 mv package.tar.xz  $final_dir
 echo "I put stuff into $final_dir!"
 
