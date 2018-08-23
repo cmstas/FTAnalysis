@@ -91,6 +91,10 @@ if __name__ == "__main__":
 
     # Run2017_MultiIsoNew
 
+    # f_el = r.TFile("outhist.root")
+    # h = f_el.Get("h3data")
+    # print dump_bins(h, "testScaleFactor", transpose=False)
+
     # https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#2017_and_or_Late_2016_data_analy
     # https://indico.cern.ch/event/732975/contributions/3082298/attachments/1693028/2724384/SUSY_SF_2017_EGMappr.pdf
     nmiss = 1

@@ -35,24 +35,30 @@ r.gStyle.SetPaintTextFormat(".3F")
 c1 = r.TCanvas()
 c1.SetLogx(1)
 
-# r.gROOT.ProcessLine(".L lepton_sfs_el_v2_nmiss0.h")
-# h = get_sf_hist(
-#     funcs_sf = [r.electronScaleFactorReco_RunBCDEF, r.electronScaleFactor_RunBCDEF],
-#     funcs_sferr = [r.electronScaleFactorRecoError_RunBCDEF, r.electronScaleFactorError_RunBCDEF],
-#     ptbins = [10.0,20,35,50,100,200,300],
-#     etabins = [0.,0.8,1.44,1.566,2.0,2.5],
-#     )
-# h.Draw("colztexte")
-# c1.SaveAs("test.pdf")
-# os.system("ic test.pdf")
-
-r.gROOT.ProcessLine(".L lepton_sfs_el_v2_nmiss1.h")
-h = get_sf_hist(
-    funcs_sf = [r.electronScaleFactorReco_RunBCDEF, r.electronScaleFactor_RunBCDEF],
-    funcs_sferr = [r.electronScaleFactorRecoError_RunBCDEF, r.electronScaleFactorError_RunBCDEF],
+r.gROOT.ProcessLine(".L lepton_sfs_el_v2_nmiss0.h")
+hnmiss0 = get_sf_hist(
+    funcs_sf = [r.nmiss0.electronScaleFactorReco_RunBCDEF, r.nmiss0.electronScaleFactor_RunBCDEF],
+    funcs_sferr = [r.nmiss0.electronScaleFactorRecoError_RunBCDEF, r.nmiss0.electronScaleFactorError_RunBCDEF],
     ptbins = [10.0,20,35,50,100,200,300],
     etabins = [0.,0.8,1.44,1.566,2.0,2.5],
     )
-h.Draw("colztexte")
+hnmiss0.Draw("colztexte")
 c1.SaveAs("test.pdf")
 os.system("ic test.pdf")
+
+r.gROOT.ProcessLine(".L lepton_sfs_el_v2_nmiss1.h")
+hnmiss1 = get_sf_hist(
+    funcs_sf = [r.nmiss1.electronScaleFactorReco_RunBCDEF, r.nmiss1.electronScaleFactor_RunBCDEF],
+    funcs_sferr = [r.nmiss1.electronScaleFactorRecoError_RunBCDEF, r.nmiss1.electronScaleFactorError_RunBCDEF],
+    ptbins = [10.0,20,35,50,100,200,300],
+    etabins = [0.,0.8,1.44,1.566,2.0,2.5],
+    )
+hnmiss1.Draw("colztexte")
+c1.SaveAs("test.pdf")
+os.system("ic test.pdf")
+
+hnmiss0.Divide(hnmiss1)
+hnmiss0.Draw("colztexte")
+c1.SaveAs("test.pdf")
+os.system("ic test.pdf")
+
