@@ -87,11 +87,19 @@ struct HistCol {
     }
 };
 
-tuple<int, int, int, float, float> calc_jet_quants() {
+tuple<int, int, int, float, float> calc_jet_quants(int year) {
+    // 2017
     float bloose =  0.1522;
     float bmed = 0.4941;
     float btight = 0.8001;
-
+    if (year == 2016) {
+        bloose =  0.2219;
+        bmed = 0.6324;
+        btight = 0.8958;
+    }
+    else if (year == 2018) {
+    }
+    
     int nlb40 = 0;
     int ntb40 = 0;
     int nisrjets = 0;
@@ -112,18 +120,20 @@ tuple<int, int, int, float, float> calc_jet_quants() {
     return std::make_tuple(nlb40, ntb40, nisrjets, mjoverpt, htb);
 }
 
-float isr_reweight(const std::string& proc, int year, int nisrmatch) {
+float isr_reweight(bool useIsrWeight, int year, int nisrmatch) {
+    if (!useIsrWeight) return 1;
     std::map<int, std::vector<float>> weights = {
         {2016, {1.00689633, 1.01152742, 0.97021783, 0.89924575,
                 0.93356379, 0.73271888, 0.54848046, 0.64497428}},
-        {2017, {1.04525021, 0.92187767, 0.96888994, 1.12158514,
-                1.47891696, 1.32093988, 1.98892384, 1.63844457}},
+        // {2017, {1.00000000, 1.00000000, 1.00000000, 1.00000000,
+        //         1.00000000, 1.00000000, 1.00000000, 1.00000000}},
+        {2017, {1.07505487, 0.91544422, 0.92976169, 1.02473884, // FIXME rederive
+                1.36086090, 1.01386038, 1.59616434, 0.81957195}},
         {2018, {1.00000000, 1.00000000, 1.00000000, 1.00000000,
                 1.00000000, 1.00000000, 1.00000000, 1.00000000}}
     };
 
-    if (proc != "tt") return 1;
-    if (nisrmatch < 0 or nisrmatch >= weights.size()) return 1;
+    if (nisrmatch < 0 or nisrmatch >= weights[year].size()) return 1;
     return weights[year][nisrmatch];
 }
 
@@ -157,7 +167,15 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool doTruthFake = options.Contains("doTruthFake");
     bool useNewMET = options.Contains("useNewMET");
     bool quiet = options.Contains("quiet");
-    std::string proc = ch->GetTitle();
+    bool minPtFake18 = options.Contains("minPtFake18");
+
+    TString proc(ch->GetTitle());
+    bool useIsrWeight = proc.Contains("tt_");
+
+    // We may have derived the fake rate map throwing away leptons with pT<18 (e.g., 2017), so
+    // we need to apply this cut here to be consistent
+    // float min_pt_fake = minPtFake18 ? 18. : -1;
+    float min_pt_fake = minPtFake18 ? 18. : -1;
 
     int year;
     bool is2016(false), is2017(false), is2018(false);
@@ -187,19 +205,21 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
 
     vector<string> regions = {
-        // "os",                          // OS tight-tight and variants
+
+        "os",                          // OS tight-tight and variants
+        "osloose",                    // DY dominated CR
+        "tl",                          // SS tight-loose
+        "br",
+        "crw", "crz",                  // CRZ, CRW
+        "htnb1",                        // fake-dominated CR
+
         // "os_noisr", "os_btagreweight", // |
         // "os_highbdt", "os_lowbdt",     // |
-        // "osloose",                    // DY dominated CR
-        // "tl",                          // SS tight-loose
-        "br",
-        // "crw", "crz",                  // CRZ, CRW
         // "bdt_nb", "bdt_ht",            // Baseline w/ inverted nbtags/Ht/MET selection
         // "bdt_met","bdt_met_ht",        // |
         // "bdt_train",                   // BDT Training region - BR + CRW
-        // "tt_isr",                      // TTBar ISR Reweighting derivation region
-        // "tt_isr_reweight_check",       // |
-        // "htnb1"                        // fake-dominated CR
+        "tt_isr",                      // TTBar ISR Reweighting derivation region
+        "tt_isr_reweight_check",       // |
     };
 
     vector<HistCol*> registry;
@@ -213,6 +233,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_mllzoom     (regions, "mllzoom"    , 60, 60  , 120 , &registry);
     HistCol h_zmll        (regions, "zmll"       , 30, 0   , 300 , &registry);
     HistCol h_mtmin       (regions, "mtmin"      , 30, 0   , 300 , &registry);
+    HistCol h_nleps       (regions, "nleps"      , 5, -0.5 , 4.5 , &registry);
     HistCol h_njets       (regions, "njets"      , 8 , 0   , 8   , &registry);
     HistCol h_nisrjets    (regions, "nisrjets"   , 8 , 0   , 8   , &registry);
     HistCol h_nisrmatch   (regions, "nisrmatch"  , 8 , 0   , 8   , &registry);
@@ -467,12 +488,14 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             lep2miniiso = ss::lep2_miniIso();
             nmiss1 = ss::lep1_el_exp_innerlayers();
             nmiss2 = ss::lep2_el_exp_innerlayers();
-            lep1ptratio = ss::lep1_closeJet().pt() > 0 ? lep1pt/ss::lep1_closeJet().pt() : 1.0;
-            lep2ptratio = ss::lep2_closeJet().pt() > 0 ? lep2pt/ss::lep2_closeJet().pt() : 1.0;
-            nleps = (lep3good and lep3ccpt > 20) ? 3 : 2;
+            // lep1ptratio = ss::lep1_closeJet().pt() > 0 ? lep1pt/ss::lep1_closeJet().pt() : 1.0;
+            // lep2ptratio = ss::lep2_closeJet().pt() > 0 ? lep2pt/ss::lep2_closeJet().pt() : 1.0;
+            lep1ptratio = ss::lep1_ptratio();
+            lep2ptratio = ss::lep2_ptratio();
+            nleps = (lep3good and lep3ccpt > 20) ? ((ss::lep4_passes_id() and ss::lep4_p4().pt() > 20) ? 4 : 3) : 2;
             ht = ss::ht();
             rawmet = ss::rawmet();
-            std::tie(nlb40, ntb40, nisrjets, maxmjoverpt, htb) = calc_jet_quants();
+            std::tie(nlb40, ntb40, nisrjets, maxmjoverpt, htb) = calc_jet_quants(year);
             nisrmatch = ss::nisrMatch();
             SR = 0; // Just a dummy for now
 
@@ -549,7 +572,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 }
 
                 weight *= ss::weight_btagsf();
-                weight *= isr_reweight(proc, year, nisrmatch);
+                weight *= isr_reweight(useIsrWeight, year, nisrmatch);
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
 
@@ -566,17 +589,17 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     bool lep1_lowpt_veto = lep1pt < (abs(lep1id) == 11 ? 15 : 10);
                     bool lep2_lowpt_veto = lep2pt < (abs(lep2id) == 11 ? 15 : 10);
                     bool lep3_lowpt_veto = lep3pt < (abs(lep3id) == 11 ? 15 : 10);
-                    if (ss::lep3_fo() and !ss::lep3_tight() and !lep3_lowpt_veto and lep1good and lep2good) {  // lep3 fake
+                    if (ss::lep3_fo() and !ss::lep3_tight() and !lep3_lowpt_veto and lep1good and lep2good && lep3pt>min_pt_fake) {  // lep3 fake
                         float fr = yearly_fake_rate(lep3id, lep3ccpt, lep3eta);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
-                    if (ss::lep2_fo() and !ss::lep2_tight() and !lep2_lowpt_veto and lep1good and lep3good) {  // lep2 fake
+                    if (ss::lep2_fo() and !ss::lep2_tight() and !lep2_lowpt_veto and lep1good and lep3good && lep2pt>min_pt_fake) {  // lep2 fake
                         float fr = yearly_fake_rate(lep2id, lep2ccpt, lep2eta);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
-                    if (ss::lep1_fo() and !ss::lep1_tight() and !lep1_lowpt_veto and lep2good and lep3good) {  // lep1 fake
+                    if (ss::lep1_fo() and !ss::lep1_tight() and !lep1_lowpt_veto and lep2good and lep3good && lep1pt>min_pt_fake) {  // lep1 fake
                         float fr = yearly_fake_rate(lep1id, lep1ccpt, lep1eta);
                         class6Fake = true;
                         weight *= fr / (1-fr);
@@ -585,16 +608,21 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                         continue; // No fakes!
                     }
                 } else if (hyp_class == 1 or hyp_class == 2) {
-                    if (ss::lep1_passes_id()==0) {
+                    bool foundGoodLoose = false;
+                    if (ss::lep1_passes_id()==0 && lep1pt>min_pt_fake) {
                         float fr = (year == 2017) ? fakeRate(lep1id, lep1ccpt, lep1eta, ht) : fakeRate_2016(lep1id, lep1ccpt, lep1eta, ht);
                         weight *= fr/(1.-fr);
+                        foundGoodLoose = true;
                     }
-                    if (ss::lep2_passes_id()==0) {
+                    if (ss::lep2_passes_id()==0 && lep2pt>min_pt_fake) {
                         float fr = (year == 2017) ? fakeRate(lep2id, lep2ccpt, lep2eta, ht) : fakeRate_2016(lep2id, lep2ccpt, lep2eta, ht);
                         weight *= fr/(1.-fr);
+                        foundGoodLoose = true;
                     }
+                    if (!foundGoodLoose)
+                        continue;
                     // subtract double FO (why is this?)
-                    if (hyp_class == 1) weight *= -1.;
+                    if (hyp_class == 1 && lep1pt>min_pt_fake && lep2pt>min_pt_fake) weight *= -1.;
                     hyp_class = 3; // we've faked a SS Tight-Tight with a SS LL or SS TL
                                    // Basically just update this so it gets put in the SR
                 } else {
@@ -672,6 +700,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(h_mll, ss::dilep_p4().M());
                 do_fill(h_mllzoom, ss::dilep_p4().M());
                 if (nleps > 2) do_fill(h_zmll, mllos);
+                do_fill(h_nleps, nleps);
                 do_fill(h_mtmin, ss::mtmin());
                 do_fill(h_njets, njets);
                 do_fill(h_nisrjets, nisrjets);
@@ -779,7 +808,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     met > 50. and
                     ht > 300) {
                 if (hyp_class == 4 and !zcand12) {
-                    fill_region("os_noisr", weight / isr_reweight(proc, year, nisrmatch));
+                    fill_region("os_noisr", weight / isr_reweight(useIsrWeight, year, nisrmatch));
                     fill_region("os", weight);
                     fill_region("os_btagreweight", weight * btag_reweight(nbtags));
                     if (evaluateBDT) {
@@ -815,7 +844,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             if (hyp_class == 4 and !zcand12 and
                     nbtags == 2 and
                     njets >= 2) {
-                fill_region("tt_isr", weight / isr_reweight(proc, year, nisrmatch));
+                fill_region("tt_isr", weight / isr_reweight(useIsrWeight, year, nisrmatch));
                 fill_region("tt_isr_reweight_check", weight);
             }
 

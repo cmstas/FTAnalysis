@@ -10,8 +10,8 @@ r.gROOT.ProcessLine(".L ScanChain.C+")
 
 years_to_consider = [
         # 2016,
-        # 2017,
-        2018,
+        2017,
+        # 2018,
         ]
 # outputdir = "outputs_20172018_newWP_newmet"
 # outputdir = "outputs_2017_oldmet"
@@ -21,7 +21,7 @@ years_to_consider = [
 basedirs ={
         2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.00_80x_baseline_full_v5"),
         # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.04_v1"),  # old multiiso WP
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.06_v2"),  # new multiiso WP, old,new met
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v3.02_nmiss0"),
         # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.03"),
         2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("2018_v1.05"),  # new multiiso WP, old,new met
         }
@@ -33,11 +33,15 @@ basedirs ={
 #         2018: "useInclusiveSFs Data2018 quiet ",
 #         }
 
-outputdir = "outputs_20172018_newWP_newmet"
+# outputdir = "outputs_20172018_newWP_newmet"
+# outputdir = "outputs_20172018_newWP_newmet"
+# outputdir = "outputs_2017_ptfake18"
+outputdir = "outputs_2017_isr"
+# outputdir = "outputs_2017_ptfake20"
 options = {
-        2016: "useIsoTriggers2016 useInclusiveSFs Data2016 useNewMET quiet ",
-        2017: "useInclusiveSFs Data2017 useNewMET quiet ",
-        2018: "useInclusiveSFs Data2018 useNewMET quiet ",
+        2016: "useIsoTriggers2016 useInclusiveSFs Data2016 quiet ",
+        2017: "useInclusiveSFs Data2017 minPtFake18 quiet ",
+        2018: "useInclusiveSFs Data2018 quiet ",
         }
 
 def make_objs(fpatts=[],options="",treename="t"):
@@ -49,19 +53,23 @@ def make_objs(fpatts=[],options="",treename="t"):
 
 chs = {
         2017: {
+            "tt": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]),
             "fakes": make_objs(basedirs[2017]+"Data*.root", options=options[2017]+" doFakes"),
             "flips": make_objs(basedirs[2017]+"Data*.root", options=options[2017]+" doFlips"),
             "data": make_objs(basedirs[2017]+"Data*.root", options=options[2017]),
             "ttw": make_objs(basedirs[2017]+"TTWnlo.root", options=options[2017]),
-            "ttz": make_objs(basedirs[2017]+"TTZnlo.root", options=options[2017]),
             "tth": make_objs(basedirs[2017]+"TTHtoNonBB.root", options=options[2017]),
             "dy": make_objs(basedirs[2017]+"DY_high.root", options=options[2017]),
             "wjets": make_objs(basedirs[2017]+"WJets*.root", options=options[2017]),
-            "tt": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]),
             "ttfake": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]+ "doTruthFake"),
+            "ttz": make_objs([
+                basedirs[2017]+"TTZnlo.root",
+                basedirs[2017]+"TTZLOW.root",
+                ]
+                , options=options[2017]),
             "vv": make_objs([
                 basedirs[2017]+"WZ.root",
-                # basedirs[2017]+"WW.root",
+                basedirs[2017]+"WW.root",
                 basedirs[2017]+"WWDPS.root",
                 basedirs[2017]+"ZZ.root",
                 ],options=options[2017]),
