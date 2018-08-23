@@ -4,16 +4,18 @@ mkdir -p common
 if [ ! -d common/$therelease ]; then 
     cd common/ ;
     cmsrel $therelease;
-    cd -
+    cd ~-
 fi
 cd common/$therelease/src
 eval `scram ru -sh`
 cd -
 
-export LD_LIBRARY_PATH=$PWD/babymaking/batch/:$LD_LIBRARY_PATH
+export FTBASE="$( cd "$(dirname "$BASH_SOURCE")" ; pwd -P )"
 
-export PYTHONPATH=$PWD/:$PYTHONPATH
-export PYTHONPATH=$PWD/common/matplottery:$PYTHONPATH
+export LD_LIBRARY_PATH=${FTBASE}/babymaking/batch/:$LD_LIBRARY_PATH
+
+export PYTHONPATH=${FTBASE}/:$PYTHONPATH
+export PYTHONPATH=${FTBASE}/common/matplottery:$PYTHONPATH
 
 # bash PS1 gets mangled because CMSSW overrides this to LANG=C :(, so switch it back.
 export LANG=en_US.UTF-8
@@ -22,22 +24,25 @@ export LANG=en_US.UTF-8
 # export PYTHONPATH=$PWD/analysis/bdt/xgboost/python-package/:$PYTHONPATH
 # export PYTHONPATH=$PWD/analysis/bdt/root_numpy-4.7.2/lib/python2.7/site-packages/:$PYTHONPATH
 
-[[ -d common/matplottery/ ]] || {
-    git clone git@github.com:aminnj/matplottery.git common/matplottery/;
+[[ -d ${FTBASE}/common/matplottery/ ]] || {
+    git clone git@github.com:aminnj/matplottery.git ${FTBASE}/common/matplottery/;
 }
-[[ -d babymaking/batch/NtupleTools/ ]] || git clone git@github.com:cmstas/NtupleTools.git babymaking/batch/NtupleTools/
-[[ -d babymaking/batch/ProjectMetis/ ]] || git clone https://github.com/aminnj/ProjectMetis/ babymaking/batch/ProjectMetis/
-[[ -d common/Software/ ]] || git clone git@github.com:cmstas/Software.git common/Software/
-[[ -d common/CORE/ ]] || {
-    git clone git@github.com:cmstas/CORE.git common/CORE/;
-    cd common/CORE; 
-    git checkout -b 2017 origin/2017;
+# [[ -d babymaking/batch/NtupleTools/ ]] || git clone git@github.com:cmstas/NtupleTools.git babymaking/batch/NtupleTools/
+if [ ! -d ${FTBASE}/babymaking/batch/ProjectMetis/ ]; then
+    git clone https://github.com/aminnj/ProjectMetis/ ${FTBASE}/babymaking/batch/ProjectMetis/
+else
+    source ${FTBASE}/babymaking/batch/ProjectMetis/setup.sh
+fi
+[[ -d ${FTBASE}/common/Software/ ]] || git clone git@github.com:cmstas/Software.git ${FTBASE}/common/Software/
+[[ -d ${FTBASE}/common/CORE/ ]] || {
+    git clone git@github.com:cmstas/CORE.git ${FTBASE}/common/CORE/;
+    cd ${FTBASE}/common/CORE; 
     make -j10 >&/dev/null &
     cd -;
 }
-[[ -d common/${therelease}/src/HiggsAnalysis/CombinedLimit/ ]] || {
-    pushd $(pwd)
-    cd $CMSSW_BASE/src
+[[ -d ${FTBASE}/common/${therelease}/src/HiggsAnalysis/CombinedLimit/ ]] || {
+    pushd ${FTBASE}/
+    cd ${FTBASE}/$CMSSW_BASE/src
     cmsenv
     git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
     cd HiggsAnalysis/CombinedLimit
