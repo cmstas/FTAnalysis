@@ -17,12 +17,13 @@
 #include "TRandom.h"
 
 #include "../../misc/class_files/v8.02/SS.h"
-#include "../../../common/CORE/Tools/utils.h"
-#include "../../../common/CORE/Tools/dorky/dorky.h"
+// #include "../../../common/CORE/Tools/utils.h"
+// #include "../../../common/CORE/Tools/dorky/dorky.h"
 #include "../../misc/common_utils.h"
 #include "../../misc/signal_regions.h"
+#include "../../misc/tqdm.h"
 
-#include "nvtx_weights.h"
+// #include "testsf.h"
 
 using namespace std;
 
@@ -96,13 +97,13 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
     float lumiAG = getLumi();
     if (lumi > 0) lumiAG = lumi;
-    duplicate_removal::clear_list();
+    // duplicate_removal::clear_list();
 
     TFile *flip_file = new TFile(flipfname); 
     TH2D  *rate = (TH2D*)flip_file->Get("ratio"); 
 
     // Closure vs. inv mass plot
-    constexpr int clos_mll_nBinsX = 9;
+    constexpr int clos_mll_nBinsX = 20;
     TH1F* clos_mll_MC   = new TH1F("clos_mll_plot_MC"  , "clos_mll_plot_MC"  , clos_mll_nBinsX, 70, 115); 
     TH1F* clos_mll_MCp  = new TH1F("clos_mll_plot_MCp" , "clos_mll_plot_MCp" , clos_mll_nBinsX, 70, 115); 
     TH1F* clos_mll_data = new TH1F("clos_mll_plot_data", "clos_mll_plot_data", clos_mll_nBinsX, 70, 115); 
@@ -176,6 +177,22 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     clos_nbtags_MC->Sumw2();
     clos_nbtags_MCp->Sumw2();
 
+    TH1F* clos_lep1nmiss_MC   = new TH1F("clos_lep1nmiss_plot_MC"  , "clos_lep1nmiss_plot_MC"  , 6, 0, 6); 
+    TH1F* clos_lep1nmiss_MCp  = new TH1F("clos_lep1nmiss_plot_MCp" , "clos_lep1nmiss_plot_MCp" , 6, 0, 6); 
+    TH1F* clos_lep1nmiss_data = new TH1F("clos_lep1nmiss_plot_data", "clos_lep1nmiss_plot_data", 6, 0, 6); 
+    TH1F* osee_lep1nmiss_MC   = new TH1F("osee_lep1nmiss_plot_MC"  , "osee_lep1nmiss_plot_MC"  , 6, 0, 6); 
+    TH1F* osee_lep1nmiss_data = new TH1F("osee_lep1nmiss_plot_data", "osee_lep1nmiss_plot_data", 6, 0, 6); 
+    clos_lep1nmiss_MC->Sumw2();
+    clos_lep1nmiss_MCp->Sumw2();
+
+    TH1F* clos_lep2nmiss_MC   = new TH1F("clos_lep2nmiss_plot_MC"  , "clos_lep2nmiss_plot_MC"  , 6, 0, 6); 
+    TH1F* clos_lep2nmiss_MCp  = new TH1F("clos_lep2nmiss_plot_MCp" , "clos_lep2nmiss_plot_MCp" , 6, 0, 6); 
+    TH1F* clos_lep2nmiss_data = new TH1F("clos_lep2nmiss_plot_data", "clos_lep2nmiss_plot_data", 6, 0, 6); 
+    TH1F* osee_lep2nmiss_MC   = new TH1F("osee_lep2nmiss_plot_MC"  , "osee_lep2nmiss_plot_MC"  , 6, 0, 6); 
+    TH1F* osee_lep2nmiss_data = new TH1F("osee_lep2nmiss_plot_data", "osee_lep2nmiss_plot_data", 6, 0, 6); 
+    clos_lep2nmiss_MC->Sumw2();
+    clos_lep2nmiss_MCp->Sumw2();
+
     TH1F* clos_nvtx_MC   = new TH1F("clos_nvtx_plot_MC"  , "clos_nvtx_plot_MC"  , 80, 0, 80); 
     TH1F* clos_nvtx_MCp  = new TH1F("clos_nvtx_plot_MCp" , "clos_nvtx_plot_MCp" , 80, 0, 80); 
     TH1F* clos_nvtx_data = new TH1F("clos_nvtx_plot_data", "clos_nvtx_plot_data", 80, 0, 80); 
@@ -235,6 +252,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     TObjArray *listOfFiles = ch->GetListOfFiles();
     TIter fileIter(listOfFiles);
 
+    tqdm bar;
+
     while ( (currentFile = (TFile*)fileIter.Next()) ) { 
 
         TFile *file = new TFile( currentFile->GetTitle() );
@@ -248,7 +267,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
             samesign.GetEntry(event);
             nEventsTotal++;
 
-            SSAG::progress(nEventsTotal, nEventsChain);
+            bar.progress(nEventsTotal, nEventsChain);
 
             if (debugCounter) {
                 int tocheck = 3;
@@ -322,18 +341,20 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 if (minrun == 302030) rand = 3;
                 if (minrun == 303824) rand = 4;
                 if (minrun == 305040) rand = 5;
-                if (rand > 0) weight *= getNvtxWeight(ss::nGoodVertices(), rand);
+                // if (rand > 0) weight *= getNvtxWeight(ss::nGoodVertices(), rand);
                 weight *= getTruePUw(ss::trueNumInt()[0]);
                 weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand);
                 weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), rand);
+                // weight *= testScaleFactor(ss::lep1_p4().pt(), ss::lep1_p4().eta());
+                // weight *= testScaleFactor(ss::lep2_p4().pt(), ss::lep2_p4().eta());
                 weight *= ss::weight_btagsf();
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
 
             // Reject duplicates
             if (ss::is_real_data()){
-                duplicate_removal::DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
-                if (duplicate_removal::is_duplicate(id)) { reject++; continue; }
+                // duplicate_removal::DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
+                // if (duplicate_removal::is_duplicate(id)) { reject++; continue; }
 
                 if (minrun > 0 && ss::run() < minrun) continue;
                 if (maxrun > 0 && ss::run() > maxrun) continue;
@@ -362,6 +383,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         clos_rawmet_data->Fill(ss::rawmet(), weight); 
                         clos_njets_data->Fill(ss::njets(), weight); 
                         clos_nbtags_data->Fill(ss::nbtags(), weight); 
+                        clos_lep1nmiss_data->Fill(ss::lep1_el_exp_innerlayers(), weight); 
+                        clos_lep2nmiss_data->Fill(ss::lep2_el_exp_innerlayers(), weight); 
                         clos_nvtx_data->Fill(ss::nGoodVertices(), weight); 
                     }
                 } else {
@@ -383,6 +406,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         clos_rawmet_MCp->Fill(ss::rawmet(), weight); 
                         clos_njets_MCp->Fill(ss::njets(), weight); 
                         clos_nbtags_MCp->Fill(ss::nbtags(), weight); 
+                        clos_lep1nmiss_MCp->Fill(ss::lep1_el_exp_innerlayers(), weight); 
+                        clos_lep2nmiss_MCp->Fill(ss::lep2_el_exp_innerlayers(), weight); 
                         clos_nvtx_MCp->Fill(ss::nGoodVertices(), weight); 
                     }
                 }
@@ -427,6 +452,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_rawmet_data->Fill(ss::rawmet(), weight); 
                     osee_njets_data->Fill(ss::njets(), weight); 
                     osee_nbtags_data->Fill(ss::nbtags(), weight); 
+                    osee_lep1nmiss_data->Fill(ss::lep1_el_exp_innerlayers(), weight); 
+                    osee_lep2nmiss_data->Fill(ss::lep2_el_exp_innerlayers(), weight); 
                     osee_nvtx_data->Fill(ss::nGoodVertices(), weight); 
 
                     nPred += ff*weight;
@@ -441,6 +468,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     clos_rawmet_MC->Fill(ss::rawmet(), ff*weight); 
                     clos_njets_MC->Fill(ss::njets(), ff*weight); 
                     clos_nbtags_MC->Fill(ss::nbtags(), ff*weight); 
+                    clos_lep1nmiss_MC->Fill(ss::lep1_el_exp_innerlayers(), ff*weight); 
+                    clos_lep2nmiss_MC->Fill(ss::lep2_el_exp_innerlayers(), ff*weight); 
                     clos_nvtx_MC->Fill(ss::nGoodVertices(), ff*weight); 
 
                     dataCounterOS->Fill(0.5, weight);
@@ -483,6 +512,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_rawmet_MC->Fill(ss::rawmet(), weight); 
                     osee_njets_MC->Fill(ss::njets(), weight); 
                     osee_nbtags_MC->Fill(ss::nbtags(), weight); 
+                    osee_lep1nmiss_MC->Fill(ss::lep1_el_exp_innerlayers(), weight); 
+                    osee_lep2nmiss_MC->Fill(ss::lep2_el_exp_innerlayers(), weight); 
                     osee_nvtx_MC->Fill(ss::nGoodVertices(), weight); 
 
                     mcCounterOSRW->Fill(0.5, ff*weight);
@@ -498,6 +529,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
         delete file;
     }//file loop
+
+    bar.finish();
 
     cout << "number of duplicates removed: " << reject << endl;
 
@@ -524,7 +557,6 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
         //clos_mll_MC->SetBinError(k+1, sqrt(theerror[k] + pow(clos_mll_MC->GetBinError(k+1),2)));
         //cout << "set error = " <<  sqrt(theerror[k] + pow(clos_mll_MC->GetBinError(k+1),2)) << " yield=" << yield << endl;
     }
-    cout << "HEY DUMMY. MAKE SURE YOU'RE NOT SCALING BY obs/pred TWICE!" << endl;
     std::cout <<  " mcCounterSS->GetBinContent(1): " << mcCounterSS->GetBinContent(1) <<  " mcCounterSS->GetBinError(1): " << mcCounterSS->GetBinError(1) <<  std::endl;
     std::cout <<  " mcCounterOSRW->GetBinContent(1): " << mcCounterOSRW->GetBinContent(1) <<  " mcCounterOSRW->GetBinError(1): " << mcCounterOSRW->GetBinError(1) <<  std::endl;
     cout << "obsMC: " << nObsMC << endl;
@@ -582,6 +614,12 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     clos_nbtags_data->Write();
     clos_nbtags_MC->Write();
     clos_nbtags_MCp->Write();
+    clos_lep1nmiss_data->Write();
+    clos_lep1nmiss_MC->Write();
+    clos_lep1nmiss_MCp->Write();
+    clos_lep2nmiss_data->Write();
+    clos_lep2nmiss_MC->Write();
+    clos_lep2nmiss_MCp->Write();
     clos_nvtx_data->Write();
     clos_nvtx_MC->Write();
     clos_nvtx_MCp->Write();
@@ -604,6 +642,10 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     osee_njets_data->Write();
     osee_nbtags_MC->Write();
     osee_nbtags_data->Write();
+    osee_lep1nmiss_MC->Write();
+    osee_lep1nmiss_data->Write();
+    osee_lep2nmiss_MC->Write();
+    osee_lep2nmiss_data->Write();
     osee_nvtx_MC->Write();
     osee_nvtx_data->Write();
 
