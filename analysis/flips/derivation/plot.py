@@ -1,11 +1,11 @@
 import os
 import numpy as np
 import uproot
-
 import sys
 sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
 from matplottery.plotter import plot_2d
-from matplottery.utils import Hist2D
+from matplottery.utils import Hist2D, register_root_palettes
+import matplotlib
 
 # f = uproot.open("outputs/histos_dy.root")
 # f = uproot.open("outputs/histos_tt.root")
@@ -20,9 +20,10 @@ xticks,yticks = numer.get_edges()
 
 os.system("mkdir -p plots/")
 
+register_root_palettes()
+
 opts = {
         "do_colz": True,
-        "colz_fmt": ".1e",
         "logx": True,
         "xticks": xticks,
         "yticks": yticks,
@@ -31,13 +32,24 @@ opts = {
         "xlabel": "$p_{T}$ [GeV]",
         "ylabel": "$|\\eta|$",
         "cmap": "Blues_r",
+        # "cmap": "PuBu",
+        # "cmap": "kBird",
+        # "cmap": "SUSY",
         }
+opts["colz_fmt"] = ".1f"
 plot_2d(numer, filename="plots/numer.pdf", title="Numerator", **opts)
 plot_2d(denom, filename="plots/denom.pdf", title="Denominator", **opts)
-plot_2d(ratio, filename="plots/ratio.pdf", title="Rate", **opts)
+
 opts["colz_fmt"] = ".0f"
-plot_2d(numer_raw, filename="plots/numer_raw.pdf", title="Unw. numerator", **opts)
-# os.system("web plots/ratio.pdf")
+plot_2d(numer_raw, filename="plots/numer_raw.pdf", title="Unw. numer.", **opts)
+
+opts["colz_fmt"] = ".1e"
+opts["mpl_2d_params"] = dict(
+    norm=matplotlib.colors.LogNorm(vmin=1.e-6,vmax=1.e-2),
+    )
+plot_2d(ratio, filename="plots/ratio.pdf", title="Rate", **opts)
+
+# os.system("ic plots/denom.pdf")
 # os.system("ic plots/numer_raw.pdf")
 os.system("ic plots/ratio.pdf")
 print("Made plots")

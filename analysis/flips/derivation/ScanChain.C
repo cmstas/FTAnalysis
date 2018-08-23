@@ -20,6 +20,7 @@
 #include "../../../common/CORE/Tools/utils.h"
 #include "../../misc/common_utils.h"
 #include "../../misc/signal_regions.h"
+#include "../../misc/tqdm.h"
 
 using namespace std;
 // using namespace tas;
@@ -60,6 +61,9 @@ void flip(TChain *ch) {
 
     float scaling = 1.;
 
+    tqdm bar;
+    // bar.set_theme_braille();
+
     while ( (currentFile = (TFile*)fileIter.Next()) ) { 
         if (STOP_REQUESTED) break;
 
@@ -84,10 +88,56 @@ void flip(TChain *ch) {
             samesign.GetEntry(event);
             nEventsTotal++;
 
+            bar.progress(nEventsTotal, nEventsChain);
+
             if (!ss::fired_trigger()) continue;
             if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
+            if (abs(ss::lep1_id()) == 13 && abs(ss::lep2_id()) == 13) continue;
 
-            SSAG::progress(nEventsTotal, nEventsChain);
+
+            // bool sel1 = true;
+            // bool sel2 = true;
+
+            // // FIXME, we are selecting ==1 inner layers for testing purposes
+            // if (abs(ss::lep1_id()) == 11 && ss::lep1_el_exp_innerlayers() != 1) sel1 = false;
+            // if (abs(ss::lep2_id()) == 11 && ss::lep2_el_exp_innerlayers() != 1) sel2 = false;
+
+            // if (abs(ss::lep1_id()) == 11 and abs(ss::lep2_id()) != 11) {
+            //     continue;
+            //     // if (ss::lep1_el_exp_innerlayers() != 1) sel1 = false;
+            // } else if (abs(ss::lep2_id()) == 11 and abs(ss::lep1_id()) != 11) {
+            //     continue;
+            //     // if (ss::lep2_el_exp_innerlayers() != 1) sel2 = false;
+            // } else {
+            //     // if (ss::lep1_el_exp_innerlayers() != 0) continue;
+            //     // if (ss::lep2_el_exp_innerlayers() != 0) continue;
+            //     if (not (ss::lep1_el_exp_innerlayers() == 1 or ss::lep2_el_exp_innerlayers() == 1)) continue;
+            //     // if (ss::lep1_el_exp_innerlayers() != 1) continue;
+            //     // if (ss::lep2_el_exp_innerlayers() != 1) continue;
+            //     // if (ss::lep1_el_exp_innerlayers() != 1) sel1 = false;
+            //     // if (ss::lep2_el_exp_innerlayers() != 1) sel2 = false;
+            // }
+            //
+            
+            // bool el1 = abs(ss::lep1_id()) == 11;
+            // int nmiss1 = ss::lep1_el_exp_innerlayers();
+            // bool el2 = abs(ss::lep2_id()) == 11;
+            // int nmiss2 = ss::lep2_el_exp_innerlayers();
+
+            // // at least 1 el must have nmiss==1
+            // if (not((el1 && nmiss1==1) || (el2 && nmiss2==1))) continue;
+
+                // if (not (nmiss1 == 1 or nmiss2 == 1)) continue;
+                // if (not (nmiss1 == 0 and nmiss2 == 0)) continue;
+
+            // // FIXME, we are skipping electrons with nmiss!=0
+            // if (abs(ss::lep1_id()) == 11 && ss::lep1_el_exp_innerlayers() != 0) continue;
+            // if (abs(ss::lep2_id()) == 11 && ss::lep2_el_exp_innerlayers() != 0) continue;
+
+            // if (abs(ss::lep1_id()) == 11 && ss::lep1_el_exp_innerlayers() != 1) continue;
+            // if (abs(ss::lep2_id()) == 11 && ss::lep2_el_exp_innerlayers() != 1) continue;
+
+            // if (!sel1 || !sel2) continue;
 
             //Calculate weight
             float weight = ss::is_real_data() ? 1 : scaling*fabs(ss::scale1fb())*lumiAG;
@@ -100,12 +150,11 @@ void flip(TChain *ch) {
                 // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
 
-            if (abs(ss::lep1_id()) == 13 && abs(ss::lep2_id()) == 13) continue;
-
-
             //If they make it this far, they are denominator events
             if (abs(ss::lep1_id()) == 11) denom->Fill(min(ss::lep1_p4().pt(), float(299.)), fabs(ss::lep1_p4().eta()), weight); 
             if (abs(ss::lep2_id()) == 11) denom->Fill(min(ss::lep2_p4().pt(), float(299.)), fabs(ss::lep2_p4().eta()), weight); 
+            // if (abs(ss::lep1_id()) == 11 && sel1) denom->Fill(min(ss::lep1_p4().pt(), float(299.)), fabs(ss::lep1_p4().eta()), weight); 
+            // if (abs(ss::lep2_id()) == 11 && sel2) denom->Fill(min(ss::lep2_p4().pt(), float(299.)), fabs(ss::lep2_p4().eta()), weight); 
 
             //Now require exactly one charge flip
             bool isCF1 = 0;
@@ -113,19 +162,28 @@ void flip(TChain *ch) {
             if (abs(ss::lep1_id()) == 11 && abs(ss::lep1_mc_id()) == 11 && ss::lep1_id() != ss::lep1_mc_id()) isCF1 = 1;
             if (abs(ss::lep2_id()) == 11 && abs(ss::lep2_mc_id()) == 11 && ss::lep2_id() != ss::lep2_mc_id()) isCF2 = 1;
             if (!isCF1 && !isCF2) continue;
-            if ( isCF1 &&  isCF2) continue;
+            if ( isCF1 &&  isCF2) {
+                continue;
+                std::cout << "Double flip!?" << std::endl;
+            }
 
             //The one that flipped is in the numerator
             if (isCF1) numer->Fill(ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta()), weight); 
             if (isCF2) numer->Fill(ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta()), weight); 
+            // if (isCF1 && sel1) numer->Fill(ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta()), weight); 
+            // if (isCF2 && sel2) numer->Fill(ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta()), weight); 
 
             if (isCF1) numer_raw->Fill(ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta())); 
             if (isCF2) numer_raw->Fill(ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta())); 
+            // if (isCF1 && sel1) numer_raw->Fill(ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta())); 
+            // if (isCF2 && sel2) numer_raw->Fill(ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta())); 
 
         }//event loop
 
         delete file;
     }//file loop
+
+    bar.finish();
 
 
     TFile* f1 = new TFile(Form("outputs/histos_%s.root",ch->GetTitle()),"RECREATE");
