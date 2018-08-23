@@ -778,6 +778,16 @@ void SSAG::Init(TTree *tree) {
 		lep2_miniIso_branch = tree->GetBranch("lep2_miniIso");
 		if (lep2_miniIso_branch) {lep2_miniIso_branch->SetAddress(&lep2_miniIso_);}
 	}
+	lep1_ptratio_branch = 0;
+	if (tree->GetBranch("lep1_ptratio") != 0) {
+		lep1_ptratio_branch = tree->GetBranch("lep1_ptratio");
+		if (lep1_ptratio_branch) {lep1_ptratio_branch->SetAddress(&lep1_ptratio_);}
+	}
+	lep2_ptratio_branch = 0;
+	if (tree->GetBranch("lep2_ptratio") != 0) {
+		lep2_ptratio_branch = tree->GetBranch("lep2_ptratio");
+		if (lep2_ptratio_branch) {lep2_ptratio_branch->SetAddress(&lep2_ptratio_);}
+	}
 	eleID_kfhits_branch = 0;
 	if (tree->GetBranch("eleID_kfhits") != 0) {
 		eleID_kfhits_branch = tree->GetBranch("eleID_kfhits");
@@ -1816,6 +1826,8 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_ptrel_v1_isLoaded = false;
 		lep1_miniIso_isLoaded = false;
 		lep2_miniIso_isLoaded = false;
+		lep1_ptratio_isLoaded = false;
+		lep2_ptratio_isLoaded = false;
 		jet_close_lep1_isLoaded = false;
 		jet_close_lep2_isLoaded = false;
 		eleID_kfhits_isLoaded = false;
@@ -2153,6 +2165,8 @@ void SSAG::LoadAllBranches()
 	if (lep2_ptrel_v1_branch != 0) lep2_ptrel_v1();
 	if (lep1_miniIso_branch != 0) lep1_miniIso();
 	if (lep2_miniIso_branch != 0) lep2_miniIso();
+	if (lep1_ptratio_branch != 0) lep1_ptratio();
+	if (lep2_ptratio_branch != 0) lep2_ptratio();
 	if (jet_close_lep1_branch != 0) jet_close_lep1();
 	if (jet_close_lep2_branch != 0) jet_close_lep2();
 	if (eleID_kfhits_branch != 0) eleID_kfhits();
@@ -4250,6 +4264,32 @@ void SSAG::LoadAllBranches()
 			lep2_miniIso_isLoaded = true;
 		}
 		return lep2_miniIso_;
+	}
+	const float &SSAG::lep1_ptratio()
+	{
+		if (not lep1_ptratio_isLoaded) {
+			if (lep1_ptratio_branch != 0) {
+				lep1_ptratio_branch->GetEntry(index);
+			} else { 
+				printf("branch lep1_ptratio_branch does not exist!\n");
+				exit(1);
+			}
+			lep1_ptratio_isLoaded = true;
+		}
+		return lep1_ptratio_;
+	}
+	const float &SSAG::lep2_ptratio()
+	{
+		if (not lep2_ptratio_isLoaded) {
+			if (lep2_ptratio_branch != 0) {
+				lep2_ptratio_branch->GetEntry(index);
+			} else { 
+				printf("branch lep2_ptratio_branch does not exist!\n");
+				exit(1);
+			}
+			lep2_ptratio_isLoaded = true;
+		}
+		return lep2_ptratio_;
 	}
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &SSAG::jet_close_lep1()
 	{
@@ -6828,6 +6868,8 @@ namespace ss {
 	const float &lep2_ptrel_v1() { return samesign.lep2_ptrel_v1(); }
 	const float &lep1_miniIso() { return samesign.lep1_miniIso(); }
 	const float &lep2_miniIso() { return samesign.lep2_miniIso(); }
+	const float &lep1_ptratio() { return samesign.lep1_ptratio(); }
+	const float &lep2_ptratio() { return samesign.lep2_ptratio(); }
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &jet_close_lep1() { return samesign.jet_close_lep1(); }
 	const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &jet_close_lep2() { return samesign.jet_close_lep2(); }
 	const vector<int> &eleID_kfhits() { return samesign.eleID_kfhits(); }
