@@ -53,7 +53,10 @@ def print_lims(d_lims, fb=False, unblinded=False):
     if d_lims.get("mu",-999) > -980.:
         print "  Mu: %.3f (+%.3f -%.3f)" % (d_lims["mu"], d_lims["mu_up"], d_lims["mu_down"])
 
-def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=False, verbose=True, dolimits=True, dosignificance=True, doscan=True, unblinded=False,sig="tttt", yukawa=-1,allownegative=False, inject_tttt=False):
+def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False,
+        verbose=True, dolimits=True, dosignificance=True, doscan=True,
+        unblinded=False,sig="tttt", yukawa=-1,allownegative=False, inject_tttt=False,
+        use_autostats=False, thresh=0.0):
 
     if ".txt" not in card:
         card += "/card_{0}_{1}.txt".format(sig, regions)
@@ -65,7 +68,7 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
     if not os.path.isfile(full_card_name) or redocard:
         if verbose: print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
-        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt)
+        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh)
         if int(yukawa) >  0:
             print "yukawa",yukawa
     else:
@@ -77,7 +80,9 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
         extra = "--noFitAsimov"
         limit_cmd = "combine -M AsymptoticLimits {0} {1}  2>&1 | tee {2}".format(full_card_name, extra, full_log_name)
         if verbose: print ">>> Running combine [{0}]".format(limit_cmd)
-        stat, out = commands.getstatusoutput(limit_cmd)
+        out = ""
+        if doupperlimit:
+            stat, out = commands.getstatusoutput(limit_cmd)
         if dosignificance:
             extra = "-t -1 --expectSignal=1" if not unblinded else ""
             significance_cmd = "combine -M Significance {0} --significance {1}  2>&1 | tee -a {2}".format(full_card_name, extra, full_log_name)
@@ -93,7 +98,7 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
                 cardname_scan = cardname.replace(".txt","_asimov.txt")
                 full_card_name_scan = full_card_name.replace(".txt","_asimov.txt")
             if redocard:
-                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt)
+                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh)
             # scan_cmd = "combine -M MaxLikelihoodFit {0} --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
             if allownegative:
                 extra = "--rMin -2.0 --rMax +10.0"
@@ -111,7 +116,7 @@ def get_lims(card, regions="srcr", redocard=True, redolimits=True, domcfakes=Fal
     d_lims = parse_lims(out.splitlines(), fb=True)
 
     # now check to see if it's legit
-    if d_lims["exp"] < 0.:
+    if d_lims["exp"] < 0. and doupperlimit:
         if verbose: print ">>> [!] Uh-oh, error with combine? Here's what the output of combine was:"
         os.system("cat {0}".format(full_log_name))
         raise Exception("Combine error!")
@@ -131,6 +136,8 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--unblinded", help="show unblinded quantities", action="store_true")
     parser.add_argument("-a", "--allownegative", help="allow negative mu in maxlikelihood fit", action="store_true")
     parser.add_argument("-i", "--inject_tttt", help="inject tttt as a bkg", action="store_true")
+    parser.add_argument("-m", "--noautostats", help="don't use autoMCStats feature", action="store_true")
+    parser.add_argument("-t", "--thresh", help="threshold for autoMCstats", default=0.0)
     parser.add_argument("-s", "--sig", help="signal name", default="tttt")
     parser.add_argument("-y", "--yukawa", help="yukawa coupling int for tth", default=-1)
     args = parser.parse_args()
@@ -148,7 +155,9 @@ if __name__ == "__main__":
             inject_tttt=args.inject_tttt,
             dosignificance=(not args.nosignificance),
             yukawa=int(args.yukawa),
-            allownegative=args.allownegative
+            allownegative=args.allownegative,
+            use_autostats=(not args.noautostats),
+            thresh=args.thresh,
             )
     print "------------------------------"
     print_lims(d_lims, fb=True, unblinded=args.unblinded)

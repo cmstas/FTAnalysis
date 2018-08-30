@@ -111,6 +111,9 @@ def writeUncorrelatedFakesForProcess(thedir, card, kine, process, processes, lnN
     if not h_test:
         f.Close()
 
+def writeAutoMCStats(card, thresh=0.0):
+    card.write("SS autoMCStats {}\n".format(thresh))
+
 def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
     if process.name=="sig": return #fake signal for MI limits does not need stat unc.
     ra5 = ""
@@ -176,7 +179,7 @@ def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
 
 
 #write card regardless of number of processes (but make sure signal is first in list)
-def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
+def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=0.0, use_autostats=False):
 
     line = "---------------------------------------------------------------"
     binname = "SS"
@@ -335,21 +338,25 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes):
     for process in processes: card.write("%-15s " % (process.flips))
     card.write("\n")
 
-    for process in processes:
-        # if process.name in ["ttw","ttz","tth","wz","ww"]:
-        if process.name in ["ttw","ttz","tth"]:
-            statshape = 0.15 # ttw, ttz, tth, wz, tttt
-            # if process.name in ["ww"]: statshape = 0.20
-            process.statshape = 1.+statshape
-            writeStatForProcess(thedir,card,kine,process,processes, statshape=statshape)
-        else:
-            writeStatForProcess(thedir,card,kine,process,processes)
-        if process.name in ["fakes"] and do_uncorrfakes:
-            writeUncorrelatedFakesForProcess(thedir,card,kine,process,processes,lnN=1.6)
+    if use_autostats:
+        writeAutoMCStats(card,thresh=thresh)
+    else:
+        for process in processes:
+            # if process.name in ["ttw","ttz","tth","wz","ww"]:
+            if process.name in ["ttw","ttz","tth"]:
+                statshape = 0.15 # ttw, ttz, tth, wz, tttt
+                # if process.name in ["ww"]: statshape = 0.20
+                process.statshape = 1.+statshape
+                writeStatForProcess(thedir,card,kine,process,processes, statshape=statshape)
+            else:
+                writeStatForProcess(thedir,card,kine,process,processes)
+
+            if process.name in ["fakes"] and do_uncorrfakes:
+                writeUncorrelatedFakesForProcess(thedir,card,kine,process,processes,lnN=1.6)
 
     return
 
-def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, yukawa=-1, inject_tttt=False):
+def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, yukawa=-1, inject_tttt=False, use_autostats=False, thresh=0.0):
     # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
     inject_tttt = (signal != "tttt") or inject_tttt
     # do_tttt = True
@@ -535,7 +542,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         data = newdata
 
     #create it
-    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes )
+    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=thresh, use_autostats=use_autostats )
 
     # for proc in processes:
     #     print "-->", proc.name, proc.rate()
