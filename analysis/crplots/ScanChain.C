@@ -122,6 +122,7 @@ tuple<int, int, int, float, float> calc_jet_quants(int year) {
 
 float isr_reweight(bool useIsrWeight, int year, int nisrmatch) {
     if (!useIsrWeight) return 1;
+    if (ss::is_real_data()) return 1;
     std::map<int, std::vector<float>> weights = {
         {2016, {1.00689633, 1.01152742, 0.97021783, 0.89924575,
                 0.93356379, 0.73271888, 0.54848046, 0.64497428}},
@@ -145,6 +146,31 @@ float btag_reweight(int nbtags) {
     if (nbtags == 3) return 1.26;
     if (nbtags >= 4) return 1.11;
     return 1;
+}
+
+
+float njet_reweight(int njets) {
+
+    // nominal tt
+    if (ss::is_real_data()) return 1;
+    if (njets == 2) return 1.00;
+    if (njets == 3) return 0.94;
+    if (njets == 4) return 0.93;
+    if (njets == 5) return 0.90;
+    if (njets == 6) return 0.97;
+    if (njets >= 7) return 1.11;
+    return 1;
+
+    // // ttlomg
+    // if (ss::is_real_data()) return 1;
+    // if (njets == 2) return 0.97;
+    // if (njets == 3) return 0.85;
+    // if (njets == 4) return 0.75;
+    // if (njets == 5) return 0.72;
+    // if (njets == 6) return 0.71;
+    // if (njets >= 7) return 0.59;
+    // return 1;
+
 }
 
 
@@ -184,11 +210,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         year = 2016;
         is2016 = true;
     } else if (options.Contains("Data2017")) {
-        lumiAG = useNonIsoTriggers ? 36.529: 41.3;
+        lumiAG = useNonIsoTriggers ? 36.529: 41.53;
         year = 2017;
         is2017 = true;
     } else if (options.Contains("Data2018")) {
-        lumiAG = 16.594;
+        lumiAG = 35.53;
         year = 2018;
         is2018 = true;
     } else {
@@ -206,6 +232,22 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     vector<string> regions = {
 
+        // "btagcr",                          // B-tag CR enriched in prompt, like BR
+        // "btagcr_unw",                          // B-tag CR enriched in prompt, like BR
+        // "btagcr_njrw",                          // B-tag CR enriched in prompt, like BR
+        // "btagcr_up",                          // B-tag CR enriched in prompt, like BR
+        // "btagcr_dn",                          // B-tag CR enriched in prompt, like BR
+        
+        // "os_njetreweight",                          // OS tight-tight and variants
+        // "os_njetreweight_btagup",                          // OS tight-tight and variants
+        // "os_njetreweight_btagdn",                          // OS tight-tight and variants
+        // "os_njetreweight_btagup2",                          // OS tight-tight and variants
+        // "os_njetreweight_btagdn2",                          // OS tight-tight and variants
+        // "os_noisr", 
+        // "os_btagno", 
+        // "os_btagup", 
+        // "os_btagdn", 
+        // "os_stop",
         "os",                          // OS tight-tight and variants
         "osloose",                    // DY dominated CR
         "tl",                          // SS tight-loose
@@ -213,19 +255,19 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         "crw", "crz",                  // CRZ, CRW
         "htnb1",                        // fake-dominated CR
 
-        // "os_noisr", "os_btagreweight", // |
+        // "os_btagreweight", // |
         // "os_highbdt", "os_lowbdt",     // |
         // "bdt_nb", "bdt_ht",            // Baseline w/ inverted nbtags/Ht/MET selection
         // "bdt_met","bdt_met_ht",        // |
         // "bdt_train",                   // BDT Training region - BR + CRW
-        "tt_isr",                      // TTBar ISR Reweighting derivation region
-        "tt_isr_reweight_check",       // |
+        // "tt_isr",                      // TTBar ISR Reweighting derivation region
+        // "tt_isr_reweight_check",       // |
     };
 
     vector<HistCol*> registry;
-    HistCol h_met         (regions, "met"        , 30, 0   , 600 , &registry);
+    HistCol h_met         (regions, "met"        , 30, 0   , 300 , &registry);
     HistCol h_metphi      (regions, "metphi"     , 60, -3.2, 3.2 , &registry);
-    HistCol h_rawmet      (regions, "rawmet"     , 60, 0   , 600 , &registry);
+    HistCol h_rawmet      (regions, "rawmet"     , 60, 0   , 150 , &registry);
     HistCol h_calomet     (regions, "calomet"    , 60, 0   , 600 , &registry);
     HistCol h_ht          (regions, "ht"         , 16, 0   , 1600, &registry);
     HistCol h_htb         (regions, "htb"        , 16, 0   , 1600, &registry);
@@ -240,6 +282,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_nlb40       (regions, "nlb40"      , 8 , 0   , 8   , &registry);
     HistCol h_ntb40       (regions, "ntb40"      , 8 , 0   , 8   , &registry);
     HistCol h_nbtags      (regions, "nbtags"     , 5 , 0   , 5   , &registry);
+    HistCol h_bdisc1      (regions, "bdisc1"     , 100,0.4 , 1.0 , &registry);
     HistCol h_maxmjoverpt (regions, "maxmjoverpt", 50, 0   , 0.35, &registry);
 
     HistCol h_pt1         (regions, "pt1"        , 30, 0   , 300 , &registry);
@@ -318,6 +361,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     int nleps, njets, nbtags;
     float ht, htb, met, metphi, rawmet, calomet;
+    float bdisc1;
     float maxmjoverpt, ml1j1;
     int matchtype;
     int nlb40, ntb40, nisrjets, nisrmatch;
@@ -413,6 +457,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
             bool pass_trig = ss::fired_trigger();
             if (is2017 && !useNonIsoTriggers) {
+                // NOTE: not actually needed, since this is enforced in the babymaker
                 if (abs(lep1id) == 11 and !ss::lep1_isTrigSafev1()) continue;
                 if (abs(lep2id) == 11 and !ss::lep2_isTrigSafev1()) continue;
             }
@@ -456,6 +501,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             // Save a bunch of event info for quick reference later
             njets = ss::njets();
             nbtags = ss::nbtags();
+            bdisc1 = (nbtags >= 1) ? ss::btags_disc()[0] : -1;
             if (useNewMET) {
                 met = ss::modmet();
                 metphi = ss::modmetPhi();
@@ -708,6 +754,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(h_nlb40, nlb40);
                 do_fill(h_ntb40, ntb40);
                 do_fill(h_nbtags, nbtags);
+                do_fill(h_bdisc1, bdisc1);
                 do_fill(h_maxmjoverpt, maxmjoverpt);
 
                 do_fill(h_pt1, lep1ccpt);
@@ -799,18 +846,55 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
             if (BR) fill_region("br", weight);
 
+            // if (ht>0 and njets>=2 and nbtags>=1 and met>=30 and (hyp_class==3 || (
+            //                 hyp_class == 6 and (zcand13 or zcand23) and lep3ccpt > 20 and
+            //                 (class6Fake or (lep1good and lep2good and lep3good)))
+            //             )) {
+            //     float njets_weight = 1.0;
+            //     if (njets == 2) njets_weight = 1.18;
+            //     if (njets == 3) njets_weight = 1.13;
+            //     if (njets == 4) njets_weight = 1.30;
+            //     if (njets == 5) njets_weight = 1.23;
+            //     if (njets == 6) njets_weight = 1.13;
+            //     if (njets == 7) njets_weight = 1.08;
+            //     fill_region("btagcr", weight);
+            //     bool is_mc = !(ss::is_real_data());
+            //     fill_region("btagcr_njrw", (is_mc ? (weight * njets_weight) : 1));
+            //     fill_region("btagcr_unw", (is_mc ? (weight / ss::weight_btagsf()) : 1));
+            //     fill_region("btagcr_up", (is_mc ? (weight * ss::weight_btagsf_UP() / ss::weight_btagsf()) : 1));
+            //     fill_region("btagcr_dn", (is_mc ? (weight * ss::weight_btagsf_DN() / ss::weight_btagsf()) : 1));
+            // }
+
             if (hyp_class == 4) fill_region("osloose", weight);
 
             if (hyp_class == 3 and nbtags == 1 and
                    njets >= 2 and met > 50) fill_region("htnb1", weight);
 
             if (njets >= 2 and
+                    met > 250. and
+                    ss::mt() > 150) {
+                if (hyp_class == 4 and !zcand12) {
+                    fill_region("os_stop", weight);
+                }
+            }
+
+            if (njets >= 2 and
                     met > 50. and
-                    ht > 300) {
+                    // ht > 300) {
+                    ht > -1) { // FIXME
                 if (hyp_class == 4 and !zcand12) {
                     fill_region("os_noisr", weight / isr_reweight(useIsrWeight, year, nisrmatch));
                     fill_region("os", weight);
-                    fill_region("os_btagreweight", weight * btag_reweight(nbtags));
+                    bool is_mc = !(ss::is_real_data());
+                    fill_region("os_btagno", (is_mc ? (weight                          / ss::weight_btagsf()) : 1));
+                    fill_region("os_btagup", (is_mc ? (weight * ss::weight_btagsf_UP() / ss::weight_btagsf()) : 1));
+                    fill_region("os_btagdn", (is_mc ? (weight * ss::weight_btagsf_DN() / ss::weight_btagsf()) : 1));
+                    fill_region("os_btagreweight", (is_mc ? (weight * btag_reweight(nbtags)) : 1));
+                    fill_region("os_njetreweight", (is_mc ? (weight * njet_reweight(njets)) : 1));
+                    fill_region("os_njetreweight_btagup", (is_mc ? (weight * njet_reweight(njets) * ss::weight_btagsf_UP() / ss::weight_btagsf()) : 1));
+                    fill_region("os_njetreweight_btagdn", (is_mc ? (weight * njet_reweight(njets) * ss::weight_btagsf_DN() / ss::weight_btagsf()) : 1));
+                    fill_region("os_njetreweight_btagup2", (is_mc ? (weight * njet_reweight(njets) * pow(ss::weight_btagsf_UP(),2) / ss::weight_btagsf()) : 1));
+                    fill_region("os_njetreweight_btagdn2", (is_mc ? (weight * njet_reweight(njets) * pow(ss::weight_btagsf_DN(),2) / ss::weight_btagsf()) : 1));
                     if (evaluateBDT) {
                         if (event_bdt() > 0.21) {
                             fill_region("os_highbdt", weight);
