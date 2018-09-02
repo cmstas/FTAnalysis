@@ -157,7 +157,7 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
 
     else:
 
-        from pytable import Table
+        from analysis.utils.pytable import Table
         tab = Table()
         tab.set_column_names([cname.replace("$","").replace("\\","") for cname in colnames])
         tab.set_theme_basic()
