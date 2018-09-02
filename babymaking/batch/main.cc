@@ -104,6 +104,9 @@ int main(int argc, char *argv[]){
     string jecEra; // XXX NOTE that you also have to change the run-dependent data JECs below too
     std::string jecEraMC;
 
+
+    gconf.SS_innerlayers = 0;
+
     if (year == 2016) {
         gconf.year = year;
         gconf.ea_version = 1;
@@ -118,8 +121,8 @@ int main(int argc, char *argv[]){
             gconf.cmssw_ver = 94;
         }
         good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
-        jecEra = "Summer16_23Sep2016BCDV3";
-        jecEraMC = "Summer16_23Sep2016V3";
+        jecEra = "Summer16_23Sep2016BCDV4";
+        jecEraMC = "Summer16_23Sep2016V4";
     }
     if (year == 2017) {
         gconf.year = year;
@@ -145,7 +148,7 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_minireliso = 0.12;
         gconf.multiiso_mu_ptratio = 0.80;
         gconf.multiiso_mu_ptrel = 7.5;
-        good_run_file = "goodRunList/Cert_314472-317591_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+        good_run_file = "goodRunList/Cert_314472-321461_13TeV_PromptReco_Collisions18_JSON_snt.txt";
         jecEra = "Fall17_17Nov2017C_V6";
         jecEraMC = "Fall17_17Nov2017_V6";
     }

@@ -926,10 +926,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       if (!is_real_data && hyp_class == 4) return babyErrorStruct;
   }
 
-  // if MC and not DY or ttbar, skip opposite sign
-  if ( !is_real_data && !((filename.find("/DY") != std::string::npos) || (filename.find("/TT_") != std::string::npos) || (filename.find("/TTJets") != std::string::npos)) ) {
-      if (hyp_class == 4) return babyErrorStruct;
-  }
+  // // if MC and not DY or ttbar, skip opposite sign
+  // if ( !is_real_data && !((filename.find("/DY") != std::string::npos) ||
+  //             (filename.find("/TT_") != std::string::npos) ||
+  //             (filename.find("/TTJets") != std::string::npos) ||
+  //             (filename.find("/ST_") != std::string::npos)
+  //             ) ) {
+  //     if (hyp_class == 4) return babyErrorStruct;
+  // }
       
 
   if (hyp_class == 6){
@@ -1129,7 +1133,13 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   if (verbose) cout << "passed trigger safety" << endl;
 
   //Corrected MET
-  int use_cleaned_met = tas::evt_isRealData() and (filename.find("-03Feb2017-") != std::string::npos);
+  int use_cleaned_met = 0;
+  if (tas::evt_isRealData() and (filename.find("-03Feb2017-") != std::string::npos)) {
+      use_cleaned_met = 1;
+  }
+  if (gconf.year == 2017) {
+      // use_cleaned_met = 2; // FIXME eventually
+  }
   pair <float, float> T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
   met = T1CHSMET.first;
   metPhi = T1CHSMET.second;
@@ -1909,6 +1919,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   //Make sure one of our triggers fired
 
+  // https://indico.cern.ch/event/718554/contributions/3027981/attachments/1667626/2674497/leptontriggerreview.pdf#page=12
   if (gconf.year == 2016) {
       if (isFastsim == 0) {
           if (isRunH) {
@@ -1953,7 +1964,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
               passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
       if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")))              (triggers |= 1<<3);
-      if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")))        (triggers |= 1<<6);
+      if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")))        (triggers |= 1<<6);
 
       if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_v")) ||
               passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
@@ -1969,13 +1980,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   } else if (gconf.year == 2018) {
       if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
               passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
-      if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")))              (triggers |= 1<<3);
-      if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v")))        (triggers |= 1<<6);
+      if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v")))              (triggers |= 1<<3);
+      if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")))        (triggers |= 1<<6);
 
-      if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_v")) ||
-              passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
+      if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
       if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v")))    (triggers |= 1<<5);
-      if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
+      if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass3p8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
       fired_trigger = false;
       if (triggers != 0) {
           // Pure dilepton triggers for all HT

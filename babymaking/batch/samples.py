@@ -143,12 +143,42 @@ data_2017 = [
         ]
 
 data_2018 = [
+        ["/EGamma/Run2018A-PromptReco-v1/MINIAOD", "DataDoubleEGAv1"],
+        ["/EGamma/Run2018A-PromptReco-v2/MINIAOD", "DataDoubleEGAv2"],
+        ["/EGamma/Run2018A-PromptReco-v3/MINIAOD", "DataDoubleEGAv3"],
+        ["/EGamma/Run2018B-PromptReco-v1/MINIAOD", "DataDoubleEGBv1"],
+        ["/EGamma/Run2018B-PromptReco-v2/MINIAOD", "DataDoubleEGBv2"],
+        ["/EGamma/Run2018C-PromptReco-v1/MINIAOD", "DataDoubleEGCv1"],
+        ["/EGamma/Run2018C-PromptReco-v2/MINIAOD", "DataDoubleEGCv2"],
+        ["/EGamma/Run2018C-PromptReco-v3/MINIAOD", "DataDoubleEGCv3"],
+        ["/EGamma/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleEGDv2"],
+        ["/DoubleMuon/Run2018A-PromptReco-v1/MINIAOD", "DataDoubleMuonAv1"],
+        ["/DoubleMuon/Run2018A-PromptReco-v2/MINIAOD", "DataDoubleMuonAv2"],
+        ["/DoubleMuon/Run2018A-PromptReco-v3/MINIAOD", "DataDoubleMuonAv3"],
+        ["/DoubleMuon/Run2018B-PromptReco-v1/MINIAOD", "DataDoubleMuonBv1"],
+        ["/DoubleMuon/Run2018B-PromptReco-v2/MINIAOD", "DataDoubleMuonBv2"],
+        ["/DoubleMuon/Run2018C-PromptReco-v1/MINIAOD", "DataDoubleMuonCv1"],
+        ["/DoubleMuon/Run2018C-PromptReco-v2/MINIAOD", "DataDoubleMuonCv2"],
+        ["/DoubleMuon/Run2018C-PromptReco-v3/MINIAOD", "DataDoubleMuonCv3"],
+        ["/DoubleMuon/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleMuonDv2"],
+        ["/MuonEG/Run2018A-PromptReco-v1/MINIAOD", "DataMuonEGAv1"],
+        ["/MuonEG/Run2018A-PromptReco-v2/MINIAOD", "DataMuonEGAv2"],
+        ["/MuonEG/Run2018A-PromptReco-v3/MINIAOD", "DataMuonEGAv3"],
+        ["/MuonEG/Run2018B-PromptReco-v1/MINIAOD", "DataMuonEGBv1"],
+        ["/MuonEG/Run2018B-PromptReco-v2/MINIAOD", "DataMuonEGBv2"],
+        ["/MuonEG/Run2018C-PromptReco-v1/MINIAOD", "DataMuonEGCv1"],
+        ["/MuonEG/Run2018C-PromptReco-v2/MINIAOD", "DataMuonEGCv2"],
+        ["/MuonEG/Run2018C-PromptReco-v3/MINIAOD", "DataMuonEGCv3"],
+        ["/MuonEG/Run2018D-PromptReco-v2/MINIAOD", "DataMuonEGDv2"],
         ]
 
-all_2016 = data_2016 + mc_2016
-all_2017 = data_2017 + mc_2017
-all_2018 = data_2018 + mc_2018
-all_data = data_2016 + data_2017 + data_2018
-all_mc = mc_2016 + mc_2017 + mc_2018
-all_samples = all_data + all_mc
-print len(all_samples)
+
+if __name__ == "__main__":
+    all_2016 = data_2016 + mc_2016
+    all_2017 = data_2017 + mc_2017
+    all_2018 = data_2018 + mc_2018
+    all_data = data_2016 + data_2017 + data_2018
+    all_mc = mc_2016 + mc_2017 + mc_2018
+    all_samples = all_data + all_mc
+
+    print len(all_samples)
