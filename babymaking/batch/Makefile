@@ -16,6 +16,7 @@ ifndef VERBOSE
 endif
 
 opt: CFLAGS+=-O2
+small: CFLAGS+=-Os
 debug: CFLAGS+=-g -O0
 
 #ROOFITINCLUDE = 
@@ -125,6 +126,7 @@ build:  $(EXE)
 b: build
 
 opt: all
+small: all
 debug: all
 
 loopclean:
