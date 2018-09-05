@@ -21,6 +21,7 @@ years_to_consider = [
 basedirs ={
         2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.00_80x_baseline_full_v4"),
         2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v3.02_nmiss0"),
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v3.03_nmiss1_datamc2017"), # FIXME
         2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v3.03_nmiss0_data2018"),
         }
 
@@ -36,11 +37,16 @@ basedirs ={
 # outputdir = "outputs_2017_ptfake18"
 # outputdir = "outputs_2017_isr"
 # outputdir = "outputs_2017_njetreweight"
-outputdir = "outputs_2018"
+# outputdir = "outputs_2018"
 # outputdir = "outputs_2017_ptfake20"
+
+outputdir = "outputs_temp"
 options = {
         2016: "useInclusiveSFs Data2016 quiet ",
+
         2017: "useInclusiveSFs Data2017 minPtFake18 quiet ",
+        # 2017: "useInclusiveSFs Data2017 minPtFake18 quiet zeroMissingInnerHits ", # FIXME
+
         2018: "useInclusiveSFs Data2018 minPtFake18 quiet ",
         }
 
@@ -105,6 +111,7 @@ chs = {
                 ],options=options[2016]),
             },
         2017: {
+
             "tt": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]),
             "fakes": make_objs(basedirs[2017]+"Data*.root", options=options[2017]+" doFakes"),
             "flips": make_objs(basedirs[2017]+"Data*.root", options=options[2017]+" doFlips"),
@@ -151,8 +158,10 @@ chs = {
                 basedirs[2017]+"STtop.root",
                 basedirs[2017]+"STantitop.root",
                 ],options=options[2017]),
+
             },
         2018: {
+
             "fakes": make_objs(basedirs[2018]+"Data*.root", options=options[2018]+" doFakes"),
             "flips": make_objs(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips"),
             "data": make_objs(basedirs[2018]+"Data*.root", options=options[2018]),
@@ -196,7 +205,7 @@ chs = {
             "singletop": make_objs([
                 basedirs[2017]+"STtop.root",
                 basedirs[2017]+"STantitop.root",
-                ],options=options[2018]),
+                ],options=options[2018]) # FIXME,
 
             }
         }

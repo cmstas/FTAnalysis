@@ -20,8 +20,6 @@
 #include "../../common/CORE/Tools/dorky/dorky.h"
 #include "../../common/CORE/Tools/utils.h"
 #include "../misc/common_utils.h"
-#include "../misc/info_2016.h"
-#include "../misc/info_2018.h"
 
 #include "../misc/tqdm.h"
 
@@ -29,7 +27,7 @@ using namespace std;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float>> Vec4;
 // using namespace tas;
 
-float lumiAG = getLumi();
+// float lumiAG = getLumi();
 bool STOP_REQUESTED = false;
 // float lumiAG = 36.3;
 struct HistCol {
@@ -138,42 +136,6 @@ float isr_reweight(bool useIsrWeight, int year, int nisrmatch) {
     return weights[year][nisrmatch];
 }
 
-float btag_reweight(int nbtags) {
-    if (ss::is_real_data()) return 1;
-    if (nbtags == 0) return 1.14;
-    if (nbtags == 1) return 0.979;
-    if (nbtags == 2) return 0.905;
-    if (nbtags == 3) return 1.26;
-    if (nbtags >= 4) return 1.11;
-    return 1;
-}
-
-
-float njet_reweight(int njets) {
-
-    // nominal tt
-    if (ss::is_real_data()) return 1;
-    if (njets == 2) return 1.00;
-    if (njets == 3) return 0.94;
-    if (njets == 4) return 0.93;
-    if (njets == 5) return 0.90;
-    if (njets == 6) return 0.97;
-    if (njets >= 7) return 1.11;
-    return 1;
-
-    // // ttlomg
-    // if (ss::is_real_data()) return 1;
-    // if (njets == 2) return 0.97;
-    // if (njets == 3) return 0.85;
-    // if (njets == 4) return 0.75;
-    // if (njets == 5) return 0.72;
-    // if (njets == 6) return 0.71;
-    // if (njets >= 7) return 0.59;
-    // return 1;
-
-}
-
-
 int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     signal(SIGINT, [](int){
@@ -196,7 +158,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool minPtFake18 = options.Contains("minPtFake18");
 
     TString proc(ch->GetTitle());
-    bool useIsrWeight = proc.Contains("tt_");
+    // bool useIsrWeight = proc.Contains("tt_");
+    bool useIsrWeight = proc.Contains("tt_") 
+        or proc.Contains("ttw_") 
+        or proc.Contains("ttz_") 
+        or proc.Contains("tth_");
 
     // We may have derived the fake rate map throwing away leptons with pT<18 (e.g., 2017), so
     // we need to apply this cut here to be consistent
@@ -204,6 +170,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     float min_pt_fake = minPtFake18 ? 18. : -1;
 
     int year;
+    float lumiAG = 0.;
     bool is2016(false), is2017(false), is2018(false);
     if (options.Contains("Data2016")) {
         lumiAG = 35.87;
@@ -232,28 +199,16 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     vector<string> regions = {
 
-        // "btagcr",                          // B-tag CR enriched in prompt, like BR
-        // "btagcr_unw",                          // B-tag CR enriched in prompt, like BR
-        // "btagcr_njrw",                          // B-tag CR enriched in prompt, like BR
-        // "btagcr_up",                          // B-tag CR enriched in prompt, like BR
-        // "btagcr_dn",                          // B-tag CR enriched in prompt, like BR
-        
-        // "os_njetreweight",                          // OS tight-tight and variants
-        // "os_njetreweight_btagup",                          // OS tight-tight and variants
-        // "os_njetreweight_btagdn",                          // OS tight-tight and variants
-        // "os_njetreweight_btagup2",                          // OS tight-tight and variants
-        // "os_njetreweight_btagdn2",                          // OS tight-tight and variants
-        // "os_noisr", 
-        // "os_btagno", 
-        // "os_btagup", 
-        // "os_btagdn", 
-        // "os_stop",
         "os",                          // OS tight-tight and variants
+        "os_noht",                          // OS tight-tight and variants
         "osloose",                    // DY dominated CR
         "tl",                          // SS tight-loose
         "br",
         "crw", "crz",                  // CRZ, CRW
         "htnb1",                        // fake-dominated CR
+        // "htnb1mu",                        // fake-dominated CR
+        "nj2",                        // fake-dominated CR
+        "sshh",                        // HH SS sum
 
         // "os_btagreweight", // |
         // "os_highbdt", "os_lowbdt",     // |
@@ -295,6 +250,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_eta2        (regions, "eta2"       , 25, -3.2, 3.2 , &registry);
     HistCol h_etae        (regions, "etae"       , 25, -3.2, 3.2 , &registry);
     HistCol h_etam        (regions, "etam"       , 25, -3.2, 3.2 , &registry);
+
+    HistCol h_phie        (regions, "phie"       , 50, -3.2, 3.2 , &registry);
+    HistCol h_phim        (regions, "phim"       , 50, -3.2, 3.2 , &registry);
 
     HistCol h_ptrel1      (regions, "ptrel1"     , 15, 0   , 50  , &registry);
     HistCol h_ptrel2      (regions, "ptrel2"     , 15, 0   , 50  , &registry);
@@ -534,10 +492,13 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             lep2miniiso = ss::lep2_miniIso();
             nmiss1 = ss::lep1_el_exp_innerlayers();
             nmiss2 = ss::lep2_el_exp_innerlayers();
-            // lep1ptratio = ss::lep1_closeJet().pt() > 0 ? lep1pt/ss::lep1_closeJet().pt() : 1.0;
-            // lep2ptratio = ss::lep2_closeJet().pt() > 0 ? lep2pt/ss::lep2_closeJet().pt() : 1.0;
-            lep1ptratio = ss::lep1_ptratio();
-            lep2ptratio = ss::lep2_ptratio();
+            if (is2016) {
+                lep1ptratio = ss::lep1_closeJet().pt() > 0 ? lep1pt/ss::lep1_closeJet().pt() : 1.0;
+                lep2ptratio = ss::lep2_closeJet().pt() > 0 ? lep2pt/ss::lep2_closeJet().pt() : 1.0;
+            } else {
+                lep1ptratio = ss::lep1_ptratio();
+                lep2ptratio = ss::lep2_ptratio();
+            }
             nleps = (lep3good and lep3ccpt > 20) ? ((ss::lep4_passes_id() and ss::lep4_p4().pt() > 20) ? 4 : 3) : 2;
             ht = ss::ht();
             rawmet = ss::rawmet();
@@ -590,63 +551,33 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
             if (!ss::is_real_data()) {
-                float rand = -1;
-                if (!useInclusiveSFs) {
-                    tr1->SetSeed(ss::event());
-                    rand = tr1->Rndm();
-                }
-                if (is2016) {
-                    weight *= getTruePUw_2016(ss::trueNumInt()[0]);
-                    if (lep1good) weight *= leptonScaleFactor_2016(lep1id, lep1ccpt, lep1eta, ht);
-                    if (lep2good) weight *= leptonScaleFactor_2016(lep2id, lep2ccpt, lep2eta, ht);
-                    if (lep3good) weight *= leptonScaleFactor_2016(lep3id, lep3ccpt, lep3eta, ht);
-                    weight *= triggerScaleFactor(lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ht);
-                }
-                if (is2017) {
-                    weight *= getTruePUw(ss::trueNumInt()[0]);
-                    if (lep1good) weight *= leptonScaleFactor(lep1id, lep1ccpt, lep1eta, ht, rand);
-                    if (lep2good) weight *= leptonScaleFactor(lep2id, lep2ccpt, lep2eta, ht, rand);
-                    if (lep3good) weight *= leptonScaleFactor(lep3id, lep3ccpt, lep3eta, ht, rand);
-                    // weight *= triggerScaleFactor_2017(lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ht); // TODO: Update when available
-                }
-                if (is2018) {
-                    weight *= getTruePUw_2018(ss::trueNumInt()[0]);
-                    if (lep1good) weight *= leptonScaleFactor(lep1id, lep1ccpt, lep1eta, ht);
-                    if (lep2good) weight *= leptonScaleFactor(lep2id, lep2ccpt, lep2eta, ht);
-                    if (lep3good) weight *= leptonScaleFactor(lep3id, lep3ccpt, lep3eta, ht);
-                    // weight *= triggerScaleFactor_2018(lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ht); // TODO: Update when available
-                }
-
+                weight *= getTruePUw(year, ss::trueNumInt()[0]);
+                if (lep1good) weight *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ht);
+                if (lep2good) weight *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ht);
+                if (lep3good) weight *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ht);
+                weight *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ht);
                 weight *= ss::weight_btagsf();
                 weight *= isr_reweight(useIsrWeight, year, nisrmatch);
-                // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
 
             bool class6Fake = false;
             if (doFakes) {
-                auto yearly_fake_rate = [&](int id, float pt, float eta) {
-                    if (is2016) return fakeRate_2016(id, pt, eta, ht);
-                    if (is2017) return fakeRate(id, pt, eta, ht);
-                    if (is2018) return fakeRate(id, pt, eta, ht);  // Just use 2017 for now
-                    return 0.0f;
-                };
-
                 if (hyp_class == 6) {
                     bool lep1_lowpt_veto = lep1pt < (abs(lep1id) == 11 ? 15 : 10);
                     bool lep2_lowpt_veto = lep2pt < (abs(lep2id) == 11 ? 15 : 10);
                     bool lep3_lowpt_veto = lep3pt < (abs(lep3id) == 11 ? 15 : 10);
                     if (ss::lep3_fo() and !ss::lep3_tight() and !lep3_lowpt_veto and lep1good and lep2good && lep3pt>min_pt_fake) {  // lep3 fake
-                        float fr = yearly_fake_rate(lep3id, lep3ccpt, lep3eta);
+                        float fr = fakeRate(year, lep3id, lep3ccpt, lep3eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
                     if (ss::lep2_fo() and !ss::lep2_tight() and !lep2_lowpt_veto and lep1good and lep3good && lep2pt>min_pt_fake) {  // lep2 fake
-                        float fr = yearly_fake_rate(lep2id, lep2ccpt, lep2eta);
+                        float fr = fakeRate(year, lep2id, lep2ccpt, lep2eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
                     if (ss::lep1_fo() and !ss::lep1_tight() and !lep1_lowpt_veto and lep2good and lep3good && lep1pt>min_pt_fake) {  // lep1 fake
-                        float fr = yearly_fake_rate(lep1id, lep1ccpt, lep1eta);
+                        float fr = fakeRate(year, lep1id, lep1ccpt, lep1eta, ht);
                         class6Fake = true;
                         weight *= fr / (1-fr);
                     }
@@ -656,12 +587,12 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 } else if (hyp_class == 1 or hyp_class == 2) {
                     bool foundGoodLoose = false;
                     if (ss::lep1_passes_id()==0 && lep1pt>min_pt_fake) {
-                        float fr = (year == 2017) ? fakeRate(lep1id, lep1ccpt, lep1eta, ht) : fakeRate_2016(lep1id, lep1ccpt, lep1eta, ht);
+                        float fr = fakeRate(year, lep1id, lep1ccpt, lep1eta, ht);
                         weight *= fr/(1.-fr);
                         foundGoodLoose = true;
                     }
                     if (ss::lep2_passes_id()==0 && lep2pt>min_pt_fake) {
-                        float fr = (year == 2017) ? fakeRate(lep2id, lep2ccpt, lep2eta, ht) : fakeRate_2016(lep2id, lep2ccpt, lep2eta, ht);
+                        float fr = fakeRate(year, lep2id, lep2ccpt, lep2eta, ht);
                         weight *= fr/(1.-fr);
                         foundGoodLoose = true;
                     }
@@ -678,22 +609,16 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
 
             if (doFlips) {
-                auto yearly_flip_rate = [&](float pt, float eta) {
-                    if (is2016) return flipRate_2016(pt, eta);
-                    if (is2017) return flipRate(pt, eta);
-                    if (is2018) return flipRate(pt, eta);  // Just use 2017 for now
-                    return 0.0f;
-                };
                 if (hyp_class == 4) hyp_class = 3; // we've flipped an OS to a SS
                 else if (hyp_class == 6) class6Fake = true;
                 else continue;
                 float flipFact = 0.;
                 if (abs(lep1id) == 11) {
-                    float flr = yearly_flip_rate(lep1pt, lep1eta);
+                    float flr = flipRate(year, lep1pt, lep1eta);
                     flipFact += (flr/(1-flr));
                 }
                 if (abs(lep2id) == 11) {
-                    float flr = yearly_flip_rate(lep2pt, lep2eta);
+                    float flr = flipRate(year, lep2pt, lep2eta);
                     flipFact += (flr/(1-flr));
                 }
                 weight *= flipFact;
@@ -767,6 +692,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(h_eta2,   ss::lep2_p4().eta());
                 do_fill(abs(lep1id) == 11 ? h_etae     : h_etam,     lep1eta);
                 do_fill(abs(lep2id) == 11 ? h_etae     : h_etam,     lep2eta);
+                do_fill(abs(lep1id) == 11 ? h_phie     : h_phim,     lep1phi);
+                do_fill(abs(lep2id) == 11 ? h_phie     : h_phim,     lep2phi);
 
                 if (abs(lep1id) == 11) do_fill(h_nmiss1, nmiss1);
                 if (abs(lep2id) == 11) do_fill(h_nmiss2, nmiss2);
@@ -779,7 +706,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 bool lep1_fail_ptratio = false;
                 bool lep2_fail_ptratio = false;
 
-                if (is2017) {
+                if (is2017 || is2018) {
                     lep1_fail_ptratio = (lep1ptratio >= 0.) && (lep1ptratio < (abs(lep1id) == 11 ? 0.85 : 0.80));
                     lep2_fail_ptratio = (lep2ptratio >= 0.) && (lep2ptratio < (abs(lep2id) == 11 ? 0.85 : 0.80));
                 } else {
@@ -846,55 +773,39 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
             if (BR) fill_region("br", weight);
 
-            // if (ht>0 and njets>=2 and nbtags>=1 and met>=30 and (hyp_class==3 || (
-            //                 hyp_class == 6 and (zcand13 or zcand23) and lep3ccpt > 20 and
-            //                 (class6Fake or (lep1good and lep2good and lep3good)))
-            //             )) {
-            //     float njets_weight = 1.0;
-            //     if (njets == 2) njets_weight = 1.18;
-            //     if (njets == 3) njets_weight = 1.13;
-            //     if (njets == 4) njets_weight = 1.30;
-            //     if (njets == 5) njets_weight = 1.23;
-            //     if (njets == 6) njets_weight = 1.13;
-            //     if (njets == 7) njets_weight = 1.08;
-            //     fill_region("btagcr", weight);
-            //     bool is_mc = !(ss::is_real_data());
-            //     fill_region("btagcr_njrw", (is_mc ? (weight * njets_weight) : 1));
-            //     fill_region("btagcr_unw", (is_mc ? (weight / ss::weight_btagsf()) : 1));
-            //     fill_region("btagcr_up", (is_mc ? (weight * ss::weight_btagsf_UP() / ss::weight_btagsf()) : 1));
-            //     fill_region("btagcr_dn", (is_mc ? (weight * ss::weight_btagsf_DN() / ss::weight_btagsf()) : 1));
-            // }
-
             if (hyp_class == 4) fill_region("osloose", weight);
 
-            if (hyp_class == 3 and nbtags == 1 and
-                   njets >= 2 and met > 50) fill_region("htnb1", weight);
+            if (hyp_class == 3 and njets >= 2) {
+                fill_region("nj2", weight);
+            }
 
-            if (njets >= 2 and
-                    met > 250. and
-                    ss::mt() > 150) {
-                if (hyp_class == 4 and !zcand12) {
-                    fill_region("os_stop", weight);
-                }
+            if (hyp_class == 3 and nbtags == 1 and
+                   njets >= 2 and met > 50) {
+                fill_region("htnb1", weight);
+
+                // if ( (abs(lep1id) == 13 and (lep1pt < 150 and lep1pt > 125)) or
+                //      (abs(lep2id) == 13 and (lep2pt < 150 and lep2pt > 125))
+                //    ) {
+                //     if (ss::is_real_data() and !doFakes and !doFlips) {
+                //         cout << ss::run() << ":" << ss::lumi() << ":" << ss::event() << " " << lep1id << " " << lep2id << " " << lep1pt << " " << lep2pt << " " << ss::filename() << endl;
+                //     }
+                //     fill_region("htnb1mu", weight);
+                // }
+
+            }
+
+            if (hyp_class == 3 and njets >= 2 and met > 50
+                    and lep1ccpt > 25 and lep2ccpt > 25
+                    ) {
+                fill_region("sshh", weight);
             }
 
             if (njets >= 2 and
                     met > 50. and
-                    // ht > 300) {
-                    ht > -1) { // FIXME
+                    ht > 300) {
                 if (hyp_class == 4 and !zcand12) {
                     fill_region("os_noisr", weight / isr_reweight(useIsrWeight, year, nisrmatch));
                     fill_region("os", weight);
-                    bool is_mc = !(ss::is_real_data());
-                    fill_region("os_btagno", (is_mc ? (weight                          / ss::weight_btagsf()) : 1));
-                    fill_region("os_btagup", (is_mc ? (weight * ss::weight_btagsf_UP() / ss::weight_btagsf()) : 1));
-                    fill_region("os_btagdn", (is_mc ? (weight * ss::weight_btagsf_DN() / ss::weight_btagsf()) : 1));
-                    fill_region("os_btagreweight", (is_mc ? (weight * btag_reweight(nbtags)) : 1));
-                    fill_region("os_njetreweight", (is_mc ? (weight * njet_reweight(njets)) : 1));
-                    fill_region("os_njetreweight_btagup", (is_mc ? (weight * njet_reweight(njets) * ss::weight_btagsf_UP() / ss::weight_btagsf()) : 1));
-                    fill_region("os_njetreweight_btagdn", (is_mc ? (weight * njet_reweight(njets) * ss::weight_btagsf_DN() / ss::weight_btagsf()) : 1));
-                    fill_region("os_njetreweight_btagup2", (is_mc ? (weight * njet_reweight(njets) * pow(ss::weight_btagsf_UP(),2) / ss::weight_btagsf()) : 1));
-                    fill_region("os_njetreweight_btagdn2", (is_mc ? (weight * njet_reweight(njets) * pow(ss::weight_btagsf_DN(),2) / ss::weight_btagsf()) : 1));
                     if (evaluateBDT) {
                         if (event_bdt() > 0.21) {
                             fill_region("os_highbdt", weight);
@@ -904,6 +815,12 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     }
                 }
                 if (hyp_class == 2) fill_region("tl", weight);
+            }
+
+            if (njets >= 2 and
+                    met > 50. and
+                    hyp_class == 4 and !zcand12) {
+                fill_region("os_noht", weight);
             }
 
             // BDT Validation Regions

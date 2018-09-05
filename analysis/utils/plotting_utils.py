@@ -1,7 +1,8 @@
-
+import numpy as np
+from pytable import Table
+from analysis.limits.errors import E
 
 def write_table(data, bgs, outname=None):
-    from pytable import Table
     tab = Table()
     sumbgs = sum(bgs)
     databg = data/sumbgs
@@ -28,7 +29,7 @@ def write_table(data, bgs, outname=None):
         if iproc == len(procs)-1:
             totbg = E(sum(sumbgs.counts), np.sum(sumbgs.errors**2.)**0.5)
             totdata = E(sum(data.counts))
-            ratio = totdata/ totbg
+            ratio = totdata/totbg
             cent, err = ratio[0], ratio[1]
         else:
             cent = sum(proc.counts)
