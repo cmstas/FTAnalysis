@@ -1,81 +1,102 @@
 #ifndef _commonUtils_h_
 #define _commonUtils_h_
 
-float getLumi() { return 41.3; }
-float getLumiUnblind() { return 41.3; }
-bool isUnblindRun(int run) { return true; }
-TString getTag() { return "v8.07"; }
-TString getTagData() { return "v8.07"; }
-bool applyThirdLeptonVeto() { return false; }
-#include "flip_rates.h"
-#include "fake_rates.h"
-#include "trigger_sf.h"
-#include "pu_weights.h"
-#include "lepton_sf.h"
+#include "year_2016/all.h"
+#include "year_2017/all.h"
+#include "year_2018/all.h"
 
-#include "LaurentSFs_fastsim.h"
-#include "lepton_sf_fastsim.h"
-
-float fakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronFakeRate_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonFakeRate_IsoTrigs(pt,eta);
-    else return 0.;
-}
-
-float fakeRateError(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronFakeRateError_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonFakeRateError_IsoTrigs(pt,eta);
-    else return 0.;
-}
-
-float alternativeFakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronAlternativeFakeRate_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonAlternativeFakeRate_IsoTrigs(pt,eta);
-    else return 0.;
-}
-
-float qcdMCFakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronQCDMCFakeRate_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonQCDMCFakeRate_IsoTrigs(pt,eta);
-    else return 0.;
-}
-
-float qcdMCFakeRateError(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronQCDMCFakeRateError_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonQCDMCFakeRateError_IsoTrigs(pt,eta);
-    else return 0.;
-}
-
-
-// returns A if pt<ptmin, B if pt>ptmax, and linear interpolation between. if pt<10, use C
-float mvacut(float A, float B, float C, float pt_) {
-    float ptmin = 15;
-    float ptmax = 25;
-    return pt_>10 ? std::min(A, std::max(B,A + (B-A)/(ptmax-ptmin)*(pt_-ptmin))) : C; 
-}
-
-// C if pT<10, A if pT=10, B if pt>=25, lerp between A,B for pT in [10,25]
-float mvacut2017(float A, float B, float C, float pt_) {
-    if (pt_ < 10) return C;
-    else if (pt_ > 25) return B;
-    else {
-        return A + (B-A)/15.0f*(pt_-10.0f);
+float getTruePUw(int year, int nvtx, int which=0) { 
+    // which = 0, 1, -1 for nominal, up, down
+    if (which == 0) {
+        if (year == 2016) return y2016::getTruePUw(nvtx);
+        else if (year == 2017) return y2017::getTruePUw(nvtx);
+        else if (year == 2018) return y2018::getTruePUw(nvtx);
+    } else if (which == 1) {
+        if (year == 2016) return y2016::getTruePUwUp(nvtx);
+        else if (year == 2017) return y2017::getTruePUwUp(nvtx);
+        else if (year == 2018) return y2018::getTruePUwUp(nvtx);
+    } else if (which == -1) {
+        if (year == 2016) return y2016::getTruePUwDn(nvtx);
+        else if (year == 2017) return y2017::getTruePUwDn(nvtx);
+        else if (year == 2018) return y2018::getTruePUwDn(nvtx);
     }
+    return 0.;
 }
 
-bool passIsolatedFO(int id, float eta, float disc, float pt) {
-  if (abs(id)==13) return true;
-  float aeta = fabs(eta);
-  // if (aeta < 0.8) return mva > -0.155;
-  // if ((aeta >= 0.8 && aeta <= 1.479)) return mva > -0.56;
-  // if (aeta > 1.479) return mva > -0.76;
-    // if (aeta < 0.8) return disc > mvacut(-0.86,-0.96,-0.3,pt);
-    // if ((aeta >= 0.8 && aeta <= 1.479)) return disc > mvacut(-0.85,-0.96,-0.36,pt);
-    // if (aeta > 1.479) return disc > mvacut(-0.81,-0.95,-0.63,pt);
-    if (aeta < 0.8) return disc > mvacut2017(-0.93,-0.887,-0.135,pt);
-    if ((aeta >= 0.8 && aeta <= 1.479)) return disc > mvacut2017(-0.93,-0.89,-0.417,pt);
-    if (aeta > 1.479) return disc > mvacut2017(-0.942,-0.91,-0.470,pt);
-  return false;
+float leptonScaleFactor(int year, int id, float pt, float eta, float ht) { 
+    if (year == 2016) return y2016::leptonScaleFactor(id, pt, eta, ht);
+    else if (year == 2017) return y2017::leptonScaleFactor(id, pt, eta, ht);
+    else if (year == 2018) return y2018::leptonScaleFactor(id, pt, eta, ht);
+    else return 0.;
+}
+
+float leptonScaleFactorError(int year, int id, float pt, float eta, float ht) { 
+    if (year == 2016) return y2016::leptonScaleFactor_err(id, pt, eta, ht);
+    else if (year == 2017) return y2017::leptonScaleFactor_err(id, pt, eta, ht);
+    else if (year == 2018) return y2018::leptonScaleFactor_err(id, pt, eta, ht);
+    else return 0.;
+}
+
+float triggerScaleFactor(int year, int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) { 
+    if (year == 2016) return y2016::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
+    else if (year == 2017) return y2017::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
+    else if (year == 2018) return y2018::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
+    else return 0.;
+}
+
+float flipRate(int year, float pt, float eta) { 
+    if (year == 2016) return y2016::flipRate(pt, eta);
+    else if (year == 2017) return y2017::flipRate(pt, eta);
+    else if (year == 2018) return y2018::flipRate(pt, eta);
+    else return 0.;
+}
+
+float flipRateError(int year, float pt, float eta) { 
+    if (year == 2016) return y2016::flipRateError(pt, eta);
+    else if (year == 2017) return y2017::flipRateError(pt, eta);
+    else if (year == 2018) return y2018::flipRateError(pt, eta);
+    else return 0.;
+}
+
+float fakeRate(int year, int id, float pt, float eta, float ht) { 
+    if (year == 2016) return y2016::fakeRate(id, pt, eta, ht);
+    else if (year == 2017) return y2017::fakeRate(id, pt, eta, ht);
+    else if (year == 2018) return y2018::fakeRate(id, pt, eta, ht);
+    else return 0.;
+}
+float fakeRateError(int year, int id, float pt, float eta, float ht) { 
+    if (year == 2016) return y2016::fakeRateError(id, pt, eta, ht);
+    else if (year == 2017) return y2017::fakeRateError(id, pt, eta, ht);
+    else if (year == 2018) return y2018::fakeRateError(id, pt, eta, ht);
+    else return 0.;
+}
+
+float alternativeFakeRate(int year, int id, float pt, float eta, float ht) { 
+    if (year == 2016) return y2016::alternativeFakeRate(id, pt, eta, ht);
+    else if (year == 2017) return y2017::alternativeFakeRate(id, pt, eta, ht);
+    else if (year == 2018) return y2018::alternativeFakeRate(id, pt, eta, ht);
+    else return 0.;
+}
+
+float qcdMCFakeRate(int year, int id, float pt, float eta, float ht) { 
+    if (year == 2016) return y2016::qcdMCFakeRate(id, pt, eta, ht);
+    else if (year == 2017) return y2017::qcdMCFakeRate(id, pt, eta, ht);
+    else if (year == 2018) return y2018::qcdMCFakeRate(id, pt, eta, ht);
+    else return 0.;
+}
+
+float qcdMCFakeRateError(int year, int id, float pt, float eta, float ht) { 
+    if (year == 2016) return y2016::qcdMCFakeRateError(id, pt, eta, ht);
+    else if (year == 2017) return y2017::qcdMCFakeRateError(id, pt, eta, ht);
+    else if (year == 2018) return y2018::qcdMCFakeRateError(id, pt, eta, ht);
+    else return 0.;
+}
+
+float getLumi(int year) {
+    if (year == 2016) return y2016::getLumi();
+    else if (year == 2017) return y2017::getLumi();
+    else if (year == 2018) return y2018::getLumi();
+    else return 0.;
 }
 
 #endif

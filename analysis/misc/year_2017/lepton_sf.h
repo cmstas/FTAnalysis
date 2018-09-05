@@ -1,10 +1,6 @@
 #include "lepton_sfs_el.h"
 #include "lepton_sfs_mu.h"
 
-float triggerScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) {
-    return TotalTriggerSF(pdgId1, pt1, eta1, pdgId2, pt2, eta2, ht);
-}
-
 float leptonScaleFactor(int pdgId, float pt, float eta, float ht, float rand=-1.) {
     int iera = 0;
     if (rand < 0.) iera = 0; // BCDEF
@@ -59,15 +55,4 @@ float leptonScaleFactor_err(int pdgId, float pt, float eta, float ht, float rand
         return pow(e1*e1+e2*e2,0.5);
     }
     return 0.;
-}
-
-float eventScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht, float rand=-1.) {
-  return triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht) * leptonScaleFactor(pdgId1, pt1, eta1, ht, rand) * leptonScaleFactor(pdgId2, pt2, eta2, ht, rand);
-}
-
-float eventScaleFactor_trigonly(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) {
-  return triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
-}
-float eventScaleFactor_leponly(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) {
-  return leptonScaleFactor(pdgId1, pt1, eta1, ht) * leptonScaleFactor(pdgId2, pt2, eta2, ht);
 }
