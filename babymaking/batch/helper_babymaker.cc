@@ -467,7 +467,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
 
   // Jet Resolution ... :sad:
   if (gconf.year == 2016) {
-      res.loadResolutionFile("CORE/Tools/JetResolution/data/Summer16_25nsV1_MC_PtResolution_AK8PFchs.txt");
+      res.loadResolutionFile("CORE/Tools/JetResolution/data/Summer16_25nsV1_MC_PtResolution_AK4PFchs.txt");
       res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Summer16_25nsV1_MC_SF_AK4PFchs.txt");
   } else if (gconf.year == 2017) {
       res.loadResolutionFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_PtResolution_AK4PFchs.txt");
