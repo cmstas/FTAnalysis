@@ -42,7 +42,7 @@ fi
 }
 [[ -d ${FTBASE}/common/${therelease}/src/HiggsAnalysis/CombinedLimit/ ]] || {
     pushd ${FTBASE}/
-    cd ${FTBASE}/$CMSSW_BASE/src
+    cd $CMSSW_BASE/src
     cmsenv
     git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
     cd HiggsAnalysis/CombinedLimit
