@@ -104,9 +104,6 @@ int main(int argc, char *argv[]){
     string jecEra; // XXX NOTE that you also have to change the run-dependent data JECs below too
     std::string jecEraMC;
 
-
-    gconf.SS_innerlayers = 0;
-
     if (year == 2016) {
         gconf.year = year;
         gconf.ea_version = 1;
@@ -137,6 +134,7 @@ int main(int argc, char *argv[]){
         good_run_file = "goodRunList/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
         jecEra = "Fall17_17Nov2017B_V6";
         jecEraMC = "Fall17_17Nov2017_V6";
+        gconf.SS_innerlayers = 0;
     }
     if (year == 2018) {
         gconf.year = year;
@@ -151,6 +149,7 @@ int main(int argc, char *argv[]){
         good_run_file = "goodRunList/Cert_314472-321461_13TeV_PromptReco_Collisions18_JSON_snt.txt";
         jecEra = "Fall17_17Nov2017C_V6";
         jecEraMC = "Fall17_17Nov2017_V6";
+        gconf.SS_innerlayers = 0;
     }
 
     if (filenames.Contains("/SMS")) {
@@ -301,10 +300,10 @@ int main(int argc, char *argv[]){
             // HAVE TO MAKE DATA JEC HERE SINCE WE NEED RUN NUMBER BECAUSE SO MANY JECS
             // Only need to check first event because a merged file can't span eras
             if (isData && evt == 0) {
-                if (     tas::evt_run() <= 276811) jecEra = "Summer16_23Sep2016BCDV3";
-                else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = "Summer16_23Sep2016EFV3";
-                else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = "Summer16_23Sep2016GV3";
-                else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV3";
+                if (     tas::evt_run() <= 276811) jecEra = "Summer16_23Sep2016BCDV4";
+                else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = "Summer16_23Sep2016EFV4";
+                else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = "Summer16_23Sep2016GV4";
+                else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV4";
                 else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V6";
                 else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V6";
                 else if (tas::evt_run() <= 303434 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017D_V6";
@@ -365,7 +364,8 @@ int main(int argc, char *argv[]){
                 tlast = t1;
             }
 
-            csErr_t csErr = mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
+            // csErr_t csErr = mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
+            mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
             // int SR = csErr.SR; 
             // bool isGood = csErr.isGood; 
 
@@ -395,6 +395,8 @@ int main(int argc, char *argv[]){
     auto t1 = std::chrono::steady_clock::now();
     float duration = 0.001*(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0)).count();
     std::cout << "Processed " << nEventsTotal << " events in " << duration << " seconds @ " << 0.001*round(nEventsTotal/duration) << " kHz" << std::endl;
+
+    std::cout << "Stored " << mylooper->BabyTree->GetEntries() << " events in the output tree." << std::endl;
 
     // Cleanup
     mylooper->BabyFile->cd();
