@@ -1,6 +1,14 @@
 #ifndef SSBABYMAKER_H
 #define SSBABYMAKER_H
 
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <cstdlib>
+
 #include "TChain.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -24,18 +32,12 @@
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
 #include "CORE/Tools/datasetinfo/getDatasetInfo.h"
-// #include "signal_regions.h"
 #include "TROOT.h"
 #include "Math/Vector4D.h"
 #include "Math/LorentzVector.h"
+#include "TMath.h"
 #include "fastsim/xsec.h"
 
-#include <vector>
-#include <algorithm>
-#include <chrono>
-#include <signal.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #ifdef __MAKECINT__
 #pragma link C++ class ROOT::Math::PxPyPzE4D<float>+;
@@ -179,6 +181,9 @@ class babyMaker {
     float gen_met_phi;
 
     bool skim;
+    bool br;
+    int sr;
+    int nleps;
 
     int extragenb;
     int ngenjets;
@@ -298,6 +303,7 @@ class babyMaker {
     float lep1_coneCorrPt;
     float lep2_coneCorrPt;
     float lep3_coneCorrPt;
+    float lep4_coneCorrPt;
 
     //Lepton Mother (old isFromW function)
     int lep1_motherID;

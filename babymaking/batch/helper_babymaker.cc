@@ -4,6 +4,8 @@
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
 
+#include "misc/signal_regions.h"
+
 using namespace tas;
 
 const bool applyBtagSFs = true;
@@ -52,6 +54,9 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   // BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
   BabyTree->Branch("gen_met_phi"                                             , &gen_met_phi                                             );
   BabyTree->Branch("skim"                                                   , &skim                                                   );
+  BabyTree->Branch("nleps"                                                   , &nleps                                                   );
+  BabyTree->Branch("sr"                                                   , &sr                                                   );
+  BabyTree->Branch("br"                                                   , &br                                                   );
   BabyTree->Branch("njets"                                                   , &njets                                                   );
   BabyTree->Branch("njetsAG"                                                   , &njetsAG                                                   );
   BabyTree->Branch("nbtagsAG"                                                   , &nbtagsAG                                                   );
@@ -72,6 +77,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep1_coneCorrPt"                                         , &lep1_coneCorrPt                                         );
   BabyTree->Branch("lep2_coneCorrPt"                                         , &lep2_coneCorrPt                                         );
   BabyTree->Branch("lep3_coneCorrPt"                                         , &lep3_coneCorrPt                                         );
+  BabyTree->Branch("lep4_coneCorrPt"                                         , &lep4_coneCorrPt                                         );
   BabyTree->Branch("lep1_idx"                                                , &lep1_idx                                                );
   BabyTree->Branch("lep2_idx"                                                , &lep2_idx                                                );
   BabyTree->Branch("jets"                                                    , &jets                                                    );
@@ -516,6 +522,9 @@ void babyMaker::InitBabyNtuple(){
     // genweightsID.clear();
     gen_met_phi = -1;
     skim = 0;
+    nleps = 0;
+    sr = 0;
+    br = 0;
     njets = -1;
     njetsAG = -1;
     nbtagsAG = -1;
@@ -534,6 +543,7 @@ void babyMaker::InitBabyNtuple(){
     lep1_coneCorrPt = -1;
     lep2_coneCorrPt = -1;
     lep3_coneCorrPt = -1;
+    lep4_coneCorrPt = -1;
     lep1_idx = -1;
     lep2_idx = -1;
     jets.clear();
@@ -1088,6 +1098,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep4_idx = fourthLepton.idx();
   if (lep4_idx >= 0 && (abs(lep4_id) == 11 || abs(lep4_id) == 13)){
     lep4_p4 = fourthLepton.p4();
+    lep4_coneCorrPt = coneCorrPt(lep4_id, lep4_idx);
     if (!is_real_data && get_parentage){
       pair <int, int> lep4_parentage = lepMotherID_v2(fourthLepton);
       lep4_mcidx = lep4_parentage.second;
@@ -1138,7 +1149,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       use_cleaned_met = 1;
   }
   if (gconf.year == 2017) {
-      // use_cleaned_met = 2; // FIXME eventually
+      use_cleaned_met = 2;
   }
   pair <float, float> T1CHSMET = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
   met = T1CHSMET.first;
@@ -2192,10 +2203,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   }
 
+  // Compute some variables to make it easier for draw statements and skimming
   skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
          (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50);
-
-
+  br = passes_baseline(njets, nbtags, met, ht, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
+  nleps = (lep3_passes_id and lep3_coneCorrPt > 20) ? ((lep4_passes_id and lep4_coneCorrPt > 20) ? 4 : 3) : 2;
+  sr = signalRegionTest(njets, nbtags, met, ht, -1, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, nleps, hyp_class==6);
 
   //Fill Baby
   BabyTree->Fill();
