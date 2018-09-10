@@ -28,6 +28,9 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=False):
             if any(line.startswith(k) for k in ["bin", "observation", "imax", "jmax", "kmax", "rate", "-", "#"]):
                 continue
 
+            if any(k in line for k in ["autoMCStats", "rateParam"]):
+                continue
+
             if line.startswith("shapes"):
                 parts = line.split()
                 proc = parts[1]
@@ -116,9 +119,10 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
     nbins = len(d_yields["ttz"]["central"])
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
     # procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
-    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Fakes","Total","Data","$\\tttt$"]
-    # procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
-    procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes","bgtot","data","tttt"]
+    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Fakes","Total","Data","$\\tttt$"]
+    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","FakesMC","Total","Data","$\\tttt$"]
+    procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
+    # procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes","bgtot","data","tttt"]
     if slim:
         # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Fakes MC","Total","$\\tttt$"]
         # procs = ["ttw","ttz","tth","fakes_mc","bgtot","tttt"]
@@ -220,10 +224,12 @@ if __name__ == "__main__":
             ratios = []
             for n,d in zip(numer,denom):
                 r = n/d
-                if r[0] < 100 and r[1] < 100:
-                    ratios.append(r)
-                else:
+                if d[0] < 0.001:
                     ratios.append(E(-1.,0))
+                elif n[0] < 0.001:
+                    ratios.append(E(0.,0))
+                else:
+                    ratios.append(r)
 
             vals = [x[0] for x in ratios]
             errs = [x[1] for x in ratios]

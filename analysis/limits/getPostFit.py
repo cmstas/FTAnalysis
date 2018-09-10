@@ -12,6 +12,14 @@ def reduce_bins(h_in, nbins):
         h_tmp.SetBinError( ibin, h_in.GetBinError(ibin) )
     return h_tmp
 
+def reduce_bins_2d(h_in):
+    h_tmp = r.TH2F(h_in.GetName(), h_in.GetTitle(), h_in.GetNbinsX(), 0.5, h_in.GetNbinsX()+0.5, h_in.GetNbinsY(), 0.5, h_in.GetNbinsY()+0.5);
+    for iy in range(1,h_in.GetNbinsY()+1):
+        for ix in range(1,h_in.GetNbinsX()+1):
+            h_tmp.SetBinContent( ix,iy, h_in.GetBinContent(ix,iy) )
+            h_tmp.SetBinError( ix,iy, h_in.GetBinError(ix,iy) )
+    return h_tmp
+
 def get_dict(fname,typ="shapes_fit_s", nbins=10, _tostore=[]):
     f1 = r.TFile(fname)
     if not f1: 
@@ -27,11 +35,14 @@ def get_dict(fname,typ="shapes_fit_s", nbins=10, _tostore=[]):
         tmpobj = f1.Get("{0}/SS/{1}".format(typ,key))
         # clone so that we're not tied to the TFile, as it gets closed
         obj = tmpobj.Clone(key)
+        # For some reason, need to explicitly make new histograms to keep them detached from the TFile
         if tkey.ReadObj().InheritsFrom(r.TH1F.Class()):
-            reduce_bins(obj, nbins)
+            reduce_bins(obj, obj.GetNbinsX())
+        if tkey.ReadObj().InheritsFrom(r.TH2F.Class()):
+            reduce_bins_2d(obj)
 
         if key == "data":
-            h_data = r.TH1F("h_data", "h_data", nbins, 0.5, nbins+0.5);
+            h_data = r.TH1F("h_data", "h_data", obj.GetN(), 0.5, obj.GetN()+0.5);
             for ipt in range(0,obj.GetN()):
                 x = r.Double()
                 y = r.Double()
