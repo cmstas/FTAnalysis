@@ -4,7 +4,6 @@
 ### So you want to develop the babymaker?
 ```bash
 # Copy over CORE and stuff
-# Note that this will also copy stuff inside myCORE/ over CORE/
 ./copy_files.sh
 # Edit the babymaker source files or whatever
 # Compile with optimized flags
