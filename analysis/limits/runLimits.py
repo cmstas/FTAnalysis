@@ -49,65 +49,73 @@ def print_lims(d_lims, fb=False, unblinded=False):
         print "  Obs UL: %.2f %s" % (d_lims["obs"], unit)
     print "  Exp UL: %.2f +%.2f -%.2f %s" % (d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"], unit)
     if d_lims.get("significance",-1) > 0.:
-        print "  Sig: %.3f (p-value: %.3f)" % (d_lims["significance"], d_lims["pvalue"])
+        print "  Sig: %.3f (p-value: %.4f)" % (d_lims["significance"], d_lims["pvalue"])
     if d_lims.get("mu",-999) > -980.:
-        print "  Mu: %.3f (+%.3f -%.3f)" % (d_lims["mu"], d_lims["mu_up"], d_lims["mu_down"])
+        print "  Mu: %.3f (+%.3f -%.3f) | (+%.1f%% -%.1f%%)" % (d_lims["mu"], d_lims["mu_up"], d_lims["mu_down"], 100.*(d_lims["mu_up"]/d_lims["mu"]), 100.*(d_lims["mu_down"]/d_lims["mu"]))
 
 def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False,
         verbose=True, dolimits=True, dosignificance=True, doscan=True,
-        unblinded=False,sig="tttt", yukawa=-1,allownegative=False, inject_tttt=False,
-        use_autostats=False, thresh=0.0):
+        unblinded=False,sig="tttt", allownegative=False, inject_tttt=False,
+        use_autostats=False, thresh=0.0, scalelumi=1.0, scaletth=1.0):
+
+    extra_base = ""
+    # NOTE, can't do both or else need to combine the flags
+    if scalelumi != 1.0:
+        extra_base += " --setParameters lumiscale={0} --setParameterRanges lumiscale={0},{0} ".format(scalelumi)
+    elif scaletth != 1.0:
+        extra_base = " --setParameters tthscale={0} --setParameterRanges tthscale={0},{0} ".format(scaletth)
 
     if ".txt" not in card:
         card += "/card_{0}_{1}.txt".format(sig, regions)
         if verbose: print ">>> [!] no card name specified, so using {0}".format(card)
 
     full_card_name = "{0}".format(card)
+    full_card_name_root = "{0}".format(card.replace(".txt",".root"))
     full_log_name = full_card_name.replace(".txt",".log")
 
     if not os.path.isfile(full_card_name) or redocard:
         if verbose: print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
-        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh)
-        if int(yukawa) >  0:
-            print "yukawa",yukawa
+        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh)
+        if verbose: print ">>> Making workspace"
+        # There was a bug with combine (https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/issues/491) which needed text2workspace to be explicitly
+        # run before using FitDiagnostics (for mu scan & pre/postfit), but this is fixed in the 81x branch (cherry pick 69c180a04c05d0bad6a6c38d97cdc431cfe4fb49 in 94x if
+        # needed). So we don't need this anymore and can switch .root -> .txt in all the below commands. Though, it's faster to run text2workspace first and not do it
+        # implicitly 3 times total.
+        cmd = "text2workspace.py {0} -o {1}".format(full_card_name,full_card_name_root)
+        stat, out = commands.getstatusoutput(cmd)
     else:
         if verbose: print ">>> [!] Card already made, so reusing. Pass the --redocard flag to remake the card"
 
     if not dolimits: return {}
 
     if not os.path.isfile(full_log_name) or (redolimits or redocard):
-        extra = "--noFitAsimov"
-        limit_cmd = "combine -M AsymptoticLimits {0} {1}  2>&1 | tee {2}".format(full_card_name, extra, full_log_name)
-        if verbose: print ">>> Running combine [{0}]".format(limit_cmd)
+        if not unblinded:
+            extra = extra_base + " --noFitAsimov"
+        limit_cmd = "combine -M AsymptoticLimits {0} {1}  2>&1 | tee {2}".format(full_card_name_root, extra, full_log_name)
+        if verbose: print ">>> Running combine for upper limit [{0}]".format(limit_cmd)
         out = ""
         if doupperlimit:
             stat, out = commands.getstatusoutput(limit_cmd)
         if dosignificance:
-            extra = "-t -1 --expectSignal=1" if not unblinded else ""
-            significance_cmd = "combine -M Significance {0} --significance {1}  2>&1 | tee -a {2}".format(full_card_name, extra, full_log_name)
+            extra = extra_base + (" -t -1 --expectSignal=1" if not unblinded else "")
+            # verbose mode or else we can't see p-value
+            significance_cmd = "combine -M Significance {0} --significance {1} -v 1 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
             if verbose: print ">>> Running combine for significance [{0}]".format(significance_cmd)
             stat, out_sig = commands.getstatusoutput(significance_cmd)
             out += out_sig
         if doscan:
             dirname, cardname = card.rsplit("/",1)
-            do_blind=not unblinded
             cardname_scan = cardname
-            full_card_name_scan = full_card_name
-            if do_blind:
-                cardname_scan = cardname.replace(".txt","_asimov.txt")
-                full_card_name_scan = full_card_name.replace(".txt","_asimov.txt")
-            if redocard:
-                createCard.writeOneCard(dirname,cardname_scan, do_expected_data=do_blind, kine=regions,domcfakes=domcfakes, signal=sig, yukawa=int(yukawa),inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh)
-            # scan_cmd = "combine -M MaxLikelihoodFit {0} --saveShapes --saveWithUncertainties -n name 2>&1 | tee -a {1}".format(full_card_name_scan, full_log_name)
+            extra = extra_base[:]
+            if not unblinded:
+                extra += " --expectSignal=1 -t -1 "
             if allownegative:
-                extra = "--rMin -2.0 --rMax +10.0"
-            else:
-                extra = ""
-            scan_cmd = "combine -M MaxLikelihoodFit {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} -n name 2>&1 | tee -a {2}".format(full_card_name_scan, extra, full_log_name)
+                extra += " --rMin -2.0 --rMax +10.0"
+            scan_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} -n name --freezeParameters lumiscale,tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
             if verbose: print ">>> Running combine for mu [{0}]".format(scan_cmd)
             stat, out_scan = commands.getstatusoutput(scan_cmd)
-            commands.getstatusoutput("cp mlfitname.root {0}/mlfit.root".format(dirname))
+            commands.getstatusoutput("mv fitDiagnosticsname.root {0}/mlfitname.root".format(dirname))
             out += out_scan
     else:
         if verbose: print ">>> [!] Limits already run, so reusing. Pass the --redolimits flag to redo the limits"
@@ -139,7 +147,8 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--noautostats", help="don't use autoMCStats feature", action="store_true")
     parser.add_argument("-t", "--thresh", help="threshold for autoMCstats", default=0.0)
     parser.add_argument("-s", "--sig", help="signal name", default="tttt")
-    parser.add_argument("-y", "--yukawa", help="yukawa coupling int for tth", default=-1)
+    parser.add_argument("-S", "--scalelumi", help="scale luminosity", default=1.0, type=float)
+    parser.add_argument("-T", "--scaletth", help="scale tth", default=1.0, type=float)
     args = parser.parse_args()
 
     # d_lims = get_lims(args)
@@ -154,10 +163,11 @@ if __name__ == "__main__":
             doscan=(not args.noscan),
             inject_tttt=args.inject_tttt,
             dosignificance=(not args.nosignificance),
-            yukawa=int(args.yukawa),
             allownegative=args.allownegative,
             use_autostats=(not args.noautostats),
             thresh=args.thresh,
+            scalelumi=args.scalelumi,
+            scaletth=args.scaletth,
             )
     print "------------------------------"
     print_lims(d_lims, fb=True, unblinded=args.unblinded)
