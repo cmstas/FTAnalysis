@@ -4,4 +4,11 @@
 
 mkdir -p plots
 
-python diffNuisances.py -a -g nuisance_output.root -f latex mlfitname.root > nuisance_output.tex
+inpfile=mlfitname.root
+outname=nuisance_output.root
+python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py -a -g ${outname} -f latex ${inpfile} | grep -v 'with the following' > nuisances.tex
+echo "\\documentclass{article} \\begin{document}\\pagenumbering{gobble} $(cat nuisances.tex) \\end{document}" > nuisances.tex
+pdflatex -interaction=nonstopmode nuisances.tex
+pdfcrop nuisances.pdf
+mv nuisances-crop.pdf nuisances.pdf
+web nuisances.pdf
