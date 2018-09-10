@@ -4,6 +4,8 @@ import sys
 d_ds2name = {
         "backgrounds": {
 
+            "/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM":"TTBAR_PH",
+
             # XXX note, add scale1fbs when adding new samples, and also copy the package file
 
             # "/TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM": "TTSL",
@@ -13,7 +15,7 @@ d_ds2name = {
 
             # "/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM":"DY_high",
             # "/TTTT_TuneCP5_PSweights_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM":"TTTTnew",
-            "/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM":"TTBAR_PH",
+            # "/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM":"TTBAR_PH",
 
             # "/TTTT_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_pilot_94X_mc2017_realistic_v14-v1/MINIAODSIM": "TTTTnew",
             # "/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM": "TTZnlo",
@@ -69,6 +71,8 @@ d_ds2name = {
             },
         "data": {
 
+                # "/MuonEG/Run2016C-17Jul2018-v1/MINIAOD": "DataMuonEGC",
+
                 # "/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD": "DataDoubleEGB",
                 # "/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD": "DataDoubleEGC",
                 # "/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD": "DataDoubleEGD",
@@ -118,7 +122,9 @@ baby_merged_dir = "/nfs-7/userdata/${USER}/tupler_babies/merged/"
 # tag = "v1.06_v2_oldisofix" # diff wrt previous line is I corrected conecorr pt constants to match the old WPs as well (very small -- % level -- difference I hope)
 # tag = "v1.06_v3" # same as v2 but testing tttt,dy,tt samples with fixed nmiss value
 # tag = "v1.06_v2_sleptrigv2" # same as v2 but added branch for iso single lep trigs
-tag = "v1.06_v2_sleptrigv2" # previous line ran over new CMS4 which missed some files, so try 2
+# tag = "v1.06_v2_sleptrigv2" # previous line ran over new CMS4 which missed some files, so try 2
+# tag = "v2.00_94x_muegdata" # trying out run2 babymaker with 94x rereco of 2016C MuEG
+tag = "v2.00_2017_insitu_v2" # 2017 MC ttbar with insitu hyp_classes, added needed tight MVA branch
 package = inputs_path+"package.tar.gz"
 executable = inputs_path+"condor_executable.sh"
 dashboard_name = "AutoTwopler_FTbabies"
