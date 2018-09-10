@@ -1,5 +1,12 @@
 #ifndef SIGNALREGIONS_H
 #define SIGNALREGIONS_H
+
+// need to either inline everything because function bodies are in this header file
+// or need to make sure it gets included only once in total
+// header guard at the top only prevents against multiple inclusions in one file
+// so otherwise we get the "multiple definitions of..." when compiling/linking :(
+// https://stackoverflow.com/questions/8201944/multiple-definition-and-header-only-libraries
+
 int getNsrsTTTTBDT() { return 7; }
 int signalRegionBDT(float disc){
     return 1+(int)(disc*getNsrsTTTTBDT());
@@ -20,6 +27,16 @@ int baseline_region(int njets, int nbtags, float met, float ht, int id1, int id2
   else if (nbtags == 1) return 1;
   else if (nbtags == 2) return 2;
   else                  return 3;
+}
+
+bool passes_baseline(int njets, int nbtags, float met, float ht, int id1, int id2, float lep1_pt, float lep2_pt) {
+    if (lep1_pt < 25.) return 0;
+    else if (lep2_pt < 20.) return 0;
+    else if (njets < 2) return 0;
+    else if (nbtags < 2) return 0;
+    else if (ht < 300) return 0;
+    else if (met < 50) return 0;
+    else return 1;
 }
 
 // // nominal
