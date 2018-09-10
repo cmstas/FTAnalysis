@@ -176,13 +176,22 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
 
 if __name__ == "__main__":
 
+    # make_plots(
+    #         outputdir="plots_20172018_nj2",
+    #         inputdir="outputs_temp",
+    #         year=2018,
+    #         lumi="77.1", # 2017+2018 --> 41.53+35.53 = 77.06
+    #         other_years = [2017],
+    #         regions = ["nj2","nj2mc"],
+    #         )
+
     make_plots(
-            outputdir="plots_20172018_nj2",
+            outputdir="plots_temp",
             inputdir="outputs_temp",
             year=2018,
-            lumi="77.1", # 2017+2018 --> 41.53+35.53 = 77.06
-            other_years = [2017],
-            regions = ["nj2","nj2mc"],
+            lumi="35.5",
+            other_years = [],
+            regions = ["htnb1"],
             )
 
     # make_plots(

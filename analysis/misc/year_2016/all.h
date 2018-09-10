@@ -7,7 +7,7 @@ namespace y2016 {
 #include "lepton_sf.h"
 #include "puw.h"
 #include "trigger_sf.h"
-float getLumi() { return 35.87; }
+float getLumi() { return 35.922; }
 }
 
 #endif

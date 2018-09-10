@@ -173,7 +173,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     float lumiAG = 0.;
     bool is2016(false), is2017(false), is2018(false);
     if (options.Contains("Data2016")) {
-        lumiAG = 35.87;
+        lumiAG = 35.922;
         year = 2016;
         is2016 = true;
     } else if (options.Contains("Data2017")) {
@@ -199,16 +199,16 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     vector<string> regions = {
 
-        "os",                          // OS tight-tight and variants
-        "os_noht",                          // OS tight-tight and variants
-        "osloose",                    // DY dominated CR
-        "tl",                          // SS tight-loose
-        "br",
-        "crw", "crz",                  // CRZ, CRW
+        // "os",                          // OS tight-tight and variants
+        // "os_noht",                          // OS tight-tight and variants
+        // "osloose",                    // DY dominated CR
+        // "tl",                          // SS tight-loose
+        // "br",
+        // "crw", "crz",                  // CRZ, CRW
         "htnb1",                        // fake-dominated CR
-        // "htnb1mu",                        // fake-dominated CR
-        "nj2",                        // fake-dominated CR
-        "sshh",                        // HH SS sum
+        // // "htnb1mu",                        // fake-dominated CR
+        // "nj2",                        // fake-dominated CR
+        // "sshh",                        // HH SS sum
 
         // "os_btagreweight", // |
         // "os_highbdt", "os_lowbdt",     // |
@@ -566,6 +566,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     bool lep1_lowpt_veto = lep1pt < (abs(lep1id) == 11 ? 15 : 10);
                     bool lep2_lowpt_veto = lep2pt < (abs(lep2id) == 11 ? 15 : 10);
                     bool lep3_lowpt_veto = lep3pt < (abs(lep3id) == 11 ? 15 : 10);
+
                     if (ss::lep3_fo() and !ss::lep3_tight() and !lep3_lowpt_veto and lep1good and lep2good && lep3pt>min_pt_fake) {  // lep3 fake
                         float fr = fakeRate(year, lep3id, lep3ccpt, lep3eta, ht);
                         class6Fake = true;

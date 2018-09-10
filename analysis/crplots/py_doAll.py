@@ -10,7 +10,7 @@ r.gROOT.ProcessLine(".L ScanChain.C+")
 
 years_to_consider = [
         # 2016,
-        2017,
+        # 2017,
         2018,
         ]
 # outputdir = "outputs_20172018_newWP_newmet"
