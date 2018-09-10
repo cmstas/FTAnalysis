@@ -354,9 +354,12 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
             if process.name in ["fakes"] and do_uncorrfakes:
                 writeUncorrelatedFakesForProcess(thedir,card,kine,process,processes,lnN=1.6)
 
+    card.write("tthscale rateParam * tth 1.0 [1.0,1.0]\n")
+    card.write("lumiscale rateParam * * 1.0 [1.0,1.0]\n")
+
     return
 
-def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, yukawa=-1, inject_tttt=False, use_autostats=False, thresh=0.0):
+def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=False, thresh=0.0):
     # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
     inject_tttt = (signal != "tttt") or inject_tttt
     # do_tttt = True
@@ -370,10 +373,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal = Process(0,signal,signal+"_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     TTW = Process(1,"ttw","ttw_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     TTZ = Process(2,"ttz","ttz_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    if yukawa > 0:
-        TTH = Process(3,"tth_yt"+str(yukawa),"tth_yt"+str(yukawa)+"_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    else:
-        TTH = Process(3,"tth","tth_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+    TTH = Process(3,"tth","tth_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     # WZ  = Process(4,"wz","wz_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     # WW  = Process(5,"ww","ww_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     XG  = Process(4,"xg","xg_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
@@ -431,7 +431,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.btag = "1"
     TTZ.pu = "1"
     # TTH.TTH          = "1.0"
-    TTH.TTH          = "1.3"
+    # TTH.TTH          = "1.3"
+    TTH.TTH          = "1.5"
     # TTH.TTH          = "0.936/1.099" # FIXME FIXME FIXME
     TTH.lumi          = lumiunc
     TTH.bb  = "1"
