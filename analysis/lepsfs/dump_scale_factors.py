@@ -97,8 +97,9 @@ if __name__ == "__main__":
 
     # https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#2017_and_or_Late_2016_data_analy
     # https://indico.cern.ch/event/732975/contributions/3082298/attachments/1693028/2724384/SUSY_SF_2017_EGMappr.pdf
-    nmiss = 1
+    nmiss = 0
     f_el = r.TFile("rootfiles/ElectronScaleFactors_Run2017.root")
+    # f_el = r.TFile("test/esfs.root")
     for X in ["BCDEF"]:
         h_el_mvatight = f_el.Get("Run2017_MVATightIP2D3DIDEmu")
         if nmiss != 0:
