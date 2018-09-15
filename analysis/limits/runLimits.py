@@ -106,16 +106,22 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
             out += out_sig
         if doscan:
             dirname, cardname = card.rsplit("/",1)
-            cardname_scan = cardname
+            cardname_mu = cardname
             extra = extra_base[:]
             if not unblinded:
                 extra += " --expectSignal=1 -t -1 "
             if allownegative:
                 extra += " --rMin -2.0 --rMax +10.0"
-            scan_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} -n name --freezeParameters lumiscale,tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
-            if verbose: print ">>> Running combine for mu [{0}]".format(scan_cmd)
+            mu_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} -n name --freezeParameters lumiscale,tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
+            if verbose: print ">>> Running combine for mu [{0}]".format(mu_cmd)
+            stat, out_mu = commands.getstatusoutput(mu_cmd)
+            commands.getstatusoutput("cp fitDiagnosticsname.root {0}/mlfitname.root".format(dirname))
+            out += out_mu
+            # While FitDiagnostics gives a mu (and pre/postfit stuff), it does not give the *scan*, so need to do this manually with MultiDimFit
+            scan_cmd = "combine  -M MultiDimFit {0} --algo grid --centeredRange=2.0 --saveFitResult --redefineSignalPOI r --robustFit=1 --freezeParameters lumiscale,tthscale -n name --saveNLL {1} 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
+            if verbose: print ">>> Running combine for scan [{0}]".format(scan_cmd)
             stat, out_scan = commands.getstatusoutput(scan_cmd)
-            commands.getstatusoutput("mv fitDiagnosticsname.root {0}/mlfitname.root".format(dirname))
+            commands.getstatusoutput("cp higgsCombinename.MultiDimFit.mH120.root {0}/scandata.root".format(dirname))
             out += out_scan
     else:
         if verbose: print ">>> [!] Limits already run, so reusing. Pass the --redolimits flag to redo the limits"
