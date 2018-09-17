@@ -990,17 +990,22 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             weight_alphas_DN = genweights[109] / nom;
             weight_pdf_UP = (sum_pdf/N+rms) / fabs(nom);
             weight_pdf_DN = (sum_pdf/N-rms) / fabs(nom);
-            if (nweights > 1000 and gconf.year == 2017 and filename.find("PSweights") != std::string::npos) {
+            if (nweights > 1000 and filename.find("PSweights") != std::string::npos) {
                 // 14 extra weights in PSweights samples (2+3*4)
                 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopModGen#Event_Generation
                 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
                 // go to https://twiki.cern.ch/twiki/pub/CMS/TopModGen/pwg-rwl.txt and grep for <weight id ... there should be ~1080
                 float ps_nom = genweights[nweights-14];
                 if (fabs(ps_nom - nom) < 0.05) {
-                    weight_fsrvar_UP = genweights[nweights-11]; // reduced (by sqrt(2) according to recommendation in second link above)
-                    weight_fsrvar_DN = genweights[nweights-9];
-                    weight_isrvar_UP = genweights[nweights-8]; // default
-                    weight_isrvar_DN = genweights[nweights-6];
+                    weight_fsrvar_UP = genweights[nweights-11]/ps_nom; // fsr reduced (by sqrt(2) according to recommendation in second link above)
+                    weight_fsrvar_DN = genweights[nweights-9]/ps_nom;
+                    weight_isrvar_UP = genweights[nweights-8]/ps_nom; // isr default
+                    weight_isrvar_DN = genweights[nweights-6]/ps_nom;
+                } else {
+                    weight_fsrvar_UP = 1.;
+                    weight_fsrvar_DN = 1.;
+                    weight_isrvar_UP = 1.;
+                    weight_isrvar_DN = 1.;
                 }
                 weight_alphas_UP = genweights[119] / genweights[117];
                 weight_alphas_DN = genweights[114] / genweights[117];
@@ -1919,8 +1924,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
   //MT variables
-  mt    = MT(lep1_p4.pt(), lep1_p4.phi(), met, metPhi);
-  mt_l2 = MT(lep2_p4.pt(), lep2_p4.phi(), met, metPhi);
+  mt    = MT(lep1_coneCorrPt, lep1_p4.phi(), met, metPhi);
+  mt_l2 = MT(lep2_coneCorrPt, lep2_p4.phi(), met, metPhi);
   // mt2   = MT2(met, metPhi, lep1_p4, lep2_p4);
   mtmin = mt > mt_l2 ? mt_l2 : mt;
 
