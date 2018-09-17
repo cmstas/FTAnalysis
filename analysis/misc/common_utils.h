@@ -23,6 +23,14 @@ float getTruePUw(int year, int nvtx, int which=0) {
     return 0.;
 }
 
+float isrWeight(int year, int nisrmatch, int sample) { 
+    if (year == 2016) return y2016::isrWeight(nisrmatch, sample);
+    else if (year == 2017) return y2017::isrWeight(nisrmatch, sample);
+    else if (year == 2018) return y2018::isrWeight(nisrmatch, sample);
+    else return 0.;
+}
+
+
 float leptonScaleFactor(int year, int id, float pt, float eta, float ht) { 
     if (year == 2016) return y2016::leptonScaleFactor(id, pt, eta, ht);
     else if (year == 2017) return y2017::leptonScaleFactor(id, pt, eta, ht);

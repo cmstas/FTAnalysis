@@ -7,6 +7,7 @@ namespace y2017 {
 #include "lepton_sf.h"
 #include "puw.h"
 #include "trigger_sf.h"
+#include "isr_weights.h"
 float getLumi() { return 41.53; }
 }
 
