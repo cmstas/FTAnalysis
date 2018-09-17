@@ -5,39 +5,39 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TMath.h"
+#include "Math/LorentzVector.h"
 #include "TKey.h"
 #include "TSystem.h"
 #include "TMVA/Reader.h"
 #include "../misc/class_files/v8.02/SS.h"
 #include "../../common/CORE/SSSelections.h"
 #include "../../common/CORE/Tools/dorky/dorky.h"
-#include "../../common/CORE/Tools/utils.h"
+// #include "../../common/CORE/Tools/utils.h"
 #include "../misc/common_utils.h"
 #include "../misc/signal_regions.h"
 #include "xgbheader.h"
-#include "c2numpy.h"
-#define WRITE(var) { p_data.var->Write(); p_ttw.var->Write(); p_ttz.var->Write(); p_tth.var->Write(); p_xg.var->Write(); p_rares.var->Write(); p_flips.var->Write(); p_fakes.var->Write(); p_tttt.var->Write(); p_ttvv.var->Write(); p_fakes_mc.var->Write(); p_tightfake.var->Write(); p_extra.var->Write(); p_fakes_unw.var->Write(); p_fakes_mc_unw.var->Write(); }
 
-float lumiAG = getLumiUnblind();
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
 
+#include "../misc/tqdm.h"
+
+#define WRITE(var) { if (plots.var) plots.var->Write(); }
+
+bool STOP_REQUESTED = false;
+
+float lumiAG = getLumi(2017);
 float bloose = 	0.1522;
 float bmed = 0.4941;
 float btight = 0.8001;
-
-
+float xsec_tttt = 11.97;
 int nsr = getNsrsTTTT();
 int nCR = 2;
-// int nCR = 1;
 int nsrdisc = 13;
-// int nsrdisc = 19;
-// int nsrdisc = 17;
-// int nCR = 1;
-
 bool doCustomSelection = false;
 float scaleLumi = 1; // 75/35.87
-// float scaleLumi = 3.632; // 150/41.3
-// float scaleLumi = 1;
-
 bool doTTWISR = true;
 bool doTTZISR = true;
 bool doBDT = false;
@@ -46,70 +46,19 @@ bool includeDataInBDTTree = false;
 bool doISRFSRsyst = true;
 bool doTTBB = true;
 bool doJER = true;
-
-bool makeRootFiles = true;
+bool makeRootFiles = false;
 bool makeGenVariationsMC = true;
-
-// TString dir = "v1.00_baseline";
-// TString tag = "v1.00";
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
-
-// TString dir = "v1.00_baseline_caleb";
-// TString tag = "v1.02_JetPtCut40";
-// // TString tag = "v1.00";
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
-
-// float metcut = 50;
-// bool doData = false;
-// // TString dir = "v1.00_baseline_full_bdtcrz13bins";
-// TString dir = "v1.00_baseline_full_resolvedtop_40_25";
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.10_mll/output/skim/";
-
 float metcut = 50;
 bool doData = true;
-// TString dir = "v1.00_baseline_full_bdtcrz13bins";
-// /nfs-7/userdata/namin/tupler_babies/merged/FT/v1.00_80x_baseline_full_v2/output/
-
-// // 20,20
-// TString dir = "v1.00_baseline_full_resolvedtop_20_20";
-// TString tag = "v1.0.4_bJetPtCut20JetPtCut20"; // from caleb's dir
-
-// // 40,25
-// TString dir = "v1.00_baseline_full_resolvedtop_40_25";
-// TString tag = "v1.0.4_JetPtCut40"; // from caleb's dir
-
-// // 40,25
-// TString tag = "v1.03_os_nmiss1_dileptrig_v1";
-// TString tag2 = "v1.00_80x_baseline_full_v2";
-// TString dir = "v1.03_baseline";
-
-// 40,25
 TString tag = "v1.06_v2";
 TString tag2 = "v1.00_80x_baseline_full_v2";
 // TString dir = "v1.05_baseline_v2_41p3_18bins";
 TString dir = "v1.06_baseline_v2_150ifb_18bins";
-
-// // 20,20
-// TString tag = "v1.0.5_bJetPtCut20JetPtCut20";
-// TString dir = "v1.00_baseline_2020_toptag_bdtout";
-
 TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v1.05_v1/output/";
 bool doTTTTisrfsr = true;
 bool doRares = true;
-
-
-// TString dir = "v0.10_sync";
 bool doSync = false;
-
-// // 30 gev jets
-// bool doJER = true;
-// TString dir = "v0.09_May30";
-// TString tag = "v0.09"; // data is in v0.08
-// TString pfxData = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v0.08/output/skim/";
-
 bool suppressWarns = true;
-
-c2numpy_writer writer;
 
 // For output tree
 float tree_weight = -1;
@@ -188,13 +137,64 @@ int tree_stype = -1;
 TFile *out_file;
 TTree *out_tree;
 
-struct yields_t { float EE; float EM; float MM; float TOTAL; };
 struct SR_t     { TH1F* EE; TH1F* EM; TH1F* MM; TH1F* TOTAL; };
 struct triple_t { TH1F* ttzcr; TH1F* ttwcr; TH1F* sr; TH1F* br; };
 struct plots_t  {
     SR_t SRCR;
     SR_t SRDISC;
     SR_t SR;
+
+    SR_t p_alphas_alt_dn_SRCR;
+    SR_t p_alphas_alt_dn_SRDISC;
+    SR_t p_alphas_alt_up_SRCR;
+    SR_t p_alphas_alt_up_SRDISC;
+    SR_t p_bb_alt_up_SRCR;
+    SR_t p_bb_alt_up_SRDISC;
+    SR_t p_bb_alt_dn_SRCR;
+    SR_t p_bb_alt_dn_SRDISC;
+    SR_t p_btagSF_alt_dn_SRCR;
+    SR_t p_btagSF_alt_dn_SRDISC;
+    SR_t p_btagSF_alt_up_SRCR;
+    SR_t p_btagSF_alt_up_SRDISC;
+    SR_t p_fake_alt_up_SRCR;
+    SR_t p_fake_alt_up_SRDISC;
+    SR_t p_fsrvar_alt_dn_SRCR;
+    SR_t p_fsrvar_alt_dn_SRDISC;
+    SR_t p_fsrvar_alt_up_SRCR;
+    SR_t p_fsrvar_alt_up_SRDISC;
+    SR_t p_isr_alt_up_SRCR;
+    SR_t p_isr_alt_up_SRDISC;
+    SR_t p_isr_alt_dn_SRCR;
+    SR_t p_isr_alt_dn_SRDISC;
+    SR_t p_isrvar_alt_dn_SRCR;
+    SR_t p_isrvar_alt_dn_SRDISC;
+    SR_t p_isrvar_alt_up_SRCR;
+    SR_t p_isrvar_alt_up_SRDISC;
+    SR_t p_jer_alt_dn_SRCR;
+    SR_t p_jer_alt_dn_SRDISC;
+    SR_t p_jer_alt_up_SRCR;
+    SR_t p_jer_alt_up_SRDISC;
+    SR_t p_jes_alt_dn_SRCR;
+    SR_t p_jes_alt_dn_SRDISC;
+    SR_t p_jes_alt_up_SRCR;
+    SR_t p_jes_alt_up_SRDISC;
+    SR_t p_lep_alt_up_SRCR;
+    SR_t p_lep_alt_up_SRDISC;
+    SR_t p_lep_alt_dn_SRCR;
+    SR_t p_lep_alt_dn_SRDISC;
+    SR_t p_pdf_alt_dn_SRCR;
+    SR_t p_pdf_alt_dn_SRDISC;
+    SR_t p_pdf_alt_up_SRCR;
+    SR_t p_pdf_alt_up_SRDISC;
+    SR_t p_pu_alt_dn_SRCR;
+    SR_t p_pu_alt_dn_SRDISC;
+    SR_t p_pu_alt_up_SRCR;
+    SR_t p_pu_alt_up_SRDISC;
+    SR_t p_scale_alt_dn_SRCR;
+    SR_t p_scale_alt_dn_SRDISC;
+    SR_t p_scale_alt_up_SRCR;
+    SR_t p_scale_alt_up_SRDISC;
+
     triple_t h_ht;
     triple_t h_met;
     triple_t h_metnm1;
@@ -221,7 +221,6 @@ struct plots_t  {
     triple_t h_el_l3pt;
     triple_t h_el_nmiss;
     triple_t h_disc;
-    triple_t h_disc2;
     triple_t h_mid1;
     triple_t h_mid2;
     triple_t h_mid3;
@@ -275,11 +274,10 @@ struct plots_t  {
 };
 
 
-//Total
-yields_t total;
-
 //function declaration
-pair<yields_t, plots_t> run(TChain *chain, bool isData = 0, bool doFlips = 0, int doFakes = 0, int exclude = 0, bool isSignal = 0, bool isGamma = 0, bool tightfake = 0, float yt = 0., bool ignoreFakeFactor = 0);
+plots_t run(TChain *chain, int year, TString options);
+float calcDeltaPhi(float phi1, float phi2);
+float calcMT(float pt1, float phi1, float pt2, float phi2);
 void avoidNegativeYields(TH1F* plot);
 void avoidZeroIntegrals(TH1F* central,TH1F* up,TH1F* down);
 void fillDownMirrorUp(TH1F* central,TH1F* up,TH1F* down);
@@ -287,19 +285,21 @@ void writeStatUpDown(TH1F* central,string name,bool down);
 void writeStat(TH1F* central,string name);
 void writeHTHltSyst(TH1F* central,string name,TString kine);
 void initHistError(bool usePoisson, TH1F* plot);
-std::pair<int,float> getNtops();
 std::pair<float,float> getFirstTwoTops();
 std::pair<float,float> getTrijetDiscs(TMVA::Reader* reader);
 int getBDTBin(float disc, bool isClass6);
 
+void getyields(TChain* ch, TString options="", TString outputdir="outputs"){
+    // TFile f1(Form("%s/histos_%s.root", outputdir.Data(), ch->GetTitle()), "RECREATE");
 
-void getyields(){
+    signal(SIGINT, [](int){
+            cout << "SIGINT Caught, stopping after current event" << endl;
+            STOP_REQUESTED=true;
+            });
+    STOP_REQUESTED=false;
 
-    c2numpy_init(&writer, "testout", 10000000);
-    c2numpy_addcolumn(&writer, "one", C2NUMPY_INTC);
-    c2numpy_addcolumn(&writer, "two", C2NUMPY_FLOAT64);
-    c2numpy_addcolumn(&writer, "three", (c2numpy_type)((int)C2NUMPY_STRING + 5));
-    c2numpy_open(&writer);
+    int year = 2017;
+    lumiAG = getLumi(year);
 
     if (outputTrainingBDT) {
         out_file = new TFile("output.root", "RECREATE");
@@ -374,155 +374,143 @@ void getyields(){
 
     cout << "Running with lumi=" << lumiAG*scaleLumi << endl;
 
-    //Chains
-    //fakes&flips in mc
-    TChain *ttbar_chain   = new TChain("t","ttbar");
-    TChain *st_chain      = new TChain("t","st");
-    // TChain *wjets_chain   = new TChain("t","wjets");
-    // TChain *dy_chain      = new TChain("t","dy");
-    //rares
-    TChain *ttw_chain     = new TChain("t","ttw");
-    TChain *ttz_chain    = new TChain("t","ttz");
-    TChain *tth_chain    = new TChain("t","tth");
-    TChain *xg_chain      = new TChain("t","xg");
-    TChain *rares_chain   = new TChain("t","rares");
-    TChain *ttttisrup_chain    = new TChain("t","ttttisrup");
-    TChain *ttttfsrup_chain    = new TChain("t","ttttfsrup");
-    TChain *ttttisrdn_chain    = new TChain("t","ttttisrdn");
-    TChain *ttttfsrdn_chain    = new TChain("t","ttttfsrdn");
-    TChain *tttt_chain    = new TChain("t","tttt");
-    TChain *ttvv_chain    = new TChain("t","ttvv");
-    // TChain *qqww_chain    = new TChain("t","qqww"); // separate this out to check shape uncertainties
-    //data
-    TChain *data_chain    = new TChain("t","data");
-    TChain *flips_chain   = new TChain("t","flips");
-    TChain *fakes_chain   = new TChain("t","fakes");
-    TChain *tightfake_chain   = new TChain("t","tightfake");
-    TChain *extra_chain   = new TChain("t","extra");
-    //signals full sim
+    ////Chains
+    ////fakes&flips in mc
+    //TChain *ttbar_chain   = new TChain("t","ttbar");
+    //TChain *st_chain      = new TChain("t","st");
+    //// TChain *wjets_chain   = new TChain("t","wjets");
+    //// TChain *dy_chain      = new TChain("t","dy");
+    ////rares
+    //TChain *ttw_chain     = new TChain("t","ttw");
+    //TChain *ttz_chain    = new TChain("t","ttz");
+    //TChain *tth_chain    = new TChain("t","tth");
+    //TChain *xg_chain      = new TChain("t","xg");
+    //TChain *rares_chain   = new TChain("t","rares");
+    //TChain *ttttisrup_chain    = new TChain("t","ttttisrup");
+    //TChain *ttttfsrup_chain    = new TChain("t","ttttfsrup");
+    //TChain *ttttisrdn_chain    = new TChain("t","ttttisrdn");
+    //TChain *ttttfsrdn_chain    = new TChain("t","ttttfsrdn");
+    //TChain *tttt_chain    = new TChain("t","tttt");
+    //TChain *ttvv_chain    = new TChain("t","ttvv");
+    //// TChain *qqww_chain    = new TChain("t","qqww"); // separate this out to check shape uncertainties
+    ////data
+    //TChain *data_chain    = new TChain("t","data");
+    //TChain *flips_chain   = new TChain("t","flips");
+    //TChain *fakes_chain   = new TChain("t","fakes");
+    //TChain *tightfake_chain   = new TChain("t","tightfake");
+    //TChain *extra_chain   = new TChain("t","extra");
+    ////signals full sim
+    //// #include "yt_scan.h"
+    //// #include "higgs_scan_v2.h" // fullsim
+    //// #include "higgs_scan_ps_v2.h"
+    //// #include "higgs_scan.h" // fastsim
+    //// #include "higgs_scan_ps.h"
+    //// TString pfx  = Form("/nfs-7/userdata/cfangmei/tupler_babies/merged/FT/%s//output/",tag.Data());
+    //TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
+    //TString pfx2  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag2.Data());
+    //// TString pfx  = Form("/nfs-7/userdata/cfangmei/tupler_babies/merged/FT/%s//output/",tag.Data());
+    ////Fill chains
+    //tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
+    //if (doTTTTisrfsr) {
+    //    ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx2.Data()));
+    //    ttttfsrup_chain   ->Add(Form("%s/TTTTfsrup.root"           , pfx2.Data()));
+    //    ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx2.Data()));
+    //    ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx2.Data()));
+    //}
+    //if (doSync) {
+    //    ttw_chain    ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/TTWnlo.root");
+    //} else {
+    //    ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
+    //}
+    //ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
+    //ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
+    //tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
+    //ttbar_chain  ->Add(Form("%s/TTBAR_*.root"       , pfx.Data()));
+    //if (doRares) {
+    //    ttvv_chain->Add(Form("%s/TTHH.root",pfx.Data()));
+    //    ttvv_chain->Add(Form("%s/TTWH.root",pfx.Data()));
+    //    ttvv_chain->Add(Form("%s/TTWW.root",pfx.Data()));
+    //    ttvv_chain->Add(Form("%s/TTWZ.root",pfx.Data()));
+    //    ttvv_chain->Add(Form("%s/TTZH.root",pfx2.Data()));
+    //    ttvv_chain->Add(Form("%s/TTZZ.root",pfx.Data()));
+    //    xg_chain     ->Add(Form("%s/TGext.root"             , pfx2.Data()));
+    //    xg_chain     ->Add(Form("%s/WGToLNuGext.root"           , pfx2.Data()));
+    //    xg_chain     ->Add(Form("%s/TTGdilep.root"             , pfx2.Data()));
+    //    xg_chain     ->Add(Form("%s/TTGsinglelep.root"             , pfx2.Data()));
+    //    xg_chain     ->Add(Form("%s/TTGsinglelepbar.root"             , pfx2.Data()));
+    //    xg_chain     ->Add(Form("%s/ZG.root"             , pfx2.Data()));
+    //    rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
+    //    rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx2.Data()));
+    //    rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
+    //    rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
+    //    rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
+    //    rares_chain  ->Add(Form("%s/WWG.root"            , pfx2.Data()));
+    //    rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
+    //    rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx2.Data()));
+    //    rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
+    //    rares_chain  ->Add(Form("%s/TWZ.root"            , pfx2.Data()));
+    //    rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
+    //    rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
+    //    rares_chain     ->Add(Form("%s/QQWW.root"           , pfx2.Data()));
+    //    rares_chain->Add(Form("%s/TTTJ.root",pfx.Data()));
+    //    rares_chain->Add(Form("%s/TTTW.root",pfx.Data()));
+    //}
+    ////data
+    //if (doData) {
+    //    data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    //    data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    //    data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    //}
+    //// //flips
+    //flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
+    //flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
+    //// //fakes
+    //fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
+    //fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
+    //fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
+    //fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
+    //fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
+    //fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
+    //if (doRares) {
+    //    fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
+    //    fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx2.Data()));
+    //}
+    ////tightfake
+    //tightfake_chain  ->Add(Form("%s/TTHtoNonBB.root"                   , pfx.Data()));
+    //tightfake_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
+    //tightfake_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
+    //tightfake_chain  ->Add(Form("%s/TTBAR_*.root"            , pfx.Data()));
+    //extra_chain  ->Add(Form("%s/TWZ.root"            , pfx2.Data()));
 
-    // #include "yt_scan.h"
+    // plots_t results_extra       = run(extra_chain);
+    // plots_t results_tightfake       = run(tightfake_chain, 0, 0, 0, 0, 0, 0, 1);
+    // plots_t results_ttw      = run(ttw_chain);
+    // plots_t results_ttz     = run(ttz_chain);
+    // plots_t results_tth     = run(tth_chain);
+    // // plots_t results_qqww     = run(qqww_chain);
+    // plots_t results_xg       = run(xg_chain, 0, 0, 0, 0, 0, 1);
+    // plots_t results_rares    = run(rares_chain);
+    // plots_t results_ttttisrup     = run(ttttisrup_chain);
+    // plots_t results_ttttfsrup     = run(ttttfsrup_chain);
+    // plots_t results_ttttisrdn     = run(ttttisrdn_chain);
+    // plots_t results_ttttfsrdn     = run(ttttfsrdn_chain);
+    // plots_t results_tttt     = run(tttt_chain); // [!] run after the variations
+    // plots_t results_ttvv     = run(ttvv_chain);
+    // plots_t results_data     = run(data_chain, 1);
+    // duplicate_removal::clear_list();
+    // plots_t results_flips    = run(flips_chain, 1, 1);
+    // ttbar_chain->SetTitle("fakes_mc");
+    // plots_t results_fakes_mc = run(ttbar_chain, 0, 0, 1);
+    // duplicate_removal::clear_list();
+    // plots_t results_fakes    = run(fakes_chain, 1, 0, 1);
+    // duplicate_removal::clear_list();
+    // ttbar_chain->SetTitle("fakes_mc_unw");
+    // plots_t results_fakes_mc_unw = run(ttbar_chain, 0, 0, 1, 0, 0, 0, 0, 0.0, 1);
+    // duplicate_removal::clear_list();
+    // fakes_chain->SetTitle("fakes_unw");
+    // plots_t results_fakes_unw    = run(fakes_chain, 1, 0, 1, 0, 0, 0, 0, 0.0, 1);
+    // duplicate_removal::clear_list();
 
-    // #include "higgs_scan_v2.h" // fullsim
-    // #include "higgs_scan_ps_v2.h"
-
-    // #include "higgs_scan.h" // fastsim
-    // #include "higgs_scan_ps.h"
-
-    // TString pfx  = Form("/nfs-7/userdata/cfangmei/tupler_babies/merged/FT/%s//output/",tag.Data());
-    TString pfx  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag.Data());
-    TString pfx2  = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s//output/",tag2.Data());
-    // TString pfx  = Form("/nfs-7/userdata/cfangmei/tupler_babies/merged/FT/%s//output/",tag.Data());
-
-    //Fill chains
-    tttt_chain   ->Add(Form("%s/TTTTnew.root"           , pfx.Data()));
-
-    if (doTTTTisrfsr) {
-        ttttisrup_chain   ->Add(Form("%s/TTTTisrup.root"           , pfx2.Data()));
-        ttttfsrup_chain   ->Add(Form("%s/TTTTfsrup.root"           , pfx2.Data()));
-        ttttisrdn_chain   ->Add(Form("%s/TTTTisrdown.root"           , pfx2.Data()));
-        ttttfsrdn_chain   ->Add(Form("%s/TTTTfsrdown.root"           , pfx2.Data()));
-    }
-
-    if (doSync) {
-        ttw_chain    ->Add("/nfs-7/userdata/namin/tupler_babies/merged/test/FT/test_synch_btagcsv_v1/output/TTWnlo.root");
-    } else {
-        ttw_chain    ->Add(Form("%s/TTWnlo.root"            , pfx.Data()));
-    }
-    ttz_chain   ->Add(Form("%s/TTZnlo.root"           , pfx.Data()));
-    ttz_chain   ->Add(Form("%s/TTZLOW.root"         , pfx.Data()));
-    tth_chain   ->Add(Form("%s/TTHtoNonBB.root"     , pfx.Data()));
-    ttbar_chain  ->Add(Form("%s/TTBAR_*.root"       , pfx.Data()));
-
-    if (doRares) {
-        ttvv_chain->Add(Form("%s/TTHH.root",pfx.Data()));
-        ttvv_chain->Add(Form("%s/TTWH.root",pfx.Data()));
-        ttvv_chain->Add(Form("%s/TTWW.root",pfx.Data()));
-        ttvv_chain->Add(Form("%s/TTWZ.root",pfx.Data()));
-        ttvv_chain->Add(Form("%s/TTZH.root",pfx2.Data()));
-        ttvv_chain->Add(Form("%s/TTZZ.root",pfx.Data()));
-        xg_chain     ->Add(Form("%s/TGext.root"             , pfx2.Data()));
-        xg_chain     ->Add(Form("%s/WGToLNuGext.root"           , pfx2.Data()));
-        xg_chain     ->Add(Form("%s/TTGdilep.root"             , pfx2.Data()));
-        xg_chain     ->Add(Form("%s/TTGsinglelep.root"             , pfx2.Data()));
-        xg_chain     ->Add(Form("%s/TTGsinglelepbar.root"             , pfx2.Data()));
-        xg_chain     ->Add(Form("%s/ZG.root"             , pfx2.Data()));
-        rares_chain  ->Add(Form("%s/ZZ.root"             , pfx.Data()));
-        rares_chain  ->Add(Form("%s/GGHtoZZto4L.root"    , pfx2.Data()));
-        rares_chain  ->Add(Form("%s/WWZ.root"            , pfx.Data()));
-        rares_chain  ->Add(Form("%s/WZZ.root"            , pfx.Data()));
-        rares_chain  ->Add(Form("%s/WWW.root"            , pfx.Data()));
-        rares_chain  ->Add(Form("%s/WWG.root"            , pfx2.Data()));
-        rares_chain  ->Add(Form("%s/WZG.root"            , pfx.Data()));
-        rares_chain  ->Add(Form("%s/VHtoNonBB.root"      , pfx2.Data()));
-        rares_chain  ->Add(Form("%s/TZQ.root"            , pfx.Data()));
-        rares_chain  ->Add(Form("%s/TWZ.root"            , pfx2.Data()));
-        rares_chain  ->Add(Form("%s/WWDPS.root"          , pfx.Data()));
-        rares_chain     ->Add(Form("%s/WZ.root"             , pfx.Data()));
-        rares_chain     ->Add(Form("%s/QQWW.root"           , pfx2.Data()));
-        rares_chain->Add(Form("%s/TTTJ.root",pfx.Data()));
-        rares_chain->Add(Form("%s/TTTW.root",pfx.Data()));
-    }
-    //data
-
-    if (doData) {
-        data_chain   ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-        data_chain   ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-        data_chain   ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    }
-
-    // //flips
-    flips_chain  ->Add(Form("%s/DataMuonEG*.root"     , pfxData.Data()));
-    flips_chain  ->Add(Form("%s/DataDoubleEG*.root"      , pfxData.Data()));
-    // //fakes
-    fakes_chain  ->Add(Form("%s/DataDoubleMuon*.root"    , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataDoubleEG*.root"  , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/DataMuonEG*.root"      , pfxData.Data()));
-    fakes_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    fakes_chain  ->Add(Form("%s/TTHtoNonBB.root"            , pfx.Data()));
-    if (doRares) {
-        fakes_chain  ->Add(Form("%s/WZ.root"                    , pfx.Data()));
-        fakes_chain  ->Add(Form("%s/QQWW.root"                  , pfx2.Data()));
-    }
-    //tightfake
-    tightfake_chain  ->Add(Form("%s/TTHtoNonBB.root"                   , pfx.Data()));
-    tightfake_chain  ->Add(Form("%s/TTWnlo.root"                   , pfx.Data()));
-    tightfake_chain  ->Add(Form("%s/TTZnlo.root"                  , pfx.Data()));
-    tightfake_chain  ->Add(Form("%s/TTBAR_*.root"            , pfx.Data()));
-
-    extra_chain  ->Add(Form("%s/TWZ.root"            , pfx2.Data()));
-
-    pair<yields_t, plots_t> results_extra       = run(extra_chain);
-    pair<yields_t, plots_t> results_tightfake       = run(tightfake_chain, 0, 0, 0, 0, 0, 0, 1);
-    pair<yields_t, plots_t> results_ttw      = run(ttw_chain);
-    pair<yields_t, plots_t> results_ttz     = run(ttz_chain);
-    pair<yields_t, plots_t> results_tth     = run(tth_chain);
-    // pair<yields_t, plots_t> results_qqww     = run(qqww_chain);
-    pair<yields_t, plots_t> results_xg       = run(xg_chain, 0, 0, 0, 0, 0, 1);
-    pair<yields_t, plots_t> results_rares    = run(rares_chain);
-    pair<yields_t, plots_t> results_ttttisrup     = run(ttttisrup_chain);
-    pair<yields_t, plots_t> results_ttttfsrup     = run(ttttfsrup_chain);
-    pair<yields_t, plots_t> results_ttttisrdn     = run(ttttisrdn_chain);
-    pair<yields_t, plots_t> results_ttttfsrdn     = run(ttttfsrdn_chain);
-    pair<yields_t, plots_t> results_tttt     = run(tttt_chain); // [!] run after the variations
-    pair<yields_t, plots_t> results_ttvv     = run(ttvv_chain);
-    pair<yields_t, plots_t> results_data     = run(data_chain, 1);
-    duplicate_removal::clear_list();
-    pair<yields_t, plots_t> results_flips    = run(flips_chain, 1, 1);
-
-    ttbar_chain->SetTitle("fakes_mc");
-    pair<yields_t, plots_t> results_fakes_mc = run(ttbar_chain, 0, 0, 1);
-    duplicate_removal::clear_list();
-    pair<yields_t, plots_t> results_fakes    = run(fakes_chain, 1, 0, 1);
-    duplicate_removal::clear_list();
-
-    ttbar_chain->SetTitle("fakes_mc_unw");
-    pair<yields_t, plots_t> results_fakes_mc_unw = run(ttbar_chain, 0, 0, 1, 0, 0, 0, 0, 0.0, 1);
-    duplicate_removal::clear_list();
-    fakes_chain->SetTitle("fakes_unw");
-    pair<yields_t, plots_t> results_fakes_unw    = run(fakes_chain, 1, 0, 1, 0, 0, 0, 0, 0.0, 1);
-    duplicate_removal::clear_list();
 
     if (outputTrainingBDT) {
         // Write output tree
@@ -531,25 +519,28 @@ void getyields(){
         out_file->Close();
     }
 
-    plots_t& p_tttt       = results_tttt.second;
-    plots_t& p_ttvv       = results_ttvv.second;
+    // plots_t& p_tttt       = results_tttt.second;
+    // plots_t& p_ttvv       = results_ttvv.second;
+    // plots_t& p_ttw      = results_ttw.second;
+    // plots_t& p_ttz     = results_ttz.second;
+    // plots_t& p_tth     = results_tth.second;
+    // plots_t& p_xg       = results_xg.second;
+    // plots_t& p_rares    = results_rares.second;
+    // plots_t& p_data     = results_data.second;
+    // plots_t& p_flips    = results_flips.second;
+    // plots_t& p_fakes    = results_fakes.second;
+    // plots_t& p_fakes_mc = results_fakes_mc.second;
+    // plots_t& p_fakes_unw    = results_fakes_unw.second;
+    // plots_t& p_fakes_mc_unw = results_fakes_mc_unw.second;
+    // plots_t& p_tightfake = results_tightfake.second;
+    // plots_t& p_extra = results_extra.second;
 
-    plots_t& p_ttw      = results_ttw.second;
-    plots_t& p_ttz     = results_ttz.second;
-    plots_t& p_tth     = results_tth.second;
-    plots_t& p_xg       = results_xg.second;
-    plots_t& p_rares    = results_rares.second;
-    plots_t& p_data     = results_data.second;
-    plots_t& p_flips    = results_flips.second;
-    plots_t& p_fakes    = results_fakes.second;
-    plots_t& p_fakes_mc = results_fakes_mc.second;
-    plots_t& p_fakes_unw    = results_fakes_unw.second;
-    plots_t& p_fakes_mc_unw = results_fakes_mc_unw.second;
-    plots_t& p_tightfake = results_tightfake.second;
-    plots_t& p_extra = results_extra.second;
+    plots_t plots = run(ch, year, options);
 
     std::cout << "Writing out histos.root" << std::endl;
     TFile *fout = new TFile("histos.root", "RECREATE");
+
+    std::cout <<  " plots.h_ht.sr->GetEntries(): " << plots.h_ht.sr->GetEntries() <<  std::endl;
 
     WRITE(h_ht.sr)      ; WRITE(h_ht.ttzcr)      ; WRITE(h_ht.ttwcr)      ; WRITE(h_ht.br)      ;
     WRITE(h_met.sr)     ; WRITE(h_met.ttzcr)     ; WRITE(h_met.ttwcr)     ; WRITE(h_met.br)     ;
@@ -623,39 +614,107 @@ void getyields(){
 
     WRITE(h_metnm1.br)     ;
 
-    WRITE(h_mid1.br);
-    WRITE(h_mid2.br);
-    WRITE(h_mid3.br);
+    WRITE(h_mid1.br); WRITE(h_mid2.br); WRITE(h_mid3.br);
 
     WRITE(h_charge3.sr);
 
     WRITE(h_mllos.ttzcr)     ; 
 
     WRITE(h_disc.br);
-    // WRITE(h_disc2.br);
-    WRITE(SRCR.TOTAL);
-    WRITE(SRDISC.TOTAL);
-    WRITE(SR.TOTAL);
+    WRITE(SRCR.TOTAL); WRITE(SRDISC.TOTAL); WRITE(SR.TOTAL);
 
-    TNamed metadata(TString("metadata"),dir);
-    metadata.Write();
+    WRITE(p_alphas_alt_dn_SRCR.TOTAL); WRITE(p_alphas_alt_dn_SRDISC.TOTAL);
+    WRITE(p_fake_alt_up_SRCR.TOTAL); WRITE(p_fake_alt_up_SRDISC.TOTAL);
+    WRITE(p_alphas_alt_up_SRCR.TOTAL); WRITE(p_alphas_alt_up_SRDISC.TOTAL);
+    WRITE(p_bb_alt_up_SRCR.TOTAL); WRITE(p_bb_alt_up_SRDISC.TOTAL);
+    WRITE(p_bb_alt_dn_SRCR.TOTAL); WRITE(p_bb_alt_dn_SRDISC.TOTAL);
+    WRITE(p_btagSF_alt_dn_SRCR.TOTAL); WRITE(p_btagSF_alt_dn_SRDISC.TOTAL);
+    WRITE(p_btagSF_alt_up_SRCR.TOTAL); WRITE(p_btagSF_alt_up_SRDISC.TOTAL);
+    WRITE(p_fsrvar_alt_dn_SRCR.TOTAL); WRITE(p_fsrvar_alt_dn_SRDISC.TOTAL);
+    WRITE(p_fsrvar_alt_up_SRCR.TOTAL); WRITE(p_fsrvar_alt_up_SRDISC.TOTAL);
+    WRITE(p_isr_alt_up_SRCR.TOTAL); WRITE(p_isr_alt_up_SRDISC.TOTAL);
+    WRITE(p_isr_alt_dn_SRCR.TOTAL); WRITE(p_isr_alt_dn_SRDISC.TOTAL);
+    WRITE(p_isrvar_alt_dn_SRCR.TOTAL); WRITE(p_isrvar_alt_dn_SRDISC.TOTAL);
+    WRITE(p_isrvar_alt_up_SRCR.TOTAL); WRITE(p_isrvar_alt_up_SRDISC.TOTAL);
+    WRITE(p_jer_alt_dn_SRCR.TOTAL); WRITE(p_jer_alt_dn_SRDISC.TOTAL);
+    WRITE(p_jer_alt_up_SRCR.TOTAL); WRITE(p_jer_alt_up_SRDISC.TOTAL);
+    WRITE(p_jes_alt_dn_SRCR.TOTAL); WRITE(p_jes_alt_dn_SRDISC.TOTAL);
+    WRITE(p_jes_alt_up_SRCR.TOTAL); WRITE(p_jes_alt_up_SRDISC.TOTAL);
+    WRITE(p_lep_alt_up_SRCR.TOTAL); WRITE(p_lep_alt_up_SRDISC.TOTAL);
+    WRITE(p_lep_alt_dn_SRCR.TOTAL); WRITE(p_lep_alt_dn_SRDISC.TOTAL);
+    WRITE(p_pdf_alt_dn_SRCR.TOTAL); WRITE(p_pdf_alt_dn_SRDISC.TOTAL);
+    WRITE(p_pdf_alt_up_SRCR.TOTAL); WRITE(p_pdf_alt_up_SRDISC.TOTAL);
+    WRITE(p_pu_alt_dn_SRCR.TOTAL); WRITE(p_pu_alt_dn_SRDISC.TOTAL);
+    WRITE(p_pu_alt_up_SRCR.TOTAL); WRITE(p_pu_alt_up_SRDISC.TOTAL);
+    WRITE(p_scale_alt_dn_SRCR.TOTAL); WRITE(p_scale_alt_dn_SRDISC.TOTAL);
+    WRITE(p_scale_alt_up_SRCR.TOTAL); WRITE(p_scale_alt_up_SRDISC.TOTAL);
 
-    c2numpy_close(&writer);
+    // TNamed metadata(TString("metadata"),dir);
+    // metadata.Write();
 
     // fout->Write();
     fout->Close();
+
+    // std::cout <<  " plots.h_ht.sr->GetEntries(): " << plots.h_ht.sr->GetEntries() <<  std::endl;
+
     std::cout << "Done writing out histos.root" << std::endl;
 
-
-    // copy the root file with kinematic plots to live with the cards
-    gSystem->Exec(Form("cp histos.root ../limits/%s/", dir.Data()));
+    // // copy the root file with kinematic plots to live with the cards
+    // gSystem->Exec(Form("cp histos.root ../limits/%s/", dir.Data()));
 
 
 }
 
 //doFakes = 1 for QCD, 2 for inSitu
-pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFakes, int exclude, bool isSignal, bool isGamma, bool tightfake, float yt, bool ignoreFakeFactor){
+plots_t run(TChain *chain, int year, TString options){
 
+    bool isData = 0;
+    bool doFlips = 0;
+    int doFakes = 0;
+    int exclude = 0;
+    bool isSignal = 0;
+    bool isGamma = 0;
+    bool tightfake = 0;
+    bool ignoreFakeFactor = 0;
+
+    plots_t plots;
+    if (options.Contains("doData")) {
+        std::cout << "Doing data" << std::endl;
+        isData = 1;
+    }
+    else if (options.Contains("doFakesMCUnw")) {
+        std::cout << "Doing fakesMC unweighted" << std::endl;
+        doFakes = 1;
+        ignoreFakeFactor = 1;
+    }
+    else if (options.Contains("doFakesUnw")) {
+        std::cout << "Doing fakes unweighted" << std::endl;
+        isData = 1;
+        doFakes = 1;
+        ignoreFakeFactor = 1;
+    }
+    else if (options.Contains("doFakesMC")) {
+        std::cout << "Doing fakesMC" << std::endl;
+        doFakes = 1;
+    }
+    else if (options.Contains("doFakes")) {
+        std::cout << "Doing fakes" << std::endl;
+        isData = 1;
+        doFakes = 1;
+    }
+    else if (options.Contains("doFlips")) {
+        std::cout << "Doing flips" << std::endl;
+        isData = 1;
+        doFlips = 1;
+    }
+    else if (options.Contains("doTightFake")) {
+        std::cout << "Doing tightfake" << std::endl;
+        tightfake = 1;
+    }
+    else if (options.Contains("doXgamma")) {
+        std::cout << "Doing x+gamma" << std::endl;
+        isGamma = 1;
+    }
 
     TMVA::Reader* reader = new TMVA::Reader("Silent");
 
@@ -685,20 +744,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     reader->AddSpectator("ptl2",&tree_ptl2);
     reader->AddSpectator("SR",&tree_SR);
 
-    // reader->BookMVA("BDT","TMVAClassification_BDT.weights.xml");
-    // reader->BookMVA("BDT","TMVAClassification_BDT_500trees.weights.xml");
     reader->BookMVA("BDT","TMVAClassification_BDT_19vars.xml");
-    // reader->BookMVA("BDT","TMVAClassification_BDT_bgttw.weights.xml");
 
-    float dummy = 0;
-    TMVA::Reader* reader_toptag = new TMVA::Reader("Silent");
-    reader_toptag->AddVariable("btag", &dummy);
-    reader_toptag->AddVariable("ThPtOverSumPt", &dummy);
-    reader_toptag->AddVariable("AngleThWh", &dummy);
-    reader_toptag->AddVariable("AngleThBh", &dummy);
-    reader_toptag->AddVariable("HadrWmass", &dummy);
-    reader_toptag->AddVariable("TopMass", &dummy);
-    reader_toptag->BookMVA("BDT","JetCombTrainer_BDT.weights.xml");
 
     // out_file->cd();
 
@@ -734,29 +781,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         }
     }
 
-
-    // Calculate and store the normalization factors for the ISR reweighting
-    float isr_norm_dy = 1.;
-    float isr_norm_tt = 1.;
-    if ((isttZ || isttW) && (doTTWISR || doTTZISR)) {
-        TH1D* htemp = new TH1D("htemp","htemp",1,0,1);;
-        chain->Draw("0.5>>htemp","weight_isr_dy");
-        isr_norm_dy = chain->GetEntries()/htemp->GetBinContent(1);
-        htemp->Reset();
-        chain->Draw("0.5>>htemp","weight_isr_tt");
-        isr_norm_tt = chain->GetEntries()/htemp->GetBinContent(1);
-    }
-
-
-    yields_t y_result;
     plots_t  p_result;
-
-    //Initialize
-    y_result.EE    = 0;
-    y_result.EM    = 0;
-    y_result.MM    = 0;
-    y_result.TOTAL = 0;
-
 
     p_result.h_ht.sr       = new TH1F(Form("sr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
     p_result.h_met.sr      = new TH1F(Form("sr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
@@ -864,8 +889,6 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
     // p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 16       , -1.0    , 1.0);
     p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 20       , -1.0    , 1.0);
-    // p_result.h_disc2.br     = new TH1F(Form("br_disc2_%s"       , chainTitleCh) , Form("disc2_%s"       , chainTitleCh) , 16       ,0., 1.0);
-    p_result.h_disc2.br     = new TH1F(Form("br_disc2_%s"       , chainTitleCh) , Form("disc2_%s"       , chainTitleCh) , 4       ,0., 0.8);
     p_result.SRCR.TOTAL = new TH1F(Form("SRCR_TOTAL_%s" , chainTitleCh) , Form("SRCR_TOTAL_%s" , chainTitleCh) , nsr     , 0.5  , nsr+0.5);
     p_result.SRDISC.TOTAL = new TH1F(Form("SRDISC_TOTAL_%s" , chainTitleCh) , Form("SRDISC_TOTAL_%s" , chainTitleCh) , nsrdisc     , 0.5  , nsrdisc+0.5);
     p_result.SR.TOTAL   = new TH1F(Form("SR_TOTAL_%s"   , chainTitleCh) , Form("SR_TOTAL_%s"   , chainTitleCh) , nsr-nCR , 0.5  , nsr-nCR+0.5);
@@ -948,191 +971,194 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
 
     //For FR variations
-    plots_t p_fake_alt_up;
     if (doFakes == 1) {
-        p_fake_alt_up.SRCR.TOTAL        = new TH1F(Form("SRCR_FR_TOTAL_%s"      , chainTitleCh) , Form("SRCR_FR_TOTAL_%s"      , chainTitleCh) , nsr   , 0.5, nsr+0.5 );
-        p_fake_alt_up.SRDISC.TOTAL        = new TH1F(Form("SRDISC_FR_TOTAL_%s"      , chainTitleCh) , Form("SRDISC_FR_TOTAL_%s"      , chainTitleCh) , nsrdisc   , 0.5, nsrdisc+0.5 );
+        p_result.p_fake_alt_up_SRCR.TOTAL        = new TH1F(Form("SRCR_FR_TOTAL_%s"      , chainTitleCh) , Form("SRCR_FR_TOTAL_%s"      , chainTitleCh) , nsr   , 0.5, nsr+0.5 );
+        p_result.p_fake_alt_up_SRDISC.TOTAL        = new TH1F(Form("SRDISC_FR_TOTAL_%s"      , chainTitleCh) , Form("SRDISC_FR_TOTAL_%s"      , chainTitleCh) , nsrdisc   , 0.5, nsrdisc+0.5 );
     } else {
-        p_fake_alt_up.SRCR.TOTAL        = 0;
-        p_fake_alt_up.SRDISC.TOTAL        = 0;
+        p_result.p_fake_alt_up_SRCR.TOTAL        = 0;
+        p_result.p_fake_alt_up_SRDISC.TOTAL        = 0;
     }
     //For JES variations
-    plots_t p_jes_alt_up;
-    plots_t p_jes_alt_dn;
     if (doFakes == 1 || isData==0) {
-        p_jes_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JES_UP_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_jes_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JES_DN_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_jes_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JES_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
-        p_jes_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JES_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
+        p_result.p_jes_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JES_UP_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
+        p_result.p_jes_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JES_DN_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
+        p_result.p_jes_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JES_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
+        p_result.p_jes_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JES_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
     } else {
-        p_jes_alt_up.SRCR.TOTAL     = 0;
-        p_jes_alt_dn.SRCR.TOTAL     = 0;
-        p_jes_alt_up.SRDISC.TOTAL     = 0;
-        p_jes_alt_dn.SRDISC.TOTAL     = 0;
+        p_result.p_jes_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_jes_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_jes_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_jes_alt_dn_SRDISC.TOTAL     = 0;
     }
     //For JER variations
-    plots_t p_jer_alt_up;
-    plots_t p_jer_alt_dn;
     if (doFakes == 1 || isData==0) {
-        p_jer_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_jer_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_jer_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
-        p_jer_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
+        p_result.p_jer_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
+        p_result.p_jer_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
+        p_result.p_jer_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
+        p_result.p_jer_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
     } else {
-        p_jer_alt_up.SRCR.TOTAL     = 0;
-        p_jer_alt_dn.SRCR.TOTAL     = 0;
-        p_jer_alt_up.SRDISC.TOTAL     = 0;
-        p_jer_alt_dn.SRDISC.TOTAL     = 0;
+        p_result.p_jer_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_jer_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_jer_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_jer_alt_dn_SRDISC.TOTAL     = 0;
     }
     //For btag SF variations
-    plots_t p_btagSF_alt_up;
-    plots_t p_btagSF_alt_dn;
     if (isData==0){
-        p_btagSF_alt_up.SRCR.TOTAL = new TH1F(Form("SRCR_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRCR_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nsr,  0.5, nsr+0.5 );
-        p_btagSF_alt_dn.SRCR.TOTAL = new TH1F(Form("SRCR_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRCR_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nsr,  0.5, nsr+0.5 );
-        p_btagSF_alt_up.SRDISC.TOTAL = new TH1F(Form("SRDISC_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRDISC_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nsrdisc,  0.5, nsrdisc+0.5 );
-        p_btagSF_alt_dn.SRDISC.TOTAL = new TH1F(Form("SRDISC_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRDISC_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_btagSF_alt_up_SRCR.TOTAL = new TH1F(Form("SRCR_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRCR_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nsr,  0.5, nsr+0.5 );
+        p_result.p_btagSF_alt_dn_SRCR.TOTAL = new TH1F(Form("SRCR_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRCR_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nsr,  0.5, nsr+0.5 );
+        p_result.p_btagSF_alt_up_SRDISC.TOTAL = new TH1F(Form("SRDISC_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRDISC_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_btagSF_alt_dn_SRDISC.TOTAL = new TH1F(Form("SRDISC_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRDISC_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nsrdisc,  0.5, nsrdisc+0.5 );
     }
     else {
-        p_btagSF_alt_up.SRCR.TOTAL = 0;
-        p_btagSF_alt_dn.SRCR.TOTAL = 0;
-        p_btagSF_alt_up.SRDISC.TOTAL = 0;
-        p_btagSF_alt_dn.SRDISC.TOTAL = 0;
+        p_result.p_btagSF_alt_up_SRCR.TOTAL = 0;
+        p_result.p_btagSF_alt_dn_SRCR.TOTAL = 0;
+        p_result.p_btagSF_alt_up_SRDISC.TOTAL = 0;
+        p_result.p_btagSF_alt_dn_SRDISC.TOTAL = 0;
     }
     //For PU variations
-    plots_t p_pu_alt_up;
-    plots_t p_pu_alt_dn;
     if (doFakes == 1 || isData==0) {
-        p_pu_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PU_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_pu_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PU_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_pu_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PU_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_pu_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PU_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_pu_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PU_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_pu_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PU_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_pu_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PU_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_pu_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PU_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
     } else {
-        p_pu_alt_up.SRCR.TOTAL     = 0;
-        p_pu_alt_dn.SRCR.TOTAL     = 0;
-        p_pu_alt_up.SRDISC.TOTAL     = 0;
-        p_pu_alt_dn.SRDISC.TOTAL     = 0;
+        p_result.p_pu_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_pu_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_pu_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_pu_alt_dn_SRDISC.TOTAL     = 0;
     }
     //For PU variations
-    plots_t p_lep_alt_up;
-    plots_t p_lep_alt_dn;
     if (doFakes == 1 || isData==0) {
-        p_lep_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_LEP_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_lep_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_LEP_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_lep_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_LEP_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_lep_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_LEP_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_lep_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_LEP_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_lep_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_LEP_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_lep_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_LEP_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_lep_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_LEP_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
     } else {
-        p_lep_alt_up.SRCR.TOTAL     = 0;
-        p_lep_alt_dn.SRCR.TOTAL     = 0;
-        p_lep_alt_up.SRDISC.TOTAL     = 0;
-        p_lep_alt_dn.SRDISC.TOTAL     = 0;
+        p_result.p_lep_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_lep_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_lep_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_lep_alt_dn_SRDISC.TOTAL     = 0;
     }
     //For bb variations
-    plots_t p_bb_alt_up;
-    plots_t p_bb_alt_dn;
     if (doFakes == 1 || isData==0) {
-        p_bb_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_bb_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_bb_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_bb_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_bb_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_bb_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_bb_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_bb_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
     } else {
-        p_bb_alt_up.SRCR.TOTAL     = 0;
-        p_bb_alt_dn.SRCR.TOTAL     = 0;
-        p_bb_alt_up.SRDISC.TOTAL     = 0;
-        p_bb_alt_dn.SRDISC.TOTAL     = 0;
+        p_result.p_bb_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_bb_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_bb_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_bb_alt_dn_SRDISC.TOTAL     = 0;
     }
     //For PU variations
-    plots_t p_isr_alt_up;
-    plots_t p_isr_alt_dn;
     if (doFakes == 1 || isData==0) {
-        p_isr_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_isr_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_isr_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_isr_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_isr_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_isr_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_isr_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_isr_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
     } else {
-        p_isr_alt_up.SRCR.TOTAL     = 0;
-        p_isr_alt_dn.SRCR.TOTAL     = 0;
-        p_isr_alt_up.SRDISC.TOTAL     = 0;
-        p_isr_alt_dn.SRDISC.TOTAL     = 0;
+        p_result.p_isr_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_isr_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_isr_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_isr_alt_dn_SRDISC.TOTAL     = 0;
     }
     //For theory variations
-    plots_t p_pdf_alt_up;
-    plots_t p_pdf_alt_dn;
-    plots_t p_scale_alt_up;
-    plots_t p_scale_alt_dn;
-    plots_t p_alphas_alt_up;
-    plots_t p_alphas_alt_dn;
     if (isData==0) {
-        p_pdf_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_pdf_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_pdf_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_pdf_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_scale_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_scale_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_scale_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_scale_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_alphas_alt_up.SRCR.TOTAL     = new TH1F(Form("SRCR_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_alphas_alt_dn.SRCR.TOTAL     = new TH1F(Form("SRCR_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_alphas_alt_up.SRDISC.TOTAL     = new TH1F(Form("SRDISC_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_alphas_alt_dn.SRDISC.TOTAL     = new TH1F(Form("SRDISC_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_pdf_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_pdf_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_pdf_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_pdf_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_scale_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_scale_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_scale_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_scale_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_alphas_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_alphas_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_alphas_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_alphas_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_isrvar_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_isrvar_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_isrvar_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_isrvar_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_fsrvar_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_fsrvar_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_fsrvar_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_fsrvar_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        
     } else {
-        p_pdf_alt_up.SRCR.TOTAL     = 0;
-        p_pdf_alt_dn.SRCR.TOTAL     = 0;
-        p_pdf_alt_up.SRDISC.TOTAL     = 0;
-        p_pdf_alt_dn.SRDISC.TOTAL     = 0;
-        p_scale_alt_up.SRCR.TOTAL     = 0;
-        p_scale_alt_dn.SRCR.TOTAL     = 0;
-        p_scale_alt_up.SRDISC.TOTAL     = 0;
-        p_scale_alt_dn.SRDISC.TOTAL     = 0;
-        p_alphas_alt_up.SRCR.TOTAL     = 0;
-        p_alphas_alt_dn.SRCR.TOTAL     = 0;
-        p_alphas_alt_up.SRDISC.TOTAL     = 0;
-        p_alphas_alt_dn.SRDISC.TOTAL     = 0;
+        p_result.p_pdf_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_pdf_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_pdf_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_pdf_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_scale_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_scale_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_scale_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_scale_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_alphas_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_alphas_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_alphas_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_alphas_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_isrvar_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_isrvar_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_isrvar_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_isrvar_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_fsrvar_alt_up_SRCR.TOTAL     = 0;
+        p_result.p_fsrvar_alt_dn_SRCR.TOTAL     = 0;
+        p_result.p_fsrvar_alt_up_SRDISC.TOTAL     = 0;
+        p_result.p_fsrvar_alt_dn_SRDISC.TOTAL     = 0;
     }
 
 
     bool doPoisson = isData && !doFlips && !doFakes;
     initHistError(doPoisson, p_result.h_disc.br);
-    initHistError(doPoisson, p_result.h_disc2.br);
     initHistError(doPoisson, p_result.SRCR.TOTAL   );
     initHistError(doPoisson, p_result.SRDISC.TOTAL   );
     initHistError(doPoisson, p_result.SR.TOTAL   );
-    initHistError(doPoisson, p_jes_alt_up.SRCR.TOTAL   );
-    initHistError(doPoisson, p_jes_alt_up.SRDISC.TOTAL   );
-    initHistError(doPoisson, p_jes_alt_dn.SRCR.TOTAL   );
-    initHistError(doPoisson, p_jes_alt_dn.SRDISC.TOTAL   );
-    initHistError(doPoisson, p_jer_alt_up.SRCR.TOTAL   );
-    initHistError(doPoisson, p_jer_alt_up.SRDISC.TOTAL   );
-    initHistError(doPoisson, p_jer_alt_dn.SRCR.TOTAL   );
-    initHistError(doPoisson, p_jer_alt_dn.SRDISC.TOTAL   );
-    initHistError(doPoisson, p_btagSF_alt_up.SRCR.TOTAL);
-    initHistError(doPoisson, p_btagSF_alt_up.SRDISC.TOTAL);
-    initHistError(doPoisson, p_btagSF_alt_dn.SRCR.TOTAL);
-    initHistError(doPoisson, p_btagSF_alt_dn.SRDISC.TOTAL);
-    initHistError(doPoisson, p_pu_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_pu_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_lep_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_lep_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_isr_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_isr_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_bb_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_bb_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_pu_alt_dn.SRCR.TOTAL    );
-    initHistError(doPoisson, p_pu_alt_dn.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_fake_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_fake_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_pdf_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_pdf_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_pdf_alt_dn.SRCR.TOTAL    );
-    initHistError(doPoisson, p_pdf_alt_dn.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_scale_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_scale_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_scale_alt_dn.SRCR.TOTAL    );
-    initHistError(doPoisson, p_scale_alt_dn.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_alphas_alt_up.SRCR.TOTAL    );
-    initHistError(doPoisson, p_alphas_alt_up.SRDISC.TOTAL    );
-    initHistError(doPoisson, p_alphas_alt_dn.SRCR.TOTAL    );
-    initHistError(doPoisson, p_alphas_alt_dn.SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_jes_alt_up_SRCR.TOTAL   );
+    initHistError(doPoisson, p_result.p_jes_alt_up_SRDISC.TOTAL   );
+    initHistError(doPoisson, p_result.p_jes_alt_dn_SRCR.TOTAL   );
+    initHistError(doPoisson, p_result.p_jes_alt_dn_SRDISC.TOTAL   );
+    initHistError(doPoisson, p_result.p_jer_alt_up_SRCR.TOTAL   );
+    initHistError(doPoisson, p_result.p_jer_alt_up_SRDISC.TOTAL   );
+    initHistError(doPoisson, p_result.p_jer_alt_dn_SRCR.TOTAL   );
+    initHistError(doPoisson, p_result.p_jer_alt_dn_SRDISC.TOTAL   );
+    initHistError(doPoisson, p_result.p_btagSF_alt_up_SRCR.TOTAL);
+    initHistError(doPoisson, p_result.p_btagSF_alt_up_SRDISC.TOTAL);
+    initHistError(doPoisson, p_result.p_btagSF_alt_dn_SRCR.TOTAL);
+    initHistError(doPoisson, p_result.p_btagSF_alt_dn_SRDISC.TOTAL);
+    initHistError(doPoisson, p_result.p_pu_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_pu_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_lep_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_lep_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_isr_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_isr_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_bb_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_bb_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_pu_alt_dn_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_pu_alt_dn_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_fake_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_fake_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_pdf_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_pdf_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_pdf_alt_dn_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_pdf_alt_dn_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_scale_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_scale_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_scale_alt_dn_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_scale_alt_dn_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_alphas_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_alphas_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_alphas_alt_dn_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_alphas_alt_dn_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_isrvar_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_isrvar_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_isrvar_alt_dn_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_isrvar_alt_dn_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_fsrvar_alt_up_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_fsrvar_alt_up_SRDISC.TOTAL    );
+    initHistError(doPoisson, p_result.p_fsrvar_alt_dn_SRCR.TOTAL    );
+    initHistError(doPoisson, p_result.p_fsrvar_alt_dn_SRDISC.TOTAL    );
 
 
     //nEvents in chain
@@ -1147,8 +1173,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     //Number of selected events
     //int nSelected = 0;
 
+    tqdm bar;
+    // bar.set_theme_braille();
+
     //File Loop
     while ( (currentFile = (TFile*)fileIter.Next()) ){
+
+        if (STOP_REQUESTED) break;
 
         // Get File Content
         TFile *file = new TFile(currentFile->GetTitle());
@@ -1156,70 +1187,18 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
         TTree *tree = (TTree*)file->Get("t");
         samesign.Init(tree);
 
-        float fudgefactor = 1.0;
         bool isFastSim = false;
-        if (filename.Contains("_scan.root")) {
-            isFastSim = true;
-        }
-        if (isSignal && isHiggsScan && filename.Contains("TTH_scan.root")) {
-            if (fabs(mysparms.at(0)-350)<1.) fudgefactor = 103778. /  106860;
-            if (fabs(mysparms.at(0)-370)<1.) fudgefactor = 91175. /   95639;
-            if (fabs(mysparms.at(0)-390)<1.) fudgefactor = 93998. /   98685;
-            if (fabs(mysparms.at(0)-410)<1.) fudgefactor = 98687. /   103643;
-            if (fabs(mysparms.at(0)-430)<1.) fudgefactor = 102421. /  105441;
-            if (fabs(mysparms.at(0)-450)<1.) fudgefactor = 87667. /   91375;
-            if (fabs(mysparms.at(0)-470)<1.) fudgefactor = 96639. /   103045;
-            if (fabs(mysparms.at(0)-490)<1.) fudgefactor = 93382. /   98446;
-            if (fabs(mysparms.at(0)-510)<1.) fudgefactor = 101248. /  104742;
-            if (fabs(mysparms.at(0)-530)<1.) fudgefactor = 86954. /   89999;
-            if (fabs(mysparms.at(0)-550)<1.) fudgefactor = 91983. /   95851;
-            std::cout <<  " mysparms.at(0): " << mysparms.at(0) <<  " fudgefactor: " << fudgefactor <<  std::endl;
-        }
-
-        if ((istttt||(isHiggsScan && !isFastSim)) && makeGenVariationsMC) {
-            TH1F *cs_hist = 0;
-            for (auto&& keyAsObj : *file->GetListOfKeys()){
-                auto key = (TKey*) keyAsObj;
-                TH1F *hist = (TH1F*)key->ReadObj();
-                string title = hist->GetTitle();
-                if (title == "SS2015 Baby Ntuple") continue;
-                cs_hist = (TH1F*)hist->Clone("cs_hist");
-            }
-            //Next figure out scale, PDF, and alpha_s variations and fill the histograms
-            for (int i = 1; i < nsr+1; i++){
-                float nominal  = std::max(cs_hist->GetBinContent(200+i),0.); // NJA must match main.cc.norun
-                float scale_up = nominal > 0 ? fabs(1-std::max(cs_hist->GetBinContent(400+i),0.)/nominal)  : 0;  // NJA must match main.cc.norun
-                float scale_dn = nominal > 0 ? fabs(1-std::max(cs_hist->GetBinContent(600+i),0.)/nominal)  : 0;  // NJA must match main.cc.norun
-                if (scale_up >= 1.0 && scale_dn >= 1.0) { // sometimes have crazy values
-                    scale_up = 0.1;
-                    scale_dn = 0.1;
-                }
-                TH1F *h_pdf = new TH1F("pdf", "pdf", 10000, 0, 1000);
-                for (int j = 0; j < 100; j++){
-                    h_pdf->Fill(cs_hist->GetBinContent(1000+100*(i-1)+j));
-                }
-                float pdf = h_pdf->GetMean() > 0 ? h_pdf->GetRMS()/nominal : 0;
-                delete h_pdf;
-                // std::cout << " i: " << i << " nominal: " << nominal << " scale_up: " << scale_up << " scale_dn: " << scale_dn << " pdf: " << pdf << std::endl;
-                // p_scale_alt_up.SRCR.TOTAL->Fill(i,    scale_up);
-                // p_scale_alt_dn.SRCR.TOTAL->Fill(i,    scale_dn);
-                p_pdf_alt_up.SRCR.TOTAL->Fill(i,    pdf);
-            }
-        }
-
-
 
         // Loop over Events in current file
         for(unsigned int event = 0; event < tree->GetEntriesFast(); event++){
+
+            if (STOP_REQUESTED) break;
 
             //Get Event Content
             samesign.GetEntry(event);
             nEventsTotal++;
 
-            if (ss::is_real_data()){
-                if (false && !doFlips && !doFakes) continue;
-                else if (!isUnblindRun(ss::run())) continue;
-            }
+            bar.progress(nEventsTotal, nEventsChain);
 
             //Reject not triggered
             if (!isFastSim) {
@@ -1228,7 +1207,6 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (!ss::passes_met_filters()) continue;
 
             if (doCustomSelection) {
-
             }
 
             if (isHiggsScan) {
@@ -1236,66 +1214,46 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (fabs(mysparms[0]-ss::higgs_mass()) > 0.1) continue;
             }
 
-
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
 
-            // if (isttH) {
-            //     weight *= 1.26;
-            // }
             if (istttt) {
-                // new xsec is 11.97
-                weight *= 11.97 / fabs(1000.0*ss::xsec());
+                // force xsec here
+                weight *= xsec_tttt / fabs(1000.0*ss::xsec());
             }
             weight*=scaleLumi;
-
-            if (yt > 0.) weight *= yt*yt;
-
-            if (isHiggsScan && isFastSim) {
-                weight *= fudgefactor;
-            }
-
-            // // FIXME FIXME
-            // if (chainTitle=="fakes") weight *= 1.09;
-            // if (chainTitle=="flips") weight *= 1.01;
-            // if (chainTitle=="rares") weight *= 1.08;
-            // if (chainTitle=="tth") weight   *= 1.10;
-            // if (chainTitle=="ttw") weight   *= 1.21;
-            // if (chainTitle=="ttvv") weight  *= 1.03;
-            // if (chainTitle=="ttz") weight   *= 1.44;
-            // if (chainTitle=="xg") weight    *= 1.03;
-
 
             if (isHiggsPseudoscalar) weight *= ss::xsec_ps()/ss::xsec();
 
             if (!ss::is_real_data() && !isFastSim) weight *= ss::decayWSF();
 
+
             if (!ss::is_real_data()) {
-                weight *= getTruePUw(ss::trueNumInt()[0]);
+                weight *= getTruePUw(year, ss::trueNumInt()[0], 0);
             }
             weight*=ss::weight_btagsf();
-            // if (isWZ) weight*=getWZSF();
-            // if (isttZ && applyttZSF) weight*=getttZSF();
             //apply lepton scale factors
-            if (ss::is_real_data()==0 && (!isttW) && (!isttZ)) {
+            if (ss::is_real_data()==0) {
                 // weight*=eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
-                weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), -1);
-                weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), -1);
+                weight *= leptonScaleFactor(year, ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht());
+                weight *= leptonScaleFactor(year, ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht());
             }
             if (isFastSim) {
-                weight*=eventScaleFactorFastSim(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht(), ss::trueNumInt()[0]);
+                std::cout << "FIXME: no fastsim SFs being applied right now" << std::endl;
+                // weight*=eventScaleFactorFastSim(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht(), ss::trueNumInt()[0]);
             }
 
             float weight_isr_up_alt = weight;
-            if (doTTZISR && isttZ) {
+            if (doTTWISR && isttW) {
                 // want to take 50% of the effect as unc, and since we scale
                 // nominal weight, scale up twice
-                weight_isr_up_alt *= pow(ss::weight_isr_tt()*isr_norm_tt,2);
-                weight *= ss::weight_isr_tt()*isr_norm_tt;
+                float w = isrWeight(year, ss::nisrMatch(), 1);
+                weight_isr_up_alt *= w*w;
+                weight *= w;
             }
-            if (doTTWISR && isttW) {
-                weight_isr_up_alt *= pow(ss::weight_isr_tt()*isr_norm_tt,2);
-                // weight *= ss::weight_isr_dy()*isr_norm_dy;
-                weight *= ss::weight_isr_tt()*isr_norm_tt;
+            if (doTTZISR && isttZ) {
+                float w = isrWeight(year, ss::nisrMatch(), 2);
+                weight_isr_up_alt *= w*w;
+                weight *= w;
             }
 
             float weight_bb_up_alt = weight;
@@ -1305,11 +1263,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (ss::extragenb() == 2) {
                     float scaleamt = 0.7;
                     weight_bb_up_alt = (0.5*scaleamt+1)*weight;
-                    // weight_bb_up_alt = (1.0*scaleamt+1)*weight;
                     weight *= 1.0;
-                    // float scaleamt = 1.7;
-                    // weight_bb_up_alt = weight*scaleamt*scaleamt;
-                    // weight *= scaleamt;
                 }
             }
 
@@ -1322,34 +1276,26 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             if (ss::is_real_data()==0) {
                 weight_btag_up_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_UP()/ss::weight_btagsf() : weight;
                 weight_btag_dn_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_DN()/ss::weight_btagsf() : weight;
-                weight_pu_up_alt = getTruePUw(ss::trueNumInt()[0])>0 ? weight*getTruePUwUp(ss::trueNumInt()[0])/getTruePUw(ss::trueNumInt()[0]) : weight;
-                weight_pu_dn_alt = getTruePUw(ss::trueNumInt()[0])>0 ? weight*getTruePUwDn(ss::trueNumInt()[0])/getTruePUw(ss::trueNumInt()[0]) : weight;
-                weight_lep_up_alt = weight*(1.0+leptonScaleFactor_err(ss::lep1_id(),  ss::lep1_p4().pt(),  ss::lep1_p4().eta(),  ss::ht())+leptonScaleFactor_err(ss::lep2_id(),  ss::lep2_p4().pt(),  ss::lep2_p4().eta(),  ss::ht()));
-                // std::cout << ss::lep1_id() << " " << ss::lep1_p4().pt() << " " << ss::lep1_p4().eta() << " " << ss::lep2_id() << " " << ss::lep2_p4().pt() << " " << ss::lep2_p4().eta() << " " << 1.0+leptonScaleFactor_err(ss::lep1_id(),  ss::lep1_p4().pt(),  ss::lep1_p4().eta(),  ss::ht())+leptonScaleFactor_err(ss::lep2_id(),  ss::lep2_p4().pt(),  ss::lep2_p4().eta(),  ss::ht()) << std::endl;
+                weight_pu_up_alt = getTruePUw(year, ss::trueNumInt()[0], 0)>0 ? weight*getTruePUw(year, ss::trueNumInt()[0], 1)/getTruePUw(year, ss::trueNumInt()[0], 0) : weight;
+                weight_pu_dn_alt = getTruePUw(year, ss::trueNumInt()[0], 0)>0 ? weight*getTruePUw(year, ss::trueNumInt()[0],-1)/getTruePUw(year, ss::trueNumInt()[0], 0) : weight;
+                weight_lep_up_alt = weight*(1.0+leptonScaleFactorError(year,ss::lep1_id(),  ss::lep1_p4().pt(),  ss::lep1_p4().eta(),  ss::ht())+leptonScaleFactorError(year,ss::lep2_id(),  ss::lep2_p4().pt(),  ss::lep2_p4().eta(),  ss::ht()));
             }
 
 
             float lep1_pt = ss::lep1_coneCorrPt();
             float lep2_pt = ss::lep2_coneCorrPt();
             float lep3_pt = ss::lep3_coneCorrPt();
-            //now recompute mtmin
-            float mtl1 = MT(lep1_pt, ss::lep1_p4().phi(), ss::met(), ss::metPhi());
-            float mtl2 = MT(lep2_pt, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
+            float mtl1 = calcMT(lep1_pt, ss::lep1_p4().phi(), ss::met(), ss::metPhi());
+            float mtl2 = calcMT(lep2_pt, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
             float mtmin = mtl1 > mtl2 ? mtl2 : mtl1;
 
-
-            //drop electrons below 15 GeV
-            if (abs(ss::lep1_id())==11 && lep1_pt<15) continue;
-            if (abs(ss::lep2_id())==11 && lep2_pt<15) continue;
-
             //Progress
-            SSAG::progress(nEventsTotal, nEventsChain);
+            // SSAG::progress(nEventsTotal, nEventsChain);
 
             //Only keep good events
             int ssclass = 3;
             bool isClass6 = ss::hyp_class() == 6;
             if (!doFlips && !doFakes && exclude == 0 && !tightfake) {
-                // if (ss::hyp_class() != ssclass && !isClass6) continue;
                 if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !isGamma && ss::lep1_motherID()==2) continue;
                 if (!isData && !isGamma && ss::lep2_motherID()==2) continue;
@@ -1357,32 +1303,34 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             if (!doFlips && !doFakes && exclude == 1){
-                // if (ss::hyp_class() != ssclass && !isClass6) continue;
                 if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !((ss::lep1_motherID() == 1 && ss::lep2_motherID() < 0) || (ss::lep1_motherID() < 0 && ss::lep2_motherID() == 1))) continue;
             }
 
             if (!doFlips && !doFakes && exclude == 2){
-                // if (ss::hyp_class() != ssclass && !isClass6) continue;
                 if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !((ss::lep1_motherID() == 1 && ss::lep2_motherID() == 2) || (ss::lep1_motherID() == 2 && ss::lep2_motherID() == 1))) continue;
             }
 
             if (!doFlips && !doFakes && exclude == 3){
-                // if (ss::hyp_class() != ssclass && !isClass6) continue;
                 if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
                 if (!isData && !((ss::lep1_motherID() == 1 || ss::lep2_motherID() == 1))) continue;
+            }
+
+            // Don't take leptons from photons if not x-gamma
+            if ((ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3) && !isGamma) {
+                continue;
             }
 
             if (doFlips) {
                 if (ss::hyp_class() != 4 && !isClass6) continue;
                 float flipFact = 0.;
                 if (abs(ss::lep1_id())==11){
-                    float flr = flipRate(ss::lep1_p4().pt(), ss::lep1_p4().eta());
+                    float flr = flipRate(year,ss::lep1_p4().pt(), ss::lep1_p4().eta());
                     flipFact += (flr/(1-flr));
                 }
                 if (abs(ss::lep2_id())==11){
-                    float flr = flipRate(ss::lep2_p4().pt(), ss::lep2_p4().eta());
+                    float flr = flipRate(year,ss::lep2_p4().pt(), ss::lep2_p4().eta());
                     flipFact += (flr/(1-flr));
                 }
                 weight *= flipFact;
@@ -1400,18 +1348,18 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
 
             //QCD Fakes
             bool isClass6Fake = false;
-            if (doFakes == 1){
+            if (doFakes == 1) {
                 if (!isClass6) {
                     if (ss::hyp_class() != 2 && ss::hyp_class() != 1) continue;
                     if (ss::lep1_passes_id()==0) {
-                        float fr = fakeRate(ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
-                        float fra = alternativeFakeRate(ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
+                        float fr = fakeRate(year,ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
+                        float fra = alternativeFakeRate(year,ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
                         if (!ignoreFakeFactor) weight *= fr/(1.-fr);
                         if (!ignoreFakeFactor) weight_alt_FR *= fra/(1.-fra);
                     }
                     if (ss::lep2_passes_id()==0) {
-                        float fr = fakeRate(ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
-                        float fra = alternativeFakeRate(ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                        float fr = fakeRate(year,ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                        float fra = alternativeFakeRate(year,ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
                         if (!ignoreFakeFactor) weight *= fr/(1.-fr);
                         if (!ignoreFakeFactor) weight_alt_FR *= fra/(1.-fra);
                     }
@@ -1422,40 +1370,28 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     }
                 } else {
                     if(ss::is_real_data() && (ss::lep3_fo() && !ss::lep3_tight()) && ss::lep1_passes_id() && ss::lep2_passes_id()) {  // lep3 fake
-                        float fr = fakeRate(ss::lep3_id(),ss::lep3_p4().pt(),ss::lep3_p4().eta(),ss::ht());
-                        float fra = alternativeFakeRate(ss::lep3_id(),ss::lep3_p4().pt(), ss::lep3_p4().eta(), ss::ht());
+                        float fr = fakeRate(year,ss::lep3_id(),ss::lep3_p4().pt(),ss::lep3_p4().eta(),ss::ht());
+                        float fra = alternativeFakeRate(year,ss::lep3_id(),ss::lep3_p4().pt(), ss::lep3_p4().eta(), ss::ht());
                         isClass6Fake = true;
                         if (!ignoreFakeFactor) weight *= fr / (1-fr);
                         if (!ignoreFakeFactor) weight_alt_FR *= fra/(1.-fra);
                     }
                     if(ss::is_real_data() && (ss::lep2_fo() && !ss::lep2_tight()) && ss::lep1_passes_id() && ss::lep3_passes_id()) {  // lep2 fake
-                        float fr = fakeRate(ss::lep2_id(),ss::lep2_coneCorrPt(),ss::lep2_p4().eta(),ss::ht());
-                        float fra = alternativeFakeRate(ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                        float fr = fakeRate(year,ss::lep2_id(),ss::lep2_coneCorrPt(),ss::lep2_p4().eta(),ss::ht());
+                        float fra = alternativeFakeRate(year,ss::lep2_id(),ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
                         isClass6Fake = true;
                         if (!ignoreFakeFactor) weight *= fr / (1-fr);
                         if (!ignoreFakeFactor) weight_alt_FR *= fra/(1.-fra);
                     }
                     if(ss::is_real_data() && (ss::lep1_fo() && !ss::lep1_tight()) && ss::lep2_passes_id() && ss::lep3_passes_id()) {  // lep1 fake
-                        float fr = fakeRate(ss::lep1_id(),ss::lep1_coneCorrPt(),ss::lep1_p4().eta(),ss::ht());
-                        float fra = alternativeFakeRate(ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
+                        float fr = fakeRate(year,ss::lep1_id(),ss::lep1_coneCorrPt(),ss::lep1_p4().eta(),ss::ht());
+                        float fra = alternativeFakeRate(year,ss::lep1_id(),ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
                         isClass6Fake = true;
                         if (!ignoreFakeFactor) weight *= fr / (1-fr);
                         if (!ignoreFakeFactor) weight_alt_FR *= fra/(1.-fra);
                     }
                 }
             }
-
-            // // Before any real continue statements
-            //     int nleps_temp = 2;
-            //     if (ss::lep3_passes_id()) nleps_temp++;
-            //     int SR_temp = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt,  nleps_temp, isClass6);
-            //     if (doSync && isttW) {
-            //         std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%1d\t%1d\t%1d\n",
-            //                 ss::run(), ss::lumi(), ss::event(),
-            //                 ss::lep1_id(), lep1_pt,
-            //                 ss::lep2_id(), lep2_pt,
-            //                 ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::hyp_class(), SR_temp, nleps_temp) << std::endl;
-            //     }
 
             if (isClass6) {
                 float zmass23 = ss::lep2_id() == -ss::lep3_id() ? (ss::lep2_p4()+ss::lep3_p4()).mass() : -999.0;
@@ -1470,25 +1406,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             int nleps = 2;
-            bool lep3_pid = ss::lep3_passes_id();
             if (ss::lep3_passes_id()) nleps++;
-            // if (ss::is_real_data()) {
-            //     if (ss::lep3_passes_id()) nleps++;
-            // } else {
-            //     if (ss::lep3_passes_RA7v2() && ss::lep3_p4().pt() > 20.) nleps++;
-            // }
             if (ss::lep4_passes_id() && (ss::lep4_p4().pt() > 20.) ) nleps++;
 
             if (!doFlips && !doFakes && exclude == 0) {
                 if (nleps > 2) {
                     if (!isData && !isGamma && ss::lep3_motherID()==2) continue;
                 }
-            }
-
-            //Reject duplicates (after selection otherwise flips are ignored...)
-            if (isData && ss::is_real_data()){
-                duplicate_removal::DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
-                if (duplicate_removal::is_duplicate(id)){ continue; }
             }
 
             // if all 3 charges are the same, throw the event away
@@ -1498,13 +1422,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (q3==q1) continue;
             }
 
-            if (signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt,  nleps, isClass6) > 1) {
-                p_result.h_metnm1.br->Fill(ss::met() , weight);
+            //Reject duplicates (after selection otherwise flips are ignored...)
+            if (isData && ss::is_real_data()){
+                duplicate_removal::DorkyEventIdentifier id(ss::run(), ss::event(), ss::lumi());
+                if (duplicate_removal::is_duplicate(id)){ continue; }
             }
-
-            //Require nominal baseline selections
-            int BR = baseline_region(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, metcut);
-            if (BR < 0) continue;
 
             if (!outputTrainingBDT) {
                 // tttt baseline selections
@@ -1514,6 +1436,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (ss::ht() < 300) continue;
                 if (lep1_pt < 25.) continue;
                 if (lep2_pt < 20.) continue;
+
+                //Require nominal baseline selections
+                int BR = baseline_region(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, metcut);
+                if (BR < 0) continue;
+
             } else {
                 // looser selections when training BDT
                 if (lep1_pt < 15.) continue;
@@ -1523,18 +1450,6 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (ss::njets() < 2) continue;
                 if (ss::nbtags() < 1) continue;
             }
-
-            // if (ss::ht() < 400) continue; // FIXME
-
-
-            // if (istttt) {
-            //     float blah = eventScaleFactor_trigonly(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
-            //     std::cout <<  " blah: " << blah <<  std::endl;
-            // }
-
-            // c2numpy_intc(&writer, 3);
-            // c2numpy_float64(&writer, 3.3);
-            // c2numpy_string(&writer, "THREE");
 
             LorentzVector visible;
             for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
@@ -1548,7 +1463,6 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             visible += ss::lep2_p4();
             if (nleps > 2) visible += ss::lep3_p4();
             float mvis = visible.M();
-            // float mtvis = MT(visible.pt(), visible.phi(), ss::met(), ss::metPhi());
             float mtvis = visible.Mt();
 
             float pt1 = lep1_pt;
@@ -1560,27 +1474,15 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             int mytype = ss::hyp_type();
             if (mytype==2 && abs(ss::lep1_id())==13) mytype = 1;
 
-            float ptratio_1 = -1.;
-            float ptratio_2 = -1.;
-            if (
-                    (istttt || isttW || isttH || isttZ || istt || tightfake || ss::is_real_data())
-                    && !(isttZ && ss::scale1fb() < 0.0001998 && ss::scale1fb() > 0.0001996) // skip 80x ttzlow sample by scale1fb
-               ) {
-                ptratio_1 = ss::lep1_closeJet().pt() > 0 ? ss::lep1_p4().pt()/ss::lep1_closeJet().pt() : 1.0;
-                ptratio_2 = ss::lep2_closeJet().pt() > 0 ? ss::lep2_p4().pt()/ss::lep2_closeJet().pt() : 1.0;
-            }
-            bool lep1_fail_ptratio = (ptratio_1 >= 0.) && (ptratio_1 < (abs(ss::lep1_id()) == 11 ? 0.80 : 0.76));
-            bool lep2_fail_ptratio = (ptratio_2 >= 0.) && (ptratio_2 < (abs(ss::lep2_id()) == 11 ? 0.80 : 0.76));
-
-            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6);
+            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::mtmin(), ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt, nleps, isClass6);
 
             // JEC
             float mll = (ss::lep1_p4()*lep1_pt/ss::lep1_p4().pt()+ss::lep2_p4()*lep2_pt/ss::lep2_p4().pt()).M();
-            float mtl1_unc_up = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
-            float mtl2_unc_up = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
+            float mtl1_unc_up = calcMT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
+            float mtl2_unc_up = calcMT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
             float mtmin_unc_up = mtl1_unc_up > mtl2_unc_up ? mtl2_unc_up : mtl1_unc_up;
-            float mtl1_unc_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
-            float mtl2_unc_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
+            float mtl1_unc_dn = calcMT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
+            float mtl2_unc_dn = calcMT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
             float mtmin_unc_dn = mtl1_unc_dn > mtl2_unc_dn ? mtl2_unc_dn : mtl1_unc_dn;
             int SR_unc_up = signalRegionTest(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt,  nleps, isClass6);
             int SR_unc_dn = signalRegionTest(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt,  nleps, isClass6);
@@ -1595,11 +1497,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             int SR_JER_up = SR;
             int SR_JER_dn = SR;
             if (doJER && !ss::is_real_data()) {
-                mtl1_JER_up = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_JER_up(), ss::metPhi_JER_up());
-                mtl2_JER_up = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_JER_up(), ss::metPhi_JER_up());
+                mtl1_JER_up = calcMT(lep1_pt, ss::lep1_p4().phi(), ss::met_JER_up(), ss::metPhi_JER_up());
+                mtl2_JER_up = calcMT(lep2_pt, ss::lep2_p4().phi(), ss::met_JER_up(), ss::metPhi_JER_up());
                 mtmin_JER_up = mtl1_JER_up > mtl2_JER_up ? mtl2_JER_up : mtl1_JER_up;
-                mtl1_JER_dn = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
-                mtl2_JER_dn = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
+                mtl1_JER_dn = calcMT(lep1_pt, ss::lep1_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
+                mtl2_JER_dn = calcMT(lep2_pt, ss::lep2_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
                 mtmin_JER_dn = mtl1_JER_dn > mtl2_JER_dn ? mtl2_JER_dn : mtl1_JER_dn;
                 SR_JER_up = signalRegionTest(ss::njets_JER_up(), ss::nbtags_JER_up(), ss::met_JER_up(), ss::ht_JER_up(), mtmin_JER_up, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt,  nleps, isClass6);
                 SR_JER_dn = signalRegionTest(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, ss::lep1_id(), ss::lep2_id(), lep1_pt, lep2_pt, lep3_pt,  nleps, isClass6);
@@ -1683,16 +1585,16 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 tree_htb = htb;
                 tree_mt1 = mtl1;
                 tree_mt2 = mtl2;
-                tree_dphil1j1 = DeltaPhi(ss::lep1_p4().phi(),ss::jets().at(0).phi());
-                tree_dphil2j2 = DeltaPhi(ss::lep2_p4().phi(),ss::jets().at(1).phi());
-                tree_dphil1j2 = DeltaPhi(ss::lep1_p4().phi(),ss::jets().at(1).phi());
-                tree_dphil2j1 = DeltaPhi(ss::lep2_p4().phi(),ss::jets().at(0).phi());
-                tree_dphil1l2 = DeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi());
-                tree_dphij1j2 = DeltaPhi(ss::jets().at(0).phi(),ss::jets().at(1).phi());
-                tree_dphil1met = DeltaPhi(ss::lep1_p4().phi(),ss::metPhi());
-                tree_dphil2met = DeltaPhi(ss::lep2_p4().phi(),ss::metPhi());
-                tree_dphij1met = DeltaPhi(ss::jets().at(0).phi(),ss::metPhi());
-                tree_dphij2met = DeltaPhi(ss::jets().at(1).phi(),ss::metPhi());
+                tree_dphil1j1 = calcDeltaPhi(ss::lep1_p4().phi(),ss::jets().at(0).phi());
+                tree_dphil2j2 = calcDeltaPhi(ss::lep2_p4().phi(),ss::jets().at(1).phi());
+                tree_dphil1j2 = calcDeltaPhi(ss::lep1_p4().phi(),ss::jets().at(1).phi());
+                tree_dphil2j1 = calcDeltaPhi(ss::lep2_p4().phi(),ss::jets().at(0).phi());
+                tree_dphil1l2 = calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi());
+                tree_dphij1j2 = calcDeltaPhi(ss::jets().at(0).phi(),ss::jets().at(1).phi());
+                tree_dphil1met = calcDeltaPhi(ss::lep1_p4().phi(),ss::metPhi());
+                tree_dphil2met = calcDeltaPhi(ss::lep2_p4().phi(),ss::metPhi());
+                tree_dphij1met = calcDeltaPhi(ss::jets().at(0).phi(),ss::metPhi());
+                tree_dphij2met = calcDeltaPhi(ss::jets().at(1).phi(),ss::metPhi());
                 tree_detal1j1 = fabs(ss::lep1_p4().eta()-ss::jets().at(0).eta());
                 tree_detal2j2 = fabs(ss::lep2_p4().eta()-ss::jets().at(1).eta());
                 tree_detal1j2 = fabs(ss::lep1_p4().eta()-ss::jets().at(1).eta());
@@ -1745,16 +1647,16 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 tree_nbtags = ss::nbtags_unc_up();
                 tree_met = ss::met_unc_up();
                 tree_ht = ss::ht_unc_up();
-                tree_mt1 = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
-                tree_mt2 = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
+                tree_mt1 = calcMT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
+                tree_mt2 = calcMT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_up(), ss::metPhi_unc_up());
                 mvavalueup = reader->EvaluateMVA("BDT");
 
                 tree_njets = ss::njets_unc_dn();
                 tree_nbtags = ss::nbtags_unc_dn();
                 tree_met = ss::met_unc_dn();
                 tree_ht = ss::ht_unc_dn();
-                tree_mt1 = MT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
-                tree_mt2 = MT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
+                tree_mt1 = calcMT(lep1_pt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
+                tree_mt2 = calcMT(lep2_pt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
                 mvavaluedn = reader->EvaluateMVA("BDT");
 
 
@@ -1771,80 +1673,31 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 mvavalueJERdn = reader->EvaluateMVA("BDT");
 
                 // transform preds
-                pred = min(pred,0.79F);
-                p_result.h_disc2.br->Fill(pred,weight); //  0. 0.25 0.35 0.65
-                // float upper = 0.8F;
-                // float lower = -0.4F;
-                // mvavalue = ((max(min((float)mvavalue,upper-0.01F),lower)-lower)/(upper-lower));
                 p_result.h_disc.br->Fill(mvavalue,weight);
             }
 
-            // int SRdisc = mvavalue*10+1;
-            int SRdisc = 1;
-            int SRdiscup = 1;
-            int SRdiscdn = 1;
-            int SRdiscJERup = 1;
-            int SRdiscJERdn = 1;
+            int SRdisc = getBDTBin(mvavalue, isClass6);
+            int SRdisc_unc_up = getBDTBin(mvavalueup, isClass6);
+            int SRdisc_unc_dn = getBDTBin(mvavaluedn, isClass6);
+            int SRdisc_JER_up = getBDTBin(mvavalueJERup, isClass6);
+            int SRdisc_JER_dn = getBDTBin(mvavalueJERdn, isClass6);
 
-            SRdisc = getBDTBin(mvavalue, isClass6);
-            SRdiscup = getBDTBin(mvavalueup, isClass6);
-            SRdiscdn = getBDTBin(mvavaluedn, isClass6);
-            SRdiscJERup = getBDTBin(mvavalueJERup, isClass6);
-            SRdiscJERdn = getBDTBin(mvavalueJERdn, isClass6);
+            if (isData  == 0 && SR >= 0 && SR_unc_up > 0)            p_result.p_jes_alt_up_SRCR.TOTAL->Fill(SR_unc_up, weight);
+            if (isData  == 0 && SR >= 0 && SR_unc_dn > 0)            p_result.p_jes_alt_dn_SRCR.TOTAL->Fill(SR_unc_dn, weight);
 
-            int SRdisc_unc_up = SRdiscup;
-            int SRdisc_unc_dn = SRdiscdn;
-            int SRdisc_JER_up = SRdiscJERup;
-            int SRdisc_JER_dn = SRdiscJERdn;
+            if (isData  == 0 && SR >= 0 && SR_JER_up > 0)            p_result.p_jer_alt_up_SRCR.TOTAL->Fill(SR_JER_up, weight);
+            if (isData  == 0 && SR >= 0 && SR_JER_dn > 0)            p_result.p_jer_alt_dn_SRCR.TOTAL->Fill(SR_JER_dn, weight);
 
-            if (isData  == 0 && SR >= 0 && SR_unc_up > 0)            p_jes_alt_up.SRCR.TOTAL->Fill(SR_unc_up, weight);
-            if (isData  == 0 && SR >= 0 && SR_unc_dn > 0)            p_jes_alt_dn.SRCR.TOTAL->Fill(SR_unc_dn, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_unc_up > 0)            p_result.p_jes_alt_up_SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_unc_dn > 0)            p_result.p_jes_alt_dn_SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
 
-            if (isData  == 0 && SR >= 0 && SR_JER_up > 0)            p_jer_alt_up.SRCR.TOTAL->Fill(SR_JER_up, weight);
-            if (isData  == 0 && SR >= 0 && SR_JER_dn > 0)            p_jer_alt_dn.SRCR.TOTAL->Fill(SR_JER_dn, weight);
-
-            if (isData  == 0 && SR >= 0 && SRdisc_unc_up > 0)            p_jes_alt_up.SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
-            if (isData  == 0 && SR >= 0 && SRdisc_unc_dn > 0)            p_jes_alt_dn.SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
-
-            if (isData  == 0 && SR >= 0 && SRdisc_JER_up > 0)            p_jer_alt_up.SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
-            if (isData  == 0 && SR >= 0 && SRdisc_JER_dn > 0)            p_jer_alt_dn.SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_JER_up > 0)            p_result.p_jer_alt_up_SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
+            if (isData  == 0 && SR >= 0 && SRdisc_JER_dn > 0)            p_result.p_jer_alt_dn_SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
 
             // require SRs+CR (= ttZ CR + ttW CR + SRs)
             if (!outputTrainingBDT) {
                 if (SR < 0) continue;
             }
-
-
-            // if (doSync && SR == 2 && isttW && ss::hyp_class() == 3) {
-            //     std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\n",
-            //             ss::run(), ss::lumi(), ss::event(),
-            //             ss::lep1_id(), lep1_pt,
-            //             ss::lep2_id(), lep2_pt,
-            //             ss::njets(), ss::nbtags(), ss::met(), ss::ht()) << std::endl;
-            // }
-
-            // if (doSync && SR == 2 && ss::is_real_data() && isData && ss::hyp_class() == 3) { // signal leptons
-            //     std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\n",
-            //             ss::run(), ss::lumi(), ss::event(),
-            //             ss::lep1_id(), lep1_pt,
-            //             ss::lep2_id(), lep2_pt,
-            //             ss::njets(), ss::nbtags(), ss::met(), ss::ht()) << std::endl;
-            // }
-
-            // // fake app
-            // if (doSync && SR == 2 && ss::is_real_data() && doFakes && (ss::hyp_class() == 1 || ss::hyp_class() == 2 || (ss::hyp_class()==6 && isClass6Fake))) {
-            //     std::cout << Form("%1d %9d %llu\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%1d\t%1d\t%1d\n",
-            //             ss::run(), ss::lumi(), ss::event(),
-            //             ss::lep1_id(), lep1_pt,
-            //             ss::lep2_id(), lep2_pt,
-            //             ss::njets(), ss::nbtags(), ss::met(), ss::ht(),
-            //             ss::lep1_passes_id(), ss::lep2_passes_id(), ss::lep3_passes_id()) << std::endl;
-            // }
-
-            // if (isXgamma && SR > 2) {
-            //     std::cout << " filename: " << filename << " chainTitle: " << chainTitle << " weight: " << weight << " SR: " << SR << std::endl;
-            // }
-
 
             // truth match the third lepton
             if (!isData) {
@@ -1853,32 +1706,31 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 if (ss::lep3_passes_id()) p_result.h_mid3.br->Fill(ss::lep3_motherID(), weight);
             }
 
-
-
             //These c-s errors
-            if ((istttt || isHiggsScan) && makeGenVariationsMC && ss::genweights().size()>110) {
-                float nom = ss::genweights().at(0);
-                // float pdfrms = 0.;
-                float scale_up = ss::genweights().at(4)/nom;
-                float scale_dn = ss::genweights().at(8)/nom;
-                float alphas_up = ss::genweights().at(110)/nom;
-                float alphas_dn = ss::genweights().at(109)/nom;
-                // TH1F *h_pdf = new TH1F("pdf", "pdf", 1000, 0, 10);
-                // for (int i = 0; i < 100; i++) pdf += ss::genweights().at(i+10);
-                // pdf /= (100*nom);
-                // for (int i = 0; i < 100; i++) h_pdf->Fill(ss::genweights().at(i+10)*weight);
-                // for (int i = 0; i < 100; i++) h_pdf->Fill(ss::genweights().at(i+10)*weight);
-                // pdfrms = h_pdf->GetRMS()*sqrt(h_pdf->GetEntries());
-                // delete h_pdf;
-                p_scale_alt_up.SRCR.TOTAL->Fill(SR,    scale_up*weight);
-                p_scale_alt_dn.SRCR.TOTAL->Fill(SR,    scale_dn*weight);
-                p_scale_alt_up.SRDISC.TOTAL->Fill(SRdisc,    scale_up*weight);
-                p_scale_alt_dn.SRDISC.TOTAL->Fill(SRdisc,    scale_dn*weight);
-                p_alphas_alt_up.SRCR.TOTAL->Fill(SR,    alphas_up*weight);
-                p_alphas_alt_dn.SRCR.TOTAL->Fill(SR,    alphas_dn*weight);
-                p_alphas_alt_up.SRDISC.TOTAL->Fill(SRdisc,    alphas_up*weight);
-                p_alphas_alt_dn.SRDISC.TOTAL->Fill(SRdisc,    alphas_dn*weight);
-                // p_pdf_alt_up.SRCR.TOTAL->Fill(SR,      pdfrms);
+            if (istttt && makeGenVariationsMC) {
+                // float nom = ss::genweights().at(0);
+                // float scale_up = ss::genweights().at(4)/nom;
+                // float scale_dn = ss::genweights().at(8)/nom;
+                // float alphas_up = ss::genweights().at(110)/nom;
+                // float alphas_dn = ss::genweights().at(109)/nom;
+                p_result.p_scale_alt_up_SRCR.TOTAL->Fill(SR,    ss::weight_scale_UP()*weight);
+                p_result.p_scale_alt_dn_SRCR.TOTAL->Fill(SR,    ss::weight_scale_DN()*weight);
+                p_result.p_scale_alt_up_SRDISC.TOTAL->Fill(SRdisc,    ss::weight_scale_UP()*weight);
+                p_result.p_scale_alt_dn_SRDISC.TOTAL->Fill(SRdisc,    ss::weight_scale_DN()*weight);
+                p_result.p_alphas_alt_up_SRCR.TOTAL->Fill(SR,    ss::weight_alphas_UP()*weight);
+                p_result.p_alphas_alt_dn_SRCR.TOTAL->Fill(SR,    ss::weight_alphas_DN()*weight);
+                p_result.p_alphas_alt_up_SRDISC.TOTAL->Fill(SRdisc,    ss::weight_alphas_UP()*weight);
+                p_result.p_alphas_alt_dn_SRDISC.TOTAL->Fill(SRdisc,    ss::weight_alphas_DN()*weight);
+                p_result.p_pdf_alt_up_SRCR.TOTAL->Fill(SR,      ss::weight_pdf_UP()*weight);
+                p_result.p_pdf_alt_dn_SRCR.TOTAL->Fill(SR,      ss::weight_pdf_DN()*weight);
+                p_result.p_isrvar_alt_up_SRCR.TOTAL->Fill(SR      , ss::weight_isrvar_UP()*weight);
+                p_result.p_isrvar_alt_dn_SRCR.TOTAL->Fill(SR      , ss::weight_isrvar_DN()*weight);
+                p_result.p_isrvar_alt_up_SRDISC.TOTAL->Fill(SRdisc, ss::weight_isrvar_UP()*weight);
+                p_result.p_isrvar_alt_dn_SRDISC.TOTAL->Fill(SRdisc, ss::weight_isrvar_DN()*weight);
+                p_result.p_fsrvar_alt_up_SRCR.TOTAL->Fill(SR      , ss::weight_fsrvar_UP()*weight);
+                p_result.p_fsrvar_alt_dn_SRCR.TOTAL->Fill(SR      , ss::weight_fsrvar_DN()*weight);
+                p_result.p_fsrvar_alt_up_SRDISC.TOTAL->Fill(SRdisc, ss::weight_fsrvar_UP()*weight);
+                p_result.p_fsrvar_alt_dn_SRDISC.TOTAL->Fill(SRdisc, ss::weight_fsrvar_DN()*weight);
             }
 
             p_result.SRCR.TOTAL->Fill(SR, weight);
@@ -1886,31 +1738,25 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             p_result.SRDISC.TOTAL->Fill(SRdisc, weight);
 
             // fill systematics hists
-            if (doFakes == 1 )            p_fake_alt_up.SRCR.TOTAL->Fill(SR, weight_alt_FR);
-            if (isData  == 0 )            p_btagSF_alt_up.SRCR.TOTAL->Fill(SR, weight_btag_up_alt);
-            if (isData  == 0 )            p_btagSF_alt_dn.SRCR.TOTAL->Fill(SR, weight_btag_dn_alt);
-            if (isData  == 0 )            p_pu_alt_up.SRCR.TOTAL->Fill(SR, weight_pu_up_alt);
-            if (isData  == 0 )            p_pu_alt_dn.SRCR.TOTAL->Fill(SR, weight_pu_dn_alt);
-            if (isData  == 0 )            p_isr_alt_up.SRCR.TOTAL->Fill(SR, weight_isr_up_alt);
-            if (isData  == 0 )            p_bb_alt_up.SRCR.TOTAL->Fill(SR, weight_bb_up_alt);
-            if (isData  == 0 )            p_lep_alt_up.SRCR.TOTAL->Fill(SR, weight_lep_up_alt);
+            if (doFakes == 1 )            p_result.p_fake_alt_up_SRCR.TOTAL->Fill(SR, weight_alt_FR);
+            if (isData  == 0 )            p_result.p_btagSF_alt_up_SRCR.TOTAL->Fill(SR, weight_btag_up_alt);
+            if (isData  == 0 )            p_result.p_btagSF_alt_dn_SRCR.TOTAL->Fill(SR, weight_btag_dn_alt);
+            if (isData  == 0 )            p_result.p_pu_alt_up_SRCR.TOTAL->Fill(SR, weight_pu_up_alt);
+            if (isData  == 0 )            p_result.p_pu_alt_dn_SRCR.TOTAL->Fill(SR, weight_pu_dn_alt);
+            if (isData  == 0 )            p_result.p_isr_alt_up_SRCR.TOTAL->Fill(SR, weight_isr_up_alt);
+            if (isData  == 0 )            p_result.p_bb_alt_up_SRCR.TOTAL->Fill(SR, weight_bb_up_alt);
+            if (isData  == 0 )            p_result.p_lep_alt_up_SRCR.TOTAL->Fill(SR, weight_lep_up_alt);
 
-            if (doFakes == 1 )            p_fake_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_alt_FR);
-            if (isData  == 0 )            p_btagSF_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_btag_up_alt);
-            if (isData  == 0 )            p_btagSF_alt_dn.SRDISC.TOTAL->Fill(SRdisc, weight_btag_dn_alt);
-            if (isData  == 0 )            p_pu_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_pu_up_alt);
-            if (isData  == 0 )            p_pu_alt_dn.SRDISC.TOTAL->Fill(SRdisc, weight_pu_dn_alt);
-            if (isData  == 0 )            p_isr_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_isr_up_alt);
-            if (isData  == 0 )            p_bb_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_bb_up_alt);
-            if (isData  == 0 )            p_lep_alt_up.SRDISC.TOTAL->Fill(SRdisc, weight_lep_up_alt);
+            if (doFakes == 1 )            p_result.p_fake_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_alt_FR);
+            if (isData  == 0 )            p_result.p_btagSF_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_btag_up_alt);
+            if (isData  == 0 )            p_result.p_btagSF_alt_dn_SRDISC.TOTAL->Fill(SRdisc, weight_btag_dn_alt);
+            if (isData  == 0 )            p_result.p_pu_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_pu_up_alt);
+            if (isData  == 0 )            p_result.p_pu_alt_dn_SRDISC.TOTAL->Fill(SRdisc, weight_pu_dn_alt);
+            if (isData  == 0 )            p_result.p_isr_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_isr_up_alt);
+            if (isData  == 0 )            p_result.p_bb_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_bb_up_alt);
+            if (isData  == 0 )            p_result.p_lep_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_lep_up_alt);
 
             bool plotlep3 = ss::lep3_passes_id() && lep3_pt > 20.;
-
-            if ((ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3) && !isGamma) {
-                // NOTE we will need to get rid of these few events
-                // since it's wrong that we take -3 from non x-gamma
-                std::cout <<  " ss::lep1_motherID(): " << ss::lep1_motherID() <<  " ss::lep2_motherID(): " << ss::lep2_motherID() <<  " chainTitle: " << chainTitle <<  std::endl;
-            }
 
             if (SR > 1) { // non ttZ CR
                 p_result.h_njets.br->Fill(ss::njets() , weight);
@@ -1935,31 +1781,26 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_l3pt.br->Fill(pto3, weight);
                     (abs(ss::lep3_id()) == 11) ? p_result.h_el_l3pt.br->Fill(pto3, weight) : p_result.h_mu_l3pt.br->Fill(pto3, weight);
                 }
-
                 for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
                     p_result.h_bjetpt.br->Fill(ss::btags()[ijet].pt(),weight);
                 }
                 for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                    // if (ss::jets_disc()[ijet] > bmed) continue;
                     p_result.h_jetpt.br->Fill(ss::jets()[ijet].pt(),weight);
                 }
-
                 if (abs(ss::lep1_id()) == 11) p_result.h_mva.br->Fill(ss::lep1_MVA()                                                     , weight);
                 if(abs(ss::lep1_id()) == 13) {
                     p_result.h_mu_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
                     p_result.h_mu_l1eta.br       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
                     p_result.h_mu_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_mu_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    if (lep1_fail_ptratio) p_result.h_mu_lep1_ptRelfail.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep1_ptRatio.br->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_mu_lep1_ptRatio.br->Fill(ss::lep1_ptratio()                                                                               , weight);
                 } else {
                     p_result.h_el_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
                     p_result.h_el_l1pt.br        ->Fill(lep1_pt                                                                                 , weight);
                     p_result.h_el_l1eta.br       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
                     p_result.h_el_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_el_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    if (lep1_fail_ptratio) p_result.h_el_lep1_ptRelfail.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep1_ptRatio.br->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_el_lep1_ptRatio.br->Fill(ss::lep1_ptratio()                                                                               , weight);
                 }
                 if (abs(ss::lep2_id()) == 11) p_result.h_mva.br->Fill(ss::lep2_MVA()                                                     , weight);
                 if(abs(ss::lep2_id()) == 13) {
@@ -1967,15 +1808,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_mu_l2eta.br       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
                     p_result.h_mu_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_mu_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    if (lep2_fail_ptratio) p_result.h_mu_lep2_ptRelfail.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep2_ptRatio.br->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_mu_lep2_ptRatio.br->Fill(ss::lep2_ptratio()                                                                               , weight);
                 } else {
                     p_result.h_el_sip3d_lep2.br  ->Fill(ss::lep2_sip()                                                                          , weight);
                     p_result.h_el_l2eta.br       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
                     p_result.h_el_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_el_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    if (lep2_fail_ptratio) p_result.h_el_lep2_ptRelfail.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep2_ptRatio.br->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_el_lep2_ptRatio.br->Fill(ss::lep2_ptratio()                                                                               , weight);
                 }
                 if (plotlep3) {
                     if(abs(ss::lep3_id()) == 13) {
@@ -1984,7 +1823,6 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                         p_result.h_el_l3eta.br       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
                     }
                 }
-
             }
 
             if (SR == 1) { // ttZ CR
@@ -2036,6 +1874,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             }
 
             if (SR > nCR) {
+                // std::cout <<  " ss::ht(): " << ss::ht() <<  " weight: " << weight <<  " SR: " << SR <<  std::endl;
+                p_result.SR.TOTAL->Fill(SR-nCR, weight);
                 p_result.h_njets.sr->Fill(ss::njets() , weight);
                 p_result.h_nbtags.sr->Fill(ss::nbtags() , weight);
                 p_result.h_type.sr->Fill(mytype , weight);
@@ -2045,21 +1885,9 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 p_result.h_met.sr->Fill(ss::met() , weight);
                 p_result.h_mvis.sr->Fill(mvis , weight);
                 p_result.h_mtvis.sr->Fill(mtvis , weight);
-                auto firsttwotops = getFirstTwoTops();
-
-                if (false) {
-                    auto trijet_discpair = getTrijetDiscs(reader_toptag);
-                    p_result.h_topdisc1.sr->Fill(trijet_discpair.first, weight);
-                    p_result.h_topdisc2.sr->Fill(trijet_discpair.second, weight);
-                    tree_topdisc1 = trijet_discpair.first;
-                    tree_topdisc2 = trijet_discpair.second;
-                }
-
-                // auto ntopinfo = getNtops();
-                // p_result.h_ntops.sr->Fill(ntopinfo.first , weight);
-                // p_result.h_ntopness.sr->Fill(ntopinfo.second , weight);
-                if (firsttwotops.first > 0.) p_result.h_mtop1.sr->Fill(firsttwotops.first, weight);
-                if (firsttwotops.second > 0.) p_result.h_mtop2.sr->Fill(firsttwotops.second, weight);
+                // auto firsttwotops = getFirstTwoTops();
+                // if (firsttwotops.first > 0.) p_result.h_mtop1.sr->Fill(firsttwotops.first, weight);
+                // if (firsttwotops.second > 0.) p_result.h_mtop2.sr->Fill(firsttwotops.second, weight);
                 p_result.h_mll.sr->Fill(mll , weight);
                 p_result.h_mtmin.sr->Fill(mtmin , weight);
                 p_result.h_l1pt.sr->Fill(pto1, weight);
@@ -2070,32 +1898,25 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_l3pt.sr->Fill(pto3, weight);
                     (abs(ss::lep3_id()) == 11) ? p_result.h_el_l3pt.sr->Fill(pto3, weight) : p_result.h_mu_l3pt.sr->Fill(pto3, weight);
                 }
-                //Fill SR plot
-                p_result.SR.TOTAL->Fill(SR-nCR, weight);
-
                 for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
                     p_result.h_bjetpt.sr->Fill(ss::btags()[ijet].pt(),weight);
                 }
                 for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                    // if (ss::jets_disc()[ijet] > bmed) continue;
                     p_result.h_jetpt.sr->Fill(ss::jets()[ijet].pt(),weight);
                 }
-
                 if (abs(ss::lep1_id()) == 11) p_result.h_mva.sr->Fill(ss::lep1_MVA()                                                     , weight);
                 if(abs(ss::lep1_id()) == 13) {
                     p_result.h_mu_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
                     p_result.h_mu_l1eta.sr       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
                     p_result.h_mu_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_mu_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    if (lep1_fail_ptratio) p_result.h_mu_lep1_ptRelfail.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep1_ptRatio.sr->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_mu_lep1_ptRatio.sr->Fill(ss::lep1_ptratio()                                                                               , weight);
                 } else {
                     p_result.h_el_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
                     p_result.h_el_l1eta.sr       ->Fill(ss::lep1_p4().eta()                                                                     , weight);
                     p_result.h_el_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_el_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    if (lep1_fail_ptratio) p_result.h_el_lep1_ptRelfail.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep1_ptRatio.sr->Fill(ptratio_1                                                                               , weight);
+                    p_result.h_el_lep1_ptRatio.sr->Fill(ss::lep1_ptratio()                                                                               , weight);
                 }
                 if (abs(ss::lep2_id()) == 11) p_result.h_mva.sr->Fill(ss::lep2_MVA()                                                     , weight);
                 if(abs(ss::lep2_id()) == 13) {
@@ -2103,15 +1924,13 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                     p_result.h_mu_l2eta.sr       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
                     p_result.h_mu_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_mu_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    if (lep2_fail_ptratio) p_result.h_mu_lep2_ptRelfail.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep2_ptRatio.sr->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_mu_lep2_ptRatio.sr->Fill(ss::lep2_ptratio()                                                                               , weight);
                 } else {
                     p_result.h_el_sip3d_lep2.sr  ->Fill(ss::lep2_sip()                                                                          , weight);
                     p_result.h_el_l2eta.sr       ->Fill(ss::lep2_p4().eta()                                                                     , weight);
                     p_result.h_el_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_el_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    if (lep2_fail_ptratio) p_result.h_el_lep2_ptRelfail.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep2_ptRatio.sr->Fill(ptratio_2                                                                               , weight);
+                    p_result.h_el_lep2_ptRatio.sr->Fill(ss::lep2_ptratio()                                                                               , weight);
                 }
                 if (plotlep3) {
                     if(abs(ss::lep3_id()) == 13) {
@@ -2120,48 +1939,42 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                         p_result.h_el_l3eta.sr       ->Fill(ss::lep3_p4().eta()                                                                     , weight);
                     }
                 }
-
-                // if (nleps > 2) {
-                //     int q1 = 2*(ss::lep1_id() > 0) - 1;
-                //     int q3 = 2*(ss::lep3_id() > 0) - 1;
-                //     p_result.h_charge3.sr->Fill(q3==q1 ? 1.5: 0.5 , weight);
-                // }
-
             }
 
 
         }//event loop
         file->Close();
     }//file loop
+    bar.finish();
 
     if (!isData) {
-        avoidNegativeYields(p_btagSF_alt_up.SRCR.TOTAL);
-        avoidNegativeYields(p_btagSF_alt_dn.SRCR.TOTAL);
-        avoidNegativeYields(p_btagSF_alt_up.SRDISC.TOTAL);
-        avoidNegativeYields(p_btagSF_alt_dn.SRDISC.TOTAL);
-        avoidNegativeYields(p_pu_alt_up.SRCR.TOTAL);
-        avoidNegativeYields(p_pu_alt_dn.SRCR.TOTAL);
-        avoidNegativeYields(p_pu_alt_up.SRDISC.TOTAL);
-        avoidNegativeYields(p_pu_alt_dn.SRDISC.TOTAL);
-        avoidNegativeYields(p_isr_alt_up.SRCR.TOTAL);
-        avoidNegativeYields(p_isr_alt_dn.SRCR.TOTAL);
-        avoidNegativeYields(p_isr_alt_up.SRDISC.TOTAL);
-        avoidNegativeYields(p_isr_alt_dn.SRDISC.TOTAL);
-        avoidNegativeYields(p_lep_alt_up.SRCR.TOTAL);
-        avoidNegativeYields(p_lep_alt_dn.SRCR.TOTAL);
-        avoidNegativeYields(p_lep_alt_up.SRDISC.TOTAL);
-        avoidNegativeYields(p_lep_alt_dn.SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_btagSF_alt_up_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_btagSF_alt_dn_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_btagSF_alt_up_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_btagSF_alt_dn_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_pu_alt_up_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_pu_alt_dn_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_pu_alt_up_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_pu_alt_dn_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_isr_alt_up_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_isr_alt_dn_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_isr_alt_up_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_isr_alt_dn_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_lep_alt_up_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_lep_alt_dn_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_lep_alt_up_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_lep_alt_dn_SRDISC.TOTAL);
         avoidNegativeYields(p_result.SRCR.TOTAL);
         avoidNegativeYields(p_result.SRDISC.TOTAL);
         avoidNegativeYields(p_result.SR.TOTAL);
-        avoidNegativeYields(p_jes_alt_up.SRCR.TOTAL);
-        avoidNegativeYields(p_jes_alt_dn.SRCR.TOTAL);
-        avoidNegativeYields(p_jes_alt_up.SRDISC.TOTAL);
-        avoidNegativeYields(p_jes_alt_dn.SRDISC.TOTAL);
-        avoidNegativeYields(p_jer_alt_up.SRCR.TOTAL);
-        avoidNegativeYields(p_jer_alt_dn.SRCR.TOTAL);
-        avoidNegativeYields(p_jer_alt_up.SRDISC.TOTAL);
-        avoidNegativeYields(p_jer_alt_dn.SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_jes_alt_up_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_jes_alt_dn_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_jes_alt_up_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_jes_alt_dn_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_jer_alt_up_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_jer_alt_dn_SRCR.TOTAL);
+        avoidNegativeYields(p_result.p_jer_alt_up_SRDISC.TOTAL);
+        avoidNegativeYields(p_result.p_jer_alt_dn_SRDISC.TOTAL);
     }
 
     if (makeRootFiles) {
@@ -2216,8 +2029,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             //fakes ewk
             if (doFakes == 1) {
                 TH1F* plot_alt = 0;
-                if      (kinRegs[kr] == "srcr")   plot_alt = p_fake_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr] == "srdisc")   plot_alt = p_fake_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_result.p_fake_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr] == "srdisc")   plot_alt = p_result.p_fake_alt_up_SRDISC.TOTAL;
                 else exit(1);
                 TH1F* fakes_EWKUp    = (TH1F*) plot_alt->Clone("fakes_EWKUp");
                 TH1F* fakes_EWKDown  = (TH1F*) plot_alt->Clone("fakes_EWKDown");
@@ -2230,8 +2043,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
             // signal scale
             if ((istttt || isHiggsScan) && makeGenVariationsMC) {
                 TH1F* plot_alt = 0;
-                if      (kinRegs[kr] == "srcr")   plot_alt = p_scale_alt_up.SRCR.TOTAL;
-                else if (kinRegs[kr] == "srdisc")  plot_alt = p_scale_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_result.p_scale_alt_up_SRCR.TOTAL;
+                else if (kinRegs[kr] == "srdisc")  plot_alt = p_result.p_scale_alt_up_SRDISC.TOTAL;
                 else exit(1);
                 for (int bin = 0; bin < plot_alt->GetNbinsX(); bin++){
                     float vnom = h_sr->GetBinContent(bin);
@@ -2241,8 +2054,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 avoidNegativeYields(scaleUp);
                 scaleUp->Scale(h_sr->Integral()/scaleUp->Integral());
                 scaleUp->Write();
-                if      (kinRegs[kr] == "srcr")   plot_alt = p_scale_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr] == "srdisc")   plot_alt = p_scale_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_result.p_scale_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr] == "srdisc")   plot_alt = p_result.p_scale_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 for (int bin = 0; bin < plot_alt->GetNbinsX(); bin++){
                 }
@@ -2251,8 +2064,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 scaleDn->Scale(h_sr->Integral()/scaleDn->Integral());
                 scaleDn->Write();
                 // signal pdf
-                if      (kinRegs[kr] == "srcr")   plot_alt = p_pdf_alt_up.SRCR.TOTAL;
-                else if (kinRegs[kr] == "srdisc")  plot_alt = p_pdf_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_result.p_pdf_alt_up_SRCR.TOTAL;
+                else if (kinRegs[kr] == "srdisc")  plot_alt = p_result.p_pdf_alt_up_SRDISC.TOTAL;
                 else exit(1);
                 for (int bin = 1; bin <= plot_alt->GetNbinsX(); bin++){
                     plot_alt->SetBinContent(bin, h_sr->GetBinContent(bin)*(1+plot_alt->GetBinContent(bin)));
@@ -2266,8 +2079,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 avoidNegativeYields(pdfDn);
                 pdfDn->Write();
                 // alphas
-                if      (kinRegs[kr] == "srcr")   plot_alt = p_alphas_alt_up.SRCR.TOTAL;
-                else if (kinRegs[kr] == "srdisc")  plot_alt = p_alphas_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_result.p_alphas_alt_up_SRCR.TOTAL;
+                else if (kinRegs[kr] == "srdisc")  plot_alt = p_result.p_alphas_alt_up_SRDISC.TOTAL;
                 else exit(1);
                 for (int bin = 0; bin < plot_alt->GetNbinsX(); bin++){
                     float vnom = h_sr->GetBinContent(bin);
@@ -2277,8 +2090,8 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 avoidNegativeYields(alphasUp);
                 alphasUp->Scale(h_sr->Integral()/alphasUp->Integral());
                 alphasUp->Write();
-                if      (kinRegs[kr] == "srcr")   plot_alt = p_alphas_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr] == "srdisc")   plot_alt = p_alphas_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr] == "srcr")   plot_alt = p_result.p_alphas_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr] == "srdisc")   plot_alt = p_result.p_alphas_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 for (int bin = 0; bin < plot_alt->GetNbinsX(); bin++){
                 }
@@ -2349,11 +2162,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 TH1F* plot_btagSF_up_alt = 0;
                 TH1F* plot_btagSF_ct_alt = 0;
                 TH1F* plot_btagSF_dn_alt = 0;
-                if      (kinRegs[kr]=="srcr")   plot_btagSF_up_alt = p_btagSF_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_btagSF_up_alt = p_btagSF_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_btagSF_up_alt = p_result.p_btagSF_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_btagSF_up_alt = p_result.p_btagSF_alt_up_SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_btagSF_dn_alt = p_btagSF_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_btagSF_dn_alt = p_btagSF_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_btagSF_dn_alt = p_result.p_btagSF_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_btagSF_dn_alt = p_result.p_btagSF_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 if      (kinRegs[kr]=="srcr")   plot_btagSF_ct_alt = p_result.SRCR.TOTAL;
                 else if      (kinRegs[kr]=="srdisc")   plot_btagSF_ct_alt = p_result.SRDISC.TOTAL;
@@ -2386,11 +2199,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //jes
                 TH1F* plot_alt_jes_up = 0;
                 TH1F* plot_alt_jes_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_jes_up=p_jes_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jes_up=p_jes_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_jes_up=p_result.p_jes_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_jes_up=p_result.p_jes_alt_up_SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_jes_dn=p_jes_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jes_dn=p_jes_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_jes_dn=p_result.p_jes_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_jes_dn=p_result.p_jes_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 TH1F* jesUp   = (TH1F*) plot_alt_jes_up->Clone("jesUp");
                 TH1F* jesDown = (TH1F*) plot_alt_jes_dn->Clone("jesDown");
@@ -2406,11 +2219,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //jer
                 TH1F* plot_alt_jer_up = 0;
                 TH1F* plot_alt_jer_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_jer_up=p_jer_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_up=p_jer_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_jer_up=p_result.p_jer_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_up=p_result.p_jer_alt_up_SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_jer_dn=p_jer_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_dn=p_jer_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_jer_dn=p_result.p_jer_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_jer_dn=p_result.p_jer_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 TH1F* jerUp   = (TH1F*) plot_alt_jer_up->Clone("jerUp");
                 TH1F* jerDown = (TH1F*) plot_alt_jer_dn->Clone("jerDown");
@@ -2426,11 +2239,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //lep
                 TH1F* plot_alt_lep_up = 0;
                 TH1F* plot_alt_lep_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_lep_up=p_lep_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_lep_up=p_lep_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_lep_up=p_result.p_lep_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_lep_up=p_result.p_lep_alt_up_SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_lep_dn=p_lep_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_lep_dn=p_lep_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_lep_dn=p_result.p_lep_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_lep_dn=p_result.p_lep_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 TH1F* lepUp   = (TH1F*) plot_alt_lep_up->Clone("lepUp");
                 TH1F* lepDown = (TH1F*) plot_alt_lep_dn->Clone("lepDown");
@@ -2441,11 +2254,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 // ttbb/ttjj ~ 1.7 uncertainty
                 TH1F* plot_alt_bb_up = 0;
                 TH1F* plot_alt_bb_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_bb_up=p_bb_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_up=p_bb_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_bb_up=p_result.p_bb_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_up=p_result.p_bb_alt_up_SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_bb_dn=p_bb_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_dn=p_bb_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_bb_dn=p_result.p_bb_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_bb_dn=p_result.p_bb_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 TH1F* bbUp   = (TH1F*) plot_alt_bb_up->Clone("bbUp");
                 TH1F* bbDown = (TH1F*) plot_alt_bb_dn->Clone("bbDown");
@@ -2466,11 +2279,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //isr
                 TH1F* plot_alt_isr_up = 0;
                 TH1F* plot_alt_isr_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_isr_up=p_isr_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_isr_up=p_isr_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_isr_up=p_result.p_isr_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_isr_up=p_result.p_isr_alt_up_SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_isr_dn=p_isr_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_isr_dn=p_isr_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_isr_dn=p_result.p_isr_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_isr_dn=p_result.p_isr_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 TH1F* isrUp   = (TH1F*) plot_alt_isr_up->Clone("isrUp");
                 TH1F* isrDown = (TH1F*) plot_alt_isr_dn->Clone("isrDown");
@@ -2491,11 +2304,11 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
                 //pu
                 TH1F* plot_alt_pu_up = 0;
                 TH1F* plot_alt_pu_dn = 0;
-                if      (kinRegs[kr]=="srcr")   plot_alt_pu_up=p_pu_alt_up.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_pu_up=p_pu_alt_up.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_pu_up=p_result.p_pu_alt_up_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_pu_up=p_result.p_pu_alt_up_SRDISC.TOTAL;
                 else exit(1);
-                if      (kinRegs[kr]=="srcr")   plot_alt_pu_dn=p_pu_alt_dn.SRCR.TOTAL;
-                else if      (kinRegs[kr]=="srdisc")   plot_alt_pu_dn=p_pu_alt_dn.SRDISC.TOTAL;
+                if      (kinRegs[kr]=="srcr")   plot_alt_pu_dn=p_result.p_pu_alt_dn_SRCR.TOTAL;
+                else if      (kinRegs[kr]=="srdisc")   plot_alt_pu_dn=p_result.p_pu_alt_dn_SRDISC.TOTAL;
                 else exit(1);
                 TH1F* puUp   = (TH1F*) plot_alt_pu_up->Clone("puUp");
                 TH1F* puDown = (TH1F*) plot_alt_pu_dn->Clone("puDown");
@@ -2520,7 +2333,7 @@ pair<yields_t, plots_t> run(TChain *chain, bool isData, bool doFlips, int doFake
     }
 
     //Return yield
-    return pair<yields_t, plots_t>(y_result,p_result);
+    return p_result;
 
 }
 
@@ -2602,117 +2415,15 @@ void initHistError(bool usePoisson, TH1F* plot) {
     else  plot->Sumw2();
 }
 
-std::pair<float,float> getTrijetDiscs(TMVA::Reader* reader) {
-    // Separate out b-tagged jets from non-btagged jets
-    std::vector<LorentzVector> bjets;
-    std::vector<float> bjets_disc;
-    std::vector<LorentzVector> jets;
-    for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-        bjets.push_back(ss::btags()[ijet]);
-        bjets_disc.push_back(ss::btags_disc()[ijet]);
-    }
-    for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-        if (ss::jets_disc()[ijet] > bmed) continue;
-        jets.push_back(ss::jets()[ijet]);
-    }
-
-    // std::vector<float> discs;
-    float disc_best = -2;
-    float disc_secondbest = -2;
-    for (unsigned int ib = 0; ib < bjets.size(); ib++) {
-        LorentzVector bjet = (bjets[ib]);
-        float disc = bjets_disc[ib];
-        for (unsigned int i = 0; i < jets.size(); i++) {
-            for (unsigned int j = i+1; j < jets.size(); j++) {
-
-                LorentzVector w = (jets[i]+jets[j]);
-                float HadrWmass = w.M();
-                if (HadrWmass > 1650. || HadrWmass < 15.) continue;
-
-                LorentzVector top = (jets[i]+jets[j]+bjet);
-                float TopMass = top.M();
-                if (TopMass > 3900 || TopMass < 30) continue;
-
-                float sumpt = jets[i].pt() + jets[j].pt() + bjet.pt();
-
-                float ThPtOverSumPt = top.pt()/sumpt;
-
-                float AngleThWh = fabs(DeltaPhi(top.phi(),w.phi()));
-                float AngleThBh = fabs(DeltaPhi(top.phi(),bjet.phi()));
-
-                std::vector<float> inputs = {disc,ThPtOverSumPt,AngleThWh,AngleThBh,HadrWmass,TopMass};
-                float disc = reader->EvaluateMVA(inputs,"BDT");
-
-                if (disc > disc_best) disc_best = disc;
-                else if (disc > disc_secondbest) disc_secondbest = disc;
-
-                // discs.push_back(disc);
-
-            }
-        }
-    }
-    // return discs;
-    return std::pair<float,float>(disc_best,disc_secondbest);
+float calcDeltaPhi(float phi1, float phi2){
+  float dPhi = phi1 - phi2;
+  while (dPhi  >  TMath::Pi()) dPhi -= 2*TMath::Pi();
+  while (dPhi <= -TMath::Pi()) dPhi += 2*TMath::Pi();
+  return fabs(dPhi);
 }
 
-std::pair<int,float> getNtops() {
-    // Separate out b-tagged jets from non-btagged jets
-    std::vector<LorentzVector> bjets;
-    std::vector<LorentzVector> jets;
-    for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-        bjets.push_back(ss::btags()[ijet]);
-    }
-    for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-        if (ss::jets_disc()[ijet] > bmed) continue;
-        jets.push_back(ss::jets()[ijet]);
-    }
-    // std::cout << "begin getNtops() -->" << std::endl;
-    // std::cout << "   found " << jets.size() << " jets and " << bjets.size() << " bjets" << std::endl;
-
-
-    // Try to divide out combinatorics
-    float ncomb = 0.5 * bjets.size() * jets.size();
-
-    float cutw = 30.;
-    float cutt = 50.;
-    int ntops = 0;
-    std::vector<int> used_ijets;
-    // for each bjet, increment ntops if there is a unique pair
-    // of quarks q1,q2 that satisfies
-    //      |m(q1,q2)-mW| < 30
-    //      |m(b,q1,q2)-mtop| < 50
-    for (auto bjet : bjets) {
-        int best_ijet1 = -1;
-        int best_ijet2 = -1;
-        float best_dmt = cutt;
-        // std::cout << "   considering bjet with pt " << bjet.pt() << std::endl;
-        for (unsigned int i = 0; i < jets.size(); i++) {
-            for (unsigned int j = i+1; j < jets.size(); j++) {
-                float dmw = fabs((jets[i]+jets[j]).M()-80.4);
-                float dmt = fabs((jets[i]+jets[j]+bjet).M()-172.5);
-                if (dmw > cutw) continue;
-                if (dmt > cutt) continue;
-                // bool already_used = std::find(used_pairs.begin(), used_pairs.end(), std::make_pair<int,int>(i,j)) != used_pairs.end();
-                bool already_used = (std::find(used_ijets.begin(), used_ijets.end(), i) != used_ijets.end()
-                        || std::find(used_ijets.begin(), used_ijets.end(), j) != used_ijets.end());
-                // std::cout << "       pair " << i << "," << j << " already used? " << already_used << std::endl;
-                if (already_used) continue;
-                if (dmt < best_dmt) {
-                    // std::cout << "       pair " << i << "," << j << " has better dmt of " << dmt << std::endl;
-                    best_dmt = dmt;
-                    best_ijet1 = i;
-                    best_ijet2 = j;
-                }
-            }
-        }
-        if (best_ijet1 < 0 || best_ijet2 < 0) continue;
-        used_ijets.push_back(best_ijet1);
-        used_ijets.push_back(best_ijet2);
-        // std::cout << "   incrementing ntops" << std::endl;
-        ntops++;
-    }
-    // std::cout << "end getNtops() -->" << std::endl;
-    return std::pair<int,float>(ntops, 1.0*ntops/ncomb);
+float calcMT(float pt1, float phi1, float pt2, float phi2){
+  return sqrt( 2 * pt1 * pt2 * ( 1 - cos( phi1 - phi2 ) ) );
 }
 
 std::pair<float,float> getFirstTwoTops() {
@@ -2756,7 +2467,6 @@ std::pair<float,float> getFirstTwoTops() {
             }
         }
     }
-    // std::cout <<  " bjets.size(): " << bjets.size() <<  " jets.size(): " << jets.size() <<  " bestmt1: " << bestmt1 <<  " bestmt2: " << bestmt2 <<  " bestchisq1: " << bestchisq1 <<  " bestchisq2: " << bestchisq2 <<  std::endl;
     return std::pair<float,float>(bestmt1,bestmt2);
 }
 
