@@ -1668,6 +1668,11 @@ void SSAG::Init(TTree *tree) {
 		lep4_isTrigSafeNoIsov1_branch = tree->GetBranch("lep4_isTrigSafeNoIsov1");
 		if (lep4_isTrigSafeNoIsov1_branch) {lep4_isTrigSafeNoIsov1_branch->SetAddress(&lep4_isTrigSafeNoIsov1_);}
 	}
+	skim_branch = 0;
+	if (tree->GetBranch("skim") != 0) {
+		skim_branch = tree->GetBranch("skim");
+		if (skim_branch) {skim_branch->SetAddress(&skim_);}
+	}
 	lep2_isTrigSafev1_branch = 0;
 	if (tree->GetBranch("lep2_isTrigSafev1") != 0) {
 		lep2_isTrigSafev1_branch = tree->GetBranch("lep2_isTrigSafev1");
@@ -2013,6 +2018,7 @@ void SSAG::GetEntry(unsigned int idx)
 		lep1_isTrigSafev1_isLoaded = false;
 		lep4_isTrigSafeNoIsov1_isLoaded = false;
 		lep2_isTrigSafev1_isLoaded = false;
+		skim_isLoaded = false;
 	}
 
 void SSAG::LoadAllBranches() 
@@ -2352,6 +2358,7 @@ void SSAG::LoadAllBranches()
 	if (lep1_isTrigSafev1_branch != 0) lep1_isTrigSafev1();
 	if (lep4_isTrigSafeNoIsov1_branch != 0) lep4_isTrigSafeNoIsov1();
 	if (lep2_isTrigSafev1_branch != 0) lep2_isTrigSafev1();
+	if (skim_branch != 0) skim();
 }
 
 	const bool &SSAG::lep1_isPrompt()
@@ -6696,6 +6703,19 @@ void SSAG::LoadAllBranches()
 		}
 		return lep2_isTrigSafev1_;
 	}
+	const bool &SSAG::skim()
+	{
+		if (not skim_isLoaded) {
+			if (skim_branch != 0) {
+				skim_branch->GetEntry(index);
+			} else { 
+				printf("branch skim_branch does not exist!\n");
+				exit(1);
+			}
+			skim_isLoaded = true;
+		}
+		return skim_;
+	}
 
 std::chrono::time_point<std::chrono::system_clock> t_old = std::chrono::system_clock::now();
 std::vector<double> deq;
@@ -7055,4 +7075,5 @@ namespace ss {
 	const bool &lep1_isTrigSafev1() { return samesign.lep1_isTrigSafev1(); }
 	const bool &lep4_isTrigSafeNoIsov1() { return samesign.lep4_isTrigSafeNoIsov1(); }
 	const bool &lep2_isTrigSafev1() { return samesign.lep2_isTrigSafev1(); }
+	const bool &skim() { return samesign.skim(); }
 }

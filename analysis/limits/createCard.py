@@ -28,7 +28,7 @@ class Process(object):
         self.fsrvar  = "-"
         self.lepeff  = "-"
         self.hlt  = "-"
-        self.lephlt  = "-"
+        # self.lephlt  = "-"
         self.hthlt  = "-"
         self.btag = "-"
         self.pu = "-"
@@ -243,9 +243,9 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     card.write("%-40s %-5s " % ("lep","shape"))
     for process in processes: card.write("%-15s " % (process.lepeff))
     card.write("\n")
-    #nuisance lephlt
-    card.write("%-40s %-5s " % ("lephlt","lnN"))
-    for process in processes: card.write("%-15s " % (process.lephlt))
+    ##nuisance lephlt
+    #card.write("%-40s %-5s " % ("lephlt","lnN"))
+    #for process in processes: card.write("%-15s " % (process.lephlt))
     card.write("\n")
     #nuisance hthlt
     card.write("%-40s %-5s " % ("hthlt","shape"))
@@ -359,7 +359,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
 
     return
 
-def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=False, thresh=0.0):
+def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=False, thresh=0.0,year=-1):
     # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
     inject_tttt = (signal != "tttt") or inject_tttt
     # do_tttt = True
@@ -369,28 +369,31 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     #     data = Process(-1,"data","pdata_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
     # else:
         # print "Using real data!"
-    data = Process(-1,"data","data_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    signal = Process(0,signal,signal+"_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    TTW = Process(1,"ttw","ttw_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    TTZ = Process(2,"ttz","ttz_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    TTH = Process(3,"tth","tth_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    # WZ  = Process(4,"wz","wz_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    # WW  = Process(5,"ww","ww_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    XG  = Process(4,"xg","xg_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    rares = Process(5,"rares","rares_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+    tomatch = "ifb"
+    if year > 0:
+        tomatch = str(year)
+    data = Process(-1,"data","data_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    signal = Process(0,signal,signal+"_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    TTW = Process(1,"ttw","ttw_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    TTZ = Process(2,"ttz","ttz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    TTH = Process(3,"tth","tth_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    # WZ  = Process(4,"wz","wz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    # WW  = Process(5,"ww","ww_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    XG  = Process(4,"xg","xg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    rares = Process(5,"rares","rares_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     if not domcfakes:
-        fakes = Process(6,"fakes","fakes_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+        fakes = Process(6,"fakes","fakes_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     else:
-        fakes = Process(6,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    flips = Process(7,"flips","flips_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
-    TTVV = Process(8,"ttvv","ttvv_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+        fakes = Process(6,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    flips = Process(7,"flips","flips_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    TTVV = Process(8,"ttvv","ttvv_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     if inject_tttt:
         os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
-        TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+        TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     #overwrite nuisances
     lumiunc = "1.025"
     signal.lumi  = "1"
-    signal.lephlt  = "1.04"
+    # signal.lephlt  = "1.04"
     signal.hlt  = "1.03"
     signal.jes  = "1"
     signal.jer  = "1"
@@ -412,8 +415,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTW.bb         = "1"
     TTW.jes  = "1"
     TTW.jer  = "1"
-    # TTW.lepeff  = "1.0"
-    TTW.lephlt  = "1.04"
+    TTW.lepeff  = "1.0"
+    # TTW.lephlt  = "1.04"
     TTW.hlt  = "1.03"
     # TTW.hthlt  = "1"
     TTW.btag = "1"
@@ -424,8 +427,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.bb  = "1"
     TTZ.jes  = "1"
     TTZ.jer  = "1"
-    # TTZ.lepeff  = "1.0"
-    TTZ.lephlt  = "1.04"
+    TTZ.lepeff  = "1.0"
+    # TTZ.lephlt  = "1.04"
     TTZ.hlt  = "1.03"
     # TTZ.hthlt  = "1"
     TTZ.btag = "1"
@@ -439,7 +442,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTH.jes  = "1"
     TTH.jer  = "1"
     TTH.lepeff  = "1.0"
-    TTH.lephlt  = "1.04"
+    # TTH.lephlt  = "1.04"
     TTH.hlt  = "1.03"
     TTH.hthlt  = "1"
     TTH.btag = "1"
@@ -449,7 +452,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTVV.jes  = "1"
     TTVV.jer  = "1"
     TTVV.lepeff  = "1.0"
-    TTVV.lephlt  = "1.04"
+    # TTVV.lephlt  = "1.04"
     TTVV.hlt  = "1.03"
     TTVV.hthlt  = "1"
     TTVV.btag = "1"
@@ -472,7 +475,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     XG.jes  = "1"
     XG.jer  = "1"
     XG.lepeff  = "1.0"
-    XG.lephlt  = "1.04"
+    # XG.lephlt  = "1.04"
     XG.hlt  = "1.03"
     XG.hthlt  = "1"
     XG.btag = "1"
@@ -482,7 +485,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     rares.jes  = "1"
     rares.jer  = "1"
     rares.lepeff  = "1.0"
-    rares.lephlt  = "1.04"
+    # rares.lephlt  = "1.04"
     rares.hlt  = "1.03"
     rares.hthlt  = "1"
     rares.btag = "1"
@@ -490,7 +493,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     if inject_tttt:
         TTTT.TTTT = "0.79/1.18" # - In 2017, latest NLO(QCD+EWK) calculation (arxiv:1711.02116).  - 11.97 +2.15 -2.51
         TTTT.lumi  = "1"
-        TTTT.lephlt  = "1.04"
+        # TTTT.lephlt  = "1.04"
         TTTT.hlt  = "1.03"
         TTTT.jes  = "1"
         TTTT.jer  = "1"
@@ -561,7 +564,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", help="card directory")
     parser.add_argument("-o", "--output", help="output card name", default="card_tttt.txt")
+    parser.add_argument("-y", "--year", help="year", default=-1, type=int)
     args = parser.parse_args()
 
     # thedir = "v0.02_Apr26_test"
-    writeOneCard(args.directory,args.output)
+    writeOneCard(args.directory,args.output,year=args.year)

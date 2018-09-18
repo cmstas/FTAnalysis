@@ -21,6 +21,7 @@ def plot_one(ax,fname,poi_name="r",poi_scale=1.,fmt=".3f",unit="",label="Expecte
 
     points = []
     for evt in t:
+        if 2*evt.deltaNLL > 8.: continue
         if evt.quantileExpected > -1.5:
             points.append((evt.r*poi_scale, 2*evt.deltaNLL))
     points = np.array(sorted(points))
@@ -32,7 +33,7 @@ def plot_one(ax,fname,poi_name="r",poi_scale=1.,fmt=".3f",unit="",label="Expecte
     r_1sigma = get_roots(points,y_1sigma)
     r_2sigma = get_roots(points,y_2sigma)
 
-    rtext = "%%s = ${%%%s}^{+%%%s}_{-%%%s}$" % (fmt,fmt,fmt)
+    rtext = "%%s = ${%%%s}^{+%%%s}_{-%%%s}$ %s" % (fmt,fmt,fmt,unit if unit else "")
     # rtext = "%s = ${%.3f}^{+%.3f}_{-%.3f}$" % (poi_name, r_center,r_center-r_1sigma[0],r_1sigma[1]-r_center)
     rtext = rtext % (poi_name, r_center,r_center-r_1sigma[0],r_1sigma[1]-r_center)
     ax.text(0.99, 0.97,rtext, horizontalalignment='right', verticalalignment='top', transform = ax.transAxes, size="xx-large")
@@ -57,6 +58,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("scandata", help="scandata.root file name")
     parser.add_argument("-l", "--label", help="label", default="Expected",type=str)
+    parser.add_argument("-L", "--lumi", help="label", default="150.0",type=str)
     parser.add_argument("-x", "--xsec", help="scale and rename POI for xsec", action="store_true")
     args = parser.parse_args()
 
@@ -65,10 +67,12 @@ if __name__ == "__main__":
     poi_name = "r"
     poi_scale = 1.
     unit = ""
+    fmt = ".3f"
     if args.xsec:
         poi_name = r"$\sigma$"
         poi_scale = 11.97
         unit = "fb"
+        fmt = ".2f"
 
     set_defaults()
 
@@ -76,14 +80,18 @@ if __name__ == "__main__":
     # fig, ax = plt.subplots(nrows=1, ncols=1)
 
     # plot_one(ax,fname="original_cards_2017_94X_mcfakes_75ifb/scandata.root", poi_name=poi_name, poi_scale=poi_scale,fmt=".3f",unit="",label="Expected")
-    plot_one(ax,fname=args.scandata, poi_name=poi_name, poi_scale=poi_scale,fmt=".3f",unit=unit,label=args.label)
+    plot_one(ax,fname=args.scandata, poi_name=poi_name, poi_scale=poi_scale,fmt=fmt,unit=unit,label=args.label)
 
-    add_cms_info(ax, typ="Simulation", lumi="75.0")
+    add_cms_info(ax, typ="Simulation", lumi=args.lumi)
 
     ax.legend(loc="upper left",fontsize="x-large")
 
-    ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(base=0.1))
-    ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(base=0.2))
+    if args.xsec:
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(base=1))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(base=0.5))
+    else:
+        ax.xaxis.set_minor_locator(mpl.ticker.MultipleLocator(base=0.1))
+        ax.yaxis.set_minor_locator(mpl.ticker.MultipleLocator(base=0.5))
 
 
 

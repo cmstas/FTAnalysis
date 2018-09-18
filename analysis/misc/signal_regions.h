@@ -7,11 +7,6 @@
 // so otherwise we get the "multiple definitions of..." when compiling/linking :(
 // https://stackoverflow.com/questions/8201944/multiple-definition-and-header-only-libraries
 
-int getNsrsTTTTBDT() { return 7; }
-int signalRegionBDT(float disc){
-    return 1+(int)(disc*getNsrsTTTTBDT());
-}
-
 float ptcut(int id){
   return (abs(id) == 11) ? 15 : 10; 
 }
@@ -115,7 +110,54 @@ int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, i
     }
     return -1;
 }
-int getNsrsTTTT() { return 18; }
+int getNsrs() { return 18; } // note that this includes CRs
+int getNCRs() { return 2; }
+int getNsrsDisc() { return 13; }
+
+// // 19 bins  with q split CRW
+// int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, int isClass6){
+//     if (lep1pt < 25.) return -1;
+//     if (lep2pt < 20.) return -1;
+//     if (njets < 2) return -1;
+//     if (nbtags < 2) return -1;
+//     if (ht < 300) return -1;
+//     if (met < 50) return -1;
+//     if (isClass6) {
+//         if (lep3pt >= 20.) return 1;
+//         else return -1;
+//     }
+//     if (nleps == 2) {
+//         if (nbtags == 2) {
+//             if (njets <= 5) return 2 + (id1>0);
+//             if (njets == 6) return 4;
+//             if (njets == 7) return 5;
+//             if (njets >= 8) return 6;
+//         } else if (nbtags == 3) {
+//             if (njets == 5) return 7;
+//             if (njets == 6) return 8;
+//             if (njets == 7) return 9;
+//             if (njets >= 8) return 10;
+//         } else if (nbtags >= 4) {
+//             if (njets == 5) return 11;
+//             if (njets == 6) return 12;
+//             if (njets >= 7) return 13;
+//         }
+//     } else {
+//         if (nbtags == 2) {
+//             if (njets == 5) return 14;
+//             if (njets == 6) return 15;
+//             if (njets >= 7) return 16;
+//         } else if (nbtags >= 3) {
+//             if (njets == 4) return 17;
+//             if (njets == 5) return 18;
+//             if (njets >= 6) return 19;
+//         }
+//     }
+//     return -1;
+// }
+// int getNsrs() { return 19; } // note that this includes CRs
+// int getNCRs() { return 3; }
+// int getNsrsDisc() { return 13; }
 
 
 #endif

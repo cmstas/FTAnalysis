@@ -2,12 +2,16 @@ import numpy as np
 from pytable import Table
 from analysis.limits.errors import E
 
-def write_table(data, bgs, outname=None):
+def write_table(data, bgs, outname=None, signal=None):
     tab = Table()
     sumbgs = sum(bgs)
     databg = data/sumbgs
-    procs = bgs+[sumbgs,data,databg]
-    cnames = [bg.get_attr("label") for bg in bgs] + ["Total bkg","Data", "Data/bkg"]
+    if signal is not None:
+        procs = bgs+[sumbgs,data,databg,signal]
+        cnames = [bg.get_attr("label") for bg in bgs] + ["Total bkg","Data", "Data/bkg","tttt"]
+    else:
+        procs = bgs+[sumbgs,data,databg]
+        cnames = [bg.get_attr("label") for bg in bgs] + ["Total bkg","Data", "Data/bkg"]
     tab.set_column_names(["bin"]+cnames)
     sep = "+-"
     precision = 2
@@ -26,7 +30,7 @@ def write_table(data, bgs, outname=None):
 
     row = ["total"]
     for iproc,proc in enumerate(procs):
-        if iproc == len(procs)-1:
+        if iproc == len(procs)-(1+(signal is not None)):
             totbg = E(sum(sumbgs.counts), np.sum(sumbgs.errors**2.)**0.5)
             totdata = E(sum(data.counts))
             ratio = totdata/totbg

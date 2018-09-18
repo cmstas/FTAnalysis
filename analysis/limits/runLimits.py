@@ -56,7 +56,7 @@ def print_lims(d_lims, fb=False, unblinded=False):
 def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False,
         verbose=True, dolimits=True, dosignificance=True, doscan=True,
         unblinded=False,sig="tttt", allownegative=False, inject_tttt=False,
-        use_autostats=False, thresh=0.0, scalelumi=1.0, scaletth=1.0):
+        use_autostats=False, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=-1):
 
     extra_base = ""
     # NOTE, can't do both or else need to combine the flags
@@ -76,7 +76,7 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
     if not os.path.isfile(full_card_name) or redocard:
         if verbose: print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
-        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh)
+        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh, year=year)
         if verbose: print ">>> Making workspace"
         # There was a bug with combine (https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/issues/491) which needed text2workspace to be explicitly
         # run before using FitDiagnostics (for mu scan & pre/postfit), but this is fixed in the 81x branch (cherry pick 69c180a04c05d0bad6a6c38d97cdc431cfe4fb49 in 94x if
@@ -90,6 +90,7 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
     if not dolimits: return {}
 
     if not os.path.isfile(full_log_name) or (redolimits or redocard):
+        extra = extra_base[:]
         if not unblinded:
             extra = extra_base + " --noFitAsimov"
         limit_cmd = "combine -M AsymptoticLimits {0} {1}  2>&1 | tee {2}".format(full_card_name_root, extra, full_log_name)
@@ -155,6 +156,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--sig", help="signal name", default="tttt")
     parser.add_argument("-S", "--scalelumi", help="scale luminosity", default=1.0, type=float)
     parser.add_argument("-T", "--scaletth", help="scale tth", default=1.0, type=float)
+    parser.add_argument("-y", "--year", help="year", default=-1, type=int)
     args = parser.parse_args()
 
     # d_lims = get_lims(args)
@@ -174,6 +176,7 @@ if __name__ == "__main__":
             thresh=args.thresh,
             scalelumi=args.scalelumi,
             scaletth=args.scaletth,
+            year=args.year,
             )
     print "------------------------------"
     print_lims(d_lims, fb=True, unblinded=args.unblinded)

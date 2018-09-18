@@ -1,3 +1,4 @@
+import os
 import ROOT as r
 
 def avoid_negative_yields(h):
@@ -51,14 +52,15 @@ def avoid_zero_integrals(h,h_var):
 
 
 def write_one_file(fname_in, fname_out, name, region, year):
+    if not os.path.exists(fname_in):
+        print "[!] {} does not exist!".format(fname_in)
+        return
+
     fin = r.TFile(fname_in)
     fout = r.TFile(fname_out,"RECREATE")
 
     # make sure we write to fout
     fout.cd()
-
-    # name = "tttt"
-    # region = "SRCR"
 
     # nominal
     h = fin.Get("{}_TOTAL_{}".format(region,name))
@@ -135,6 +137,9 @@ def write_one_file(fname_in, fname_out, name, region, year):
         h_syst_up.Write()
         h_syst_down.Write()
 
+        # HLT syst
+        write_hthlt_syst(h_nominal,name)
+
     # ISR/FSR up and down variations for tttt
     if name == "tttt":
         if year in [2017, 2018]:
@@ -152,10 +157,14 @@ def write_one_file(fname_in, fname_out, name, region, year):
             f_isrdn = r.TFile(fname_in.replace("tttt","ttttisrdn"))
             f_fsrup = r.TFile(fname_in.replace("tttt","ttttfsrup"))
             f_fsrdn = r.TFile(fname_in.replace("tttt","ttttfsrdn"))
-            h_isrup = f_isrup.Get("{}_TOTAL_{}".format(region,name))
-            h_isrdn = f_isrdn.Get("{}_TOTAL_{}".format(region,name))
-            h_fsrup = f_fsrup.Get("{}_TOTAL_{}".format(region,name))
-            h_fsrdn = f_fsrdn.Get("{}_TOTAL_{}".format(region,name))
+            h_isrup_tmp = f_isrup.Get("{}_TOTAL_ttttisrup".format(region))
+            h_isrdn_tmp = f_isrdn.Get("{}_TOTAL_ttttisrdn".format(region))
+            h_fsrup_tmp = f_fsrup.Get("{}_TOTAL_ttttfsrup".format(region))
+            h_fsrdn_tmp = f_fsrdn.Get("{}_TOTAL_ttttfsrdn".format(region))
+            h_isrup = h_isrup_tmp.Clone("isrvarUp")
+            h_isrdn = h_isrdn_tmp.Clone("isrvarDown")
+            h_fsrup = h_fsrup_tmp.Clone("fsrvarUp")
+            h_fsrdn = h_fsrdn_tmp.Clone("fsrvarDown")
             h_isrup.Scale(h_nominal.Integral()/h_isrup.Integral())
             h_isrdn.Scale(h_nominal.Integral()/h_isrdn.Integral())
             h_fsrup.Scale(h_nominal.Integral()/h_fsrup.Integral())
@@ -168,36 +177,59 @@ def write_one_file(fname_in, fname_out, name, region, year):
                 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
                 varup = h_fsrup.GetBinContent(ix)
                 vardn = h_fsrdn.GetBinContent(ix)
-                nom = h_sr.GetBinContent(ix)
+                nom = h_nominal.GetBinContent(ix)
                 newup = nom+(varup-nom)/(2.**0.5)
                 newdn = nom+(vardn-nom)/(2.**0.5)
                 if (nom <= 1.0e-6): continue
                 h_fsrup.SetBinContent(ix,newup)
                 h_fsrdn.SetBinContent(ix,newdn)
-            map(lambda x: x.Close(), [f_isrup,f_isrdn,f_fsrup,f_fsrdn])
             fout.cd()
             map(lambda x: x.Write(), [h_isrup,h_isrdn,h_fsrup,h_fsrdn])
+            map(lambda x: x.Close(), [f_isrup,f_isrdn,f_fsrup,f_fsrdn])
 
     # EWK subtraction
     if "fakes" in name:
         h_alt = fin.Get("{}_FR_TOTAL_{}".format(region,name))
-        h_syst_up = h_alt.Clone("fakes_EWKUp".format(which))
-        h_syst_down = h_alt.Clone("fakes_EWKDown".format(which))
+        h_syst_up = h_alt.Clone("fakes_EWKUp")
+        h_syst_down = h_alt.Clone("fakes_EWKDown")
         fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
         h_syst_up.Write()
         h_syst_down.Write()
 
-    # HLT syst
-    write_hthlt_syst(h_nominal,name)
 
     fout.Close()
 
 if __name__ == "__main__":
 
-    write_one_file(
-            fname_in = "histos.root",
-            fname_out = "test.root",
-            name = "tttt",
-            region = "SRCR",
-            year = 2017,
-            )
+    indir = "outputs"
+    copy_to = "../limits/v3.05_allyears_v2"
+    # copy_to = "../limits/v3.05_allyears_v1"
+    # copy_to = "../limits/v3.05_allyears_tmp"
+
+    for year in [2016, 2017, 2018]:
+        for proc in ["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"]:
+            for region in ["SRCR","SRDISC"]:
+                fname_in = "{}/output_{}_{}.root".format(indir,year,proc)
+                fname_out = "{}/{}_histos_{}_{}.root".format(indir,proc,region.lower(),year)
+                print "Converting {} -> {}".format(fname_in,fname_out)
+                write_one_file(
+                        fname_in = fname_in,
+                        fname_out = fname_out,
+                        name = proc,
+                        region = region.upper(),
+                        year = year,
+                        )
+
+    os.system("mkdir -p {}".format(copy_to))
+    os.system("cp {}/*.root {}/".format(indir,copy_to))
+
+#     write_one_file(
+#             fname_in = "outputs/output_2017_tttt.root",
+#             fname_out = "tttt_histos_srcr.root",
+#             name = "tttt",
+#             # name = "ttw",
+#             # name = "fakes",
+#             # name = "fakes_mc",
+#             region = "SRCR",
+#             year = 2017,
+#             )

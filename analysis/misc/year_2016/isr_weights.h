@@ -12,13 +12,13 @@ float isrWeight(int nisrmatch, int sample) {
     } else if (sample == 3) { // ttH
         scale = 1.10286;
     }
-    if (nisrMatch == 0) { return scale*1.00; }
-    else if (nisrMatch == 1) { return scale*0.86; }
-    else if (nisrMatch == 2) { return scale*0.79; }
-    else if (nisrMatch == 3) { return scale*0.75; }
-    else if (nisrMatch == 4) { return scale*0.77; }
-    else if (nisrMatch == 5) { return scale*0.74; }
-    else if (nisrMatch == 6) { return scale*0.73; }
-    else if (nisrMatch == 7) { return scale*0.56; }
-    else { return scale };
+    if (nisrmatch == 0) { return scale*1.00; }
+    else if (nisrmatch == 1) { return scale*0.86; }
+    else if (nisrmatch == 2) { return scale*0.79; }
+    else if (nisrmatch == 3) { return scale*0.75; }
+    else if (nisrmatch == 4) { return scale*0.77; }
+    else if (nisrmatch == 5) { return scale*0.74; }
+    else if (nisrmatch == 6) { return scale*0.73; }
+    else if (nisrmatch == 7) { return scale*0.56; }
+    else { return scale; }
 }

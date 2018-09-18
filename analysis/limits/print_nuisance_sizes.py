@@ -55,10 +55,16 @@ def print_table(fname):
 
 if __name__ == "__main__":
 
-    fname = "original_cards_2017_94X_mcfakes_75ifb/card_tttt_srcr.txt"
-    print_table(fname)
-    fname = "v1.00_2016_75p0_v1_try2/card_tttt_srcr.txt"
-    print_table(fname)
+    # fname = "original_cards_2017_94X_mcfakes_75ifb/card_tttt_srcr.txt"
+    # print_table(fname)
+    # fname = "v1.00_2016_75p0_v1_try2/card_tttt_srcr.txt"
+    # print_table(fname)
+
+    print_table("v3.05_allyears_v1/card_tttt_srcr_2016.txt")
+    print_table("v3.05_allyears_v1/card_tttt_srcr_2017.txt")
+    print_table("v3.05_allyears_v1/card_tttt_srcr_2018.txt")
+    # print_table("v3.05_allyears_v1/combined_card.txt")
+
 
     # proc = "tttt"
     # nuisance = "pdf"

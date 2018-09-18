@@ -1027,6 +1027,9 @@ protected:
 	bool     lep2_isTrigSafev1_;
 	TBranch *lep2_isTrigSafev1_branch;
 	bool     lep2_isTrigSafev1_isLoaded;
+	bool     skim_;
+	TBranch *skim_branch;
+	bool     skim_isLoaded;
 public: 
 void Init(TTree *tree);
 void GetEntry(unsigned int idx); 
@@ -1365,6 +1368,7 @@ void LoadAllBranches();
 	const bool &lep1_isTrigSafev1();
 	const bool &lep4_isTrigSafeNoIsov1();
 	const bool &lep2_isTrigSafev1();
+	const bool &skim();
 
   static void progress( int curr, int tot, int period=10000, unsigned int smoothing=250 );
 };
@@ -1708,5 +1712,6 @@ namespace ss {
 	const bool &lep1_isTrigSafev1();
 	const bool &lep4_isTrigSafeNoIsov1();
 	const bool &lep2_isTrigSafev1();
+	const bool &skim();
 }
 #endif
