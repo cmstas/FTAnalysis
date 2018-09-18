@@ -647,6 +647,27 @@ class babyMaker {
     bool lep4_isTrigSafeNoIsov1;
     bool lep4_isTrigSafev1;
 
+    // bdt variables
+    float bdt_nbtags;
+    float bdt_njets;
+    float bdt_met;
+    float bdt_ptl2;
+    float bdt_nlb40;
+    float bdt_ntb40;
+    float bdt_nleps;
+    float bdt_htb;
+    float bdt_ml1j1;
+    float bdt_dphil1l2;
+    float bdt_maxmjoverpt;
+    float bdt_detal1l2;
+    float bdt_q1;
+    float bdt_ptj1;
+    float bdt_ptj6;
+    float bdt_ptj7;
+    float bdt_ptj8;
+    float bdt_ptl1;
+    float bdt_ptl3;
+
 };
 
 #endif

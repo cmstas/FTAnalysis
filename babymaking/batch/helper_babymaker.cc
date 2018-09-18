@@ -394,6 +394,27 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("njincone1"       , &njincone1       );
   BabyTree->Branch("njincone2"       , &njincone2       );
 
+  // bdt variables
+  BabyTree->Branch("bdt_nbtags", &bdt_nbtags);
+  BabyTree->Branch("bdt_njets", &bdt_njets);
+  BabyTree->Branch("bdt_met", &bdt_met);
+  BabyTree->Branch("bdt_ptl2", &bdt_ptl2);
+  BabyTree->Branch("bdt_nlb40", &bdt_nlb40);
+  BabyTree->Branch("bdt_ntb40", &bdt_ntb40);
+  BabyTree->Branch("bdt_nleps", &bdt_nleps);
+  BabyTree->Branch("bdt_htb", &bdt_htb);
+  BabyTree->Branch("bdt_ml1j1", &bdt_ml1j1);
+  BabyTree->Branch("bdt_dphil1l2", &bdt_dphil1l2);
+  BabyTree->Branch("bdt_maxmjoverpt", &bdt_maxmjoverpt);
+  BabyTree->Branch("bdt_detal1l2", &bdt_detal1l2);
+  BabyTree->Branch("bdt_q1", &bdt_q1);
+  BabyTree->Branch("bdt_ptj1", &bdt_ptj1);
+  BabyTree->Branch("bdt_ptj6", &bdt_ptj6);
+  BabyTree->Branch("bdt_ptj7", &bdt_ptj7);
+  BabyTree->Branch("bdt_ptj8", &bdt_ptj8);
+  BabyTree->Branch("bdt_ptl1", &bdt_ptl1);
+  BabyTree->Branch("bdt_ptl3", &bdt_ptl3);
+
   if (applyBtagSFs) {
     // setup btag calibration readers
     // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation94X
@@ -885,6 +906,26 @@ void babyMaker::InitBabyNtuple(){
     decayWSF = 0.;
     njincone1 = 0;
     njincone2 = 0;
+
+    bdt_nbtags = 0.;
+    bdt_njets = 0.;
+    bdt_met = 0.;
+    bdt_ptl2 = 0.;
+    bdt_nlb40 = 0.;
+    bdt_ntb40 = 0.;
+    bdt_nleps = 0.;
+    bdt_htb = 0.;
+    bdt_ml1j1 = 0.;
+    bdt_dphil1l2 = 0.;
+    bdt_maxmjoverpt = 0.;
+    bdt_detal1l2 = 0.;
+    bdt_q1 = 0.;
+    bdt_ptj1 = 0.;
+    bdt_ptj6 = 0.;
+    bdt_ptj7 = 0.;
+    bdt_ptj8 = 0.;
+    bdt_ptl1 = 0.;
+    bdt_ptl3 = 0.;
 }
 
 //Main function
@@ -1781,14 +1822,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     float jet_pt_up = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0+mostJets_unc.at(i));
     if (jet_pt_up > jetMinPt) {
         njets_unc_up++;
-        jets_jec_up.push_back(mostJets.at(i));
-        jets_disc_up.push_back(mostJets_disc.at(i));
+        // jets_jec_up.push_back(mostJets.at(i));
+        // jets_disc_up.push_back(mostJets_disc.at(i));
         ht_unc_up += jet_pt_up;
     }
     if (mostJets_disc.at(i) < gconf.btag_disc_wp) continue;
     if (jet_pt_up > bjetMinPt) {
         nbtags_unc_up++;
-        bjets_jec_up.push_back(mostJets.at(i));
+        // bjets_jec_up.push_back(mostJets.at(i));
     }
   }
   for (unsigned int i = 0; i < mostJets.size(); i++){
@@ -1797,14 +1838,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     float jet_pt_dn = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i)*(1.0-mostJets_unc.at(i));
     if (jet_pt_dn > jetMinPt) {
         njets_unc_dn++;
-        jets_jec_dn.push_back(mostJets.at(i));
-        jets_disc_dn.push_back(mostJets_disc.at(i));
+        // jets_jec_dn.push_back(mostJets.at(i));
+        // jets_disc_dn.push_back(mostJets_disc.at(i));
         ht_unc_dn += jet_pt_dn;
     }
     if (mostJets_disc.at(i) < gconf.btag_disc_wp) continue;
     if (jet_pt_dn > bjetMinPt) {
         nbtags_unc_dn++;
-        bjets_jec_dn.push_back(mostJets.at(i));
+        // bjets_jec_dn.push_back(mostJets.at(i));
     }
   }
 
@@ -2210,10 +2251,60 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   // Compute some variables to make it easier for draw statements and skimming
   skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
-         (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50);
+         (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50) and \
+         (hyp_class != 4 or is_real_data);
   br = passes_baseline(njets, nbtags, met, ht, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
   nleps = (lep3_passes_id and lep3_coneCorrPt > 20) ? ((lep4_passes_id and lep4_coneCorrPt > 20) ? 4 : 3) : 2;
   sr = signalRegionTest(njets, nbtags, met, ht, -1, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, nleps, hyp_class==6);
+
+  // BDT stuff
+  float bloose = -1;
+  float btight = -1;
+  if (gconf.year == 2016) {
+      bloose =  0.2219;
+      btight = 0.8958;
+  } else if (gconf.year == 2017) {
+      bloose =  0.1522;
+      btight = 0.8001;
+  } else if (gconf.year == 2018) {
+      // 2017
+      bloose =  0.1522;
+      btight = 0.8001;
+  }
+  int nlb40 = 0;
+  int ntb40 = 0;
+  float mjoverpt = 0.;
+  float htb = 0;
+  for (unsigned int ijet = 0; ijet < jets.size(); ijet++) {
+      const auto& jet = jets[ijet];
+      mjoverpt = std::max(mjoverpt, jet.M()/jet.pt());
+      float disc = jets_disc[ijet];
+      if (disc > bloose) nlb40++;
+      if (disc > btight) ntb40++;
+  }
+  for (size_t ibtag=0; ibtag < btags.size(); ibtag++) {
+      htb += btags[ibtag].pt();
+  }
+  bdt_nbtags = nbtags;
+  bdt_njets = njets;
+  bdt_met = met;
+  bdt_ptl2 = lep2_coneCorrPt;
+  bdt_nlb40 = nlb40;
+  bdt_ntb40 = ntb40;
+  bdt_nleps = nleps;
+  bdt_htb = htb;
+  bdt_ml1j1 = (njets >= 1) ? (jets[0] + lep1_p4).M() : 0;
+  bdt_dphil1l2 = DeltaPhi(lep1_p4.phi(),lep2_p4.phi());
+  bdt_maxmjoverpt = mjoverpt;
+  bdt_detal1l2 = fabs(lep1_p4.eta()-lep2_p4.eta());
+  bdt_q1 = (lep1_id > 0) ? -1 : 1;
+  bdt_ptj1 = (njets > 0) ? jets[0].pt() : 0.;
+  bdt_ptj6 = (njets > 5) ? jets[5].pt() : 0.;
+  bdt_ptj7 = (njets > 6) ? jets[6].pt() : 0.;
+  bdt_ptj8 = (njets > 7) ? jets[7].pt() : 0.;
+  bdt_ptl1 = lep1_coneCorrPt;
+  bdt_ptl3 = lep3_coneCorrPt;
+
 
   //Fill Baby
   BabyTree->Fill();

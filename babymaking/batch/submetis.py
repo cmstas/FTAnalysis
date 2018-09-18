@@ -41,8 +41,10 @@ if __name__ == "__main__":
     from samples import data_2016, mc_2016, data_2017, mc_2017, data_2018, mc_2018
 
     year_sample_map = [(2016,data_2016+mc_2016)] + [(2017,data_2017+mc_2017)] + [(2018,data_2018)]
+    # year_sample_map = [(2017,mc_2017)]
     # year_sample_map = [(y,sm[-1:]) for y,sm in year_sample_map]
-    tag = "v3.05_all"
+    # tag = "v3.05_all"
+    tag = "v3.06_all"
 
     skip_tail = False
     
