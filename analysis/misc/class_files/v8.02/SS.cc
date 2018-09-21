@@ -963,6 +963,120 @@ void SSAG::Init(TTree *tree) {
 		lep2_trigMatch_isoReq_branch = tree->GetBranch("lep2_trigMatch_isoReq");
 		if (lep2_trigMatch_isoReq_branch) {lep2_trigMatch_isoReq_branch->SetAddress(&lep2_trigMatch_isoReq_);}
 	}
+
+  bdt_nbtags_branch = 0;
+  if (tree->GetBranch("bdt_nbtags") != 0) {
+    bdt_nbtags_branch = tree->GetBranch("bdt_nbtags");
+    if (bdt_nbtags_branch) { bdt_nbtags_branch->SetAddress(&bdt_nbtags_); }
+  }
+
+  bdt_njets_branch = 0;
+  if (tree->GetBranch("bdt_njets") != 0) {
+    bdt_njets_branch = tree->GetBranch("bdt_njets");
+    if (bdt_njets_branch) { bdt_njets_branch->SetAddress(&bdt_njets_); }
+  }
+
+  bdt_met_branch = 0;
+  if (tree->GetBranch("bdt_met") != 0) {
+    bdt_met_branch = tree->GetBranch("bdt_met");
+    if (bdt_met_branch) { bdt_met_branch->SetAddress(&bdt_met_); }
+  }
+
+  bdt_ptl2_branch = 0;
+  if (tree->GetBranch("bdt_ptl2") != 0) {
+    bdt_ptl2_branch = tree->GetBranch("bdt_ptl2");
+    if (bdt_ptl2_branch) { bdt_ptl2_branch->SetAddress(&bdt_ptl2_); }
+  }
+
+  bdt_nlb40_branch = 0;
+  if (tree->GetBranch("bdt_nlb40") != 0) {
+    bdt_nlb40_branch = tree->GetBranch("bdt_nlb40");
+    if (bdt_nlb40_branch) { bdt_nlb40_branch->SetAddress(&bdt_nlb40_); }
+  }
+
+  bdt_ntb40_branch = 0;
+  if (tree->GetBranch("bdt_ntb40") != 0) {
+    bdt_ntb40_branch = tree->GetBranch("bdt_ntb40");
+    if (bdt_ntb40_branch) { bdt_ntb40_branch->SetAddress(&bdt_ntb40_); }
+  }
+
+  bdt_nleps_branch = 0;
+  if (tree->GetBranch("bdt_nleps") != 0) {
+    bdt_nleps_branch = tree->GetBranch("bdt_nleps");
+    if (bdt_nleps_branch) { bdt_nleps_branch->SetAddress(&bdt_nleps_); }
+  }
+
+  bdt_htb_branch = 0;
+  if (tree->GetBranch("bdt_htb") != 0) {
+    bdt_htb_branch = tree->GetBranch("bdt_htb");
+    if (bdt_htb_branch) { bdt_htb_branch->SetAddress(&bdt_htb_); }
+  }
+
+  bdt_ml1j1_branch = 0;
+  if (tree->GetBranch("bdt_ml1j1") != 0) {
+    bdt_ml1j1_branch = tree->GetBranch("bdt_ml1j1");
+    if (bdt_ml1j1_branch) { bdt_ml1j1_branch->SetAddress(&bdt_ml1j1_); }
+  }
+
+  bdt_dphil1l2_branch = 0;
+  if (tree->GetBranch("bdt_dphil1l2") != 0) {
+    bdt_dphil1l2_branch = tree->GetBranch("bdt_dphil1l2");
+    if (bdt_dphil1l2_branch) { bdt_dphil1l2_branch->SetAddress(&bdt_dphil1l2_); }
+  }
+
+  bdt_maxmjoverpt_branch = 0;
+  if (tree->GetBranch("bdt_maxmjoverpt") != 0) {
+    bdt_maxmjoverpt_branch = tree->GetBranch("bdt_maxmjoverpt");
+    if (bdt_maxmjoverpt_branch) { bdt_maxmjoverpt_branch->SetAddress(&bdt_maxmjoverpt_); }
+  }
+
+  bdt_detal1l2_branch = 0;
+  if (tree->GetBranch("bdt_detal1l2") != 0) {
+    bdt_detal1l2_branch = tree->GetBranch("bdt_detal1l2");
+    if (bdt_detal1l2_branch) { bdt_detal1l2_branch->SetAddress(&bdt_detal1l2_); }
+  }
+
+  bdt_q1_branch = 0;
+  if (tree->GetBranch("bdt_q1") != 0) {
+    bdt_q1_branch = tree->GetBranch("bdt_q1");
+    if (bdt_q1_branch) { bdt_q1_branch->SetAddress(&bdt_q1_); }
+  }
+
+  bdt_ptj1_branch = 0;
+  if (tree->GetBranch("bdt_ptj1") != 0) {
+    bdt_ptj1_branch = tree->GetBranch("bdt_ptj1");
+    if (bdt_ptj1_branch) { bdt_ptj1_branch->SetAddress(&bdt_ptj1_); }
+  }
+
+  bdt_ptj6_branch = 0;
+  if (tree->GetBranch("bdt_ptj6") != 0) {
+    bdt_ptj6_branch = tree->GetBranch("bdt_ptj6");
+    if (bdt_ptj6_branch) { bdt_ptj6_branch->SetAddress(&bdt_ptj6_); }
+  }
+
+  bdt_ptj7_branch = 0;
+  if (tree->GetBranch("bdt_ptj7") != 0) {
+    bdt_ptj7_branch = tree->GetBranch("bdt_ptj7");
+    if (bdt_ptj7_branch) { bdt_ptj7_branch->SetAddress(&bdt_ptj7_); }
+  }
+
+  bdt_ptj8_branch = 0;
+  if (tree->GetBranch("bdt_ptj8") != 0) {
+    bdt_ptj8_branch = tree->GetBranch("bdt_ptj8");
+    if (bdt_ptj8_branch) { bdt_ptj8_branch->SetAddress(&bdt_ptj8_); }
+  }
+
+  bdt_ptl1_branch = 0;
+  if (tree->GetBranch("bdt_ptl1") != 0) {
+    bdt_ptl1_branch = tree->GetBranch("bdt_ptl1");
+    if (bdt_ptl1_branch) { bdt_ptl1_branch->SetAddress(&bdt_ptl1_); }
+  }
+
+  bdt_ptl3_branch = 0;
+  if (tree->GetBranch("bdt_ptl3") != 0) {
+    bdt_ptl3_branch = tree->GetBranch("bdt_ptl3");
+    if (bdt_ptl3_branch) { bdt_ptl3_branch->SetAddress(&bdt_ptl3_); }
+  }
 	met3p0_branch = 0;
 	if (tree->GetBranch("met3p0") != 0) {
 		met3p0_branch = tree->GetBranch("met3p0");
@@ -1871,6 +1985,25 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_trigMatch_noIsoReq_isLoaded = false;
 		lep2_trigMatch_isoReq_isLoaded = false;
 		met3p0_isLoaded = false;
+  bdt_nbtags_isLoaded = false;
+  bdt_njets_isLoaded = false;
+  bdt_met_isLoaded = false;
+  bdt_ptl2_isLoaded = false;
+  bdt_nlb40_isLoaded = false;
+  bdt_ntb40_isLoaded = false;
+  bdt_nleps_isLoaded = false;
+  bdt_htb_isLoaded = false;
+  bdt_ml1j1_isLoaded = false;
+  bdt_dphil1l2_isLoaded = false;
+  bdt_maxmjoverpt_isLoaded = false;
+  bdt_detal1l2_isLoaded = false;
+  bdt_q1_isLoaded = false;
+  bdt_ptj1_isLoaded = false;
+  bdt_ptj6_isLoaded = false;
+  bdt_ptj7_isLoaded = false;
+  bdt_ptj8_isLoaded = false;
+  bdt_ptl1_isLoaded = false;
+  bdt_ptl3_isLoaded = false;
 		jet_pt_isLoaded = false;
 		metphi3p0_isLoaded = false;
 		passes_met_filters_isLoaded = false;
@@ -2211,6 +2344,25 @@ void SSAG::LoadAllBranches()
 	if (lep2_trigMatch_noIsoReq_branch != 0) lep2_trigMatch_noIsoReq();
 	if (lep2_trigMatch_isoReq_branch != 0) lep2_trigMatch_isoReq();
 	if (met3p0_branch != 0) met3p0();
+  if (bdt_nbtags_branch != 0) bdt_nbtags();
+  if (bdt_njets_branch != 0) bdt_njets();
+  if (bdt_met_branch != 0) bdt_met();
+  if (bdt_ptl2_branch != 0) bdt_ptl2();
+  if (bdt_nlb40_branch != 0) bdt_nlb40();
+  if (bdt_ntb40_branch != 0) bdt_ntb40();
+  if (bdt_nleps_branch != 0) bdt_nleps();
+  if (bdt_htb_branch != 0) bdt_htb();
+  if (bdt_ml1j1_branch != 0) bdt_ml1j1();
+  if (bdt_dphil1l2_branch != 0) bdt_dphil1l2();
+  if (bdt_maxmjoverpt_branch != 0) bdt_maxmjoverpt();
+  if (bdt_detal1l2_branch != 0) bdt_detal1l2();
+  if (bdt_q1_branch != 0) bdt_q1();
+  if (bdt_ptj1_branch != 0) bdt_ptj1();
+  if (bdt_ptj6_branch != 0) bdt_ptj6();
+  if (bdt_ptj7_branch != 0) bdt_ptj7();
+  if (bdt_ptj8_branch != 0) bdt_ptj8();
+  if (bdt_ptl1_branch != 0) bdt_ptl1();
+  if (bdt_ptl3_branch != 0) bdt_ptl3();
 	if (jet_pt_branch != 0) jet_pt();
 	if (metphi3p0_branch != 0) metphi3p0();
 	if (passes_met_filters_branch != 0) passes_met_filters();
@@ -4779,6 +4931,253 @@ void SSAG::LoadAllBranches()
 		}
 		return lep2_trigMatch_isoReq_;
 	}
+
+const float &SSAG::bdt_nbtags() {
+  if (not bdt_nbtags_isLoaded) {
+    if (bdt_nbtags_branch != 0) {
+      bdt_nbtags_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_nbtags_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_nbtags_isLoaded = true;
+  }
+  return bdt_nbtags_;
+}
+
+const float &SSAG::bdt_njets() {
+  if (not bdt_njets_isLoaded) {
+    if (bdt_njets_branch != 0) {
+      bdt_njets_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_njets_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_njets_isLoaded = true;
+  }
+  return bdt_njets_;
+}
+
+const float &SSAG::bdt_met() {
+  if (not bdt_met_isLoaded) {
+    if (bdt_met_branch != 0) {
+      bdt_met_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_met_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_met_isLoaded = true;
+  }
+  return bdt_met_;
+}
+
+const float &SSAG::bdt_ptl2() {
+  if (not bdt_ptl2_isLoaded) {
+    if (bdt_ptl2_branch != 0) {
+      bdt_ptl2_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ptl2_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ptl2_isLoaded = true;
+  }
+  return bdt_ptl2_;
+}
+
+const float &SSAG::bdt_nlb40() {
+  if (not bdt_nlb40_isLoaded) {
+    if (bdt_nlb40_branch != 0) {
+      bdt_nlb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_nlb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_nlb40_isLoaded = true;
+  }
+  return bdt_nlb40_;
+}
+
+const float &SSAG::bdt_ntb40() {
+  if (not bdt_ntb40_isLoaded) {
+    if (bdt_ntb40_branch != 0) {
+      bdt_ntb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ntb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ntb40_isLoaded = true;
+  }
+  return bdt_ntb40_;
+}
+
+const float &SSAG::bdt_nleps() {
+  if (not bdt_nleps_isLoaded) {
+    if (bdt_nleps_branch != 0) {
+      bdt_nleps_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_nleps_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_nleps_isLoaded = true;
+  }
+  return bdt_nleps_;
+}
+
+const float &SSAG::bdt_htb() {
+  if (not bdt_htb_isLoaded) {
+    if (bdt_htb_branch != 0) {
+      bdt_htb_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_htb_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_htb_isLoaded = true;
+  }
+  return bdt_htb_;
+}
+
+const float &SSAG::bdt_ml1j1() {
+  if (not bdt_ml1j1_isLoaded) {
+    if (bdt_ml1j1_branch != 0) {
+      bdt_ml1j1_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ml1j1_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ml1j1_isLoaded = true;
+  }
+  return bdt_ml1j1_;
+}
+
+const float &SSAG::bdt_dphil1l2() {
+  if (not bdt_dphil1l2_isLoaded) {
+    if (bdt_dphil1l2_branch != 0) {
+      bdt_dphil1l2_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_dphil1l2_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_dphil1l2_isLoaded = true;
+  }
+  return bdt_dphil1l2_;
+}
+
+const float &SSAG::bdt_maxmjoverpt() {
+  if (not bdt_maxmjoverpt_isLoaded) {
+    if (bdt_maxmjoverpt_branch != 0) {
+      bdt_maxmjoverpt_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_maxmjoverpt_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_maxmjoverpt_isLoaded = true;
+  }
+  return bdt_maxmjoverpt_;
+}
+
+const float &SSAG::bdt_detal1l2() {
+  if (not bdt_detal1l2_isLoaded) {
+    if (bdt_detal1l2_branch != 0) {
+      bdt_detal1l2_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_detal1l2_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_detal1l2_isLoaded = true;
+  }
+  return bdt_detal1l2_;
+}
+
+const float &SSAG::bdt_q1() {
+  if (not bdt_q1_isLoaded) {
+    if (bdt_q1_branch != 0) {
+      bdt_q1_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_q1_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_q1_isLoaded = true;
+  }
+  return bdt_q1_;
+}
+
+const float &SSAG::bdt_ptj1() {
+  if (not bdt_ptj1_isLoaded) {
+    if (bdt_ptj1_branch != 0) {
+      bdt_ptj1_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ptj1_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ptj1_isLoaded = true;
+  }
+  return bdt_ptj1_;
+}
+
+const float &SSAG::bdt_ptj6() {
+  if (not bdt_ptj6_isLoaded) {
+    if (bdt_ptj6_branch != 0) {
+      bdt_ptj6_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ptj6_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ptj6_isLoaded = true;
+  }
+  return bdt_ptj6_;
+}
+
+const float &SSAG::bdt_ptj7() {
+  if (not bdt_ptj7_isLoaded) {
+    if (bdt_ptj7_branch != 0) {
+      bdt_ptj7_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ptj7_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ptj7_isLoaded = true;
+  }
+  return bdt_ptj7_;
+}
+
+const float &SSAG::bdt_ptj8() {
+  if (not bdt_ptj8_isLoaded) {
+    if (bdt_ptj8_branch != 0) {
+      bdt_ptj8_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ptj8_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ptj8_isLoaded = true;
+  }
+  return bdt_ptj8_;
+}
+
+const float &SSAG::bdt_ptl1() {
+  if (not bdt_ptl1_isLoaded) {
+    if (bdt_ptl1_branch != 0) {
+      bdt_ptl1_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ptl1_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ptl1_isLoaded = true;
+  }
+  return bdt_ptl1_;
+}
+
+const float &SSAG::bdt_ptl3() {
+  if (not bdt_ptl3_isLoaded) {
+    if (bdt_ptl3_branch != 0) {
+      bdt_ptl3_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_ptl3_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_ptl3_isLoaded = true;
+  }
+  return bdt_ptl3_;
+}
 	const float &SSAG::met3p0()
 	{
 		if (not met3p0_isLoaded) {
@@ -6928,6 +7327,25 @@ namespace ss {
 	const bool &lep2_trigMatch_noIsoReq() { return samesign.lep2_trigMatch_noIsoReq(); }
 	const bool &lep2_trigMatch_isoReq() { return samesign.lep2_trigMatch_isoReq(); }
 	const float &met3p0() { return samesign.met3p0(); }
+  const float &bdt_nbtags() { return samesign.bdt_nbtags(); }
+  const float &bdt_njets() { return samesign.bdt_njets(); }
+  const float &bdt_met() { return samesign.bdt_met(); }
+  const float &bdt_ptl2() { return samesign.bdt_ptl2(); }
+  const float &bdt_nlb40() { return samesign.bdt_nlb40(); }
+  const float &bdt_ntb40() { return samesign.bdt_ntb40(); }
+  const float &bdt_nleps() { return samesign.bdt_nleps(); }
+  const float &bdt_htb() { return samesign.bdt_htb(); }
+  const float &bdt_ml1j1() { return samesign.bdt_ml1j1(); }
+  const float &bdt_dphil1l2() { return samesign.bdt_dphil1l2(); }
+  const float &bdt_maxmjoverpt() { return samesign.bdt_maxmjoverpt(); }
+  const float &bdt_detal1l2() { return samesign.bdt_detal1l2(); }
+  const float &bdt_q1() { return samesign.bdt_q1(); }
+  const float &bdt_ptj1() { return samesign.bdt_ptj1(); }
+  const float &bdt_ptj6() { return samesign.bdt_ptj6(); }
+  const float &bdt_ptj7() { return samesign.bdt_ptj7(); }
+  const float &bdt_ptj8() { return samesign.bdt_ptj8(); }
+  const float &bdt_ptl1() { return samesign.bdt_ptl1(); }
+  const float &bdt_ptl3() { return samesign.bdt_ptl3(); }
 	const vector<float> &jet_pt() { return samesign.jet_pt(); }
 	const float &metphi3p0() { return samesign.metphi3p0(); }
 	const bool &passes_met_filters() { return samesign.passes_met_filters(); }
