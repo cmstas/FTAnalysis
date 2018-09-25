@@ -4,6 +4,7 @@
 import createCard
 import os
 import ROOT as r
+from errors import E
 
 def reduce_bins(h_in, nbins):
     h_tmp = r.TH1F(h_in.GetName(), h_in.GetTitle(), nbins, 0.5, nbins+0.5);
@@ -20,7 +21,7 @@ def reduce_bins_2d(h_in):
             h_tmp.SetBinError( ix,iy, h_in.GetBinError(ix,iy) )
     return h_tmp
 
-def get_dict(fname,typ="shapes_fit_s", nbins=10, _tostore=[]):
+def get_dict(fname,typ="shapes_fit_s", nbins=10, _tostore=[], channel="SS"):
     f1 = r.TFile(fname)
     if not f1: 
         print "[!] Error, couldn't find file {0}".format(fname)
@@ -28,11 +29,11 @@ def get_dict(fname,typ="shapes_fit_s", nbins=10, _tostore=[]):
 
     d = {}
     # typ = "shapes_fit_s"
-    g_data = f1.Get("{0}/SS/data".format(typ))
-    tkeys = f1.Get("{0}/SS".format(typ)).GetListOfKeys()
+    g_data = f1.Get("{0}/{1}/data".format(typ,channel))
+    tkeys = f1.Get("{0}/{1}".format(typ,channel)).GetListOfKeys()
     for tkey in tkeys:
         key = tkey.GetName()
-        tmpobj = f1.Get("{0}/SS/{1}".format(typ,key))
+        tmpobj = f1.Get("{0}/{1}/{2}".format(typ,channel,key))
         # clone so that we're not tied to the TFile, as it gets closed
         obj = tmpobj.Clone(key)
         # For some reason, need to explicitly make new histograms to keep them detached from the TFile
@@ -56,18 +57,34 @@ def get_dict(fname,typ="shapes_fit_s", nbins=10, _tostore=[]):
     return d
 # shapes_prefit
 
-def get_postfit_dict(fname="mlfitname.root"):
-    d_splusbfit = get_dict(fname,"shapes_fit_s")
-    d_prefit = get_dict(fname,"shapes_prefit")
-    # for key in d_splusbfit:
+def get_postfit_dict(fname="mlfitname.root",channels=["SS"], bonly=False):
+    which_postfit = "shapes_fit_s" # s+b
+    if bonly: which_postfit = "shapes_fit_b" # bonly
+    d_postfit = get_dict(fname,which_postfit,channel=channels[0])
+    d_prefit = get_dict(fname,"shapes_prefit",channel=channels[0])
+    if len(channels) > 1:
+        for ch in channels[1:]:
+            for k,v in get_dict(fname,which_postfit,channel=ch).items():
+                if not v: continue
+                d_postfit[k].Add(v)
+            for k,v in get_dict(fname,"shapes_prefit",channel=ch).items():
+                if not v: continue
+                d_prefit[k].Add(v)
+    # for key in d_postfit:
     ratios = {} # postfit SRCR / prefit SRCR integrals
+    ratios_errors = {} # errors in the above SFs (gaussian propagated)
     for key in d_prefit:
         if "covar" in key: continue
-        h_spb = d_splusbfit.get(key, None)
+        h_postfit = d_postfit.get(key, None)
         h_prefit = d_prefit.get(key, None)
-        if not h_spb or not h_prefit: continue
-        ratios[key] = 1.0*h_spb.Integral()/h_prefit.Integral()
-    return d_splusbfit, ratios
+        if not h_postfit or not h_prefit: continue
+        epostfit = r.Double(0.0)
+        eprefit = r.Double(0.0)
+        vpostfit = h_postfit.IntegralAndError(0,-1,epostfit)
+        vprefit = h_prefit.IntegralAndError(0,-1,eprefit)
+        ratios[key] = 1.0*vpostfit/vprefit
+        ratios_errors[key] = (E(vpostfit,epostfit)/E(vprefit,eprefit))[1]
+    return d_postfit, ratios, ratios_errors
     # return d_prefit
 
 
@@ -78,7 +95,13 @@ if __name__ == "__main__":
     # args = parser.parse_args()
 
     # print get_postfit_dict()
-    d_postfit, ratios = get_postfit_dict("v0.10_Jul20/mlfit.root")
-    print d_postfit
+    from pprint import pprint
+    d_postfit, ratios, ratios_errors = get_postfit_dict("v3.05_allyears_crwsplit_3bins_v1/mlfitname.root",channels=["y2016","y2017","y2018"], bonly=True)
+    # d_postfit, ratios, ratios_errors = get_postfit_dict("v3.05_allyears_2bins_v1/mlfitname.root",channels=["y2016","y2017","y2018"], bonly=True)
     print d_postfit["tttt"].Integral()
-    print ratios
+    pprint(d_postfit)
+    pprint(ratios)
+    pprint(ratios_errors)
+
+    for k in ratios.keys():
+        print k, E(ratios[k],ratios_errors[k]).round(2)
