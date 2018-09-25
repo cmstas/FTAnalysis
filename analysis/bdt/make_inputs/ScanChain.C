@@ -14,6 +14,12 @@
 #include "../../misc/common_utils.h"
 #include "../../misc/signal_regions.h"
 #include "../../misc/tqdm.h"
+namespace binary {
+#include "func.h"
+}
+namespace multiclass {
+#include "func_mc.h"
+}
 
 using namespace std;
 
@@ -44,6 +50,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     float tree_ptl1 = -1;
     float tree_ptl3 = -1;
     float tree_disc = -1;
+    // auto tree_classprobs = std::vector<float>();
 
     TMVA::Reader reader("Silent");
     reader.AddVariable("nbtags",      &tree_nbtags);
@@ -111,6 +118,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     out_tree->Branch("ptl1", &tree_ptl1);
     out_tree->Branch("ptl3", &tree_ptl3);
     out_tree->Branch("disc", &tree_disc);
+    // out_tree->Branch("classprobs", &tree_classprobs);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
@@ -135,6 +143,10 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
         else if (filename.Contains("2017")) tree_year = 2017;
         else if (filename.Contains("2018")) tree_year = 2018;
 
+        float min_pt_fake = -1;
+        if (tree_year >= 2017) min_pt_fake = 18.;
+        float lumi = getLumi(tree_year);
+
         for( unsigned int event = 0; event < tree->GetEntriesFast(); ++event) {
 
             samesign.GetEntry(event);
@@ -151,10 +163,10 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
             if (ss::lep1_coneCorrPt() < 15) continue;
             if (ss::lep2_coneCorrPt() < 15) continue;
 
-            float weight = ss::is_real_data() ? 1.0 : 50.0*(ss::scale1fb());
+            float weight = ss::is_real_data() ? 1.0 : lumi*(ss::scale1fb());
 
-            // Flips
             if (tree_stype == 5) {
+                // Flips
                 if (ss::hyp_class() != 4) continue;
                 float ff = 0.;
                 if (abs(ss::lep1_id()) == 11) {
@@ -167,18 +179,34 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
                 }
                 weight *= ff;
                 if (weight == 0.0) continue; // just quit if there are no flips.
+            } else if (tree_stype == 4) {
+                // Fakes
+                if (ss::hyp_class() != 2) continue;
+                bool found_fake = false;
+                if (!ss::lep1_passes_id() && ss::lep1_p4().pt()>min_pt_fake) {
+                    found_fake = true;
+                    float fr = fakeRate(tree_year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
+                    weight *= fr/(1.-fr);
+                }
+                if (!ss::lep2_passes_id() && ss::lep2_p4().pt()>min_pt_fake) {
+                    found_fake = true;
+                    float fr = fakeRate(tree_year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                    weight *= fr/(1.-fr);
+                }
+                if (!found_fake) continue;
             } else {
+                // Tight
                 if (ss::hyp_class() != 3) continue;
             }
 
-            // Truth fakes
-            if (tree_stype == 4) {
-                int nbadlegs = (ss::lep1_motherID() <= 0) + (ss::lep2_motherID() <= 0);
-                int ngoodlegs = (ss::lep1_motherID() == 1) + (ss::lep2_motherID() == 1);
-                // skip the event if it's truth matched to be prompt prompt.
-                // We only want reco tight-tight events that are prompt-nonprompt (or nonprompt nonprompt)
-                if (ngoodlegs == 2) continue;
-            }
+            // // Truth fakes
+            // if (tree_stype == 4) {
+            //     int nbadlegs = (ss::lep1_motherID() <= 0) + (ss::lep2_motherID() <= 0);
+            //     int ngoodlegs = (ss::lep1_motherID() == 1) + (ss::lep2_motherID() == 1);
+            //     // skip the event if it's truth matched to be prompt prompt.
+            //     // We only want reco tight-tight events that are prompt-nonprompt (or nonprompt nonprompt)
+            //     if (ngoodlegs == 2) continue;
+            // }
 
             bool br = passes_baseline(
                     ss::njets(),
@@ -213,12 +241,20 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
             tree_ptj8 = ss::bdt_ptj8();
             tree_ptl1 = ss::bdt_ptl1();
             tree_ptl3 = ss::bdt_ptl3();
+            // tree_ptj1 = tree_njets >= 1 ? ss::bdt_ptj1() : -1;
+            // tree_ptj6 = tree_njets >= 6 ? ss::bdt_ptj6() : -1;
+            // tree_ptj7 = tree_njets >= 7 ? ss::bdt_ptj7() : -1;
+            // tree_ptj8 = tree_njets >= 8 ? ss::bdt_ptj8() : -1;
+            // tree_ptl1 = ss::bdt_ptl1();
+            // tree_ptl3 = tree_nleps >= 3 ? ss::bdt_ptl3() : -1;
 
             tree_weight = weight;
             tree_SR = SR;
             tree_br = br;
 
-            tree_disc = reader.EvaluateMVA("BDT");
+            // tree_disc = reader.EvaluateMVA("BDT");
+            tree_disc = binary::get_prediction(tree_nbtags,tree_njets,tree_met,tree_ptl2,tree_nlb40,tree_ntb40,tree_nleps,tree_htb,tree_q1,tree_ptj1,tree_ptj6,tree_ptj7,tree_ml1j1,tree_dphil1l2,tree_maxmjoverpt,tree_ptl1,tree_detal1l2,tree_ptj8,tree_ptl3);
+            // tree_classprobs = multiclass::get_prediction(tree_nbtags,tree_njets,tree_met,tree_ptl2,tree_nlb40,tree_ntb40,tree_nleps,tree_htb,tree_q1,tree_ptj1,tree_ptj6,tree_ptj7,tree_ml1j1,tree_dphil1l2,tree_maxmjoverpt,tree_ptl1,tree_detal1l2,tree_ptj8,tree_ptl3);
 
             out_tree->Fill();
 
