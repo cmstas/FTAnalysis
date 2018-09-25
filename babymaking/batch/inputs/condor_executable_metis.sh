@@ -18,6 +18,7 @@ echo "IFILE: $IFILE"
 echo "CMSSWVERSION: $CMSSWVERSION"
 echo "SCRAMARCH: $SCRAMARCH"
 
+echo "GLIDEIN_CMSSite: $GLIDEIN_CMSSite"
 echo "hostname: $(hostname)"
 echo "uname -a: $(uname -a)"
 echo "time: $(date +%s)"
