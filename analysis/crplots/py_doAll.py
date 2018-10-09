@@ -1,5 +1,5 @@
 import os
-import pyrun
+import analysis.utils.pyrun as pyrun
 import ROOT as r
 r.gROOT.SetBatch()
 
@@ -10,43 +10,20 @@ r.gROOT.ProcessLine(".L ScanChain.C+")
 
 years_to_consider = [
         # 2016,
-        # 2017,
-        2018,
+        2017,
+        # 2018,
         ]
-# outputdir = "outputs_20172018_newWP_newmet"
-# outputdir = "outputs_2017_oldmet"
-# outputdir = "outputs_2017_newmet"
-
 
 basedirs ={
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v1.00_80x_baseline_full_v4"),
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v3.02_nmiss0"),
-        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v3.03_nmiss1_datamc2017"), # FIXME
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/{}/output/".format("v3.03_nmiss0_data2018"),
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2016/",
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2017/",
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2018/",
         }
-
-# outputdir = "outputs_20172018_newWP_oldmet"
-# options = {
-#         2016: "useIsoTriggers2016 useInclusiveSFs Data2016 quiet ",
-#         2017: "useInclusiveSFs Data2017 quiet ",
-#         2018: "useInclusiveSFs Data2018 quiet ",
-#         }
-
-# outputdir = "outputs_20172018_newWP_newmet"
-# outputdir = "outputs_20172018_newWP_newmet"
-# outputdir = "outputs_2017_ptfake18"
-# outputdir = "outputs_2017_isr"
-# outputdir = "outputs_2017_njetreweight"
-# outputdir = "outputs_2018"
-# outputdir = "outputs_2017_ptfake20"
 
 outputdir = "outputs_temp"
 options = {
         2016: "useInclusiveSFs Data2016 quiet ",
-
         2017: "useInclusiveSFs Data2017 minPtFake18 quiet ",
-        # 2017: "useInclusiveSFs Data2017 minPtFake18 quiet zeroMissingInnerHits ", # FIXME
-
         2018: "useInclusiveSFs Data2018 minPtFake18 quiet ",
         }
 
@@ -126,6 +103,14 @@ chs = {
             "ttfake": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]+ "doTruthFake"),
             # "ttlomg": make_objs(basedirs[2017]+"TTLOMG.root", options=options[2017]),
             # "ttslph": make_objs(basedirs[2017]+"TTSLPH.root", options=options[2017]),
+            "ttdl0jet": make_objs([
+                basedirs[2017]+"TTdilep0jet.root",
+                "/home/users/namin/2018/fourtop/all/FTAnalysis/babymaking/batch/output_isr_ttdilep0jet.root",
+                ], options=options[2017]),
+            "ttdl1jet": make_objs([
+                basedirs[2017]+"TTdilep1jet.root",
+                "/home/users/namin/2018/fourtop/all/FTAnalysis/babymaking/batch/output_isr_ttdilep1jet.root",
+                ], options=options[2017]),
             "ttz": make_objs([
                 basedirs[2017]+"TTZnlo.root",
                 basedirs[2017]+"TTZLOW.root",
@@ -225,11 +210,8 @@ for year in years_to_consider:
     for proc,obj in chs[year].items():
         to_run.append([obj["ch"], obj["options"], outputdir])
 
-# for tr in to_run:
-#     print tr
-
 os.system("mkdir -p {}".format(outputdir))
 
-runner = pyrun.Runner(nproc=10, func=run_chain)
+runner = pyrun.Runner(nproc=20, func=run_chain)
 runner.add_args(to_run)
 runner.run()

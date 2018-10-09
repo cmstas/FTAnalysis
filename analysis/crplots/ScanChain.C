@@ -124,10 +124,10 @@ float isr_reweight(bool useIsrWeight, int year, int nisrmatch) {
     std::map<int, std::vector<float>> weights = {
         {2016, {1.00689633, 1.01152742, 0.97021783, 0.89924575,
                 0.93356379, 0.73271888, 0.54848046, 0.64497428}},
-        // {2017, {1.00000000, 1.00000000, 1.00000000, 1.00000000,
-        //         1.00000000, 1.00000000, 1.00000000, 1.00000000}},
-        {2017, {1.07505487, 0.91544422, 0.92976169, 1.02473884, // FIXME rederive
-                1.36086090, 1.01386038, 1.59616434, 0.81957195}},
+        {2017, {1.00000000, 1.00000000, 1.00000000, 1.00000000,
+                1.00000000, 1.00000000, 1.00000000, 1.00000000}},
+        // {2017, {1.07505487, 0.91544422, 0.92976169, 1.02473884, // FIXME rederive
+        //         1.36086090, 1.01386038, 1.59616434, 0.81957195}},
         {2018, {1.00000000, 1.00000000, 1.00000000, 1.00000000,
                 1.00000000, 1.00000000, 1.00000000, 1.00000000}}
     };
@@ -205,8 +205,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         // "tl",                          // SS tight-loose
         // "br",
         // "crw", "crz",                  // CRZ, CRW
-        "htnb1",                        // fake-dominated CR
-        // // "htnb1mu",                        // fake-dominated CR
+        // "htnb1",                        // fake-dominated CR
+        // "htnb1mu",                        // fake-dominated CR
         // "nj2",                        // fake-dominated CR
         // "sshh",                        // HH SS sum
 
@@ -215,8 +215,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         // "bdt_nb", "bdt_ht",            // Baseline w/ inverted nbtags/Ht/MET selection
         // "bdt_met","bdt_met_ht",        // |
         // "bdt_train",                   // BDT Training region - BR + CRW
-        // "tt_isr",                      // TTBar ISR Reweighting derivation region
-        // "tt_isr_reweight_check",       // |
+        "tt_isr",                      // TTBar ISR Reweighting derivation region
+        "tt_isr_reweight_check",       // |
     };
 
     vector<HistCol*> registry;
@@ -784,14 +784,14 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                    njets >= 2 and met > 50) {
                 fill_region("htnb1", weight);
 
-                // if ( (abs(lep1id) == 13 and (lep1pt < 150 and lep1pt > 125)) or
-                //      (abs(lep2id) == 13 and (lep2pt < 150 and lep2pt > 125))
-                //    ) {
-                //     if (ss::is_real_data() and !doFakes and !doFlips) {
-                //         cout << ss::run() << ":" << ss::lumi() << ":" << ss::event() << " " << lep1id << " " << lep2id << " " << lep1pt << " " << lep2pt << " " << ss::filename() << endl;
-                //     }
-                //     fill_region("htnb1mu", weight);
-                // }
+                if ( (abs(lep1id) == 13 and (lep1pt < 150 and lep1pt > 125)) or
+                     (abs(lep2id) == 13 and (lep2pt < 150 and lep2pt > 125))
+                   ) {
+                    // if (ss::is_real_data() and !doFakes and !doFlips) {
+                    //     cout << ss::run() << ":" << ss::lumi() << ":" << ss::event() << " " << lep1id << " " << lep2id << " " << lep1pt << " " << lep2pt << " " << ss::filename() << endl;
+                    // }
+                    fill_region("htnb1mu", weight);
+                }
 
             }
 

@@ -188,10 +188,10 @@ if __name__ == "__main__":
     make_plots(
             outputdir="plots_temp",
             inputdir="outputs_temp",
+            regions = ["htnb1","htnb1mu"],
             year=2018,
-            lumi="35.5",
-            other_years = [],
-            regions = ["htnb1"],
+            lumi="112.9", # 2016+2017+2018 --> 35.87+41.53+35.53 = 112.9
+            other_years = [2016,2017],
             )
 
     # make_plots(
