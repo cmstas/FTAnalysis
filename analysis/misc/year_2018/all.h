@@ -9,7 +9,7 @@ namespace y2018 {
 #include "../year_2017/lepton_sf.h"
 #include "../year_2017/trigger_sf.h"
 #include "../year_2017/isr_weights.h"
-float getLumi() { return 35.5; }
+float getLumi() { return 46.57; }
 }
 
 #endif
