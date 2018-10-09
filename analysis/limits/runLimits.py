@@ -53,10 +53,12 @@ def print_lims(d_lims, fb=False, unblinded=False):
     if d_lims.get("mu",-999) > -980.:
         print "  Mu: %.3f (+%.3f -%.3f) | (+%.1f%% -%.1f%%)" % (d_lims["mu"], d_lims["mu_up"], d_lims["mu_down"], 100.*(d_lims["mu_up"]/d_lims["mu"]), 100.*(d_lims["mu_down"]/d_lims["mu"]))
 
-def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False,
+def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False, ignorefakes=False,
         verbose=True, dolimits=True, dosignificance=True, doscan=True,
         unblinded=False,sig="tttt", allownegative=False, inject_tttt=False,
-        use_autostats=False, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=-1):
+        use_autostats=False, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=-1, nosyst=False):
+
+    params = locals()
 
     extra_base = ""
     # NOTE, can't do both or else need to combine the flags
@@ -64,6 +66,10 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
         extra_base += " --setParameters lumiscale={0} --setParameterRanges lumiscale={0},{0} ".format(scalelumi)
     elif scaletth != 1.0:
         extra_base = " --setParameters tthscale={0} --setParameterRanges tthscale={0},{0} ".format(scaletth)
+
+    if nosyst:
+        extra_base += " -S 0 "
+
 
     if ".txt" not in card:
         card += "/card_{0}_{1}.txt".format(sig, regions)
@@ -76,7 +82,7 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
     if not os.path.isfile(full_card_name) or redocard:
         if verbose: print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
-        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh, year=year)
+        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh, year=year, ignorefakes=ignorefakes)
         if verbose: print ">>> Making workspace"
         # There was a bug with combine (https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/issues/491) which needed text2workspace to be explicitly
         # run before using FitDiagnostics (for mu scan & pre/postfit), but this is fixed in the 81x branch (cherry pick 69c180a04c05d0bad6a6c38d97cdc431cfe4fb49 in 94x if
@@ -136,27 +142,35 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
         os.system("cat {0}".format(full_log_name))
         raise Exception("Combine error!")
 
+    if os.path.exists(full_log_name):
+        with open(full_log_name,"a") as fh:
+            fh.write("\n")
+            fh.write("PARAMS: {}\n".format(str(params)))
+            fh.write("RESULT: {}\n".format(str(d_lims)))
+
     return d_lims
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=35, width=150))
     parser.add_argument("card", help="card name in directory")
-    parser.add_argument("-C", "--redocard", help="force the recreation of the card", action="store_true")
-    parser.add_argument("-L", "--redolimits", help="force the rerunning of limits", action="store_true")
-    parser.add_argument("-M", "--domcfakes", help="use fakes from MC", action="store_true")
-    parser.add_argument("-X", "--noscan", help="don't do a likelihood fit/scan", action="store_true")
-    parser.add_argument("-N", "--nosignificance", help="don't calculate significance", action="store_true")
-    parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits", default="srcr")
-    parser.add_argument("-u", "--unblinded", help="show unblinded quantities", action="store_true")
-    parser.add_argument("-a", "--allownegative", help="allow negative mu in maxlikelihood fit", action="store_true")
-    parser.add_argument("-i", "--inject_tttt", help="inject tttt as a bkg", action="store_true")
-    parser.add_argument("-m", "--noautostats", help="don't use autoMCStats feature", action="store_true")
-    parser.add_argument("-t", "--thresh", help="threshold for autoMCstats", default=0.0)
-    parser.add_argument("-s", "--sig", help="signal name", default="tttt")
-    parser.add_argument("-S", "--scalelumi", help="scale luminosity", default=1.0, type=float)
-    parser.add_argument("-T", "--scaletth", help="scale tth", default=1.0, type=float)
-    parser.add_argument("-y", "--year", help="year", default=-1, type=int)
+    parser.add_argument("-C", "--redocard", help="force the recreation of the card (default: %(default)s)", action="store_true")
+    parser.add_argument("-L", "--redolimits", help="force the rerunning of limits (default: %(default)s)", action="store_true")
+    parser.add_argument("-M", "--domcfakes", help="use fakes from MC (default: %(default)s)", action="store_true")
+    parser.add_argument("-X", "--noscan", help="don't do a likelihood fit/scan (default: %(default)s)", action="store_true")
+    parser.add_argument("-N", "--nosignificance", help="don't calculate significance (default: %(default)s)", action="store_true")
+    parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits (default: %(default)s)", default="srcr")
+    parser.add_argument("-u", "--unblinded", help="show unblinded quantities (default: %(default)s)", action="store_true")
+    parser.add_argument("-a", "--allownegative", help="allow negative mu in maxlikelihood fit (default: %(default)s)", action="store_true")
+    parser.add_argument("-i", "--inject_tttt", help="inject tttt as a bkg (default: %(default)s)", action="store_true")
+    parser.add_argument("-m", "--noautostats", help="don't use autoMCStats feature (default: %(default)s)", action="store_true")
+    parser.add_argument("-t", "--thresh", help="threshold for autoMCstats (default: %(default)s)", default=0.0)
+    parser.add_argument("-s", "--sig", help="signal name (default: %(default)s)", default="tttt")
+    parser.add_argument("-y", "--year", help="year (default: %(default)s)", default=-1, type=int)
+    parser.add_argument(      "--scalelumi", help="scale luminosity (default: %(default)s)", default=1.0, type=float)
+    parser.add_argument(      "--scaletth", help="scale tth (default: %(default)s)", default=1.0, type=float)
+    parser.add_argument(      "--nosyst", help="no systs at all, but note autoMCStats might be included (default: %(default)s)", action="store_true")
+    parser.add_argument(      "--ignorefakes", help="ignore fake background entirely (default: %(default)s)", action="store_true")
     args = parser.parse_args()
 
     # d_lims = get_lims(args)
@@ -177,7 +191,10 @@ if __name__ == "__main__":
             scalelumi=args.scalelumi,
             scaletth=args.scaletth,
             year=args.year,
+            nosyst=args.nosyst,
+            ignorefakes=args.ignorefakes,
             )
+    print "card: {}".format(args.card.strip())
     print "------------------------------"
     print_lims(d_lims, fb=True, unblinded=args.unblinded)
     print "------------------------------"

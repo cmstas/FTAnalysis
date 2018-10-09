@@ -179,7 +179,7 @@ def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
 
 
 #write card regardless of number of processes (but make sure signal is first in list)
-def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=0.0, use_autostats=False):
+def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=0.0, use_autostats=False, ignorefakes=False):
 
     line = "---------------------------------------------------------------"
     binname = "SS"
@@ -359,7 +359,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
 
     return
 
-def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=False, thresh=0.0,year=-1):
+def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=False, thresh=0.0,year=-1, ignorefakes=False):
     # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
     inject_tttt = (signal != "tttt") or inject_tttt
     # do_tttt = True
@@ -372,24 +372,39 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     tomatch = "ifb"
     if year > 0:
         tomatch = str(year)
-    data = Process(-1,"data","data_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    signal = Process(0,signal,signal+"_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    TTW = Process(1,"ttw","ttw_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    TTZ = Process(2,"ttz","ttz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    TTH = Process(3,"tth","tth_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    # WZ  = Process(4,"wz","wz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    # WW  = Process(5,"ww","ww_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    XG  = Process(4,"xg","xg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    rares = Process(5,"rares","rares_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num = -1
+    data = Process(num,"data","data_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    signal = Process(num,signal,signal+"_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    TTW = Process(num,"ttw","ttw_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    TTZ = Process(num,"ttz","ttz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    TTH = Process(num,"tth","tth_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    # WZ  = Process(num,"wz","wz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    # num += 1
+    # WW  = Process(num,"ww","ww_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    # num += 1
+    XG  = Process(num,"xg","xg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    rares = Process(num,"rares","rares_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
     if not domcfakes:
-        fakes = Process(6,"fakes","fakes_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        fakes = Process(num,"fakes","fakes_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        num += 1
     else:
-        fakes = Process(6,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    flips = Process(7,"flips","flips_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    TTVV = Process(8,"ttvv","ttvv_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        fakes = Process(num,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        num += 1
+    flips = Process(num,"flips","flips_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    TTVV = Process(num,"ttvv","ttvv_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
     if inject_tttt:
         os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
         TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        num += 1
     #overwrite nuisances
     lumiunc = "1.025"
     signal.lumi  = "1"
@@ -412,6 +427,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTW.TTWSF          = ttw_sf
     TTW.lumi         = lumiunc
     TTW.isr         = "1"
+    TTW.scale         = "1"
+    TTW.pdf         = "1"
+    TTW.alphas         = "1"
     TTW.bb         = "1"
     TTW.jes  = "1"
     TTW.jer  = "1"
@@ -427,6 +445,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.bb  = "1"
     TTZ.jes  = "1"
     TTZ.jer  = "1"
+    TTZ.scale  = "1"
+    TTZ.pdf  = "1"
+    TTZ.alphas  = "1"
     TTZ.lepeff  = "1.0"
     # TTZ.lephlt  = "1.04"
     TTZ.hlt  = "1.03"
@@ -443,6 +464,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTH.jer  = "1"
     TTH.lepeff  = "1.0"
     # TTH.lephlt  = "1.04"
+    TTH.scale  = "1"
+    TTH.pdf  = "1"
+    TTH.alphas  = "1"
     TTH.hlt  = "1.03"
     TTH.hthlt  = "1"
     TTH.btag = "1"
@@ -509,8 +533,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
             fakes.fakes = "1.30"
         fakes.fakes_EWK = "1"
     else:
-        fakes.fakes = "1.20"
-        fakes.fakes_EWK = "-"
+        fakes.fakes = "1.30"
+        # fakes.fakes_EWK = "-"
     flips.flips = "1.20"
 
     #fill list of processes
@@ -523,7 +547,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # processes.append(WW)
     processes.append(XG)
     processes.append(rares)
-    processes.append(fakes)
+    if not ignorefakes: processes.append(fakes)
     processes.append(flips)
     processes.append(TTVV)
     if inject_tttt:
@@ -546,7 +570,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         data = newdata
 
     #create it
-    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=thresh, use_autostats=use_autostats )
+    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=thresh, use_autostats=use_autostats, ignorefakes=ignorefakes )
 
     # for proc in processes:
     #     print "-->", proc.name, proc.rate()

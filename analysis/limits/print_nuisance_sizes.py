@@ -41,15 +41,40 @@ def print_table(fname):
         pct[pct > 150.] = np.nan
         return np.nanmedian(pct)
 
+            # ret = '\033[1m' + ret + '\033[0m'
+        # if offcolor and self.use_color:
+            # ret = '\033[2m' + ret + '\033[0m'
+        # if self.use_color:
+            # if color == "green":
+            #     ret = '\033[00;32m' + ret + '\033[0m'
+            # if color == "blue":
+            #     ret = '\033[00;34m' + ret + '\033[0m'
+            # if color == "red":
+            #     ret = '\033[00;31m' + ret + '\033[0m'
+            # if color == "lightblue":
+            #     ret = '\033[38;5;117m' + ret + '\033[0m'
+        # return ret
+
+    def format_val(v):
+        # return "{:.1f}%".format(v) if v is not None else ""
+        if v is None: return ""
+        # return "{:.1f}%".format(v)
+        if v > 20.:
+            # return "\033[00;31m{:.1f}%\033[0m".format(v)
+            return "\033[00;31m{:.1f}%\033[0m".format(v)
+        else:
+            return "{:.1f}%".format(v)
+
     tab = Table()
-    tab.set_theme_basic()
+    # tab.set_theme_basic()
+    tab.set_theme_fancy()
     tab.set_column_names(["nuisance"]+sorted(proc_files.keys()))
-    for nuisance,procs in shape_procs.items():
+    for nuisance,procs in sorted(shape_procs.items()):
         dline = { k:None for k in proc_files.keys() }
         for proc in procs:
             diff = get_median_percent_diff(proc,nuisance)
             dline[proc] = diff
-        line = [nuisance] + [("{:.1f}%".format(v) if v is not None else "") for k,v in sorted(dline.items())]
+        line = [nuisance] + [format_val(v) for k,v in sorted(dline.items())]
         tab.add_row(line)
     tab.print_table(show_row_separators=False,show_alternating=False)
 
@@ -60,9 +85,14 @@ if __name__ == "__main__":
     # fname = "v1.00_2016_75p0_v1_try2/card_tttt_srcr.txt"
     # print_table(fname)
 
-    print_table("v3.05_allyears_v1/card_tttt_srcr_2016.txt")
-    print_table("v3.05_allyears_v1/card_tttt_srcr_2017.txt")
-    print_table("v3.05_allyears_v1/card_tttt_srcr_2018.txt")
+    print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2016.txt")
+    print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2017.txt")
+    print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2018.txt")
+
+    # print_table("v3.08_bdtscan_v1_16/card_tttt_srdisc_2016.txt")
+    # print_table("v3.08_bdtscan_v1_16/card_tttt_srdisc_2017.txt")
+    # print_table("v3.08_bdtscan_v1_16/card_tttt_srdisc_2018.txt")
+
     # print_table("v3.05_allyears_v1/combined_card.txt")
 
 

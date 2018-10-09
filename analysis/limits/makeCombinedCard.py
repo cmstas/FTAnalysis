@@ -8,7 +8,7 @@ import argparse
 
 def do_combine(
         basedir,
-        region="srcr",
+        regions="srcr",
         years = [2016,2017,2018],
         procs = ["data", "fakes", "fakes_mc", "flips", "rares", "tth", "tttt", "ttvv", "ttw", "ttz", "xg"],
         ):
@@ -34,7 +34,7 @@ def do_combine(
     for basedir,year in zip(basedirs,years):
         nuisance_map = {}
         for proc in procs:
-            basename = "{}_histos_{}_{}.root".format(proc,region,year)
+            basename = "{}_histos_{}_{}.root".format(proc,regions,year)
             fin = r.TFile("{}/{}".format(basedir,basename), "UPDATE")
 
             keys = [x.GetName() for x in fin.GetListOfKeys()]
@@ -64,7 +64,7 @@ def do_combine(
 
             fin.Close()
 
-        card_basename = "card_tttt_{}_{}.txt".format(region,year)
+        card_basename = "card_tttt_{}_{}.txt".format(regions,year)
         with open("{}/{}".format(basedir,card_basename),"r") as fhin:
             with open("{}/{}_tmp".format(basedir,card_basename),"w") as fhout:
                 for line in fhin:
@@ -114,6 +114,8 @@ def do_combine(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", help="card directory")
-    args = parser.parse_args()
+    parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits", default="srcr")
+    args, unknown = parser.parse_known_args()
+    print "[?] Found some unknown args, but just ignoring them:", unknown
 
-    do_combine(args.directory)
+    do_combine(args.directory,regions=args.regions)
