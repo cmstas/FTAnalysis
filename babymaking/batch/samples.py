@@ -45,6 +45,16 @@ mc_2016 = [
             ["/ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "ZZZ"],
             ["/tZq_ll_4f_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TZQ"],
             ["/ttHToNonbb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTHtoNonBB"],
+            ["/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTDL"],
+            ["/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtop"],
+            ["/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtopbar"],
+
+        ]
+
+mc_2016_94x = [
+
+            ["/TTTT_TuneCUETP8M2T4_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "TTTTnew"],
+
         ]
 
 mc_2017 = [
@@ -91,7 +101,13 @@ mc_2017 = [
         ["/ZZTo4L_13TeV_powheg_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "ZZ"],
         ["/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "ZZZ"],
         ["/tZq_ll_4f_ckm_NLO_TuneCP5_PSweights_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TZQ"],
-        ["/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTHtoNonBB"],
+        ["/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTHtoNonBB"],
+        ["/TT_DiLept_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM", "TTdilep0jet"],
+        ["/TTPlus1Jet_DiLept_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM", "TTdilep1jet"],
+        ["/TTJets_DiLept_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTDL"],
+        ["/TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTSLtop"],
+        ["/TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTSLtopbar"],
+
         ]
 
 mc_2018 = [
@@ -127,30 +143,35 @@ data_2016 = [
         ["/MuonEG/Run2016H-03Feb2017_ver2-v1/MINIAOD", "DataMuonEGHv2"],
         ["/MuonEG/Run2016H-03Feb2017_ver3-v1/MINIAOD", "DataMuonEGHv3"],
 
-        # ["/DoubleEG/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleEGBv1"],
-        # ["/DoubleEG/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleEGBv2"],
-        # ["/DoubleEG/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleEGC"],
-        # ["/DoubleEG/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleEGD"],
-        # ["/DoubleEG/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleEGE"],
-        # ["/DoubleEG/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleEGF"],
-        # ["/DoubleEG/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleEGG"],
-        # ["/DoubleEG/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleEGH"],
-        # ["/DoubleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleMuonBv1"],
-        # ["/DoubleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleMuonBv2"],
-        # ["/DoubleMuon/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleMuonC"],
-        # ["/DoubleMuon/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleMuonD"],
-        # ["/DoubleMuon/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleMuonE"],
-        # ["/DoubleMuon/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleMuonF"],
-        # ["/DoubleMuon/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleMuonG"],
-        # ["/DoubleMuon/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleMuonH"],
-        # ["/MuonEG/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataMuonEGBv1"],
-        # ["/MuonEG/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataMuonEGBv2"],
-        # ["/MuonEG/Run2016C-17Jul2018-v1/MINIAOD", "DataMuonEGC"],
-        # ["/MuonEG/Run2016D-17Jul2018-v1/MINIAOD", "DataMuonEGD"],
-        # ["/MuonEG/Run2016E-17Jul2018-v1/MINIAOD", "DataMuonEGE"],
-        # ["/MuonEG/Run2016F-17Jul2018-v1/MINIAOD", "DataMuonEGF"],
-        # ["/MuonEG/Run2016G-17Jul2018-v1/MINIAOD", "DataMuonEGG"],
-        # ["/MuonEG/Run2016H-17Jul2018-v1/MINIAOD", "DataMuonEGH"],
+
+        ]
+
+data_2016_94x = [
+
+        ["/DoubleEG/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleEGBv1"],
+        ["/DoubleEG/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleEGBv2"],
+        ["/DoubleEG/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleEGC"],
+        ["/DoubleEG/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleEGD"],
+        ["/DoubleEG/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleEGE"],
+        ["/DoubleEG/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleEGF"],
+        ["/DoubleEG/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleEGG"],
+        ["/DoubleEG/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleEGH"],
+        ["/DoubleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleMuonBv1"],
+        ["/DoubleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleMuonBv2"],
+        ["/DoubleMuon/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleMuonC"],
+        ["/DoubleMuon/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleMuonD"],
+        ["/DoubleMuon/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleMuonE"],
+        ["/DoubleMuon/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleMuonF"],
+        ["/DoubleMuon/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleMuonG"],
+        ["/DoubleMuon/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleMuonH"],
+        ["/MuonEG/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataMuonEGBv1"],
+        ["/MuonEG/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataMuonEGBv2"],
+        ["/MuonEG/Run2016C-17Jul2018-v1/MINIAOD", "DataMuonEGC"],
+        ["/MuonEG/Run2016D-17Jul2018-v1/MINIAOD", "DataMuonEGD"],
+        ["/MuonEG/Run2016E-17Jul2018-v2/MINIAOD", "DataMuonEGE"], # note, v2 due to email titled "[ops] Reprocessing 2017 94X with MET Recipe"
+        ["/MuonEG/Run2016F-17Jul2018-v1/MINIAOD", "DataMuonEGF"],
+        ["/MuonEG/Run2016G-17Jul2018-v1/MINIAOD", "DataMuonEGG"],
+        ["/MuonEG/Run2016H-17Jul2018-v1/MINIAOD", "DataMuonEGH"],
 
         ]
 

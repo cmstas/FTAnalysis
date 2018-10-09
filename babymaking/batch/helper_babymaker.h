@@ -535,6 +535,7 @@ class babyMaker {
 
     //Trigger matching
     bool fired_trigger;
+    bool fired_trigger_second;
     unsigned int triggers;
     bool lep1_trigMatch_noIsoReq;
     bool lep1_trigMatch_isoReq;
@@ -667,6 +668,42 @@ class babyMaker {
     float bdt_ptj8;
     float bdt_ptl1;
     float bdt_ptl3;
+
+    float bdt_jec_up_nbtags;
+    float bdt_jec_dn_nbtags;
+    float bdt_jer_up_nbtags;
+    float bdt_jer_dn_nbtags;
+
+    float bdt_jec_up_njets;
+    float bdt_jec_dn_njets;
+    float bdt_jer_up_njets;
+    float bdt_jer_dn_njets;
+
+    float bdt_jec_up_met;
+    float bdt_jec_dn_met;
+    float bdt_jer_up_met;
+    float bdt_jer_dn_met;
+
+    float bdt_jec_up_htb;
+    float bdt_jec_dn_htb;
+    float bdt_jer_up_htb;
+    float bdt_jer_dn_htb;
+
+    float bdt_jec_up_nlb40;
+    float bdt_jec_dn_nlb40;
+    float bdt_jer_up_nlb40;
+    float bdt_jer_dn_nlb40;
+
+    float bdt_jec_up_ntb40;
+    float bdt_jec_dn_ntb40;
+    float bdt_jer_up_ntb40;
+    float bdt_jer_dn_ntb40;
+
+    float bdt_disc;
+    float bdt_disc_jec_up;
+    float bdt_disc_jer_up;
+    float bdt_disc_jec_dn;
+    float bdt_disc_jer_dn;
 
 };
 

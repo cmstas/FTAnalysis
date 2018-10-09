@@ -5,6 +5,7 @@
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"
 
 #include "misc/signal_regions.h"
+#include "misc/bdt.h"
 
 using namespace tas;
 
@@ -295,6 +296,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
 
   //Triggers
   BabyTree->Branch("fired_trigger"                                           , &fired_trigger                                                                           );
+  BabyTree->Branch("fired_trigger_second"                                           , &fired_trigger_second                                                                           );
   BabyTree->Branch("triggers"                                                , &triggers                                                                                );
   BabyTree->Branch("weight_btagsf"                                           , &weight_btagsf                                                                           );
   BabyTree->Branch("weight_btagsf_UP"                                        , &weight_btagsf_UP                                                                        );
@@ -414,6 +416,35 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("bdt_ptj8", &bdt_ptj8);
   BabyTree->Branch("bdt_ptl1", &bdt_ptl1);
   BabyTree->Branch("bdt_ptl3", &bdt_ptl3);
+  BabyTree->Branch("bdt_jec_up_nbtags", &bdt_jec_up_nbtags);
+  BabyTree->Branch("bdt_jec_dn_nbtags", &bdt_jec_dn_nbtags);
+  BabyTree->Branch("bdt_jer_up_nbtags", &bdt_jer_up_nbtags);
+  BabyTree->Branch("bdt_jer_dn_nbtags", &bdt_jer_dn_nbtags);
+  BabyTree->Branch("bdt_jec_up_njets", &bdt_jec_up_njets);
+  BabyTree->Branch("bdt_jec_dn_njets", &bdt_jec_dn_njets);
+  BabyTree->Branch("bdt_jer_up_njets", &bdt_jer_up_njets);
+  BabyTree->Branch("bdt_jer_dn_njets", &bdt_jer_dn_njets);
+  BabyTree->Branch("bdt_jec_up_met", &bdt_jec_up_met);
+  BabyTree->Branch("bdt_jec_dn_met", &bdt_jec_dn_met);
+  BabyTree->Branch("bdt_jer_up_met", &bdt_jer_up_met);
+  BabyTree->Branch("bdt_jer_dn_met", &bdt_jer_dn_met);
+  BabyTree->Branch("bdt_jec_up_htb", &bdt_jec_up_htb);
+  BabyTree->Branch("bdt_jec_dn_htb", &bdt_jec_dn_htb);
+  BabyTree->Branch("bdt_jer_up_htb", &bdt_jer_up_htb);
+  BabyTree->Branch("bdt_jer_dn_htb", &bdt_jer_dn_htb);
+  BabyTree->Branch("bdt_jec_up_nlb40", &bdt_jec_up_nlb40);
+  BabyTree->Branch("bdt_jec_dn_nlb40", &bdt_jec_dn_nlb40);
+  BabyTree->Branch("bdt_jer_up_nlb40", &bdt_jer_up_nlb40);
+  BabyTree->Branch("bdt_jer_dn_nlb40", &bdt_jer_dn_nlb40);
+  BabyTree->Branch("bdt_jec_up_ntb40", &bdt_jec_up_ntb40);
+  BabyTree->Branch("bdt_jec_dn_ntb40", &bdt_jec_dn_ntb40);
+  BabyTree->Branch("bdt_jer_up_ntb40", &bdt_jer_up_ntb40);
+  BabyTree->Branch("bdt_jer_dn_ntb40", &bdt_jer_dn_ntb40);
+  BabyTree->Branch("bdt_disc",&bdt_disc);
+  BabyTree->Branch("bdt_disc_jec_up",&bdt_disc_jec_up);
+  BabyTree->Branch("bdt_disc_jer_up",&bdt_disc_jer_up);
+  BabyTree->Branch("bdt_disc_jec_dn",&bdt_disc_jec_dn);
+  BabyTree->Branch("bdt_disc_jer_dn",&bdt_disc_jer_dn);
 
   if (applyBtagSFs) {
     // setup btag calibration readers
@@ -593,7 +624,6 @@ void babyMaker::InitBabyNtuple(){
     btags_eff.clear();
     btags_effpt.clear();
     btags_sf.clear();
-    btags.clear();
     nbtags = -1;
     nbtags_raw = -1;
     sf_dilepTrig_hpt = -1;
@@ -765,6 +795,7 @@ void babyMaker::InitBabyNtuple(){
     lep2_trigMatch_noIsoReq = 0;
     lep2_trigMatch_isoReq = 0;
     fired_trigger = 0;
+    fired_trigger_second = 0;
     triggers = 0;
     passes_met_filters = 0;
     evt_egclean_pfmet = -1.0;
@@ -926,6 +957,35 @@ void babyMaker::InitBabyNtuple(){
     bdt_ptj8 = 0.;
     bdt_ptl1 = 0.;
     bdt_ptl3 = 0.;
+    bdt_jec_up_nbtags = 0.;
+    bdt_jec_dn_nbtags = 0.;
+    bdt_jer_up_nbtags = 0.;
+    bdt_jer_dn_nbtags = 0.;
+    bdt_jec_up_njets = 0.;
+    bdt_jec_dn_njets = 0.;
+    bdt_jer_up_njets = 0.;
+    bdt_jer_dn_njets = 0.;
+    bdt_jec_up_met = 0.;
+    bdt_jec_dn_met = 0.;
+    bdt_jer_up_met = 0.;
+    bdt_jer_dn_met = 0.;
+    bdt_jec_up_htb = 0.;
+    bdt_jec_dn_htb = 0.;
+    bdt_jer_up_htb = 0.;
+    bdt_jer_dn_htb = 0.;
+    bdt_jec_up_nlb40 = 0.;
+    bdt_jec_dn_nlb40 = 0.;
+    bdt_jer_up_nlb40 = 0.;
+    bdt_jer_dn_nlb40 = 0.;
+    bdt_jec_up_ntb40 = 0.;
+    bdt_jec_dn_ntb40 = 0.;
+    bdt_jer_up_ntb40 = 0.;
+    bdt_jer_dn_ntb40 = 0.;
+    bdt_disc = 0.;
+    bdt_disc_jec_up = 0.;
+    bdt_disc_jer_up = 0.;
+    bdt_disc_jec_dn = 0.;
+    bdt_disc_jer_dn = 0.;
 }
 
 //Main function
@@ -1488,11 +1548,15 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_JEC.push_back(jet_results.first.at(i).jec());
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_undoJEC.push_back(jet_results.first.at(i).undo_jec());
 
-  for (unsigned int i = 0; i < jet_results.second.size(); i++) btags.push_back(jet_results.second.at(i).p4());
-  for (unsigned int i = 0; i < jet_results.second.size(); i++) btags_flavor.push_back(jet_results.second.at(i).mcFlavor()); // NJA
-  for (unsigned int i = 0; i < jet_results.second.size(); i++) btags_disc.push_back(jet_results.second.at(i).disc());
-  for (unsigned int i = 0; i < jet_results.second.size(); i++) btags_JEC.push_back(jet_results.second.at(i).jec());
-  for (unsigned int i = 0; i < jet_results.second.size(); i++) btags_undoJEC.push_back(jet_results.second.at(i).undo_jec());
+  for (unsigned int i = 0; i < jet_results.second.size(); i++) {
+      auto jet = jet_results.second.at(i).p4();
+      auto disc = jet_results.second.at(i).disc();
+      btags.push_back(jet);
+      btags_flavor.push_back(jet_results.second.at(i).mcFlavor());
+      btags_disc.push_back(disc);
+      btags_JEC.push_back(jet_results.second.at(i).jec());
+      btags_undoJEC.push_back(jet_results.second.at(i).undo_jec());
+  }
 
   for (unsigned int i = 0; i < jet_results.first.size(); i++){
     jecUnc->setJetEta(jets[i].eta());
@@ -1809,13 +1873,33 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //Unc up/down results
   njetsAG = 0; // is the same as njets
   nbtagsAG = 0; // is the same as nbtags
+  float htb = 0;
+  float htb_jec_up = 0;
+  float htb_jec_dn = 0;
+  float htb_jer_up = 0;
+  float htb_jer_dn = 0;
+  int nlb40 = 0;
+  int nlb40_jec_up = 0;
+  int nlb40_jec_dn = 0;
+  int nlb40_jer_up = 0;
+  int nlb40_jer_dn = 0;
+  int ntb40 = 0;
+  int ntb40_jec_up = 0;
+  int ntb40_jec_dn = 0;
+  int ntb40_jer_up = 0;
+  int ntb40_jer_dn = 0;
+  // XXX NOMINAL
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
     float jet_pt = mostJets.at(i).pt()*mostJets_undoJEC.at(i)*mostJets_JEC.at(i);
     if (jet_pt > bjetMinPt && mostJets_disc.at(i) > gconf.btag_disc_wp) nbtagsAG++;
+    if (jet_pt > bjetMinPt && mostJets_disc.at(i) > gconf.btag_disc_wp) htb += jet_pt;
+    if (jet_pt > 40. && mostJets_disc.at(i) > gconf.WP_DEEPCSV_LOOSE) nlb40++;
+    if (jet_pt > 40. && mostJets_disc.at(i) > gconf.WP_DEEPCSV_TIGHT) ntb40++;
     if (jet_pt > jetMinPt) njetsAG++;
   }
+  // XXX JEC UP
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_up_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
@@ -1826,12 +1910,16 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         // jets_disc_up.push_back(mostJets_disc.at(i));
         ht_unc_up += jet_pt_up;
     }
+    if ((jet_pt_up > 40.) && (mostJets_disc.at(i) > gconf.WP_DEEPCSV_LOOSE)) nlb40_jec_up++;
+    if ((jet_pt_up > 40.) && (mostJets_disc.at(i) > gconf.WP_DEEPCSV_TIGHT)) ntb40_jec_up++;
     if (mostJets_disc.at(i) < gconf.btag_disc_wp) continue;
     if (jet_pt_up > bjetMinPt) {
         nbtags_unc_up++;
+        htb_jec_up += jet_pt_up;
         // bjets_jec_up.push_back(mostJets.at(i));
     }
   }
+  // XXX JEC DOWN
   for (unsigned int i = 0; i < mostJets.size(); i++){
     if (mostJets_dn_passCleaning.at(i) == 0) continue;
     if (mostJets_passID.at(i) == 0) continue;
@@ -1842,9 +1930,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         // jets_disc_dn.push_back(mostJets_disc.at(i));
         ht_unc_dn += jet_pt_dn;
     }
+    if ((jet_pt_dn > 40.) && (mostJets_disc.at(i) > gconf.WP_DEEPCSV_LOOSE)) nlb40_jec_dn++;
+    if ((jet_pt_dn > 40.) && (mostJets_disc.at(i) > gconf.WP_DEEPCSV_TIGHT)) ntb40_jec_dn++;
     if (mostJets_disc.at(i) < gconf.btag_disc_wp) continue;
     if (jet_pt_dn > bjetMinPt) {
         nbtags_unc_dn++;
+        htb_jec_dn += jet_pt_dn;
         // bjets_jec_dn.push_back(mostJets.at(i));
     }
   }
@@ -1924,13 +2015,21 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             if (jer_mostJets_passCleaning.at(i) == 0) continue;
             if (jer_mostJets_passID.at(i) == 0) continue;
             float jet_pt = jer_mostJets.at(i).pt()*jer_mostJets_undoJEC.at(i)*jer_mostJets_JEC.at(i)*jer_mostJets_JER.at(i);
-            if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > gconf.btag_disc_wp) nbtags_JER_up++;
+            if (jet_pt > bjetMinPt && jer_mostJets_disc.at(i) > gconf.btag_disc_wp) {
+                nbtags_JER_up++;
+                htb_jer_up += jet_pt;
+            }
             if (jet_pt > jetMinPt) ht_JER_up += jet_pt;
             if (jet_pt > jetMinPt) njets_JER_up++;
+            if ((jet_pt > 40.) && (jer_mostJets_disc.at(i) > gconf.WP_DEEPCSV_LOOSE)) nlb40_jer_up++;
+            if ((jet_pt > 40.) && (jer_mostJets_disc.at(i) > gconf.WP_DEEPCSV_TIGHT)) ntb40_jer_up++;
         }
         njets_JER_dn = max(2*njets-njets_JER_up,0);
         nbtags_JER_dn = max(2*nbtags-nbtags_JER_up,0);
         ht_JER_dn = max(2.*ht-ht_JER_up,0.);
+        nlb40_jer_dn = max(2*nlb40-nlb40_jer_up,0);
+        ntb40_jer_dn = max(2*ntb40-ntb40_jer_up,0);
+        htb_jer_dn = max(2.*htb-htb_jer_up,0.);
 
         LorentzVector jetp4_jer_up(0,0,0,0);
         LorentzVector jetp4_jer_dn(0,0,0,0);
@@ -2033,6 +2132,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           if ( hyp_type==0 && ((triggers & 1<<3)==(1<<3) || (triggers & 1<<4)==(1<<4)) ) fired_trigger = true;
           if ( hyp_type==3 && (triggers & 1<<6)==(1<<6) ) fired_trigger = true;
           if ( (hyp_type==1 || hyp_type==2) && ((triggers & 1<<1)==(1<<1) || (triggers & 1<<2)==(1<<2)) ) fired_trigger = true;
+
+          // Store noniso triggers in secondary variable for convenience (even though we can always do the annoying trigger bit math)
+          if ( hyp_type==0 && (triggers & 1<<7)==(1<<7) ) fired_trigger_second = true;
+          if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger_second = true;
+          if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger_second = true;
       }
   } else if (gconf.year == 2018) {
       if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
@@ -2258,32 +2362,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   sr = signalRegionTest(njets, nbtags, met, ht, -1, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, nleps, hyp_class==6);
 
   // BDT stuff
-  float bloose = -1;
-  float btight = -1;
-  if (gconf.year == 2016) {
-      bloose =  0.2219;
-      btight = 0.8958;
-  } else if (gconf.year == 2017) {
-      bloose =  0.1522;
-      btight = 0.8001;
-  } else if (gconf.year == 2018) {
-      // 2017
-      bloose =  0.1522;
-      btight = 0.8001;
-  }
-  int nlb40 = 0;
-  int ntb40 = 0;
   float mjoverpt = 0.;
-  float htb = 0;
   for (unsigned int ijet = 0; ijet < jets.size(); ijet++) {
       const auto& jet = jets[ijet];
       mjoverpt = std::max(mjoverpt, jet.M()/jet.pt());
-      float disc = jets_disc[ijet];
-      if (disc > bloose) nlb40++;
-      if (disc > btight) ntb40++;
-  }
-  for (size_t ibtag=0; ibtag < btags.size(); ibtag++) {
-      htb += btags[ibtag].pt();
   }
   bdt_nbtags = nbtags;
   bdt_njets = njets;
@@ -2304,6 +2386,44 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   bdt_ptj8 = (njets > 7) ? jets[7].pt() : 0.;
   bdt_ptl1 = lep1_coneCorrPt;
   bdt_ptl3 = lep3_coneCorrPt;
+
+  // For up and down variations
+
+  bdt_jec_up_nbtags = nbtags_unc_up;
+  bdt_jec_dn_nbtags = nbtags_unc_dn;
+  bdt_jer_up_nbtags = nbtags_JER_up;
+  bdt_jer_dn_nbtags = nbtags_JER_dn;
+
+  bdt_jec_up_njets = njets_unc_up;
+  bdt_jec_dn_njets = njets_unc_dn;
+  bdt_jer_up_njets = njets_JER_up;
+  bdt_jer_dn_njets = njets_JER_dn;
+
+  bdt_jec_up_met = met_unc_up;
+  bdt_jec_dn_met = met_unc_dn;
+  bdt_jer_up_met = met_JER_up;
+  bdt_jer_dn_met = met_JER_dn;
+
+  bdt_jec_up_htb = htb_jec_up;
+  bdt_jec_dn_htb = htb_jec_dn;
+  bdt_jer_up_htb = htb_jer_up;
+  bdt_jer_dn_htb = htb_jer_dn;
+
+  bdt_jec_up_nlb40 = nlb40_jec_up;
+  bdt_jec_dn_nlb40 = nlb40_jec_dn;
+  bdt_jer_up_nlb40 = nlb40_jer_up;
+  bdt_jer_dn_nlb40 = nlb40_jer_dn;
+
+  bdt_jec_up_ntb40 = ntb40_jec_up;
+  bdt_jec_dn_ntb40 = ntb40_jec_dn;
+  bdt_jer_up_ntb40 = ntb40_jer_up;
+  bdt_jer_dn_ntb40 = ntb40_jer_dn;
+
+  bdt_disc = get_prediction( bdt_nbtags, bdt_njets, bdt_met, bdt_ptl2, bdt_nlb40, bdt_ntb40, bdt_nleps, bdt_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_disc_jec_up = get_prediction( bdt_jec_up_nbtags, bdt_jec_up_njets, bdt_jec_up_met, bdt_ptl2, bdt_jec_up_nlb40, bdt_jec_up_ntb40, bdt_nleps, bdt_jec_up_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_disc_jer_up = get_prediction( bdt_jer_up_nbtags, bdt_jer_up_njets, bdt_jer_up_met, bdt_ptl2, bdt_jer_up_nlb40, bdt_jer_up_ntb40, bdt_nleps, bdt_jer_up_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_disc_jec_dn = get_prediction( bdt_jec_dn_nbtags, bdt_jec_dn_njets, bdt_jec_dn_met, bdt_ptl2, bdt_jec_dn_nlb40, bdt_jec_dn_ntb40, bdt_nleps, bdt_jec_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_disc_jer_dn = get_prediction( bdt_jer_dn_nbtags, bdt_jer_dn_njets, bdt_jer_dn_met, bdt_ptl2, bdt_jer_dn_nlb40, bdt_jer_dn_ntb40, bdt_nleps, bdt_jer_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
 
 
   //Fill Baby

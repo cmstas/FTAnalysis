@@ -108,13 +108,20 @@ int main(int argc, char *argv[]){
         gconf.year = year;
         gconf.ea_version = 1;
         gconf.btag_disc_wp = 0.6324;
+        gconf.WP_DEEPCSV_TIGHT  = 0.8958;
+        gconf.WP_DEEPCSV_MEDIUM = 0.6324;
+        gconf.WP_DEEPCSV_LOOSE  = 0.2219;
         gconf.multiiso_el_minireliso = 0.12;
         gconf.multiiso_el_ptratio = 0.80;
         gconf.multiiso_el_ptrel = 7.2;
         gconf.multiiso_mu_minireliso = 0.16;
         gconf.multiiso_mu_ptratio = 0.76;
         gconf.multiiso_mu_ptrel = 7.2;
-        if (filenames.Contains("-17Jul2018-")) {
+        if (
+                filenames.Contains("17Jul2018") ||
+                filenames.Contains("RunIISummer16MiniAODv3-PUMoriond17_94X") ||
+                filenames.Contains("94X")
+                ) {
             gconf.cmssw_ver = 94;
         }
         good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
@@ -125,6 +132,9 @@ int main(int argc, char *argv[]){
         gconf.year = year;
         gconf.ea_version = 4;
         gconf.btag_disc_wp = 0.4941;
+        gconf.WP_DEEPCSV_TIGHT  = 0.8001;
+        gconf.WP_DEEPCSV_MEDIUM = 0.4941;
+        gconf.WP_DEEPCSV_LOOSE  = 0.1522;
         gconf.multiiso_el_minireliso = 0.09;
         gconf.multiiso_el_ptratio = 0.85;
         gconf.multiiso_el_ptrel = 9.2;
@@ -140,20 +150,23 @@ int main(int argc, char *argv[]){
         gconf.year = year;
         gconf.ea_version = 4;
         gconf.btag_disc_wp = 0.4941;
+        gconf.WP_DEEPCSV_TIGHT  = 0.8001;
+        gconf.WP_DEEPCSV_MEDIUM = 0.4941;
+        gconf.WP_DEEPCSV_LOOSE  = 0.1522;
         gconf.multiiso_el_minireliso = 0.09;
         gconf.multiiso_el_ptratio = 0.85;
         gconf.multiiso_el_ptrel = 9.2;
         gconf.multiiso_mu_minireliso = 0.12;
         gconf.multiiso_mu_ptratio = 0.80;
         gconf.multiiso_mu_ptrel = 7.5;
-        good_run_file = "goodRunList/Cert_314472-321461_13TeV_PromptReco_Collisions18_JSON_snt.txt";
+        good_run_file = "goodRunList/Cert_314472-323523_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 46.57
         jecEra = "Fall17_17Nov2017C_V6";
         jecEraMC = "Fall17_17Nov2017_V6";
         gconf.SS_innerlayers = 0;
     }
 
     if (filenames.Contains("/SMS")) {
-        if (filenames.Contains("SMS-T1tttt_Tune")) isSignal = 1;
+        if (filenames.Contains("SMS-T1tttt_")) isSignal = 1;
         else if (filenames.Contains("SMS-T5qqqqVV_Tune")) isSignal = 2;
         else if (filenames.Contains("SMS-T5qqqqVV_dM20_Tune")) isSignal = 3;
         else if (filenames.Contains("SMS-T6ttWW_Tune")) isSignal = 10;
@@ -168,6 +181,10 @@ int main(int argc, char *argv[]){
     // if (filenames.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
     if (filenames.Contains("_HToTT_") && filenames.Contains("Summer16Fast")) isSignal = 101; // fastsim higgs vs fullsim higgs
 
+    if (std::getenv("notsignal")) {
+        isSignal = 0;
+        std::cout << ">>> [!] Not actually a signal file!" << std::endl;
+    }
 
     //Set up file and tree
     babyMaker *mylooper = new babyMaker();
