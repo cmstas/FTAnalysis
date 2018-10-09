@@ -1,5 +1,4 @@
 import os
-import sys
 import ROOT as r
 import sys
 sys.path.insert(0,'../../')
@@ -69,7 +68,7 @@ if __name__ == "__main__":
           # "SR_TOTAL"   : [("",),     commonopts+"   --xAxisLabel Region --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
           # "SRCR_TOTAL" : [("",),     commonopts+"  --xAxisLabel Region   --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp .03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable     --xAxisBinLabels CRZ,CRW,SR1,SR2,SR3,SR4,SR5,SR6,SR7,SR8 --yAxisLabel Events "],
           # "ht"         : [("ttzcr","ttwcr","sr","br"), commonopts+"     --ratioUpperBound 4 --xAxisLabel H_{T} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
-          "metnm1"        : [("br",), commonopts+"     --xAxisLabel p_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
+          # "metnm1"        : [("br",), commonopts+"     --xAxisLabel p_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
           # "met"        : [("ttzcr","ttwcr","sr","br"), commonopts+"     --xAxisLabel p_{T}^{miss} --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events "],
           # "njets"      : [("ttzcr","ttwcr","sr","br"), commonopts+"   --xAxisLabel N_{jets} --noXaxisUnit --nDivisions 6 --noDivisionLabel --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.1  --yAxisLabel Events / bin "],
           # "nbtags"     : [("ttzcr","ttwcr","sr","br"), commonopts+"  --noDivisionLabel --noXaxisUnit --xAxisLabel N_{b} --nDivisions 4 --noXaxisUnit --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  --makeTable --yAxisLabel Events / bin "],
@@ -128,8 +127,7 @@ if __name__ == "__main__":
           # "bjetpt"       : [("sr","br"), commonopts+"   --xAxisLabel p_{T}(bjets) --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  "],
           # "jetpt"       : [("sr","br"), commonopts+"   --xAxisLabel p_{T}(jets) --isLinear --legendUp -.15 --legendRight -0.08    --legendTaller 0.15 --yTitleOffset -0.1  "],
 
-          # "disc"       : [("br",),   commonopts+"  --isLinear  --xAxisLabel disc  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
-          # "disc2"       : [("br",),  commonopts+" --isLinear  --xAxisLabel disc2  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
+          "disc"       : [("br",),   commonopts+"  --isLinear  --xAxisLabel disc  --legendUp .0 --legendRight -0.08    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable "],
           "SRDISC_TOTAL"   : [("",), commonopts+"   --xAxisLabel SR_{disc} --noDivisionLabel --noXaxisUnit --isLinear --noOverflow --legendUp -.03 --legendRight -0.05    --legendTaller 0.05 --yTitleOffset -0.1  --makeTable    --percentageInBox "],
           # "ntops"      : [("sr",), commonopts+"   --xAxisLabel N_{tops} --noXaxisUnit --nDivisions 5 --noDivisionLabel  --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset 0.1  --makeTable "],
           # "ntopness"      : [("sr",), commonopts+"     --xAxisLabel N_{tops}ness --isLinear --legendUp -.15 --legendRight -0.08   --legendTaller 0.15 --yTitleOffset -0.0  "],
