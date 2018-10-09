@@ -1077,6 +1077,186 @@ void SSAG::Init(TTree *tree) {
     bdt_ptl3_branch = tree->GetBranch("bdt_ptl3");
     if (bdt_ptl3_branch) { bdt_ptl3_branch->SetAddress(&bdt_ptl3_); }
   }
+
+  bdt_jec_up_nbtags_branch = 0;
+  if (tree->GetBranch("bdt_jec_up_nbtags") != 0) {
+    bdt_jec_up_nbtags_branch = tree->GetBranch("bdt_jec_up_nbtags");
+    if (bdt_jec_up_nbtags_branch) { bdt_jec_up_nbtags_branch->SetAddress(&bdt_jec_up_nbtags_); }
+  }
+
+  bdt_jec_dn_nbtags_branch = 0;
+  if (tree->GetBranch("bdt_jec_dn_nbtags") != 0) {
+    bdt_jec_dn_nbtags_branch = tree->GetBranch("bdt_jec_dn_nbtags");
+    if (bdt_jec_dn_nbtags_branch) { bdt_jec_dn_nbtags_branch->SetAddress(&bdt_jec_dn_nbtags_); }
+  }
+
+  bdt_jer_up_nbtags_branch = 0;
+  if (tree->GetBranch("bdt_jer_up_nbtags") != 0) {
+    bdt_jer_up_nbtags_branch = tree->GetBranch("bdt_jer_up_nbtags");
+    if (bdt_jer_up_nbtags_branch) { bdt_jer_up_nbtags_branch->SetAddress(&bdt_jer_up_nbtags_); }
+  }
+
+  bdt_jer_dn_nbtags_branch = 0;
+  if (tree->GetBranch("bdt_jer_dn_nbtags") != 0) {
+    bdt_jer_dn_nbtags_branch = tree->GetBranch("bdt_jer_dn_nbtags");
+    if (bdt_jer_dn_nbtags_branch) { bdt_jer_dn_nbtags_branch->SetAddress(&bdt_jer_dn_nbtags_); }
+  }
+
+  bdt_jec_up_njets_branch = 0;
+  if (tree->GetBranch("bdt_jec_up_njets") != 0) {
+    bdt_jec_up_njets_branch = tree->GetBranch("bdt_jec_up_njets");
+    if (bdt_jec_up_njets_branch) { bdt_jec_up_njets_branch->SetAddress(&bdt_jec_up_njets_); }
+  }
+
+  bdt_jec_dn_njets_branch = 0;
+  if (tree->GetBranch("bdt_jec_dn_njets") != 0) {
+    bdt_jec_dn_njets_branch = tree->GetBranch("bdt_jec_dn_njets");
+    if (bdt_jec_dn_njets_branch) { bdt_jec_dn_njets_branch->SetAddress(&bdt_jec_dn_njets_); }
+  }
+
+  bdt_jer_up_njets_branch = 0;
+  if (tree->GetBranch("bdt_jer_up_njets") != 0) {
+    bdt_jer_up_njets_branch = tree->GetBranch("bdt_jer_up_njets");
+    if (bdt_jer_up_njets_branch) { bdt_jer_up_njets_branch->SetAddress(&bdt_jer_up_njets_); }
+  }
+
+  bdt_jer_dn_njets_branch = 0;
+  if (tree->GetBranch("bdt_jer_dn_njets") != 0) {
+    bdt_jer_dn_njets_branch = tree->GetBranch("bdt_jer_dn_njets");
+    if (bdt_jer_dn_njets_branch) { bdt_jer_dn_njets_branch->SetAddress(&bdt_jer_dn_njets_); }
+  }
+
+  bdt_jec_up_met_branch = 0;
+  if (tree->GetBranch("bdt_jec_up_met") != 0) {
+    bdt_jec_up_met_branch = tree->GetBranch("bdt_jec_up_met");
+    if (bdt_jec_up_met_branch) { bdt_jec_up_met_branch->SetAddress(&bdt_jec_up_met_); }
+  }
+
+  bdt_jec_dn_met_branch = 0;
+  if (tree->GetBranch("bdt_jec_dn_met") != 0) {
+    bdt_jec_dn_met_branch = tree->GetBranch("bdt_jec_dn_met");
+    if (bdt_jec_dn_met_branch) { bdt_jec_dn_met_branch->SetAddress(&bdt_jec_dn_met_); }
+  }
+
+  bdt_jer_up_met_branch = 0;
+  if (tree->GetBranch("bdt_jer_up_met") != 0) {
+    bdt_jer_up_met_branch = tree->GetBranch("bdt_jer_up_met");
+    if (bdt_jer_up_met_branch) { bdt_jer_up_met_branch->SetAddress(&bdt_jer_up_met_); }
+  }
+
+  bdt_jer_dn_met_branch = 0;
+  if (tree->GetBranch("bdt_jer_dn_met") != 0) {
+    bdt_jer_dn_met_branch = tree->GetBranch("bdt_jer_dn_met");
+    if (bdt_jer_dn_met_branch) { bdt_jer_dn_met_branch->SetAddress(&bdt_jer_dn_met_); }
+  }
+
+  bdt_jec_up_htb_branch = 0;
+  if (tree->GetBranch("bdt_jec_up_htb") != 0) {
+    bdt_jec_up_htb_branch = tree->GetBranch("bdt_jec_up_htb");
+    if (bdt_jec_up_htb_branch) { bdt_jec_up_htb_branch->SetAddress(&bdt_jec_up_htb_); }
+  }
+
+  bdt_jec_dn_htb_branch = 0;
+  if (tree->GetBranch("bdt_jec_dn_htb") != 0) {
+    bdt_jec_dn_htb_branch = tree->GetBranch("bdt_jec_dn_htb");
+    if (bdt_jec_dn_htb_branch) { bdt_jec_dn_htb_branch->SetAddress(&bdt_jec_dn_htb_); }
+  }
+
+  bdt_jer_up_htb_branch = 0;
+  if (tree->GetBranch("bdt_jer_up_htb") != 0) {
+    bdt_jer_up_htb_branch = tree->GetBranch("bdt_jer_up_htb");
+    if (bdt_jer_up_htb_branch) { bdt_jer_up_htb_branch->SetAddress(&bdt_jer_up_htb_); }
+  }
+
+  bdt_jer_dn_htb_branch = 0;
+  if (tree->GetBranch("bdt_jer_dn_htb") != 0) {
+    bdt_jer_dn_htb_branch = tree->GetBranch("bdt_jer_dn_htb");
+    if (bdt_jer_dn_htb_branch) { bdt_jer_dn_htb_branch->SetAddress(&bdt_jer_dn_htb_); }
+  }
+
+  bdt_jec_up_nlb40_branch = 0;
+  if (tree->GetBranch("bdt_jec_up_nlb40") != 0) {
+    bdt_jec_up_nlb40_branch = tree->GetBranch("bdt_jec_up_nlb40");
+    if (bdt_jec_up_nlb40_branch) { bdt_jec_up_nlb40_branch->SetAddress(&bdt_jec_up_nlb40_); }
+  }
+
+  bdt_jec_dn_nlb40_branch = 0;
+  if (tree->GetBranch("bdt_jec_dn_nlb40") != 0) {
+    bdt_jec_dn_nlb40_branch = tree->GetBranch("bdt_jec_dn_nlb40");
+    if (bdt_jec_dn_nlb40_branch) { bdt_jec_dn_nlb40_branch->SetAddress(&bdt_jec_dn_nlb40_); }
+  }
+
+  bdt_jer_up_nlb40_branch = 0;
+  if (tree->GetBranch("bdt_jer_up_nlb40") != 0) {
+    bdt_jer_up_nlb40_branch = tree->GetBranch("bdt_jer_up_nlb40");
+    if (bdt_jer_up_nlb40_branch) { bdt_jer_up_nlb40_branch->SetAddress(&bdt_jer_up_nlb40_); }
+  }
+
+  bdt_jer_dn_nlb40_branch = 0;
+  if (tree->GetBranch("bdt_jer_dn_nlb40") != 0) {
+    bdt_jer_dn_nlb40_branch = tree->GetBranch("bdt_jer_dn_nlb40");
+    if (bdt_jer_dn_nlb40_branch) { bdt_jer_dn_nlb40_branch->SetAddress(&bdt_jer_dn_nlb40_); }
+  }
+
+  bdt_jec_up_ntb40_branch = 0;
+  if (tree->GetBranch("bdt_jec_up_ntb40") != 0) {
+    bdt_jec_up_ntb40_branch = tree->GetBranch("bdt_jec_up_ntb40");
+    if (bdt_jec_up_ntb40_branch) { bdt_jec_up_ntb40_branch->SetAddress(&bdt_jec_up_ntb40_); }
+  }
+
+  bdt_jec_dn_ntb40_branch = 0;
+  if (tree->GetBranch("bdt_jec_dn_ntb40") != 0) {
+    bdt_jec_dn_ntb40_branch = tree->GetBranch("bdt_jec_dn_ntb40");
+    if (bdt_jec_dn_ntb40_branch) { bdt_jec_dn_ntb40_branch->SetAddress(&bdt_jec_dn_ntb40_); }
+  }
+
+  bdt_jer_up_ntb40_branch = 0;
+  if (tree->GetBranch("bdt_jer_up_ntb40") != 0) {
+    bdt_jer_up_ntb40_branch = tree->GetBranch("bdt_jer_up_ntb40");
+    if (bdt_jer_up_ntb40_branch) { bdt_jer_up_ntb40_branch->SetAddress(&bdt_jer_up_ntb40_); }
+  }
+
+  bdt_jer_dn_ntb40_branch = 0;
+  if (tree->GetBranch("bdt_jer_dn_ntb40") != 0) {
+    bdt_jer_dn_ntb40_branch = tree->GetBranch("bdt_jer_dn_ntb40");
+    if (bdt_jer_dn_ntb40_branch) { bdt_jer_dn_ntb40_branch->SetAddress(&bdt_jer_dn_ntb40_); }
+  }
+
+  bdt_disc_branch = 0;
+  if (tree->GetBranch("bdt_disc") != 0) {
+    bdt_disc_branch = tree->GetBranch("bdt_disc");
+    if (bdt_disc_branch) { bdt_disc_branch->SetAddress(&bdt_disc_); }
+  }
+
+  bdt_disc_jec_up_branch = 0;
+  if (tree->GetBranch("bdt_disc_jec_up") != 0) {
+    bdt_disc_jec_up_branch = tree->GetBranch("bdt_disc_jec_up");
+    if (bdt_disc_jec_up_branch) { bdt_disc_jec_up_branch->SetAddress(&bdt_disc_jec_up_); }
+  }
+
+  bdt_disc_jer_up_branch = 0;
+  if (tree->GetBranch("bdt_disc_jer_up") != 0) {
+    bdt_disc_jer_up_branch = tree->GetBranch("bdt_disc_jer_up");
+    if (bdt_disc_jer_up_branch) { bdt_disc_jer_up_branch->SetAddress(&bdt_disc_jer_up_); }
+  }
+
+  bdt_disc_jec_dn_branch = 0;
+  if (tree->GetBranch("bdt_disc_jec_dn") != 0) {
+    bdt_disc_jec_dn_branch = tree->GetBranch("bdt_disc_jec_dn");
+    if (bdt_disc_jec_dn_branch) { bdt_disc_jec_dn_branch->SetAddress(&bdt_disc_jec_dn_); }
+  }
+
+  bdt_disc_jer_dn_branch = 0;
+  if (tree->GetBranch("bdt_disc_jer_dn") != 0) {
+    bdt_disc_jer_dn_branch = tree->GetBranch("bdt_disc_jer_dn");
+    if (bdt_disc_jer_dn_branch) { bdt_disc_jer_dn_branch->SetAddress(&bdt_disc_jer_dn_); }
+  }
+
+  lep4_coneCorrPt_branch = 0;
+  if (tree->GetBranch("lep4_coneCorrPt") != 0) {
+    lep4_coneCorrPt_branch = tree->GetBranch("lep4_coneCorrPt");
+    if (lep4_coneCorrPt_branch) { lep4_coneCorrPt_branch->SetAddress(&lep4_coneCorrPt_); }
+  }
 	met3p0_branch = 0;
 	if (tree->GetBranch("met3p0") != 0) {
 		met3p0_branch = tree->GetBranch("met3p0");
@@ -1985,6 +2165,36 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_trigMatch_noIsoReq_isLoaded = false;
 		lep2_trigMatch_isoReq_isLoaded = false;
 		met3p0_isLoaded = false;
+  lep4_coneCorrPt_isLoaded = false;
+  bdt_jec_up_nbtags_isLoaded = false;
+  bdt_jec_dn_nbtags_isLoaded = false;
+  bdt_jer_up_nbtags_isLoaded = false;
+  bdt_jer_dn_nbtags_isLoaded = false;
+  bdt_jec_up_njets_isLoaded = false;
+  bdt_jec_dn_njets_isLoaded = false;
+  bdt_jer_up_njets_isLoaded = false;
+  bdt_jer_dn_njets_isLoaded = false;
+  bdt_jec_up_met_isLoaded = false;
+  bdt_jec_dn_met_isLoaded = false;
+  bdt_jer_up_met_isLoaded = false;
+  bdt_jer_dn_met_isLoaded = false;
+  bdt_jec_up_htb_isLoaded = false;
+  bdt_jec_dn_htb_isLoaded = false;
+  bdt_jer_up_htb_isLoaded = false;
+  bdt_jer_dn_htb_isLoaded = false;
+  bdt_jec_up_nlb40_isLoaded = false;
+  bdt_jec_dn_nlb40_isLoaded = false;
+  bdt_jer_up_nlb40_isLoaded = false;
+  bdt_jer_dn_nlb40_isLoaded = false;
+  bdt_jec_up_ntb40_isLoaded = false;
+  bdt_jec_dn_ntb40_isLoaded = false;
+  bdt_jer_up_ntb40_isLoaded = false;
+  bdt_jer_dn_ntb40_isLoaded = false;
+  bdt_disc_isLoaded = false;
+  bdt_disc_jec_up_isLoaded = false;
+  bdt_disc_jer_up_isLoaded = false;
+  bdt_disc_jec_dn_isLoaded = false;
+  bdt_disc_jer_dn_isLoaded = false;
   bdt_nbtags_isLoaded = false;
   bdt_njets_isLoaded = false;
   bdt_met_isLoaded = false;
@@ -2344,6 +2554,36 @@ void SSAG::LoadAllBranches()
 	if (lep2_trigMatch_noIsoReq_branch != 0) lep2_trigMatch_noIsoReq();
 	if (lep2_trigMatch_isoReq_branch != 0) lep2_trigMatch_isoReq();
 	if (met3p0_branch != 0) met3p0();
+  if (lep4_coneCorrPt_branch != 0) lep4_coneCorrPt();
+  if (bdt_jec_up_nbtags_branch != 0) bdt_jec_up_nbtags();
+  if (bdt_jec_dn_nbtags_branch != 0) bdt_jec_dn_nbtags();
+  if (bdt_jer_up_nbtags_branch != 0) bdt_jer_up_nbtags();
+  if (bdt_jer_dn_nbtags_branch != 0) bdt_jer_dn_nbtags();
+  if (bdt_jec_up_njets_branch != 0) bdt_jec_up_njets();
+  if (bdt_jec_dn_njets_branch != 0) bdt_jec_dn_njets();
+  if (bdt_jer_up_njets_branch != 0) bdt_jer_up_njets();
+  if (bdt_jer_dn_njets_branch != 0) bdt_jer_dn_njets();
+  if (bdt_jec_up_met_branch != 0) bdt_jec_up_met();
+  if (bdt_jec_dn_met_branch != 0) bdt_jec_dn_met();
+  if (bdt_jer_up_met_branch != 0) bdt_jer_up_met();
+  if (bdt_jer_dn_met_branch != 0) bdt_jer_dn_met();
+  if (bdt_jec_up_htb_branch != 0) bdt_jec_up_htb();
+  if (bdt_jec_dn_htb_branch != 0) bdt_jec_dn_htb();
+  if (bdt_jer_up_htb_branch != 0) bdt_jer_up_htb();
+  if (bdt_jer_dn_htb_branch != 0) bdt_jer_dn_htb();
+  if (bdt_jec_up_nlb40_branch != 0) bdt_jec_up_nlb40();
+  if (bdt_jec_dn_nlb40_branch != 0) bdt_jec_dn_nlb40();
+  if (bdt_jer_up_nlb40_branch != 0) bdt_jer_up_nlb40();
+  if (bdt_jer_dn_nlb40_branch != 0) bdt_jer_dn_nlb40();
+  if (bdt_jec_up_ntb40_branch != 0) bdt_jec_up_ntb40();
+  if (bdt_jec_dn_ntb40_branch != 0) bdt_jec_dn_ntb40();
+  if (bdt_jer_up_ntb40_branch != 0) bdt_jer_up_ntb40();
+  if (bdt_jer_dn_ntb40_branch != 0) bdt_jer_dn_ntb40();
+  if (bdt_disc_branch != 0) bdt_disc();
+  if (bdt_disc_jec_up_branch != 0) bdt_disc_jec_up();
+  if (bdt_disc_jer_up_branch != 0) bdt_disc_jer_up();
+  if (bdt_disc_jec_dn_branch != 0) bdt_disc_jec_dn();
+  if (bdt_disc_jer_dn_branch != 0) bdt_disc_jer_dn();
   if (bdt_nbtags_branch != 0) bdt_nbtags();
   if (bdt_njets_branch != 0) bdt_njets();
   if (bdt_met_branch != 0) bdt_met();
@@ -5178,6 +5418,396 @@ const float &SSAG::bdt_ptl3() {
   }
   return bdt_ptl3_;
 }
+
+const float &SSAG::bdt_jec_up_nbtags() {
+  if (not bdt_jec_up_nbtags_isLoaded) {
+    if (bdt_jec_up_nbtags_branch != 0) {
+      bdt_jec_up_nbtags_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_up_nbtags_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_up_nbtags_isLoaded = true;
+  }
+  return bdt_jec_up_nbtags_;
+}
+
+const float &SSAG::bdt_jec_dn_nbtags() {
+  if (not bdt_jec_dn_nbtags_isLoaded) {
+    if (bdt_jec_dn_nbtags_branch != 0) {
+      bdt_jec_dn_nbtags_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_dn_nbtags_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_dn_nbtags_isLoaded = true;
+  }
+  return bdt_jec_dn_nbtags_;
+}
+
+const float &SSAG::bdt_jer_up_nbtags() {
+  if (not bdt_jer_up_nbtags_isLoaded) {
+    if (bdt_jer_up_nbtags_branch != 0) {
+      bdt_jer_up_nbtags_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_up_nbtags_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_up_nbtags_isLoaded = true;
+  }
+  return bdt_jer_up_nbtags_;
+}
+
+const float &SSAG::bdt_jer_dn_nbtags() {
+  if (not bdt_jer_dn_nbtags_isLoaded) {
+    if (bdt_jer_dn_nbtags_branch != 0) {
+      bdt_jer_dn_nbtags_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_dn_nbtags_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_dn_nbtags_isLoaded = true;
+  }
+  return bdt_jer_dn_nbtags_;
+}
+
+const float &SSAG::bdt_jec_up_njets() {
+  if (not bdt_jec_up_njets_isLoaded) {
+    if (bdt_jec_up_njets_branch != 0) {
+      bdt_jec_up_njets_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_up_njets_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_up_njets_isLoaded = true;
+  }
+  return bdt_jec_up_njets_;
+}
+
+const float &SSAG::bdt_jec_dn_njets() {
+  if (not bdt_jec_dn_njets_isLoaded) {
+    if (bdt_jec_dn_njets_branch != 0) {
+      bdt_jec_dn_njets_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_dn_njets_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_dn_njets_isLoaded = true;
+  }
+  return bdt_jec_dn_njets_;
+}
+
+const float &SSAG::bdt_jer_up_njets() {
+  if (not bdt_jer_up_njets_isLoaded) {
+    if (bdt_jer_up_njets_branch != 0) {
+      bdt_jer_up_njets_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_up_njets_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_up_njets_isLoaded = true;
+  }
+  return bdt_jer_up_njets_;
+}
+
+const float &SSAG::bdt_jer_dn_njets() {
+  if (not bdt_jer_dn_njets_isLoaded) {
+    if (bdt_jer_dn_njets_branch != 0) {
+      bdt_jer_dn_njets_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_dn_njets_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_dn_njets_isLoaded = true;
+  }
+  return bdt_jer_dn_njets_;
+}
+
+const float &SSAG::bdt_jec_up_met() {
+  if (not bdt_jec_up_met_isLoaded) {
+    if (bdt_jec_up_met_branch != 0) {
+      bdt_jec_up_met_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_up_met_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_up_met_isLoaded = true;
+  }
+  return bdt_jec_up_met_;
+}
+
+const float &SSAG::bdt_jec_dn_met() {
+  if (not bdt_jec_dn_met_isLoaded) {
+    if (bdt_jec_dn_met_branch != 0) {
+      bdt_jec_dn_met_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_dn_met_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_dn_met_isLoaded = true;
+  }
+  return bdt_jec_dn_met_;
+}
+
+const float &SSAG::bdt_jer_up_met() {
+  if (not bdt_jer_up_met_isLoaded) {
+    if (bdt_jer_up_met_branch != 0) {
+      bdt_jer_up_met_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_up_met_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_up_met_isLoaded = true;
+  }
+  return bdt_jer_up_met_;
+}
+
+const float &SSAG::bdt_jer_dn_met() {
+  if (not bdt_jer_dn_met_isLoaded) {
+    if (bdt_jer_dn_met_branch != 0) {
+      bdt_jer_dn_met_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_dn_met_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_dn_met_isLoaded = true;
+  }
+  return bdt_jer_dn_met_;
+}
+
+const float &SSAG::bdt_jec_up_htb() {
+  if (not bdt_jec_up_htb_isLoaded) {
+    if (bdt_jec_up_htb_branch != 0) {
+      bdt_jec_up_htb_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_up_htb_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_up_htb_isLoaded = true;
+  }
+  return bdt_jec_up_htb_;
+}
+
+const float &SSAG::bdt_jec_dn_htb() {
+  if (not bdt_jec_dn_htb_isLoaded) {
+    if (bdt_jec_dn_htb_branch != 0) {
+      bdt_jec_dn_htb_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_dn_htb_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_dn_htb_isLoaded = true;
+  }
+  return bdt_jec_dn_htb_;
+}
+
+const float &SSAG::bdt_jer_up_htb() {
+  if (not bdt_jer_up_htb_isLoaded) {
+    if (bdt_jer_up_htb_branch != 0) {
+      bdt_jer_up_htb_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_up_htb_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_up_htb_isLoaded = true;
+  }
+  return bdt_jer_up_htb_;
+}
+
+const float &SSAG::bdt_jer_dn_htb() {
+  if (not bdt_jer_dn_htb_isLoaded) {
+    if (bdt_jer_dn_htb_branch != 0) {
+      bdt_jer_dn_htb_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_dn_htb_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_dn_htb_isLoaded = true;
+  }
+  return bdt_jer_dn_htb_;
+}
+
+const float &SSAG::bdt_jec_up_nlb40() {
+  if (not bdt_jec_up_nlb40_isLoaded) {
+    if (bdt_jec_up_nlb40_branch != 0) {
+      bdt_jec_up_nlb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_up_nlb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_up_nlb40_isLoaded = true;
+  }
+  return bdt_jec_up_nlb40_;
+}
+
+const float &SSAG::bdt_jec_dn_nlb40() {
+  if (not bdt_jec_dn_nlb40_isLoaded) {
+    if (bdt_jec_dn_nlb40_branch != 0) {
+      bdt_jec_dn_nlb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_dn_nlb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_dn_nlb40_isLoaded = true;
+  }
+  return bdt_jec_dn_nlb40_;
+}
+
+const float &SSAG::bdt_jer_up_nlb40() {
+  if (not bdt_jer_up_nlb40_isLoaded) {
+    if (bdt_jer_up_nlb40_branch != 0) {
+      bdt_jer_up_nlb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_up_nlb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_up_nlb40_isLoaded = true;
+  }
+  return bdt_jer_up_nlb40_;
+}
+
+const float &SSAG::bdt_jer_dn_nlb40() {
+  if (not bdt_jer_dn_nlb40_isLoaded) {
+    if (bdt_jer_dn_nlb40_branch != 0) {
+      bdt_jer_dn_nlb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_dn_nlb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_dn_nlb40_isLoaded = true;
+  }
+  return bdt_jer_dn_nlb40_;
+}
+
+const float &SSAG::bdt_jec_up_ntb40() {
+  if (not bdt_jec_up_ntb40_isLoaded) {
+    if (bdt_jec_up_ntb40_branch != 0) {
+      bdt_jec_up_ntb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_up_ntb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_up_ntb40_isLoaded = true;
+  }
+  return bdt_jec_up_ntb40_;
+}
+
+const float &SSAG::bdt_jec_dn_ntb40() {
+  if (not bdt_jec_dn_ntb40_isLoaded) {
+    if (bdt_jec_dn_ntb40_branch != 0) {
+      bdt_jec_dn_ntb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jec_dn_ntb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jec_dn_ntb40_isLoaded = true;
+  }
+  return bdt_jec_dn_ntb40_;
+}
+
+const float &SSAG::bdt_jer_up_ntb40() {
+  if (not bdt_jer_up_ntb40_isLoaded) {
+    if (bdt_jer_up_ntb40_branch != 0) {
+      bdt_jer_up_ntb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_up_ntb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_up_ntb40_isLoaded = true;
+  }
+  return bdt_jer_up_ntb40_;
+}
+
+const float &SSAG::bdt_jer_dn_ntb40() {
+  if (not bdt_jer_dn_ntb40_isLoaded) {
+    if (bdt_jer_dn_ntb40_branch != 0) {
+      bdt_jer_dn_ntb40_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_jer_dn_ntb40_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_jer_dn_ntb40_isLoaded = true;
+  }
+  return bdt_jer_dn_ntb40_;
+}
+
+const float &SSAG::bdt_disc() {
+  if (not bdt_disc_isLoaded) {
+    if (bdt_disc_branch != 0) {
+      bdt_disc_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_disc_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_disc_isLoaded = true;
+  }
+  return bdt_disc_;
+}
+
+const float &SSAG::bdt_disc_jec_up() {
+  if (not bdt_disc_jec_up_isLoaded) {
+    if (bdt_disc_jec_up_branch != 0) {
+      bdt_disc_jec_up_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_disc_jec_up_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_disc_jec_up_isLoaded = true;
+  }
+  return bdt_disc_jec_up_;
+}
+
+const float &SSAG::bdt_disc_jer_up() {
+  if (not bdt_disc_jer_up_isLoaded) {
+    if (bdt_disc_jer_up_branch != 0) {
+      bdt_disc_jer_up_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_disc_jer_up_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_disc_jer_up_isLoaded = true;
+  }
+  return bdt_disc_jer_up_;
+}
+
+const float &SSAG::bdt_disc_jec_dn() {
+  if (not bdt_disc_jec_dn_isLoaded) {
+    if (bdt_disc_jec_dn_branch != 0) {
+      bdt_disc_jec_dn_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_disc_jec_dn_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_disc_jec_dn_isLoaded = true;
+  }
+  return bdt_disc_jec_dn_;
+}
+
+const float &SSAG::bdt_disc_jer_dn() {
+  if (not bdt_disc_jer_dn_isLoaded) {
+    if (bdt_disc_jer_dn_branch != 0) {
+      bdt_disc_jer_dn_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_disc_jer_dn_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_disc_jer_dn_isLoaded = true;
+  }
+  return bdt_disc_jer_dn_;
+}
+
+const float &SSAG::lep4_coneCorrPt() {
+  if (not lep4_coneCorrPt_isLoaded) {
+    if (lep4_coneCorrPt_branch != 0) {
+      lep4_coneCorrPt_branch->GetEntry(index);
+    } else {
+      printf("branch lep4_coneCorrPt_branch does not exist!\n");
+      exit(1);
+    }
+    lep4_coneCorrPt_isLoaded = true;
+  }
+  return lep4_coneCorrPt_;
+}
 	const float &SSAG::met3p0()
 	{
 		if (not met3p0_isLoaded) {
@@ -7327,6 +7957,36 @@ namespace ss {
 	const bool &lep2_trigMatch_noIsoReq() { return samesign.lep2_trigMatch_noIsoReq(); }
 	const bool &lep2_trigMatch_isoReq() { return samesign.lep2_trigMatch_isoReq(); }
 	const float &met3p0() { return samesign.met3p0(); }
+  const float &lep4_coneCorrPt() { return samesign.lep4_coneCorrPt(); }
+  const float &bdt_jec_up_nbtags() { return samesign.bdt_jec_up_nbtags(); }
+  const float &bdt_jec_dn_nbtags() { return samesign.bdt_jec_dn_nbtags(); }
+  const float &bdt_jer_up_nbtags() { return samesign.bdt_jer_up_nbtags(); }
+  const float &bdt_jer_dn_nbtags() { return samesign.bdt_jer_dn_nbtags(); }
+  const float &bdt_jec_up_njets() { return samesign.bdt_jec_up_njets(); }
+  const float &bdt_jec_dn_njets() { return samesign.bdt_jec_dn_njets(); }
+  const float &bdt_jer_up_njets() { return samesign.bdt_jer_up_njets(); }
+  const float &bdt_jer_dn_njets() { return samesign.bdt_jer_dn_njets(); }
+  const float &bdt_jec_up_met() { return samesign.bdt_jec_up_met(); }
+  const float &bdt_jec_dn_met() { return samesign.bdt_jec_dn_met(); }
+  const float &bdt_jer_up_met() { return samesign.bdt_jer_up_met(); }
+  const float &bdt_jer_dn_met() { return samesign.bdt_jer_dn_met(); }
+  const float &bdt_jec_up_htb() { return samesign.bdt_jec_up_htb(); }
+  const float &bdt_jec_dn_htb() { return samesign.bdt_jec_dn_htb(); }
+  const float &bdt_jer_up_htb() { return samesign.bdt_jer_up_htb(); }
+  const float &bdt_jer_dn_htb() { return samesign.bdt_jer_dn_htb(); }
+  const float &bdt_jec_up_nlb40() { return samesign.bdt_jec_up_nlb40(); }
+  const float &bdt_jec_dn_nlb40() { return samesign.bdt_jec_dn_nlb40(); }
+  const float &bdt_jer_up_nlb40() { return samesign.bdt_jer_up_nlb40(); }
+  const float &bdt_jer_dn_nlb40() { return samesign.bdt_jer_dn_nlb40(); }
+  const float &bdt_jec_up_ntb40() { return samesign.bdt_jec_up_ntb40(); }
+  const float &bdt_jec_dn_ntb40() { return samesign.bdt_jec_dn_ntb40(); }
+  const float &bdt_jer_up_ntb40() { return samesign.bdt_jer_up_ntb40(); }
+  const float &bdt_jer_dn_ntb40() { return samesign.bdt_jer_dn_ntb40(); }
+  const float &bdt_disc() { return samesign.bdt_disc(); }
+  const float &bdt_disc_jec_up() { return samesign.bdt_disc_jec_up(); }
+  const float &bdt_disc_jer_up() { return samesign.bdt_disc_jer_up(); }
+  const float &bdt_disc_jec_dn() { return samesign.bdt_disc_jec_dn(); }
+  const float &bdt_disc_jer_dn() { return samesign.bdt_disc_jer_dn(); }
   const float &bdt_nbtags() { return samesign.bdt_nbtags(); }
   const float &bdt_njets() { return samesign.bdt_njets(); }
   const float &bdt_met() { return samesign.bdt_met(); }
