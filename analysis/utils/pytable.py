@@ -2,10 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import re
+import math
 
 def round_sig(x, sig=2):
     if x < 0.001: return x
     return round(x, sig-int(math.floor(math.log10(x)))-1)
+
+def visible_len(val):
+    try: val = val.decode("utf-8")
+    except: pass
+    lenval = len(val)
+    if "\033" in val:
+        # lenval -= 12
+        lenval -= sum(map(len,re.findall(r"\033\[[0-9\;]+m",val)))
+    return lenval
+
 
 class Table():
 
@@ -17,6 +29,7 @@ class Table():
         self.rowcolors = {}
         self.extra_padding = 1
         self.d_style = {}
+        self.theme = ""
         self.set_theme_fancy()
         self.use_color = True
 
@@ -25,7 +38,7 @@ class Table():
     def fmt_string(self, val, length, fill_char=" ", justify="c", bold=False, offcolor=False, color=None):
         ret = ""
         val = str(val)
-        lenval = len(val.decode("utf-8"))
+        lenval = visible_len(val)
             
         if lenval > length: val = self.shorten_string(val, length)
         if justify == "l": 
@@ -46,11 +59,14 @@ class Table():
                 ret = '\033[00;32m' + ret + '\033[0m'
             if color == "blue":
                 ret = '\033[00;34m' + ret + '\033[0m'
+            if color == "red":
+                ret = '\033[00;31m' + ret + '\033[0m'
             if color == "lightblue":
                 ret = '\033[38;5;117m' + ret + '\033[0m'
         return ret
 
     def set_theme_fancy(self):
+        self.theme = "fancy"
         self.d_style["INNER_HORIZONTAL"] = '\033(0\x71\033(B'
         self.d_style["INNER_INTERSECT"] = '\033(0\x6e\033(B'
         self.d_style["INNER_VERTICAL"] = '\033(0\x78\033(B'
@@ -68,6 +84,7 @@ class Table():
         self.d_style["OUTER_TOP_RIGHT"] = '\033(0\x6b\033(B'
 
     def set_theme_basic(self):
+        self.theme = "basic"
         self.use_color = False
 
         self.d_style["INNER_HORIZONTAL"] = '-'
@@ -87,6 +104,7 @@ class Table():
         self.d_style["OUTER_TOP_RIGHT"] = '+'
 
     def set_theme_csv(self):
+        self.theme = "csv"
         self.use_color = False
 
         self.d_style["INNER_HORIZONTAL"] = ''
@@ -106,6 +124,9 @@ class Table():
         self.d_style["OUTER_TOP_RIGHT"] = ''
 
     def set_theme_latex(self):
+        self.theme = "latex"
+        self.use_color = False
+
         self.d_style["INNER_HORIZONTAL"] = ''
         self.d_style["INNER_INTERSECT"] = ''
         self.d_style["INNER_VERTICAL"] = ' & '
@@ -158,7 +179,7 @@ class Table():
         if self.matrix:
             for ic, cname in enumerate(self.colnames):
                 self.colsizes.append( max(
-                    max([len(str(r[ic]).decode("utf-8")) for r in self.matrix])+2,
+                    max([visible_len(str(r[ic]).decode("utf-8")) for r in self.matrix])+2,
                     len(str(cname))+2
                     ) )
 
@@ -190,6 +211,11 @@ class Table():
     def get_table_string(self, bold_title=True, show_row_separators=False, show_alternating=False, ljustall=False, show_colnames=True):
         self.update()
         nrows = len(self.matrix) + 1
+        draw_row_separators = True
+        draw_hlines = True
+        if self.theme in ["csv"]:
+            draw_row_separators = False
+            draw_hlines = False
 
         for irow,row in enumerate([self.colnames]+self.matrix):
 
@@ -217,12 +243,13 @@ class Table():
             yield self.d_style["OUTER_RIGHT_VERTICAL"]+"\n"
 
             # lines separating rows
-            if (show_row_separators and (irow < nrows-1)) or (irow == 0):
+            if draw_row_separators and ((show_row_separators and (irow < nrows-1)) or (irow == 0)):
                 yield self.d_style["OUTER_LEFT_INTERSECT"]
                 for icol,col in enumerate(row):
                     yield self.d_style["INNER_HORIZONTAL"]*(self.colsizes[icol]+self.extra_padding)
                     if icol != len(row)-1: yield self.d_style["INNER_INTERSECT"]
-                yield self.d_style["OUTER_RIGHT_INTERSECT"]+"\n"
+                yield self.d_style["OUTER_RIGHT_INTERSECT"]
+                yield "\n"
 
             # line at very bottom
             if irow == nrows-1:
@@ -233,7 +260,7 @@ class Table():
                 yield self.d_style["OUTER_BOTTOM_RIGHT"]+"\n"
             else:
                 # extra hlines
-                if irow in self.hlines:
+                if draw_hlines and (irow in self.hlines):
                     yield self.d_style["OUTER_LEFT_INTERSECT"]
                     for icol,col in enumerate(row):
                         yield self.d_style["OUTER_TOP_HORIZONTAL"]*(self.colsizes[icol]+self.extra_padding)

@@ -2,7 +2,7 @@ import numpy as np
 from pytable import Table
 from analysis.limits.errors import E
 
-def write_table(data, bgs, outname=None, signal=None):
+def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2,sep = u"\u00B1".encode("utf-8"), binedge_fmt="{}-{}"):
     tab = Table()
     sumbgs = sum(bgs)
     databg = data/sumbgs
@@ -12,15 +12,16 @@ def write_table(data, bgs, outname=None, signal=None):
     else:
         procs = bgs+[sumbgs,data,databg]
         cnames = [bg.get_attr("label") for bg in bgs] + ["Total bkg","Data", "Data/bkg"]
+    for eh in extra_hists:
+        procs.append(eh)
+        cnames.append(eh.get_attr("label"))
     tab.set_column_names(["bin"]+cnames)
-    sep = "+-"
-    precision = 2
-    if "tt_isr" in outname and "nisrjets" in outname:
-        precision = 5
+    if outname:
+        sep = "+-"
     binpairs = zip(data.edges[:-1],data.edges[1:])
     tab.set_theme_basic()
     for ibin,binrow in enumerate(binpairs):
-        row = ["[{},{}]".format(*binrow)]
+        row = [("[%s]"%binedge_fmt).format(binrow[0],binrow[1])]
         for iproc,proc in enumerate(procs):
             cent = max(proc.counts[ibin],0.)
             err = proc.errors[ibin]
@@ -30,11 +31,12 @@ def write_table(data, bgs, outname=None, signal=None):
 
     row = ["total"]
     for iproc,proc in enumerate(procs):
-        if iproc == len(procs)-(1+(signal is not None)):
+        if iproc == len(procs)-(1+(signal is not None)+len(extra_hists)):
             totbg = E(sum(sumbgs.counts), np.sum(sumbgs.errors**2.)**0.5)
             totdata = E(sum(data.counts))
             ratio = totdata/totbg
             cent, err = ratio[0], ratio[1]
+            precision = max(precision, 2)
         else:
             cent = sum(proc.counts)
             err = np.sum(proc.errors**2.)**0.5
@@ -51,6 +53,7 @@ def write_table(data, bgs, outname=None, signal=None):
             total = parts[-4:-1]
             table_info = { "header":"<br>".join(header), "bins":binparts, "total":"<br>".join(total) }
             return table_info
+    return tab
 
 def get_bin_info(bin_coords, table_info):
     info = { "xedges": [], "yedges": [], "table": table_info }

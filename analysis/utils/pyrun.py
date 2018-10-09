@@ -9,7 +9,7 @@ import argparse
 try:
     from tqdm import format_meter, StatusPrinter
 except:
-    from pyfiles.tqdm import format_meter, StatusPrinter
+    from pyfiles.mytqdm import format_meter, StatusPrinter
 
 from multiprocessing import Pool
 
