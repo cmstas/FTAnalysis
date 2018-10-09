@@ -41,8 +41,9 @@ print points
 for k,v in temp:
     train_auc, test_auc, params = get_avg_auc(v,"train"), get_avg_auc(v,"test"), v["params"]
     ntrees,time_tree = len(v["test-auc-mean"]), v["time_per_tree"]
-    if train_auc > 0.8955: continue
+    # if train_auc > 0.8955: continue
     if test_auc < 0.8929: continue
+    if train_auc/test_auc > 1.004: continue
     # if test_auc < 0.8935: continue
     print "{},{:.4f},{:.4f},{:.4f},{},{:.1f}".format(k,test_auc,train_auc,train_auc-test_auc,ntrees,time_tree),params
 
@@ -53,7 +54,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots()
 
-# 12:17:45 PM | namin@uaf-10 | ~/2018/fourtop/all/FTAnalysis/analysis/bdt > cat log_bo_v4.txt | grep "train-auc"
+# cat ../log_bo_v5.txt | grep "train-auc"
 to_parse = """
 [502]	train-auc:0.902945+0.000277264	test-auc:0.894863+0.000330881
 [144]	train-auc:0.901776+2.62619e-05	test-auc:0.896826+0.000210218
@@ -82,6 +83,14 @@ to_parse = """
 [1088]	train-auc:0.902784+5.33497e-05	test-auc:0.897363+0.000141367
 [771]	train-auc:0.905346+9.7103e-05	test-auc:0.897435+0.000136881
 [741]	train-auc:0.905476+2.20497e-05	test-auc:0.897406+0.000157877
+[1020]	train-auc:0.90417+1.85e-05	test-auc:0.897391+0.000196513
+[1190]	train-auc:0.904257+7.03682e-05	test-auc:0.897468+0.000186092
+[900]	train-auc:0.904778+8.70384e-05	test-auc:0.897398+0.000178777
+[1485]	train-auc:0.903367+0.000102989	test-auc:0.896468+0.000136148
+[410]	train-auc:0.903645+0.000101318	test-auc:0.897168+0.000228404
+[830]	train-auc:0.903985+5.29174e-05	test-auc:0.89729+0.000220729
+[509]	train-auc:0.904231+0.000127328	test-auc:0.897305+0.000204808
+[395]	train-auc:0.903982+0.00012866	test-auc:0.897227+0.000175273
 """
 
 more_points = []
@@ -102,6 +111,7 @@ print more_points.shape
 # for i in [0.08,0.1,0.15,0.2,0.3,0.4]:
 #     ax.scatter(points[:,0][points[:,2] == i], points[:,1][points[:,2] == i], s=3.0, alpha=0.5, label="depth = {}".format(i))
 # points = points[points[:,1] > 0.893]
+points = points[points[:,0]/points[:,1] < 1.004]
 ax.scatter(points[:,0], points[:,1], s=10.0, alpha=0.8, label="naive condor")
 ax.scatter(more_points[:,0], more_points[:,1], s=25.0, alpha=0.8, label="bayesian opt")
 # ax.set_ylim([0.9999*points[:,1].min(),1.0001*points[:,1].max()])

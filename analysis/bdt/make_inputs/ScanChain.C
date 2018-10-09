@@ -15,7 +15,7 @@
 #include "../../misc/signal_regions.h"
 #include "../../misc/tqdm.h"
 namespace binary {
-#include "func.h"
+#include "../../misc/bdt.h"
 }
 namespace multiclass {
 #include "func_mc.h"
@@ -28,8 +28,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     int tree_year = -1;
     int tree_stype = -1;
     float tree_weight = -1;
-    bool tree_br = 0;
+    int tree_br = 0;
     int tree_SR = 0;
+    int tree_class = -1;
     float tree_nbtags = -1;
     float tree_njets = -1;
     float tree_met = -1;
@@ -50,7 +51,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     float tree_ptl1 = -1;
     float tree_ptl3 = -1;
     float tree_disc = -1;
+    float tree_disc_tmva = -1;
     // auto tree_classprobs = std::vector<float>();
+    // auto tree_nnvec = std::vector<float>();
 
     TMVA::Reader reader("Silent");
     reader.AddVariable("nbtags",      &tree_nbtags);
@@ -76,7 +79,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     reader.AddSpectator("ptl1",       &tree_ptl1);
     reader.AddSpectator("ptl2",       &tree_ptl2);
     reader.AddSpectator("SR",         &tree_SR);
-    reader.BookMVA("BDT","../../yields/TMVAClassification_BDT_19vars.xml");
+    reader.AddSpectator("br",         &tree_br);
+    // reader.BookMVA("BDT","../../yields/TMVAClassification_BDT_19vars.xml");
+    reader.BookMVA("BDT","TMVAClassification_BDT.weights.xml");
 
     TString proc(ch->GetTitle());
 
@@ -98,6 +103,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     out_tree->Branch("weight", &tree_weight);
     out_tree->Branch("br", &tree_br);
     out_tree->Branch("SR", &tree_SR);
+    out_tree->Branch("class", &tree_class);
     out_tree->Branch("nbtags", &tree_nbtags);
     out_tree->Branch("njets", &tree_njets);
     out_tree->Branch("met", &tree_met);
@@ -118,10 +124,14 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     out_tree->Branch("ptl1", &tree_ptl1);
     out_tree->Branch("ptl3", &tree_ptl3);
     out_tree->Branch("disc", &tree_disc);
+    out_tree->Branch("disc_tmva", &tree_disc_tmva);
     // out_tree->Branch("classprobs", &tree_classprobs);
+    // out_tree->Branch("nnvec", &tree_nnvec);
 
     int nEventsTotal = 0;
     int nEventsChain = ch->GetEntries();
+
+    bool allowOSsignal = true;
 
     TFile *currentFile = 0;
     TObjArray *listOfFiles = ch->GetListOfFiles();
@@ -195,8 +205,12 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
                 }
                 if (!found_fake) continue;
             } else {
-                // Tight
-                if (ss::hyp_class() != 3) continue;
+                if (tree_stype == 0 && allowOSsignal) {
+                    if (!(ss::hyp_class() == 3 || ss::hyp_class() == 4)) continue;
+                } else {
+                    // Tight
+                    if (ss::hyp_class() != 3) continue;
+                }
             }
 
             // // Truth fakes
@@ -218,6 +232,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
                     ss::lep1_coneCorrPt(),
                     ss::lep2_coneCorrPt()
                     );
+            if (tree_stype == 0 && allowOSsignal) {
+                br = br && (ss::hyp_class() == 3);
+            }
 
             int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::mtmin(), ss::lep1_id(), ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(), ss::lep3_coneCorrPt(), ss::bdt_nleps(), ss::hyp_class() == 6);
 
@@ -250,11 +267,53 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
 
             tree_weight = weight;
             tree_SR = SR;
+            tree_class = ss::hyp_class();
             tree_br = br;
 
-            // tree_disc = reader.EvaluateMVA("BDT");
+            tree_disc_tmva = reader.EvaluateMVA("BDT");
             tree_disc = binary::get_prediction(tree_nbtags,tree_njets,tree_met,tree_ptl2,tree_nlb40,tree_ntb40,tree_nleps,tree_htb,tree_q1,tree_ptj1,tree_ptj6,tree_ptj7,tree_ml1j1,tree_dphil1l2,tree_maxmjoverpt,tree_ptl1,tree_detal1l2,tree_ptj8,tree_ptl3);
             // tree_classprobs = multiclass::get_prediction(tree_nbtags,tree_njets,tree_met,tree_ptl2,tree_nlb40,tree_ntb40,tree_nleps,tree_htb,tree_q1,tree_ptj1,tree_ptj6,tree_ptj7,tree_ml1j1,tree_dphil1l2,tree_maxmjoverpt,tree_ptl1,tree_detal1l2,tree_ptj8,tree_ptl3);
+
+            // // -- 5x3 floats (nbtags, -5padded pt eta phi), 10x3 floats (njets), 3x3 floats (lep1,2,3 pt,eta,phi -5padded)
+            // // -- 54 floats in total
+            // tree_nnvec.clear();
+            // for (int ijet = 0; ijet < 5; ijet++) {
+            //     if (ijet >= ss::nbtags()) {
+            //         tree_nnvec.push_back(-5);
+            //         tree_nnvec.push_back(-5);
+            //         tree_nnvec.push_back(-5);
+            //     } else {
+            //         tree_nnvec.push_back(ss::jets()[ijet].pt());
+            //         tree_nnvec.push_back(ss::jets()[ijet].eta());
+            //         tree_nnvec.push_back(ss::jets()[ijet].phi());
+            //     }
+            // }
+            // for (int ijet = 0; ijet < 10; ijet++) {
+            //     if (ijet >= ss::njets()) {
+            //         tree_nnvec.push_back(-5);
+            //         tree_nnvec.push_back(-5);
+            //         tree_nnvec.push_back(-5);
+            //     } else {
+            //         tree_nnvec.push_back(ss::jets()[ijet].pt());
+            //         tree_nnvec.push_back(ss::jets()[ijet].eta());
+            //         tree_nnvec.push_back(ss::jets()[ijet].phi());
+            //     }
+            // }
+            // tree_nnvec.push_back(ss::lep1_coneCorrPt());
+            // tree_nnvec.push_back(ss::lep1_p4().eta());
+            // tree_nnvec.push_back(ss::lep1_p4().phi());
+            // tree_nnvec.push_back(ss::lep2_coneCorrPt());
+            // tree_nnvec.push_back(ss::lep2_p4().eta());
+            // tree_nnvec.push_back(ss::lep2_p4().phi());
+            // if (tree_nleps >= 3) {
+            //     tree_nnvec.push_back(ss::lep3_coneCorrPt());
+            //     tree_nnvec.push_back(ss::lep3_p4().eta());
+            //     tree_nnvec.push_back(ss::lep3_p4().phi());
+            // } else {
+            //     tree_nnvec.push_back(-5);
+            //     tree_nnvec.push_back(-5);
+            //     tree_nnvec.push_back(-5);
+            // }
 
             out_tree->Fill();
 

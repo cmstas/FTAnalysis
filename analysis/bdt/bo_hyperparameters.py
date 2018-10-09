@@ -34,11 +34,12 @@ def xgb_evaluate(eta,
              seed=random_state,
              callbacks=[xgb.callback.early_stop(20)])
 
-    return cv_result['test-auc-mean'].values[-1]
+    testaucs = cv_result['test-auc-mean'].values
+    return testaucs[:-5].mean()
 
 
 def prepare_data():
-    f = uproot.open("make_inputs/output_total.root")
+    f = uproot.open("make_inputs/output_total_sigssos.root")
     t = f["t"]
     arrs = t.arrays(t.keys())
     feature_names = [
@@ -79,10 +80,10 @@ def prepare_data():
 if __name__ == '__main__':
     xgtrain = prepare_data()
 
-    num_rounds = 2000
+    num_rounds = 500
     random_state = 42
-    num_iter = 40
-    init_points = 7
+    num_iter = 60
+    init_points = 10
     params = {
             'objective': 'binary:logistic',
             'eta': 0.1,
@@ -93,10 +94,10 @@ if __name__ == '__main__':
             }
 
     xgbBO = BayesianOptimization(xgb_evaluate, {
-                                                'eta': (0.025,0.2),
+                                                'eta': (0.025,0.15),
                                                 'min_child_weight': (1, 10),
                                                 'colsample_bytree': (0.1, 1),
-                                                'max_depth': (5.2, 6.5),
+                                                'max_depth': (4.3, 6.3),
                                                 'subsample': (0.5, 0.9),
                                                 'lamb': (1, 4),
                                                 'gamma': (0, 10),
@@ -105,4 +106,7 @@ if __name__ == '__main__':
 
     xgbBO.maximize(init_points=init_points, n_iter=num_iter)
     xgbBO.points_to_csv("data_bo.csv")
+    print "-"*50
+    print "results: ", xgbBO.res
+    print "-"*50
 

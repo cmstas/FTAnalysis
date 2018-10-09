@@ -21,7 +21,8 @@ import pickle
 print xgb.__file__
 
 # f = uproot.open("make_inputs/output_total_Sep24.root")
-f = uproot.open("make_inputs/output_total.root")
+# f = uproot.open("make_inputs/output_total.root")
+f = uproot.open("make_inputs/output_total_sigssos.root")
 # f = uproot.open("make_inputs/output_total_missm1.root")
 t = f["t"]
 arrs = t.arrays(t.keys())
@@ -48,6 +49,8 @@ feature_names = [
         "ptl3",
         ]
 
+
+
 stype = arrs["stype"]
 y_data = (stype == 0.)
 x_data = np.column_stack([arrs[name] for name in feature_names])
@@ -55,6 +58,13 @@ weights_raw = arrs["weight"]
 
 
 weights = arrs["weight"]*1.0
+
+# keep = arrs["class"] == 3
+# stype = stype[keep]
+# y_data = y_data[keep]
+# x_data = x_data[keep]
+# weights = weights[keep]
+# weights_raw = weights_raw[keep]
 
 avg_weight_bkg = np.abs(weights[y_data == 0]).mean()
 avg_weight_sig = np.abs(weights[y_data == 1]).mean()
@@ -64,6 +74,10 @@ weights[y_data == 0] *= 1.0/avg_weight_bkg
 weights[y_data == 1] *= 1.0/avg_weight_sig
 # weights = arrs["weight"]*100.
 # weights[y_data == 1] *= 10.
+
+print "avg weights"
+for s in np.unique(stype):
+    print s, (stype==s).sum(), np.abs(weights[stype == s]).mean()
 
 # clip weight for large weight events (mainly xg and fakes)
 weights[np.abs(weights) > 2.] *= 2.0/(weights[np.abs(weights) > 2.])
@@ -75,6 +89,7 @@ weights[np.abs(weights) > 2.] *= 2.0/(weights[np.abs(weights) > 2.])
 # weights_raw = weights_raw[keep]
 print weights
 
+print "avg weights"
 for s in np.unique(stype):
     print s, (stype==s).sum(), np.abs(weights[stype == s]).mean()
 
@@ -93,7 +108,7 @@ x_train, x_test, \
                 y_data,
                 weights,
                 weights_raw,
-                test_size=0.25, random_state=42,
+                test_size=0.20, random_state=42,
                 )
 
 
@@ -101,48 +116,65 @@ dtrain = xgb.DMatrix( x_train, label=y_train, weight=np.abs(weights_train)) #, m
 dtest = xgb.DMatrix( x_test, label=y_test, weight=np.abs(weights_test)) #, missing=-1.0)
 evallist  = [(dtrain,'train'), (dtest,'eval')]
 # 2131,0.8930,0.8954,0.0024,2626,3.5 {'colsample_bytree': 0.5, 'silent': 1, 'eval_metric': 'auc', 'scale_pos_weight': 1.262414, 'nthread': 1, 'min_child_weight': 5.0, 'subsample': 0.6, 'eta': 0.04, 'alpha': 4.0, 'max_depth': 5, 'gamma': 2.0, 'lambda': 1.5}
-num_round = 1500
+num_round = 750
 param = {}
 param['objective'] = 'binary:logistic'
 
-param['eta'] = 0.04
+# # bst_orig.pkl
+# param['eta'] = 0.04
+# param['max_depth'] = 4
+# param['silent'] = 1
+# param['nthread'] = 15
+# param['eval_metric'] = "auc"
+# param['subsample'] = 0.6
+# param['alpha'] = 4.0
+# param['gamma'] = 2.0
+# param['lambda'] = 1.5
+# param['min_child_weight'] = 5.0
+# param['colsample_bytree'] = 0.5
+
+# 2337,0.8964,0.8993,0.0028,1547,3.5 {'colsample_bytree': 1.0, 'silent': 1, 'eval_metric': 'auc', 'scale_pos_weight': 1.9180059, 'nthread': 1, 'min_child_weight': 1.0, 'subsample': 0.6, 'eta': 0.04, 'alpha': 8.0, 'max_depth': 4, 'gamma': 2.0, 'lambda': 1.0}
+num_round = 500
+param['eta'] = 0.07
+# param['max_depth'] = 4
 param['max_depth'] = 5
 param['silent'] = 1
 param['nthread'] = 15
 param['eval_metric'] = "auc"
 param['subsample'] = 0.6
-param['alpha'] = 4.0
+param['alpha'] = 8.0
 param['gamma'] = 2.0
-param['lambda'] = 1.5
-param['min_child_weight'] = 5.0
-param['colsample_bytree'] = 0.5
+param['lambda'] = 1.0
+param['min_child_weight'] = 1.0
+param['colsample_bytree'] = 1.0
 
-# param['eta'] = 0.05
+# param['eta'] = 0.03
 # param['max_depth'] = 5
 # param['silent'] = 1
 # param['nthread'] = 15
 # param['eval_metric'] = "auc"
-# param['subsample'] = 0.8
-# param['alpha'] = 6.9
-# param['gamma'] = 9.7
-# param['lambda'] = 1.5
-# param['min_child_weight'] = 6.6
-# param['colsample_bytree'] = 0.8
+# param['subsample'] = 0.86
+# param['alpha'] = 9.45
+# param['gamma'] = 4.3
+# param['lambda'] = 3.7
+# param['min_child_weight'] = 1.4
+# param['colsample_bytree'] = 0.94
 
 sumw_pos = np.abs(dtrain.get_weight()[dtrain.get_label()==1]).sum()
 sumw_neg = np.abs(dtrain.get_weight()[dtrain.get_label()==0]).sum()
 param["scale_pos_weight"] = sumw_neg/sumw_pos
-if not os.path.exists("bst.pkl"):
+pklname = "bst_ssos.pkl"
+# pklname = "bst_ssos_depth4.pkl"
+# pklname = "bst_ss.pkl"
+if not os.path.exists(pklname):
+    os.nice(10)
     bst = xgb.train( param.items(), dtrain, num_round, evallist, early_stopping_rounds=20 )
-    pickle.dump(bst,open("bst.pkl","wb"))
+    pickle.dump(bst,open(pklname,"wb"))
     write_json("model.json", bst, feature_names)
     json_to_cfunc("model.json", fname_out="func.h")
 else:
     print "[!] Found pickle file...loading"
-    bst = pickle.load(open("bst.pkl","rb"))
-
-pickle.dump(bst,open("bst.pkl","wb"))
-write_json("model.json", bst, feature_names)
+    bst = pickle.load(open(pklname,"rb"))
 
 y_pred_train = bst.predict(dtrain)
 y_pred = bst.predict(dtest)
@@ -177,36 +209,83 @@ preds_sig_train = y_pred_train[y_train==1]
 density = True
 bins = np.linspace(0.0,1,50)
 
+# # XXX TRANSFORM by unstretching peaks at 0 and 1 with inverse sigmoid
+# vmin = min(preds_bkg_train.min(),preds_bkg_test.min())
+# vmax = max(preds_sig_train.max(),preds_sig_test.max())
+# def inv_sigmoid(x,tau):
+#     return (1.0/tau)*np.log(x/(1-x))
+# def trans(x,tau=6.):
+#     y = inv_sigmoid(x,tau)
+#     ymin = inv_sigmoid(vmin,tau)
+#     ymax = inv_sigmoid(vmax,tau)
+#     y = (y-ymin)/(ymax-ymin)
+#     return y
+# preds_bkg_train = trans(preds_bkg_train)
+# preds_sig_train = trans(preds_sig_train)
+# preds_bkg_test = trans(preds_bkg_test)
+# preds_sig_test = trans(preds_sig_test)
+# bins = np.linspace(0,1,50)
+# print preds_bkg_train.min(),preds_bkg_train.max()
+# print preds_sig_train.min(),preds_sig_train.max()
+# print preds_bkg_test.min(),preds_bkg_test.max()
+# print preds_sig_test.min(),preds_sig_test.max()
+
 from scipy import stats
 pks_bkg = stats.ks_2samp(preds_bkg_train,preds_bkg_test)[1]
 pks_sig = stats.ks_2samp(preds_sig_train,preds_sig_test)[1]
 
 
 # train bkg
-ax.hist(preds_bkg_train, weights=weights_raw_train[y_train==0], bins=bins,histtype="stepfilled",alpha=0.45, density=density, label="bkg, train",color="C0")
+counts_train_bkg,_,_ = ax.hist(preds_bkg_train, weights=weights_raw_train[y_train==0], bins=bins,histtype="stepfilled",alpha=0.45, density=density, label="bkg, train",color="C0")
+h_train_bkg = Hist1D(preds_bkg_train, weights=weights_raw_train[y_train==0], bins=bins)
+h_train_bkg *= float(counts_train_bkg.sum()/h_train_bkg.get_integral())
+# ax.errorbar( h_train_bkg.get_bin_centers(), h_train_bkg.counts, yerr=h_train_bkg.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="k",)
 
 # train sig
-ax.hist(preds_sig_train, weights=weights_raw_train[y_train==1], bins=bins,histtype="stepfilled",alpha=0.45, density=density, label="sig, train",color="C3")
+counts_train_sig,_,_ = ax.hist(preds_sig_train, weights=weights_raw_train[y_train==1], bins=bins,histtype="stepfilled",alpha=0.45, density=density, label="sig, train",color="C3")
+h_train_sig = Hist1D(preds_sig_train, weights=weights_raw_train[y_train==1], bins=bins)
+h_train_sig *= float(counts_train_sig.sum()/h_train_sig.get_integral())
+# ax.errorbar( h_train_sig.get_bin_centers(), h_train_sig.counts, yerr=h_train_sig.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="k",)
 
 # test bkg error bars
-counts_bkg,_,_ = ax.hist(preds_bkg_test, weights=weights_raw_test[y_test==0], bins=bins,histtype="step",alpha=1.0, density=density, label="bkg, test (KS prob = {:.2f})".format(pks_bkg),color="C0", lw=1.5, linestyle="solid")
-h = Hist1D(preds_bkg_test, weights=weights_raw_test[y_test==0], bins=bins)
-h *= float(counts_bkg.sum()/h.get_integral())
-ax.errorbar( h.get_bin_centers(), h.counts, yerr=h.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="C0",)
+counts_test_bkg,_,_ = ax.hist(preds_bkg_test, weights=weights_raw_test[y_test==0], bins=bins,histtype="step",alpha=1.0, density=density, label="bkg, test (KS prob = {:.2f})".format(pks_bkg),color="C0", lw=1.5, linestyle="solid")
+h_test_bkg = Hist1D(preds_bkg_test, weights=weights_raw_test[y_test==0], bins=bins)
+h_test_bkg *= float(counts_test_bkg.sum()/h_test_bkg.get_integral())
+ax.errorbar( h_test_bkg.get_bin_centers(), h_test_bkg.counts, yerr=h_test_bkg.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="C0",)
 
 # test sig error bars
-counts_sig,_,_= ax.hist(preds_sig_test, weights=weights_raw_test[y_test==1], bins=bins,histtype="step",alpha=1.0, density=density, label="sig, test (KS prob = {:.2f})".format(pks_sig),color="C3", lw=1.5, linestyle="solid")
-h = Hist1D(preds_sig_test, weights=weights_raw_test[y_test==1], bins=bins)
-h *= float(counts_sig.sum()/h.get_integral())
-ax.errorbar( h.get_bin_centers(), h.counts, yerr=h.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="C3",)
+counts_test_sig,_,_= ax.hist(preds_sig_test, weights=weights_raw_test[y_test==1], bins=bins,histtype="step",alpha=1.0, density=density, label="sig, test (KS prob = {:.2f})".format(pks_sig),color="C3", lw=1.5, linestyle="solid")
+h_test_sig = Hist1D(preds_sig_test, weights=weights_raw_test[y_test==1], bins=bins)
+h_test_sig *= float(counts_test_sig.sum()/h_test_sig.get_integral())
+ax.errorbar( h_test_sig.get_bin_centers(), h_test_sig.counts, yerr=h_test_sig.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="C3",)
 
-print counts_bkg.sum()
-print counts_sig.sum()
+# print h_train_bkg
+# print h_test_bkg
+# print h_train_sig
+# print h_test_sig
+# import ROOT as r
+# def to_root(h, name):
+#     edges = h._edges
+#     counts = h._counts
+#     errors = h._errors
+#     h1 = r.TH1F(name,"",len(edges)-1,edges)
+#     for i,(count,error) in enumerate(zip(counts,errors)):
+#         h1.SetBinContent(i+1,count)
+#         h1.SetBinError(i+1,error)
+#     return h1
+# h_train1 = to_root(h_train_bkg, "h_train1")
+# h_train2 = to_root(h_train_sig, "h_train2")
+# h_test1 = to_root(h_test_bkg, "h_test1")
+# h_test2 = to_root(h_test_sig, "h_test2")
+# print h_train1.KolmogorovTest(h_train2)
+# print h_test1.KolmogorovTest(h_test2)
+
 
 
 
 ax.legend()
 
 ax.set_ylim([0.,ax.get_ylim()[1]])
-fig.savefig("disc.png")
-os.system("which ic && ic disc.png")
+fig.set_tight_layout(True)
+fig.savefig("disc.pdf")
+os.system("which ic && ic disc.pdf")

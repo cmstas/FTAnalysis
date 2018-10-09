@@ -14,7 +14,8 @@ parser.add_argument("-t", "--train", help="do training", action="store_true")
 
 args = parser.parse_args()
  
-dotrain = True
+# dotrain = True
+dotrain = args.train
 # inname = "output_toptag_75ifb_18sr_jet2020.root"
 # outname = "LearningOutput_2020_notoptag.root"
 
@@ -35,16 +36,19 @@ if dotrain:
     # Create the TMVA factory
     ROOT.TMVA.Tools.Instance()
     factory = ROOT.TMVA.Factory("TMVAClassification", f_out,"AnalysisType=Classification")
+    print dir(factory)
+
+    loader = ROOT.TMVA.DataLoader("dataset")
      
     # Add the six variables to the TMVA factory as floats
-    all_vars = ["l1id", "l2id", "nbtags", "njets", "nleps", "wcands", "met", "ht", "htb", "mt1", "mt2", "dphil1j1", "dphil2j2", "dphil1j2", "dphil2j1", "dphil1l2", "dphij1j2", "dphil1met", "dphil2met", "dphij1met", "dphij2met", "detal1j1", "detal2j2", "detal1j2", "detal2j1", "detal1l2", "detaj1j2", "ml1j1", "ml2j2", "ml1j2", "ml2j1", "ml1l2", "mj1j2", "ptl1", "ptl2", "ptj1", "ptj2", "nlb40", "nmb40", "ntb40", "q1", "q2", "q3", "ht4ratio"]
+    # all_vars = ["l1id", "l2id", "nbtags", "njets", "nleps", "wcands", "met", "ht", "htb", "mt1", "mt2", "dphil1j1", "dphil2j2", "dphil1j2", "dphil2j1", "dphil1l2", "dphij1j2", "dphil1met", "dphil2met", "dphij1met", "dphij2met", "detal1j1", "detal2j2", "detal1j2", "detal2j1", "detal1l2", "detaj1j2", "ml1j1", "ml2j2", "ml1j2", "ml2j1", "ml1l2", "mj1j2", "ptl1", "ptl2", "ptj1", "ptj2", "nlb40", "nmb40", "ntb40", "q1", "q2", "q3", "ht4ratio"]
     # nominal_vars = ["njets", "nbtags", "mt1", "mt2", "met", "ml1l2", "htb", "nleps", "ht", "mj1j2", "dphij1j2", "ptj1", "ptj2", "ml1j2", "ml1j1", "wcands", "dphil1j1", "detal1l2","nlb40","nmb40","ntb40","q1","q2","ht4ratio"]
-    nominal_vars = ["njets", "nbtags", "mt1", "mt2", "met", "ml1l2", "htb", "nleps", "ht", "mj1j2", "dphij1j2", "ptj1", "ptj2", "ml1j2", "ml1j1", "wcands", "dphil1j1", "detal1l2","nlb40","nmb40","ntb40","q1","ht4ratio"]
+    # nominal_vars = ["njets", "nbtags", "mt1", "mt2", "met", "ml1l2", "htb", "nleps", "ht", "mj1j2", "dphij1j2", "ptj1", "ptj2", "ml1j2", "ml1j1", "wcands", "dphil1j1", "detal1l2","nlb40","nmb40","ntb40","q1","ht4ratio"]
     new_vars = ["nbtags", "njets", "met", "ptl2", "nlb40", "ntb40", "nleps", "htb", "q1", "ptj1", "ptj6", "ptj7", "ml1j1", "dphil1l2", "maxmjoverpt", "ptl1", "detal1l2", "ptj8", "ptl3"]
 
     new_vars = new_vars[:max_vars]
-    small_vars = ["nbtags"]
-    test_vars = ["ht"]
+    # small_vars = ["nbtags"]
+    # test_vars = ["ht"]
     # for x in all_vars:
     # for x in new_vars:
     for x in new_vars:
@@ -52,30 +56,33 @@ if dotrain:
     # for x in test_vars:
         typ = "F"
         if x in ["nleps","wcands","q1","q2","q3","nlb40","nmb40","ntb40","njets","nbtags"]: typ = "I"
-        factory.AddVariable(x,typ)
-    factory.AddSpectator("weight","F")
-    factory.AddSpectator("ptl1","F")
-    factory.AddSpectator("ptl2","F")
-    factory.AddSpectator("SR","F")
+        loader.AddVariable(x,typ)
+    loader.AddSpectator("weight","F")
+    loader.AddSpectator("ptl1","F")
+    loader.AddSpectator("ptl2","F")
+    loader.AddSpectator("SR","F")
+    loader.AddSpectator("br","F")
      
     # Link the signal and background to the root_data ntuple
-    factory.AddBackgroundTree(t1)
-    factory.AddSignalTree(t1)
+    loader.AddBackgroundTree(t1)
+    loader.AddSignalTree(t1)
     # factory.SetBackgroundWeightExpression("weight")
     # factory.SetSignalWeightExpression("weight")
-    factory.SetBackgroundWeightExpression("weight")
-    factory.SetSignalWeightExpression("weight")
+    loader.SetBackgroundWeightExpression("weight")
+    loader.SetSignalWeightExpression("weight")
      
     # cuts defining the signal and background sample
     extra = "1"
     # # extra = "(ht>300)"
     # extra = "(ht>600)"
-    sigCut = ROOT.TCut("(stype == 7) && "+extra)
-    bgCut = ROOT.TCut("(stype >= 0 && stype < 7) && "+extra) 
+    # sigCut = ROOT.TCut("(stype == 7) && "+extra)
+    # bgCut = ROOT.TCut("(stype >= 0 && stype < 7) && "+extra) 
+    sigCut = ROOT.TCut("(stype == 0) && "+extra)
+    bgCut = ROOT.TCut("(stype > 0) && "+extra) 
     # Prepare the training/testing signal/background  
-    factory.PrepareTrainingAndTestTree(sigCut,bgCut,"SplitMode=Random:NormMode=NumEvents:!V") 
+    loader.PrepareTrainingAndTestTree(sigCut,bgCut,"SplitMode=Random:NormMode=NumEvents:!V") 
      
-    method = factory.BookMethod(ROOT.TMVA.Types.kBDT, "BDT",
+    method = factory.BookMethod(loader, ROOT.TMVA.Types.kBDT, "BDT",
                        ":".join([
                            "!H",
                            "!V",
@@ -111,12 +118,12 @@ Histo_testing_S = ROOT.TH1D('Histo_testing_S'   , '%i x S (Test)'%normfact  , 25
 Histo_testing_B = ROOT.TH1D('Histo_testing_B'   , 'B (Test)'                , 25 , xmin,xmax)
  
 # Fetch the trees of events from the root file 
-TrainTree = f_out.Get("TrainTree") 
-TestTree = f_out.Get("TestTree") 
+TrainTree = f_out.Get("dataset/TrainTree") 
+TestTree = f_out.Get("dataset/TestTree") 
  
 # Cutting on these objects in the trees will allow to separate true S/B SCut_Tree = 'classID>0.5'
-BCut_Tree = 'classID<0.5 && (SR>0)'
-SCut_Tree = 'classID>0.5 && (SR>0)'
+BCut_Tree = 'classID<0.5 && (br)'
+SCut_Tree = 'classID>0.5 && (br)'
  
 TrainTree.Draw("BDT>>Histo_training_S",("%i*weight*("%normfact)+SCut_Tree+")")
 TrainTree.Draw("BDT>>Histo_training_B","weight*("+BCut_Tree+")")
@@ -222,7 +229,7 @@ for ibz, val in enumerate(cumsum_sqrtsb):
     soverb_cumulative.SetBinContent(ibz,val)
     soverb_cumulative.SetBinError(ibz,0.)
 maxsb = max(list(soverb_cumulative))
-print "GREP", maxsb, auc, max_vars, ",".join(new_vars)
+# print "GREP", maxsb, auc, max_vars, ",".join(new_vars)
 soverb_cumulative.SetLineColor(ROOT.kBlue-2)
 soverb_cumulative.SetMarkerColor(ROOT.kBlue-2)
 # soverb_cumulative.GetYaxis().SetTitle("Cumulative s/b")
