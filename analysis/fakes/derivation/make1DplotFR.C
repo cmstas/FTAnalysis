@@ -6,6 +6,7 @@
 
 void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float muSF_mt, bool useIsoTrig){
     bool do_qcd = true;
+    int year = 2018;
 
     for(int doPt = 0; doPt < 2; doPt++) {
         gROOT->Reset();
@@ -212,7 +213,7 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
         labelcms->SetTextSize(1.2*0.035);
         labelcms->SetTextFont(42);
         labelcms->SetFillColor(kWhite);
-        labelcms->AddText(Form("%.1f fb^{-1} (13 TeV)",getLumi()));
+        labelcms->AddText(Form("%.1f fb^{-1} (13 TeV)",getLumi(year)));
         labelcms->SetBorderSize(0);
         labelcms->SetLineWidth(2);
         labelcms->Draw();

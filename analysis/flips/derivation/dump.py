@@ -9,7 +9,7 @@ def print_flip_rate(hist, do_errors=False, scale=1.0):
           extra = ""
           if do_errors:
               val = ratio.GetBinError(xbin,ybin)
-              extra = " // {:.1f}%".format(100.0*val/ratio.GetBinContent(xbin,ybin))
+              extra = " // {:.1f}%".format(100.0*val/max(1e-6,ratio.GetBinContent(xbin,ybin)))
           if xbin != ratio.GetNbinsX():
               print "   if (pt>={} && pt<{} && fabs(eta)>={:.3f} && fabs(eta)<{:.3f} ) return {}*scale;{}".format(
                       ratio.GetXaxis().GetBinLowEdge(xbin),
@@ -34,6 +34,7 @@ if __name__ == "__main__":
 
     f = r.TFile("outputs//histos_both.root")
     ratio = f.Get("ratio")
-    predscale = 1.51
+    # predscale = 1.51
+    predscale = 1.0
     print_flip_rate(ratio, do_errors=False, scale=predscale)
     print_flip_rate(ratio, do_errors=True, scale=predscale)

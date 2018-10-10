@@ -228,16 +228,27 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
   // float sf_HLT_Mu8 = 0.6994;
   // float sf_HLT_IsoMu27 = 1.1062;
 
-  // v13 - correct rho, latest fake WPs for 2017
-  float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3700;
-  float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3764;
-  float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1107;
-  float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1203;
-  float sf_HLT_Mu17_TrkIsoVVL = 1.0232;
-  float sf_HLT_Mu17 = 1.0227;
-  float sf_HLT_Mu8_TrkIsoVVL = 0.6999;
-  float sf_HLT_Mu8 = 0.7015;
-  float sf_HLT_IsoMu27 = 1.1110;
+  // // v13 - correct rho, latest fake WPs for 2017
+  // float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3700;
+  // float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3764;
+  // float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1107;
+  // float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1203;
+  // float sf_HLT_Mu17_TrkIsoVVL = 1.0232;
+  // float sf_HLT_Mu17 = 1.0227;
+  // float sf_HLT_Mu8_TrkIsoVVL = 0.6999;
+  // float sf_HLT_Mu8 = 0.7015;
+  // float sf_HLT_IsoMu27 = 1.1110;
+
+  // v23 - 2018
+  float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 2.5130;
+  float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.5203;
+  float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 2.1316;
+  float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.1833;
+  float sf_HLT_Mu17_TrkIsoVVL = 1.9637;
+  float sf_HLT_Mu17 = 1.9632;
+  float sf_HLT_Mu8_TrkIsoVVL = 1.5784;
+  float sf_HLT_Mu8 = 1.5784;
+  float sf_HLT_IsoMu27 = 2.0158;
   
 
   if (false) {

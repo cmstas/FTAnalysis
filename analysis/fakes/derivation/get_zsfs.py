@@ -1,5 +1,5 @@
 import ROOT as r
-from errors import E
+from analysis.limits.errors import E
 import plottery.plottery as ply
 
 el_trigs = [
@@ -24,7 +24,8 @@ mu_trigs = [
 # version = "v22"
 version = "v23"
 f_dy = r.TFile("zpeaks/{}/DYJets.root".format(version))
-f_data_el = r.TFile("zpeaks/{}/SingleElectron.root".format(version))
+# f_data_el = r.TFile("zpeaks/{}/SingleElectron.root".format(version))
+f_data_el = r.TFile("zpeaks/{}/EGamma.root".format(version))
 f_data_mu = r.TFile("zpeaks/{}/DoubleMuon.root".format(version))
 
 hacky_ZSF = 1

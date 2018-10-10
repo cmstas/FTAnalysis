@@ -8,7 +8,7 @@ import itertools
 do_prompt_sub = False # when using QCD MC template, don't subtract
 include_ttjets = True
 basedir = "outputs/"
-thedir = "plots_fit_Jun11"
+thedir = "plots_fit_2018_Sep19"
 d_postfits = {}
 d_sfs = {}
 

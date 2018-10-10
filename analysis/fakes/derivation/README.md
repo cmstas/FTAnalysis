@@ -16,7 +16,6 @@ over the previous lines in `ScanChain_fast.C`.
 
 4. Some setup:
 ```
-cp ../../limits/errors.py .
 git clone https://github.com/aminnj/plottery
 mkdir -p outputs/
 mkdir -p pdfs/

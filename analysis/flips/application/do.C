@@ -6,33 +6,25 @@
     // gROOT->ProcessLine(".L ../../../common/CORE/Tools/dorky/dorky.cc++");
     gROOT->ProcessLine(".L ScanChain.C+");
 
-    // TString tag = "v3.01";
-    // TString tag = "v3.01_nmiss0";
-    TString tag = "v3.02_nmiss0";
-    // TString tag = "v3.02_nmiss0_newmet";
-    TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
+    TString tag_2017 = "v3.02_nmiss0";
+    TString basedir_2017 = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag_2017.Data());
 
+    // TChain *ch = new TChain("t");
+    // ch->Add(basedir_2017+"DY_high.root");
+    // ch->Add(basedir_2017+"DY_low.root");
+    // ch->Add(basedir_2017+"TTBAR*.root");
+    // ch->Add(basedir_2017+"DataDoubleEG*.root");
+
+    TString tag_2018 = "v3.03_nmiss0_data2018";
+    TString basedir_2018 = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag_2018.Data());
     TChain *ch = new TChain("t");
-    ch->Add(basedir+"DY_high.root");
-    // ch->Add(basedir+"DY_highext1.root");
-    ch->Add(basedir+"DY_low.root");
-    ch->Add(basedir+"TTBAR*.root");
-    ch->Add(basedir+"DataDoubleEG*.root");
+    ch->Add(basedir_2017+"DY_high.root"); // TODO still using 2017 MC
+    ch->Add(basedir_2017+"DY_low.root");
+    ch->Add(basedir_2017+"TTBAR*.root");
+    ch->Add(basedir_2018+"DataDoubleEG*.root");
 
     TString flipfname = "../derivation/outputs/histos_both.root";
 
-    // TChain *ch2016 = new TChain("t");
-    // ch2016->Add("/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/DY_high*.root");
-    // ch2016->Add("/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/DY_low*.root");
-    // ch2016->Add("/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/TTBAR*.root");
-    // ch2016->Add("/nfs-7/userdata/namin/tupler_babies/merged/SS/v9.04/output/DataDoubleEG*.root");
-    // closure(ch2016, flipfname, "outputs/histos_2016.root", -1, -1, 35.9); // Run2016
-
-    // closure(ch, flipfname, "outputs/histos_B.root", 297046, 299329, 4.767); // Run2017B
-    // closure(ch, flipfname, "outputs/histos_C.root", 299368, 302029, 9.583); // Run2017C
-    // closure(ch, flipfname, "outputs/histos_D.root", 302030, 303434, 4.224); // Run2017D
-    // closure(ch, flipfname, "outputs/histos_E.root", 303824, 304797, 9.261); // Run2017E
-    // closure(ch, flipfname, "outputs/histos_F.root", 305040, 306462, 13.463); // Run2017F
     closure(ch, flipfname, "outputs/histos.root");
 
 

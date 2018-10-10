@@ -8,7 +8,7 @@ import time
 
 header = """
   gROOT->ProcessLine(".L ../../misc/common_utils.h");
-  gSystem->Load("../../../common/CORE/CMS3_CORE.so");
+  // gSystem->Load("../../../common/CORE/CMS3_CORE.so");
 
   // gROOT->ProcessLine(".L ScanChain.C+");
   gROOT->ProcessLine(".L ScanChain_fast.C+");
@@ -18,19 +18,41 @@ header = """
 
 d_chain_strs = {
         "data_el": """
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017B-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017D-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017E-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017F-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017B-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017D-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017E-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017F-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018A-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018A-PromptReco-v2_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018A-PromptReco-v3_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018B-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018B-PromptReco-v2_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018C-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018C-PromptReco-v2_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018C-PromptReco-v3_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018D-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_EGamma_Run2018D-PromptReco-v2_LEPTON_{tag_data}/*.root");
   """,
 
       "data_mu": """
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017B-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017D-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017E-31Mar2018-v1_LEPTON_{tag_data}/*.root");
-  ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017F-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017B-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017D-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017E-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+  // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017F-31Mar2018-v1_LEPTON_{tag_data}/*.root");
+
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018A-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018A-PromptReco-v2_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018A-PromptReco-v3_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018B-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018B-PromptReco-v2_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018C-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018C-PromptReco-v2_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018C-PromptReco-v3_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018D-PromptReco-v1_LEPTON_{tag_data}/*.root");
+    ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2018D-PromptReco-v2_LEPTON_{tag_data}/*.root");
   """,
 
   "wjets": """
@@ -63,19 +85,21 @@ d_chain_strs = {
 # tag_mc = "v9"
 # tag_data = "v13"
 # tag_mc = "v13"
-tag_data = "v15"
-tag_mc = "v15"
+# tag_data = "v15"
+# tag_mc = "v15"
+tag_data = "v23"
+tag_mc = "v23"
 
 for proc in d_chain_strs.keys():
     for iso in [True,False]:
 
         if iso:
             footer = """
-          ScanChain(ch,"./outputs/rate_histos_{proc}_LooseEMVA_IsoTrigs.root","useLooseEMVA,IsoTrigs");
+          ScanChain(ch,"./outputs/rate_histos_{proc}_LooseEMVA_IsoTrigs.root","doAbove18,useLooseEMVA,IsoTrigs");
             """.format(proc=proc)
         else:
             footer = """
-          ScanChain(ch,"./outputs/rate_histos_{proc}_LooseEMVA.root","useLooseEMVA");
+          ScanChain(ch,"./outputs/rate_histos_{proc}_LooseEMVA.root","doAbove18,useLooseEMVA");
             """.format(proc=proc)
 
         full = "{\n" + header + d_chain_strs[proc].format(tag_data=tag_data,tag_mc=tag_mc) + footer + "\n}"

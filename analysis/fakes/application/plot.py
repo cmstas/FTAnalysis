@@ -8,7 +8,8 @@ from matplottery.plotter import plot_stack, plot_2d
 from matplottery.utils import Hist1D, Hist2D
 
 
-f = uproot.open("histos__LooseEMVA_coneCorr_HH.root")
+# f = uproot.open("histos__LooseEMVA_coneCorr_HH.root")
+f = uproot.open("histos__LooseEMVA_soup_inSitu_coneCorr_HH.root")
 
 # for k in sorted(f.keys()):
 #     print k
@@ -99,7 +100,8 @@ for var in varnames:
 # os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun12")
 # os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun17")
 # os.system("NOCONVERT=true niceplots plots plots_fakerateclosurecheck_Jul2") # old WPs for QCD FR applied to tt1l (v1.06_v2_oldiso)
-os.system("NOCONVERT=true niceplots plots plots_fakeclosure1wnfo2_Jul6") # new WPs for QCD FR applied to inclusive tt (v1.06_v2)
+# os.system("NOCONVERT=true niceplots plots plots_fakeclosure1wnfo2_Jul6") # new WPs for QCD FR applied to inclusive tt (v1.06_v2)
+os.system("NOCONVERT=true niceplots plots plots_fakeclosureinsitu_Aug2")
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosure1wnfo1_Jul6") # new WPs for QCD FR applied to inclusive tt (v1.06_v2)
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosureextrapt_Apr24")
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosurenolooseemva_Apr22")

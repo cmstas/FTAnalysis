@@ -20,6 +20,7 @@
 // #include "../../../common/CORE/Tools/utils.h"
 // #include "../../../common/CORE/Tools/dorky/dorky.h"
 #include "../../misc/common_utils.h"
+#include "../../misc/info_2018.h"
 #include "../../misc/signal_regions.h"
 #include "../../misc/tqdm.h"
 
@@ -92,11 +93,18 @@ float getFlipFactor(TH2D* rate){
 }
 
 void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root", float minrun=-1, float maxrun=-1, float lumi=-1) {
+    bool do2018 = true; // FIXME
+    if (do2018) {
+        std::cout << "NOTE: doing 2018!" << std::endl;
+    }
     initCounter();
     TRandom *tr1 = new TRandom();
 
     float lumiAG = getLumi();
     if (lumi > 0) lumiAG = lumi;
+    if (do2018) {
+        lumiAG = 35.53;
+    }
     // duplicate_removal::clear_list();
 
     TFile *flip_file = new TFile(flipfname); 
@@ -313,6 +321,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
                 if (ss::met() > 50.) continue; 
                 if (abs(ss::lep1_id()) != 11 || abs(ss::lep2_id()) != 11) continue;
+                // if (abs(ss::lep1_id()) != 13 || abs(ss::lep2_id()) != 13) continue; // FIXME
                 if (ss::nbtags() > 0) continue;
             }
 
@@ -342,7 +351,11 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 if (minrun == 303824) rand = 4;
                 if (minrun == 305040) rand = 5;
                 // if (rand > 0) weight *= getNvtxWeight(ss::nGoodVertices(), rand);
-                weight *= getTruePUw(ss::trueNumInt()[0]);
+                if (do2018) {
+                    weight *= getTruePUw_2018(ss::trueNumInt()[0]);
+                } else {
+                    weight *= getTruePUw(ss::trueNumInt()[0]);
+                }
                 weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand);
                 weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), rand);
                 // weight *= testScaleFactor(ss::lep1_p4().pt(), ss::lep1_p4().eta());

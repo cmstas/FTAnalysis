@@ -87,6 +87,9 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
     bool doMu18Only = false;
     if (option.Contains("doMu18Only")) doMu18Only = true;
+    
+    bool doAbove18 = false;
+    if (option.Contains("doAbove18")) doAbove18 = true;
 
     bool noPUweight = false;
     if (option.Contains("noPUweight")) noPUweight = true;
@@ -174,16 +177,40 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
     // handmade "prescales" from normalizeToZPeak.C
 
-    // v13 - correct rho, latest fake WPs for 2017
-    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3700;
-    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3764;
-    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1107;
-    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1203;
-    float sf_HLT_Mu17_TrkIsoVVL = 1.0232;
-    float sf_HLT_Mu17 = 1.0227;
-    float sf_HLT_Mu8_TrkIsoVVL = 0.6999;
-    float sf_HLT_Mu8 = 0.7015;
+    // // v13 - correct rho, latest fake WPs for 2017
+    // float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3700;
+    // float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3764;
+    // float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1107;
+    // float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1203;
+    // float sf_HLT_Mu17_TrkIsoVVL = 1.0232;
+    // float sf_HLT_Mu17 = 1.0227;
+    // float sf_HLT_Mu8_TrkIsoVVL = 0.6999;
+    // float sf_HLT_Mu8 = 0.7015;
 
+
+    // // v23 latest 2017, nmiss==0
+    // float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.3777;
+    // float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.3841;
+    // float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.1027;
+    // float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1112;
+    // float sf_HLT_Mu17_TrkIsoVVL = 1.0261;
+    // float sf_HLT_Mu17 = 1.0256;
+    // float sf_HLT_Mu8_TrkIsoVVL = 0.7031;
+    // float sf_HLT_Mu8 = 0.7048;
+    // float sf_HLT_IsoMu27 = 1.1146;
+
+    // v23 2018
+    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 2.5130;
+    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.5203;
+    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 2.1316;
+    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.1833;
+    float sf_HLT_Mu17_TrkIsoVVL = 1.9637;
+    float sf_HLT_Mu17 = 1.9632;
+    float sf_HLT_Mu8_TrkIsoVVL = 1.5784;
+    float sf_HLT_Mu8 = 1.5784;
+    float sf_HLT_IsoMu27 = 2.0158;
+
+    int year = 2018;
 
     if (false) {
         //this should be ok as long as there are less bins in the extrPtRel case
@@ -694,6 +721,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     // Loop over events to Analyze
     unsigned int nEventsTotal = 0;
     unsigned int nEventsChain = chain->GetEntries();
+    std::cout <<  " nEventsChain: " << nEventsChain <<  std::endl;
     if( nEvents >= 0 ) nEventsChain = nEvents;
     TObjArray *listOfFiles = chain->GetListOfFiles();
     TIter fileIter(listOfFiles);
@@ -718,13 +746,14 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
         // Apply JEC
         bool isDataFromFileName = TString(currentFile->GetTitle()).Contains("Run201") || 
-            TString(currentFile->GetTitle()).Contains("DoubleMu") || TString(currentFile->GetTitle()).Contains("DoubleEG");
+            TString(currentFile->GetTitle()).Contains("DoubleMu") || TString(currentFile->GetTitle()).Contains("DoubleEG") || TString(currentFile->GetTitle()).Contains("EGamma");
         bool isDoubleMuon = TString(currentFile->GetTitle()).Contains("DoubleMu");
         bool isQCD = TString(currentFile->GetTitle()).Contains("QCD");
         bool isQCDMu = TString(currentFile->GetTitle()).Contains("QCD_M");
         bool isQCDEl = TString(currentFile->GetTitle()).Contains("QCD_E") || TString(currentFile->GetTitle()).Contains("QCD_bcToE");
         bool isTTbar = TString(currentFile->GetTitle()).Contains("TTJets") || TString(currentFile->GetTitle()).Contains("output_tt_");
         bool isDY = TString(currentFile->GetTitle()).Contains("DY");
+        bool isWjets = TString(currentFile->GetTitle()).Contains("WJets");
 
         auto filename = TString(currentFile->GetTitle());
         auto tokens = filename.Tokenize("/");
@@ -757,7 +786,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
 
 
             bool isEWK = false;
-            if (TString(currentFile->GetTitle()).Contains("WJets") || isDY || isTTbar) isEWK = true;
+            if (isWjets || isDY || isTTbar) isEWK = true;
 
             bool isData = evt_isRealData();
             bool noMCMatch = false;
@@ -781,6 +810,11 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                 if (p4().pt() < 18.) continue;
                 if (coneCorrPt() < 18.) continue;
                 anyPt = true; // don't require raw>25 for trigger
+            }
+
+            if (doAbove18) {
+                if (p4().pt() < 18.) continue;
+                if (coneCorrPt() < 18.) continue;
             }
 
 
@@ -850,11 +884,11 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                 // if (noPUweight) weight = scale1fb()*getLumi();
                 // else weight = puweight()*scale1fb()*getLumi();
                 if (absweight) {
-                    if (noPUweight) weight = fabs(scale1fb())*getLumi();
-                    else weight = puweight()*fabs(scale1fb())*getLumi();
+                    if (noPUweight) weight = fabs(scale1fb())*getLumi(year);
+                    else weight = puweight()*fabs(scale1fb())*getLumi(year);
                 } else {
-                    if (noPUweight) weight = (scale1fb())*getLumi();
-                    else weight = puweight()*(scale1fb())*getLumi();
+                    if (noPUweight) weight = (scale1fb())*getLumi(year);
+                    else weight = puweight()*(scale1fb())*getLumi(year);
                 }
             }
 
@@ -1234,12 +1268,12 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                         auto pt = getPt(p4().pt()*(1+coneptcorr),false);
                         auto eta = getEta(fabs(p4().eta()),ht,false);
 
-                        if (pt > 35 && pt < 50 && eta < 2.1 && eta > 1.2) {
-                            cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %7.3f %2i",
-                                    (unsigned long long)evt_event() , p4().pt(),pt,eta,miniiso(),p4().pt()/closejetpt,ptrel,passId,motherID(),evt_met,evt_mt,weight,
-                                    tag_p4().pt(),hyp_class()
-                                    ) << endl;
-                        }
+                        // if (pt > 35 && pt < 50 && eta < 2.1 && eta > 1.2) {
+                        //     cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %7.3f %2i",
+                        //             (unsigned long long)evt_event() , p4().pt(),pt,eta,miniiso(),p4().pt()/closejetpt,ptrel,passId,motherID(),evt_met,evt_mt,weight,
+                        //             tag_p4().pt(),hyp_class()
+                        //             ) << endl;
+                        // }
 
                         if( passId ) Nl_fine_cone_histo_mu->Fill(p4().pt(), fabs(p4().eta()), weight);   //  <-- loose (as opposed to l!t)
                         else Nl_fine_cone_histo_mu->Fill(p4().pt()*(1+coneptcorr), fabs(p4().eta()), weight);

@@ -50,11 +50,18 @@
     // float mt_sf_mu_iso =    1.112;
     // float mt_sf_mu_noniso = 1.117;
 
+    // TString dir = "outputs/";
+    // float mt_sf_el_iso =    1.377;
+    // float mt_sf_el_noniso = 1.381;
+    // float mt_sf_mu_iso =    1.209;
+    // float mt_sf_mu_noniso = 1.209;
+
+    // 2018 with 2017 MC
     TString dir = "outputs/";
-    float mt_sf_el_iso =    1.377;
-    float mt_sf_el_noniso = 1.381;
-    float mt_sf_mu_iso =    1.209;
-    float mt_sf_mu_noniso = 1.209;
+    float mt_sf_el_iso =    2.671;
+    float mt_sf_el_noniso = 2.653;
+    float mt_sf_mu_iso =    1.716;
+    float mt_sf_mu_noniso = 1.722;
 
 
     plotFR(dir);

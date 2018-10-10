@@ -50,7 +50,8 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
         fname = "{}/{}{}.pdf".format(outputdir,prefix,var)
         plot_stack(bgs=[pred], sigs=[obsMC],data=obs, xlabel=xlabel, ylabel="Events",filename=fname,
                 cms_type = " Preliminary",
-                lumi = "41.3",
+                # lumi = "41.5",
+                lumi = "35.5", # TODO 2018
                 ratio=ratio,
                 ratio_range=[0.5,1.5],
                 mpl_hist_params={
@@ -72,7 +73,7 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
                         prop=dict(color="b"),
                         )
                     ),
-                ax_ratio_callback = lambda ax: ax.legend_.remove(),
+                ax_ratio_callback = lambda ax: ax.legend_.remove() if ax.legend_ else None,
                 )
         # os.system("ic {}".format(fname))
         print "Wrote {}".format(fname)
@@ -86,7 +87,8 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
             ratio_range=[0.8,1.2]
         plot_stack(data=data, bgs=[mc], xlabel=xlabel, ylabel="Events",filename=fname,
                 cms_type = "Preliminary",
-                lumi = "41.3",
+                # lumi = "41.5",
+                lumi = "35.5", # TODO 2018
                 ratio_range=ratio_range,
                 ax_main_callback = lambda ax: ax.add_artist(
                     matplotlib.offsetbox.AnchoredText(
@@ -96,7 +98,7 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
                         prop=dict(color="b"),
                         )
                     ),
-                ax_ratio_callback = lambda ax: ax.legend_.remove(),
+                ax_ratio_callback = lambda ax: ax.legend_.remove() if ax.legend_ else None,
                 )
         # os.system("ic {}".format(fname))
         print "Wrote {}".format(fname)

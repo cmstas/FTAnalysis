@@ -16,11 +16,12 @@
     // TString tag = "v1.05_v1";
 
     // TString tag = "v1.06_v2"; // new
-    TString tag = "v1.06_v2_sleptrigv2"; // test single lept triggers
+    TString tag = "v2.00_2017_insitu_v2"; // test single lept triggers
     bool doBonly         = 0; // FIXME FIXME FIXME
     // TString tag = "v1.06_v2_oldisofix"; // old
 
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
+    bool doInSitu        = 1;
 
 
     bool highhigh   = 1;
@@ -38,7 +39,6 @@
 
     bool doData          = 0;
 
-    bool doInSitu        = 0;
     bool testMVA         = 0; // use modified MVA from Lesya in 2015 AN for ISFR
     bool extrPt          = 0; // extra Ptbin for electrons
     bool inclusiveHT     = 0; // use inclusive HT FR

@@ -49,18 +49,20 @@ using namespace std;
 // #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2_mu18.h"
 // #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newoldfrs_v2_newp.h"
 // #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_ttbartest25.h"
-#include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_ttbartest25_mid3.h"
+// #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_ttbartest25_mid3.h"
+#include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_qcd18.h"
+#include "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/insitu/frs.h"
 
 bool inclHT = false;
 
 bool doNew = true;
 bool doQCD = false; // XXX
 bool doHadFR = false;
-bool doHadApp = true; // XXX
+bool doHadApp = false;
 bool onlyMuMu = false;
 bool doAbove18 = false;
 bool doNewP = false;
-bool doAbove25 = true; // XXX
+bool doAbove25 = false;
 bool bypassTrigger = false;
 bool absweight = true; // XXX
 bool ignoreConeCorr = false;
@@ -131,65 +133,15 @@ float getFakeRate(int id, float pt, float eta, float ht, bool extrPtRel = false,
 
     float fact = 0.;
 
-    // // FIXME FIXME
-    // if (abs(id) == 13) {
-    //     float rw = 1.;
-    //     // float rw = muonTTbarMCReweightToMeas_IsoTrigs(pt,eta);
-    //     return rw*muonTTbarMCFakeRate_IsoTrigs(pt,eta);
-    // }
-
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRate_new(pt,eta) : electronTTbarMCFakeRate_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_notrig_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_notrig_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_new(pt,eta) : electronTTbarMCFakeRatehad1_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_new(pt,eta) : electronTTbarMCFakeRatehad2_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1bonly_new(pt,eta) : electronTTbarMCFakeRatehad1bonly_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_bonly_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_bonly_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRate_bonly_new(pt,eta) : electronTTbarMCFakeRate_bonly_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_bonly_new(pt,eta) : electronTTbarMCFakeRatehad2_bonly_new(pt,eta);
-
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_abs_fogeq2_new(pt,eta) : electronTTbarMCFakeRatehad1_abs_fogeq2_new(pt,eta);
-    fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_abs_new(pt,eta) : electronTTbarMCFakeRatehad2_abs_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_abs_fogeq2_bonly_new(pt,eta) : electronTTbarMCFakeRatehad1_abs_fogeq2_bonly_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad2_abs_bonly_new(pt,eta) : electronTTbarMCFakeRatehad2_abs_bonly_new(pt,eta);
-
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_bonly_newFine(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_bonly_newFine(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_newFine(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_newFine(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fix_new(pt,eta) : electronTTbarMCFakeRatehad1_fix_new(pt,eta);
-    // fact = (abs(id)==13) ? muonTTbarMCFakeRatehad1_fogeq2_fix_new(pt,eta) : electronTTbarMCFakeRatehad1_fogeq2_fix_new(pt,eta);
+    if (doInSitu) {
+        // fact = (abs(id)==13) ? numer1_mu_siphigh_FakeRate(pt,eta) : numer1_el_siphigh_FakeRate(pt,eta);
+        fact = (abs(id)==13) ? numer1_mu_siplow_FakeRate(pt,eta) : numer1_el_siplow_FakeRate(pt,eta);
+    } else {
+        fact = (abs(id)==13) ? muonQCDMCFakeRate_18noanypt_new(pt,eta) : electronQCDMCFakeRate_18noanypt_new(pt,eta);
+    }
 
     if (fact > 0.8) fact = 0.8;
     if (fact < 0.) fact = 0.;
-
-    // if (abs(id) == 13) {
-    //     if (doQCD) {
-    //         if (doNew) fact = muonQCDMCFakeRate_new(pt,eta);
-    //         else fact = muonQCDMCFakeRate_old(pt,eta);
-    //     } else {
-    //         if (doHadFR) {
-    //             if (doNew) fact = muonTTbarMCFakeRatehad_new(pt,eta);
-    //             else fact = muonTTbarMCFakeRatehad_old(pt,eta);
-    //         } else {
-    //             if (doNew) fact = muonTTbarMCFakeRate_new(pt,eta);
-    //             else fact = muonTTbarMCFakeRate_old(pt,eta);
-    //         }
-    //     }
-    //     if (fact > 0.99) fact = 0.8;
-    // } else {
-    //     if (doQCD) {
-    //         if (doNew) fact = electronQCDMCFakeRate_new(pt,eta);
-    //         else fact = electronQCDMCFakeRate_old(pt,eta);
-    //     } else {
-    //         if (doHadFR) {
-    //             if (doNew) fact = electronTTbarMCFakeRatehad_new(pt,eta);
-    //             else fact = electronTTbarMCFakeRatehad_old(pt,eta);
-    //         } else {
-    //             if (doNew) fact = electronTTbarMCFakeRate_new(pt,eta);
-    //             else fact = electronTTbarMCFakeRate_old(pt,eta);
-    //         }
-    //     }
-    //     if (fact > 0.9) fact = 0.9;
-    // }
 
     return fact;
 
@@ -202,15 +154,15 @@ float getFakeRate(int id, float pt, float eta, float ht, bool extrPtRel = false,
 }
 
 float getFakeRateError(int id, float pt, float eta, float ht, bool doInSitu = false) { 
-    // if (doInSitu) return fakeRateErrorInSitu(id, pt, eta, ht);
+    float fact = 0.;
+    if (doInSitu) {
+        // return fakeRateErrorInSitu(id, pt, eta, ht);
+        // fact = (abs(id)==13) ? numer1_mu_siphigh_FakeRateError(pt,eta) : numer1_el_siphigh_FakeRateError(pt,eta);
+        fact = (abs(id)==13) ? numer1_mu_siplow_FakeRateError(pt,eta) : numer1_el_siplow_FakeRateError(pt,eta);
+    }
     // else return fakeRateError(id, pt, eta, ht);
-    return qcdMCFakeRateError(id, pt, eta, ht);
-}
-
-float getFakeRate2(int id, float pt, float eta, float ht, bool extrPtRel = false, bool doData = false){
-    return 0.;
-  // if (doData) return fakeRateNoCC(id, pt, eta, ht);
-  // else return qcdMCFakeRateNoCC(id, pt, eta, ht);
+    fact = (abs(id)==13) ? muonQCDMCFakeRateError_18noanypt_new(pt,eta) : electronQCDMCFakeRateError_18noanypt_new(pt,eta);
+    return fact;
 }
 
 void GetErrorPlot(TH1F *pred, vector< vector<TH2D*> > pred_err2_mu, vector< vector<TH2D*> > pred_err2_el, bool inSitu){
@@ -370,23 +322,15 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
   //Parse options
   bool coneCorr = option.Contains("coneCorr") ? true : false;
-  bool jetCorr = option.Contains("jetCorr") ? true : false;
-  bool usePtRatioCor = option.Contains("PtRatioCor") ? true :false;
   bool doBonly = option.Contains("doBonly") ? true : false;
   bool doConly = option.Contains("doConly") ? true : false;
   bool doLightonly = option.Contains("doLightonly") ? true : false;
   bool inSitu = option.Contains("inSitu") ? true : false;
   bool soup = option.Contains("soup") ? true : false;
-  bool PCssZ = option.Contains("PCssZ") ? true : false;
-  bool ssZ = (!PCssZ && option.Contains("ssZ")) ? true : false;
-  bool PC = (!PCssZ && option.Contains("PC")) ? true : false;
-  bool notCC = option.Contains("notCC") ? true : false;
-  bool looseEMVA = option.Contains("LooseEMVA") ? true : false;
   bool highhigh = ptRegion.Contains("HH") ? true : false;
   bool highlow = ptRegion.Contains("HL") ? true : false;
   bool lowlow = ptRegion.Contains("LL") ? true : false;
 
-  bool testMVA = option.Contains("_mva") ? true : false;
   bool extrPt = option.Contains("_ept") ? true : false;
   inclHT = option.Contains("_hth") ? true : false;
 
@@ -750,7 +694,6 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
   float Nnn = 0.; //# of nonprompt-nonprompt tight-tight pairs
   //float e = 0.;  //rate = Nt/Nl
   float e1 = 0.;  //rate = Nt/Nl
-  float e1a = 0.;  //rate = Nt/Nl
   float e2 = 0.;  //rate = Nt/Nl
   float e2a = 0.;  //rate = Nt/Nl
   //----------------
@@ -936,8 +879,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       float lep2_ptrel_v1 = ss::lep2_ptrel_v1();
       // assert(fabs(lep1_ptrel_v1 - computePtRel(ss::lep1_p4(),ss::jet_close_lep1(), true))<0.0001);
       // assert(fabs(lep2_ptrel_v1 - computePtRel(ss::lep2_p4(),ss::jet_close_lep2(), true))<0.0001);
-      float lep1_closejetpt = ss::jet_close_lep1().pt();
-      float lep2_closejetpt = ss::jet_close_lep2().pt();
+      float lep1_closejetpt = ss::lep1_closeJet().pt();
+      float lep2_closejetpt = ss::lep2_closeJet().pt();
 
       if (fabs(ss::lep1_ip3d()/ss::lep1_ip3d_err())>4.) continue;
       if (fabs(ss::lep2_ip3d()/ss::lep2_ip3d_err())>4.) continue;
@@ -955,10 +898,6 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
               lep1_pT = ss::lep1_coneCorrPt();
               lep2_pT = ss::lep2_coneCorrPt();
           }
-      }
-      if (jetCorr){
-          lep1_pT = ss::jet_close_lep1().pt();
-          lep2_pT = ss::jet_close_lep2().pt();
       }
 
       if (lep1_pT < 25 || lep2_pT < 25) continue;
@@ -982,21 +921,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           std::cout << " lep1prompt: " << lep1prompt << " lep2prompt: " << lep2prompt << " lep1nonprompt: " << lep1nonprompt << " lep2nonprompt: " << lep2nonprompt << std::endl;
       }
 
-      // if(!testMVA) {
-      //     if (true) {
-      //         //Skip if does not pass FO for isolated triggers
-              if (!passIsolatedFO(ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA(), ss::lep1_p4().pt())) continue;
-              if (!passIsolatedFO(ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA(), ss::lep2_p4().pt())) continue;
-          // } 
-      // } else {
-          // if (ss::ht()<300.) { // isolated
-          //     if(!AN_MVA(1, ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA())) continue;
-          //     if(!AN_MVA(1, ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA())) continue;
-          // } else { // non isolated
-          //     if(!AN_MVA(2, ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA())) continue;
-          //     if(!AN_MVA(2, ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA())) continue;
-          // }
-      // }
+      if (!passIsolatedFO(ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA(), ss::lep1_p4().pt())) continue;
+      if (!passIsolatedFO(ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA(), ss::lep2_p4().pt())) continue;
 
 
       //Determine mtMin
@@ -1044,11 +970,6 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       }
 
       if (doNewP) {
-          // if (ss::lep1_p4().pt() < 20) continue;
-          // if (ss::lep2_p4().pt() < 20) continue;
-          // if (ss::lep1_coneCorrPt() < 20) continue;
-          // if (ss::lep2_coneCorrPt() < 20) continue;
-
           if (ss::lep1_coneCorrPt() < 25. && ss::lep1_coneCorrPt() >= 20.0) {
               if (ss::lep1_p4().pt() < 20) continue;
           } else if (ss::lep1_coneCorrPt() < 35. && ss::lep1_coneCorrPt() >= 25.0) {
@@ -1065,86 +986,6 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
               if (ss::lep2_p4().pt() < 25) continue;
           }
 
-      }
-
-      // // FOR SELF SYNCH JULY
-      // if ((ss::hyp_class() == 3) && ss::met() > 50 && ss::njets() >= 2) {
-      //     if (fabs(ss::lep2_id())==13 && isFakeLeg(2)) {
-      //         if (ss::lep2_coneCorrPt() > 35 && ss::lep2_coneCorrPt() < 50 && fabs(ss::lep2_p4().eta()) < 2.1 && fabs(ss::lep2_p4().eta()) > 1.2) {
-      //             if (ss::lep2_p4().pt() > 25.)
-      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
-      //                         (unsigned long long)ss::event() , ss::lep2_p4().pt(),ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()),ss::lep2_miniIso(),
-      //                         ss::lep2_p4().pt()/ss::jet_close_lep2().pt(),ss::lep2_ptrel_v1(),ss::lep2_passes_id(),ss::lep2_motherID(),
-      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
-      //                         ss::triggers1lep() & (1<<1)) << endl;
-      //         }
-      //     } 
-      //     if (fabs(ss::lep1_id())==13 && isFakeLeg(1)) {
-      //         if (ss::lep1_coneCorrPt() > 35 && ss::lep1_coneCorrPt() < 50 && fabs(ss::lep1_p4().eta()) < 2.1 && fabs(ss::lep1_p4().eta()) > 1.2) {
-      //             if (ss::lep1_p4().pt() > 25.)
-      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
-      //                         (unsigned long long)ss::event() , ss::lep1_p4().pt(),ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()),ss::lep1_miniIso(),
-      //                         ss::lep1_p4().pt()/ss::jet_close_lep1().pt(),ss::lep1_ptrel_v1(),ss::lep1_passes_id(),ss::lep1_motherID(),
-      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
-      //                         ss::triggers1lep() & (1<<1)) << endl;
-      //         }
-      //     }
-      // }
-      // if ((ss::hyp_class() == 2) && ss::met() > 50 && ss::njets() >= 2) {
-      //     if (fabs(ss::lep2_id())==13 && !ss::lep2_passes_id()) {
-      //         if (ss::lep2_coneCorrPt() > 35 && ss::lep2_coneCorrPt() < 50 && fabs(ss::lep2_p4().eta()) < 2.1 && fabs(ss::lep2_p4().eta()) > 1.2) {
-      //             if (ss::lep2_p4().pt() > 25.)
-      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
-      //                         (unsigned long long)ss::event() , ss::lep2_p4().pt(),ss::lep2_coneCorrPt(),fabs(ss::lep2_p4().eta()),ss::lep2_miniIso(),
-      //                         ss::lep2_p4().pt()/ss::jet_close_lep2().pt(),ss::lep2_ptrel_v1(),ss::lep2_passes_id(),ss::lep2_motherID(),
-      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
-      //                         ss::triggers1lep() & (1<<1)) << endl;
-      //         }
-      //     } 
-      //     if (fabs(ss::lep1_id())==13 && !ss::lep1_passes_id()) {
-      //         if (ss::lep1_coneCorrPt() > 35 && ss::lep1_coneCorrPt() < 50 && fabs(ss::lep1_p4().eta()) < 2.1 && fabs(ss::lep1_p4().eta()) > 1.2) {
-      //             if (ss::lep1_p4().pt() > 25.)
-      //                 cout << Form("%1llu %7.3f %7.3f %6.3f %6.3f %6.3f %6.3f %1i %2i %6.3f %6.3f %2.4f %1i",
-      //                         (unsigned long long)ss::event() , ss::lep1_p4().pt(),ss::lep1_coneCorrPt(),fabs(ss::lep1_p4().eta()),ss::lep1_miniIso(),
-      //                         ss::lep1_p4().pt()/ss::jet_close_lep1().pt(),ss::lep1_ptrel_v1(),ss::lep1_passes_id(),ss::lep1_motherID(),
-      //                         ss::met(),ss::mt(),41.3*ss::scale1fb(),
-      //                         ss::triggers1lep() & (1<<1)) << endl;
-      //         }
-      //     }
-      // }
-
-      //pTrel plots
-      if(!ss::is_real_data()) {
-        if ( (lep1_pT > 25. && lep2_pT > 25.) ){
-          if( ss::lep1_id()*ss::lep2_id() > 0 ) {
-            if (  (isFakeLeg(1) && /*ss::lep1_iso()>0.1 &&*/ fabs(ss::lep1_ip3d()/ss::lep1_ip3d_err())<4. && ss::lep2_motherID()==1)
-               || (!lep1_passes_id && fabs(ss::lep1_ip3d()/ss::lep1_ip3d_err())<4. && lep2_passes_id ) ) {
-              if (abs(ss::lep1_id())==11){
-                pTrelvsIso_histo_el->Fill( std::min(ss::lep1_iso(),float(0.99)), std::min(lep1_ptrel_v1,float(29.9)) );
-                pTrelvsMiniIso_histo_el->Fill( std::min(ss::lep1_miniIso(),float(0.99)), std::min(lep1_ptrel_v1,float(29.9)) );
-                hists[getHist("pTrel_histo_el")]->Fill(std::min(lep1_ptrel_v1,float(29.9)) );
-              } 
-              else {
-                pTrelvsIso_histo_mu->Fill( std::min(ss::lep1_iso(),float(0.99)), std::min(lep1_ptrel_v1,float(29.9)) );
-                pTrelvsMiniIso_histo_mu->Fill( std::min(ss::lep1_miniIso(),float(0.99)), std::min(lep1_ptrel_v1,float(29.9)) );
-                hists[getHist("pTrel_histo_mu")]->Fill(std::min(lep1_ptrel_v1,float(29.9)) );
-              }
-            }
-            if (  (isFakeLeg(2) && /*ss::lep2_iso()>0.1 &&*/ fabs(ss::lep2_ip3d()/ss::lep2_ip3d_err())<4. && ss::lep1_motherID()==1) 
-               || (lep1_passes_id && fabs(ss::lep2_ip3d()/ss::lep2_ip3d_err())<4. && !lep2_passes_id ) ) {
-              if (abs(ss::lep2_id())==11) {
-                pTrelvsIso_histo_el->Fill( std::min(ss::lep2_iso(),float(0.99)), std::min(lep2_ptrel_v1,float(29.9)) );
-                pTrelvsMiniIso_histo_el->Fill( std::min(ss::lep2_miniIso(),float(0.99)), std::min(lep2_ptrel_v1,float(29.9)) );
-                hists[getHist("pTrel_histo_el")]->Fill(std::min(lep2_ptrel_v1,float(29.9)) );
-              } 
-              else {
-                pTrelvsIso_histo_mu->Fill( std::min(ss::lep2_iso(),float(0.99)), std::min(lep2_ptrel_v1,float(29.9)) );
-                pTrelvsMiniIso_histo_mu->Fill( std::min(ss::lep2_miniIso(),float(0.99)), std::min(lep2_ptrel_v1,float(29.9)) );
-                hists[getHist("pTrel_histo_mu")]->Fill(std::min(lep2_ptrel_v1,float(29.9)) );
-              }
-            }
-          }
-        }
       }
 
       //////////////////////////////////////////////////////////////////////////////////////////
@@ -1374,27 +1215,20 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       float mini_cut_2     = (abs(ss::lep2_id()) == 11 ? 0.09 : 0.12);
       bool lep1_denom_iso  = ((ss::lep1_miniIso() < 0.4) && ((ss::lep1_ptrel_v1() > ptrel_cut_1) || ((ss::lep1_closeJet().pt()/ss::lep1_p4().pt()) < (1.0/ptratio_cut_1 + ss::lep1_miniIso()))));
       bool lep2_denom_iso  = ((ss::lep2_miniIso() < 0.4) && ((ss::lep2_ptrel_v1() > ptrel_cut_2) || ((ss::lep2_closeJet().pt()/ss::lep2_p4().pt()) < (1.0/ptratio_cut_2 + ss::lep2_miniIso()))));
-      // bool lep1_denom_iso  = (ss::lep1_miniIso() < 0.4) ; // && ((ss::lep1_ptrel_v1() > ptrel_cut_1) || ((ss::lep1_closeJet().pt()/ss::lep1_p4().pt()) < (1.0/ptratio_cut_1 + ss::lep1_miniIso()))));
-      // bool lep2_denom_iso  = (ss::lep2_miniIso() < 0.4) ; // && ((ss::lep2_ptrel_v1() > ptrel_cut_2) || ((ss::lep2_closeJet().pt()/ss::lep2_p4().pt()) < (1.0/ptratio_cut_2 + ss::lep2_miniIso()))));
 
 
       // // for new ntuples, we must re-compute the IDs (and apply MVA manually) because I have taken out the tight MVA at the babymaking level
-      bool inSituFR_id_lep1 = true;
-      bool inSituFR_id_lep2 = true;
-      // if(abs(ss::lep1_id()) == 11) inSituFR_id_lep1 = fabs(ss::lep1_el_etaSC())<2.5 &&  ss::lep1_el_conv_vtx_flag() == 1 &&  ss::lep1_el_threeChargeAgree() == 1 &&  ss::lep1_el_exp_innerlayers() == 1 &&  ss::lep1_dZ() < 0.1;
-      // else inSituFR_id_lep1 =  ss::lep1_dZ() < 0.1 && ss::lep1_mu_ptErr() && ss::lep1_mediumMuonPOG() &&  fabs(ss::lep1_p4().eta()) < 2.4;
-      // if(abs(ss::lep2_id()) == 11) inSituFR_id_lep2 = fabs(ss::lep2_el_etaSC())<2.5 &&  ss::lep2_el_conv_vtx_flag() == 1 &&  ss::lep2_el_threeChargeAgree() == 1 &&  ss::lep2_el_exp_innerlayers() == 1 &&  ss::lep2_dZ() < 0.1;
-      // else inSituFR_id_lep2 =  ss::lep2_dZ() < 0.1 && ss::lep2_mu_ptErr() && ss::lep2_mediumMuonPOG() &&  fabs(ss::lep2_p4().eta()) < 2.4;
+      bool inSituFR_id_lep1 = ss::passed_id_inSituFR_lep1();
+      bool inSituFR_id_lep2 = ss::passed_id_inSituFR_lep2();
 
-      // if(!testMVA) {
-      //     inSituFR_id_lep1 = inSituFR_id_lep1 && passesNumeratorMVA(ss::lep1_id(), ss::lep1_el_etaSC(), ss::lep1_MVA(), ss::lep1_p4().pt());
-      //     inSituFR_id_lep2 = inSituFR_id_lep2 && passesNumeratorMVA(ss::lep2_id(), ss::lep2_el_etaSC(), ss::lep2_MVA(), ss::lep2_p4().pt());
-      // }
+      if (inSitu && (!inSituFR_id_lep1 || !inSituFR_id_lep2)) continue; // recomputed versions of variables above
 
-          // if (inSitu && (!ss::passed_id_inSituFR_lep1() || !ss::passed_id_inSituFR_lep2())) continue;
-          if (inSitu && (!inSituFR_id_lep1 || !inSituFR_id_lep2)) continue; // recomputed versions of variables above
-          // if (inSitu && (!ss::lep1_isTrigSafeNoIsov1() || !ss::lep2_isTrigSafeNoIsov1())) continue;
-
+      if (inSitu) {
+          // normally, !lep1_passes_id means it is loose (conventional definition),
+          // but we want !lep1_passes_id to mean loose (insitu definition)
+          if (!inSituFR_id_lep1 || !lep1_denom_iso) lep1_passes_id = false;
+          if (!inSituFR_id_lep2 || !lep2_denom_iso) lep2_passes_id = false;
+      }
 
         //1) Lep1 is tight, lep2 is loose!tight
         if (lep1_passes_id && !lep2_passes_id){
@@ -1403,23 +1237,10 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           if (!inSitu && (ss::hyp_class() != 2)) continue;
           if (inSitu && (ss::lep2_multiIso() || !isFakeLeg(2, doData) || !isGoodLeg(1, doData) || !lep2_denom_iso)) continue;
 
-          if (usePtRatioCor){
-            //this is a tighter FO than default, so skip if it does not pass
-            if ( abs(ss::lep2_id())==11 ){
-              float ptratiocor = lep2_closejetpt>0. ? ss::lep2_p4().pt()*(1+std::max(0.,ss::lep2_miniIso()-0.10))/lep2_closejetpt : 1.;
-              if (!(ptratiocor > 0.70 || lep2_ptrel_v1 > 7.0)) continue;
-            } 
-            else {
-              float ptratiocor = lep2_closejetpt>0. ? ss::lep2_p4().pt()*(1+std::max(0.,ss::lep2_miniIso()-0.14))/lep2_closejetpt : 1.;
-              if (!(ptratiocor > 0.68 || lep2_ptrel_v1 > 6.7)) continue;
-            }
-          }
-
           if (abs(ss::lep2_id()) == 11){  
 
             e2 = getFakeRate(11, lep2_pT, fabs(ss::lep2_p4().eta()), ss::ht(), false, doData, inSitu );
-            e2a = getFakeRate2(11, ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta()), ss::ht(), false, doData); 
-            w = coneCorr ? (e2/(1-e2))*weight : (e2a/(1-e2a))*weight;
+            w = (e2/(1-e2))*weight;
             if(weightOne) w = 1.0;
             if(subtractContamination) w = mult*weight;
 
@@ -1464,8 +1285,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           }
           else if (abs(ss::lep2_id()) == 13){ 
             e2 = getFakeRate(13, lep2_pT, fabs(ss::lep2_p4().eta()), ss::ht(), false, doData, inSitu );
-            e2a = getFakeRate2(13, ss::lep2_p4().pt(), fabs(ss::lep2_p4().eta()), ss::ht(), false, doData); 
-            w = coneCorr ? (e2/(1-e2))*weight : (e2a/(1-e2a))*weight;
+            w = (e2/(1-e2))*weight;
             if(weightOne) w = 1.0;
             if(subtractContamination) w = mult*weight;
 
@@ -1536,22 +1356,11 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           // if(doData && !ss::is_real_data() && isGoodLeg(1)) weight = -ss::scale1fb(); 
           // else weight = 0;
 
-          if (usePtRatioCor){
-            if ( abs(ss::lep1_id())==11 ){
-              float ptratiocor = lep1_closejetpt>0. ? ss::lep1_p4().pt()*(1+std::max(0.,ss::lep1_miniIso()-0.10))/lep1_closejetpt : 1.;
-              if (!(ptratiocor > 0.70 || lep1_ptrel_v1 > 7.0)) continue;
-            } 
-            else {
-              float ptratiocor = lep1_closejetpt>0. ? ss::lep1_p4().pt()*(1+std::max(0.,ss::lep1_miniIso()-0.14))/lep1_closejetpt : 1.;
-              if (!(ptratiocor > 0.68 || lep1_ptrel_v1 > 6.7)) continue;
-            }
-          }
 
           if( abs(ss::lep1_id()) == 11 ){	//if el, use el rate.  FILL WITH NONPROMPT			  
 
             e1 = getFakeRate(11, lep1_pT, fabs(ss::lep1_p4().eta()), ss::ht(), false, doData, inSitu );
-            e1a = getFakeRate2(11, ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta()), ss::ht(), false, doData); 
-            w = coneCorr ? (e1/(1-e1))*weight : (e1a/(1-e1a))*weight;
+            w = (e1/(1-e1))*weight;
             if(weightOne) w = 1.0;
             if(subtractContamination) w = mult*weight;
 
@@ -1597,8 +1406,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           }
           else if( abs(ss::lep1_id()) == 13 ){ //if mu, use mu rate.  FILL WITH NONPROMPT				  
             e1 = getFakeRate(13, lep1_pT, fabs(ss::lep1_p4().eta()), ss::ht(), false, doData, inSitu );
-            e1a = getFakeRate2(13, ss::lep1_p4().pt(), fabs(ss::lep1_p4().eta()), ss::ht(), false, doData); 
-            w = coneCorr ? (e1/(1-e1))*weight : (e1a/(1-e1a))*weight;
+            w = (e1/(1-e1))*weight;
             if(weightOne) w = 1.0;
             if(subtractContamination) w = mult*weight;
 
