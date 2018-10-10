@@ -6,6 +6,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
+#include "TH2F.h"
 #include "Math/LorentzVector.h"
 #include "TKey.h"
 #include "TSystem.h"
@@ -13,7 +14,6 @@
 #include "../misc/class_files/v8.02/SS.h"
 #include "../../common/CORE/SSSelections.h"
 #include "../../common/CORE/Tools/dorky/dorky.h"
-// #include "../../common/CORE/Tools/utils.h"
 #include "../misc/common_utils.h"
 #include "../misc/signal_regions.h"
 #include "../misc/bdt.h"
@@ -31,6 +31,7 @@ bool STOP_REQUESTED = false;
 
 float XSEC_TTTT = 11.97;
 float scaleLumi = 1; // 75/35.87
+TH2F *h_counts = 0;
 
 struct SR_t     { TH1F* EE; TH1F* EM; TH1F* MM; TH1F* TOTAL; };
 struct triple_t { TH1F* ttzcr; TH1F* ttwcr; TH1F* sr; TH1F* br; };
@@ -195,6 +196,7 @@ float calcDeltaPhi(float phi1, float phi2);
 float calcMT(float pt1, float phi1, float pt2, float phi2);
 void avoidNegativeYields(TH1F* plot);
 void initHistError(bool usePoisson, TH1F* plot);
+float getSMSscale1fb();
 std::pair<float,float> getTrijetDiscs(TMVA::Reader* reader);
 
 void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
@@ -210,8 +212,10 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
     bool quiet = options.Contains("quiet");
 
     int year = -1;
+    TString extra("");
     if (options.Contains("Data2016")) {
         year = 2016;
+        if (options.Contains("94x")) extra = "_94x";
     } else if (options.Contains("Data2017")) {
         year = 2017;
     } else if (options.Contains("Data2018")) {
@@ -224,7 +228,7 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
     plots_t plots = run(ch, year, options);
 
     TString chainTitle = ch->GetTitle();
-    TString outname = Form("%s/output_%d_%s.root", outputdir.Data(), year, chainTitle.Data());
+    TString outname = Form("%s/output_%d%s_%s.root", outputdir.Data(), year, extra.Data(), chainTitle.Data());
 
     if (!quiet) std::cout << "Writing out " << outname << std::endl;
     TFile *fout = new TFile(outname, "RECREATE");
@@ -382,7 +386,7 @@ plots_t run(TChain *chain, int year, TString options){
     bool doFlips = 0;
     int doFakes = 0;
     int exclude = 0;
-    bool isSignal = 0;
+    bool isFastsim = 0;
     bool isGamma = 0;
     bool truthfake = 0;
     bool ignoreFakeFactor = 0;
@@ -463,6 +467,11 @@ plots_t run(TChain *chain, int year, TString options){
     const char* chainTitleCh = chainTitle.Data();
     if (!quiet) std::cout << "Working on " << chainTitle << std::endl;
 
+    if (chainTitle.Contains("fs_")) {
+        if (!quiet) std::cout << "Fastsim sample detected" << std::endl;
+        isFastsim = true;
+    }
+
     // bool isWZ = (chainTitle=="wz");
     bool istttt = (chainTitle=="tttt");
     bool isttZ = (chainTitle=="ttz");
@@ -474,19 +483,25 @@ plots_t run(TChain *chain, int year, TString options){
     bool isHiggsScan = false;
     bool isHiggsPseudoscalar = false;
     vector<float> mysparms;
-    if (isSignal && (
-                chainTitle.Contains("higgs_scan") ||  chainTitle.Contains("higgs_ps_scan") 
+    if (isFastsim) {
+        if ( chainTitle.Contains("higgs_scan") ||  chainTitle.Contains("higgs_ps_scan") 
                 || chainTitle.Contains("tth_scan") || chainTitle.Contains("thq_scan") || chainTitle.Contains("thw_scan")
-                || chainTitle.Contains("tta_scan") || chainTitle.Contains("taq_scan") || chainTitle.Contains("taw_scan")
-                ) ) {
-        isHiggsScan = true;
-        isHiggsPseudoscalar = chainTitle.Contains("tta_scan") || chainTitle.Contains("taq_scan") || chainTitle.Contains("taw_scan") || chainTitle.Contains("higgs_ps_scan");
+                || chainTitle.Contains("tta_scan") || chainTitle.Contains("taq_scan") || chainTitle.Contains("taw_scan")) {
+            isHiggsScan = true;
+            isHiggsPseudoscalar = chainTitle.Contains("tta_scan") || chainTitle.Contains("taq_scan") || chainTitle.Contains("taw_scan") || chainTitle.Contains("higgs_ps_scan");
+        }
         TObjArray *tx = chainTitle.Tokenize("_");
         for (int i = 0; i < tx->GetEntries(); i++) {
             if (((TObjString *)(tx->At(i)))->String().BeginsWith("m")) {
                 float asparm = ((TObjString *)(tx->At(i)))->String().ReplaceAll("m","").Atof();
                 mysparms.push_back(asparm);
             }
+        }
+        if (!quiet) {
+            std::cout << "Parsed " << mysparms.size() << " sparms:";
+            if (mysparms.size() > 0) std::cout << " " << mysparms[0];
+            if (mysparms.size() > 1) std::cout << " " << mysparms[1];
+            std::cout << std::endl;
         }
     }
 
@@ -928,11 +943,14 @@ plots_t run(TChain *chain, int year, TString options){
 
         // Get File Content
         TFile *file = new TFile(currentFile->GetTitle());
+
+        if (file->Get("counts")) {
+            // h_counts = ((TH2F*)(file->Get("counts")))->Clone("h_counts");
+            h_counts = (TH2F*)((file->Get("counts"))->Clone("h_counts"));
+        }
         TString filename = currentFile->GetTitle();
         TTree *tree = (TTree*)file->Get("t");
         samesign.Init(tree);
-
-        bool isFastSim = false;
 
         // Loop over Events in current file
         for(unsigned int event = 0; event < tree->GetEntriesFast(); event++){
@@ -945,16 +963,21 @@ plots_t run(TChain *chain, int year, TString options){
 
             if (!quiet) bar.progress(nEventsTotal, nEventsChain);
 
-            //Reject not triggered
-            if (!isFastSim) {
-                if (!ss::fired_trigger()) continue;
-            }
-            if (!ss::passes_met_filters()) continue;
-
             // skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
             //        (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50) and \
             //        (hyp_class != 4 or is_real_data);
             if (!ss::skim()) continue;
+
+            if (isFastsim) {
+                if ((fabs(mysparms[0]-ss::sparms()[0]) > 0.1) || (fabs(mysparms[1]-ss::sparms()[1]) > 0.1)) continue;
+            }
+
+            //Reject not triggered
+            if (!isFastsim) {
+                if (!ss::fired_trigger()) continue;
+            }
+            if (!ss::passes_met_filters()) continue;
+
 
             if (isHiggsScan) {
                 // make sure the higgs mass point we are considering is the same as chain title
@@ -962,6 +985,10 @@ plots_t run(TChain *chain, int year, TString options){
             }
 
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
+
+            if (isFastsim) {
+                weight = getSMSscale1fb()*lumiAG;
+            }
 
             if (istttt) {
                 // force xsec here
@@ -1014,13 +1041,15 @@ plots_t run(TChain *chain, int year, TString options){
                 weight *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
                 weight *= ss::weight_btagsf();
                 weight *= getTruePUw(year, ss::trueNumInt()[0], 0);
-                if (!isFastSim) {
+                if (!isFastsim) {
                     weight *= ss::decayWSF();
                 }
             }
-            if (isFastSim) {
-                if (!quiet) std::cout << "FIXME: no fastsim SFs being applied right now" << std::endl;
-                // weight*=eventScaleFactorFastSim(lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht(), ss::trueNumInt()[0]);
+            if (isFastsim) {
+                weight *= fastsim_triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
+                if (lep1good) weight *= fastsim_leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
+                if (lep2good) weight *= fastsim_leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
+                if (lep3good && lep3ccpt>20) weight *= fastsim_leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
             }
 
             float weight_isr_up_alt = weight;
@@ -1230,19 +1259,19 @@ plots_t run(TChain *chain, int year, TString options){
                 if (duplicate_removal::is_duplicate(id)){ continue; }
             }
 
-            LorentzVector visible;
-            for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-                if (ss::btags()[ijet].pt() > 40.) continue;
-                visible += ss::btags()[ijet];
-            }
-            for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                visible += ss::jets()[ijet];
-            }
-            visible += ss::lep1_p4();
-            visible += ss::lep2_p4();
-            if (nleps > 2) visible += ss::lep3_p4();
-            float mvis = visible.M();
-            float mtvis = visible.Mt();
+            // LorentzVector visible;
+            // for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
+            //     if (ss::btags()[ijet].pt() > 40.) continue;
+            //     visible += ss::btags()[ijet];
+            // }
+            // for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
+            //     visible += ss::jets()[ijet];
+            // }
+            // visible += ss::lep1_p4();
+            // visible += ss::lep2_p4();
+            // if (nleps > 2) visible += ss::lep3_p4();
+            // float mvis = visible.M();
+            // float mtvis = visible.Mt();
 
             float pt1 = lep1ccpt;
             float pt2 = lep2ccpt;
@@ -1358,14 +1387,14 @@ plots_t run(TChain *chain, int year, TString options){
             int SRdisc_JER_up = getBDTBin(nbdtbins, mvavalueJERup, SR_JER_up==1);
             int SRdisc_JER_dn = getBDTBin(nbdtbins, mvavalueJERdn, SR_JER_dn==1);
 
-            // FIXME -- put CRW into 2nd bin
-            if (SR == 2) {
-                SRdisc = 2;
-                SRdisc_unc_up = 2;
-                SRdisc_unc_dn = 2;
-                SRdisc_JER_up = 2;
-                SRdisc_JER_dn = 2;
-            }
+            // // FIXME -- put CRW into 2nd bin
+            // if (SR == 2) {
+            //     SRdisc = 2;
+            //     SRdisc_unc_up = 2;
+            //     SRdisc_unc_dn = 2;
+            //     SRdisc_JER_up = 2;
+            //     SRdisc_JER_dn = 2;
+            // }
 
             // if (SR >= 0) {
             //     std::cout <<  " mvavalueup: " << mvavalueup <<  " mvavaluedn: " << mvavaluedn <<  " mvavalueJERup: " << mvavalueJERup <<  " mvavalueJERdn: " << mvavalueJERdn <<  std::endl;
@@ -1382,15 +1411,6 @@ plots_t run(TChain *chain, int year, TString options){
 
             if (isData  == 0 && SRdisc >= 0 && SRdisc_JER_up > 0)            p_result.p_jer_alt_up_SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
             if (isData  == 0 && SRdisc >= 0 && SRdisc_JER_dn > 0)            p_result.p_jer_alt_dn_SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
-
-
-            // truth match the third lepton
-            if (!isData) {
-                p_result.h_mid1.br->Fill(ss::lep1_motherID(), weight);
-                p_result.h_mid2.br->Fill(ss::lep2_motherID(), weight);
-                if (ss::lep3_passes_id()) p_result.h_mid3.br->Fill(ss::lep3_motherID(), weight);
-            }
-
 
             if (SR >= 0) {
                 p_result.SRCR.TOTAL->Fill(SR, weight);
@@ -1445,32 +1465,32 @@ plots_t run(TChain *chain, int year, TString options){
             bool plotlep3 = ss::lep3_passes_id() && lep3ccpt > 20.;
 
 
-            {
-                float lepsf = 1.;
-                float btagsf = 1.;
-                float wsf = 1.;
-                float puw = 1.;
-                float trigsf = 1.;
-                float isrw = 1.;
-                float w = ss::is_real_data() ? 0.0 : ss::scale1fb()*lumiAG; // ignore data
-                if (ss::is_real_data()==0) {
-                    if (lep1good) lepsf *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
-                    if (lep2good) lepsf *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
-                    if (lep3good && lep3ccpt>20) lepsf *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
-                    trigsf *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
-                    btagsf *= ss::weight_btagsf();
-                    puw *= getTruePUw(year, ss::trueNumInt()[0], 0);
-                    wsf *= ss::decayWSF();
-                    if (isttW) isrw *= isrWeight(year, ss::nisrMatch(), 1);
-                    if (isttZ) isrw *= isrWeight(year, ss::nisrMatch(), 2);
-                }
-                p_result.h_lepsf.br->Fill(lepsf, w);
-                p_result.h_btagsf.br->Fill(btagsf, w);
-                p_result.h_wsf.br->Fill(wsf, w);
-                p_result.h_puw.br->Fill(puw, w);
-                p_result.h_trigsf.br->Fill(trigsf, w);
-                p_result.h_isrw.br->Fill(isrw, w);
-            }
+            // {
+            //     float lepsf = 1.;
+            //     float btagsf = 1.;
+            //     float wsf = 1.;
+            //     float puw = 1.;
+            //     float trigsf = 1.;
+            //     float isrw = 1.;
+            //     float w = ss::is_real_data() ? 0.0 : ss::scale1fb()*lumiAG; // ignore data
+            //     if (ss::is_real_data()==0) {
+            //         if (lep1good) lepsf *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
+            //         if (lep2good) lepsf *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
+            //         if (lep3good && lep3ccpt>20) lepsf *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
+            //         trigsf *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
+            //         btagsf *= ss::weight_btagsf();
+            //         puw *= getTruePUw(year, ss::trueNumInt()[0], 0);
+            //         wsf *= ss::decayWSF();
+            //         if (isttW) isrw *= isrWeight(year, ss::nisrMatch(), 1);
+            //         if (isttZ) isrw *= isrWeight(year, ss::nisrMatch(), 2);
+            //     }
+            //     p_result.h_lepsf.br->Fill(lepsf, w);
+            //     p_result.h_btagsf.br->Fill(btagsf, w);
+            //     p_result.h_wsf.br->Fill(wsf, w);
+            //     p_result.h_puw.br->Fill(puw, w);
+            //     p_result.h_trigsf.br->Fill(trigsf, w);
+            //     p_result.h_isrw.br->Fill(isrw, w);
+            // }
 
 
 
@@ -1483,8 +1503,8 @@ plots_t run(TChain *chain, int year, TString options){
                 p_result.h_nleps.br->Fill(nleps , weight);
                 p_result.h_ht.br->Fill(ss::ht() , weight);
                 p_result.h_met.br->Fill(ss::met() , weight);
-                p_result.h_mvis.br->Fill(mvis , weight);
-                p_result.h_mtvis.br->Fill(mtvis , weight);
+                // p_result.h_mvis.br->Fill(mvis , weight);
+                // p_result.h_mtvis.br->Fill(mtvis , weight);
                 p_result.h_mll.br->Fill(mll , weight);
                 p_result.h_mtmin.br->Fill(mtmin , weight);
                 p_result.h_l1pt.br->Fill(pto1, weight);
@@ -1497,12 +1517,12 @@ plots_t run(TChain *chain, int year, TString options){
                     p_result.h_l3pt.br->Fill(pto3, weight);
                     (abs(lep3id) == 11) ? p_result.h_el_l3pt.br->Fill(pto3, weight) : p_result.h_mu_l3pt.br->Fill(pto3, weight);
                 }
-                for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-                    p_result.h_bjetpt.br->Fill(ss::btags()[ijet].pt(),weight);
-                }
-                for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                    p_result.h_jetpt.br->Fill(ss::jets()[ijet].pt(),weight);
-                }
+                // for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
+                //     p_result.h_bjetpt.br->Fill(ss::btags()[ijet].pt(),weight);
+                // }
+                // for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
+                //     p_result.h_jetpt.br->Fill(ss::jets()[ijet].pt(),weight);
+                // }
                 if (abs(lep1id) == 11) p_result.h_mva.br->Fill(ss::lep1_MVA()                                                     , weight);
                 if(abs(lep1id) == 13) {
                     p_result.h_mu_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
@@ -1549,8 +1569,8 @@ plots_t run(TChain *chain, int year, TString options){
                 p_result.h_nleps.ttzcr->Fill(nleps , weight);
                 p_result.h_ht.ttzcr->Fill(ss::ht() , weight);
                 p_result.h_met.ttzcr->Fill(ss::met() , weight);
-                p_result.h_mvis.ttzcr->Fill(mvis , weight);
-                p_result.h_mtvis.ttzcr->Fill(mtvis , weight);
+                // p_result.h_mvis.ttzcr->Fill(mvis , weight);
+                // p_result.h_mtvis.ttzcr->Fill(mtvis , weight);
                 p_result.h_mll.ttzcr->Fill(mll , weight);
                 p_result.h_mtmin.ttzcr->Fill(mtmin , weight);
                 p_result.h_l1pt.ttzcr->Fill(pto1, weight);
@@ -1575,8 +1595,8 @@ plots_t run(TChain *chain, int year, TString options){
                 p_result.h_nleps.ttwcr->Fill(nleps , weight);
                 p_result.h_ht.ttwcr->Fill(ss::ht() , weight);
                 p_result.h_met.ttwcr->Fill(ss::met() , weight);
-                p_result.h_mvis.ttwcr->Fill(mvis , weight);
-                p_result.h_mtvis.ttwcr->Fill(mtvis , weight);
+                // p_result.h_mvis.ttwcr->Fill(mvis , weight);
+                // p_result.h_mtvis.ttwcr->Fill(mtvis , weight);
                 p_result.h_mll.ttwcr->Fill(mll , weight);
                 p_result.h_mtmin.ttwcr->Fill(mtmin , weight);
                 p_result.h_l1pt.ttwcr->Fill(pto1, weight);
@@ -1604,8 +1624,8 @@ plots_t run(TChain *chain, int year, TString options){
                 // if (SR == 5+2)  p_result.h_ht_sr5.sr->Fill(ss::ht() , weight);
                 // if (SR == 11+2) p_result.h_ht_sr11.sr->Fill(ss::ht() , weight);
                 p_result.h_met.sr->Fill(ss::met() , weight);
-                p_result.h_mvis.sr->Fill(mvis , weight);
-                p_result.h_mtvis.sr->Fill(mtvis , weight);
+                // p_result.h_mvis.sr->Fill(mvis , weight);
+                // p_result.h_mtvis.sr->Fill(mtvis , weight);
                 p_result.h_mll.sr->Fill(mll , weight);
                 p_result.h_mtmin.sr->Fill(mtmin , weight);
                 p_result.h_l1pt.sr->Fill(pto1, weight);
@@ -1616,12 +1636,12 @@ plots_t run(TChain *chain, int year, TString options){
                     p_result.h_l3pt.sr->Fill(pto3, weight);
                     (abs(lep3id) == 11) ? p_result.h_el_l3pt.sr->Fill(pto3, weight) : p_result.h_mu_l3pt.sr->Fill(pto3, weight);
                 }
-                for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-                    p_result.h_bjetpt.sr->Fill(ss::btags()[ijet].pt(),weight);
-                }
-                for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                    p_result.h_jetpt.sr->Fill(ss::jets()[ijet].pt(),weight);
-                }
+                // for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
+                //     p_result.h_bjetpt.sr->Fill(ss::btags()[ijet].pt(),weight);
+                // }
+                // for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
+                //     p_result.h_jetpt.sr->Fill(ss::jets()[ijet].pt(),weight);
+                // }
                 if (abs(lep1id) == 11) p_result.h_mva.sr->Fill(ss::lep1_MVA()                                                     , weight);
                 if(abs(lep1id) == 13) {
                     p_result.h_mu_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
@@ -1714,6 +1734,15 @@ void initHistError(bool usePoisson, TH1F* plot) {
     if (plot==0) return;
     if (usePoisson) plot->SetBinErrorOption(TH1::kPoisson);
     else  plot->Sumw2();
+}
+
+float getSMSscale1fb() {
+    if (!h_counts) {
+        std::cerr << "Count histogram (h_counts) isn't loaded!" << std::endl;
+        exit(1);
+    }
+    float count = h_counts->GetBinContent(h_counts->FindBin(ss::sparms()[0],ss::sparms()[1]));
+    return 1000.0*ss::xsec()/count;
 }
 
 float calcDeltaPhi(float phi1, float phi2){

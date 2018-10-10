@@ -252,21 +252,29 @@ def write_one_file(fname_in, fname_out, name, region, year):
     fout.Close()
 
 def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_tmp"):
+
+    def do_one(year,proc,region):
+        fname_in = "{}/output_{}_{}.root".format(inputdir,year,proc)
+        fname_out = "{}/{}_histos_{}_{}.root".format(inputdir,proc,region.lower(),year)
+        print "Converting {} -> {}".format(fname_in,fname_out)
+        write_one_file(
+                fname_in = fname_in,
+                fname_out = fname_out,
+                name = proc,
+                region = region.upper(),
+                year = year,
+                )
+
     for year in [2016, 2017, 2018]:
         for proc in ["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"]:
-    # for year in [2018]: # FIXME
-    #     for proc in ["fakes"]: # FIXME
             for region in ["SRCR","SRDISC"]:
-                fname_in = "{}/output_{}_{}.root".format(inputdir,year,proc)
-                fname_out = "{}/{}_histos_{}_{}.root".format(inputdir,proc,region.lower(),year)
-                print "Converting {} -> {}".format(fname_in,fname_out)
-                write_one_file(
-                        fname_in = fname_in,
-                        fname_out = fname_out,
-                        name = proc,
-                        region = region.upper(),
-                        year = year,
-                        )
+                do_one(year,proc,region)
+
+    # for year in [2016]:
+    #     for proc in ["fs_t6ttww_m875_m775"]:
+    #     # for proc in ["fs_t1tttt_m1700_m1350"]:
+    #         for region in ["SRCR"]:
+    #             do_one(year,proc,region)
 
     os.system("mkdir -p {}".format(outputdir))
     # # FIXME didn't copy
@@ -284,29 +292,3 @@ if __name__ == "__main__":
 
     make_root_files(inputdir, outputdir)
 
-    # for year in [2016, 2017, 2018]:
-    #     for proc in ["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"]:
-    #         for region in ["SRCR","SRDISC"]:
-    #             fname_in = "{}/output_{}_{}.root".format(inputdir,year,proc)
-    #             fname_out = "{}/{}_histos_{}_{}.root".format(inputdir,proc,region.lower(),year)
-    #             print "Converting {} -> {}".format(fname_in,fname_out)
-    #             write_one_file(
-    #                     fname_in = fname_in,
-    #                     fname_out = fname_out,
-    #                     name = proc,
-    #                     region = region.upper(),
-    #                     year = year,
-    #                     )
-    # os.system("mkdir -p {}".format(outputdir))
-    # os.system("cp {}/*.root {}/".format(inputdir,outputdir))
-
-#     write_one_file(
-#             fname_in = "outputs/output_2017_tttt.root",
-#             fname_out = "tttt_histos_srcr.root",
-#             name = "tttt",
-#             # name = "ttw",
-#             # name = "fakes",
-#             # name = "fakes_mc",
-#             region = "SRCR",
-#             year = 2017,
-#             )

@@ -169,7 +169,7 @@ int main(int argc, char *argv[]){
         if (filenames.Contains("SMS-T1tttt_")) isSignal = 1;
         else if (filenames.Contains("SMS-T5qqqqVV_Tune")) isSignal = 2;
         else if (filenames.Contains("SMS-T5qqqqVV_dM20_Tune")) isSignal = 3;
-        else if (filenames.Contains("SMS-T6ttWW_Tune")) isSignal = 10;
+        else if (filenames.Contains("SMS-T6ttWW")) isSignal = 10;
         else if (filenames.Contains("SMS-T1ttbb_Tune")) isSignal = 6;
         else if (filenames.Contains("SMS-T5tttt_dM175_Tune")) isSignal = 5;
         else if (filenames.Contains("SMS-T5ttcc_Tune")) isSignal = 4;
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]){
     //Make Jet Energy Uncertainties
     JetCorrectionUncertainty *jecUnc = 0;
     if (!isData)      jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/"+jecEraMC+"_MC/"+jecEraMC+"_MC_Uncertainty_AK4PFchs.txt"); 
-    if (isSignal > 0) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1_Uncertainty_AK4PFchs.txt"); 
+    if (isSignal > 0) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_Uncertainty_AK4PFchs.txt"); 
 
     //Init MVA
     createAndInitMVA("./CORE", true, true, 80);
@@ -245,12 +245,12 @@ int main(int argc, char *argv[]){
     std::vector<std::string> jetcorr_filenames_25ns_FASTSIM_pfL1;
     std::vector<std::string> jetcorr_filenames_25ns_FASTSIM_pfL2L3;
     std::vector<std::string> jetcorr_filenames_25ns_FASTSIM_pfL1L2L3;
-    jetcorr_filenames_25ns_FASTSIM_pfL1.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1_L1FastJet_AK4PFchs.txt");
-    jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1_L2Relative_AK4PFchs.txt"); 
-    jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1_L3Absolute_AK4PFchs.txt"); 
-    jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1_L2Relative_AK4PFchs.txt"); 
-    jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1_L3Absolute_AK4PFchs.txt"); 
-    jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1_L1FastJet_AK4PFchs.txt");
+    jetcorr_filenames_25ns_FASTSIM_pfL1.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L1FastJet_AK4PFchs.txt");
+    jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L2Relative_AK4PFchs.txt"); 
+    jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L3Absolute_AK4PFchs.txt"); 
+    jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L2Relative_AK4PFchs.txt"); 
+    jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L3Absolute_AK4PFchs.txt"); 
+    jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L1FastJet_AK4PFchs.txt");
 
     //JECs
 

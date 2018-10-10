@@ -2116,6 +2116,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               if (!fired_trigger) return babyErrorStruct;
           }
       }
+      if (isFastsim > 0) {
+          // There's no trigger emulation in 80X fastsim, but we'll just set the branch to 1 for convenience
+          fired_trigger = true;
+      }
   } else if (gconf.year == 2017) {
       if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
               passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);

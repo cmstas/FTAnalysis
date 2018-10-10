@@ -48,6 +48,11 @@ echo -e "\n--- begin running ---\n" #                           <----- section d
 echo Executing ./main.exe $INPUTFILENAMES ${OUTPUTNAME}.root
 ./main.exe $INPUTFILENAMES ${OUTPUTNAME}.root
 
+# if [ "$?" != "0" ]; then
+#     echo "Removing output file because ./main.exe didn't return exit code of 0"
+#     rm ${OUTPUTNAME}.root
+# fi
+
 # Rigorous sweeproot which checks ALL branches for ALL events.
 # If GetEntry() returns -1, then there was an I/O problem, so we will delete it
 python << EOL

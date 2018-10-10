@@ -103,7 +103,7 @@ class Runner(object):
                 chars += char
             return u" "+color+chars+u"\033[0m"
 
-    def run(self):
+    def run(self, print_callback=None):
         if not self.t0: 
             self.t0 = time.time()
 
@@ -120,6 +120,8 @@ class Runner(object):
             #     self.add_args(["sleep 2"])
             self.ndone += 1
             self.elapsed = time.time()-self.t0
+            if print_callback:
+                print_callback(ret)
             dots = self.get_dots(self.indices_status,which=self.dot_type)
             sp.print_status(format_meter(self.ndone, self.ntotal, self.elapsed, size=13,extra=dots))
         print
