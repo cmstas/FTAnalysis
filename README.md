@@ -33,7 +33,21 @@ cd analysis/yields/
 cd analysis/limits/
 ```
 
-## Hitting the ground running (quick start to reproduce paper yields)
+## Hitting the ground running
+
+### Quick start to get Run2 yields and combined significances
+```
+git clone https://github.com/cmstas/FTAnalysis
+cd FTAnalysis
+source /code/osgcode/cmssoft/cms/cmsset_default.sh
+source setup.sh
+cd $FTBASE/analysis/yields/
+./py_doAll.py --shapes --plots --tag v3.09_quickstart_v0
+cd $FTBASE/analysis/limits/
+./run_all_limits.sh v3.09_quickstart_v0 --regions srcr
+```
+
+### Quick start to reproduce 2016 paper yields
 ```
 # clone and set up
 git clone https://github.com/cmstas/FTAnalysis

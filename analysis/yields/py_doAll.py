@@ -26,6 +26,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--noloop", help="skip looping/scanchain", action="store_true")
     parser.add_argument("-s", "--shapes", help="make shape hists and copy to limit directory tag folder", action="store_true")
     parser.add_argument("-p", "--plots", help="make plots and copy to the limit directory tag folder", action="store_true")
+    parser.add_argument("-f", "--fastsim", help="include fastsim scans", action="store_true")
 
     args = parser.parse_args()
 
@@ -286,7 +287,6 @@ if __name__ == "__main__":
     def get_fastsim_procnames(fname, procbase="fs_t1tttt"):
         f = r.TFile(fname)
         counts = f.Get("counts")
-        count_list = list(counts)
         xaxis = counts.GetXaxis()
         yaxis = counts.GetYaxis()
         valid_points = []
@@ -300,13 +300,14 @@ if __name__ == "__main__":
         strs = map(lambda x:"{}_m{}_m{}".format(procbase,x[0],x[1]), valid_points)
         return strs
 
-    fn = basedirs[2016]+"T1TTTT.root"
-    procnames = get_fastsim_procnames(fn, procbase="fs_t1tttt")
-    for pn in procnames: chs[2016][pn] = make_obj(fn, options=options[2016])
+    if args.fastsim:
+        fn = basedirs[2016]+"T1TTTT.root"
+        procnames = get_fastsim_procnames(fn, procbase="fs_t1tttt")
+        for pn in procnames: chs[2016][pn] = make_obj(fn, options=options[2016])
 
-    fn = basedirs[2016]+"T6TTWW.root"
-    procnames = get_fastsim_procnames(fn, procbase="fs_t6ttww")
-    for pn in procnames: chs[2016][pn] = make_obj(fn, options=options[2016])
+        fn = basedirs[2016]+"T6TTWW.root"
+        procnames = get_fastsim_procnames(fn, procbase="fs_t6ttww")
+        for pn in procnames: chs[2016][pn] = make_obj(fn, options=options[2016])
 
     # # chs[2016]["fs_t1tttt_m1200_m800"] = make_obj(basedirs[2016]+"T1TTTT.root", options=options[2016])
     # chs[2016]["fs_t1tttt_m1200_m600"] = make_obj(basedirs[2016]+"T1TTTT.root", options=options[2016])
@@ -357,10 +358,14 @@ if __name__ == "__main__":
     # print to_run
 
     if not args.noloop:
-        def callback(ret):
-            return # FIXME
-            ret, proc, t = ret
-            print "Processed {} in {:.1f} seconds".format(proc,t)
+
+        if len(to_run) < 30:
+            def callback(ret):
+                ret, proc, t = ret
+                print "Processed {} in {:.1f} seconds".format(proc,t)
+        else:
+            def callback(ret):
+                pass
 
         # Now run them
         if len(to_run) == 1:
