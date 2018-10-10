@@ -40,6 +40,13 @@ float leptonScaleFactor(int year, int id, float pt, float eta, float ht) {
     else return 0.;
 }
 
+float fastsim_leptonScaleFactor(int year, int id, float pt, float eta, float ht) { 
+    // FIXME only 2016
+    // modify for SS!
+    if (year == 2016) return y2016::leptonScaleFactorFastSim(id, pt, eta, ht);
+    return 1.0;
+}
+
 float leptonScaleFactorError(int year, int id, float pt, float eta, float ht) { 
     if (year == 2016) return y2016::leptonScaleFactor_err(id, pt, eta, ht);
     else if (year == 2017) return y2017::leptonScaleFactor_err(id, pt, eta, ht);
@@ -52,6 +59,13 @@ float triggerScaleFactor(int year, int pdgId1, int pdgId2, float pt1, float pt2,
     else if (year == 2017) return y2017::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
     else if (year == 2018) return y2018::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
     else return 0.;
+}
+
+float fastsim_triggerScaleFactor(int year, int id1, int id2, float pt1, float pt2, float eta1, float eta2, float ht) {
+    // FIXME only 2016 -- actually this is an efficiency since there is no trigger in 80X fastsim
+    // modify for SS!
+    if (year == 2016) return y2016::FastSimTriggerEfficiency(id1,id2,pt1,pt2,eta1,eta2,ht);
+    return 1.0;
 }
 
 float flipRate(int year, float pt, float eta) { 

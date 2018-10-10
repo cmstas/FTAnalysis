@@ -8,6 +8,8 @@ namespace y2016 {
 #include "puw.h"
 #include "trigger_sf.h"
 #include "isr_weights.h"
+#include "fastsim_trigger_eff.h"
+#include "fastsim_lepton_sf.h"
 float getLumi() { return 35.922; }
 }
 
