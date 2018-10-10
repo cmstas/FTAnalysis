@@ -17,7 +17,6 @@
 #include "../misc/common_utils.h"
 #include "../misc/signal_regions.h"
 #include "../misc/bdt.h"
-#include "xgbheader.h"
 
 #include <signal.h>
 #include <stdlib.h>

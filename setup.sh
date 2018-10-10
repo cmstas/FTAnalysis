@@ -1,5 +1,5 @@
-therelease=CMSSW_9_2_8
-export SCRAM_ARCH=slc6_amd64_gcc530
+therelease=CMSSW_9_4_9
+export SCRAM_ARCH=slc6_amd64_gcc630
 mkdir -p common
 if [ ! -d common/$therelease ]; then 
     cd common/ ;
@@ -33,7 +33,7 @@ if [ ! -d ${FTBASE}/babymaking/batch/ProjectMetis/ ]; then
 else
     source ${FTBASE}/babymaking/batch/ProjectMetis/setup.sh
 fi
-[[ -d ${FTBASE}/common/Software/ ]] || git clone git@github.com:cmstas/Software.git ${FTBASE}/common/Software/
+# [[ -d ${FTBASE}/common/Software/ ]] || git clone git@github.com:cmstas/Software.git ${FTBASE}/common/Software/
 [[ -d ${FTBASE}/common/CORE/ ]] || {
     git clone git@github.com:cmstas/CORE.git ${FTBASE}/common/CORE/;
     cd ${FTBASE}/common/CORE; 
