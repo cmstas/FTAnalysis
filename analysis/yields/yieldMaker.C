@@ -470,9 +470,10 @@ plots_t run(TChain *chain, int year, TString options){
     if (chainTitle.Contains("fs_")) {
         if (!quiet) std::cout << "Fastsim sample detected" << std::endl;
         isFastsim = true;
+        evaluateBDT = false;
     }
 
-    // bool isWZ = (chainTitle=="wz");
+    bool isWZ = (chainTitle=="wz");
     bool istttt = (chainTitle=="tttt");
     bool isttZ = (chainTitle=="ttz");
     bool istt = (chainTitle=="ttbar") || (chainTitle=="fakes_mc") || (chainTitle=="fakes_mc_unw");
