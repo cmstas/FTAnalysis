@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstdlib>
+#include <string>
 
 #include "TChain.h"
 #include "TFile.h"
@@ -160,7 +161,7 @@ class babyMaker {
     vector <float> sparms;
     float kfactor;
     string filename;
-    vector <float> genweights;
+    // vector <float> genweights;
     vector <string> genweightsID;
     bool passedFilterList;
 

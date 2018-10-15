@@ -50,13 +50,18 @@ if __name__ == "__main__":
 
     # tag = "v3.05_all"
     # tag = "v3.08_all"
+    # tag = "v3.09_all"
+    # year_sample_map = [("2016",data_2016+mc_2016)]
+    # tag = "v3.09_lowpt3" # pt>10,15 for lep3, 2016 only
+
+    year_sample_map = [("2018",mc_2018)]
     tag = "v3.09_all"
 
 
     # year_sample_map = [
     #         (2016, [
-    #             ["/SMS-T6ttWW_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T6TTWW"],
-    #             ["/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T1TTTT"],
+    #             # ["/SMS-T6ttWW_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T6TTWW"],
+    #             # ["/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T1TTTT"],
     #             # ["/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTDL"],
     #             # ["/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtop"],
     #             # ["/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtopbar"],
@@ -65,12 +70,15 @@ if __name__ == "__main__":
     #             # ["/TTJets_DiLept_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTDL"],
     #             # ["/TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTSLtop"],
     #             # ["/TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTSLtopbar"],
+    #             ["/TTPlus0Jet_DiLept_TuneCP5_amcatnlo/RunIIFall17MiniAODv2-Private-v1/CMS4", "TTdilep0jetext1"],
+    #             ["/TTPlus0Jet_DiLept_TuneCP5_amcatnlo/RunIIFall17MiniAODv2-Private-v2/CMS4", "TTdilep0jetext2"],
+    #             ["/TTPlus1Jet_DiLept_TuneCP5_amcatnlo/RunIIFall17MiniAODv2-Private-v1/CMS4", "TTdilep1jetext1"],
+    #             ["/TTPlus1Jet_DiLept_TuneCP5_amcatnlo/RunIIFall17MiniAODv2-Private-v2/CMS4", "TTdilep1jetext2"],
     #             ]),
     #         ]
 
     # year_sample_map = [(2017,mc_2017[:4])] # FIXME
 
-    skip_tail = False
     
     # Loop 'til we get dizzy
     for i in range(1000):
@@ -91,18 +99,20 @@ if __name__ == "__main__":
                         dataset=dsname,
                         # tag="CMS4_V09-04-13", # if not specified, get latest tag
                         )
+                skip_tail = "/SMS" in dsname
                 task = CondorTask(
                         sample = sample,
                         files_per_output = split_func(dsname),
                         output_name = "output.root",
                         tag = tag,
-                        min_completion_fraction = 0.5 if skip_tail else 1.0,
+                        min_completion_fraction = 0.93 if skip_tail else 1.0,
                         # min_completion_fraction = 1.0 if not "/SMS" in dsname else 0.9,
                         # condor_submit_params = {"use_xrootd":True},
                         condor_submit_params = {"sites":"T2_US_UCSD"}, # I/O is hella faster
                         # condor_submit_params = {"use_xrootd":True},
                         # condor_submit_params = {"sites":"T2_US_UCSD,UCSB"}, # I/O is hella faster
-                        cmssw_version = "CMSSW_9_2_8",
+                        cmssw_version = "CMSSW_9_4_9",
+                        scram_arch = "slc6_amd64_gcc630",
                         input_executable = "inputs/condor_executable_metis.sh",
                         tarfile = "inputs/package.tar.xz",
                         special_dir = "FTbabies/",

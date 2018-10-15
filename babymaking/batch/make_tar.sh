@@ -10,6 +10,7 @@ liblooperBatch.so
 CORE
 LinkDef_out_rdict.pcm
 goodRunList
+cxxopts.h
 $(find misc/ -name '*.h' -print)
 "
 

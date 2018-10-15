@@ -45,6 +45,8 @@ ls -lrth
 
 echo -e "\n--- begin running ---\n" #                           <----- section division
 
+# comma separated to space separated
+INPUTFILENAMES=$(echo $INPUTFILENAMES | sed s/,/" "/g)
 echo Executing ./main.exe $INPUTFILENAMES ${OUTPUTNAME}.root
 ./main.exe $INPUTFILENAMES ${OUTPUTNAME}.root
 

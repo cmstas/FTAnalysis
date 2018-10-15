@@ -10,10 +10,72 @@
 #include "CORE/Tools/datasetinfo/getDatasetInfo.h"
 #include "CORE/Tools/jetcorr/JetCorrectionUncertainty.h"  
 #include "CORE/Tools/jetcorr/SimpleJetCorrectionUncertainty.h"
+#include "cxxopts.h"
 
 bool STOP_REQUESTED;
 
 int main(int argc, char *argv[]){
+
+
+    bool verbose = false;
+    bool arg_notfastsim = false;
+    bool arg_ignorescale1fb = false;
+    bool arg_skipos = false;
+    bool arg_xrootd = false;
+    auto arg_files = std::vector<std::string>();
+    std::string arg_output = "output.root";
+    int arg_nevents = -1;
+    std::vector<TString> vfilenames;
+
+
+    try {
+
+        cxxopts::Options options(argv[0], "FTAnalysis babymaker");
+        options.positional_help("[optional args]").show_positional_help();
+        options.add_options()
+            ("h,help", "Print help")
+            ("v,verbose", "Enable verbosity", cxxopts::value<bool>(verbose))
+            ("notfastsim", "Don't treat this as fastsim even if it is", cxxopts::value<bool>(arg_notfastsim))
+            ("ignorescale1fb", "Ignore the scale1fb.txt file", cxxopts::value<bool>(arg_ignorescale1fb))
+            ("skipos", "Skip OS events for MC", cxxopts::value<bool>(arg_skipos))
+            ("xrootd", "Use xrootd by force", cxxopts::value<bool>(arg_xrootd))
+            ("o,output", "Output name", cxxopts::value<std::string>(arg_output)->default_value(arg_output))
+            ("n,nevents", "Number of events", cxxopts::value<int>(arg_nevents)->default_value(std::to_string(arg_nevents)))
+            ("f,files", "Files or file patterns", cxxopts::value<std::vector<std::string>>(arg_files))
+            ;
+        options.parse_positional({"files"});
+        auto result = options.parse(argc, argv);
+        if (result.count("help")) {
+            std::cout << options.help({""}) << std::endl;
+            return 0;
+        }
+
+        if (result.count("files")) {
+            auto& ff = result["files"].as<std::vector<std::string>>();
+            for (const auto& f : ff) {
+                vfilenames.push_back(TString(f));
+            }
+        } else {
+            std::cout << ">>> Need a list of files!" << std::endl;
+            std::cout << options.help({""}) << std::endl;
+            return 1;
+        }
+
+        // std::cout <<  " vfilenames.size(): " << vfilenames.size() <<  std::endl;
+        // std::cout <<  " verbose: " << verbose <<  std::endl;
+        // std::cout <<  " arg_notfastsim: " << arg_notfastsim <<  std::endl;
+        // std::cout <<  " arg_ignorescale1fb: " << arg_ignorescale1fb <<  std::endl;
+        // std::cout <<  " arg_skipos: " << arg_skipos <<  std::endl;
+        // std::cout <<  " arg_output: " << arg_output <<  std::endl;
+        // std::cout <<  " arg_nevents: " << arg_nevents <<  std::endl;
+
+    } catch (const cxxopts::OptionException& e) {
+        std::cout << "error parsing options: " << e.what() << std::endl;
+        return 1;
+    }
+
+
+    // std::cout << result << std::endl;
 
     signal(SIGINT, [](int){
             cout << "SIGINT Caught, stopping after current event" << endl;
@@ -37,15 +99,15 @@ int main(int argc, char *argv[]){
     // // }
     // return 0;
 
-    TString filenames;
-    TString outname = "output.root";
-    unsigned int nevents_max = 0;
+    TString filenames = vfilenames.at(0);
+    TString outname(arg_output);
+    unsigned int nevents_max = (arg_nevents > 0 ? arg_nevents : 0);
     // bool useXrootd = false;
     char hostnamestupid[100];
-    int result = gethostname(hostnamestupid, 100);
+    int res = gethostname(hostnamestupid, 100);
     TString hostname(hostnamestupid);
     std::cout << ">>> Hostname is " << hostname << std::endl;  
-    bool useXrootd = !(hostname.Contains("t2.ucsd.edu"));
+    bool useXrootd = !(hostname.Contains("t2.ucsd.edu")) or arg_xrootd;
     bool goodRunsOnly = true;
     // bool useXrootd = false;
     if (hostname.Contains("uafino")) {
@@ -53,20 +115,13 @@ int main(int argc, char *argv[]){
         useXrootd = true;
     }
 
-    if (argc > 1) filenames   = TString(argv[1]);
-    if (argc > 2) outname     = TString(argv[2]);
-    if (argc > 3) nevents_max = atoi(argv[3]);
-
     std::cout << ">>> Args: " << std::endl;
-    std::cout << "     filenames:    " << filenames << std::endl;
+    std::cout << "     filenames:   " << std::endl;
+    for (auto f : vfilenames) { 
+        std::cout << "         " << f << std::endl;
+    }
     std::cout << "     outname:     " << outname << std::endl;
     std::cout << "     nevents_max: " << nevents_max << std::endl;
-
-    if (argc <= 1) { 
-        std::cout << ">>> [!] Not enough arguments!" << std::endl;  
-        return 1;
-    }
-
 
     bool isData = filenames.Contains("run2_data") || filenames.Contains("Run201");
     int isSignal = 0; 
@@ -181,7 +236,7 @@ int main(int argc, char *argv[]){
     // if (filenames.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
     if (filenames.Contains("_HToTT_") && filenames.Contains("Summer16Fast")) isSignal = 101; // fastsim higgs vs fullsim higgs
 
-    if (std::getenv("notsignal")) {
+    if (arg_notfastsim) {
         isSignal = 0;
         std::cout << ">>> [!] Not actually a signal file!" << std::endl;
     }
@@ -190,11 +245,11 @@ int main(int argc, char *argv[]){
     babyMaker *mylooper = new babyMaker();
     mylooper->MakeBabyNtuple(outname.Data(), isSignal);
 
-    if (std::getenv("noscale1fb")) {
+    if (arg_ignorescale1fb) {
         mylooper->ignore_scale1fb = true;
         std::cout << ">>> [!] Ignoring scale1fb text file!" << std::endl;
     }
-    if (std::getenv("noos")) {
+    if (arg_skipos) {
         mylooper->ignore_os = true;
         std::cout << ">>> [!] Skipping OS events for MC!" << std::endl;
     }
@@ -203,14 +258,14 @@ int main(int argc, char *argv[]){
 
     if (useXrootd) {
         std::cout << ">>> Using xrootd" << std::endl;  
-        filenames.ReplaceAll("/hadoop/cms", "root://cmsxrootd.fnal.gov/");
     }
 
-    TObjArray *files = filenames.Tokenize(",");
-    for (Int_t i = 0; i < files->GetEntries(); i++)  {
-        TString fname(((TObjString *)(files->At(i)))->String());
-        std::cout << ">>> Adding file: " << fname << std::endl;  
-        chain->Add(fname);
+    for (auto fname : vfilenames) {
+        if (useXrootd) {
+            fname.ReplaceAll("/hadoop/cms", "root://cmsxrootd.fnal.gov/");
+        }
+        auto nfiles = chain->Add(fname);
+        std::cout << ">>> Adding " << nfiles << " file(s): " << fname << std::endl;  
     }
 
     //Add good run list
@@ -295,6 +350,7 @@ int main(int argc, char *argv[]){
 
         // Get File Content
         if(nEventsTotal >= nEventsToDo) continue;
+        if ((nevents_max > 0) && (nEventsTotal >= nevents_max)) break;
         TFile *file = TFile::Open( currentFile->GetTitle() );
         TTree *tree = (TTree*)file->Get("Events");
         TString filename(currentFile->GetTitle());
