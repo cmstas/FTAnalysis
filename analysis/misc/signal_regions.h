@@ -338,7 +338,7 @@ int getBDTBin(int nbins, float disc, bool crz) {
 // int getNsrsTTTT() { return 10; }
 
 // 18 bins
-int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, int isClass6){
+int signalRegionTest(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, bool isClass6){
     if (lep1pt < 25.) return -1;
     if (lep2pt < 20.) return -1;
     if (njets < 2) return -1;
