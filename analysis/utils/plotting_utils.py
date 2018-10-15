@@ -2,7 +2,7 @@ import numpy as np
 from pytable import Table
 from analysis.limits.errors import E
 
-def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2,sep = u"\u00B1".encode("utf-8"), binedge_fmt="{}-{}"):
+def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2,sep = u"\u00B1".encode("utf-8"), binedge_fmt="{}-{}", fix_negative=True):
     tab = Table()
     sumbgs = sum(bgs)
     databg = data/sumbgs
@@ -23,7 +23,10 @@ def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2
     for ibin,binrow in enumerate(binpairs):
         row = [("[%s]"%binedge_fmt).format(binrow[0],binrow[1])]
         for iproc,proc in enumerate(procs):
-            cent = max(proc.counts[ibin],0.)
+            if fix_negative:
+                cent = max(proc.counts[ibin],0.)
+            else:
+                cent = proc.counts[ibin]
             err = proc.errors[ibin]
             row.append(("{0:5.%if} {1}{2:%i.%if}" % (precision,precision+3,precision)).format(cent,sep,err))
         tab.add_row(row)
