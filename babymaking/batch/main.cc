@@ -22,6 +22,7 @@ int main(int argc, char *argv[]){
     bool arg_ignorescale1fb = false;
     bool arg_skipos = false;
     bool arg_xrootd = false;
+    bool arg_ignorebadfiles = false;
     auto arg_files = std::vector<std::string>();
     std::string arg_output = "output.root";
     int arg_nevents = -1;
@@ -37,6 +38,7 @@ int main(int argc, char *argv[]){
             ("v,verbose", "Enable verbosity", cxxopts::value<bool>(verbose))
             ("notfastsim", "Don't treat this as fastsim even if it is", cxxopts::value<bool>(arg_notfastsim))
             ("ignorescale1fb", "Ignore the scale1fb.txt file", cxxopts::value<bool>(arg_ignorescale1fb))
+            ("ignorebadfiles", "Ignore/skip files with I/O errors", cxxopts::value<bool>(arg_ignorebadfiles))
             ("skipos", "Skip OS events for MC", cxxopts::value<bool>(arg_skipos))
             ("xrootd", "Use xrootd by force", cxxopts::value<bool>(arg_xrootd))
             ("o,output", "Output name", cxxopts::value<std::string>(arg_output)->default_value(arg_output))
@@ -186,10 +188,17 @@ int main(int argc, char *argv[]){
     if (year == 2017) {
         gconf.year = year;
         gconf.ea_version = 4;
+
         gconf.btag_disc_wp = 0.4941;
         gconf.WP_DEEPCSV_TIGHT  = 0.8001;
         gconf.WP_DEEPCSV_MEDIUM = 0.4941;
         gconf.WP_DEEPCSV_LOOSE  = 0.1522;
+
+        // gconf.btag_disc_wp = 0.3033;
+        // gconf.WP_DEEPCSV_TIGHT  = 0.7489;
+        // gconf.WP_DEEPCSV_MEDIUM = 0.3033;
+        // gconf.WP_DEEPCSV_LOOSE  = 0.0521;
+
         gconf.multiiso_el_minireliso = 0.09;
         gconf.multiiso_el_ptratio = 0.85;
         gconf.multiiso_el_ptrel = 9.2;
@@ -214,7 +223,7 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_minireliso = 0.12;
         gconf.multiiso_mu_ptratio = 0.80;
         gconf.multiiso_mu_ptrel = 7.5;
-        good_run_file = "goodRunList/Cert_314472-323523_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 46.57
+        good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
         jecEra = "Fall17_17Nov2017C_V6";
         jecEraMC = "Fall17_17Nov2017_V6";
         gconf.SS_innerlayers = 0;
@@ -352,6 +361,10 @@ int main(int argc, char *argv[]){
         if(nEventsTotal >= nEventsToDo) continue;
         if ((nevents_max > 0) && (nEventsTotal >= nevents_max)) break;
         TFile *file = TFile::Open( currentFile->GetTitle() );
+        if (!file and arg_ignorebadfiles) {
+            std::cout << "Ignore bad file option is set, so continuing onto the next file" << std::endl;
+            continue;
+        }
         TTree *tree = (TTree*)file->Get("Events");
         TString filename(currentFile->GetTitle());
         cms3.Init(tree);
@@ -425,7 +438,7 @@ int main(int argc, char *argv[]){
             //}
 
             //If data, check good run list
-            if (goodRunsOnly && tas::evt_isRealData() && !goodrun(tas::evt_run(), tas::evt_lumiBlock())) continue;
+            if (goodRunsOnly && isData && tas::evt_isRealData() && !goodrun(tas::evt_run(), tas::evt_lumiBlock())) continue;
 
             //Progress bar
             CMS3::progress(nEventsTotal, nEvents);
@@ -438,7 +451,16 @@ int main(int argc, char *argv[]){
             }
 
             // csErr_t csErr = mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
-            mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
+            try {
+                mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
+            } catch (const std::ios_base::failure& e) {
+                std::cout << "Got an I/O error!" << std::endl;
+                std::cout << e.what() << std::endl;
+                if (arg_ignorebadfiles) {
+                    std::cout << "Ignore bad file option is set, so continuing onto the next file" << std::endl;
+                    break;
+                }
+            }
             // int SR = csErr.SR; 
             // bool isGood = csErr.isGood; 
 

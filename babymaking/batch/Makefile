@@ -123,11 +123,19 @@ libs:	$(LIBS)
 
 build:  $(EXE)
 
+# `make test` will say "up to date" because there's a folder called test
+# https://stackoverflow.com/questions/3931741/why-does-make-think-the-target-is-up-to-date
+.PHONY: test
+
 b: build
 
 opt: all
 small: all
 debug: all
+tar:
+	./make_tar.sh
+test:
+	./test_babymaker.sh
 
 loopclean:
 	rm -f \

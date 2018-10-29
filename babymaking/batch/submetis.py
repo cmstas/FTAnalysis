@@ -54,9 +54,26 @@ if __name__ == "__main__":
     # year_sample_map = [("2016",data_2016+mc_2016)]
     # tag = "v3.09_lowpt3" # pt>10,15 for lep3, 2016 only
 
-    year_sample_map = [("2018",mc_2018)]
-    tag = "v3.09_all"
+    # year_sample_map = [("2018",mc_2018)]
+    # year_sample_map = [("2016_94x",mc_2016_94x)]
+    # tag = "v3.09_all"
 
+    # year_sample_map = [("2017",mc_2017)]
+    # tag = "v3.09_deepflav"
+
+    year_sample_map = [("2016",[
+        # ["/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTBAR_PH"],
+        # # ["/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTDL"],
+        # # ["/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtop"],
+        # # ["/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtopbar"],
+        # ["/TTTo2L2Nu_HT500Njet7_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTDLht500"],
+        ["/SMS-T6ttWW_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T6TTWW"],
+        ["/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T1TTTT"],
+        ])]
+    tag = "v3.09_fakesv4"
+
+    # year_sample_map = [("2018",data_2018+mc_2018)]
+    # tag = "v3.10_all"
 
     # year_sample_map = [
     #         (2016, [
@@ -77,9 +94,6 @@ if __name__ == "__main__":
     #             ]),
     #         ]
 
-    # year_sample_map = [(2017,mc_2017[:4])] # FIXME
-
-    
     # Loop 'til we get dizzy
     for i in range(1000):
         ndone = 0
@@ -92,7 +106,6 @@ if __name__ == "__main__":
                     sample = DirectorySample(
                         dataset=dsname.split("|",1)[0].strip(),
                         location=dsname.split("|",1)[1].strip(),
-                        # tag="CMS4_V09-04-13", # if not specified, get latest tag
                         )
                 else:
                     sample = SNTSample(
@@ -100,28 +113,28 @@ if __name__ == "__main__":
                         # tag="CMS4_V09-04-13", # if not specified, get latest tag
                         )
                 skip_tail = "/SMS" in dsname
+                # skip_tail = False
                 task = CondorTask(
                         sample = sample,
                         files_per_output = split_func(dsname),
                         output_name = "output.root",
                         tag = tag,
                         min_completion_fraction = 0.93 if skip_tail else 1.0,
-                        # min_completion_fraction = 1.0 if not "/SMS" in dsname else 0.9,
-                        # condor_submit_params = {"use_xrootd":True},
-                        condor_submit_params = {"sites":"T2_US_UCSD"}, # I/O is hella faster
-                        # condor_submit_params = {"use_xrootd":True},
-                        # condor_submit_params = {"sites":"T2_US_UCSD,UCSB"}, # I/O is hella faster
+                        condor_submit_params = {
+                            "sites":"T2_US_UCSD,UCSB",  # I/O is hella faster
+                            # "classads": [ ["metis_extraargs","--ignorebadfiles"], ],
+                            },
                         cmssw_version = "CMSSW_9_4_9",
                         scram_arch = "slc6_amd64_gcc630",
                         input_executable = "inputs/condor_executable_metis.sh",
                         tarfile = "inputs/package.tar.xz",
-                        special_dir = "FTbabies/",
+                        special_dir = "FTbabies/{}/".format(tag),
+                        # recopy_inputs = True,
                 )
                 merge_task = LocalMergeTask(
                         input_filenames=task.get_outputs(),
                         output_filename="{}/{}.root".format(merged_dir,shortname),
                         ignore_bad = skip_tail,
-                        # ignore_bad = "/SMS" in dsname,
                         )
                 nsamples += 1
                 if not task.complete():
@@ -142,5 +155,5 @@ if __name__ == "__main__":
             print "All done!"
             sys.exit()
 
-        time.sleep(1800 if i < 10 else 3*60*60)
+        time.sleep(600 if i < 10 else 1.5*60*60)
 

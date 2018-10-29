@@ -278,6 +278,17 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_looseMuonPOG"  , &lep2_looseMuonPOG  );
   BabyTree->Branch("lep3_mediumMuonPOG"  , &lep3_mediumMuonPOG  );
 
+  BabyTree->Branch("prefire2016_sf"  , &prefire2016_sf  );
+  BabyTree->Branch("prefire2016_sferr"  , &prefire2016_sferr  );
+  BabyTree->Branch("prefire2016_njets"  , &prefire2016_njets  );
+  BabyTree->Branch("prefire2017_sf"  , &prefire2017_sf  );
+  BabyTree->Branch("prefire2017_sferr"  , &prefire2017_sferr  );
+  BabyTree->Branch("prefire2017_njets"  , &prefire2017_njets  );
+  BabyTree->Branch("prefire2017ele_sf"  , &prefire2017ele_sf  );
+  BabyTree->Branch("prefire2017ele_sferr"  , &prefire2017ele_sferr  );
+  BabyTree->Branch("prefire2017ele_njets"  , &prefire2017ele_njets  );
+
+
   BabyTree->Branch("is_fastsim", &is_fastsim);
 
   //InSituFR
@@ -379,6 +390,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("extragenb"       , &extragenb       );
   BabyTree->Branch("extragenbmoms"       , &extragenbmoms       );
   BabyTree->Branch("ngenjets"       , &ngenjets       );
+  BabyTree->Branch("genht"       , &genht       );
+  BabyTree->Branch("ngenjets30"       , &ngenjets30       );
+  BabyTree->Branch("genht30"       , &genht30       );
+  BabyTree->Branch("passfilter"       , &passfilter       );
 
   // for tttt
   BabyTree->Branch("bjet_type"       , &bjet_type       );
@@ -450,10 +465,16 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     // setup btag calibration readers
     // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation94X
       // calib1 should be period1, calib2 - period2, calib3 - period3, calib4 - INCLUSIVE
+
     calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_B.csv");
     calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_C_E.csv");
     calib3 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_E_F.csv");
     calib4 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_94XSF_V3_B_F.csv");
+
+    // calib1 = new BTagCalibration("deepflavour", "CORE/Tools/btagsf/data/run2_25ns/DeepFlavour_94XSF_V1_B_F.csv");
+    // calib2 = new BTagCalibration("deepflavour", "CORE/Tools/btagsf/data/run2_25ns/DeepFlavour_94XSF_V1_B_F.csv");
+    // calib3 = new BTagCalibration("deepflavour", "CORE/Tools/btagsf/data/run2_25ns/DeepFlavour_94XSF_V1_B_F.csv");
+    // calib4 = new BTagCalibration("deepflavour", "CORE/Tools/btagsf/data/run2_25ns/DeepFlavour_94XSF_V1_B_F.csv");
 
     if (gconf.year == 2016) {
         calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
@@ -924,6 +945,10 @@ void babyMaker::InitBabyNtuple(){
     extragenb = 0;
     extragenbmoms.clear();
     ngenjets = 0;
+    genht = 0;
+    ngenjets30 = 0;
+    passfilter = 0;
+    genht30 = 0;
     bjet_type.clear();
     jet_type.clear();
     ndrlt0p4 = 0;
@@ -938,7 +963,15 @@ void babyMaker::InitBabyNtuple(){
     decayWSF = 0.;
     njincone1 = 0;
     njincone2 = 0;
-
+    prefire2016_sf = 1.;
+    prefire2016_sferr = 0.;
+    prefire2016_njets = 0;
+    prefire2017_sf = 1.;
+    prefire2017_sferr = 0.;
+    prefire2017_njets = 0;
+    prefire2017ele_sf = 1.;
+    prefire2017ele_sferr = 0.;
+    prefire2017ele_njets = 0;
     bdt_nbtags = 0.;
     bdt_njets = 0.;
     bdt_met = 0.;
@@ -1180,10 +1213,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_ip3d_err = lep2.ip3dErr();
   hyp_type = tas::hyp_type().at(best_hyp);
   pair <Lep, int> thirdLepton = make_pair(Lep(0,-1), -1);
+  bool dolowpt = true;
   if (hyp_class == 8) {
       // thirdLepton =  make_pair(best_lep3,2);
   } else {
-      thirdLepton = getThirdLepton(best_hyp);
+      thirdLepton = getThirdLepton(best_hyp, dolowpt);
   }
   lep3_id = thirdLepton.first.pdgId();
   lep3_idx = thirdLepton.first.idx();
@@ -1478,14 +1512,26 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       // (i.e., match status 1 gen b-quarks to genjets and count)
       extragenb = 0;
       ngenjets = 0;
+      ngenjets30 = 0;
+      genht = 0;
+      genht30 = 0;
       std::vector<int> bidxs; // check for duplicates so we don't double count/match
       extragenbmoms.clear();
       for (unsigned int ij = 0; ij < tas::genjets_p4NoMuNoNu().size(); ij++){
           ngenjets++;
           auto jet = tas::genjets_p4NoMuNoNu()[ij];
+          auto pt = jet.pt();
           bool foundB = false;
           float mindR = 0.25;
           int bestidx = -1;
+
+          genht += pt;
+          if (pt > 30.) {
+              ngenjets30++;
+              if (fabs(jet.eta()) < 2.4) {
+                  genht30 += pt;
+              }
+          }
 
           for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
               auto genp4 = tas::genps_p4()[igen];
@@ -1516,6 +1562,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           }
       }
   }
+
 
 
 
@@ -2068,8 +2115,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //MT variables
   mt    = MT(lep1_coneCorrPt, lep1_p4.phi(), met, metPhi);
   mt_l2 = MT(lep2_coneCorrPt, lep2_p4.phi(), met, metPhi);
-  // mt2   = MT2(met, metPhi, lep1_p4, lep2_p4);
   mtmin = mt > mt_l2 ? mt_l2 : mt;
+
+  mt2   = -1;
+  if (lep3_idx >= 0 && (abs(lep3_id) == 11 || abs(lep3_id) == 13)) {
+      if ((lep1_id>0) == (lep3_id>0)) {
+          // all the same sign? just put it in highest MT2 bin
+          mt2 =  300.;
+      } else {
+          if (lep1_coneCorrPt > lep2_coneCorrPt) mt2 = MT2(met, metPhi, lep1_p4*lep1_coneCorrPt/lep1_p4.pt(), lep3_p4*lep3_coneCorrPt/lep3_p4.pt());
+          else mt2 = MT2(met, metPhi, lep2_p4*lep2_coneCorrPt/lep2_p4.pt(), lep3_p4*lep3_coneCorrPt/lep3_p4.pt());
+      }
+  }
 
   //Ht and MET
   if (verbose) cout << "ht: " << ht << endl;
@@ -2170,6 +2227,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   bool failsFastSimJetFilter = 0;
   if(isFastsim) {
+      std::tie(prefire2016_sf, prefire2016_sferr, prefire2016_njets) = getPrefireInfo(2016); // or gconf.year eventually;
+      std::tie(prefire2017_sf, prefire2017_sferr, prefire2017_njets) = getPrefireInfo(2017);
+      std::tie(prefire2017ele_sf, prefire2017ele_sferr, prefire2017ele_njets) = getPrefireInfo(2017, false); // use ele/pho map, not jet
       for (unsigned int i = 0; i < mostJets.size(); i++){
           if (mostJets_passCleaning.at(i) == 0) continue;
           if (mostJets_passID.at(i) == 0) continue;
@@ -2357,6 +2417,20 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
       }
 
+  }
+
+  if (!is_real_data and (gconf.year == 2016)) {
+      // don't take inclusive sample if 
+      // ngenjets30>=7 && nleptonicW==2 && genht30>500
+      // and take ht500 sample instead
+      if (filename.find("TTTo2L2Nu_HT500Njet7") != std::string::npos) {
+          // MCM configuration: http://uaf-8.t2.ucsd.edu/~namin/dis/?query=%2FTTTo2L2Nu_HT500Njet7_TuneCUETP8M2T4_13TeV-powheg-pythia8%2FRunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1%2FMINIAODSIM%2Cthis&type=mcm
+          passfilter = (ngenjets30 >= 7 && nleptonicW==2 && genht30>500);
+          scale1fb *= 1.4960; //derived in samples.py -- check again after making babies
+      }
+      if (filename.find("TT_TuneCUETP8M2T4_13TeV-powheg-pythia8") != std::string::npos) {
+          passfilter = !(ngenjets30 >= 7 && nleptonicW==2 && genht30>500);
+      }
   }
 
   // Compute some variables to make it easier for draw statements and skimming

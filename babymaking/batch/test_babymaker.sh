@@ -28,7 +28,7 @@ function check() {
 
 function run() {
     echo Running ./main.exe $(get_file $1 $2) $3 10000 $4
-    ./main.exe $(get_file $1 $2) $3 10000 >& $4
+    ./main.exe $(get_file $1 $2) -o $3 -n 10000 >& $4
     check $4
 }
 

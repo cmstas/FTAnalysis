@@ -7,6 +7,10 @@ IFILE=$4
 CMSSWVERSION=$5
 SCRAMARCH=$6
 
+function getjobad {
+    grep -i "^$1" "$_CONDOR_JOB_AD" | cut -d= -f2- | xargs echo
+}
+
 # Make sure OUTPUTNAME doesn't have .root since we add it manually
 OUTPUTNAME=$(echo $OUTPUTNAME | sed 's/\.root//')
 
@@ -26,7 +30,16 @@ echo "args: $@"
 
 echo -e "\n--- end header output ---\n" #                       <----- section division
 
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+if [ -f "$OSG_APP"/cmssoft/cms/cmsset_default.sh ]; then
+    echo "sourcing environment: source $OSG_APP/cmssoft/cms/cmsset_default.sh"
+    source "$OSG_APP"/cmssoft/cms/cmsset_default.sh
+elif [ -f /cvmfs/cms.cern.ch/cmsset_default.sh ]; then
+    echo "sourcing environment: source /cvmfs/cms.cern.ch/cmsset_default.sh"
+    source /cvmfs/cms.cern.ch/cmsset_default.sh
+else
+    echo "ERROR! Couldn't find either /cvmfs/cms.cern.ch/cmsset_default.sh or $OSG_APP/cmssoft/cms/cmsset_default.sh"
+    exit 0
+fi
 
 export SCRAM_ARCH=${SCRAMARCH}
 
@@ -45,10 +58,10 @@ ls -lrth
 
 echo -e "\n--- begin running ---\n" #                           <----- section division
 
-# comma separated to space separated
-INPUTFILENAMES=$(echo $INPUTFILENAMES | sed s/,/" "/g)
-echo Executing ./main.exe $INPUTFILENAMES ${OUTPUTNAME}.root
-./main.exe $INPUTFILENAMES ${OUTPUTNAME}.root
+EXTRAARGS="$(getjobad metis_extraargs)"
+INPUTFILENAMES=$(echo $INPUTFILENAMES | sed s/,/" "/g) # comma separated to space separated
+echo Executing ./main.exe $INPUTFILENAMES -o ${OUTPUTNAME}.root ${EXTRAARGS}
+./main.exe $INPUTFILENAMES -o ${OUTPUTNAME}.root ${EXTRAARGS}
 
 # if [ "$?" != "0" ]; then
 #     echo "Removing output file because ./main.exe didn't return exit code of 0"
@@ -86,9 +99,17 @@ ls -lrth
 
 echo -e "\n--- begin copying output ---\n" #                    <----- section division
 echo "Sending output file $OUTPUTNAME.root"
-gfal-copy -p -f -t 4200 --verbose file://`pwd`/${OUTPUTNAME}.root gsiftp://gftp.t2.ucsd.edu${OUTPUTDIR}/${OUTPUTNAME}_${IFILE}.root --checksum ADLER32
-if [ "$?" != "0" ]; then
-    echo "Removing output file because gfal-copy crashed"
-    gfal-rm --verbose gsiftp://gftp.t2.ucsd.edu${OUTPUTDIR}/${OUTPUTNAME}_${IFILE}.root
+COPY_SRC="file://`pwd`/${OUTPUTNAME}.root"
+COPY_DEST="gsiftp://gftp.t2.ucsd.edu${OUTPUTDIR}/${OUTPUTNAME}_${IFILE}.root"
+echo "Running: env -i X509_USER_PROXY=${X509_USER_PROXY} gfal-copy -p -f -t 4200 --verbose --checksum ADLER32 ${COPY_SRC} ${COPY_DEST}"
+env -i X509_USER_PROXY=${X509_USER_PROXY} gfal-copy -p -f -t 4200 --verbose --checksum ADLER32 ${COPY_SRC} ${COPY_DEST}
+COPY_STATUS=$?
+if [[ $COPY_STATUS != 0 ]]; then
+    echo "Removing output file because gfal-copy crashed with code $COPY_STATUS"
+    env -i X509_USER_PROXY=${X509_USER_PROXY} gfal-rm --verbose ${COPY_DEST}
+    REMOVE_STATUS=$?
+    if [[ $REMOVE_STATUS != 0 ]]; then
+        echo "Uhh, gfal-copy crashed and then the gfal-rm also crashed with code $REMOVE_STATUS"
+    fi
 fi
 
