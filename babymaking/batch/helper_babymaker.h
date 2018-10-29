@@ -164,6 +164,15 @@ class babyMaker {
     // vector <float> genweights;
     vector <string> genweightsID;
     bool passedFilterList;
+    float prefire2016_sf;
+    float prefire2016_sferr;
+    int prefire2016_njets;
+    float prefire2017_sf;
+    float prefire2017_sferr;
+    int prefire2017_njets;
+    float prefire2017ele_sf;
+    float prefire2017ele_sferr;
+    int prefire2017ele_njets;
 
     //Pileup
     vector <float> trueNumInt;
@@ -188,6 +197,10 @@ class babyMaker {
 
     int extragenb;
     int ngenjets;
+    float genht;
+    int ngenjets30;
+    float genht30;
+    bool passfilter;
     vector <int> extragenbmoms;
 
     // for TTTT
