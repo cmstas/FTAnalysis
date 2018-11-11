@@ -51,7 +51,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("xsec_error"                                              , &xsec_error                                              );
   BabyTree->Branch("kfactor"                                                 , &kfactor                                                 );
   BabyTree->Branch("gen_met"                                                 , &gen_met                                                 );
-  BabyTree->Branch("genweights"                                              , &genweights                                              );
+  // BabyTree->Branch("genweights"                                              , &genweights                                              );
   // BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
   BabyTree->Branch("gen_met_phi"                                             , &gen_met_phi                                             );
   BabyTree->Branch("skim"                                                   , &skim                                                   );
@@ -570,7 +570,7 @@ void babyMaker::InitBabyNtuple(){
     xsec_ps = -1;
     kfactor = -1;
     gen_met = -1;
-    genweights.clear();
+    // genweights.clear();
     // genweightsID.clear();
     gen_met_phi = -1;
     skim = 0;
@@ -1065,12 +1065,13 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     gen_met_phi = tas::gen_metPhi();
     // XXX for non tttt we don't need genweights, right?
     if (
-            (filename.find("/TTTT") != std::string::npos)
-            || (filename.find("/TTW") != std::string::npos)
-            || (filename.find("/TTZ") != std::string::npos)
-            || (filename.find("/ttH") != std::string::npos)
+            true
+            // (filename.find("/TTTT") != std::string::npos)
+            // || (filename.find("/TTW") != std::string::npos)
+            // || (filename.find("/TTZ") != std::string::npos)
+            // || (filename.find("/ttH") != std::string::npos)
             ) {
-        genweights = tas::genweights();  // These two are 20% of the ntuple size
+        auto genweights = tas::genweights();  // These two are 20% of the ntuple size
         // genweightsID = tas::genweightsID(); // do we even need the IDs? they are just numbers from 1...N
 
         //These c-s errors

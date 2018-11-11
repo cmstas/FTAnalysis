@@ -12,8 +12,10 @@
 #include "TSystem.h"
 #include "TMVA/Reader.h"
 #include "../misc/class_files/v8.02/SS.h"
-#include "../../common/CORE/SSSelections.h"
+// #include "../../common/CORE/SSSelections.h"
 #include "../../common/CORE/Tools/dorky/dorky.h"
+#include "../../common/CORE/Tools/MT2/MT2Utility.h"
+#include "../../common/CORE/Tools/MT2/MT2.h"
 #include "../misc/common_utils.h"
 #include "../misc/signal_regions.h"
 #include "../misc/bdt.h"
@@ -31,70 +33,236 @@ bool STOP_REQUESTED = false;
 float XSEC_TTTT = 11.97;
 float scaleLumi = 1; // 75/35.87
 TH2F *h_counts = 0;
+bool doThirdLepton = true; // FIXME
 
-struct SR_t     { TH1F* EE; TH1F* EM; TH1F* MM; TH1F* TOTAL; };
-struct triple_t { TH1F* ttzcr; TH1F* ttwcr; TH1F* sr; TH1F* br; };
+void avoidNegativeYields(TH1F* plot);
+
+struct SR_t     {
+    TH1F* HH = 0;
+    TH1F* HL = 0;
+    TH1F* LL = 0;
+    TH1F* ML = 0;
+    // SR_t() {
+    // }
+    void Write() {
+        AvoidNegativeYields();
+        if (HH) HH->Write();
+        if (HL) HL->Write();
+        if (LL) LL->Write();
+        if (ML) ML->Write();
+    }
+    void CatFill(region_t category, float value, float weight) {
+        if ((category == HighHigh   ) && HH) HH->Fill(value, weight);
+        if ((category == HighLow    ) && HL) HL->Fill(value, weight);
+        if ((category == LowLow     ) && LL) LL->Fill(value, weight);
+        if ((category == Multilepton) && ML) ML->Fill(value, weight);
+    }
+    void AvoidNegativeYields() {
+        if (HH) avoidNegativeYields(HH);
+        if (HL) avoidNegativeYields(HL);
+        if (LL) avoidNegativeYields(LL);
+        if (ML) avoidNegativeYields(ML);
+    }
+    void InitHistError(bool poisson) {
+        if (poisson) {
+            if (HH) HH->SetBinErrorOption(TH1::kPoisson);
+            if (HL) HL->SetBinErrorOption(TH1::kPoisson);
+            if (LL) LL->SetBinErrorOption(TH1::kPoisson);
+            if (ML) ML->SetBinErrorOption(TH1::kPoisson);
+        } else {
+            if (HH) HH->Sumw2();
+            if (HL) HL->Sumw2();
+            if (LL) LL->Sumw2();
+            if (ML) ML->Sumw2();
+        }
+    }
+};
+
+
+enum categbit_t { 
+    kBaseline        = 1<<0,
+    kSignalRegion    = 1<<1,
+    kHighHigh        = 1<<2,
+    kHighLow         = 1<<3,
+    kLowLow          = 1<<4,
+    kMultilepton     = 1<<5,
+    kMultileptonOnZ  = 1<<6,
+    kMultileptonOffZ = 1<<7
+};
+
+struct triple_t {
+    TH1F* br = 0; 
+    TH1F* hh = 0;
+    TH1F* hl = 0;
+    TH1F* ll = 0;
+    TH1F* ml = 0;
+    TH1F* mloffz = 0;
+    TH1F* mlonz = 0;
+    TH1F* sr = 0;
+    // triple_t() {
+    // }
+    void Init(TString label, TString chainTitle, int nbins, float xlow, float xhigh) {
+        br = new TH1F(Form("br_%s_%s"        ,label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); br->SetDirectory(0);
+        hh = new TH1F(Form("hh_%s_%s"        ,label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); hh->SetDirectory(0);
+        hl = new TH1F(Form("hl_%s_%s"        ,label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); hl->SetDirectory(0);
+        ll = new TH1F(Form("ll_%s_%s"        ,label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); ll->SetDirectory(0);
+        ml = new TH1F(Form("ml_%s_%s"        ,label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); ml->SetDirectory(0);
+        mloffz = new TH1F(Form("mloffz_%s_%s",label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); mloffz->SetDirectory(0);
+        mlonz = new TH1F(Form("mlonz_%s_%s"  ,label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); mlonz->SetDirectory(0);
+        sr = new TH1F(Form("sr_%s_%s"        ,label.Data(),chainTitle.Data()), Form("%s_%s",label.Data(),chainTitle.Data()), nbins, xlow, xhigh); sr->SetDirectory(0);
+    }
+
+
+    void CatFill(int kcategs, float value, float weight) {
+        if ((kcategs & kBaseline   ) && br) br->Fill(value, weight);
+        if ((kcategs & kSignalRegion   ) && sr) sr->Fill(value, weight);
+        if ((kcategs & kHighHigh   ) && hh) hh->Fill(value, weight);
+        if ((kcategs & kHighLow    ) && hl) hl->Fill(value, weight);
+        if ((kcategs & kLowLow     ) && ll) ll->Fill(value, weight);
+        if ((kcategs & kMultilepton) && ml) ml->Fill(value, weight);
+        if ((kcategs & kMultileptonOnZ) && mlonz) mlonz->Fill(value, weight);
+        if ((kcategs & kMultileptonOffZ) && mloffz) mloffz->Fill(value, weight);
+    }
+    void Write() {
+        if (br) { br->Write(); }
+        if (hh) { hh->Write(); }
+        if (hl) { hl->Write(); }
+        if (ll) { ll->Write(); }
+        if (ml) { ml->Write(); }
+        if (mloffz) { mloffz->Write(); }
+        if (mlonz) { mlonz->Write(); }
+        if (sr) { sr->Write(); }
+    }
+};
+
+struct tree_t {
+    TFile* out_file;
+    TTree* out_tree;
+    int tree_event = -1;
+    int tree_lumi = -1;
+    int tree_run = -1;
+    float tree_weight = -1.;
+    TString tree_name = "";
+    int tree_stype = -1;
+    int tree_SR = -1;
+    int tree_hyp_class = -1;
+    int tree_region = -1;
+    int tree_categbits = -1;
+    int tree_l1id = 0;
+    int tree_l2id = 0;
+    int tree_l3id = 0;
+    int tree_nbtags = -1;
+    int tree_njets = -1;
+    int tree_nleps = -1;
+    float tree_met = -1.;
+    float tree_ht = -1.;
+    float tree_mtmin = -1.;
+    float tree_mt2 = -1.;
+    float tree_mt2min = -1.;
+    void Init(int year, TString chainTitle) {
+        out_file = new TFile(Form("trees/tree_%i_%s.root",year,chainTitle.Data()),"RECREATE");
+        out_file->cd();
+        out_tree = new TTree("t", "tree_yieldMaker");
+        out_tree->Branch("event" , &tree_event );
+        out_tree->Branch("lumi" , &tree_lumi );
+        out_tree->Branch("run" , &tree_run );
+        out_tree->Branch("weight" , &tree_weight );
+        out_tree->Branch("name" , &tree_name );
+        out_tree->Branch("stype" , &tree_stype );
+        out_tree->Branch("SR" , &tree_SR );
+        out_tree->Branch("hyp_class" , &tree_hyp_class );
+        out_tree->Branch("region" , &tree_region );
+        out_tree->Branch("categbits" , &tree_categbits );
+        out_tree->Branch("l1id", &tree_l1id );
+        out_tree->Branch("l2id", &tree_l2id );
+        out_tree->Branch("l3id", &tree_l3id );
+        out_tree->Branch("nbtags", &tree_nbtags );
+        out_tree->Branch("njets", &tree_njets );
+        out_tree->Branch("nleps", &tree_nleps );
+        out_tree->Branch("met", &tree_met );
+        out_tree->Branch("ht", &tree_ht );
+        out_tree->Branch("mtmin", &tree_mtmin );
+        out_tree->Branch("mt2", &tree_mt2 );
+        out_tree->Branch("mt2min", &tree_mt2min );
+        tree_name = chainTitle;
+        if (chainTitle.BeginsWith("fs_")) tree_stype = 0;
+        if (chainTitle == "ttph") tree_stype = 1;
+        if (chainTitle == "flips") tree_stype = 2;
+        if (chainTitle == "wz") tree_stype = 3;
+        if (chainTitle == "ww") tree_stype = 3;
+        if (chainTitle == "ttw") tree_stype = 3;
+        if (chainTitle == "ttz") tree_stype = 3;
+        if (chainTitle == "tth") tree_stype = 3;
+        if (chainTitle == "rares") tree_stype = 3;
+        if (chainTitle == "xg") tree_stype = 3;
+    }
+    void FillVars(
+            int event, int lumi, int run,
+            float weight, 
+            int SR, int hyp_class, int region, int categbits,
+            int l1id, int l2id, int l3id,
+            int nbtags, int njets, int nleps,
+            float met, float ht, float mtmin, float mt2, float mt2min
+            ) {
+        tree_event = event;
+        tree_lumi = lumi;
+        tree_run = run;
+        tree_weight = weight;
+        tree_SR = SR;
+        tree_hyp_class = hyp_class;
+        tree_region = region;
+        tree_categbits = categbits;
+        tree_l1id = l1id;
+        tree_l2id = l2id;
+        tree_l3id = l3id;
+        tree_nbtags = nbtags;
+        tree_njets = njets;
+        tree_nleps = nleps;
+        tree_met = met;
+        tree_ht = ht;
+        tree_mtmin = mtmin;
+        tree_mt2 = mt2;
+        tree_mt2min = mt2min;
+        out_tree->Fill();
+    }
+    void Write() {
+        out_file->cd();
+        out_tree->Write();
+        out_file->Close();
+    }
+};
+
 struct plots_t  {
-    SR_t SRCR;
-    SR_t SRDISC;
     SR_t SR;
 
-    SR_t p_alphas_alt_dn_SRCR;
-    SR_t p_alphas_alt_dn_SRDISC;
-    SR_t p_alphas_alt_up_SRCR;
-    SR_t p_alphas_alt_up_SRDISC;
-    SR_t p_bb_alt_up_SRCR;
-    SR_t p_bb_alt_up_SRDISC;
-    SR_t p_bb_alt_dn_SRCR;
-    SR_t p_bb_alt_dn_SRDISC;
-    SR_t p_btagSF_alt_dn_SRCR;
-    SR_t p_btagSF_alt_dn_SRDISC;
-    SR_t p_btagSF_alt_up_SRCR;
-    SR_t p_btagSF_alt_up_SRDISC;
-    SR_t p_fake_alt_up_SRCR;
-    SR_t p_fake_alt_up_SRDISC;
-    SR_t p_fake_unw_up_SRCR;
-    SR_t p_fake_unw_up_SRDISC;
-    SR_t p_fsrvar_alt_dn_SRCR;
-    SR_t p_fsrvar_alt_dn_SRDISC;
-    SR_t p_fsrvar_alt_up_SRCR;
-    SR_t p_fsrvar_alt_up_SRDISC;
-    SR_t p_isr_alt_up_SRCR;
-    SR_t p_isr_alt_up_SRDISC;
-    SR_t p_isr_alt_dn_SRCR;
-    SR_t p_isr_alt_dn_SRDISC;
-    SR_t p_isrvar_alt_dn_SRCR;
-    SR_t p_isrvar_alt_dn_SRDISC;
-    SR_t p_isrvar_alt_up_SRCR;
-    SR_t p_isrvar_alt_up_SRDISC;
-    SR_t p_jer_alt_dn_SRCR;
-    SR_t p_jer_alt_dn_SRDISC;
-    SR_t p_jer_alt_up_SRCR;
-    SR_t p_jer_alt_up_SRDISC;
-    SR_t p_jes_alt_dn_SRCR;
-    SR_t p_jes_alt_dn_SRDISC;
-    SR_t p_jes_alt_up_SRCR;
-    SR_t p_jes_alt_up_SRDISC;
-    SR_t p_met_alt_up_SRCR;
-    SR_t p_met_alt_up_SRDISC;
-    SR_t p_met_alt_dn_SRCR;
-    SR_t p_met_alt_dn_SRDISC;
-    SR_t p_lep_alt_up_SRCR;
-    SR_t p_lep_alt_up_SRDISC;
-    SR_t p_lep_alt_dn_SRCR;
-    SR_t p_lep_alt_dn_SRDISC;
-    SR_t p_pdf_alt_dn_SRCR;
-    SR_t p_pdf_alt_dn_SRDISC;
-    SR_t p_pdf_alt_up_SRCR;
-    SR_t p_pdf_alt_up_SRDISC;
-    SR_t p_pu_alt_dn_SRCR;
-    SR_t p_pu_alt_dn_SRDISC;
-    SR_t p_pu_alt_up_SRCR;
-    SR_t p_pu_alt_up_SRDISC;
-    SR_t p_scale_alt_dn_SRCR;
-    SR_t p_scale_alt_dn_SRDISC;
-    SR_t p_scale_alt_up_SRCR;
-    SR_t p_scale_alt_up_SRDISC;
+    SR_t p_alphas_alt_dn_SR;
+    SR_t p_alphas_alt_up_SR;
+    SR_t p_bb_alt_up_SR    ;
+    SR_t p_bb_alt_dn_SR    ;
+    SR_t p_btagSF_alt_dn_SR;
+    SR_t p_btagSF_alt_up_SR;
+    SR_t p_fake_alt_up_SR  ;
+    SR_t p_fake_unw_up_SR  ;
+    SR_t p_fsrvar_alt_dn_SR;
+    SR_t p_fsrvar_alt_up_SR;
+    SR_t p_isr_alt_up_SR   ;
+    SR_t p_isr_alt_dn_SR   ;
+    SR_t p_isrvar_alt_dn_SR;
+    SR_t p_isrvar_alt_up_SR;
+    SR_t p_jer_alt_dn_SR   ;
+    SR_t p_jer_alt_up_SR   ;
+    SR_t p_jes_alt_dn_SR   ;
+    SR_t p_jes_alt_up_SR   ;
+    SR_t p_met_alt_up_SR   ;
+    SR_t p_met_alt_dn_SR   ;
+    SR_t p_lep_alt_up_SR   ;
+    SR_t p_lep_alt_dn_SR   ;
+    SR_t p_pdf_alt_dn_SR   ;
+    SR_t p_pdf_alt_up_SR   ;
+    SR_t p_pu_alt_dn_SR    ;
+    SR_t p_pu_alt_up_SR    ;
+    SR_t p_scale_alt_dn_SR ;
+    SR_t p_scale_alt_up_SR ;
 
     triple_t h_ht;
     triple_t h_met;
@@ -102,16 +270,23 @@ struct plots_t  {
     triple_t h_mll;
     triple_t h_mllos;
     triple_t h_mtmin;
-    triple_t h_mt1;
+    triple_t h_mtmax;
     triple_t h_mt2;
+    triple_t h_mt2min;
+    triple_t h_twobinmtmin;
+    triple_t h_twobinmt2;
+    triple_t h_nleptonicW;
     triple_t h_njets;
     triple_t h_nbtags;
     triple_t h_l1pt;
     triple_t h_l2pt;
     triple_t h_l3pt;
     triple_t h_type;
+    triple_t h_type3;
+    triple_t h_category;
     triple_t h_nvtx;
     triple_t h_charge;
+    triple_t h_q3;
     triple_t h_charge3;
     triple_t h_nleps;
     triple_t h_mu_l1pt;
@@ -180,11 +355,6 @@ struct plots_t  {
     triple_t h_trigsf;
     triple_t h_isrw;
 
-    triple_t h_ht_sr1;
-    triple_t h_ht_sr2;
-    triple_t h_ht_sr4;
-    triple_t h_ht_sr5;
-    triple_t h_ht_sr11;
 
 };
 
@@ -193,8 +363,6 @@ struct plots_t  {
 plots_t run(TChain *chain, int year, TString options);
 float calcDeltaPhi(float phi1, float phi2);
 float calcMT(float pt1, float phi1, float pt2, float phi2);
-void avoidNegativeYields(TH1F* plot);
-void initHistError(bool usePoisson, TH1F* plot);
 float getSMSscale1fb();
 std::pair<float,float> getTrijetDiscs(TMVA::Reader* reader);
 
@@ -224,136 +392,133 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
         assert(year > 0);
     }
 
+
     plots_t plots = run(ch, year, options);
+
 
     TString chainTitle = ch->GetTitle();
     TString outname = Form("%s/output_%d%s_%s.root", outputdir.Data(), year, extra.Data(), chainTitle.Data());
 
     if (!quiet) std::cout << "Writing out " << outname << std::endl;
     TFile *fout = new TFile(outname, "RECREATE");
+    fout->cd();
 
-    WRITE(h_ht_sr1.sr)      ;
-    WRITE(h_ht_sr2.sr)      ;
-    WRITE(h_ht_sr4.sr)      ;
-    WRITE(h_ht_sr5.sr)      ;
-    WRITE(h_ht_sr11.sr)      ;
-
-    WRITE(h_ht.sr)      ; WRITE(h_ht.ttzcr)      ; WRITE(h_ht.ttwcr)      ; WRITE(h_ht.br)      ;
-    WRITE(h_met.sr)     ; WRITE(h_met.ttzcr)     ; WRITE(h_met.ttwcr)     ; WRITE(h_met.br)     ;
-    WRITE(h_mll.sr)     ; WRITE(h_mll.ttzcr)     ; WRITE(h_mll.ttwcr)     ; WRITE(h_mll.br)     ;
-    WRITE(h_mtmin.sr)   ; WRITE(h_mtmin.ttzcr)   ; WRITE(h_mtmin.ttwcr)   ; WRITE(h_mtmin.br)   ;
-    WRITE(h_njets.sr)   ; WRITE(h_njets.ttzcr)   ; WRITE(h_njets.ttwcr)   ; WRITE(h_njets.br)   ;
-    WRITE(h_nleps.sr)   ; WRITE(h_nleps.ttzcr)   ; WRITE(h_nleps.ttwcr)   ; WRITE(h_nleps.br)   ;
-    WRITE(h_nbtags.sr)  ; WRITE(h_nbtags.ttzcr)  ; WRITE(h_nbtags.ttwcr)  ; WRITE(h_nbtags.br)  ;
-    WRITE(h_type.sr)    ; WRITE(h_type.ttzcr)    ; WRITE(h_type.ttwcr)    ; WRITE(h_type.br)    ;
-    WRITE(h_charge.sr)  ; WRITE(h_charge.ttzcr)  ; WRITE(h_charge.ttwcr)  ; WRITE(h_charge.br)  ;
-    WRITE(h_l1pt.sr)    ; WRITE(h_l1pt.ttzcr)    ; WRITE(h_l1pt.ttwcr)    ; WRITE(h_l1pt.br)    ;
-    WRITE(h_l2pt.sr)    ; WRITE(h_l2pt.ttzcr)    ; WRITE(h_l2pt.ttwcr)    ; WRITE(h_l2pt.br)    ;
-    WRITE(h_l3pt.sr)    ; WRITE(h_l3pt.ttzcr)    ; WRITE(h_l3pt.ttwcr)    ; WRITE(h_l3pt.br)    ;
-    WRITE(h_el_l1pt.sr) ; WRITE(h_el_l1pt.ttzcr) ; WRITE(h_el_l1pt.ttwcr) ; WRITE(h_el_l1pt.br) ;
-    WRITE(h_el_l2pt.sr) ; WRITE(h_el_l2pt.ttzcr) ; WRITE(h_el_l2pt.ttwcr) ; WRITE(h_el_l2pt.br) ;
-    WRITE(h_el_l3pt.sr) ; WRITE(h_el_l3pt.ttzcr) ; WRITE(h_el_l3pt.ttwcr) ; WRITE(h_el_l3pt.br) ;
-    WRITE(h_mu_l1pt.sr) ; WRITE(h_mu_l1pt.ttzcr) ; WRITE(h_mu_l1pt.ttwcr) ; WRITE(h_mu_l1pt.br) ;
-    WRITE(h_mu_l2pt.sr) ; WRITE(h_mu_l2pt.ttzcr) ; WRITE(h_mu_l2pt.ttwcr) ; WRITE(h_mu_l2pt.br) ;
-    WRITE(h_mu_l3pt.sr) ; WRITE(h_mu_l3pt.ttzcr) ; WRITE(h_mu_l3pt.ttwcr) ; WRITE(h_mu_l3pt.br) ;
-    WRITE(h_mvis.sr)    ; WRITE(h_mvis.ttzcr)    ; WRITE(h_mvis.ttwcr)    ; WRITE(h_mvis.br)    ;
-    WRITE(h_mtvis.sr)  ; WRITE(h_mtvis.ttzcr)  ; WRITE(h_mtvis.ttwcr)  ; WRITE(h_mtvis.br)  ;
-    WRITE(h_ntops.sr)  ; 
-    WRITE(h_mtop1.sr)  ; 
-    WRITE(h_mtop2.sr)  ; 
-    WRITE(h_topdisc1.sr)  ; 
-    WRITE(h_topdisc2.sr)  ; 
-    WRITE(h_ntopness.sr)  ; 
-    WRITE(h_nvtx.br)  ; 
-
-    WRITE(h_bjetpt.br)  ; WRITE(h_bjetpt.sr)  ; 
-    WRITE(h_jetpt.br)  ; WRITE(h_jetpt.sr)  ; 
-    WRITE(h_el_nmiss.br)  ;
-
-    WRITE(h_mva.br)               ;   WRITE(h_mva.sr);
-    WRITE(h_mu_sip3d_lep1.br)     ;   WRITE(h_mu_sip3d_lep1.sr);
-    WRITE(h_mu_sip3d_lep2.br)     ;   WRITE(h_mu_sip3d_lep2.sr);
-    WRITE(h_mu_sip3d_lep3.br)     ;   WRITE(h_mu_sip3d_lep3.sr);
-    WRITE(h_el_sip3d_lep1.br)     ;   WRITE(h_el_sip3d_lep1.sr);
-    WRITE(h_el_sip3d_lep2.br)     ;   WRITE(h_el_sip3d_lep2.sr);
-    WRITE(h_el_sip3d_lep3.br)     ;   WRITE(h_el_sip3d_lep3.sr);
-    WRITE(h_mu_l1eta.br)          ;   WRITE(h_mu_l1eta.sr);
-    WRITE(h_mu_l2eta.br)          ;   WRITE(h_mu_l2eta.sr);
-    WRITE(h_mu_l3eta.br)          ;   WRITE(h_mu_l3eta.sr);
-    WRITE(h_el_l1eta.br)          ;   WRITE(h_el_l1eta.sr);
-    WRITE(h_el_l2eta.br)          ;   WRITE(h_el_l2eta.sr);
-    WRITE(h_el_l3eta.br)          ;   WRITE(h_el_l3eta.sr);
-    WRITE(h_mu_lep1_miniIso.br)   ;   WRITE(h_mu_lep1_miniIso.sr);
-    WRITE(h_mu_lep2_miniIso.br)   ;   WRITE(h_mu_lep2_miniIso.sr);
-    WRITE(h_mu_lep3_miniIso.br)   ;   WRITE(h_mu_lep3_miniIso.sr);
-    WRITE(h_mu_lep1_ptRatio.br)   ;   WRITE(h_mu_lep1_ptRatio.sr);
-    WRITE(h_mu_lep2_ptRatio.br)   ;   WRITE(h_mu_lep2_ptRatio.sr);
-    WRITE(h_mu_lep3_ptRatio.br)   ;   WRITE(h_mu_lep3_ptRatio.sr);
-    WRITE(h_mu_lep1_ptRel.br)     ;   WRITE(h_mu_lep1_ptRel.sr);
-    WRITE(h_mu_lep2_ptRel.br)     ;   WRITE(h_mu_lep2_ptRel.sr);
-    WRITE(h_mu_lep3_ptRel.br)     ;   WRITE(h_mu_lep3_ptRel.sr);
-    WRITE(h_mu_lep1_ptRelfail.br)     ;   WRITE(h_mu_lep1_ptRelfail.sr);
-    WRITE(h_mu_lep2_ptRelfail.br)     ;   WRITE(h_mu_lep2_ptRelfail.sr);
-    WRITE(h_mu_lep3_ptRelfail.br)     ;   WRITE(h_mu_lep3_ptRelfail.sr);
-    WRITE(h_el_lep1_miniIso.br)   ;   WRITE(h_el_lep1_miniIso.sr);
-    WRITE(h_el_lep2_miniIso.br)   ;   WRITE(h_el_lep2_miniIso.sr);
-    WRITE(h_el_lep3_miniIso.br)   ;   WRITE(h_el_lep3_miniIso.sr);
-    WRITE(h_el_lep1_ptRatio.br)   ;   WRITE(h_el_lep1_ptRatio.sr);
-    WRITE(h_el_lep2_ptRatio.br)   ;   WRITE(h_el_lep2_ptRatio.sr);
-    WRITE(h_el_lep3_ptRatio.br)   ;   WRITE(h_el_lep3_ptRatio.sr);
-    WRITE(h_el_lep1_ptRel.br)     ;   WRITE(h_el_lep1_ptRel.sr);
-    WRITE(h_el_lep2_ptRel.br)     ;   WRITE(h_el_lep2_ptRel.sr);
-    WRITE(h_el_lep3_ptRel.br)     ;   WRITE(h_el_lep3_ptRel.sr);
-    WRITE(h_el_lep1_ptRelfail.br)     ;   WRITE(h_el_lep1_ptRelfail.sr);
-    WRITE(h_el_lep2_ptRelfail.br)     ;   WRITE(h_el_lep2_ptRelfail.sr);
-    WRITE(h_el_lep3_ptRelfail.br)     ;   WRITE(h_el_lep3_ptRelfail.sr);
-
-    WRITE(h_metnm1.br)     ;
-
-    WRITE(h_mid1.br); WRITE(h_mid2.br); WRITE(h_mid3.br);
-
-    WRITE(h_charge3.sr);
-
-    WRITE(h_mllos.ttzcr)     ; 
-
-    WRITE(h_disc.br);
-    WRITE(SRCR.TOTAL); WRITE(SRDISC.TOTAL); WRITE(SR.TOTAL);
-
-    WRITE(h_lepsf.br);
-    WRITE(h_btagsf.br);
-    WRITE(h_wsf.br);
-    WRITE(h_puw.br);
-    WRITE(h_trigsf.br);
-    WRITE(h_isrw.br);
-
-    WRITE(p_alphas_alt_dn_SRCR.TOTAL); WRITE(p_alphas_alt_dn_SRDISC.TOTAL);
-    WRITE(p_fake_alt_up_SRCR.TOTAL); WRITE(p_fake_alt_up_SRDISC.TOTAL);
-    WRITE(p_fake_unw_up_SRCR.TOTAL); WRITE(p_fake_unw_up_SRDISC.TOTAL);
-    WRITE(p_alphas_alt_up_SRCR.TOTAL); WRITE(p_alphas_alt_up_SRDISC.TOTAL);
-    WRITE(p_bb_alt_up_SRCR.TOTAL); WRITE(p_bb_alt_up_SRDISC.TOTAL);
-    WRITE(p_bb_alt_dn_SRCR.TOTAL); WRITE(p_bb_alt_dn_SRDISC.TOTAL);
-    WRITE(p_btagSF_alt_dn_SRCR.TOTAL); WRITE(p_btagSF_alt_dn_SRDISC.TOTAL);
-    WRITE(p_btagSF_alt_up_SRCR.TOTAL); WRITE(p_btagSF_alt_up_SRDISC.TOTAL);
-    WRITE(p_fsrvar_alt_dn_SRCR.TOTAL); WRITE(p_fsrvar_alt_dn_SRDISC.TOTAL);
-    WRITE(p_fsrvar_alt_up_SRCR.TOTAL); WRITE(p_fsrvar_alt_up_SRDISC.TOTAL);
-    WRITE(p_isr_alt_up_SRCR.TOTAL); WRITE(p_isr_alt_up_SRDISC.TOTAL);
-    WRITE(p_isr_alt_dn_SRCR.TOTAL); WRITE(p_isr_alt_dn_SRDISC.TOTAL);
-    WRITE(p_isrvar_alt_dn_SRCR.TOTAL); WRITE(p_isrvar_alt_dn_SRDISC.TOTAL);
-    WRITE(p_isrvar_alt_up_SRCR.TOTAL); WRITE(p_isrvar_alt_up_SRDISC.TOTAL);
-    WRITE(p_jer_alt_dn_SRCR.TOTAL); WRITE(p_jer_alt_dn_SRDISC.TOTAL);
-    WRITE(p_jer_alt_up_SRCR.TOTAL); WRITE(p_jer_alt_up_SRDISC.TOTAL);
-    WRITE(p_jes_alt_dn_SRCR.TOTAL); WRITE(p_jes_alt_dn_SRDISC.TOTAL);
-    WRITE(p_jes_alt_up_SRCR.TOTAL); WRITE(p_jes_alt_up_SRDISC.TOTAL);
-    WRITE(p_lep_alt_up_SRCR.TOTAL); WRITE(p_lep_alt_up_SRDISC.TOTAL);
-    WRITE(p_lep_alt_dn_SRCR.TOTAL); WRITE(p_lep_alt_dn_SRDISC.TOTAL);
-    WRITE(p_met_alt_up_SRCR.TOTAL); WRITE(p_met_alt_up_SRDISC.TOTAL);
-    WRITE(p_met_alt_dn_SRCR.TOTAL); WRITE(p_met_alt_dn_SRDISC.TOTAL);
-    WRITE(p_pdf_alt_dn_SRCR.TOTAL); WRITE(p_pdf_alt_dn_SRDISC.TOTAL);
-    WRITE(p_pdf_alt_up_SRCR.TOTAL); WRITE(p_pdf_alt_up_SRDISC.TOTAL);
-    WRITE(p_pu_alt_dn_SRCR.TOTAL); WRITE(p_pu_alt_dn_SRDISC.TOTAL);
-    WRITE(p_pu_alt_up_SRCR.TOTAL); WRITE(p_pu_alt_up_SRDISC.TOTAL);
-    WRITE(p_scale_alt_dn_SRCR.TOTAL); WRITE(p_scale_alt_dn_SRDISC.TOTAL);
-    WRITE(p_scale_alt_up_SRCR.TOTAL); WRITE(p_scale_alt_up_SRDISC.TOTAL);
+    plots.SR.Write();
+    plots.h_bjetpt.Write();
+    plots.h_btagsf.Write();
+    plots.h_charge.Write();
+    plots.h_q3.Write();
+    plots.h_charge3.Write();
+    plots.h_disc.Write();
+    plots.h_el_l1eta.Write();
+    plots.h_el_l1pt.Write();
+    plots.h_el_l2eta.Write();
+    plots.h_el_l2pt.Write();
+    plots.h_el_l3eta.Write();
+    plots.h_el_l3pt.Write();
+    plots.h_el_lep1_miniIso.Write();
+    plots.h_el_lep1_ptRatio.Write();
+    plots.h_el_lep1_ptRel.Write();
+    plots.h_el_lep1_ptRelfail.Write();
+    plots.h_el_lep2_miniIso.Write();
+    plots.h_el_lep2_ptRatio.Write();
+    plots.h_el_lep2_ptRel.Write();
+    plots.h_el_lep2_ptRelfail.Write();
+    plots.h_el_lep3_miniIso.Write();
+    plots.h_el_lep3_ptRatio.Write();
+    plots.h_el_lep3_ptRel.Write();
+    plots.h_el_lep3_ptRelfail.Write();
+    plots.h_el_nmiss.Write();
+    plots.h_el_sip3d_lep1.Write();
+    plots.h_el_sip3d_lep2.Write();
+    plots.h_el_sip3d_lep3.Write();
+    plots.h_ht.Write();
+    plots.h_isrw.Write();
+    plots.h_jetpt.Write();
+    plots.h_l1pt.Write();
+    plots.h_l2pt.Write();
+    plots.h_l3pt.Write();
+    plots.h_lepsf.Write();
+    plots.h_met.Write();
+    plots.h_metnm1.Write();
+    plots.h_mid1.Write();
+    plots.h_mll.Write();
+    plots.h_mllos.Write();
+    plots.h_mtmin.Write();
+    plots.h_mtmax.Write();
+    plots.h_mt2.Write();
+    plots.h_mt2min.Write();
+    plots.h_twobinmtmin.Write();
+    plots.h_twobinmt2.Write();
+    plots.h_nleptonicW.Write();
+    plots.h_mtop1.Write();
+    plots.h_mtop2.Write();
+    plots.h_mtvis.Write();
+    plots.h_mu_l1eta.Write();
+    plots.h_mu_l1pt.Write();
+    plots.h_mu_l2eta.Write();
+    plots.h_mu_l2pt.Write();
+    plots.h_mu_l3eta.Write();
+    plots.h_mu_l3pt.Write();
+    plots.h_mu_lep1_miniIso.Write();
+    plots.h_mu_lep1_ptRatio.Write();
+    plots.h_mu_lep1_ptRel.Write();
+    plots.h_mu_lep1_ptRelfail.Write();
+    plots.h_mu_lep2_miniIso.Write();
+    plots.h_mu_lep2_ptRatio.Write();
+    plots.h_mu_lep2_ptRel.Write();
+    plots.h_mu_lep2_ptRelfail.Write();
+    plots.h_mu_lep3_miniIso.Write();
+    plots.h_mu_lep3_ptRatio.Write();
+    plots.h_mu_lep3_ptRel.Write();
+    plots.h_mu_lep3_ptRelfail.Write();
+    plots.h_mu_sip3d_lep1.Write();
+    plots.h_mu_sip3d_lep2.Write();
+    plots.h_mu_sip3d_lep3.Write();
+    plots.h_mva.Write();
+    plots.h_mvis.Write();
+    plots.h_nbtags.Write();
+    plots.h_njets.Write();
+    plots.h_nleps.Write();
+    plots.h_ntopness.Write();
+    plots.h_ntops.Write();
+    plots.h_nvtx.Write();
+    plots.h_puw.Write();
+    plots.h_topdisc1.Write();
+    plots.h_topdisc2.Write();
+    plots.h_trigsf.Write();
+    plots.h_type.Write();
+    plots.h_type3.Write();
+    plots.h_category.Write();
+    plots.h_wsf.Write();
+    plots.p_alphas_alt_dn_SR.Write();
+    plots.p_alphas_alt_up_SR.Write();
+    plots.p_bb_alt_dn_SR.Write();
+    plots.p_bb_alt_up_SR.Write();
+    plots.p_btagSF_alt_dn_SR.Write();
+    plots.p_btagSF_alt_up_SR.Write();
+    plots.p_fake_alt_up_SR.Write();
+    plots.p_fake_unw_up_SR.Write();
+    plots.p_fsrvar_alt_dn_SR.Write();
+    plots.p_fsrvar_alt_up_SR.Write();
+    plots.p_isr_alt_dn_SR.Write();
+    plots.p_isr_alt_up_SR.Write();
+    plots.p_isrvar_alt_dn_SR.Write();
+    plots.p_isrvar_alt_up_SR.Write();
+    plots.p_jer_alt_dn_SR.Write();
+    plots.p_jer_alt_up_SR.Write();
+    plots.p_jes_alt_dn_SR.Write();
+    plots.p_jes_alt_up_SR.Write();
+    plots.p_lep_alt_dn_SR.Write();
+    plots.p_lep_alt_up_SR.Write();
+    plots.p_met_alt_dn_SR.Write();
+    plots.p_met_alt_up_SR.Write();
+    plots.p_pdf_alt_dn_SR.Write();
+    plots.p_pdf_alt_up_SR.Write();
+    plots.p_pu_alt_dn_SR.Write();
+    plots.p_pu_alt_up_SR.Write();
+    plots.p_scale_alt_dn_SR.Write();
+    plots.p_scale_alt_up_SR.Write();
 
     // TNamed metadata(TString("metadata"),dir);
     // metadata.Write();
@@ -380,18 +545,24 @@ plots_t run(TChain *chain, int year, TString options){
     int nCR = getNCRs();
     int nbdtbins = 13;
 
+    int nHHsr = 51;
+    int nHLsr = 41;
+    int nLLsr = 8;
+    int nMLsr = 46; // (16+7)*2
 
     bool isData = 0;
     bool doFlips = 0;
     int doFakes = 0;
-    int exclude = 0;
     bool isFastsim = 0;
     bool isGamma = 0;
     bool truthfake = 0;
+    bool skipmatching = 0;
     bool ignoreFakeFactor = 0;
+
 
     bool evaluateBDT = options.Contains("evaluateBDT");
     bool quiet = options.Contains("quiet");
+    bool write_tree = options.Contains("writeTree");
     bool minPtFake18 = options.Contains("minPtFake18");
     if (options.Contains("BDT10")) { nbdtbins = 10; }
     if (options.Contains("BDT11")) { nbdtbins = 11; }
@@ -449,6 +620,12 @@ plots_t run(TChain *chain, int year, TString options){
         if (!quiet) std::cout << "Doing truthfake" << std::endl;
         truthfake = 1;
     }
+    
+    // --------
+    if (options.Contains("doSkipMatching")) {
+        if (!quiet) std::cout << "Skipping gen matching" << std::endl;
+        skipmatching = 1;
+    }
 
     // --------
     if (options.Contains("doXgamma")) {
@@ -460,11 +637,20 @@ plots_t run(TChain *chain, int year, TString options){
 
     // out_file->cd();
 
-    plots_t plots;
 
     TString chainTitle = chain->GetTitle();
     const char* chainTitleCh = chainTitle.Data();
     if (!quiet) std::cout << "Working on " << chainTitle << std::endl;
+
+    plots_t plots;
+    tree_t output_tree;
+
+    if (write_tree) {
+        if (!quiet) std::cout << "Initializing output tree" << std::endl;
+        output_tree.Init(year, chainTitle);
+    }
+
+
 
     if (chainTitle.Contains("fs_")) {
         if (!quiet) std::cout << "Fastsim sample detected" << std::endl;
@@ -482,6 +668,9 @@ plots_t run(TChain *chain, int year, TString options){
 
     bool isHiggsScan = false;
     bool isHiggsPseudoscalar = false;
+    float fastsim_isr_norm_central = 1.;
+    float fastsim_isr_norm_up = 1.;
+    float fastsim_isr_norm_down = 1.;
     vector<float> mysparms;
     if (isFastsim) {
         if ( chainTitle.Contains("higgs_scan") ||  chainTitle.Contains("higgs_ps_scan") 
@@ -503,423 +692,247 @@ plots_t run(TChain *chain, int year, TString options){
             if (mysparms.size() > 1) std::cout << " " << mysparms[1];
             std::cout << std::endl;
         }
+        if (mysparms.size() == 2) {
+            if (!quiet) {
+                std::cout << "Calculating normalization factors for NISR jet reweighting..." << std::endl;
+            }
+            TH1D* htemp = new TH1D("htemp","htemp",1,0,2);
+            int N = chain->Draw("1>>htemp",Form("(sparms[0] == %f) && (sparms[1] == %f)", mysparms[0], mysparms[1]));
+            htemp->Reset();
+            chain->Draw("1>>htemp",Form("weight_isr * ((sparms[0] == %f) && (sparms[1] == %f))", mysparms[0], mysparms[1]));
+            fastsim_isr_norm_central = 1.0*N/htemp->GetBinContent(1); htemp->Reset();
+            chain->Draw("1>>htemp",Form("weight_isr_UP * ((sparms[0] == %f) && (sparms[1] == %f))", mysparms[0], mysparms[1]));
+            fastsim_isr_norm_up = 1.0*N/htemp->GetBinContent(1); htemp->Reset();
+            chain->Draw("1>>htemp",Form("weight_isr_DN * ((sparms[0] == %f) && (sparms[1] == %f))", mysparms[0], mysparms[1]));
+            fastsim_isr_norm_down = 1.0*N/htemp->GetBinContent(1); htemp->Reset();
+            if (!quiet) {
+                std::cout << "Calculated normalization factors for (central,up,down) ISR weights to be: " << fastsim_isr_norm_central << "," << fastsim_isr_norm_up << "," << fastsim_isr_norm_down << std::endl;
+            }
+        }
     }
 
     plots_t  p_result;
 
-    p_result.h_ht.sr       = new TH1F(Form("sr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
-    p_result.h_met.sr      = new TH1F(Form("sr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
-    p_result.h_mll.sr      = new TH1F(Form("sr_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mtmin.sr    = new TH1F(Form("sr_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_njets.sr    = new TH1F(Form("sr_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
-    p_result.h_nleps.sr    = new TH1F(Form("sr_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
-    p_result.h_nbtags.sr   = new TH1F(Form("sr_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
-    p_result.h_type.sr     = new TH1F(Form("sr_type_%s"       , chainTitleCh) , Form("type_%s"       , chainTitleCh) , 4       , 0    , 4);
-    p_result.h_charge.sr   = new TH1F(Form("sr_charge_%s"     , chainTitleCh) , Form("charge_%s"     , chainTitleCh) , 3       , -1   , 2);
-    p_result.h_l1pt.sr     = new TH1F(Form("sr_l1pt_%s"       , chainTitleCh) , Form("l1pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l2pt.sr     = new TH1F(Form("sr_l2pt_%s"       , chainTitleCh) , Form("l2pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l3pt.sr     = new TH1F(Form("sr_l3pt_%s"       , chainTitleCh) , Form("l3pt_%s"       , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_el_l1pt.sr  = new TH1F(Form("sr_el_l1pt_%s"    , chainTitleCh) , Form("el_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l2pt.sr  = new TH1F(Form("sr_el_l2pt_%s"    , chainTitleCh) , Form("el_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l3pt.sr  = new TH1F(Form("sr_el_l3pt_%s"    , chainTitleCh) , Form("el_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mu_l1pt.sr  = new TH1F(Form("sr_mu_l1pt_%s"    , chainTitleCh) , Form("mu_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l2pt.sr  = new TH1F(Form("sr_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l3pt.sr  = new TH1F(Form("sr_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mvis.sr      = new TH1F(Form("sr_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 15      , 250    , 2750);
-    p_result.h_mtvis.sr      = new TH1F(Form("sr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
-    p_result.h_ntops.sr      = new TH1F(Form("sr_ntops_%s"        , chainTitleCh) , Form("ntops_%s"        , chainTitleCh) , 5      , -0.5    , 4.5);
-    p_result.h_mtop1.sr      = new TH1F(Form("sr_mtop1_%s"        , chainTitleCh) , Form("mtop1_%s"        , chainTitleCh) , 15      , 100    , 250);
-    p_result.h_mtop2.sr      = new TH1F(Form("sr_mtop2_%s"        , chainTitleCh) , Form("mtop2_%s"        , chainTitleCh) , 15      , 100    , 250);
-    p_result.h_topdisc1.sr      = new TH1F(Form("sr_topdisc1_%s"        , chainTitleCh) , Form("topdisc1_%s"        , chainTitleCh) , 30      , -0.6    , 0.4);
-    p_result.h_topdisc2.sr      = new TH1F(Form("sr_topdisc2_%s"        , chainTitleCh) , Form("topdisc2_%s"        , chainTitleCh) , 30      , -0.6    , 0.4);
-    p_result.h_ntopness.sr      = new TH1F(Form("sr_ntopness_%s"        , chainTitleCh) , Form("ntopness_%s"        , chainTitleCh) , 15      , 0., 0.75);
-    p_result.h_bjetpt.sr      = new TH1F(Form("sr_bjetpt_%s"        , chainTitleCh) , Form("bjetpt_%s"        , chainTitleCh) , 16      , 0., 200.);
-    p_result.h_jetpt.sr      = new TH1F(Form("sr_jetpt_%s"        , chainTitleCh) , Form("jetpt_%s"        , chainTitleCh) , 20      , 0., 200.);
+    p_result.h_l1pt.Init("l1pt", chainTitle, 30 , 0 , 150);
+    p_result.h_l2pt.Init("l2pt", chainTitle, 30 , 0 , 150);
+    p_result.h_l3pt.Init("l3pt", chainTitle, 20 , 0 , 100);
+    p_result.h_el_l1eta.Init("el_l1eta", chainTitle, 12, -2.5 , 2.5);
+    p_result.h_el_l1pt.Init("el_l1pt", chainTitle, 15 , 0 , 150);
+    p_result.h_el_l2eta.Init("el_l2eta", chainTitle, 12, -2.5 , 2.5);
+    p_result.h_el_l2pt.Init("el_l2pt", chainTitle, 15 , 0 , 150);
+    p_result.h_el_l3eta.Init("el_l3eta", chainTitle, 8, -2.5 , 2.5);
+    p_result.h_el_l3pt.Init("el_l3pt", chainTitle, 7 , 0 , 140);
+    p_result.h_mu_l1eta.Init("mu_l1eta", chainTitle, 12, -2.5 , 2.5);
+    p_result.h_mu_l1pt.Init("mu_l1pt", chainTitle, 15 , 0 , 150);
+    p_result.h_mu_l2eta.Init("mu_l2eta", chainTitle, 12, -2.5 , 2.5);
+    p_result.h_mu_l2pt.Init("mu_l2pt", chainTitle, 15 , 0 , 150);
+    p_result.h_mu_l3eta.Init("mu_l3eta", chainTitle, 8, -2.5 , 2.5);
+    p_result.h_mu_l3pt.Init("mu_l3pt", chainTitle, 7 , 0 , 140);
 
-    p_result.h_ht.ttzcr       = new TH1F(Form("ttzcr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
-    p_result.h_met.ttzcr      = new TH1F(Form("ttzcr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
-    p_result.h_mll.ttzcr      = new TH1F(Form("ttzcr_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mllos.ttzcr      = new TH1F(Form("ttzcr_mllos_%s"        , chainTitleCh) , Form("mllos_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mtmin.ttzcr    = new TH1F(Form("ttzcr_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_njets.ttzcr    = new TH1F(Form("ttzcr_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
-    p_result.h_nleps.ttzcr    = new TH1F(Form("ttzcr_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
-    p_result.h_nbtags.ttzcr   = new TH1F(Form("ttzcr_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
-    p_result.h_type.ttzcr     = new TH1F(Form("ttzcr_type_%s"       , chainTitleCh) , Form("type_%s"       , chainTitleCh) , 4       , 0    , 4);
-    p_result.h_charge.ttzcr   = new TH1F(Form("ttzcr_charge_%s"     , chainTitleCh) , Form("charge_%s"     , chainTitleCh) , 3       , -1   , 2);
-    p_result.h_l1pt.ttzcr     = new TH1F(Form("ttzcr_l1pt_%s"       , chainTitleCh) , Form("l1pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l2pt.ttzcr     = new TH1F(Form("ttzcr_l2pt_%s"       , chainTitleCh) , Form("l2pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l3pt.ttzcr     = new TH1F(Form("ttzcr_l3pt_%s"       , chainTitleCh) , Form("l3pt_%s"       , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_el_l1pt.ttzcr  = new TH1F(Form("ttzcr_el_l1pt_%s"    , chainTitleCh) , Form("el_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l2pt.ttzcr  = new TH1F(Form("ttzcr_el_l2pt_%s"    , chainTitleCh) , Form("el_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l3pt.ttzcr  = new TH1F(Form("ttzcr_el_l3pt_%s"    , chainTitleCh) , Form("el_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mu_l1pt.ttzcr  = new TH1F(Form("ttzcr_mu_l1pt_%s"    , chainTitleCh) , Form("mu_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l2pt.ttzcr  = new TH1F(Form("ttzcr_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l3pt.ttzcr  = new TH1F(Form("ttzcr_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mvis.ttzcr      = new TH1F(Form("ttzcr_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 25      , 0    , 2500);
-    p_result.h_mtvis.ttzcr      = new TH1F(Form("ttzcr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
+    p_result.h_met.Init("met", chainTitle, 20 , 0 , 500);
+    p_result.h_ht.Init("ht", chainTitle, 15, 100, 1600);
+    p_result.h_mll.Init("mll", chainTitle, 20 , 0 , 200);
+    p_result.h_mllos.Init("mllos", chainTitle, 20 , 0 , 200);
+    p_result.h_mtmin.Init("mtmin", chainTitle, 10 , 0 , 200);
+    p_result.h_mtmax.Init("mtmax", chainTitle, 75 , 0 , 200);
+    p_result.h_mt2.Init("mt2", chainTitle, 10 , 0 , 200);
+    p_result.h_mt2min.Init("mt2min", chainTitle, 10 , 0 , 200);
+    p_result.h_twobinmtmin.Init("twobinmtmin", chainTitle, 2 , 0 , 200);
+    p_result.h_twobinmt2.Init("twobinmt2", chainTitle, 2 , 0 , 200);
+    p_result.h_nbtags.Init("nbtags", chainTitle, 7 , -0.5 , 6.5);
+    p_result.h_njets.Init("njets", chainTitle, 10 , 1.5 , 11.5);
+    p_result.h_nleps.Init("nleps", chainTitle, 6 , 0 , 6);
+    p_result.h_nleptonicW.Init("nleptonicW", chainTitle, 5 , -0.5 , 4.5);
+    p_result.h_type.Init("type", chainTitle, 4 , 0 , 4);
+    p_result.h_type3.Init("type3", chainTitle, 4 , 0 , 4);
+    p_result.h_category.Init("category", chainTitle, 7 , 0.5 , 7.5);
+    p_result.h_charge.Init("charge", chainTitle, 3 , -1 , 2);
+    p_result.h_q3.Init("q3", chainTitle, 3 , -1 , 2);
+    p_result.h_charge3.Init("charge3", chainTitle, 3 , -1 , 2);
 
-    p_result.h_ht.ttwcr       = new TH1F(Form("ttwcr_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
-    p_result.h_met.ttwcr      = new TH1F(Form("ttwcr_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
-    p_result.h_mll.ttwcr      = new TH1F(Form("ttwcr_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mtmin.ttwcr    = new TH1F(Form("ttwcr_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_njets.ttwcr    = new TH1F(Form("ttwcr_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
-    p_result.h_nleps.ttwcr    = new TH1F(Form("ttwcr_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
-    p_result.h_nbtags.ttwcr   = new TH1F(Form("ttwcr_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
-    p_result.h_type.ttwcr     = new TH1F(Form("ttwcr_type_%s"       , chainTitleCh) , Form("type_%s"       , chainTitleCh) , 4       , 0    , 4);
-    p_result.h_charge.ttwcr   = new TH1F(Form("ttwcr_charge_%s"     , chainTitleCh) , Form("charge_%s"     , chainTitleCh) , 3       , -1   , 2);
-    p_result.h_l1pt.ttwcr     = new TH1F(Form("ttwcr_l1pt_%s"       , chainTitleCh) , Form("l1pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l2pt.ttwcr     = new TH1F(Form("ttwcr_l2pt_%s"       , chainTitleCh) , Form("l2pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l3pt.ttwcr     = new TH1F(Form("ttwcr_l3pt_%s"       , chainTitleCh) , Form("l3pt_%s"       , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_el_l1pt.ttwcr  = new TH1F(Form("ttwcr_el_l1pt_%s"    , chainTitleCh) , Form("el_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l2pt.ttwcr  = new TH1F(Form("ttwcr_el_l2pt_%s"    , chainTitleCh) , Form("el_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l3pt.ttwcr  = new TH1F(Form("ttwcr_el_l3pt_%s"    , chainTitleCh) , Form("el_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mu_l1pt.ttwcr  = new TH1F(Form("ttwcr_mu_l1pt_%s"    , chainTitleCh) , Form("mu_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l2pt.ttwcr  = new TH1F(Form("ttwcr_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l3pt.ttwcr  = new TH1F(Form("ttwcr_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mvis.ttwcr      = new TH1F(Form("ttwcr_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 25      , 0    , 2500);
-    p_result.h_mtvis.ttwcr      = new TH1F(Form("ttwcr_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
+    p_result.h_nvtx.Init("nvtx", chainTitle, 20 , 0 , 80);
 
-    p_result.h_ht.br       = new TH1F(Form("br_ht_%s"         , chainTitleCh) , Form("ht_%s"         , chainTitleCh) , 15      , 100   , 1600);
-    p_result.h_met.br      = new TH1F(Form("br_met_%s"        , chainTitleCh) , Form("met_%s"        , chainTitleCh) , 15      , 0    , 600);
-    p_result.h_mll.br      = new TH1F(Form("br_mll_%s"        , chainTitleCh) , Form("mll_%s"        , chainTitleCh) , 20      , 0    , 200);
-    p_result.h_mtmin.br    = new TH1F(Form("br_mtmin_%s"      , chainTitleCh) , Form("mtmin_%s"      , chainTitleCh) , 10      , 0    , 200);
-    p_result.h_njets.br    = new TH1F(Form("br_njets_%s"      , chainTitleCh) , Form("njets_%s"      , chainTitleCh) , 10      , 1.5  , 11.5);
-    p_result.h_nleps.br    = new TH1F(Form("br_nleps_%s"      , chainTitleCh) , Form("nleps_%s"      , chainTitleCh) , 6       , 0    , 6);
-    p_result.h_nbtags.br   = new TH1F(Form("br_nbtags_%s"     , chainTitleCh) , Form("nbtags_%s"     , chainTitleCh) , 7       , -0.5 , 6.5);
-    p_result.h_type.br     = new TH1F(Form("br_type_%s"       , chainTitleCh) , Form("type_%s"       , chainTitleCh) , 4       , 0    , 4);
-    p_result.h_charge.br   = new TH1F(Form("br_charge_%s"     , chainTitleCh) , Form("charge_%s"     , chainTitleCh) , 3       , -1   , 2);
-    p_result.h_l1pt.br     = new TH1F(Form("br_l1pt_%s"       , chainTitleCh) , Form("l1pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l2pt.br     = new TH1F(Form("br_l2pt_%s"       , chainTitleCh) , Form("l2pt_%s"       , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_l3pt.br     = new TH1F(Form("br_l3pt_%s"       , chainTitleCh) , Form("l3pt_%s"       , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_el_l1pt.br  = new TH1F(Form("br_el_l1pt_%s"    , chainTitleCh) , Form("el_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l2pt.br  = new TH1F(Form("br_el_l2pt_%s"    , chainTitleCh) , Form("el_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_el_l3pt.br  = new TH1F(Form("br_el_l3pt_%s"    , chainTitleCh) , Form("el_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mu_l1pt.br  = new TH1F(Form("br_mu_l1pt_%s"    , chainTitleCh) , Form("mu_l1pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l2pt.br  = new TH1F(Form("br_mu_l2pt_%s"    , chainTitleCh) , Form("mu_l2pt_%s"    , chainTitleCh) , 15      , 0    , 150);
-    p_result.h_mu_l3pt.br  = new TH1F(Form("br_mu_l3pt_%s"    , chainTitleCh) , Form("mu_l3pt_%s"    , chainTitleCh) , 7       , 0    , 140);
-    p_result.h_mvis.br      = new TH1F(Form("br_mvis_%s"        , chainTitleCh) , Form("mvis_%s"        , chainTitleCh) , 25      , 0    , 2500);
-    p_result.h_mtvis.br      = new TH1F(Form("br_mtvis_%s"        , chainTitleCh) , Form("mtvis_%s"        , chainTitleCh) , 20, 300 , 2500);
-    p_result.h_bjetpt.br      = new TH1F(Form("br_bjetpt_%s"        , chainTitleCh) , Form("bjetpt_%s"        , chainTitleCh) , 16      , 0., 200.);
-    p_result.h_jetpt.br      = new TH1F(Form("br_jetpt_%s"        , chainTitleCh) , Form("jetpt_%s"        , chainTitleCh) , 20      , 0., 200.);
-    p_result.h_el_nmiss.br  = new TH1F(Form("br_el_nmiss_%s"    , chainTitleCh) , Form("el_nmiss_%s"    , chainTitleCh) , 2      , 0    , 2);
-    p_result.h_nvtx.br     = new TH1F(Form("br_nvtx_%s"       , chainTitleCh) , Form("nvtx_%s"       , chainTitleCh) , 20       , 0    , 80);
-
-    // p_result.h_metnm1.br      = new TH1F(Form("br_metnm1_%s"        , chainTitleCh) , Form("metnm1_%s"        , chainTitleCh) , 80      , 0    , 400);
-    p_result.h_metnm1.br      = new TH1F(Form("br_metnm1_%s"        , chainTitleCh) , Form("metnm1_%s"        , chainTitleCh) , 40      , 0    , 400);
-    p_result.h_mid1.br     = new TH1F(Form("br_mid1_%s"       , chainTitleCh) , Form("mid1_%s"       , chainTitleCh) , 5       , -2    , 3);
-    p_result.h_mid2.br     = new TH1F(Form("br_mid2_%s"       , chainTitleCh) , Form("mid2_%s"       , chainTitleCh) , 5       , -2    , 3);
-    p_result.h_mid3.br     = new TH1F(Form("br_mid3_%s"       , chainTitleCh) , Form("mid3_%s"       , chainTitleCh) , 5       , -2    , 3);
-    p_result.h_charge3.sr   = new TH1F(Form("sr_charge3_%s"     , chainTitleCh) , Form("charge3_%s"     , chainTitleCh) , 3       , 0   , 3);
-
-    // p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 16       , -1.0    , 1.0);
-    p_result.h_disc.br     = new TH1F(Form("br_disc_%s"       , chainTitleCh) , Form("disc_%s"       , chainTitleCh) , 20       , 0.0    , 1.0);
-    p_result.SRCR.TOTAL = new TH1F(Form("SRCR_TOTAL_%s" , chainTitleCh) , Form("SRCR_TOTAL_%s" , chainTitleCh) , nsr     , 0.5  , nsr+0.5);
-    p_result.SRDISC.TOTAL = new TH1F(Form("SRDISC_TOTAL_%s" , chainTitleCh) , Form("SRDISC_TOTAL_%s" , chainTitleCh) , nsrdisc     , 0.5  , nsrdisc+0.5);
-    p_result.SR.TOTAL   = new TH1F(Form("SR_TOTAL_%s"   , chainTitleCh) , Form("SR_TOTAL_%s"   , chainTitleCh) , nsr-nCR , 0.5  , nsr-nCR+0.5);
-
-    p_result.h_mva.br             = new TH1F(Form("br_mva_%s"             , chainTitleCh), Form("mva_%s"             , chainTitleCh), 10, 0    , 1.5);
-    p_result.h_mu_sip3d_lep1.br   = new TH1F(Form("br_sip3d_mu_lep1_%s"   , chainTitleCh), Form("sip3d_mu_lep1_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_sip3d_lep2.br   = new TH1F(Form("br_sip3d_mu_lep2_%s"   , chainTitleCh), Form("sip3d_mu_lep2_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_sip3d_lep3.br   = new TH1F(Form("br_sip3d_mu_lep3_%s"   , chainTitleCh), Form("sip3d_mu_lep3_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_el_sip3d_lep1.br   = new TH1F(Form("br_sip3d_el_lep1_%s"   , chainTitleCh), Form("sip3d_el_lep1_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_el_sip3d_lep2.br   = new TH1F(Form("br_sip3d_el_lep2_%s"   , chainTitleCh), Form("sip3d_el_lep2_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_el_sip3d_lep3.br   = new TH1F(Form("br_sip3d_el_lep3_%s"   , chainTitleCh), Form("sip3d_el_lep3_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_l1eta.br        = new TH1F(Form("br_l1eta_mu_%s"        , chainTitleCh), Form("l1eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_mu_l2eta.br        = new TH1F(Form("br_l2eta_mu_%s"        , chainTitleCh), Form("l2eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_mu_l3eta.br        = new TH1F(Form("br_l3eta_mu_%s"        , chainTitleCh), Form("l3eta_mu_%s"        , chainTitleCh), 8, -2.5 , 2.5);
-    p_result.h_el_l1eta.br        = new TH1F(Form("br_l1eta_el_%s"        , chainTitleCh), Form("l1eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_el_l2eta.br        = new TH1F(Form("br_l2eta_el_%s"        , chainTitleCh), Form("l2eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_el_l3eta.br        = new TH1F(Form("br_l3eta_el_%s"        , chainTitleCh), Form("l3eta_el_%s"        , chainTitleCh), 8, -2.5 , 2.5);
-    p_result.h_mu_lep1_miniIso.br = new TH1F(Form("br_lep1_mu_miniIso_%s" , chainTitleCh), Form("lep1_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_mu_lep2_miniIso.br = new TH1F(Form("br_lep2_mu_miniIso_%s" , chainTitleCh), Form("lep2_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_mu_lep3_miniIso.br = new TH1F(Form("br_lep3_mu_miniIso_%s" , chainTitleCh), Form("lep3_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_mu_lep1_ptRel.br   = new TH1F(Form("br_lep1_mu_ptRel_%s"   , chainTitleCh), Form("lep1_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep2_ptRel.br   = new TH1F(Form("br_lep2_mu_ptRel_%s"   , chainTitleCh), Form("lep2_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep3_ptRel.br   = new TH1F(Form("br_lep3_mu_ptRel_%s"   , chainTitleCh), Form("lep3_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep1_ptRelfail.br   = new TH1F(Form("br_lep1_mu_ptRelfail_%s"   , chainTitleCh), Form("lep1_mu_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep2_ptRelfail.br   = new TH1F(Form("br_lep2_mu_ptRelfail_%s"   , chainTitleCh), Form("lep2_mu_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep3_ptRelfail.br   = new TH1F(Form("br_lep3_mu_ptRelfail_%s"   , chainTitleCh), Form("lep3_mu_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep1_miniIso.br = new TH1F(Form("br_lep1_el_miniIso_%s" , chainTitleCh), Form("lep1_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_el_lep2_miniIso.br = new TH1F(Form("br_lep2_el_miniIso_%s" , chainTitleCh), Form("lep2_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_el_lep3_miniIso.br = new TH1F(Form("br_lep3_el_miniIso_%s" , chainTitleCh), Form("lep3_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_el_lep1_ptRel.br   = new TH1F(Form("br_lep1_el_ptRel_%s"   , chainTitleCh), Form("lep1_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep2_ptRel.br   = new TH1F(Form("br_lep2_el_ptRel_%s"   , chainTitleCh), Form("lep2_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep3_ptRel.br   = new TH1F(Form("br_lep3_el_ptRel_%s"   , chainTitleCh), Form("lep3_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep1_ptRelfail.br   = new TH1F(Form("br_lep1_el_ptRelfail_%s"   , chainTitleCh), Form("lep1_el_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep2_ptRelfail.br   = new TH1F(Form("br_lep2_el_ptRelfail_%s"   , chainTitleCh), Form("lep2_el_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep3_ptRelfail.br   = new TH1F(Form("br_lep3_el_ptRelfail_%s"   , chainTitleCh), Form("lep3_el_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep1_ptRatio.br = new TH1F(Form("br_lep1_mu_ptRatio_%s" , chainTitleCh), Form("lep1_mu_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_mu_lep2_ptRatio.br = new TH1F(Form("br_lep2_mu_ptRatio_%s" , chainTitleCh), Form("lep2_mu_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_mu_lep3_ptRatio.br = new TH1F(Form("br_lep3_mu_ptRatio_%s" , chainTitleCh), Form("lep3_mu_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_el_lep1_ptRatio.br = new TH1F(Form("br_lep1_el_ptRatio_%s" , chainTitleCh), Form("lep1_el_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_el_lep2_ptRatio.br = new TH1F(Form("br_lep2_el_ptRatio_%s" , chainTitleCh), Form("lep2_el_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_el_lep3_ptRatio.br = new TH1F(Form("br_lep3_el_ptRatio_%s" , chainTitleCh), Form("lep3_el_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-
-    p_result.h_mva.sr             = new TH1F(Form("sr_mva_%s"             , chainTitleCh), Form("mva_%s"             , chainTitleCh), 10, 0    , 1.5);
-    p_result.h_mu_sip3d_lep1.sr   = new TH1F(Form("sr_sip3d_mu_lep1_%s"   , chainTitleCh), Form("sip3d_mu_lep1_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_sip3d_lep2.sr   = new TH1F(Form("sr_sip3d_mu_lep2_%s"   , chainTitleCh), Form("sip3d_mu_lep2_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_sip3d_lep3.sr   = new TH1F(Form("sr_sip3d_mu_lep3_%s"   , chainTitleCh), Form("sip3d_mu_lep3_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_el_sip3d_lep1.sr   = new TH1F(Form("sr_sip3d_el_lep1_%s"   , chainTitleCh), Form("sip3d_el_lep1_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_el_sip3d_lep2.sr   = new TH1F(Form("sr_sip3d_el_lep2_%s"   , chainTitleCh), Form("sip3d_el_lep2_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_el_sip3d_lep3.sr   = new TH1F(Form("sr_sip3d_el_lep3_%s"   , chainTitleCh), Form("sip3d_el_lep3_%s"   , chainTitleCh), 20, 0    , 5);
-    p_result.h_mu_l1eta.sr        = new TH1F(Form("sr_l1eta_mu_%s"        , chainTitleCh), Form("l1eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_mu_l2eta.sr        = new TH1F(Form("sr_l2eta_mu_%s"        , chainTitleCh), Form("l2eta_mu_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_mu_l3eta.sr        = new TH1F(Form("sr_l3eta_mu_%s"        , chainTitleCh), Form("l3eta_mu_%s"        , chainTitleCh), 8, -2.5 , 2.5);
-    p_result.h_el_l1eta.sr        = new TH1F(Form("sr_l1eta_el_%s"        , chainTitleCh), Form("l1eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_el_l2eta.sr        = new TH1F(Form("sr_l2eta_el_%s"        , chainTitleCh), Form("l2eta_el_%s"        , chainTitleCh), 12, -2.5 , 2.5);
-    p_result.h_el_l3eta.sr        = new TH1F(Form("sr_l3eta_el_%s"        , chainTitleCh), Form("l3eta_el_%s"        , chainTitleCh), 8, -2.5 , 2.5);
-    p_result.h_mu_lep1_miniIso.sr = new TH1F(Form("sr_lep1_mu_miniIso_%s" , chainTitleCh), Form("lep1_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_mu_lep2_miniIso.sr = new TH1F(Form("sr_lep2_mu_miniIso_%s" , chainTitleCh), Form("lep2_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_mu_lep3_miniIso.sr = new TH1F(Form("sr_lep3_mu_miniIso_%s" , chainTitleCh), Form("lep3_mu_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_mu_lep1_ptRel.sr   = new TH1F(Form("sr_lep1_mu_ptRel_%s"   , chainTitleCh), Form("lep1_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep2_ptRel.sr   = new TH1F(Form("sr_lep2_mu_ptRel_%s"   , chainTitleCh), Form("lep2_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep3_ptRel.sr   = new TH1F(Form("sr_lep3_mu_ptRel_%s"   , chainTitleCh), Form("lep3_mu_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep1_ptRelfail.sr   = new TH1F(Form("sr_lep1_mu_ptRelfail_%s"   , chainTitleCh), Form("lep1_mu_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep2_ptRelfail.sr   = new TH1F(Form("sr_lep2_mu_ptRelfail_%s"   , chainTitleCh), Form("lep2_mu_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep3_ptRelfail.sr   = new TH1F(Form("sr_lep3_mu_ptRelfail_%s"   , chainTitleCh), Form("lep3_mu_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep1_miniIso.sr = new TH1F(Form("sr_lep1_el_miniIso_%s" , chainTitleCh), Form("lep1_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_el_lep2_miniIso.sr = new TH1F(Form("sr_lep2_el_miniIso_%s" , chainTitleCh), Form("lep2_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_el_lep3_miniIso.sr = new TH1F(Form("sr_lep3_el_miniIso_%s" , chainTitleCh), Form("lep3_el_miniIso_%s" , chainTitleCh), 15, 0    , 0.2);
-    p_result.h_el_lep1_ptRel.sr   = new TH1F(Form("sr_lep1_el_ptRel_%s"   , chainTitleCh), Form("lep1_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep2_ptRel.sr   = new TH1F(Form("sr_lep2_el_ptRel_%s"   , chainTitleCh), Form("lep2_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep3_ptRel.sr   = new TH1F(Form("sr_lep3_el_ptRel_%s"   , chainTitleCh), Form("lep3_el_ptRel_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep1_ptRelfail.sr   = new TH1F(Form("sr_lep1_el_ptRelfail_%s"   , chainTitleCh), Form("lep1_el_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep2_ptRelfail.sr   = new TH1F(Form("sr_lep2_el_ptRelfail_%s"   , chainTitleCh), Form("lep2_el_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_el_lep3_ptRelfail.sr   = new TH1F(Form("sr_lep3_el_ptRelfail_%s"   , chainTitleCh), Form("lep3_el_ptRelfail_%s"   , chainTitleCh), 15, 0    , 50);
-    p_result.h_mu_lep1_ptRatio.sr = new TH1F(Form("sr_lep1_mu_ptRatio_%s" , chainTitleCh), Form("lep1_mu_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_mu_lep2_ptRatio.sr = new TH1F(Form("sr_lep2_mu_ptRatio_%s" , chainTitleCh), Form("lep2_mu_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_mu_lep3_ptRatio.sr = new TH1F(Form("sr_lep3_mu_ptRatio_%s" , chainTitleCh), Form("lep3_mu_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_el_lep1_ptRatio.sr = new TH1F(Form("sr_lep1_el_ptRatio_%s" , chainTitleCh), Form("lep1_el_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_el_lep2_ptRatio.sr = new TH1F(Form("sr_lep2_el_ptRatio_%s" , chainTitleCh), Form("lep2_el_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-    p_result.h_el_lep3_ptRatio.sr = new TH1F(Form("sr_lep3_el_ptRatio_%s" , chainTitleCh), Form("lep3_el_ptRatio_%s" , chainTitleCh), 30, -0.5    , 1.5);
-
-    p_result.h_lepsf.br = new TH1F(Form("br_lepsf_%s"   , chainTitleCh) , Form("lepsf_%s"  , chainTitleCh) , 50 , 0.7 , 1.3);
-    p_result.h_btagsf.br = new TH1F(Form("br_btagsf_%s" , chainTitleCh) , Form("btagsf_%s" , chainTitleCh) , 50 , 0.7 , 1.3);
-    p_result.h_wsf.br = new TH1F(Form("br_wsf_%s"       , chainTitleCh) , Form("wsf_%s"    , chainTitleCh) , 50 , 0.7 , 1.3);
-    p_result.h_puw.br = new TH1F(Form("br_puw_%s"       , chainTitleCh) , Form("puw_%s"    , chainTitleCh) , 50 , 0.7 , 1.3);
-    p_result.h_trigsf.br = new TH1F(Form("br_trigsf_%s" , chainTitleCh) , Form("trigsf_%s" , chainTitleCh) , 50 , 0.7 , 1.3);
-    p_result.h_isrw.br = new TH1F(Form("br_isrw_%s"     , chainTitleCh) , Form("isrw_%s"   , chainTitleCh) , 50 , 0.7 , 1.3);
-
-    p_result.h_ht_sr1.sr       = new TH1F(Form("sr_ht_sr1_%s"         , chainTitleCh) , Form("ht_sr1_%s"         , chainTitleCh) , 10      , 100   , 1600);
-    p_result.h_ht_sr2.sr       = new TH1F(Form("sr_ht_sr2_%s"         , chainTitleCh) , Form("ht_sr2_%s"         , chainTitleCh) , 10      , 100   , 1600);
-    p_result.h_ht_sr4.sr       = new TH1F(Form("sr_ht_sr4_%s"         , chainTitleCh) , Form("ht_sr4_%s"         , chainTitleCh) , 10      , 100   , 1600);
-    p_result.h_ht_sr5.sr       = new TH1F(Form("sr_ht_sr5_%s"         , chainTitleCh) , Form("ht_sr5_%s"         , chainTitleCh) , 10      , 100   , 1600);
-    p_result.h_ht_sr11.sr       = new TH1F(Form("sr_ht_sr11_%s"         , chainTitleCh) , Form("ht_sr11_%s"         , chainTitleCh) , 10      , 100   , 1600);
+    p_result.SR.HH = new TH1F(Form("SRHH_TOTAL_%s" , chainTitleCh) , Form("SRHH_TOTAL_%s" , chainTitleCh) , nHHsr     , 0.5  , nHHsr+0.5); p_result.SR.HH->SetDirectory(0);
+    p_result.SR.HL = new TH1F(Form("SRHL_TOTAL_%s" , chainTitleCh) , Form("SRHL_TOTAL_%s" , chainTitleCh) , nHLsr     , 0.5  , nHLsr+0.5); p_result.SR.HL->SetDirectory(0);
+    p_result.SR.LL = new TH1F(Form("SRLL_TOTAL_%s" , chainTitleCh) , Form("SRLL_TOTAL_%s" , chainTitleCh) , nLLsr     , 0.5  , nLLsr+0.5); p_result.SR.LL->SetDirectory(0);
+    p_result.SR.ML = new TH1F(Form("SRML_TOTAL_%s" , chainTitleCh) , Form("SRML_TOTAL_%s" , chainTitleCh) , nMLsr     , 0.5  , nMLsr+0.5); p_result.SR.ML->SetDirectory(0);
 
     //For FR variations
     if (doFakes == 1) {
-        p_result.p_fake_alt_up_SRCR.TOTAL        = new TH1F(Form("SRCR_FR_TOTAL_%s"      , chainTitleCh) , Form("SRCR_FR_TOTAL_%s"      , chainTitleCh) , nsr   , 0.5, nsr+0.5 );
-        p_result.p_fake_alt_up_SRDISC.TOTAL        = new TH1F(Form("SRDISC_FR_TOTAL_%s"      , chainTitleCh) , Form("SRDISC_FR_TOTAL_%s"      , chainTitleCh) , nsrdisc   , 0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_fake_alt_up_SRCR.TOTAL        = 0;
-        p_result.p_fake_alt_up_SRDISC.TOTAL        = 0;
+        p_result.p_fake_alt_up_SR.HH        = new TH1F(Form("SRHH_FR_TOTAL_%s"      , chainTitleCh) , Form("SRHH_FR_TOTAL_%s"      , chainTitleCh) , nHHsr   , 0.5, nHHsr+0.5 ); p_result.p_fake_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_fake_alt_up_SR.HL        = new TH1F(Form("SRHL_FR_TOTAL_%s"      , chainTitleCh) , Form("SRHL_FR_TOTAL_%s"      , chainTitleCh) , nHLsr   , 0.5, nHLsr+0.5 ); p_result.p_fake_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_fake_alt_up_SR.LL        = new TH1F(Form("SRLL_FR_TOTAL_%s"      , chainTitleCh) , Form("SRLL_FR_TOTAL_%s"      , chainTitleCh) , nLLsr   , 0.5, nLLsr+0.5 ); p_result.p_fake_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_fake_alt_up_SR.ML        = new TH1F(Form("SRML_FR_TOTAL_%s"      , chainTitleCh) , Form("SRML_FR_TOTAL_%s"      , chainTitleCh) , nMLsr   , 0.5, nMLsr+0.5 ); p_result.p_fake_alt_up_SR.ML->SetDirectory(0);
     }
     //For unw FR application counts
     if (doFakes == 1) {
-        p_result.p_fake_unw_up_SRCR.TOTAL        = new TH1F(Form("SRCR_UNWFR_TOTAL_%s"      , chainTitleCh) , Form("SRCR_UNWFR_TOTAL_%s"      , chainTitleCh) , nsr   , 0.5, nsr+0.5 );
-        p_result.p_fake_unw_up_SRDISC.TOTAL        = new TH1F(Form("SRDISC_UNWFR_TOTAL_%s"      , chainTitleCh) , Form("SRDISC_UNWFR_TOTAL_%s"      , chainTitleCh) , nsrdisc   , 0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_fake_unw_up_SRCR.TOTAL        = 0;
-        p_result.p_fake_unw_up_SRDISC.TOTAL        = 0;
+        p_result.p_fake_unw_up_SR.HH        = new TH1F(Form("SRHH_UNWFR_TOTAL_%s"      , chainTitleCh) , Form("SRHH_UNWFR_TOTAL_%s"      , chainTitleCh) , nHHsr   , 0.5, nHHsr+0.5 ); p_result.p_fake_unw_up_SR.HH->SetDirectory(0);
+        p_result.p_fake_unw_up_SR.HL        = new TH1F(Form("SRHL_UNWFR_TOTAL_%s"      , chainTitleCh) , Form("SRHL_UNWFR_TOTAL_%s"      , chainTitleCh) , nHLsr   , 0.5, nHLsr+0.5 ); p_result.p_fake_unw_up_SR.HL->SetDirectory(0);
+        p_result.p_fake_unw_up_SR.LL        = new TH1F(Form("SRLL_UNWFR_TOTAL_%s"      , chainTitleCh) , Form("SRLL_UNWFR_TOTAL_%s"      , chainTitleCh) , nLLsr   , 0.5, nLLsr+0.5 ); p_result.p_fake_unw_up_SR.LL->SetDirectory(0);
+        p_result.p_fake_unw_up_SR.ML        = new TH1F(Form("SRML_UNWFR_TOTAL_%s"      , chainTitleCh) , Form("SRML_UNWFR_TOTAL_%s"      , chainTitleCh) , nMLsr   , 0.5, nMLsr+0.5 ); p_result.p_fake_unw_up_SR.ML->SetDirectory(0);
     }
     //For JES variations
     if (doFakes == 1 || isData==0) {
-        p_result.p_jes_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JES_UP_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_result.p_jes_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JES_DN_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_result.p_jes_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JES_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
-        p_result.p_jes_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JES_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_jes_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_jes_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_jes_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_jes_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_jes_alt_up_SR.HH     = new TH1F(Form("SRHH_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_JES_UP_TOTAL_%s"   , chainTitleCh) , nHHsr , 0.5, nHHsr+0.5 ); p_result.p_jes_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_jes_alt_up_SR.HL     = new TH1F(Form("SRHL_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_JES_UP_TOTAL_%s"   , chainTitleCh) , nHLsr , 0.5, nHLsr+0.5 ); p_result.p_jes_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_jes_alt_up_SR.LL     = new TH1F(Form("SRLL_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_JES_UP_TOTAL_%s"   , chainTitleCh) , nLLsr , 0.5, nLLsr+0.5 ); p_result.p_jes_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_jes_alt_up_SR.ML     = new TH1F(Form("SRML_JES_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_JES_UP_TOTAL_%s"   , chainTitleCh) , nMLsr , 0.5, nMLsr+0.5 ); p_result.p_jes_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_jes_alt_dn_SR.HH     = new TH1F(Form("SRHH_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_JES_DN_TOTAL_%s"   , chainTitleCh) , nHHsr , 0.5, nHHsr+0.5 ); p_result.p_jes_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_jes_alt_dn_SR.HL     = new TH1F(Form("SRHL_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_JES_DN_TOTAL_%s"   , chainTitleCh) , nHLsr , 0.5, nHLsr+0.5 ); p_result.p_jes_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_jes_alt_dn_SR.LL     = new TH1F(Form("SRLL_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_JES_DN_TOTAL_%s"   , chainTitleCh) , nLLsr , 0.5, nLLsr+0.5 ); p_result.p_jes_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_jes_alt_dn_SR.ML     = new TH1F(Form("SRML_JES_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_JES_DN_TOTAL_%s"   , chainTitleCh) , nMLsr , 0.5, nMLsr+0.5 ); p_result.p_jes_alt_dn_SR.ML->SetDirectory(0);
     }
     //For JER variations
     if (doFakes == 1 || isData==0) {
-        p_result.p_jer_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_UP_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_result.p_jer_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_JER_DN_TOTAL_%s"   , chainTitleCh) , nsr , 0.5, nsr+0.5 );
-        p_result.p_jer_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
-        p_result.p_jer_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_JER_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_jer_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_jer_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_jer_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_jer_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_jer_alt_up_SR.HH     = new TH1F(Form("SRHH_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_JER_UP_TOTAL_%s"   , chainTitleCh) , nHHsr , 0.5, nHHsr+0.5 ); p_result.p_jer_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_jer_alt_up_SR.HL     = new TH1F(Form("SRHL_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_JER_UP_TOTAL_%s"   , chainTitleCh) , nHLsr , 0.5, nHLsr+0.5 ); p_result.p_jer_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_jer_alt_up_SR.LL     = new TH1F(Form("SRLL_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_JER_UP_TOTAL_%s"   , chainTitleCh) , nLLsr , 0.5, nLLsr+0.5 ); p_result.p_jer_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_jer_alt_up_SR.ML     = new TH1F(Form("SRML_JER_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_JER_UP_TOTAL_%s"   , chainTitleCh) , nMLsr , 0.5, nMLsr+0.5 ); p_result.p_jer_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_jer_alt_dn_SR.HH     = new TH1F(Form("SRHH_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_JER_DN_TOTAL_%s"   , chainTitleCh) , nHHsr , 0.5, nHHsr+0.5 ); p_result.p_jer_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_jer_alt_dn_SR.HL     = new TH1F(Form("SRHL_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_JER_DN_TOTAL_%s"   , chainTitleCh) , nHLsr , 0.5, nHLsr+0.5 ); p_result.p_jer_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_jer_alt_dn_SR.LL     = new TH1F(Form("SRLL_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_JER_DN_TOTAL_%s"   , chainTitleCh) , nLLsr , 0.5, nLLsr+0.5 ); p_result.p_jer_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_jer_alt_dn_SR.ML     = new TH1F(Form("SRML_JER_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_JER_DN_TOTAL_%s"   , chainTitleCh) , nMLsr , 0.5, nMLsr+0.5 ); p_result.p_jer_alt_dn_SR.ML->SetDirectory(0);
     }
     //For btag SF variations
     if (isData==0){
-        p_result.p_btagSF_alt_up_SRCR.TOTAL = new TH1F(Form("SRCR_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRCR_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nsr,  0.5, nsr+0.5 );
-        p_result.p_btagSF_alt_dn_SRCR.TOTAL = new TH1F(Form("SRCR_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRCR_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nsr,  0.5, nsr+0.5 );
-        p_result.p_btagSF_alt_up_SRDISC.TOTAL = new TH1F(Form("SRDISC_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRDISC_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_btagSF_alt_dn_SRDISC.TOTAL = new TH1F(Form("SRDISC_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRDISC_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nsrdisc,  0.5, nsrdisc+0.5 );
-    }
-    else {
-        p_result.p_btagSF_alt_up_SRCR.TOTAL = 0;
-        p_result.p_btagSF_alt_dn_SRCR.TOTAL = 0;
-        p_result.p_btagSF_alt_up_SRDISC.TOTAL = 0;
-        p_result.p_btagSF_alt_dn_SRDISC.TOTAL = 0;
+        p_result.p_btagSF_alt_up_SR.HH = new TH1F(Form("SRHH_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRHH_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nHHsr,  0.5, nHHsr+0.5 ); p_result.p_btagSF_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_btagSF_alt_up_SR.HL = new TH1F(Form("SRHL_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRHL_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nHLsr,  0.5, nHLsr+0.5 ); p_result.p_btagSF_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_btagSF_alt_up_SR.LL = new TH1F(Form("SRLL_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRLL_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nLLsr,  0.5, nLLsr+0.5 ); p_result.p_btagSF_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_btagSF_alt_up_SR.ML = new TH1F(Form("SRML_BTAGSF_UP_TOTAL_%s", chainTitleCh), Form("SRML_BTAGSF_UP_TOTAL_%s", chainTitleCh),  nMLsr,  0.5, nMLsr+0.5 ); p_result.p_btagSF_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_btagSF_alt_dn_SR.HH = new TH1F(Form("SRHH_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRHH_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nHHsr,  0.5, nHHsr+0.5 ); p_result.p_btagSF_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_btagSF_alt_dn_SR.HL = new TH1F(Form("SRHL_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRHL_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nHLsr,  0.5, nHLsr+0.5 ); p_result.p_btagSF_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_btagSF_alt_dn_SR.LL = new TH1F(Form("SRLL_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRLL_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nLLsr,  0.5, nLLsr+0.5 ); p_result.p_btagSF_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_btagSF_alt_dn_SR.ML = new TH1F(Form("SRML_BTAGSF_DN_TOTAL_%s", chainTitleCh), Form("SRML_BTAGSF_DN_TOTAL_%s", chainTitleCh),  nMLsr,  0.5, nMLsr+0.5 ); p_result.p_btagSF_alt_dn_SR.ML->SetDirectory(0);
     }
     //For PU variations
     if (doFakes == 1 || isData==0) {
-        p_result.p_pu_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PU_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_pu_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PU_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_pu_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PU_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_pu_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PU_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_pu_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_pu_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_pu_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_pu_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_pu_alt_up_SR.HH     = new TH1F(Form("SRHH_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_PU_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_pu_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_pu_alt_up_SR.HL     = new TH1F(Form("SRHL_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_PU_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_pu_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_pu_alt_up_SR.LL     = new TH1F(Form("SRLL_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_PU_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_pu_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_pu_alt_up_SR.ML     = new TH1F(Form("SRML_PU_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_PU_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_pu_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_pu_alt_dn_SR.HH     = new TH1F(Form("SRHH_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_PU_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_pu_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_pu_alt_dn_SR.HL     = new TH1F(Form("SRHL_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_PU_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_pu_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_pu_alt_dn_SR.LL     = new TH1F(Form("SRLL_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_PU_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_pu_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_pu_alt_dn_SR.ML     = new TH1F(Form("SRML_PU_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_PU_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_pu_alt_dn_SR.ML->SetDirectory(0);
     }
     //For fastsim MET variations
     if (isData==0) {
-        p_result.p_met_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_MET_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_MET_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_met_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_MET_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_MET_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_met_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_MET_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_MET_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_met_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_MET_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_MET_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_met_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_met_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_met_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_met_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_met_alt_up_SR.HH     = new TH1F(Form("SRHH_MET_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_MET_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_met_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_met_alt_up_SR.HL     = new TH1F(Form("SRHL_MET_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_MET_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_met_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_met_alt_up_SR.LL     = new TH1F(Form("SRLL_MET_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_MET_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_met_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_met_alt_up_SR.ML     = new TH1F(Form("SRML_MET_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_MET_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_met_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_met_alt_dn_SR.HH     = new TH1F(Form("SRHH_MET_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_MET_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_met_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_met_alt_dn_SR.HL     = new TH1F(Form("SRHL_MET_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_MET_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_met_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_met_alt_dn_SR.LL     = new TH1F(Form("SRLL_MET_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_MET_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_met_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_met_alt_dn_SR.ML     = new TH1F(Form("SRML_MET_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_MET_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_met_alt_dn_SR.ML->SetDirectory(0);
     }
     //For PU variations
     if (doFakes == 1 || isData==0) {
-        p_result.p_lep_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_LEP_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_lep_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_LEP_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_lep_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_LEP_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_lep_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_LEP_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_lep_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_lep_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_lep_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_lep_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_lep_alt_up_SR.HH     = new TH1F(Form("SRHH_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_LEP_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_lep_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_lep_alt_up_SR.HL     = new TH1F(Form("SRHL_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_LEP_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_lep_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_lep_alt_up_SR.LL     = new TH1F(Form("SRLL_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_LEP_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_lep_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_lep_alt_up_SR.ML     = new TH1F(Form("SRML_LEP_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_LEP_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_lep_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_lep_alt_dn_SR.HH     = new TH1F(Form("SRHH_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_LEP_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_lep_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_lep_alt_dn_SR.HL     = new TH1F(Form("SRHL_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_LEP_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_lep_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_lep_alt_dn_SR.LL     = new TH1F(Form("SRLL_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_LEP_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_lep_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_lep_alt_dn_SR.ML     = new TH1F(Form("SRML_LEP_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_LEP_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_lep_alt_dn_SR.ML->SetDirectory(0);
     }
     //For bb variations
     if (doFakes == 1 || isData==0) {
-        p_result.p_bb_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_bb_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_BB_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_bb_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_bb_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_bb_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_bb_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_bb_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_bb_alt_dn_SRDISC.TOTAL     = 0;
+        p_result.p_bb_alt_up_SR.HH     = new TH1F(Form("SRHH_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_BB_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_bb_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_bb_alt_up_SR.HL     = new TH1F(Form("SRHL_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_BB_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_bb_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_bb_alt_up_SR.LL     = new TH1F(Form("SRLL_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_BB_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_bb_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_bb_alt_up_SR.ML     = new TH1F(Form("SRML_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_BB_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_bb_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_bb_alt_dn_SR.HH     = new TH1F(Form("SRHH_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_BB_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_bb_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_bb_alt_dn_SR.HL     = new TH1F(Form("SRHL_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_BB_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_bb_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_bb_alt_dn_SR.LL     = new TH1F(Form("SRLL_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_BB_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_bb_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_bb_alt_dn_SR.ML     = new TH1F(Form("SRML_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_BB_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_bb_alt_dn_SR.ML->SetDirectory(0);
     }
     //For PU variations
-    if (doFakes == 1 || isData==0) {
-        p_result.p_isr_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_isr_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_isr_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_isr_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-    } else {
-        p_result.p_isr_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_isr_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_isr_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_isr_alt_dn_SRDISC.TOTAL     = 0;
+    if (isData==0) {
+        p_result.p_isr_alt_up_SR.HH     = new TH1F(Form("SRHH_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_ISR_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_isr_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_isr_alt_up_SR.HL     = new TH1F(Form("SRHL_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_ISR_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_isr_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_isr_alt_up_SR.LL     = new TH1F(Form("SRLL_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_ISR_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_isr_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_isr_alt_up_SR.ML     = new TH1F(Form("SRML_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_ISR_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_isr_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_isr_alt_dn_SR.HH     = new TH1F(Form("SRHH_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_ISR_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_isr_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_isr_alt_dn_SR.HL     = new TH1F(Form("SRHL_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_ISR_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_isr_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_isr_alt_dn_SR.LL     = new TH1F(Form("SRLL_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_ISR_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_isr_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_isr_alt_dn_SR.ML     = new TH1F(Form("SRML_ISR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_ISR_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_isr_alt_dn_SR.ML->SetDirectory(0);
     }
     //For theory variations
     if (isData==0) {
-        p_result.p_pdf_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_pdf_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_pdf_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_pdf_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PDF_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_scale_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_scale_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_scale_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_scale_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_alphas_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_alphas_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_alphas_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_alphas_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_isrvar_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_isrvar_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_isrvar_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_isrvar_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_fsrvar_alt_up_SRCR.TOTAL     = new TH1F(Form("SRCR_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_fsrvar_alt_dn_SRCR.TOTAL     = new TH1F(Form("SRCR_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
-        p_result.p_fsrvar_alt_up_SRDISC.TOTAL     = new TH1F(Form("SRDISC_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
-        p_result.p_fsrvar_alt_dn_SRDISC.TOTAL     = new TH1F(Form("SRDISC_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_pdf_alt_up_SR.HH     = new TH1F(Form("SRHH_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_PDF_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_pdf_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_pdf_alt_up_SR.HL     = new TH1F(Form("SRHL_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_PDF_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_pdf_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_pdf_alt_up_SR.LL     = new TH1F(Form("SRLL_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_PDF_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_pdf_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_pdf_alt_up_SR.ML     = new TH1F(Form("SRML_PDF_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_PDF_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_pdf_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_pdf_alt_dn_SR.HH     = new TH1F(Form("SRHH_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_PDF_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_pdf_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_pdf_alt_dn_SR.HL     = new TH1F(Form("SRHL_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_PDF_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_pdf_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_pdf_alt_dn_SR.LL     = new TH1F(Form("SRLL_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_PDF_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_pdf_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_pdf_alt_dn_SR.ML     = new TH1F(Form("SRML_PDF_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_PDF_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_pdf_alt_dn_SR.ML->SetDirectory(0);
+        p_result.p_scale_alt_up_SR.HH     = new TH1F(Form("SRHH_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_scale_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_scale_alt_up_SR.HL     = new TH1F(Form("SRHL_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_scale_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_scale_alt_up_SR.LL     = new TH1F(Form("SRLL_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_scale_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_scale_alt_up_SR.ML     = new TH1F(Form("SRML_SCALE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_SCALE_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_scale_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_scale_alt_dn_SR.HH     = new TH1F(Form("SRHH_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_scale_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_scale_alt_dn_SR.HL     = new TH1F(Form("SRHL_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_scale_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_scale_alt_dn_SR.LL     = new TH1F(Form("SRLL_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_scale_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_scale_alt_dn_SR.ML     = new TH1F(Form("SRML_SCALE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_SCALE_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_scale_alt_dn_SR.ML->SetDirectory(0);
+        p_result.p_alphas_alt_up_SR.HH     = new TH1F(Form("SRHH_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_alphas_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_alphas_alt_up_SR.HL     = new TH1F(Form("SRHL_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_alphas_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_alphas_alt_up_SR.LL     = new TH1F(Form("SRLL_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_alphas_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_alphas_alt_up_SR.ML     = new TH1F(Form("SRML_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_ALPHAS_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_alphas_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_alphas_alt_dn_SR.HH     = new TH1F(Form("SRHH_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_alphas_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_alphas_alt_dn_SR.HL     = new TH1F(Form("SRHL_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_alphas_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_alphas_alt_dn_SR.LL     = new TH1F(Form("SRLL_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_alphas_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_alphas_alt_dn_SR.ML     = new TH1F(Form("SRML_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_ALPHAS_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_alphas_alt_dn_SR.ML->SetDirectory(0);
+        p_result.p_isrvar_alt_up_SR.HH     = new TH1F(Form("SRHH_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_isrvar_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_isrvar_alt_up_SR.HL     = new TH1F(Form("SRHL_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_isrvar_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_isrvar_alt_up_SR.LL     = new TH1F(Form("SRLL_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_isrvar_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_isrvar_alt_up_SR.ML     = new TH1F(Form("SRML_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_ISRVAR_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_isrvar_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_isrvar_alt_dn_SR.HH     = new TH1F(Form("SRHH_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_isrvar_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_isrvar_alt_dn_SR.HL     = new TH1F(Form("SRHL_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_isrvar_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_isrvar_alt_dn_SR.LL     = new TH1F(Form("SRLL_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_isrvar_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_isrvar_alt_dn_SR.ML     = new TH1F(Form("SRML_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_ISRVAR_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_isrvar_alt_dn_SR.ML->SetDirectory(0);
+        p_result.p_fsrvar_alt_up_SR.HH     = new TH1F(Form("SRHH_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHH_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_fsrvar_alt_up_SR.HH->SetDirectory(0);
+        p_result.p_fsrvar_alt_up_SR.HL     = new TH1F(Form("SRHL_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRHL_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_fsrvar_alt_up_SR.HL->SetDirectory(0);
+        p_result.p_fsrvar_alt_up_SR.LL     = new TH1F(Form("SRLL_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRLL_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_fsrvar_alt_up_SR.LL->SetDirectory(0);
+        p_result.p_fsrvar_alt_up_SR.ML     = new TH1F(Form("SRML_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRML_FSRVAR_UP_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_fsrvar_alt_up_SR.ML->SetDirectory(0);
+        p_result.p_fsrvar_alt_dn_SR.HH     = new TH1F(Form("SRHH_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHH_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nHHsr,  0.5, nHHsr+0.5 ); p_result.p_fsrvar_alt_dn_SR.HH->SetDirectory(0);
+        p_result.p_fsrvar_alt_dn_SR.HL     = new TH1F(Form("SRHL_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRHL_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nHLsr,  0.5, nHLsr+0.5 ); p_result.p_fsrvar_alt_dn_SR.HL->SetDirectory(0);
+        p_result.p_fsrvar_alt_dn_SR.LL     = new TH1F(Form("SRLL_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRLL_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nLLsr,  0.5, nLLsr+0.5 ); p_result.p_fsrvar_alt_dn_SR.LL->SetDirectory(0);
+        p_result.p_fsrvar_alt_dn_SR.ML     = new TH1F(Form("SRML_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , Form("SRML_FSRVAR_DN_TOTAL_%s"   , chainTitleCh) , nMLsr,  0.5, nMLsr+0.5 ); p_result.p_fsrvar_alt_dn_SR.ML->SetDirectory(0);
         
-    } else {
-        p_result.p_pdf_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_pdf_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_pdf_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_pdf_alt_dn_SRDISC.TOTAL     = 0;
-        p_result.p_scale_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_scale_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_scale_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_scale_alt_dn_SRDISC.TOTAL     = 0;
-        p_result.p_alphas_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_alphas_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_alphas_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_alphas_alt_dn_SRDISC.TOTAL     = 0;
-        p_result.p_isrvar_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_isrvar_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_isrvar_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_isrvar_alt_dn_SRDISC.TOTAL     = 0;
-        p_result.p_fsrvar_alt_up_SRCR.TOTAL     = 0;
-        p_result.p_fsrvar_alt_dn_SRCR.TOTAL     = 0;
-        p_result.p_fsrvar_alt_up_SRDISC.TOTAL     = 0;
-        p_result.p_fsrvar_alt_dn_SRDISC.TOTAL     = 0;
     }
 
 
     bool doPoisson = isData && !doFlips && !doFakes;
-    initHistError(doPoisson, p_result.h_disc.br);
-    initHistError(doPoisson, p_result.SRCR.TOTAL   );
-    initHistError(doPoisson, p_result.SRDISC.TOTAL   );
-    initHistError(doPoisson, p_result.SR.TOTAL   );
-    initHistError(doPoisson, p_result.p_jes_alt_up_SRCR.TOTAL   );
-    initHistError(doPoisson, p_result.p_jes_alt_up_SRDISC.TOTAL   );
-    initHistError(doPoisson, p_result.p_jes_alt_dn_SRCR.TOTAL   );
-    initHistError(doPoisson, p_result.p_jes_alt_dn_SRDISC.TOTAL   );
-    initHistError(doPoisson, p_result.p_jer_alt_up_SRCR.TOTAL   );
-    initHistError(doPoisson, p_result.p_jer_alt_up_SRDISC.TOTAL   );
-    initHistError(doPoisson, p_result.p_jer_alt_dn_SRCR.TOTAL   );
-    initHistError(doPoisson, p_result.p_jer_alt_dn_SRDISC.TOTAL   );
-    initHistError(doPoisson, p_result.p_btagSF_alt_up_SRCR.TOTAL);
-    initHistError(doPoisson, p_result.p_btagSF_alt_up_SRDISC.TOTAL);
-    initHistError(doPoisson, p_result.p_btagSF_alt_dn_SRCR.TOTAL);
-    initHistError(doPoisson, p_result.p_btagSF_alt_dn_SRDISC.TOTAL);
-    initHistError(doPoisson, p_result.p_pu_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_pu_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_lep_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_lep_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_met_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_met_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_isr_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_isr_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_bb_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_bb_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_pu_alt_dn_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_pu_alt_dn_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_fake_unw_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_fake_unw_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_fake_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_fake_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_pdf_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_pdf_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_pdf_alt_dn_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_pdf_alt_dn_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_scale_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_scale_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_scale_alt_dn_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_scale_alt_dn_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_alphas_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_alphas_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_alphas_alt_dn_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_alphas_alt_dn_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_isrvar_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_isrvar_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_isrvar_alt_dn_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_isrvar_alt_dn_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_fsrvar_alt_up_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_fsrvar_alt_up_SRDISC.TOTAL    );
-    initHistError(doPoisson, p_result.p_fsrvar_alt_dn_SRCR.TOTAL    );
-    initHistError(doPoisson, p_result.p_fsrvar_alt_dn_SRDISC.TOTAL    );
 
+    p_result.SR.InitHistError(doPoisson);
+    p_result.p_jes_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_jes_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_jer_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_jer_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_btagSF_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_btagSF_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_pu_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_lep_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_met_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_isr_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_isr_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_bb_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_pu_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_fake_unw_up_SR.InitHistError(doPoisson);
+    p_result.p_fake_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_pdf_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_pdf_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_scale_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_scale_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_alphas_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_alphas_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_isrvar_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_isrvar_alt_dn_SR.InitHistError(doPoisson);
+    p_result.p_fsrvar_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_fsrvar_alt_dn_SR.InitHistError(doPoisson);
 
     //nEvents in chain
     unsigned int nEventsTotal = 0;
@@ -966,7 +979,7 @@ plots_t run(TChain *chain, int year, TString options){
             // skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
             //        (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50) and \
             //        (hyp_class != 4 or is_real_data);
-            if (!ss::skim()) continue;
+            if (!ss::skim()) continue; // FIXME
 
             if (isFastsim) {
                 if ((fabs(mysparms[0]-ss::sparms()[0]) > 0.1) || (fabs(mysparms[1]-ss::sparms()[1]) > 0.1)) continue;
@@ -986,8 +999,20 @@ plots_t run(TChain *chain, int year, TString options){
 
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
 
+            // if (!ss::is_real_data()) {
+            //     // FIXME
+            //     weight *= ss::prefire2017_sf();
+            // }
+
             if (isFastsim) {
                 weight = getSMSscale1fb()*lumiAG;
+
+                // if (year == 2016) {
+                //     weight *= ss::prefire2016_sf();
+                // } else if (year == 2017) {
+                //     weight *= ss::prefire2017_sf();
+                // }
+
             }
 
             if (istttt) {
@@ -1021,51 +1046,91 @@ plots_t run(TChain *chain, int year, TString options){
             float mtl2 = calcMT(lep2ccpt, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
             float mtmin = mtl1 > mtl2 ? mtl2 : mtl1;
 
-            int nleps = (lep3good and lep3ccpt > 20) ? ((ss::lep4_passes_id() and ss::lep4_p4().pt() > 20) ? 4 : 3) : 2;
+            int nleps = (lep3good) ? ((ss::lep4_passes_id() and (ss::lep4_p4().pt() > (abs(ss::lep4_id())==11 ? 15 : 10))) ? 4 : 3) : 2;
+            if (!doThirdLepton) nleps = 2;
+
+            // if (analysis_category(ss::lep1_id(), ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(), ss::lep3_coneCorrPt(), nleps) == Multilepton) {
+            //     float pto1 = max(max(lep1ccpt,lep2ccpt),lep3ccpt);
+            //     float pto3 = min(min(lep1ccpt,lep2ccpt),lep3ccpt);
+            //     float pto2 = lep1ccpt+lep2ccpt+lep3ccpt-pto1-pto3;
+            //     if (ss::njets() <= 1 and ss::nbtags() == 0 
+            //             and pto1 > 25 and pto2 > 20 and pto3 > 20
+            //             and ((lep1id>0)^(lep3id>0))
+            //             and ((abs(lep1id) == abs(lep3id))^(abs(lep2id) == abs(lep3id)))
+            //             and not doFlips
+            //             ) {
+            //         float mtl3 = calcMT(lep3ccpt, ss::lep3_p4().phi(), ss::met(), ss::metPhi());
+            //         float mtmax = max(max(mtl1, mtl2), mtl3);
+            //         p_result.h_mtmax.CatFill(kMultilepton, mtmax, weight);
+            //     }
+            // }
 
             //Require nominal baseline selections
-            if (!passes_baseline(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), lep1id, lep2id, lep1ccpt, lep2ccpt)) continue;
+            if (!passes_baseline_ss(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), lep1id, lep2id, lep1pt, lep2pt, 50.)) continue;
 
-            // // FIXME
-            // if (isttW || isttZ) {
-            //     weight *= 1.3;
-            // }
+            region_t categ = analysis_category(ss::lep1_id(), ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(), ss::lep3_coneCorrPt(), nleps);
+            if (categ == Undefined) continue; // HighHigh = 0, HighLow, LowLow, Multilepton
+
+            if (categ == Multilepton) {
+                float mtl3 = calcMT(lep3ccpt, ss::lep3_p4().phi(), ss::met(), ss::metPhi());
+                mtmin = min(mtl3, mtmin);
+            }
+
+            // FIXME
+            // from /home/users/namin/2016/ss/master/SSAnalysis/commonUtils.h
+            if (isWZ) {
+                weight *= 1.23;
+            }
+            if (isttZ) {
+            // if (isttZ || isttH) {
+                weight *= 1.14;
+            }
+
 
             if (isHiggsPseudoscalar) weight *= ss::xsec_ps()/ss::xsec();
             if (ss::is_real_data()==0) {
                 // weight*=eventScaleFactor(lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
                 // missing trigger SF
-                if (lep1good) weight *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
-                if (lep2good) weight *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
-                if (lep3good && lep3ccpt>20) weight *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
-                weight *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
+                // if ((!isWZ) && (!isttZ)) {
+                // if ((!isWZ) && (!isttZ) && (!isttH)) {
+                    if (lep1good) weight *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
+                    if (lep2good) weight *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
+                    if (categ == Multilepton) weight *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
+                    weight *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
+                // }
                 weight *= ss::weight_btagsf();
                 weight *= getTruePUw(year, ss::trueNumInt()[0], 0);
                 if (!isFastsim) {
-                    weight *= ss::decayWSF();
+                    // weight *= ss::decayWSF();
                 }
             }
             if (isFastsim) {
                 weight *= fastsim_triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
                 if (lep1good) weight *= fastsim_leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
                 if (lep2good) weight *= fastsim_leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
-                if (lep3good && lep3ccpt>20) weight *= fastsim_leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
+                if (categ == Multilepton) weight *= fastsim_leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
+                weight *= ss::weight_isr()*fastsim_isr_norm_central;
+
             }
 
             float weight_isr_up_alt = weight;
-            if (isttW) {
-                // want to take 50% of the effect as unc, and since we scale
-                // nominal weight, scale up twice
-                float w = isrWeight(year, ss::nisrMatch(), 1);
-                weight_isr_up_alt *= w*w;
-                weight *= w;
+            float weight_isr_dn_alt = weight;
+            if (isFastsim) {
+              weight_isr_up_alt *= ss::weight_isr_UP()*fastsim_isr_norm_up;
+              weight_isr_dn_alt *= ss::weight_isr_DN()*fastsim_isr_norm_down;
             }
-            if (isttZ) {
-                float w = isrWeight(year, ss::nisrMatch(), 2);
-                weight_isr_up_alt *= w*w;
-                weight *= w;
-            }
-
+            // if (isttW) {
+            //     // want to take 50% of the effect as unc, and since we scale
+            //     // nominal weight, scale up twice
+            //     float w = isrWeight(year, ss::nisrMatch(), 1);
+            //     weight_isr_up_alt *= w*w;
+            //     weight *= w;
+            // }
+            // if (isttZ) {
+            //     float w = isrWeight(year, ss::nisrMatch(), 2);
+            //     weight_isr_up_alt *= w*w;
+            //     weight *= w;
+            // }
 
             float weight_bb_up_alt = weight;
             if ((isttZ || isttW)) {
@@ -1089,7 +1154,7 @@ plots_t run(TChain *chain, int year, TString options){
                 weight_btag_dn_alt = ss::weight_btagsf()>0 ? weight*ss::weight_btagsf_DN()/ss::weight_btagsf() : weight;
                 weight_pu_up_alt = getTruePUw(year, ss::trueNumInt()[0], 0)>0 ? weight*getTruePUw(year, ss::trueNumInt()[0], 1)/getTruePUw(year, ss::trueNumInt()[0], 0) : weight;
                 weight_pu_dn_alt = getTruePUw(year, ss::trueNumInt()[0], 0)>0 ? weight*getTruePUw(year, ss::trueNumInt()[0],-1)/getTruePUw(year, ss::trueNumInt()[0], 0) : weight;
-                if (nleps == 2) {
+                if (categ != Multilepton) {
                     weight_lep_up_alt = weight*(1.0+leptonScaleFactorError(year,lep1id,  lep1pt,  lep1eta,  ss::ht())+leptonScaleFactorError(year,lep2id,  lep2pt,  lep2eta,  ss::ht()));
                 } else {
                     weight_lep_up_alt = weight*(1.0+leptonScaleFactorError(year,lep1id,  lep1pt,  lep1eta,  ss::ht())+leptonScaleFactorError(year,lep2id,  lep2pt,  lep2eta,  ss::ht())+leptonScaleFactorError(year,lep3id,  lep3pt,  lep3eta,  ss::ht()));
@@ -1113,14 +1178,19 @@ plots_t run(TChain *chain, int year, TString options){
             //Progress
             // SSAG::progress(nEventsTotal, nEventsChain);
 
-            //Only keep good events
+            // Only keep good events
             int ssclass = 3;
             bool isClass6 = ss::hyp_class() == 6;
-            if (!doFlips && !doFakes && exclude == 0 && !truthfake) {
-                if (ss::hyp_class() != ssclass && !isClass6 && ss::hyp_class() != 8) continue;
-                if (!isData && !isGamma && ss::lep1_motherID()==2) continue;
-                if (!isData && !isGamma && ss::lep2_motherID()==2) continue;
-                if (!isData && !( (ss::lep1_motherID()==1 && ss::lep2_motherID()==1) || (ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3)) ) continue;
+            if (!doFlips && !doFakes) {
+                if (ss::hyp_class() != ssclass && !isClass6) continue;
+                if (!truthfake and !skipmatching) {
+                    if (!isData && !isGamma && ss::lep1_motherID()==2) continue;
+                    if (!isData && !isGamma && ss::lep2_motherID()==2) continue;
+                    if (!isData && !( (ss::lep1_motherID()==1 && ss::lep2_motherID()==1) || (ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3)) ) continue;
+                    if (categ == Multilepton) {
+                        if (!isData && !isGamma && !(ss::lep3_motherID()==1 || ss::lep3_motherID()==-3)) continue;
+                    }
+                }
             }
 
             // Don't take leptons from photons if not x-gamma
@@ -1146,7 +1216,7 @@ plots_t run(TChain *chain, int year, TString options){
             if (truthfake) {
                 if (ss::hyp_class() == ssclass) {
                     int nbadlegs = (ss::lep1_motherID() <= 0) + (ss::lep2_motherID() <= 0);
-                    if (nleps > 2) nbadlegs += (ss::lep3_motherID() <= 0);
+                    if (categ == Multilepton) nbadlegs += (ss::lep3_motherID() <= 0);
                     // if it's MC and we're truthfake, then skip the event if it's 
                     // truth matched to be prompt prompt. we only want reco tight-tight
                     // events that are prompt-nonprompt (or nonprompt nonprompt)
@@ -1163,8 +1233,8 @@ plots_t run(TChain *chain, int year, TString options){
             bool isClass6Fake = false;
             if (doFakes == 1) {
                 if (!isClass6) {
-                    if (ss::hyp_class() == 3) {
-                        if (lep1good && lep2good && !lep3good && (lep3ccpt>20) && lep3pt>min_pt_fake) {  // lep3 fake
+                    if (ss::hyp_class() == 3 and (categ == Multilepton)) {
+                        if (lep1good && lep2good && !lep3good && lep3pt>min_pt_fake) {  // lep3 fake
                             float fr = fakeRate(year, lep3id, lep3ccpt, lep3eta, ss::ht());
                             float fra = alternativeFakeRate(year, lep3id, lep3ccpt, lep3eta, ss::ht());
                             if (!ignoreFakeFactor) weight *= fr / (1-fr);
@@ -1175,14 +1245,14 @@ plots_t run(TChain *chain, int year, TString options){
                     } else {
                         if (ss::hyp_class() != 2 && ss::hyp_class() != 1) continue;
                         bool foundGoodLoose = false;
-                        if (!lep1good && lep1pt>min_pt_fake) {
+                        if (!lep1good && lep1pt>min_pt_fake) { // lep1 fake
                             float fr = fakeRate(year, lep1id, lep1ccpt, lep1eta, ss::ht());
                             float fra = alternativeFakeRate(year, lep1id, lep1ccpt, lep1eta, ss::ht());
                             if (!ignoreFakeFactor) weight *= fr/(1.-fr);
                             if (!ignoreFakeFactor) weight_alt_FR *= fra/(1.-fra);
                             foundGoodLoose = true;
                         }
-                        if (!lep2good && lep2pt>min_pt_fake) {
+                        if (!lep2good && lep2pt>min_pt_fake) { // lep2 fake
                             float fr = fakeRate(year, lep2id, lep2ccpt, lep2eta, ss::ht());
                             float fra = alternativeFakeRate(year, lep2id, lep2ccpt, lep2eta, ss::ht());
                             if (!ignoreFakeFactor) weight *= fr/(1.-fr);
@@ -1191,11 +1261,8 @@ plots_t run(TChain *chain, int year, TString options){
                         }
                         if (!foundGoodLoose) continue;
                         if (ss::hyp_class() == 1 && lep1pt>min_pt_fake && lep2pt>min_pt_fake) weight *= -1.;
-                        if (!ss::is_real_data() && isData) {
-                            weight *= -1.;
-                        }
                     }
-                } else {
+                } else if (categ == Multilepton) {
 
                     bool lep1_lowpt_veto = lep1pt < (abs(lep1id) == 11 ? 15 : 10);
                     bool lep2_lowpt_veto = lep2pt < (abs(lep2id) == 11 ? 15 : 10);
@@ -1229,29 +1296,41 @@ plots_t run(TChain *chain, int year, TString options){
                     // subtract double fakes, add triple fakes: x = (f1*LTT + f2*TLT + f3*TTL - f1*f2*LLT - f2*f3*TLL - f1*f3*LTL + f1*f2*f3*LLL) /. {LTT -> LLT*f2, TTL -> TLL*f2, LTL -> LLL*f2}
                     if (nClass6Fakes == 2) weight *= -1;
                 }
+                // Real data fakes chain has prompt MC too (ttV,ttH)...we want to subtract out such prompt contributions
+                if (!ss::is_real_data() && isData) {
+                    weight *= -1.;
+                    weight_alt_FR *= -1.;
+                }
             }
 
+            float mtnonz = mtmin;
+            float zmass = -1;
             if (isClass6) {
                 float zmass23 = lep2id == -lep3id ? (ss::lep2_p4()+ss::lep3_p4()).mass() : -999.0;
                 float zmass31 = lep3id == -lep1id ? (ss::lep3_p4()+ss::lep1_p4()).mass() : -999.0;
-                float zmass = ( fabs(zmass31 - 91.2) < fabs(zmass23 - 91.2) ) ? zmass31 : zmass23;
+
+                if (fabs(zmass31 - 91.2) < fabs(zmass23 - 91.2)) {
+                    zmass = zmass31;
+                    mtnonz = calcMT(lep2ccpt, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
+                } else {
+                    zmass = zmass23;
+                    mtnonz = calcMT(lep1ccpt, ss::lep1_p4().phi(), ss::met(), ss::metPhi());
+                }
                 if (fabs(zmass-91.2) > 15) continue;
-                if (doFakes && isData) {
-                    if (!ss::is_real_data()) continue;
+                if (doFakes) {
+                    // if (isData) {
+                    //     if (!ss::is_real_data()) continue;
+                    // }
                     if (!isClass6Fake) continue;
                 }
                 if( !( isClass6Fake || (lep1good && lep2good && lep3good) ) ) continue;
             }
+            if ((categ != Multilepton) && isClass6) continue;
 
-            if (!doFlips && !doFakes && exclude == 0) {
-                if (nleps > 2) {
-                    if (!isData && !isGamma && ss::lep3_motherID()==2) continue;
-                }
-            }
 
-            // if all 3 charges are the same, throw the event away
-            if (nleps > 2 and ((lep1id>0 and lep2id>0 and lep3id>0) or
-                               (lep1id<0 and lep2id<0 and lep3id<0))) continue;
+            // // if all 3 charges are the same, throw the event away
+            // if (nleps > 2 and ((lep1id>0 and lep2id>0 and lep3id>0) or
+            //                    (lep1id<0 and lep2id<0 and lep3id<0))) continue;
 
             //Reject duplicates (after selection otherwise flips are ignored...)
             if (isData && ss::is_real_data()){
@@ -1282,8 +1361,10 @@ plots_t run(TChain *chain, int year, TString options){
             int mytype = ss::hyp_type();
             if (mytype==2 && abs(lep1id)==13) mytype = 1;
 
-            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::mtmin(), lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6);
-            int SRgenmet = signalRegionTest(ss::njets(), ss::nbtags(), ss::gen_met(), ss::ht(), ss::mtmin(), lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6);
+
+
+            int SR = signal_region_ss(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6, mtnonz);
+            int SRgenmet = signal_region_ss(ss::njets(), ss::nbtags(), ss::gen_met(), ss::ht(), mtmin, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6, mtnonz);
 
             // JEC
             float mll = (ss::lep1_p4()*lep1ccpt/lep1pt+ss::lep2_p4()*lep2ccpt/lep2pt).M();
@@ -1293,8 +1374,8 @@ plots_t run(TChain *chain, int year, TString options){
             float mtl1_unc_dn = calcMT(lep1ccpt, ss::lep1_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
             float mtl2_unc_dn = calcMT(lep2ccpt, ss::lep2_p4().phi(), ss::met_unc_dn(), ss::metPhi_unc_dn());
             float mtmin_unc_dn = mtl1_unc_dn > mtl2_unc_dn ? mtl2_unc_dn : mtl1_unc_dn;
-            int SR_unc_up = signalRegionTest(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
-            int SR_unc_dn = signalRegionTest(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
+            int SR_unc_up = signal_region_ss(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
+            int SR_unc_dn = signal_region_ss(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
 
             // JER
             float mtl1_JER_up = 0.;
@@ -1312,8 +1393,8 @@ plots_t run(TChain *chain, int year, TString options){
                 mtl1_JER_dn = calcMT(lep1ccpt, ss::lep1_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
                 mtl2_JER_dn = calcMT(lep2ccpt, ss::lep2_p4().phi(), ss::met_JER_dn(), ss::metPhi_JER_dn());
                 mtmin_JER_dn = mtl1_JER_dn > mtl2_JER_dn ? mtl2_JER_dn : mtl1_JER_dn;
-                SR_JER_up = signalRegionTest(ss::njets_JER_up(), ss::nbtags_JER_up(), ss::met_JER_up(), ss::ht_JER_up(), mtmin_JER_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
-                SR_JER_dn = signalRegionTest(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
+                SR_JER_up = signal_region_ss(ss::njets_JER_up(), ss::nbtags_JER_up(), ss::met_JER_up(), ss::ht_JER_up(), mtmin_JER_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
+                SR_JER_dn = signal_region_ss(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
             }
 
 
@@ -1381,11 +1462,11 @@ plots_t run(TChain *chain, int year, TString options){
                 p_result.h_disc.br->Fill(mvavalue,weight);
             }
 
-            int SRdisc =        getBDTBin(nbdtbins, mvavalue, SR==1);
-            int SRdisc_unc_up = getBDTBin(nbdtbins, mvavalueup, SR_unc_up==1);
-            int SRdisc_unc_dn = getBDTBin(nbdtbins, mvavaluedn, SR_unc_dn==1);
-            int SRdisc_JER_up = getBDTBin(nbdtbins, mvavalueJERup, SR_JER_up==1);
-            int SRdisc_JER_dn = getBDTBin(nbdtbins, mvavalueJERdn, SR_JER_dn==1);
+            // int SRdisc =        getBDTBin(nbdtbins, mvavalue, SR==1);
+            // int SRdisc_unc_up = getBDTBin(nbdtbins, mvavalueup, SR_unc_up==1);
+            // int SRdisc_unc_dn = getBDTBin(nbdtbins, mvavaluedn, SR_unc_dn==1);
+            // int SRdisc_JER_up = getBDTBin(nbdtbins, mvavalueJERup, SR_JER_up==1);
+            // int SRdisc_JER_dn = getBDTBin(nbdtbins, mvavalueJERdn, SR_JER_dn==1);
 
             // // FIXME -- put CRW into 2nd bin
             // if (SR == 2) {
@@ -1400,283 +1481,130 @@ plots_t run(TChain *chain, int year, TString options){
             //     std::cout <<  " mvavalueup: " << mvavalueup <<  " mvavaluedn: " << mvavaluedn <<  " mvavalueJERup: " << mvavalueJERup <<  " mvavalueJERdn: " << mvavalueJERdn <<  std::endl;
             // }
 
-            if (isData  == 0 && SR >= 0 && SR_unc_up > 0)            p_result.p_jes_alt_up_SRCR.TOTAL->Fill(SR_unc_up, weight);
-            if (isData  == 0 && SR >= 0 && SR_unc_dn > 0)            p_result.p_jes_alt_dn_SRCR.TOTAL->Fill(SR_unc_dn, weight);
-
-            if (isData  == 0 && SR >= 0 && SR_JER_up > 0)            p_result.p_jer_alt_up_SRCR.TOTAL->Fill(SR_JER_up, weight);
-            if (isData  == 0 && SR >= 0 && SR_JER_dn > 0)            p_result.p_jer_alt_dn_SRCR.TOTAL->Fill(SR_JER_dn, weight);
-
-            if (isData  == 0 && SRdisc >= 0 && SRdisc_unc_up > 0)            p_result.p_jes_alt_up_SRDISC.TOTAL->Fill(SRdisc_unc_up, weight);
-            if (isData  == 0 && SRdisc >= 0 && SRdisc_unc_dn > 0)            p_result.p_jes_alt_dn_SRDISC.TOTAL->Fill(SRdisc_unc_dn, weight);
-
-            if (isData  == 0 && SRdisc >= 0 && SRdisc_JER_up > 0)            p_result.p_jer_alt_up_SRDISC.TOTAL->Fill(SRdisc_JER_up, weight);
-            if (isData  == 0 && SRdisc >= 0 && SRdisc_JER_dn > 0)            p_result.p_jer_alt_dn_SRDISC.TOTAL->Fill(SRdisc_JER_dn, weight);
-
-            if (SR >= 0) {
-                p_result.SRCR.TOTAL->Fill(SR, weight);
-                if (doFakes == 1 )            p_result.p_fake_alt_up_SRCR.TOTAL->Fill(SR, weight_alt_FR);
-                if (doFakes == 1 )            p_result.p_fake_unw_up_SRCR.TOTAL->Fill(SR, weight > 0 ? 1 : -1);
-                if (isData  == 0 )            p_result.p_btagSF_alt_up_SRCR.TOTAL->Fill(SR, weight_btag_up_alt);
-                if (isData  == 0 )            p_result.p_btagSF_alt_dn_SRCR.TOTAL->Fill(SR, weight_btag_dn_alt);
-                if (isData  == 0 )            p_result.p_pu_alt_up_SRCR.TOTAL->Fill(SR, weight_pu_up_alt);
-                if (isData  == 0 )            p_result.p_pu_alt_dn_SRCR.TOTAL->Fill(SR, weight_pu_dn_alt);
-                if (isData  == 0 )            p_result.p_isr_alt_up_SRCR.TOTAL->Fill(SR, weight_isr_up_alt);
-                if (isData  == 0 )            p_result.p_bb_alt_up_SRCR.TOTAL->Fill(SR, weight_bb_up_alt);
-                if (isData  == 0 )            p_result.p_lep_alt_up_SRCR.TOTAL->Fill(SR, weight_lep_up_alt);
-                if (isData  == 0 && SRgenmet > 0)            p_result.p_met_alt_up_SRCR.TOTAL->Fill(SRgenmet, weight);
-                if (istttt || isttW || isttZ || isttH) {
-                    p_result.p_scale_alt_up_SRCR.TOTAL->Fill(SR,    (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP() : 1.0)*weight);
-                    p_result.p_scale_alt_dn_SRCR.TOTAL->Fill(SR,    (ss::weight_scale_DN() > -9000 ? ss::weight_scale_DN() : 1.0)*weight);
-                    p_result.p_alphas_alt_up_SRCR.TOTAL->Fill(SR,    (ss::weight_alphas_UP() > -9000 ? ss::weight_alphas_UP() : 1.0)*weight);
-                    p_result.p_alphas_alt_dn_SRCR.TOTAL->Fill(SR,    (ss::weight_alphas_DN() > -9000 ? ss::weight_alphas_DN() : 1.0)*weight);
-                    p_result.p_pdf_alt_up_SRCR.TOTAL->Fill(SR,      (ss::weight_pdf_UP() > -9000 ? ss::weight_pdf_UP() : 1.0)*weight);
-                    p_result.p_pdf_alt_dn_SRCR.TOTAL->Fill(SR,      (ss::weight_pdf_DN() > -9000 ? ss::weight_pdf_DN() : 1.0)*weight);
-                    p_result.p_isrvar_alt_up_SRCR.TOTAL->Fill(SR      , ss::weight_isrvar_UP()*weight);
-                    p_result.p_isrvar_alt_dn_SRCR.TOTAL->Fill(SR      , ss::weight_isrvar_DN()*weight);
-                    p_result.p_fsrvar_alt_up_SRCR.TOTAL->Fill(SR      , ss::weight_fsrvar_UP()*weight);
-                    p_result.p_fsrvar_alt_dn_SRCR.TOTAL->Fill(SR      , ss::weight_fsrvar_DN()*weight);
-                }
-            }
-            if (SRdisc >= 0) {
-                p_result.SRDISC.TOTAL->Fill(SRdisc, weight);
-                if (doFakes == 1 )            p_result.p_fake_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_alt_FR);
-                if (doFakes == 1 )            p_result.p_fake_unw_up_SRDISC.TOTAL->Fill(SRdisc, weight > 0 ? 1 : -1);
-                if (isData  == 0 )            p_result.p_btagSF_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_btag_up_alt);
-                if (isData  == 0 )            p_result.p_btagSF_alt_dn_SRDISC.TOTAL->Fill(SRdisc, weight_btag_dn_alt);
-                if (isData  == 0 )            p_result.p_pu_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_pu_up_alt);
-                if (isData  == 0 )            p_result.p_pu_alt_dn_SRDISC.TOTAL->Fill(SRdisc, weight_pu_dn_alt);
-                if (isData  == 0 )            p_result.p_isr_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_isr_up_alt);
-                if (isData  == 0 )            p_result.p_bb_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_bb_up_alt);
-                if (isData  == 0 )            p_result.p_lep_alt_up_SRDISC.TOTAL->Fill(SRdisc, weight_lep_up_alt);
-                if (istttt || isttW || isttZ || isttH) {
-                    p_result.p_scale_alt_up_SRDISC.TOTAL->Fill(SRdisc,    (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP() : 1.0)*weight);
-                    p_result.p_scale_alt_dn_SRDISC.TOTAL->Fill(SRdisc,    (ss::weight_scale_DN() > -9000 ? ss::weight_scale_DN() : 1.0)*weight);
-                    p_result.p_alphas_alt_up_SRDISC.TOTAL->Fill(SRdisc,    (ss::weight_alphas_UP() > -9000 ? ss::weight_alphas_UP() : 1.0)*weight);
-                    p_result.p_alphas_alt_dn_SRDISC.TOTAL->Fill(SRdisc,    (ss::weight_alphas_DN() > -9000 ? ss::weight_alphas_DN() : 1.0)*weight);
-                    p_result.p_pdf_alt_up_SRDISC.TOTAL->Fill(SRdisc,      (ss::weight_pdf_UP() > -9000 ? ss::weight_pdf_UP() : 1.0)*weight);
-                    p_result.p_pdf_alt_dn_SRDISC.TOTAL->Fill(SRdisc,      (ss::weight_pdf_DN() > -9000 ? ss::weight_pdf_DN() : 1.0)*weight);
-                    p_result.p_isrvar_alt_up_SRDISC.TOTAL->Fill(SRdisc, ss::weight_isrvar_UP()*weight);
-                    p_result.p_isrvar_alt_dn_SRDISC.TOTAL->Fill(SRdisc, ss::weight_isrvar_DN()*weight);
-                    p_result.p_fsrvar_alt_up_SRDISC.TOTAL->Fill(SRdisc, ss::weight_fsrvar_UP()*weight);
-                    p_result.p_fsrvar_alt_dn_SRDISC.TOTAL->Fill(SRdisc, ss::weight_fsrvar_DN()*weight);
-                }
+            if (isData == 0 && SR_unc_up > 0) p_result.p_jes_alt_up_SR.CatFill(categ, SR_unc_up, weight);
+            if (isData == 0 && SR_unc_dn > 0) p_result.p_jes_alt_dn_SR.CatFill(categ, SR_unc_dn, weight);
+            if (isData == 0 && SR_JER_up > 0) p_result.p_jer_alt_up_SR.CatFill(categ, SR_JER_up, weight);
+            if (isData == 0 && SR_JER_dn > 0) p_result.p_jer_alt_dn_SR.CatFill(categ, SR_JER_dn, weight);
+            if (isData == 0 && SRgenmet > 0) p_result.p_met_alt_up_SR.CatFill(categ, SRgenmet, weight);
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_alt_up_SR.CatFill(categ, SR, weight_alt_FR);
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_unw_up_SR.CatFill(categ, SR, weight > 0 ? 1 : -1);
+            if (isData == 0 && SR >= 0) p_result.p_btagSF_alt_up_SR.CatFill(categ, SR, weight_btag_up_alt);
+            if (isData == 0 && SR >= 0) p_result.p_btagSF_alt_dn_SR.CatFill(categ, SR, weight_btag_dn_alt);
+            if (isData == 0 && SR >= 0) p_result.p_pu_alt_up_SR.CatFill(categ, SR, weight_pu_up_alt);
+            if (isData == 0 && SR >= 0) p_result.p_pu_alt_dn_SR.CatFill(categ, SR, weight_pu_dn_alt);
+            if (isFastsim && SR >= 0) p_result.p_isr_alt_up_SR.CatFill(categ, SR, weight_isr_up_alt);
+            if (isFastsim && SR >= 0) p_result.p_isr_alt_dn_SR.CatFill(categ, SR, weight_isr_dn_alt);
+            if (isData == 0 && SR >= 0) p_result.p_bb_alt_up_SR.CatFill(categ, SR, weight_bb_up_alt);
+            if (isData == 0 && SR >= 0) p_result.p_lep_alt_up_SR.CatFill(categ, SR, weight_lep_up_alt);
+            if (SR > 0) {
+                p_result.p_scale_alt_up_SR.CatFill(categ, SR, (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP() : 1.0)*weight);
+                p_result.p_scale_alt_dn_SR.CatFill(categ, SR, (ss::weight_scale_DN() > -9000 ? ss::weight_scale_DN() : 1.0)*weight);
+                p_result.p_alphas_alt_up_SR.CatFill(categ, SR, (ss::weight_alphas_UP() > -9000 ? ss::weight_alphas_UP() : 1.0)*weight);
+                p_result.p_alphas_alt_dn_SR.CatFill(categ, SR, (ss::weight_alphas_DN() > -9000 ? ss::weight_alphas_DN() : 1.0)*weight);
+                p_result.p_pdf_alt_up_SR.CatFill(categ, SR, (ss::weight_pdf_UP() > -9000 ? ss::weight_pdf_UP() : 1.0)*weight);
+                p_result.p_pdf_alt_dn_SR.CatFill(categ, SR, (ss::weight_pdf_DN() > -9000 ? ss::weight_pdf_DN() : 1.0)*weight);
+                p_result.SR.CatFill(categ, SR, weight);
             }
 
-            bool plotlep3 = ss::lep3_passes_id() && lep3ccpt > 20.;
+
+            // OR together all possible categories for this event
+            int kcategs = kBaseline;
+            if (categ == Multilepton && SR > 0) {
+                kcategs |= kMultilepton;
+                if (SR >= 24) kcategs |= kMultileptonOnZ;
+                else kcategs |= kMultileptonOffZ;
+            }
+            if (SR > 0) kcategs |= kSignalRegion;
+            if (categ == HighHigh) kcategs |= kHighHigh;
+            if (categ == HighLow) kcategs |= kHighLow;
+            if (categ == LowLow) kcategs |= kLowLow;
+
+            // Only plot 3rd lepton if event is in ML region
+            bool plotlep3 = categ == Multilepton;
 
 
-            // {
-            //     float lepsf = 1.;
-            //     float btagsf = 1.;
-            //     float wsf = 1.;
-            //     float puw = 1.;
-            //     float trigsf = 1.;
-            //     float isrw = 1.;
-            //     float w = ss::is_real_data() ? 0.0 : ss::scale1fb()*lumiAG; // ignore data
-            //     if (ss::is_real_data()==0) {
-            //         if (lep1good) lepsf *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
-            //         if (lep2good) lepsf *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
-            //         if (lep3good && lep3ccpt>20) lepsf *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
-            //         trigsf *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
-            //         btagsf *= ss::weight_btagsf();
-            //         puw *= getTruePUw(year, ss::trueNumInt()[0], 0);
-            //         wsf *= ss::decayWSF();
-            //         if (isttW) isrw *= isrWeight(year, ss::nisrMatch(), 1);
-            //         if (isttZ) isrw *= isrWeight(year, ss::nisrMatch(), 2);
-            //     }
-            //     p_result.h_lepsf.br->Fill(lepsf, w);
-            //     p_result.h_btagsf.br->Fill(btagsf, w);
-            //     p_result.h_wsf.br->Fill(wsf, w);
-            //     p_result.h_puw.br->Fill(puw, w);
-            //     p_result.h_trigsf.br->Fill(trigsf, w);
-            //     p_result.h_isrw.br->Fill(isrw, w);
-            // }
-
-
-
-            if (SR != 1) { // non ttZ CR
-                p_result.h_njets.br->Fill(ss::njets() , weight);
-                p_result.h_nbtags.br->Fill(ss::nbtags() , weight);
-                p_result.h_type.br->Fill(mytype , weight);
-                p_result.h_nvtx.br->Fill(ss::nGoodVertices() , weight);
-                p_result.h_charge.br->Fill(lep1id > 0 ? -0.5: 0.5 , weight);
-                p_result.h_nleps.br->Fill(nleps , weight);
-                p_result.h_ht.br->Fill(ss::ht() , weight);
-                p_result.h_met.br->Fill(ss::met() , weight);
-                // p_result.h_mvis.br->Fill(mvis , weight);
-                // p_result.h_mtvis.br->Fill(mtvis , weight);
-                p_result.h_mll.br->Fill(mll , weight);
-                p_result.h_mtmin.br->Fill(mtmin , weight);
-                p_result.h_l1pt.br->Fill(pto1, weight);
-                p_result.h_l2pt.br->Fill(pto2, weight);
-                (abs(lep1id) == 11) ? p_result.h_el_l1pt.br->Fill(pto1, weight) : p_result.h_mu_l1pt.br->Fill(pto1, weight);
-                (abs(lep2id) == 11) ? p_result.h_el_l2pt.br->Fill(pto2, weight) : p_result.h_mu_l2pt.br->Fill(pto2, weight);
-                if (abs(lep1id) == 11) p_result.h_el_nmiss.br->Fill(ss::lep1_el_exp_innerlayers(), weight);
-                if (abs(lep2id) == 11) p_result.h_el_nmiss.br->Fill(ss::lep2_el_exp_innerlayers(), weight);
-                if (plotlep3) {
-                    p_result.h_l3pt.br->Fill(pto3, weight);
-                    (abs(lep3id) == 11) ? p_result.h_el_l3pt.br->Fill(pto3, weight) : p_result.h_mu_l3pt.br->Fill(pto3, weight);
-                }
-                // for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-                //     p_result.h_bjetpt.br->Fill(ss::btags()[ijet].pt(),weight);
-                // }
-                // for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                //     p_result.h_jetpt.br->Fill(ss::jets()[ijet].pt(),weight);
-                // }
-                if (abs(lep1id) == 11) p_result.h_mva.br->Fill(ss::lep1_MVA()                                                     , weight);
-                if(abs(lep1id) == 13) {
-                    p_result.h_mu_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_mu_l1eta.br       ->Fill(lep1eta                                                                     , weight);
-                    p_result.h_mu_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep1_ptRatio.br->Fill(ss::lep1_ptratio()                                                                               , weight);
+            // Fill based on categories
+            p_result.h_l1pt.CatFill(kcategs, pto1, weight);
+            p_result.h_l2pt.CatFill(kcategs, pto2, weight);
+            p_result.h_l3pt.CatFill(kcategs, pto3, weight);
+            if (abs(ss::lep1_id()) == 11) {
+                p_result.h_el_l1eta.CatFill(kcategs, lep1eta, weight);
+                p_result.h_el_l1pt.CatFill(kcategs, lep1ccpt, weight);
+            } else {
+                p_result.h_mu_l1eta.CatFill(kcategs, lep1eta, weight);
+                p_result.h_mu_l1pt.CatFill(kcategs, lep1ccpt, weight);
+            }
+            if (abs(ss::lep2_id()) == 11) {
+                p_result.h_el_l2eta.CatFill(kcategs, lep2eta, weight);
+                p_result.h_el_l2pt.CatFill(kcategs, lep2ccpt, weight);
+            } else {
+                p_result.h_mu_l2eta.CatFill(kcategs, lep2eta, weight);
+                p_result.h_mu_l2pt.CatFill(kcategs, lep2ccpt, weight);
+            }
+            if (plotlep3) {
+                p_result.h_q3.CatFill(kcategs, lep3id > 0 ? -0.5 : 0.5, weight);
+                if (abs(ss::lep3_id()) == 11) {
+                    p_result.h_el_l3eta.CatFill(kcategs, lep3eta, weight);
+                    p_result.h_el_l3pt.CatFill(kcategs, lep3ccpt, weight);
                 } else {
-                    p_result.h_el_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_el_l1pt.br        ->Fill(lep1ccpt                                                                                 , weight);
-                    p_result.h_el_l1eta.br       ->Fill(lep1eta                                                                     , weight);
-                    p_result.h_el_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_el_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep1_ptRatio.br->Fill(ss::lep1_ptratio()                                                                               , weight);
+                    p_result.h_mu_l3eta.CatFill(kcategs, lep3eta, weight);
+                    p_result.h_mu_l3pt.CatFill(kcategs, lep3ccpt, weight);
                 }
-                if (abs(lep2id) == 11) p_result.h_mva.br->Fill(ss::lep2_MVA()                                                     , weight);
-                if(abs(lep2id) == 13) {
-                    p_result.h_mu_sip3d_lep2.br  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_mu_l2eta.br       ->Fill(lep2eta                                                                     , weight);
-                    p_result.h_mu_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep2_ptRatio.br->Fill(ss::lep2_ptratio()                                                                               , weight);
+            }
+            p_result.h_met.CatFill(kcategs, ss::met(), weight);
+            p_result.h_ht.CatFill(kcategs, ss::ht(), weight);
+            p_result.h_mll.CatFill(kcategs, mll, weight);
+            p_result.h_mllos.CatFill(kcategs, zmass, weight);
+
+            // float mt2 = ss::mt2();
+            float mt2 = -1;
+            float mt2min = -1;
+            if (categ == Multilepton) {
+                if ((lep1id>0) == (lep3id>0)) {
+                    // all the same sign? just put it in highest MT2 bin
+                    mt2 =  300.;
                 } else {
-                    p_result.h_el_sip3d_lep2.br  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_el_l2eta.br       ->Fill(lep2eta                                                                     , weight);
-                    p_result.h_el_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_el_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep2_ptRatio.br->Fill(ss::lep2_ptratio()                                                                               , weight);
-                }
-                if (plotlep3) {
-                    if(abs(lep3id) == 13) {
-                        p_result.h_mu_l3eta.br       ->Fill(lep3eta                                                                     , weight);
+                    float mt2_13 = MT2(ss::met(), ss::metPhi(), ss::lep1_p4()*lep1ccpt/lep1pt, ss::lep3_p4()*lep3ccpt/lep3pt);
+                    float mt2_23 = MT2(ss::met(), ss::metPhi(), ss::lep2_p4()*lep2ccpt/lep2pt, ss::lep3_p4()*lep3ccpt/lep3pt);
+                    if (lep1ccpt > lep2ccpt) {
+                        mt2 = mt2_13;
                     } else {
-                        p_result.h_el_l3eta.br       ->Fill(lep3eta                                                                     , weight);
+                        mt2 = mt2_23;
                     }
+                    mt2min = min(mt2_13, mt2_23);
                 }
             }
+            p_result.h_mt2.CatFill(kcategs, mt2, weight);
+            p_result.h_mt2min.CatFill(kcategs, mt2min, weight);
+            p_result.h_mtmin.CatFill(kcategs, kcategs & kMultileptonOnZ ? mtnonz : mtmin, weight);
+            p_result.h_twobinmt2.CatFill(kcategs, mt2, weight);
+            p_result.h_twobinmtmin.CatFill(kcategs, kcategs & kMultileptonOnZ ? mtnonz : mtmin, weight);
+            p_result.h_nbtags.CatFill(kcategs, ss::nbtags(), weight);
+            p_result.h_njets.CatFill(kcategs, ss::njets(), weight);
+            p_result.h_nleps.CatFill(kcategs, nleps, weight);
+            p_result.h_nleptonicW.CatFill(kcategs, ss::nleptonicW(), weight);
+            p_result.h_type.CatFill(kcategs, mytype, weight);
+            p_result.h_type3.CatFill(kcategs, (abs(lep1id)==11)+(abs(lep2id)==11)+(abs(lep3id)==11), weight);
+            p_result.h_category.CatFill(kcategs,
+                    1.0*(categ == HighHigh) +
+                    2.0*(categ == HighLow) +
+                    3.0*(categ == LowLow) +
+                    4.0*((kcategs & kMultileptonOffZ)>0) +
+                    5.0*((kcategs & kMultileptonOnZ)>0),
+                    weight);
+            p_result.h_charge.CatFill(kcategs, lep1id > 0 ? -0.5 : 0.5, weight);
+            p_result.h_charge3.CatFill(kcategs, ((lep1id>0)^(lep3id>0))-0.5, weight); // 0.5 if 3 charges are SSO, -0.5 if SSS
+            p_result.h_nvtx.CatFill(kcategs, ss::nGoodVertices(), weight);
 
-            if (SR == 1) { // ttZ CR
-                p_result.h_njets.ttzcr->Fill(ss::njets() , weight);
-                p_result.h_nbtags.ttzcr->Fill(ss::nbtags() , weight);
-                p_result.h_type.ttzcr->Fill(mytype , weight);
-                p_result.h_charge.ttzcr->Fill(lep1id > 0 ? -0.5: 0.5 , weight);
-                p_result.h_nleps.ttzcr->Fill(nleps , weight);
-                p_result.h_ht.ttzcr->Fill(ss::ht() , weight);
-                p_result.h_met.ttzcr->Fill(ss::met() , weight);
-                // p_result.h_mvis.ttzcr->Fill(mvis , weight);
-                // p_result.h_mtvis.ttzcr->Fill(mtvis , weight);
-                p_result.h_mll.ttzcr->Fill(mll , weight);
-                p_result.h_mtmin.ttzcr->Fill(mtmin , weight);
-                p_result.h_l1pt.ttzcr->Fill(pto1, weight);
-                p_result.h_l2pt.ttzcr->Fill(pto2, weight);
-                (abs(lep1id) == 11) ? p_result.h_el_l1pt.ttzcr->Fill(pto1, weight) : p_result.h_mu_l1pt.ttzcr->Fill(pto1, weight);
-                (abs(lep2id) == 11) ? p_result.h_el_l2pt.ttzcr->Fill(pto2, weight) : p_result.h_mu_l2pt.ttzcr->Fill(pto2, weight);
-                if (plotlep3) {
-                    float mllos1 = (ss::lep1_p4()*lep1ccpt/lep1pt+ss::lep3_p4()*lep3ccpt/lep3pt).M();
-                    float mllos2 = (ss::lep2_p4()*lep2ccpt/lep2pt+ss::lep3_p4()*lep3ccpt/lep3pt).M();
-                    float mllos = fabs(mllos1 - 91.2) < fabs(mllos2 - 91.2) ? mllos1 : mllos2;
-                    p_result.h_mllos.ttzcr->Fill(mllos, weight);
-                    p_result.h_l3pt.ttzcr->Fill(pto3, weight);
-                    (abs(lep3id) == 11) ? p_result.h_el_l3pt.ttzcr->Fill(pto3, weight) : p_result.h_mu_l3pt.ttzcr->Fill(pto3, weight);
-                }
-            }
 
-            if (SR == 2) { // ttW CR
-                p_result.h_njets.ttwcr->Fill(ss::njets() , weight);
-                p_result.h_nbtags.ttwcr->Fill(ss::nbtags() , weight);
-                p_result.h_type.ttwcr->Fill(mytype , weight);
-                p_result.h_charge.ttwcr->Fill(lep1id > 0 ? -0.5: 0.5 , weight);
-                p_result.h_nleps.ttwcr->Fill(nleps , weight);
-                p_result.h_ht.ttwcr->Fill(ss::ht() , weight);
-                p_result.h_met.ttwcr->Fill(ss::met() , weight);
-                // p_result.h_mvis.ttwcr->Fill(mvis , weight);
-                // p_result.h_mtvis.ttwcr->Fill(mtvis , weight);
-                p_result.h_mll.ttwcr->Fill(mll , weight);
-                p_result.h_mtmin.ttwcr->Fill(mtmin , weight);
-                p_result.h_l1pt.ttwcr->Fill(pto1, weight);
-                p_result.h_l2pt.ttwcr->Fill(pto2, weight);
-                (abs(lep1id) == 11) ? p_result.h_el_l1pt.ttwcr->Fill(pto1, weight) : p_result.h_mu_l1pt.ttwcr->Fill(pto1, weight);
-                (abs(lep2id) == 11) ? p_result.h_el_l2pt.ttwcr->Fill(pto2, weight) : p_result.h_mu_l2pt.ttwcr->Fill(pto2, weight);
-                if (plotlep3) {
-                    p_result.h_l3pt.ttwcr->Fill(pto3, weight);
-                    (abs(lep3id) == 11) ? p_result.h_el_l3pt.ttwcr->Fill(pto3, weight) : p_result.h_mu_l3pt.ttwcr->Fill(pto3, weight);
-                }
-            }
 
-            if (SR > nCR) {
-                // std::cout <<  " ss::ht(): " << ss::ht() <<  " weight: " << weight <<  " SR: " << SR <<  std::endl;
-                p_result.SR.TOTAL->Fill(SR-nCR, weight);
-                p_result.h_njets.sr->Fill(ss::njets() , weight);
-                p_result.h_nbtags.sr->Fill(ss::nbtags() , weight);
-                p_result.h_type.sr->Fill(mytype , weight);
-                p_result.h_charge.sr->Fill(lep1id > 0 ? -0.5: 0.5 , weight);
-                p_result.h_nleps.sr->Fill(nleps , weight);
-                p_result.h_ht.sr->Fill(ss::ht() , weight);
-                // if (SR == 1+2)  p_result.h_ht_sr1.sr->Fill(ss::ht() , weight);
-                // if (SR == 2+2)  p_result.h_ht_sr2.sr->Fill(ss::ht() , weight);
-                // if (SR == 4+2)  p_result.h_ht_sr4.sr->Fill(ss::ht() , weight);
-                // if (SR == 5+2)  p_result.h_ht_sr5.sr->Fill(ss::ht() , weight);
-                // if (SR == 11+2) p_result.h_ht_sr11.sr->Fill(ss::ht() , weight);
-                p_result.h_met.sr->Fill(ss::met() , weight);
-                // p_result.h_mvis.sr->Fill(mvis , weight);
-                // p_result.h_mtvis.sr->Fill(mtvis , weight);
-                p_result.h_mll.sr->Fill(mll , weight);
-                p_result.h_mtmin.sr->Fill(mtmin , weight);
-                p_result.h_l1pt.sr->Fill(pto1, weight);
-                p_result.h_l2pt.sr->Fill(pto2, weight);
-                (abs(lep1id) == 11) ? p_result.h_el_l1pt.sr->Fill(pto1, weight) : p_result.h_mu_l1pt.sr->Fill(pto1, weight);
-                (abs(lep2id) == 11) ? p_result.h_el_l2pt.sr->Fill(pto2, weight) : p_result.h_mu_l2pt.sr->Fill(pto2, weight);
-                if (plotlep3) {
-                    p_result.h_l3pt.sr->Fill(pto3, weight);
-                    (abs(lep3id) == 11) ? p_result.h_el_l3pt.sr->Fill(pto3, weight) : p_result.h_mu_l3pt.sr->Fill(pto3, weight);
-                }
-                // for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {
-                //     p_result.h_bjetpt.sr->Fill(ss::btags()[ijet].pt(),weight);
-                // }
-                // for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
-                //     p_result.h_jetpt.sr->Fill(ss::jets()[ijet].pt(),weight);
-                // }
-                if (abs(lep1id) == 11) p_result.h_mva.sr->Fill(ss::lep1_MVA()                                                     , weight);
-                if(abs(lep1id) == 13) {
-                    p_result.h_mu_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_mu_l1eta.sr       ->Fill(lep1eta                                                                     , weight);
-                    p_result.h_mu_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep1_ptRatio.sr->Fill(ss::lep1_ptratio()                                                                               , weight);
-                } else {
-                    p_result.h_el_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
-                    p_result.h_el_l1eta.sr       ->Fill(lep1eta                                                                     , weight);
-                    p_result.h_el_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
-                    p_result.h_el_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep1_ptRatio.sr->Fill(ss::lep1_ptratio()                                                                               , weight);
-                }
-                if (abs(lep2id) == 11) p_result.h_mva.sr->Fill(ss::lep2_MVA()                                                     , weight);
-                if(abs(lep2id) == 13) {
-                    p_result.h_mu_sip3d_lep2.sr  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_mu_l2eta.sr       ->Fill(lep2eta                                                                     , weight);
-                    p_result.h_mu_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_mu_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_mu_lep2_ptRatio.sr->Fill(ss::lep2_ptratio()                                                                               , weight);
-                } else {
-                    p_result.h_el_sip3d_lep2.sr  ->Fill(ss::lep2_sip()                                                                          , weight);
-                    p_result.h_el_l2eta.sr       ->Fill(lep2eta                                                                     , weight);
-                    p_result.h_el_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
-                    p_result.h_el_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
-                    p_result.h_el_lep2_ptRatio.sr->Fill(ss::lep2_ptratio()                                                                               , weight);
-                }
-                if (plotlep3) {
-                    if(abs(lep3id) == 13) {
-                        p_result.h_mu_l3eta.sr       ->Fill(lep3eta                                                                     , weight);
-                    } else {
-                        p_result.h_el_l3eta.sr       ->Fill(lep3eta                                                                     , weight);
-                    }
-                }
+            if (write_tree) {
+                output_tree.FillVars(
+                        ss::event(), ss::lumi(), ss::run(),
+                        weight, SR, ss::hyp_class(), categ, kcategs,
+                        lep1id, lep2id, lep3id, ss::nbtags(), ss::njets(), nleps,
+                        ss::met(), ss::ht(), mtmin, mt2, mt2min
+                        );
             }
 
 
@@ -1685,34 +1613,9 @@ plots_t run(TChain *chain, int year, TString options){
     }//file loop
     if (!quiet) bar.finish();
 
-    if (!isData) {
-        avoidNegativeYields(p_result.p_btagSF_alt_up_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_btagSF_alt_dn_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_btagSF_alt_up_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_btagSF_alt_dn_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_pu_alt_up_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_pu_alt_dn_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_pu_alt_up_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_pu_alt_dn_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_isr_alt_up_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_isr_alt_dn_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_isr_alt_up_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_isr_alt_dn_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_lep_alt_up_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_lep_alt_dn_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_lep_alt_up_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_lep_alt_dn_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.SRCR.TOTAL);
-        avoidNegativeYields(p_result.SRDISC.TOTAL);
-        avoidNegativeYields(p_result.SR.TOTAL);
-        avoidNegativeYields(p_result.p_jes_alt_up_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_jes_alt_dn_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_jes_alt_up_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_jes_alt_dn_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_jer_alt_up_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_jer_alt_dn_SRCR.TOTAL);
-        avoidNegativeYields(p_result.p_jer_alt_up_SRDISC.TOTAL);
-        avoidNegativeYields(p_result.p_jer_alt_dn_SRDISC.TOTAL);
+    if (write_tree) {
+        if (!quiet) std::cout << "Writing output tree" << std::endl;
+        output_tree.Write();
     }
 
     //Return yield
@@ -1730,18 +1633,13 @@ void avoidNegativeYields(TH1F* plot) {
 }
 
 
-void initHistError(bool usePoisson, TH1F* plot) {
-    if (plot==0) return;
-    if (usePoisson) plot->SetBinErrorOption(TH1::kPoisson);
-    else  plot->Sumw2();
-}
-
 float getSMSscale1fb() {
     if (!h_counts) {
         std::cerr << "Count histogram (h_counts) isn't loaded!" << std::endl;
         exit(1);
     }
     float count = h_counts->GetBinContent(h_counts->FindBin(ss::sparms()[0],ss::sparms()[1]));
+    // return 1000.0*ss::xsec()/count;
     return 1000.0*ss::xsec()/count;
 }
 

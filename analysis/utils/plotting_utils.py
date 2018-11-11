@@ -2,13 +2,13 @@ import numpy as np
 from pytable import Table
 from analysis.limits.errors import E
 
-def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2,sep = u"\u00B1".encode("utf-8"), binedge_fmt="{}-{}"):
+def write_table(data, bgs, outname=None, signal=None, signame="tttt",extra_hists=[],precision=2,sep = u"\u00B1".encode("utf-8"), binedge_fmt="{}-{}", binlabels=[],csv=False):
     tab = Table()
     sumbgs = sum(bgs)
     databg = data/sumbgs
     if signal is not None:
         procs = bgs+[sumbgs,data,databg,signal]
-        cnames = [bg.get_attr("label") for bg in bgs] + ["Total bkg","Data", "Data/bkg","tttt"]
+        cnames = [bg.get_attr("label") for bg in bgs] + ["Total bkg","Data", "Data/bkg",signame]
     else:
         procs = bgs+[sumbgs,data,databg]
         cnames = [bg.get_attr("label") for bg in bgs] + ["Total bkg","Data", "Data/bkg"]
@@ -16,12 +16,15 @@ def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2
         procs.append(eh)
         cnames.append(eh.get_attr("label"))
     tab.set_column_names(["bin"]+cnames)
-    if outname:
+    if outname and not csv:
         sep = "+-"
     binpairs = zip(data.edges[:-1],data.edges[1:])
     tab.set_theme_basic()
     for ibin,binrow in enumerate(binpairs):
-        row = [("[%s]"%binedge_fmt).format(binrow[0],binrow[1])]
+        if ibin < len(binlabels):
+            row = [binlabels[ibin]]
+        else:
+            row = [("[%s]"%binedge_fmt).format(binrow[0],binrow[1])]
         for iproc,proc in enumerate(procs):
             cent = max(proc.counts[ibin],0.)
             err = proc.errors[ibin]
@@ -52,6 +55,11 @@ def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2
             binparts = parts[3:-4]
             total = parts[-4:-1]
             table_info = { "header":"<br>".join(header), "bins":binparts, "total":"<br>".join(total) }
+            if csv:
+                tab.set_theme_csv()
+                with open(outname.replace(".txt",".csv"),"w") as fhout:
+                    towrite = "".join(tab.get_table_string(show_row_separators=False,show_alternating=False))
+                    fhout.write(towrite)
             return table_info
     return tab
 

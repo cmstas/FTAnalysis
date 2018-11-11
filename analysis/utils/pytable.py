@@ -103,13 +103,13 @@ class Table():
         self.d_style["OUTER_TOP_LEFT"] = '+'
         self.d_style["OUTER_TOP_RIGHT"] = '+'
 
-    def set_theme_csv(self):
+    def set_theme_csv(self, delim=","):
         self.theme = "csv"
         self.use_color = False
 
         self.d_style["INNER_HORIZONTAL"] = ''
-        self.d_style["INNER_INTERSECT"] = ','
-        self.d_style["INNER_VERTICAL"] = ','
+        self.d_style["INNER_INTERSECT"] = delim
+        self.d_style["INNER_VERTICAL"] = delim
         self.d_style["OUTER_LEFT_INTERSECT"] = ''
         self.d_style["OUTER_LEFT_VERTICAL"] = ''
         self.d_style["OUTER_RIGHT_INTERSECT"] = ''

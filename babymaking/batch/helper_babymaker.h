@@ -160,7 +160,7 @@ class babyMaker {
     vector <float> sparms;
     float kfactor;
     string filename;
-    vector <float> genweights;
+    // vector <float> genweights;
     vector <string> genweightsID;
     bool passedFilterList;
 

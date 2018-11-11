@@ -5,11 +5,9 @@ import os
 import argparse
 import createCard
 import commands
+import subprocess
 
-# XSEC_TTTT = 0.0092 # pb
-XSEC_TTTT = 0.01197 # pb
-
-def parse_lims(lim_lines, fb=False):
+def parse_lims(lim_lines):
     """
     return dictionary with obs, exp, sp1, sm1 cross section limits in pb
     input xsec must be in pb
@@ -19,44 +17,25 @@ def parse_lims(lim_lines, fb=False):
         if "Observed" in line: d["obs"] = float(line.split("<")[-1])
         elif "Expected" in line: d["exp_"+line.split("%")[0].replace("Expected","").strip()] = float(line.split("<")[-1])
         elif "Significance:" in line: d["significance"] = float(line.split(":")[-1])
-        elif "p-value" in line: d["pvalue"] = float(line.split("=")[-1].replace(")",""))
-        elif "Best fit r:" in line:
-            parts = line.split(":")[-1].split()
-            rval = parts[0]
-            down, up = parts[1].replace("+","").replace("-","").split("/")
-            d["mu"] = float(rval)
-            d["mu_up"] = float(up)
-            d["mu_down"] = float(down)
 
-    mult = 1 if not fb else 1000.0
-    obs = d.get("obs",-1)*XSEC_TTTT*mult
-    exp = d.get("exp_50.0",-1)*XSEC_TTTT*mult
-    exp_sm1 = d.get("exp_16.0",-1)*XSEC_TTTT*mult
-    exp_sp1 = d.get("exp_84.0",-1)*XSEC_TTTT*mult
+    obs = d.get("obs",-1)
+    exp = d.get("exp_50.0",-1)
+    exp_sm1 = d.get("exp_16.0",-1)
+    exp_sp1 = d.get("exp_84.0",-1)
     return {
             "obs":obs, "exp":exp,
             "sp1":exp_sp1,"sm1":exp_sm1,
-            "significance": d.get("significance",-1.),
-            "pvalue": d.get("pvalue",-1.),
-            "mu": d.get("mu",-999.),
-            "mu_up": d.get("mu_up",-999.),
-            "mu_down": d.get("mu_down",-999.),
             }
 
 def print_lims(d_lims, fb=False, unblinded=False):
-    unit = "pb" if not fb else "fb"
     if unblinded:
-        print "  Obs UL: %.2f %s" % (d_lims["obs"], unit)
-    print "  Exp UL: %.2f +%.2f -%.2f %s" % (d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"], unit)
-    if d_lims.get("significance",-1) > 0.:
-        print "  Sig: %.3f (p-value: %.4f)" % (d_lims["significance"], d_lims["pvalue"])
-    if d_lims.get("mu",-999) > -980.:
-        print "  Mu: %.3f (+%.3f -%.3f) | (+%.1f%% -%.1f%%)" % (d_lims["mu"], d_lims["mu_up"], d_lims["mu_down"], 100.*(d_lims["mu_up"]/d_lims["mu"]), 100.*(d_lims["mu_down"]/d_lims["mu"]))
+        print "  Obs UL: r = {:.3f}".format(d_lims["obs"])
+    print "  Exp UL: r = {:.3f} (+{:.3f} -{:.3f})".format(d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"])
 
 def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False, ignorefakes=False,
-        verbose=True, dolimits=True, dosignificance=True, doscan=True,
-        unblinded=False,sig="tttt", allownegative=False, inject_tttt=False,
-        use_autostats=True, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=-1, nosyst=False):
+        verbose=True, dolimits=True, dosignificance=False, doscan=False,includeml=False,
+        unblinded=False,sig="fs_t1tttt_m1600_m500", allownegative=False, inject_tttt=False,
+        use_autostats=True, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=2016, nosyst=False):
 
     params = locals()
 
@@ -72,7 +51,7 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
 
 
     if ".txt" not in card:
-        card += "/card_{0}_{1}.txt".format(sig, regions)
+        card += "/card_{}_{}_{}.txt".format(sig, regions, year)
         if verbose: print ">>> [!] no card name specified, so using {0}".format(card)
 
     full_card_name = "{0}".format(card)
@@ -81,8 +60,20 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
 
     if not os.path.isfile(full_card_name) or redocard:
         if verbose: print ">>> Making card"
-        dirname, cardname = card.rsplit("/",1)
-        createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh, year=year, ignorefakes=ignorefakes)
+        dirname, cardname = full_card_name.rsplit("/",1)
+        if regions != "all":
+            createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh, year=year, ignorefakes=ignorefakes)
+        else:
+            onames = []
+            for reg in ["srhh","srhl","srll"]+(["srml"] if includeml else []):
+                oname = cardname.replace("_all","_{}".format(reg)) 
+                onames.append(oname)
+                createCard.writeOneCard(dirname,oname, kine=reg,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh, year=year, ignorefakes=ignorefakes, rateparams=False)
+                cwd = os.getcwd()
+                os.chdir(dirname)
+                f = open(cardname, "wb")
+                subprocess.call(["combineCards.py"]+onames,stdout=f)
+                os.chdir(cwd)
         if verbose: print ">>> Making workspace"
         # There was a bug with combine (https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/issues/491) which needed text2workspace to be explicitly
         # run before using FitDiagnostics (for mu scan & pre/postfit), but this is fixed in the 81x branch (cherry pick 69c180a04c05d0bad6a6c38d97cdc431cfe4fb49 in 94x if
@@ -134,7 +125,7 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
         if verbose: print ">>> [!] Limits already run, so reusing. Pass the --redolimits flag to redo the limits"
         stat, out = 0, open(full_log_name,"r").read()
 
-    d_lims = parse_lims(out.splitlines(), fb=True)
+    d_lims = parse_lims(out.splitlines())
 
     # now check to see if it's legit
     if d_lims["exp"] < 0. and doupperlimit:
@@ -171,7 +162,12 @@ if __name__ == "__main__":
     parser.add_argument(      "--scaletth", help="scale tth (default: %(default)s)", default=1.0, type=float)
     parser.add_argument(      "--nosyst", help="no systs at all, but note autoMCStats might be included (default: %(default)s)", action="store_true")
     parser.add_argument(      "--ignorefakes", help="ignore fake background entirely (default: %(default)s)", action="store_true")
+    parser.add_argument(      "--includeml", help="include multilep channel (default: %(default)s)", action="store_true")
     args = parser.parse_args()
+
+    if "fs_" in args.sig:
+        args.noscan = True
+        args.nosignificance = True
 
     # d_lims = get_lims(args)
     d_lims = get_lims(
@@ -193,8 +189,9 @@ if __name__ == "__main__":
             year=args.year,
             nosyst=args.nosyst,
             ignorefakes=args.ignorefakes,
+            includeml=args.includeml,
             )
     print "card: {}".format(args.card.strip())
     print "------------------------------"
-    print_lims(d_lims, fb=True, unblinded=args.unblinded)
+    print_lims(d_lims, unblinded=args.unblinded)
     print "------------------------------"

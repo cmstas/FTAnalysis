@@ -13,7 +13,7 @@ os.system("mkdir -p plots/")
 
 
 
-def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
+def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix="", lumi=-1, year=2016):
 
     os.system("mkdir -p {}/".format(outputdir))
 
@@ -37,22 +37,23 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
             ["lepphi", "$\\phi$(lep)"],
             ["mll", "$m_{ll}$"],
             ["nvtx", "# good vertices"],
-            ["lep1nmiss", "lep1 nmiss"],
-            ["lep2nmiss", "lep2 nmiss"],
+            # ["lep1nmiss", "lep1 nmiss"],
+            # ["lep2nmiss", "lep2 nmiss"],
             ]:
 
-        obs = Hist1D(f["clos_{}_plot_data".format(var)], label="obs (data)", no_overflow=True)
-        pred = Hist1D(f["clos_{}_plot_MC".format(var)], label="pred (data)", color=(28/255.,168/255.,19/255.), no_overflow=True)
-        obsMC = Hist1D(f["clos_{}_plot_MCp".format(var)], label="obs (MC)", color=(68/255.,61/255.,165/255.), no_overflow=True)
+        obs = Hist1D(f["clos_{}_plot_data".format(var)], label="obs SS (data)", no_overflow=True)
+        pred = Hist1D(f["clos_{}_plot_MC".format(var)], label="pred SS (data)", color=(28/255.,168/255.,19/255.), no_overflow=True)
+        obsMC = Hist1D(f["clos_{}_plot_MCp".format(var)], label="obs SS (MC)", color=(68/255.,61/255.,165/255.), no_overflow=True)
         pred *= sf
         ratio = obs/pred
 
         fname = "{}/{}{}.pdf".format(outputdir,prefix,var)
         plot_stack(bgs=[pred], sigs=[obsMC],data=obs, xlabel=xlabel, ylabel="Events",filename=fname,
                 cms_type = " Preliminary",
-                lumi = "41.3",
+                lumi = lumi,
                 ratio=ratio,
                 ratio_range=[0.5,1.5],
+                title=year,
                 mpl_hist_params={
                     "linewidth": 0.5,
                     "linestyle": "-",
@@ -69,10 +70,10 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
                         "Pred scaled by {:.2f}".format(sf),
                         loc="center right",
                         frameon=False,
-                        prop=dict(color="b"),
+                        prop=dict(color="red"),
                         )
                     ),
-                ax_ratio_callback = lambda ax: ax.legend_.remove(),
+                # ax_ratio_callback = lambda ax: ax.legend_.remove(),
                 )
         # os.system("ic {}".format(fname))
         print "Wrote {}".format(fname)
@@ -86,7 +87,8 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
             ratio_range=[0.8,1.2]
         plot_stack(data=data, bgs=[mc], xlabel=xlabel, ylabel="Events",filename=fname,
                 cms_type = "Preliminary",
-                lumi = "41.3",
+                lumi = lumi,
+                title=year,
                 ratio_range=ratio_range,
                 ax_main_callback = lambda ax: ax.add_artist(
                     matplotlib.offsetbox.AnchoredText(
@@ -96,13 +98,21 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix=""):
                         prop=dict(color="b"),
                         )
                     ),
-                ax_ratio_callback = lambda ax: ax.legend_.remove(),
+                # ax_ratio_callback = lambda ax: ax.legend_.remove(),
                 )
         # os.system("ic {}".format(fname))
         print "Wrote {}".format(fname)
 
 if __name__ == "__main__":
-    make_plots("plots", "outputs/histos.root",   prefix="all_")
+    make_plots("plots", "outputs/histos_2016.root", year=2016,  prefix="y2016_", lumi="35.9")
+    make_plots("plots", "outputs/histos_2017.root", year=2017,  prefix="y2017_", lumi="41.5")
+    make_plots("plots", "outputs/histos_2018.root", year=2018,  prefix="y2018_", lumi="46.6")
+    # make_plots("plots", "outputs/histos_2016_94x.root", year="2016 (94x)",  prefix="y201694x_", lumi="35.9")
+    # make_plots("plots", "outputs/histos_2016_tail.root", year="2016 (tail)",  prefix="y2016tail_", lumi="35.9")
+    # make_plots("plots", "outputs/histos_2016_mu.root", year="2016 (mu)",  prefix="y2016mu_", lumi="35.9")
+    # make_plots("plots", "outputs/histos_2017_mu.root", year="2017 (mu)",  prefix="y2017mu_", lumi="41.5")
+
+    # make_plots("plots", "outputs/histos.root",   prefix="all_")
     # make_plots("plots", "outputs/histos_B.root", prefix="Run2017B_")
     # make_plots("plots", "outputs/histos_C.root", prefix="Run2017C_")
     # make_plots("plots", "outputs/histos_D.root", prefix="Run2017D_")

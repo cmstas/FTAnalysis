@@ -1257,6 +1257,18 @@ void SSAG::Init(TTree *tree) {
     lep4_coneCorrPt_branch = tree->GetBranch("lep4_coneCorrPt");
     if (lep4_coneCorrPt_branch) { lep4_coneCorrPt_branch->SetAddress(&lep4_coneCorrPt_); }
   }
+
+  prefire2016_sf_branch = 0;
+  if (tree->GetBranch("prefire2016_sf") != 0) {
+    prefire2016_sf_branch = tree->GetBranch("prefire2016_sf");
+    if (prefire2016_sf_branch) { prefire2016_sf_branch->SetAddress(&prefire2016_sf_); }
+  }
+
+  prefire2017_sf_branch = 0;
+  if (tree->GetBranch("prefire2017_sf") != 0) {
+    prefire2017_sf_branch = tree->GetBranch("prefire2017_sf");
+    if (prefire2017_sf_branch) { prefire2017_sf_branch->SetAddress(&prefire2017_sf_); }
+  }
 	met3p0_branch = 0;
 	if (tree->GetBranch("met3p0") != 0) {
 		met3p0_branch = tree->GetBranch("met3p0");
@@ -1742,6 +1754,11 @@ void SSAG::Init(TTree *tree) {
 		nhadronicW_branch = tree->GetBranch("nhadronicW");
 		if (nhadronicW_branch) {nhadronicW_branch->SetAddress(&nhadronicW_);}
 	}
+	nleptonicW_branch = 0;
+	if (tree->GetBranch("nleptonicW") != 0) {
+		nleptonicW_branch = tree->GetBranch("nleptonicW");
+		if (nleptonicW_branch) {nleptonicW_branch->SetAddress(&nleptonicW_);}
+	}
 	extragenb_branch = 0;
 	if (tree->GetBranch("extragenb") != 0) {
 		extragenb_branch = tree->GetBranch("extragenb");
@@ -2165,6 +2182,8 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_trigMatch_noIsoReq_isLoaded = false;
 		lep2_trigMatch_isoReq_isLoaded = false;
 		met3p0_isLoaded = false;
+  prefire2016_sf_isLoaded = false;
+  prefire2017_sf_isLoaded = false;
   lep4_coneCorrPt_isLoaded = false;
   bdt_jec_up_nbtags_isLoaded = false;
   bdt_jec_dn_nbtags_isLoaded = false;
@@ -2316,6 +2335,7 @@ void SSAG::GetEntry(unsigned int idx)
 		isr_unc_isLoaded = false;
 		nisrMatch_isLoaded = false;
 		nhadronicW_isLoaded = false;
+		nleptonicW_isLoaded = false;
 		extragenb_isLoaded = false;
 		weight_isr_isLoaded = false;
 		weight_isr_UP_isLoaded = false;
@@ -2554,6 +2574,8 @@ void SSAG::LoadAllBranches()
 	if (lep2_trigMatch_noIsoReq_branch != 0) lep2_trigMatch_noIsoReq();
 	if (lep2_trigMatch_isoReq_branch != 0) lep2_trigMatch_isoReq();
 	if (met3p0_branch != 0) met3p0();
+  if (prefire2016_sf_branch != 0) prefire2016_sf();
+  if (prefire2017_sf_branch != 0) prefire2017_sf();
   if (lep4_coneCorrPt_branch != 0) lep4_coneCorrPt();
   if (bdt_jec_up_nbtags_branch != 0) bdt_jec_up_nbtags();
   if (bdt_jec_dn_nbtags_branch != 0) bdt_jec_dn_nbtags();
@@ -2705,6 +2727,7 @@ void SSAG::LoadAllBranches()
 	if (isr_unc_branch != 0) isr_unc();
 	if (nisrMatch_branch != 0) nisrMatch();
 	if (nhadronicW_branch != 0) nhadronicW();
+	if (nleptonicW_branch != 0) nleptonicW();
 	if (extragenb_branch != 0) extragenb();
 	if (weight_isr_branch != 0) weight_isr();
 	if (weight_isr_UP_branch != 0) weight_isr_UP();
@@ -5808,6 +5831,32 @@ const float &SSAG::lep4_coneCorrPt() {
   }
   return lep4_coneCorrPt_;
 }
+
+const float &SSAG::prefire2016_sf() {
+  if (not prefire2016_sf_isLoaded) {
+    if (prefire2016_sf_branch != 0) {
+      prefire2016_sf_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2016_sf_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2016_sf_isLoaded = true;
+  }
+  return prefire2016_sf_;
+}
+
+const float &SSAG::prefire2017_sf() {
+  if (not prefire2017_sf_isLoaded) {
+    if (prefire2017_sf_branch != 0) {
+      prefire2017_sf_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2017_sf_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2017_sf_isLoaded = true;
+  }
+  return prefire2017_sf_;
+}
 	const float &SSAG::met3p0()
 	{
 		if (not met3p0_isLoaded) {
@@ -7147,6 +7196,19 @@ const float &SSAG::lep4_coneCorrPt() {
 		}
 		return nhadronicW_;
 	}
+	const int &SSAG::nleptonicW()
+	{
+		if (not nleptonicW_isLoaded) {
+			if (nleptonicW_branch != 0) {
+				nleptonicW_branch->GetEntry(index);
+			} else { 
+				printf("branch nleptonicW_branch does not exist!\n");
+				exit(1);
+			}
+			nleptonicW_isLoaded = true;
+		}
+		return nleptonicW_;
+	}
 	const int &SSAG::extragenb()
 	{
 		if (not extragenb_isLoaded) {
@@ -7957,6 +8019,8 @@ namespace ss {
 	const bool &lep2_trigMatch_noIsoReq() { return samesign.lep2_trigMatch_noIsoReq(); }
 	const bool &lep2_trigMatch_isoReq() { return samesign.lep2_trigMatch_isoReq(); }
 	const float &met3p0() { return samesign.met3p0(); }
+  const float &prefire2016_sf() { return samesign.prefire2016_sf(); }
+  const float &prefire2017_sf() { return samesign.prefire2017_sf(); }
   const float &lep4_coneCorrPt() { return samesign.lep4_coneCorrPt(); }
   const float &bdt_jec_up_nbtags() { return samesign.bdt_jec_up_nbtags(); }
   const float &bdt_jec_dn_nbtags() { return samesign.bdt_jec_dn_nbtags(); }
@@ -8108,6 +8172,7 @@ namespace ss {
 	const float &isr_unc() { return samesign.isr_unc(); }
 	const int &nisrMatch() { return samesign.nisrMatch(); }
 	const int &nhadronicW() { return samesign.nhadronicW(); }
+	const int &nleptonicW() { return samesign.nleptonicW(); }
 	const int &extragenb() { return samesign.extragenb(); }
 	const float &weight_isr() { return samesign.weight_isr(); }
 	const float &weight_isr_UP() { return samesign.weight_isr_UP(); }

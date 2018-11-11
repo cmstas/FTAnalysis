@@ -30,15 +30,17 @@ class Process(object):
         self.hlt  = "-"
         # self.lephlt  = "-"
         self.hthlt  = "-"
+        self.fs_hlt  = "-"
+        self.fs_lepeff  = "-"
         self.btag = "-"
         self.pu = "-"
         self.TTWSF = "-"
         self.TTZSF = "-"
-        # self.WZSF = "-"
+        self.WZSF = "-"
         self.TTH = "-"
         self.TTTT = "-"
         self.TTVV = "-"
-        # self.WW = "-"
+        self.WW = "-"
         self.XG = "-"
         self.rares = "-"
         self.fakes = "-"
@@ -58,7 +60,7 @@ class Process(object):
                 self.ratecache = f.Get(self.plot).Integral()
                 return self.ratecache
             else:
-                print self.plot+" not found in "+self.rootf
+                # print self.plot+" not found in "+self.rootf
                 return 0
 
     def bins(self):
@@ -70,7 +72,7 @@ class Process(object):
                 self.binscache = list(f.Get(self.plot))[1:-1]
                 return self.binscache
             else:
-                print self.plot+" not found in "+self.rootf
+                # print self.plot+" not found in "+self.rootf
                 return []
 
 def writeUncorrelatedFakesForProcess(thedir, card, kine, process, processes, lnN=1.3):
@@ -179,7 +181,7 @@ def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
 
 
 #write card regardless of number of processes (but make sure signal is first in list)
-def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=0.0, use_autostats=False, ignorefakes=False):
+def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=0.0, use_autostats=True, ignorefakes=False, rateparams=True):
 
     line = "---------------------------------------------------------------"
     binname = "SS"
@@ -215,10 +217,10 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     #separate
     card.write(line+"\n")
 
-    #nuisance TTTT
-    card.write("%-40s %-5s " % ("TTTT","lnN"))
-    for process in processes: card.write("%-15s " % (process.TTTT))
-    card.write("\n")
+    ##nuisance TTTT
+    #card.write("%-40s %-5s " % ("TTTT","lnN"))
+    #for process in processes: card.write("%-15s " % (process.TTTT))
+    #card.write("\n")
     #nuisance lumi
     card.write("%-40s %-5s " % ("lumi","lnN"))
     for process in processes: card.write("%-15s " % (process.lumi))
@@ -227,18 +229,24 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     card.write("%-40s %-5s " % ("jes","shape"))
     for process in processes: card.write("%-15s " % (process.jes))
     card.write("\n")
-    #nuisance jer
-    card.write("%-40s %-5s " % ("jer","shape"))
-    for process in processes: card.write("%-15s " % (process.jer))
-    card.write("\n")
+    ##nuisance jer
+    #card.write("%-40s %-5s " % ("jer","shape"))
+    #for process in processes: card.write("%-15s " % (process.jer))
+    #card.write("\n")
     #nuisance isr
     card.write("%-40s %-5s " % ("isr","shape"))
     for process in processes: card.write("%-15s " % (process.isr))
     card.write("\n")
-    #nuisance bb
-    card.write("%-40s %-5s " % ("bb","shape"))
-    for process in processes: card.write("%-15s " % (process.bb))
+    ##nuisance bb
+    #card.write("%-40s %-5s " % ("bb","shape"))
+
+    # met genmet for fastsim
+    card.write("%-40s %-5s " % ("met","shape"))
+    for process in processes: card.write("%-15s " % (process.met))
     card.write("\n")
+
+    #for process in processes: card.write("%-15s " % (process.bb))
+    #card.write("\n")
     #nuisance lepeff
     card.write("%-40s %-5s " % ("lep","shape"))
     for process in processes: card.write("%-15s " % (process.lepeff))
@@ -246,6 +254,14 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     ##nuisance lephlt
     #card.write("%-40s %-5s " % ("lephlt","lnN"))
     #for process in processes: card.write("%-15s " % (process.lephlt))
+    #card.write("\n")
+    #nuisance fs_lepeff
+    card.write("%-40s %-5s " % ("fs_lepeff","lnN"))
+    for process in processes: card.write("%-15s " % (process.fs_lepeff))
+    card.write("\n")
+    #nuisance fs_hlt
+    card.write("%-40s %-5s " % ("fs_hlt","lnN"))
+    for process in processes: card.write("%-15s " % (process.fs_hlt))
     card.write("\n")
     #nuisance hthlt
     card.write("%-40s %-5s " % ("hthlt","shape"))
@@ -256,14 +272,14 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     for process in processes: card.write("%-15s " % (process.btag))
     card.write("\n")
 
-    #nuisance isrvar
-    card.write("%-40s %-5s " % ("isrvar","shape"))
-    for process in processes: card.write("%-15s " % (process.isrvar))
-    card.write("\n")
-    #nuisance fsrvar
-    card.write("%-40s %-5s " % ("fsrvar","shape"))
-    for process in processes: card.write("%-15s " % (process.fsrvar))
-    card.write("\n")
+    ##nuisance isrvar
+    #card.write("%-40s %-5s " % ("isrvar","shape"))
+    #for process in processes: card.write("%-15s " % (process.isrvar))
+    #card.write("\n")
+    ##nuisance fsrvar
+    #card.write("%-40s %-5s " % ("fsrvar","shape"))
+    #for process in processes: card.write("%-15s " % (process.fsrvar))
+    #card.write("\n")
 
     #nuisance scale
     card.write("%-40s %-5s " % ("scale","shape"))
@@ -298,21 +314,21 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     for process in processes: card.write("%-15s " % (process.TTH))
     card.write("\n")
 
-    #nuisance TTVV
-    card.write("%-40s %-5s " % ("TTVV","lnN"))
-    for process in processes: card.write("%-15s " % (process.TTVV))
+    ##nuisance TTVV
+    #card.write("%-40s %-5s " % ("TTVV","lnN"))
+    #for process in processes: card.write("%-15s " % (process.TTVV))
+    #card.write("\n")
+
+    #nuisance WZ
+    card.write("%-40s %-5s " % ("WZSF","lnN"))
+    for process in processes: card.write("%-15s " % (process.WZSF))
     card.write("\n")
 
-    # #nuisance WZ
-    # card.write("%-40s %-5s " % ("WZSF","lnN"))
-    # for process in processes: card.write("%-15s " % (process.WZSF))
-    # card.write("\n")
 
-
-    # #nuisance WW
-    # card.write("%-40s %-5s " % ("WW","lnN"))
-    # for process in processes: card.write("%-15s " % (process.WW))
-    # card.write("\n")
+    #nuisance WW
+    card.write("%-40s %-5s " % ("WW","lnN"))
+    for process in processes: card.write("%-15s " % (process.WW))
+    card.write("\n")
 
     #nuisance XG
     card.write("%-40s %-5s " % ("XG","lnN"))
@@ -354,14 +370,16 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
             if process.name in ["fakes"] and do_uncorrfakes:
                 writeUncorrelatedFakesForProcess(thedir,card,kine,process,processes,lnN=1.6)
 
-    card.write("tthscale rateParam * tth 1.0 [1.0,1.0]\n")
-    card.write("lumiscale rateParam * * 1.0 [1.0,1.0]\n")
+    if rateparams:
+        card.write("tthscale rateParam * tth 1.0 [1.0,1.0]\n")
+        card.write("lumiscale rateParam * * 1.0 [1.0,1.0]\n")
 
     return
 
-def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=False, thresh=0.0,year=-1, ignorefakes=False):
-    # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
-    inject_tttt = (signal != "tttt") or inject_tttt
+def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=False, thresh=0.0,year=-1, ignorefakes=False, rateparams=True):
+    # For SS, tttt is already in rares # NOTE
+    # # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
+    # inject_tttt = (signal != "tttt") or inject_tttt
     # do_tttt = True
     #define processes (signal first)
     # if pseudoData:
@@ -383,10 +401,10 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     num += 1
     TTH = Process(num,"tth","tth_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     num += 1
-    # WZ  = Process(num,"wz","wz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    # num += 1
-    # WW  = Process(num,"ww","ww_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    # num += 1
+    WZ  = Process(num,"wz","wz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
+    WW  = Process(num,"ww","ww_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    num += 1
     XG  = Process(num,"xg","xg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     num += 1
     rares = Process(num,"rares","rares_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
@@ -399,8 +417,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         num += 1
     flips = Process(num,"flips","flips_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     num += 1
-    TTVV = Process(num,"ttvv","ttvv_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-    num += 1
+    # TTVV = Process(num,"ttvv","ttvv_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    # num += 1
     if inject_tttt:
         os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
         TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
@@ -417,16 +435,23 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal.btag = "1"
     signal.pu = "1"
     signal.scale = "1"
-    signal.alphas = "1"
-    signal.isrvar = "1"
-    signal.fsrvar = "1"
+    signal.fs_hlt = "1.05"
+    signal.isr = "1"
+    if kine == "srhh": signal.fs_lepeff = "1.08"
+    if kine == "srhl": signal.fs_lepeff = "1.15"
+    if kine == "srll": signal.fs_lepeff = "1.20"
+    if kine == "srml": signal.fs_lepeff = "1.08"
+    # signal.alphas = "1"
+    # signal.isrvar = "1"
+    # signal.fsrvar = "1"
     signal.pdf = "1"
-    ttz_sf = "1.40"
-    ttw_sf = "1.40"
-    wz_sf = "1.15"
+    signal.met = "1"
+    ttz_sf = "1.30"
+    wz_sf = "1.12"
+    ttw_sf = "1.13"
     TTW.TTWSF          = ttw_sf
     TTW.lumi         = lumiunc
-    TTW.isr         = "1"
+    # TTW.isr         = "1"
     TTW.scale         = "1"
     TTW.pdf         = "1"
     TTW.alphas         = "1"
@@ -436,27 +461,27 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTW.lepeff  = "1.0"
     # TTW.lephlt  = "1.04"
     TTW.hlt  = "1.03"
-    # TTW.hthlt  = "1"
+    TTW.hthlt  = "1"
     TTW.btag = "1"
     TTW.pu = "1"
     TTZ.TTZSF          = ttz_sf
     TTZ.lumi          = lumiunc
-    TTZ.isr  = "1"
+    # TTZ.isr  = "1"
     TTZ.bb  = "1"
     TTZ.jes  = "1"
     TTZ.jer  = "1"
     TTZ.scale  = "1"
     TTZ.pdf  = "1"
     TTZ.alphas  = "1"
-    TTZ.lepeff  = "1.0"
+    # TTZ.lepeff  = "1.0"
     # TTZ.lephlt  = "1.04"
     TTZ.hlt  = "1.03"
     # TTZ.hthlt  = "1"
     TTZ.btag = "1"
     TTZ.pu = "1"
     # TTH.TTH          = "1.0"
-    # TTH.TTH          = "1.3"
-    TTH.TTH          = "1.5"
+    TTH.TTH          = "1.3"
+    # TTH.TTH          = "1.5"
     # TTH.TTH          = "0.936/1.099" # FIXME FIXME FIXME
     TTH.lumi          = lumiunc
     TTH.bb  = "1"
@@ -471,34 +496,37 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTH.hthlt  = "1"
     TTH.btag = "1"
     TTH.pu = "1"
-    TTVV.TTVV          = "1.5"
-    TTVV.lumi          = lumiunc
-    TTVV.jes  = "1"
-    TTVV.jer  = "1"
-    TTVV.lepeff  = "1.0"
-    # TTVV.lephlt  = "1.04"
-    TTVV.hlt  = "1.03"
-    TTVV.hthlt  = "1"
-    TTVV.btag = "1"
-    TTVV.pu = "1"
-    # WZ.WZSF = wz_sf
-    # WZ.jes  = "1"
-    # WZ.btag = "1"
-    # WZ.pu = "1"
-    # WW.WW = "1.20"
-    # WW.lumi = lumiunc
-    # WW.jes  = "1"
+    # TTVV.TTVV          = "1.5"
+    # TTVV.lumi          = lumiunc
+    # TTVV.jes  = "1"
+    # TTVV.jer  = "1"
+    # TTVV.lepeff  = "1.0"
+    # # TTVV.lephlt  = "1.04"
+    # TTVV.hlt  = "1.03"
+    # TTVV.hthlt  = "1"
+    # TTVV.btag = "1"
+    # TTVV.pu = "1"
+    WZ.WZSF = wz_sf
+    WW.lumi = lumiunc
+    WZ.jes  = "1"
+    WZ.btag = "1"
+    WZ.pu = "1"
+    WW.WW = "1.20"
+    WW.lumi = lumiunc
+    WW.jes  = "1"
+    WW.jer  = "1"
+    WW.lepeff  = "1"
     # if kine is "srcr": WW.lepeff  = "1.04"
     # WW.lephlt  = "1.04"
     # WW.hlt  = "1.03"
-    # WW.hthlt  = "1"
+    WW.hthlt  = "1"
     # WW.btag = "1"
     # WW.pu = "1"
     XG.XG = "1.50"
     XG.lumi = lumiunc
     XG.jes  = "1"
     XG.jer  = "1"
-    XG.lepeff  = "1.0"
+    XG.lepeff  = "1"
     # XG.lephlt  = "1.04"
     XG.hlt  = "1.03"
     XG.hthlt  = "1"
@@ -508,7 +536,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     rares.lumi = lumiunc
     rares.jes  = "1"
     rares.jer  = "1"
-    rares.lepeff  = "1.0"
+    rares.lepeff  = "1"
     # rares.lephlt  = "1.04"
     rares.hlt  = "1.03"
     rares.hthlt  = "1"
@@ -521,7 +549,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         TTTT.hlt  = "1.03"
         TTTT.jes  = "1"
         TTTT.jer  = "1"
-        TTTT.lepeff  = "1.0"
+        TTTT.lepeff  = "1"
         TTTT.hthlt  = "1"
         TTTT.btag = "1"
         TTTT.pu = "1"
@@ -543,13 +571,13 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     processes.append(TTW)
     processes.append(TTZ)
     processes.append(TTH)
-    # processes.append(WZ)
-    # processes.append(WW)
+    processes.append(WZ)
+    processes.append(WW)
     processes.append(XG)
     processes.append(rares)
     if not ignorefakes: processes.append(fakes)
     processes.append(flips)
-    processes.append(TTVV)
+    # processes.append(TTVV)
     if inject_tttt:
         processes.append(TTTT)
 
@@ -570,7 +598,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         data = newdata
 
     #create it
-    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=thresh, use_autostats=use_autostats, ignorefakes=ignorefakes )
+    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=thresh, use_autostats=use_autostats, ignorefakes=ignorefakes, rateparams=rateparams )
 
     # for proc in processes:
     #     print "-->", proc.name, proc.rate()
@@ -587,9 +615,31 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", help="card directory")
-    parser.add_argument("-o", "--output", help="output card name", default="card_tttt.txt")
+    parser.add_argument("-o", "--output", help="output card name", default="card.txt")
     parser.add_argument("-y", "--year", help="year", default=-1, type=int)
+    parser.add_argument("-m", "--noautostats", help="don't use autoMCStats feature (default: %(default)s)", action="store_true")
+    parser.add_argument("-r", "--regions", help="srhh, srhl, srll (default: %(default)s)", default="srhh")
+    parser.add_argument("-s", "--sig", help="signal name (default: %(default)s)", default="fs_t1tttt_m1600_m500")
+    parser.add_argument(      "--norateparams", help="don't write rate params in cards", action="store_true")
     args = parser.parse_args()
 
-    # thedir = "v0.02_Apr26_test"
-    writeOneCard(args.directory,args.output,year=args.year)
+    regions = str(args.regions)
+    outputname = str(args.output)
+    if outputname == "card.txt":
+        outputname = "card_{}_{}_{}.txt".format(args.sig,regions,args.year)
+
+    if regions != "all":
+        writeOneCard(args.directory,outputname,signal=args.sig,year=args.year,kine=regions,use_autostats=(not args.noautostats), rateparams=(not args.norateparams))
+    else:
+        onames = []
+        # for reg in ["srhh","srhl","srll"]:
+        for reg in ["srhh","srhl","srll","srml"]:
+            oname = outputname.replace("_all","_{}".format(reg)) 
+            onames.append(oname)
+            writeOneCard(args.directory,oname,signal=args.sig,year=args.year,kine=reg,use_autostats=(not args.noautostats), rateparams=False)
+            cwd = os.getcwd()
+            os.chdir(args.directory)
+            f = open(outputname, "wb")
+            subprocess.call(["combineCards.py"]+onames,stdout=f)
+            os.chdir(cwd)
+
