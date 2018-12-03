@@ -20,7 +20,6 @@
 // #include "../../../common/CORE/Tools/utils.h"
 // #include "../../../common/CORE/Tools/dorky/dorky.h"
 #include "../../misc/common_utils.h"
-#include "../../misc/info_2018.h"
 #include "../../misc/signal_regions.h"
 #include "../../misc/tqdm.h"
 
@@ -92,19 +91,12 @@ float getFlipFactor(TH2D* rate){
   return (FR1/(1.-FR1) + FR2/(1.-FR2)); 
 }
 
-void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root", float minrun=-1, float maxrun=-1, float lumi=-1) {
-    bool do2018 = true; // FIXME
-    if (do2018) {
-        std::cout << "NOTE: doing 2018!" << std::endl;
-    }
+void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root", int year=2016, float minrun=-1, float maxrun=-1, float lumi=-1, int which=11) {
     initCounter();
     TRandom *tr1 = new TRandom();
 
-    float lumiAG = getLumi();
+    float lumiAG = getLumi(year);
     if (lumi > 0) lumiAG = lumi;
-    if (do2018) {
-        lumiAG = 35.53;
-    }
     // duplicate_removal::clear_list();
 
     TFile *flip_file = new TFile(flipfname); 
@@ -119,6 +111,10 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     TH1F* osee_mll_MC   = new TH1F("osee_mll_plot_MC"  , "osee_mll_plot_MC"  , 45, 70, 115); 
     clos_mll_MC->Sumw2();
     clos_mll_MCp->Sumw2();
+
+
+    TH1F* nSS_run_data = new TH1F("nSS_run_data_plot", "nSS_run_data_plot", 500,272007,324432); 
+    TH1F* nOS_run_data = new TH1F("nOS_run_data_plot", "nOS_run_data_plot", 500,272007,324432); 
 
     TH1F* clos_leppt_MC   = new TH1F("clos_leppt_plot_MC"  , "clos_leppt_plot_MC"  , 20, 0, 100); 
     TH1F* clos_leppt_MCp  = new TH1F("clos_leppt_plot_MCp" , "clos_leppt_plot_MCp" , 20, 0, 100); 
@@ -278,50 +274,49 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
             bar.progress(nEventsTotal, nEventsChain);
 
             if (debugCounter) {
-                int tocheck = 3;
-                doCounter("0_all", ss::is_real_data(), lumiAG*ss::scale1fb());
-                if (!ss::fired_trigger()) continue;
-                doCounter("1_trigger", ss::is_real_data(), lumiAG*ss::scale1fb());
-                if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
-                if (ss::hyp_class() == tocheck) {
-                    doCounter("2_class3", ss::is_real_data(), lumiAG*ss::scale1fb());
-                }
-                if (ss::met() > 50.) continue; 
-                if (ss::hyp_class() == tocheck) {
-                    doCounter("3_met50", ss::is_real_data(), lumiAG*ss::scale1fb());
-                }
-                if (abs(ss::lep1_id()) != 11 || abs(ss::lep2_id()) != 11) continue;
-                if (ss::hyp_class() == tocheck) {
-                    doCounter("4_ee", ss::is_real_data(), lumiAG*ss::scale1fb());
-                }
-                if(ss::nbtags() > 0) continue;
-                if (ss::hyp_class() == tocheck) {
-                    doCounter("5_nb0", ss::is_real_data(), lumiAG*ss::scale1fb());
-                    float mll = (ss::lep1_p4() + ss::lep2_p4()).M();
-                    if (mll > 80 && mll < 100) {
-                        doCounter("6_mll", ss::is_real_data(), lumiAG*ss::scale1fb());
-                        doCounter("7_weightpu", ss::is_real_data(), lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0]));
-                        doCounter("8_weightbtag", ss::is_real_data(), lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0])*ss::weight_btagsf());
-                        float rand = -1.;
-                        // tr1->SetSeed(ss::event());
-                        // float rand = tr1->Rndm();
-                        doCounter("9_weightlep1", ss::is_real_data(), 
-                                lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0])
-                                *ss::weight_btagsf()*leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand)
-                                );
-                        doCounter("10_weightlep2", ss::is_real_data(), 
-                                lumiAG*ss::scale1fb()*getTruePUw(ss::trueNumInt()[0])
-                                *ss::weight_btagsf()*leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand)
-                                *ss::weight_btagsf()*leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), rand)
-                                );
-                    }
-                }
+                // int tocheck = 3;
+                // doCounter("0_all", ss::is_real_data(), lumiAG*ss::scale1fb());
+                // if (!ss::fired_trigger()) continue;
+                // doCounter("1_trigger", ss::is_real_data(), lumiAG*ss::scale1fb());
+                // if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
+                // if (ss::hyp_class() == tocheck) {
+                //     doCounter("2_class3", ss::is_real_data(), lumiAG*ss::scale1fb());
+                // }
+                // if (ss::met() > 50.) continue; 
+                // if (ss::hyp_class() == tocheck) {
+                //     doCounter("3_met50", ss::is_real_data(), lumiAG*ss::scale1fb());
+                // }
+                // if (abs(ss::lep1_id()) != 11 || abs(ss::lep2_id()) != 11) continue;
+                // if (ss::hyp_class() == tocheck) {
+                //     doCounter("4_ee", ss::is_real_data(), lumiAG*ss::scale1fb());
+                // }
+                // if(ss::nbtags() > 0) continue;
+                // if (ss::hyp_class() == tocheck) {
+                //     doCounter("5_nb0", ss::is_real_data(), lumiAG*ss::scale1fb());
+                //     float mll = (ss::lep1_p4() + ss::lep2_p4()).M();
+                //     if (mll > 80 && mll < 100) {
+                //         doCounter("6_mll", ss::is_real_data(), lumiAG*ss::scale1fb());
+                //         doCounter("7_weightpu", ss::is_real_data(), lumiAG*ss::scale1fb()*getTruePUw(year,ss::trueNumInt()[0]));
+                //         doCounter("8_weightbtag", ss::is_real_data(), lumiAG*ss::scale1fb()*getTruePUw(year,ss::trueNumInt()[0])*ss::weight_btagsf());
+                //         float rand = -1.;
+                //         // tr1->SetSeed(ss::event());
+                //         // float rand = tr1->Rndm();
+                //         doCounter("9_weightlep1", ss::is_real_data(), 
+                //                 lumiAG*ss::scale1fb()*getTruePUw(year,ss::trueNumInt()[0])
+                //                 *ss::weight_btagsf()*leptonScaleFactor(year,ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand)
+                //                 );
+                //         doCounter("10_weightlep2", ss::is_real_data(), 
+                //                 lumiAG*ss::scale1fb()*getTruePUw(year,ss::trueNumInt()[0])
+                //                 *ss::weight_btagsf()*leptonScaleFactor(year,ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand)
+                //                 *ss::weight_btagsf()*leptonScaleFactor(year,ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), rand)
+                //                 );
+                //     }
+                // }
             } else {
                 if (!ss::fired_trigger()) continue;
                 if (ss::hyp_class() != 3 && ss::hyp_class() != 4) continue;
                 if (ss::met() > 50.) continue; 
-                if (abs(ss::lep1_id()) != 11 || abs(ss::lep2_id()) != 11) continue;
-                // if (abs(ss::lep1_id()) != 13 || abs(ss::lep2_id()) != 13) continue; // FIXME
+                if (abs(ss::lep1_id()) != which || abs(ss::lep2_id()) != which) continue;
                 if (ss::nbtags() > 0) continue;
             }
 
@@ -351,17 +346,10 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 if (minrun == 303824) rand = 4;
                 if (minrun == 305040) rand = 5;
                 // if (rand > 0) weight *= getNvtxWeight(ss::nGoodVertices(), rand);
-                if (do2018) {
-                    weight *= getTruePUw_2018(ss::trueNumInt()[0]);
-                } else {
-                    weight *= getTruePUw(ss::trueNumInt()[0]);
-                }
-                weight *= leptonScaleFactor(ss::lep1_id(), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), rand);
-                weight *= leptonScaleFactor(ss::lep2_id(), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), rand);
-                // weight *= testScaleFactor(ss::lep1_p4().pt(), ss::lep1_p4().eta());
-                // weight *= testScaleFactor(ss::lep2_p4().pt(), ss::lep2_p4().eta());
+                weight *= getTruePUw(year, ss::trueNumInt()[0]);
+                weight *= leptonScaleFactor(year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
+                weight *= leptonScaleFactor(year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
                 weight *= ss::weight_btagsf();
-                // weight *= eventScaleFactor(ss::lep1_id(), ss::lep2_id(), ss::lep1_p4().pt(), ss::lep2_p4().pt(), ss::lep1_p4().eta(), ss::lep2_p4().eta(), ss::ht());
             }
 
             // Reject duplicates
@@ -389,6 +377,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         clos_leppt_data->Fill(ss::lep2_p4().pt(), weight); 
                         clos_lepeta_data->Fill(ss::lep1_p4().eta(), weight); 
                         clos_lepeta_data->Fill(ss::lep2_p4().eta(), weight);
+                        nSS_run_data->Fill(ss::run());
                         clos_lepphi_data->Fill(ss::lep1_p4().phi(), weight); 
                         clos_lepphi_data->Fill(ss::lep2_p4().phi(), weight);  
                         clos_ht_data->Fill(ss::ht(), weight); 
@@ -468,6 +457,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_lep1nmiss_data->Fill(ss::lep1_el_exp_innerlayers(), weight); 
                     osee_lep2nmiss_data->Fill(ss::lep2_el_exp_innerlayers(), weight); 
                     osee_nvtx_data->Fill(ss::nGoodVertices(), weight); 
+                    nOS_run_data->Fill(ss::run());
 
                     nPred += ff*weight;
                     clos_leppt_MC->Fill(ss::lep1_p4().pt(), ff*weight); 
@@ -599,6 +589,9 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     // clos_nbtags_MC->Scale(clos_nbtags_data->Integral()/clos_nbtags_MC->Integral());
 
     TFile* f1 = new TFile(outname,"RECREATE");
+
+    nSS_run_data->Write();
+    nOS_run_data->Write();
 
     clos_mll_data->Write();
     clos_mll_MC->Write();

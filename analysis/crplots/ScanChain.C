@@ -8,6 +8,7 @@
 #include "TRandom.h"
 #include "TH2F.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TChain.h"
 #include "Math/VectorUtil.h"
 #include "TMVA/Reader.h"
@@ -30,6 +31,19 @@ typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float>> Vec4;
 // float lumiAG = getLumi();
 bool STOP_REQUESTED = false;
 // float lumiAG = 36.3;
+struct HistCol2D {
+    map<string, TH2D> in;
+    HistCol2D(vector<string> regions, const string& name, int nbinsx, float lowx, float highx, int nbinsy, float lowy, float highy, vector<HistCol2D*>* registry=nullptr) {
+        for (string region : regions) {
+            string base_name = region + "_" + name;
+            string base_title = region + " " + name;
+            in.emplace(region, TH2D((base_name + "_in").c_str(), (base_title + " in").c_str(), nbinsx, lowx, highx, nbinsy, lowy, highy));
+        }
+        if (registry != nullptr) registry->push_back(this);
+    }
+    void Fill(const string& region, int id1, int id2, float valx, float valy, float weight) { in[region].Fill(valx, valy, weight); }
+    void Write() { for (auto p : in) p.second.Write(); }
+};
 struct HistCol {
     map<string, TH1D> ee;
     map<string, TH1D> em;
@@ -98,24 +112,18 @@ tuple<int, int, int, float, float> calc_jet_quants(int year) {
     else if (year == 2018) {
     }
     
-    int nlb40 = 0;
-    int ntb40 = 0;
     int nisrjets = 0;
-    float mjoverpt = 0.;
-    float htb = 0;
+    int nlb40 = ss::bdt_nlb40();
+    int ntb40 = ss::bdt_ntb40();
+    float htb = ss::bdt_htb();
+    float maxmjoverpt = ss::bdt_maxmjoverpt();
     for (unsigned int ijet = 0; ijet < ss::jets().size(); ijet++) {
         const auto& jet = ss::jets()[ijet];
-        mjoverpt = std::max(mjoverpt, jet.M()/jet.pt());
         float disc = ss::jets_disc().at(ijet);
-
-        if (disc > bloose) nlb40++;
-        if (disc > btight) ntb40++;
         if (disc < bmed) nisrjets++;
     }
-    for (size_t ibtag=0; ibtag < ss::btags().size(); ibtag++) {
-        htb += ss::btags().at(ibtag).pt();
-    }
-    return std::make_tuple(nlb40, ntb40, nisrjets, mjoverpt, htb);
+    return std::make_tuple(nlb40, ntb40, nisrjets, maxmjoverpt, htb);
+
 }
 
 float isr_reweight(bool useIsrWeight, int year, int nisrmatch) {
@@ -152,6 +160,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool useIsoTriggers = options.Contains("useIsoTriggers");
     bool useNonIsoTriggers = options.Contains("useNonIsoTriggers");
     bool doHighHT = options.Contains("doHighHT");
+    bool doHEMBefore = options.Contains("doHEMBefore");
+    bool doHEMAfter = options.Contains("doHEMAfter");
     bool doTruthFake = options.Contains("doTruthFake");
     bool useNewMET = options.Contains("useNewMET");
     bool quiet = options.Contains("quiet");
@@ -173,15 +183,15 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     float lumiAG = 0.;
     bool is2016(false), is2017(false), is2018(false);
     if (options.Contains("Data2016")) {
-        lumiAG = 35.922;
+        lumiAG = getLumi(2016);
         year = 2016;
         is2016 = true;
     } else if (options.Contains("Data2017")) {
-        lumiAG = useNonIsoTriggers ? 36.529: 41.53;
+        lumiAG = useNonIsoTriggers ? 36.529: getLumi(2017);
         year = 2017;
         is2017 = true;
     } else if (options.Contains("Data2018")) {
-        lumiAG = 35.53;
+        lumiAG = getLumi(2018);
         year = 2018;
         is2018 = true;
     } else {
@@ -199,10 +209,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     vector<string> regions = {
 
-        // "os",                          // OS tight-tight and variants
+        // "hhos", "hhosloose", "hhtl",
+        "os",                          // OS tight-tight and variants
         // "os_noht",                          // OS tight-tight and variants
         // "osloose",                    // DY dominated CR
-        // "tl",                          // SS tight-loose
+        "tl",                          // SS tight-loose
         // "br",
         // "crw", "crz",                  // CRZ, CRW
         // "htnb1",                        // fake-dominated CR
@@ -216,10 +227,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         // "bdt_met","bdt_met_ht",        // |
         // "bdt_train",                   // BDT Training region - BR + CRW
         "tt_isr",                      // TTBar ISR Reweighting derivation region
-        "tt_isr_reweight_check",       // |
+        // "tt_isr_reweight_check",       // |
     };
 
     vector<HistCol*> registry;
+    vector<HistCol2D*> registry2D;
     HistCol h_met         (regions, "met"        , 30, 0   , 300 , &registry);
     HistCol h_metphi      (regions, "metphi"     , 60, -3.2, 3.2 , &registry);
     HistCol h_rawmet      (regions, "rawmet"     , 60, 0   , 150 , &registry);
@@ -232,9 +244,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_mtmin       (regions, "mtmin"      , 30, 0   , 300 , &registry);
     HistCol h_nleps       (regions, "nleps"      , 5, -0.5 , 4.5 , &registry);
     HistCol h_njets       (regions, "njets"      , 8 , 0   , 8   , &registry);
-    HistCol h_nisrjets    (regions, "nisrjets"   , 8 , 0   , 8   , &registry);
-    HistCol h_nisrmatch   (regions, "nisrmatch"  , 8 , 0   , 8   , &registry);
-    HistCol h_nlb40       (regions, "nlb40"      , 8 , 0   , 8   , &registry);
+    HistCol h_nisrjets    (regions, "nisrjets"   , 5 , 0   , 5   , &registry);
+    HistCol h_nisrmatch   (regions, "nisrmatch"  , 5 , 0   , 5   , &registry);
+    HistCol h_nlb40       (regions, "nlb40"      , 5 , 0   , 5   , &registry);
     HistCol h_ntb40       (regions, "ntb40"      , 8 , 0   , 8   , &registry);
     HistCol h_nbtags      (regions, "nbtags"     , 5 , 0   , 5   , &registry);
     HistCol h_bdisc1      (regions, "bdisc1"     , 100,0.4 , 1.0 , &registry);
@@ -250,27 +262,35 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_eta2        (regions, "eta2"       , 25, -3.2, 3.2 , &registry);
     HistCol h_etae        (regions, "etae"       , 25, -3.2, 3.2 , &registry);
     HistCol h_etam        (regions, "etam"       , 25, -3.2, 3.2 , &registry);
+    HistCol h_etaelnt        (regions, "etaelnt"       , 25, -3.2, 3.2 , &registry);
+    HistCol h_etamlnt        (regions, "etamlnt"       , 25, -3.2, 3.2 , &registry);
 
     HistCol h_phie        (regions, "phie"       , 50, -3.2, 3.2 , &registry);
     HistCol h_phim        (regions, "phim"       , 50, -3.2, 3.2 , &registry);
+    HistCol h_cphie        (regions, "cphie"       , 15, -3.2, 3.2 , &registry);
+    HistCol h_cphim        (regions, "cphim"       , 15, -3.2, 3.2 , &registry);
 
     HistCol h_ptrel1      (regions, "ptrel1"     , 15, 0   , 50  , &registry);
     HistCol h_ptrel2      (regions, "ptrel2"     , 15, 0   , 50  , &registry);
+    HistCol h_ptrellnt    (regions, "ptrellnt"   , 15, 0   , 50  , &registry);
     HistCol h_ptrele      (regions, "ptrele"     , 15, 0   , 50  , &registry);
     HistCol h_ptrelm      (regions, "ptrelm"     , 15, 0   , 50  , &registry);
 
     HistCol h_ptrelfail1  (regions, "ptrelfail1" , 15, 0   , 50  , &registry);
     HistCol h_ptrelfail2  (regions, "ptrelfail2" , 15, 0   , 50  , &registry);
+    HistCol h_ptrelfaillnt(regions, "ptrelfaillnt", 15, 0   , 50  , &registry);
     HistCol h_ptrelfaile  (regions, "ptrelfaile" , 15, 0   , 50  , &registry);
     HistCol h_ptrelfailm  (regions, "ptrelfailm" , 15, 0   , 50  , &registry);
 
     HistCol h_ptratio1    (regions, "ptratio1"   , 30, 0   , 1.5 , &registry);
     HistCol h_ptratio2    (regions, "ptratio2"   , 30, 0   , 1.5 , &registry);
+    HistCol h_ptratiolnt  (regions, "ptratiolnt" , 30, 0   , 1.5 , &registry);
     HistCol h_ptratioe    (regions, "ptratioe"   , 30, 0   , 1.5 , &registry);
     HistCol h_ptratiom    (regions, "ptratiom"   , 30, 0   , 1.5 , &registry);
 
     HistCol h_miniiso1    (regions, "miniiso1"   , 15,  0  , 0.2 , &registry);
     HistCol h_miniiso2    (regions, "miniiso2"   , 15,  0  , 0.2 , &registry);
+    HistCol h_miniisolnt  (regions, "miniisolnt" , 15,  0  , 0.2 , &registry);
     HistCol h_miniisoe    (regions, "miniisoe"   , 15,  0  , 0.2 , &registry);
     HistCol h_miniisom    (regions, "miniisom"   , 15,  0  , 0.2 , &registry);
 
@@ -298,8 +318,12 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_ml1j1       (regions, "ml1j1"      , 50, 0   , 500 , &registry);
     HistCol h_matchtype   (regions, "matchtype"  , 4 , -0.5, 3.5 , &registry);
 
+    HistCol2D h_ptabsetae       (regions, "ptetae"      , 40,0,400,30,0.,3., &registry2D);
+    HistCol2D h_ptabsetam       (regions, "ptetam"      , 40,0,400,30,0.,3., &registry2D);
+
     float bdt_bins[] = {-1.00, -0.48, -0.37, -0.25, -0.14, -0.02, 0.075, 0.21, 0.31, 0.465, 0.60, 0.715, 0.81, 1.00};
-    HistCol h_event_bdt   (regions, "event_bdt"  , 13 , bdt_bins  , &registry);
+    // HistCol h_event_bdt   (regions, "event_bdt"  , 13 , bdt_bins  , &registry);
+    HistCol h_event_bdt   (regions, "eventbdt"  , 15 , 0., 1. , &registry);
 
 
     // Declare a bunch of event variables to be filled below in the loop
@@ -408,6 +432,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             if (lep1ccpt < 25) continue;
             if (lep2ccpt < 20) continue;
 
+            if (doHEMAfter and ss::run() < 319077) continue; // keep after
+            if (doHEMBefore and ss::run() >= 319077) continue; // keep before
+
             lep1id = ss::lep1_id();
             lep2id = ss::lep2_id();
 
@@ -480,7 +507,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             lep2phi = ss::lep2_p4().phi();
             lep3phi = ss::lep3_p4().phi();
             lep3id = ss::lep3_id();
-            lep1q = (lep1id > 0) ? -1 : 1;
+            lep1q = ss::bdt_q1();
             lep2q = (lep2id > 0) ? -1 : 1;
             lep3q = (lep3id > 0) ? -1 : 1;
             lep1good = ss::lep1_passes_id();
@@ -515,7 +542,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             ptj7 = (njets >= 7) ? ss::jets()[6].pt() : 0;
             ptj8 = (njets >= 8) ? ss::jets()[7].pt() : 0;
 
-            ml1j1 = (njets >= 1) ? (ss::jets()[0] + ss::lep1_p4()).M() : 0;
+            ml1j1 = ss::bdt_ml1j1();
             set_float_vals();
 
             /* hyp_class
@@ -551,7 +578,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
 
             if (!ss::is_real_data()) {
-                weight *= getTruePUw(year, ss::trueNumInt()[0]);
+                if (year != 2018) weight *= getTruePUw(year, ss::trueNumInt()[0]); // FIXME
+                // weight *= getTruePUw(year, ss::trueNumInt()[0]); // FIXME
                 if (lep1good) weight *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ht);
                 if (lep2good) weight *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ht);
                 if (lep3good) weight *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ht);
@@ -663,14 +691,17 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 auto do_fill = [region, lep1id, lep2id, weight](HistCol& h, float val) {
                     h.Fill(region, lep1id, lep2id, val, weight);
                 };
+                auto do_fill2D = [region, lep1id, lep2id, weight](HistCol2D& h, float valx, float valy) {
+                    h.Fill(region, lep1id, lep2id, valx, valy, weight);
+                };
                 do_fill(h_met, met);
                 do_fill(h_metphi, metphi);
                 do_fill(h_rawmet, rawmet);
                 do_fill(h_calomet, calomet);
                 do_fill(h_ht, ht);
                 do_fill(h_htb, htb);
-                do_fill(h_mll, ss::dilep_p4().M());
-                do_fill(h_mllzoom, ss::dilep_p4().M());
+                do_fill(h_mll, m12);
+                do_fill(h_mllzoom, m12);
                 if (nleps > 2) do_fill(h_zmll, mllos);
                 do_fill(h_nleps, nleps);
                 do_fill(h_mtmin, ss::mtmin());
@@ -695,14 +726,28 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(abs(lep2id) == 11 ? h_etae     : h_etam,     lep2eta);
                 do_fill(abs(lep1id) == 11 ? h_phie     : h_phim,     lep1phi);
                 do_fill(abs(lep2id) == 11 ? h_phie     : h_phim,     lep2phi);
+                do_fill(abs(lep1id) == 11 ? h_cphie     : h_cphim,     lep1phi);
+                do_fill(abs(lep2id) == 11 ? h_cphie     : h_cphim,     lep2phi);
 
                 if (abs(lep1id) == 11) do_fill(h_nmiss1, nmiss1);
                 if (abs(lep2id) == 11) do_fill(h_nmiss2, nmiss2);
 
+                int looseleg = -1;
+                if (hyp_class == 2) {
+                    looseleg = (lep1good ? 2 : 1);
+                }
+
+                if (looseleg == 1) do_fill(abs(lep1id) == 11 ? h_etaelnt     : h_etamlnt,     lep1eta);
+                if (looseleg == 2) do_fill(abs(lep2id) == 11 ? h_etaelnt     : h_etamlnt,     lep2eta);
+
                 do_fill(h_ptrel1, lep1ptrel);
                 do_fill(h_ptrel2, lep2ptrel);
+                if (looseleg > 0) do_fill(h_ptrellnt, looseleg == 1 ? lep1ptrel   : lep2ptrel);
                 do_fill(abs(lep1id) == 11 ? h_ptrele   : h_ptrelm,   lep1ptrel);
                 do_fill(abs(lep2id) == 11 ? h_ptrele   : h_ptrelm,   lep2ptrel);
+
+                do_fill2D(abs(lep1id) == 11 ? h_ptabsetae     : h_ptabsetam,     lep1pt, fabs(lep1eta));
+                do_fill2D(abs(lep2id) == 11 ? h_ptabsetae     : h_ptabsetam,     lep2pt, fabs(lep2eta));
 
                 bool lep1_fail_ptratio = false;
                 bool lep2_fail_ptratio = false;
@@ -719,20 +764,25 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 if (lep2_fail_ptratio) do_fill(h_ptrelfail2, lep2ptrel);
                 if (lep1_fail_ptratio) do_fill(abs(lep1id) == 11 ? h_ptrelfaile   : h_ptrelfailm,   lep1ptrel);
                 if (lep2_fail_ptratio) do_fill(abs(lep2id) == 11 ? h_ptrelfaile   : h_ptrelfailm,   lep2ptrel);
+                if (lep1_fail_ptratio and looseleg == 1) do_fill(h_ptrelfaillnt, lep1ptrel);
+                if (lep2_fail_ptratio and looseleg == 2) do_fill(h_ptrelfaillnt, lep2ptrel);
 
                 do_fill(h_ptratio1, lep1ptratio);
                 do_fill(h_ptratio2, lep2ptratio);
+                if (looseleg > 0) do_fill(h_ptratiolnt, looseleg == 1 ? lep1ptratio   : lep2ptratio);
                 do_fill(abs(lep1id) == 11 ? h_ptratioe : h_ptratiom, lep1ptratio);
                 do_fill(abs(lep2id) == 11 ? h_ptratioe : h_ptratiom, lep2ptratio);
 
                 do_fill(h_miniiso1, lep1miniiso);
                 do_fill(h_miniiso2, lep2miniiso);
+                if (looseleg > 0) do_fill(h_miniisolnt, looseleg == 1 ? lep1miniiso   : lep2miniiso);
                 do_fill(abs(lep1id) == 11 ? h_miniisoe : h_miniisom, lep1miniiso);
                 do_fill(abs(lep2id) == 11 ? h_miniisoe : h_miniisom, lep2miniiso);
 
-                do_fill(h_dphil1l2, lep1phi - lep2phi);
-                do_fill(h_detal1l2, lep1eta - lep2eta);
-                do_fill(h_absdetal1l2, abs(lep1eta - lep2eta));
+                do_fill(h_dphil1l2, ss::bdt_dphil1l2());
+                do_fill(h_detal1l2, ss::bdt_detal1l2());
+                do_fill(h_absdetal1l2, ss::bdt_detal1l2());
+
 
                 do_fill(h_matchtype,   matchtype);
 
@@ -758,7 +808,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
                 if (njets >= 1) do_fill(h_ml1j1, ml1j1);
 
-                do_fill(h_event_bdt, event_bdt());
+                // do_fill(h_event_bdt, event_bdt());
+                do_fill(h_event_bdt, ss::bdt_disc());
             };
 
             bool BR_lite = ht > 300       and njets >= 2 and
@@ -775,6 +826,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             if (BR) fill_region("br", weight);
 
             if (hyp_class == 4) fill_region("osloose", weight);
+            if (hyp_class == 4 and lep1ccpt > 25 and lep2ccpt > 25) fill_region("hhosloose", weight);
 
             if (hyp_class == 3 and njets >= 2) {
                 fill_region("nj2", weight);
@@ -807,6 +859,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 if (hyp_class == 4 and !zcand12) {
                     fill_region("os_noisr", weight / isr_reweight(useIsrWeight, year, nisrmatch));
                     fill_region("os", weight);
+                    if (lep1ccpt > 25 and lep2ccpt > 25) fill_region("hhos", weight);
                     if (evaluateBDT) {
                         if (event_bdt() > 0.21) {
                             fill_region("os_highbdt", weight);
@@ -816,6 +869,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     }
                 }
                 if (hyp_class == 2) fill_region("tl", weight);
+                if (hyp_class == 2 and lep1ccpt > 25 and lep2ccpt > 25) fill_region("hhtl", weight);
             }
 
             if (njets >= 2 and
@@ -856,6 +910,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     TFile f1(Form("%s/histos_%s.root", outputdir.Data(), ch->GetTitle()), "RECREATE");
     for (HistCol* coll : registry) coll->Write();
+    for (HistCol2D* coll : registry2D) coll->Write();
     f1.Close();
     if (!quiet) cout << "\n Done!" << endl;
     return 0;

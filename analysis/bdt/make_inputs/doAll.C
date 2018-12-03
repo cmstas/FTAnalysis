@@ -102,7 +102,8 @@
     ScanChain(ch_fakes, "", outputdir);
 
     // gSystem->Exec(Form("hadd -f output_total.root %s/output_*.root",outputdir.Data()));
-    gSystem->Exec(Form("hadd -f output_total_withtmva.root %s/output_*.root",outputdir.Data()));
+    // gSystem->Exec(Form("hadd -f output_total_withtmva.root %s/output_*.root",outputdir.Data()));
+    // gSystem->Exec(Form("hadd -f output_total_btagsf.root %s/output_*.root",outputdir.Data()));
     // gSystem->Exec(Form("hadd -f output_nnvec.root %s/output_*.root",outputdir.Data()));
     // gSystem->Exec(Form("hadd -f output_total_mcfakes.root %s/output_*.root",outputdir.Data()));
     // gSystem->Exec(Form("hadd -f output_total_sigssos.root %s/output_*.root",outputdir.Data()));

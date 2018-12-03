@@ -17,18 +17,20 @@ mu_trigs = [
         "HLT_IsoMu27",
         ]
 
-
 # version = "v8"
 # version = "v9"
 # version = "v13"
 # version = "v22"
 version = "v23"
-f_dy = r.TFile("zpeaks/{}/DYJets.root".format(version))
-# f_data_el = r.TFile("zpeaks/{}/SingleElectron.root".format(version))
-f_data_el = r.TFile("zpeaks/{}/EGamma.root".format(version))
-f_data_mu = r.TFile("zpeaks/{}/DoubleMuon.root".format(version))
+year = 2017
+f_dy = r.TFile("zpeaks/{version}/hists_dy_{year}.root".format(version=version,year=year))
+f_data_el = r.TFile("zpeaks/{version}/hists_e_{year}.root".format(version=version,year=year))
+f_data_mu = r.TFile("zpeaks/{version}/hists_mu_{year}.root".format(version=version,year=year))
+
+print f_dy, f_data_el, f_data_mu
 
 hacky_ZSF = 1
+# hacky_ZSF = 41.5/30.4 # scale down DY for 2018 lumi (because DY hist filled with 2017 lumi scaling)
 
 def get_sf(h_dy, h_data):
 
@@ -45,11 +47,14 @@ def get_sf(h_dy, h_data):
 
 sfs = []  # these are MC/data, so we multiply data by these
 for trigname in el_trigs+mu_trigs:
-    h_dy = f_dy.Get("mll_{}".format(trigname))
+    # h_dy = f_dy.Get("mll_{}".format(trigname))
+    h_dy = f_dy.Get("{}".format(trigname))
     h_dy.Scale(1./hacky_ZSF)
     is_el = "_Ele" in trigname
-    if is_el: h_data = f_data_el.Get("mll_{}".format(trigname))
-    else: h_data = f_data_mu.Get("mll_{}".format(trigname))
+    # if is_el: h_data = f_data_el.Get("mll_{}".format(trigname))
+    # else: h_data = f_data_mu.Get("mll_{}".format(trigname))
+    if is_el: h_data = f_data_el.Get("{}".format(trigname))
+    else: h_data = f_data_mu.Get("{}".format(trigname))
     data, mc, ratio, data_entries = get_sf(h_dy, h_data)
     h_data.Sumw2()
 
@@ -84,7 +89,7 @@ for trigname in el_trigs+mu_trigs:
                 "output_name": "plots/zsf_{}.pdf".format(trigname),
                 "legend_percentageinbox": True,
                 "cms_label": "Preliminary",
-                "lumi_value": "41.3",
+                "lumi_value": "41.5",
                 # "output_ic": True,
                 }
             )

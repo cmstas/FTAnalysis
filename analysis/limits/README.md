@@ -35,6 +35,7 @@ cd $CMSSW_BASE/src
 git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 cd CombineHarvester
 scram b -j 15
+echo "This may not compile fully but it's fine. Just ignore it and proceed."
 ```
 
 Then take a card (`combined_uncorrelated.txt` for example) and do

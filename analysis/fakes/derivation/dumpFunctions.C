@@ -10,7 +10,7 @@ void dumpFunctions(TString dir) {
             TString l = doMu ? "mu" : "e";
             TString ll = doMu ? "mu" : "el";
 
-            TFile* f = TFile::Open("ewkCorFR_"+lep+suffix+".root");
+            TFile* f = TFile::Open(dir+"/ewkCorFR_"+lep+suffix+".root");
 
             TH2D* centr = (TH2D*) f->Get("Nt_histo_"+l);
 

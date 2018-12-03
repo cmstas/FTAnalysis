@@ -8,23 +8,49 @@ r.gROOT.ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+")
 r.gROOT.ProcessLine(".L ScanChain.C+")
 
 
-years_to_consider = [
-        # 2016,
+years_to_consider = [ # FIXME
+        2016,
         2017,
-        # 2018,
+        2018,
+        ]
+# procs_to_consider = []
+procs_to_consider = [ # FIXME
+        # "ttdl0jet",
+        # "ttdl1jet",
+        # "fakes",
+        # "flips",
+        # "data",
         ]
 
 basedirs ={
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2016/",
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2017/",
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2018/",
+
+        # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/", # FIXME
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2017/", # FIXME
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.10_all/output/year_2018/", # FIXME
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2016/", # FIXME
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2017/", # FIXME
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2018/", # FIXME
         }
 
-outputdir = "outputs_temp"
+# outputdir = "outputs_temp"
+# outputdir = "outputs_data2016_80x"
+# outputdir = "outputs_data2016_94x" # FIXME
+# outputdir = "outputs_ss20172018" # FIXME
+outputdir = "outputs_Nov29" # FIXME
+
+# outputdir = "outputs_ss2018_afterhem" # FIXME
+# outputdir = "outputs_ss2018_beforehem" # FIXME
+
 options = {
-        2016: "useInclusiveSFs Data2016 quiet ",
-        2017: "useInclusiveSFs Data2017 minPtFake18 quiet ",
-        2018: "useInclusiveSFs Data2018 minPtFake18 quiet ",
+        2016: "useInclusiveSFs doBDT Data2016 quiet ",
+        2017: "useInclusiveSFs doBDT Data2017 minPtFake18 quiet ",
+        2018: "useInclusiveSFs doBDT Data2018 minPtFake18 quiet ",
+
+        # 2018: "useInclusiveSFs Data2018 minPtFake18 quiet doHEMAfter ", # FIXME
+        # 2018: "useInclusiveSFs Data2018 minPtFake18 quiet doHEMBefore ", # FIXME
+
         }
 
 def make_objs(fpatts=[],options="",treename="t"):
@@ -99,17 +125,20 @@ chs = {
                 basedirs[2017]+"DY_high.root",
                 basedirs[2017]+"DY_low.root",
                 ], options=options[2017]),
-            "wjets": make_objs(basedirs[2017]+"WJets.root", options=options[2017]),
+            "wjets": make_objs(basedirs[2017]+"WJets_HT*.root", options=options[2017]),
+            # "wjets": make_objs([
+            #     "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.10_prefire/output/year_2017/WJets_HT*.root" # FIXME
+            #     ], options=options[2017]),
             "ttfake": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2017]+ "doTruthFake"),
             # "ttlomg": make_objs(basedirs[2017]+"TTLOMG.root", options=options[2017]),
             # "ttslph": make_objs(basedirs[2017]+"TTSLPH.root", options=options[2017]),
             "ttdl0jet": make_objs([
                 basedirs[2017]+"TTdilep0jet.root",
-                "/home/users/namin/2018/fourtop/all/FTAnalysis/babymaking/batch/output_isr_ttdilep0jet.root",
+                basedirs[2017]+"TTdilep0jetext2.root",
                 ], options=options[2017]),
             "ttdl1jet": make_objs([
                 basedirs[2017]+"TTdilep1jet.root",
-                "/home/users/namin/2018/fourtop/all/FTAnalysis/babymaking/batch/output_isr_ttdilep1jet.root",
+                basedirs[2017]+"TTdilep1jetext2.root",
                 ], options=options[2017]),
             "ttz": make_objs([
                 basedirs[2017]+"TTZnlo.root",
@@ -147,18 +176,26 @@ chs = {
             },
         2018: {
 
+                # only tt dy wjets are from 2018 samples
+
             "fakes": make_objs(basedirs[2018]+"Data*.root", options=options[2018]+" doFakes"),
             "flips": make_objs(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips"),
             "data": make_objs(basedirs[2018]+"Data*.root", options=options[2018]),
             # 2017 for everything other than data for now, because...uh...there's no usable 2018 MC, even though it's almost 2019 :)
-            "tt": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2018]),
+            # "tt": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2018]),
+            "tt": make_objs([
+                basedirs[2017]+"TTBAR*.root",
+                ], options=options[2018]),
             "ttw": make_objs(basedirs[2017]+"TTWnlo.root", options=options[2018]),
             "tth": make_objs(basedirs[2017]+"TTHtoNonBB.root", options=options[2018]),
             "dy": make_objs([
                 basedirs[2017]+"DY_high.root",
                 basedirs[2017]+"DY_low.root",
                 ], options=options[2018]),
-            "wjets": make_objs(basedirs[2017]+"WJets.root", options=options[2018]),
+            "wjets": make_objs(basedirs[2017]+"WJets_HT*.root", options=options[2018]),
+            # "wjets": make_objs([
+            #     "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.10_prefire/output/year_2017/WJets_HT*.root" # FIXME
+            #     ], options=options[2018]),
             "ttfake": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2018]+ "doTruthFake"),
             "ttz": make_objs([
                 basedirs[2017]+"TTZnlo.root",
@@ -208,10 +245,11 @@ def run_chain((index,info)):
 to_run = []
 for year in years_to_consider:
     for proc,obj in chs[year].items():
+        if procs_to_consider and (proc not in procs_to_consider): continue
         to_run.append([obj["ch"], obj["options"], outputdir])
 
 os.system("mkdir -p {}".format(outputdir))
 
-runner = pyrun.Runner(nproc=20, func=run_chain)
+runner = pyrun.Runner(nproc=min(len(to_run),20), func=run_chain, dot_type=2)
 runner.add_args(to_run)
 runner.run()

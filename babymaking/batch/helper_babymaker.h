@@ -95,6 +95,7 @@ class babyMaker {
 
     bool ignore_scale1fb = false;
     bool ignore_os = false;
+    unsigned int evt_cut = 0;
 
     TFile* BabyFile;
     TTree* BabyTree;
@@ -107,7 +108,6 @@ class babyMaker {
     //Switches
     TString path;
     bool verbose;
-    unsigned int evt_cut;
 
 
     // for btag SFs
@@ -162,6 +162,7 @@ class babyMaker {
     float kfactor;
     string filename;
     // vector <float> genweights;
+    vector <float> pdfweights;
     vector <string> genweightsID;
     bool passedFilterList;
     float prefire2016_sf;
@@ -235,6 +236,7 @@ class babyMaker {
     vector <float> jets_disc_dn;
     vector <int> jets_flavor;
     vector <float> jets_disc;
+    vector <float> jets_bsf;
     vector <float> jets_disc_mva;
     vector <float> jets_disc_ivf;
     vector <float> jets_JEC;
@@ -318,6 +320,15 @@ class babyMaker {
     float lep2_coneCorrPt;
     float lep3_coneCorrPt;
     float lep4_coneCorrPt;
+    float lep1_pt;
+    float lep2_pt;
+    float lep3_pt;
+    float lep1_eta;
+    float lep2_eta;
+    float lep3_eta;
+    float lep1_phi;
+    float lep2_phi;
+    float lep3_phi;
 
     //Lepton Mother (old isFromW function)
     int lep1_motherID;
@@ -605,6 +616,18 @@ class babyMaker {
     float weight_fsrvar_UP;
     float weight_fsrvar_DN;
 
+    float weight_lepsf1;
+    float weight_lepsf2;
+    float weight_lepsf3;
+    float weight_lepsf;
+    float weight_triggersf;
+    float weight_pu;
+    float weight_isrsf;
+    float weight;
+
+    int year;
+    float yearlumi;
+
     //ISR unc #s - 2015
     LorentzVector gl1_p4;
     LorentzVector gl2_p4;
@@ -718,6 +741,7 @@ class babyMaker {
     float bdt_disc_jer_up;
     float bdt_disc_jec_dn;
     float bdt_disc_jer_dn;
+
 
 };
 

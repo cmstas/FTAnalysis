@@ -23,12 +23,14 @@ labels = {
         "mll"             : [("ttzcr","ttwcr","sr","br","brpostfit"), "mll"],
         "njets"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "njets"],
         "nbtags"          : [("ttzcr","ttwcr","sr","br","brpostfit"), "nbtags"],
-        "type"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "type"],
+        "type"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "type (mm, em, ee)"],
+        "type3"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "type3 (mmm, mme, mee, eee)"],
         "charge"          : [("ttzcr","ttwcr","sr","br","brpostfit"), "charge"],
         "nleps"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "nleps"],
         "l1pt"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "l1pt"],
         "l2pt"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "l2pt"],
-        "disc"            : [("br","brpostfit"), "disc"],
+        "l3pt"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "l3pt"],
+        "disc"            : [("br","brpostfit","ttwcr","ttzcr"), "disc"],
         "l3pt"            : [("ttzcr","sr","br","brpostfit"), "l3pt"],
         "mllos"           : [("ttzcr",), "mllos"],
         "lepsf"            : [("br",), "lepsf"],
@@ -183,15 +185,15 @@ def worker(info):
                 ax.set_ylim([0.1,ax.get_ylim()[1]*1.5])
                 ax.set_yscale("log", nonposy='clip'),
             xticks = ["CRZ","CRW"]+range(1,20)
-        if (var.lower() in ["disc"]):
+        if (var.lower() in ["disc"]) and (region.lower() not in ["ttwcr","ttzcr"]):
             data._counts[-10:] *= 0.
             data._errors[-10:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
 
         if len(files.keys()) > 1:
-            fname = "{}/run2_{}_{}.png".format(outputdir,region,var)
+            fname = "{}/run2_{}_{}.pdf".format(outputdir,region,var)
         else:
-            fname = "{}/{}_{}_{}.png".format(files.keys()[0],outputdir,region,var)
+            fname = "{}/y{}_{}_{}.pdf".format(outputdir,files.keys()[0],region,var)
         fnames.append(fname)
         plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
                    cms_type = "Preliminary",
@@ -217,7 +219,7 @@ def worker(info):
         # print data
         # return
 
-        table_info = write_table(data,bgs,signal=sig,outname=fname.replace(".png",".txt"))
+        table_info = write_table(data,bgs,signal=sig,outname=fname.replace(".pdf",".txt"))
     return ", ".join(fnames)
 
 def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[]):

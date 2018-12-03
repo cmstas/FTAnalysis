@@ -27,7 +27,7 @@
 #include "LeptonTree.cc"
 
 #include "../../misc/common_utils.h"
-#include "../../crplots/tqdm.h"
+#include "../../misc/tqdm.h"
 
 using namespace std;
 using namespace lepton_tree;
@@ -67,7 +67,7 @@ bool isFake() {
 
 bool STOP_REQUESTED = false;
 
-int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = true, int nEvents = -1) {//, string skimFilePrefix = "test") {
+int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool fast = true, int nEvents = -1) {//, string skimFilePrefix = "test") {
 
     // Benchmark
     TBenchmark *bmark = new TBenchmark();
@@ -199,18 +199,41 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
     // float sf_HLT_Mu8 = 0.7048;
     // float sf_HLT_IsoMu27 = 1.1146;
 
-    // v23 2018
-    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 2.5130;
-    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.5203;
-    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 2.1316;
-    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.1833;
-    float sf_HLT_Mu17_TrkIsoVVL = 1.9637;
-    float sf_HLT_Mu17 = 1.9632;
-    float sf_HLT_Mu8_TrkIsoVVL = 1.5784;
-    float sf_HLT_Mu8 = 1.5784;
-    float sf_HLT_IsoMu27 = 2.0158;
+    // v23 with latest V1 electron SFs, but only medium muon ID SFs
+    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0475;
+    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0523;
+    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8384;
+    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8448;
+    float sf_HLT_Mu17_TrkIsoVVL = 1.0300;
+    float sf_HLT_Mu17 = 1.0296;
+    float sf_HLT_Mu8_TrkIsoVVL = 0.7059;
+    float sf_HLT_Mu8 = 0.7075;
+    float sf_HLT_IsoMu27 = 1.1188;
 
-    int year = 2018;
+    if (year == 2018) {
+        // v23 2018
+
+        // sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 2.5130;
+        // sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.5203;
+        // sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 2.1316;
+        // sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 2.1833;
+        // sf_HLT_Mu17_TrkIsoVVL = 1.9637;
+        // sf_HLT_Mu17 = 1.9632;
+        // sf_HLT_Mu8_TrkIsoVVL = 1.5784;
+        // sf_HLT_Mu8 = 1.5784;
+        // sf_HLT_IsoMu27 = 2.0158;
+
+        sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0;
+        sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0;
+        sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 1.0;
+        sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0;
+        sf_HLT_Mu17_TrkIsoVVL = 1.0;
+        sf_HLT_Mu17 = 1.0;
+        sf_HLT_Mu8_TrkIsoVVL = 1.0;
+        sf_HLT_Mu8 = 1.0;
+        sf_HLT_IsoMu27 = 1.0;
+
+    }
 
     if (false) {
         //this should be ok as long as there are less bins in the extrPtRel case
@@ -881,14 +904,16 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
             float weight = 1;
             // if (!isDataFromFileName) weight = getTruePUw(trueNumInt())*scale1fb()*getLumi();
             if (!isDataFromFileName) {
+                float mylumi = getLumi(year);
+                if (year == 2018) mylumi = 35.5;
                 // if (noPUweight) weight = scale1fb()*getLumi();
                 // else weight = puweight()*scale1fb()*getLumi();
                 if (absweight) {
-                    if (noPUweight) weight = fabs(scale1fb())*getLumi(year);
-                    else weight = puweight()*fabs(scale1fb())*getLumi(year);
+                    if (noPUweight) weight = fabs(scale1fb())*mylumi;
+                    else weight = puweight()*fabs(scale1fb())*mylumi;
                 } else {
-                    if (noPUweight) weight = (scale1fb())*getLumi(year);
-                    else weight = puweight()*(scale1fb())*getLumi(year);
+                    if (noPUweight) weight = (scale1fb())*mylumi;
+                    else weight = puweight()*(scale1fb())*mylumi;
                 }
             }
 
@@ -993,7 +1018,7 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
             if (useLooseEMVA && abs(id())==11) {
                 bool passHltCuts = isTriggerSafenoIso();
                 if (useIsoTrigs) {
-                    if (!passIsolatedFO(id(),etaSC(),mva_25ns(),p4().pt())) continue;
+                    // if (!passIsolatedFO(id(),etaSC(),mva_25ns(),p4().pt())) continue;
                     passHltCuts = isTriggerSafe();
 
                 }
@@ -1041,19 +1066,20 @@ int ScanChain( TChain* chain, TString outfile, TString option="", bool fast = tr
                     histo_mt_cr_pt->Fill( p4().pt(), weight );
                     histo_mt_cr_met->Fill( evt_met, weight );
                     histo_mt_cr_dphi->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
+                    float myweight = weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), 100.);
                     if (abs(id())==11) {
-                        histo_mt_cr_el->Fill( std::min(evt_mt,float(200.)), weight );
-                        if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_el->Fill( std::min(evt_mt,float(200.)), weight );
-                        histo_mt_cr_pt_el->Fill( p4().pt(), weight );
-                        histo_mt_cr_met_el->Fill( evt_met, weight );
-                        histo_mt_cr_dphi_el->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
+                        histo_mt_cr_el->Fill( std::min(evt_mt,float(200.)), myweight );
+                        if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_el->Fill( std::min(evt_mt,float(200.)), myweight );
+                        histo_mt_cr_pt_el->Fill( p4().pt(), myweight );
+                        histo_mt_cr_met_el->Fill( evt_met, myweight );
+                        histo_mt_cr_dphi_el->Fill( DeltaPhi(p4().phi(),evt_metPhi), myweight );
                     }
                     if (abs(id())==13) {
-                        histo_mt_cr_mu->Fill( std::min(evt_mt,float(200.)), weight );
-                        if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_mu->Fill( std::min(evt_mt,float(200.)), weight );
-                        histo_mt_cr_pt_mu->Fill( p4().pt(), weight );
-                        histo_mt_cr_met_mu->Fill( evt_met, weight );
-                        histo_mt_cr_dphi_mu->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
+                        histo_mt_cr_mu->Fill( std::min(evt_mt,float(200.)), myweight );
+                        if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_mu->Fill( std::min(evt_mt,float(200.)), myweight );
+                        histo_mt_cr_pt_mu->Fill( p4().pt(), myweight );
+                        histo_mt_cr_met_mu->Fill( evt_met, myweight );
+                        histo_mt_cr_dphi_mu->Fill( DeltaPhi(p4().phi(),evt_metPhi), myweight );
                     }
 
                     if (abs(id())==11 && passes_low) histo_mt_cr_low_el->Fill( std::min(evt_mt,float(200.)), weight );

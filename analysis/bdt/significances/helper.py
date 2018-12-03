@@ -9,7 +9,11 @@ def fix_spacing(ss):
         ss = ss.split()
     return "".join(["{:<9s}".format(x) for x in ss])
 
-def get_significance(proc_yields,proc_errors={},do_mcstats=True,print_card=False,delete_card=True):
+def get_significance(proc_yields,proc_errors={},
+        do_mcstats=True,
+        print_card=False,
+        delete_card=True,
+        ):
     if not proc_errors:
         do_mcstats = False
     nbins = len(proc_yields["tttt"])
@@ -43,6 +47,9 @@ def get_significance(proc_yields,proc_errors={},do_mcstats=True,print_card=False
                 name = "stat_{}_bin{}".format(proc,ibin)
                 buff += "{:<18s} lnN   ".format(name)
                 logn = proc_errors[proc][ibin-1]/proc_yields[proc][ibin-1]+1
+                if not np.isfinite(logn):
+                    print ibin,proc,proc_errors[proc][ibin-1],proc_yields[proc][ibin-1], logn
+                    logn = 1.0
                 islot = (ibin-1)*nproc+iproc
                 slots = sum([["-"]*nproc for i in ibins],[])
                 slots[islot] = "{:.2f}".format(logn)

@@ -85,9 +85,12 @@ if __name__ == "__main__":
     # fname = "v1.00_2016_75p0_v1_try2/card_tttt_srcr.txt"
     # print_table(fname)
 
-    print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2016.txt")
-    print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2017.txt")
-    print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2018.txt")
+    # print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2016.txt")
+    # print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2017.txt")
+    # print_table("v3.08_fixbgscalepdf/card_tttt_srcr_2018.txt")
+    print_table("v3.13_Nov30_v1/card_tttt_srcr_2016.txt")
+    print_table("v3.13_Nov30_v1/card_tttt_srcr_2017.txt")
+    print_table("v3.13_Nov30_v1/card_tttt_srcr_2018.txt")
 
     # print_table("v3.08_bdtscan_v1_16/card_tttt_srdisc_2016.txt")
     # print_table("v3.08_bdtscan_v1_16/card_tttt_srdisc_2017.txt")

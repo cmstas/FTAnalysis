@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("scandata", help="scandata.root file name")
     parser.add_argument("-l", "--label", help="label", default="Expected",type=str)
-    parser.add_argument("-L", "--lumi", help="label", default="150.0",type=str)
+    parser.add_argument("-L", "--lumi", help="label", default="136.3",type=str)
     parser.add_argument("-x", "--xsec", help="scale and rename POI for xsec", action="store_true")
     args = parser.parse_args()
 
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # plot_one(ax,fname="original_cards_2017_94X_mcfakes_75ifb/scandata.root", poi_name=poi_name, poi_scale=poi_scale,fmt=".3f",unit="",label="Expected")
     plot_one(ax,fname=args.scandata, poi_name=poi_name, poi_scale=poi_scale,fmt=fmt,unit=unit,label=args.label)
 
-    add_cms_info(ax, typ="Simulation", lumi=args.lumi)
+    add_cms_info(ax, typ="Preliminary", lumi=args.lumi)
 
     ax.legend(loc="upper left",fontsize="x-large")
 
@@ -96,5 +96,8 @@ if __name__ == "__main__":
 
 
     fig.tight_layout()
-    fig.savefig("plot.png")
-    os.system("ic plot.png")
+    basedir = args.scandata.rsplit("/",1)[0]
+    fname = "./{}/scanplot.pdf".format(basedir)
+    print "Saved {}".format(fname)
+    fig.savefig(fname)
+    os.system("ic "+fname)

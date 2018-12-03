@@ -173,6 +173,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
             if (ss::lep1_coneCorrPt() < 15) continue;
             if (ss::lep2_coneCorrPt() < 15) continue;
 
+            // float weight = ss::is_real_data() ? 1.0 : lumi*(ss::scale1fb())*ss::weight_btagsf();
             float weight = ss::is_real_data() ? 1.0 : lumi*(ss::scale1fb());
 
             if (tree_stype == 5) {

@@ -12,8 +12,10 @@ tags = [
 # "v3.05_all",
 # "v3.06_all",
 # "v3.07_all",
-"v3.08_all", # Good
-"v3.10_all",
+# "v3.08_all", # Good
+# "v3.10_all", # Good
+"v3.11_all", # Good, with 52ifb 2018
+"v3.13_all", #       with 58ifb 2018
 ]
 
 d_names = {}

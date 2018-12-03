@@ -52,15 +52,16 @@ using namespace std;
 // #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_ttbartest25_mid3.h"
 #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_qcd18.h"
 #include "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/insitu/frs.h"
+#include "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/derivation/testfrs.h"
 
 bool inclHT = false;
 
 bool doNew = true;
-bool doQCD = false; // XXX
+bool doQCD = true; // XXX
 bool doHadFR = false;
 bool doHadApp = false;
 bool onlyMuMu = false;
-bool doAbove18 = false;
+bool doAbove18 = true;
 bool doNewP = false;
 bool doAbove25 = false;
 bool bypassTrigger = false;
@@ -137,7 +138,8 @@ float getFakeRate(int id, float pt, float eta, float ht, bool extrPtRel = false,
         // fact = (abs(id)==13) ? numer1_mu_siphigh_FakeRate(pt,eta) : numer1_el_siphigh_FakeRate(pt,eta);
         fact = (abs(id)==13) ? numer1_mu_siplow_FakeRate(pt,eta) : numer1_el_siplow_FakeRate(pt,eta);
     } else {
-        fact = (abs(id)==13) ? muonQCDMCFakeRate_18noanypt_new(pt,eta) : electronQCDMCFakeRate_18noanypt_new(pt,eta);
+        // fact = (abs(id)==13) ? muonQCDMCFakeRate_18noanypt_new(pt,eta) : electronQCDMCFakeRate_18noanypt_new(pt,eta);
+        fact = (abs(id)==13) ? mytest::muonQCDMCFakeRate(pt,eta) : mytest::electronQCDMCFakeRate(pt,eta);
     }
 
     if (fact > 0.8) fact = 0.8;
@@ -161,7 +163,8 @@ float getFakeRateError(int id, float pt, float eta, float ht, bool doInSitu = fa
         fact = (abs(id)==13) ? numer1_mu_siplow_FakeRateError(pt,eta) : numer1_el_siplow_FakeRateError(pt,eta);
     }
     // else return fakeRateError(id, pt, eta, ht);
-    fact = (abs(id)==13) ? muonQCDMCFakeRateError_18noanypt_new(pt,eta) : electronQCDMCFakeRateError_18noanypt_new(pt,eta);
+    // fact = (abs(id)==13) ? muonQCDMCFakeRateError_18noanypt_new(pt,eta) : electronQCDMCFakeRateError_18noanypt_new(pt,eta);
+    fact = (abs(id)==13) ? mytest::muonQCDMCFakeRateError(pt,eta) : mytest::electronQCDMCFakeRateError(pt,eta);
     return fact;
 }
 
@@ -286,6 +289,7 @@ void printClosureNumbers(std::vector<TString> filenames) {
         }
         std::cout << "  --> pred/obs: " << val_pred/tot_obs << std::endl;
 
+        // std::string tag = "muonQCDMCFakeRate_18noanypt_new";
         // std::string tag = "muonTTbarMCFakeRate_new";
         // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_new";
         // std::string tag = "muonTTbarMCFakeRatehad1_fogeq2_notrig_new";
@@ -297,7 +301,8 @@ void printClosureNumbers(std::vector<TString> filenames) {
         // std::string tag = "muonTTbarMCFakeRatehad2_bonly_new";
         
         // std::string tag = "muonTTbarMCFakeRatehad1_abs_fogeq2_new";
-        std::string tag = "muonTTbarMCFakeRatehad2_abs_new";
+        // std::string tag = "muonTTbarMCFakeRatehad2_abs_new";
+        std::string tag = "testfrs18";
         // std::string tag = "muonTTbarMCFakeRatehad1_abs_fogeq2_bonly_new";
         // std::string tag = "muonTTbarMCFakeRatehad2_abs_bonly_new";
 
@@ -345,7 +350,8 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
   bool requireIsoTriggers = false;
 
   // float luminosity = doData ? getLumi() : 12.9;
-  float luminosity = doData ? getLumi() : getLumi();
+  int year = 2017;
+  float luminosity = doData ? getLumi(year) : getLumi(year);
 
   //Dir
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
@@ -814,9 +820,9 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       }
 
       if (!ss::is_real_data()) {
-          weight *= getTruePUw(ss::trueNumInt()[0]);
-          weight *= leptonScaleFactor(abs(ss::lep1_id()), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht(), -1);
-          weight *= leptonScaleFactor(abs(ss::lep2_id()), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht(), -1);
+          weight *= getTruePUw(year,ss::trueNumInt()[0]);
+          weight *= leptonScaleFactor(year,abs(ss::lep1_id()), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht());
+          weight *= leptonScaleFactor(year,abs(ss::lep2_id()), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht());
           weight *= ss::weight_btagsf();
       }
 

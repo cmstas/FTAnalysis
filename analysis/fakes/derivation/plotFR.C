@@ -2,7 +2,7 @@ void plotFR(TString dir) {
     for(int i = 0; i < 4; i++) {
         for(int doIso = 0; doIso < 2; doIso++) {
 
-            gROOT->Reset();
+            // gROOT->Reset(); // Uh why do we need this? NOTE it causes `dir` to become garbage later
             gStyle->SetOptStat(0);
             gStyle->SetPaintTextFormat("4.2f");
 

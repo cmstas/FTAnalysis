@@ -16,12 +16,13 @@
     // TString tag = "v1.05_v1";
 
     // TString tag = "v1.06_v2"; // new
-    TString tag = "v2.00_2017_insitu_v2"; // test single lept triggers
+    // TString tag = "v2.00_2017_insitu_v2"; // test single lept triggers
+    TString tag = "v3.13_all"; // test single lept triggers
     bool doBonly         = 0; // FIXME FIXME FIXME
     // TString tag = "v1.06_v2_oldisofix"; // old
 
     TString basedir = Form("/nfs-7/userdata/namin/tupler_babies/merged/FT/%s/output/",tag.Data());
-    bool doInSitu        = 1;
+    bool doInSitu        = 0;
 
 
     bool highhigh   = 1;
@@ -99,7 +100,8 @@
         // ch->Add("../../../babymaking/batch/output_tt_100k.root");
         // ch->Add(basedir+"TTSL*.root");
 
-        ch->Add(basedir+"TTBAR*.root");
+        ch->Add(basedir+"year_2017/TTBAR*.root");
+        // ch->Add(basedir+"year_2017/WJets_HT*.root");
         // ch->Add(basedir+"TTSL*.root");
 
     }

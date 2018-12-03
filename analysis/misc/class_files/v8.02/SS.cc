@@ -1257,6 +1257,12 @@ void SSAG::Init(TTree *tree) {
     lep4_coneCorrPt_branch = tree->GetBranch("lep4_coneCorrPt");
     if (lep4_coneCorrPt_branch) { lep4_coneCorrPt_branch->SetAddress(&lep4_coneCorrPt_); }
   }
+
+  passfilter_branch = 0;
+  if (tree->GetBranch("passfilter") != 0) {
+    passfilter_branch = tree->GetBranch("passfilter");
+    if (passfilter_branch) { passfilter_branch->SetAddress(&passfilter_); }
+  }
 	met3p0_branch = 0;
 	if (tree->GetBranch("met3p0") != 0) {
 		met3p0_branch = tree->GetBranch("met3p0");
@@ -2165,6 +2171,7 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_trigMatch_noIsoReq_isLoaded = false;
 		lep2_trigMatch_isoReq_isLoaded = false;
 		met3p0_isLoaded = false;
+  passfilter_isLoaded = false;
   lep4_coneCorrPt_isLoaded = false;
   bdt_jec_up_nbtags_isLoaded = false;
   bdt_jec_dn_nbtags_isLoaded = false;
@@ -2554,6 +2561,7 @@ void SSAG::LoadAllBranches()
 	if (lep2_trigMatch_noIsoReq_branch != 0) lep2_trigMatch_noIsoReq();
 	if (lep2_trigMatch_isoReq_branch != 0) lep2_trigMatch_isoReq();
 	if (met3p0_branch != 0) met3p0();
+  if (passfilter_branch != 0) passfilter();
   if (lep4_coneCorrPt_branch != 0) lep4_coneCorrPt();
   if (bdt_jec_up_nbtags_branch != 0) bdt_jec_up_nbtags();
   if (bdt_jec_dn_nbtags_branch != 0) bdt_jec_dn_nbtags();
@@ -5808,6 +5816,19 @@ const float &SSAG::lep4_coneCorrPt() {
   }
   return lep4_coneCorrPt_;
 }
+
+const bool &SSAG::passfilter() {
+  if (not passfilter_isLoaded) {
+    if (passfilter_branch != 0) {
+      passfilter_branch->GetEntry(index);
+    } else {
+      printf("branch passfilter_branch does not exist!\n");
+      exit(1);
+    }
+    passfilter_isLoaded = true;
+  }
+  return passfilter_;
+}
 	const float &SSAG::met3p0()
 	{
 		if (not met3p0_isLoaded) {
@@ -7957,6 +7978,7 @@ namespace ss {
 	const bool &lep2_trigMatch_noIsoReq() { return samesign.lep2_trigMatch_noIsoReq(); }
 	const bool &lep2_trigMatch_isoReq() { return samesign.lep2_trigMatch_isoReq(); }
 	const float &met3p0() { return samesign.met3p0(); }
+  const bool &passfilter() { return samesign.passfilter(); }
   const float &lep4_coneCorrPt() { return samesign.lep4_coneCorrPt(); }
   const float &bdt_jec_up_nbtags() { return samesign.bdt_jec_up_nbtags(); }
   const float &bdt_jec_dn_nbtags() { return samesign.bdt_jec_dn_nbtags(); }

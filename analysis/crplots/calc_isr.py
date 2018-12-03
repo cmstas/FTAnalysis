@@ -1,7 +1,12 @@
+import os
 import numpy as np
 
-from matplottery.utils import Hist1D
 import uproot
+
+import sys
+sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
+from matplottery.utils import Hist1D
+from matplottery.plotter import plot_stack
 
 np.set_printoptions(linewidth=150)
 
@@ -10,12 +15,12 @@ np.set_printoptions(linewidth=150)
 # # ttW has 1 extra parton
 # https://github.com/cms-sw/genproductions/blob/5fb3762c8be13dabb89a8580863856201d56f49c/bin/MadGraph5_aMCatNLO/cards/production/2017/13TeV/TTWJets/TTWJetsToLNu_5f_NLO_FXFX/TTWJetsToLNu_5f_NLO_FXFX_proc_card.dat
 
-# which = "ttdl0jet"
-which = "ttdl1jet"
+which = "ttdl0jet"
+# which = "ttdl1jet"
 # which = "tt"
 procs = ["dy", "ttz", "tth", "ttw", "vv", "rares", "singletop"]
 
-inputdir = "outputs_temp"
+inputdir = "outputs_isr2017/"
 year = 2017
 files = { proc:uproot.open("{}/histos_{}_{}.root".format(inputdir,proc,year)) for proc in procs+["data",which] }
 # print files
@@ -35,6 +40,9 @@ for newname,tosum in [
     otherbgs.append(groupbg)
 data = Hist1D(files["data"][hname],label="data")
 mc_isr = Hist1D(files[which][hname],label=which)
+
+# FIXME
+mc_isr *= (data-sum(otherbgs)).get_integral() / mc_isr.get_integral()
 
 bgs = otherbgs + [mc_isr]
 # for bg in bgs:
@@ -57,8 +65,34 @@ print hsfs
 
 from analysis.utils import pytable
 from analysis.utils.plotting_utils import write_table
-tab = write_table(data, otherbgs+[mc_isr], extra_hists=[hsfs], binedge_fmt="{:.0f}")
+tab = write_table(data, otherbgs+[mc_isr], extra_hists=[hsfs], binedge_fmt="{:.0f}", fix_negative=False)
 # tab.set_theme_fancy()
 tab.set_theme_csv()
 tab.print_table()
+
+otherbgs[0].set_attr("color", [1.0, 0.4, 1.0])
+otherbgs[1].set_attr("color", [0.4, 0.6, 1.0])
+otherbgs[2].set_attr("color", [1.0, 0.4, 0.0])
+mc_isr.set_attr("color",[0.8, 0.8, 0.8])
+
+ratio = data/sum(otherbgs+[mc_isr])
+def ax_ratio_callback(ratio):
+    def f(ax):
+        for x,y in zip(ratio.get_bin_centers(),ratio.get_counts()):
+            if not (0. < y < 2.): continue
+            ax.text(x-0.3,y-0.1,"{:.2f}".format(y),
+                    color="black", ha="center", va="center", fontsize=7.0,
+                    wrap=True)
+    return f
+
+fname = "test.pdf"
+# mc_isr._counts[mc_isr._counts < 0.] = 0.
+plot_stack(bgs=otherbgs+[mc_isr], data=data, title="nisrjets", xlabel="nisrjets", filename=fname,
+# plot_stack(bgs=[data], data=data, title="nisrjets", xlabel="nisrjets", filename=fname,
+           cms_type = "Preliminary",
+           lumi = "41.5",
+           ratio_range=[0.0,2.0],
+           ax_ratio_callback=ax_ratio_callback(ratio),
+           )
+os.system("ic {}".format(fname))
 

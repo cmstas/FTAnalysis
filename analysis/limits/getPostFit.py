@@ -84,7 +84,7 @@ def get_postfit_dict(fname="mlfitname.root",channels=["SS"], bonly=False):
         vprefit = h_prefit.IntegralAndError(0,-1,eprefit)
         ratios[key] = 1.0*vpostfit/vprefit
         ratios_errors[key] = (E(vpostfit,epostfit)/E(vprefit,eprefit))[1]
-    return d_postfit, ratios, ratios_errors
+    return d_prefit, d_postfit, ratios, ratios_errors
     # return d_prefit
 
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     # print get_postfit_dict()
     from pprint import pprint
-    d_postfit, ratios, ratios_errors = get_postfit_dict("v3.05_allyears_crwsplit_3bins_v1/mlfitname.root",channels=["y2016","y2017","y2018"], bonly=True)
+    d_prefit, d_postfit, ratios, ratios_errors = get_postfit_dict("v3.05_allyears_crwsplit_3bins_v1/mlfitname.root",channels=["y2016","y2017","y2018"], bonly=True)
     # d_postfit, ratios, ratios_errors = get_postfit_dict("v3.05_allyears_2bins_v1/mlfitname.root",channels=["y2016","y2017","y2018"], bonly=True)
     print d_postfit["tttt"].Integral()
     pprint(d_postfit)

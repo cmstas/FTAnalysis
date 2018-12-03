@@ -8,13 +8,16 @@ from matplottery.plotter import plot_stack, plot_2d
 from matplottery.utils import Hist1D, Hist2D
 
 
-# f = uproot.open("histos__LooseEMVA_coneCorr_HH.root")
-f = uproot.open("histos__LooseEMVA_soup_inSitu_coneCorr_HH.root")
+f = uproot.open("histos__LooseEMVA_coneCorr_HH.root")
+# f = uproot.open("histos__LooseEMVA_soup_inSitu_coneCorr_HH.root")
 
 # for k in sorted(f.keys()):
 #     print k
 
+outdir = "plots_FT_2017_Nov29"
+
 varnames = ["HT", "L1PT", "L2PT", "LFake", "LTrue", "MET", "MTMIN", "NJET", "NB", "MATCH", "L1ETA", "L2ETA"]
+# varnames = ["NB"]
 flavs = ["_el","_mu",""]
 # varnames = ["MATCH"]
 # flavs = [""]
@@ -48,11 +51,11 @@ for flav in ["_el","_mu"]:
     for ext in ["pdf","png"]:
         opts["cmap"] = "Blues_r"
         opts["zrange"] = []
-        plot_2d(obs, filename="plots/h2_obs{}.{}".format(flav,ext), title="obs", **opts)
-        plot_2d(pred, filename="plots/h2_pred{}.{}".format(flav,ext), title="pred", **opts)
+        plot_2d(obs, filename="{}/h2_obs{}.{}".format(outdir,flav,ext), title="obs", **opts)
+        plot_2d(pred, filename="{}/h2_pred{}.{}".format(outdir,flav,ext), title="pred", **opts)
         opts["cmap"] = "RdBu_r"
         opts["zrange"] = [0.,2.]
-        plot_2d(ratio, filename="plots/h2_ratio{}.{}".format(flav,ext), title="pred/obs", **opts)
+        plot_2d(ratio, filename="{}/h2_ratio{}.{}".format(outdir,flav,ext), title="pred/obs", **opts)
     # os.system("ic plots/h2_ratio_el.png")
 
 
@@ -73,17 +76,18 @@ for var in varnames:
             # xticks = ["unmatched","b","c","photon","light"]
             xticks = ["unmatched (0)","b (-1)","c (-2)","photon (-3)","light (-4)"]
 
-        # for ext in ["png","pdf"]:
-        for ext in ["png"]:
-            fname = "plots/{}{}.{}".format(var,flav,ext)
+        for ext in ["png","pdf"]:
+        # for ext in ["png"]:
+            fname = "{}/{}{}.{}".format(outdir,var,flav,ext)
             plot_stack(bgs=[obs_ttbar,obs_wjets], data=pred, title="",
             # plot_stack(bgs=[obs_ttbar], data=pred, title="",
                     xlabel="{}".format(var),
                     ylabel="Entries",
                     filename=fname,
                     cms_type = "Preliminary",
-                    lumi = "41.3",
-                    ratio_range=[0.,2.],
+                    lumi = "41.5",
+                    # ratio_range=[0.,2.],
+                    ratio_range=[0.5,1.5],
                     mpl_hist_params = {
                         "edgecolor": "k",
                         "linewidth": 0.5,
@@ -101,7 +105,7 @@ for var in varnames:
 # os.system("NOCONVERT=true niceplots plots plots_fakerateclosure_Jun17")
 # os.system("NOCONVERT=true niceplots plots plots_fakerateclosurecheck_Jul2") # old WPs for QCD FR applied to tt1l (v1.06_v2_oldiso)
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosure1wnfo2_Jul6") # new WPs for QCD FR applied to inclusive tt (v1.06_v2)
-os.system("NOCONVERT=true niceplots plots plots_fakeclosureinsitu_Aug2")
+# os.system("NOCONVERT=true niceplots plots plots_fakeclosureinsitu_Aug2")
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosure1wnfo1_Jul6") # new WPs for QCD FR applied to inclusive tt (v1.06_v2)
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosureextrapt_Apr24")
 # os.system("NOCONVERT=true niceplots plots plots_fakeclosurenolooseemva_Apr22")

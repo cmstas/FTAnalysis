@@ -586,6 +586,9 @@ protected:
 	float    met3p0_;
 	TBranch *met3p0_branch;
 	bool     met3p0_isLoaded;
+  bool passfilter_;
+  TBranch *passfilter_branch;
+  bool passfilter_isLoaded;
   float lep4_coneCorrPt_;
   TBranch *lep4_coneCorrPt_branch;
   bool lep4_coneCorrPt_isLoaded;
@@ -1368,6 +1371,7 @@ void LoadAllBranches();
 	const bool &lep2_trigMatch_noIsoReq();
 	const bool &lep2_trigMatch_isoReq();
 	const float &met3p0();
+  const bool &passfilter();
   const float &lep4_coneCorrPt();
   const float &bdt_jec_up_nbtags();
   const float &bdt_jec_dn_nbtags();
@@ -1761,6 +1765,7 @@ namespace ss {
 	const bool &lep2_trigMatch_noIsoReq();
 	const bool &lep2_trigMatch_isoReq();
 	const float &met3p0();
+  const bool &passfilter();
   const float &lep4_coneCorrPt();
   const float &bdt_jec_up_nbtags();
   const float &bdt_jec_dn_nbtags();

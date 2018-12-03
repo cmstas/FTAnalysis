@@ -116,7 +116,7 @@ dtrain = xgb.DMatrix( x_train, label=y_train, weight=np.abs(weights_train)) #, m
 dtest = xgb.DMatrix( x_test, label=y_test, weight=np.abs(weights_test)) #, missing=-1.0)
 evallist  = [(dtrain,'train'), (dtest,'eval')]
 # 2131,0.8930,0.8954,0.0024,2626,3.5 {'colsample_bytree': 0.5, 'silent': 1, 'eval_metric': 'auc', 'scale_pos_weight': 1.262414, 'nthread': 1, 'min_child_weight': 5.0, 'subsample': 0.6, 'eta': 0.04, 'alpha': 4.0, 'max_depth': 5, 'gamma': 2.0, 'lambda': 1.5}
-num_round = 750
+# num_round = 750
 param = {}
 param['objective'] = 'binary:logistic'
 
@@ -163,7 +163,8 @@ param['colsample_bytree'] = 1.0
 sumw_pos = np.abs(dtrain.get_weight()[dtrain.get_label()==1]).sum()
 sumw_neg = np.abs(dtrain.get_weight()[dtrain.get_label()==0]).sum()
 param["scale_pos_weight"] = sumw_neg/sumw_pos
-pklname = "bst_ssos.pkl"
+# pklname = "bst_ssos.pkl" # bdt_earlystoppingnominal.h <-- 3.3\sigma with k=11.5,17 bins
+pklname = "bst_ssos_test.pkl" # 3.21sigma with k=11.5,17 -- nominal
 # pklname = "bst_ssos_depth4.pkl"
 # pklname = "bst_ss.pkl"
 if not os.path.exists(pklname):
@@ -235,9 +236,31 @@ pks_bkg = stats.ks_2samp(preds_bkg_train,preds_bkg_test)[1]
 pks_sig = stats.ks_2samp(preds_sig_train,preds_sig_test)[1]
 
 
+def get_bkg_weights(train=True):
+    nbtagsbins = [0.5,1.5,2.5,3.5,99.5]
+    njetsbins = [1.5,2.5,3.5,4.5,5.5,99.5]
+    if train:
+        is_signal = y_train==1
+        nbtags = x_train[:,0]
+        njets = x_train[:,1]
+    else:
+        is_signal = y_test==1
+        nbtags = x_test[:,0]
+        njets = x_test[:,1]
+    extra_weights = np.ones(len(is_signal))
+    # counts_sig, _,_ = np.histogram2d(nbtags[ is_signal],njets[ is_signal],bins=[nbtagsbins,njetsbins])
+    # counts_bkg, _,_ = np.histogram2d(nbtags[~is_signal],njets[~is_signal],bins=[nbtagsbins,njetsbins])
+    # nbtagsidxs = np.digitize(nbtags[~is_signal],nbtagsbins)-1
+    # njetsidxs = np.digitize(njets[~is_signal],njetsbins)-1
+    # extra_weights[~is_signal] = (1.0*counts_sig[nbtagsidxs,njetsidxs]/counts_bkg[nbtagsidxs,njetsidxs])
+    return extra_weights[~is_signal]
+
+train_bkg_weights = get_bkg_weights(train=True)
+test_bkg_weights = get_bkg_weights(train=False)
+
 # train bkg
-counts_train_bkg,_,_ = ax.hist(preds_bkg_train, weights=weights_raw_train[y_train==0], bins=bins,histtype="stepfilled",alpha=0.45, density=density, label="bkg, train",color="C0")
-h_train_bkg = Hist1D(preds_bkg_train, weights=weights_raw_train[y_train==0], bins=bins)
+counts_train_bkg,_,_ = ax.hist(preds_bkg_train, weights=train_bkg_weights*weights_raw_train[y_train==0], bins=bins,histtype="stepfilled",alpha=0.45, density=density, label="bkg, train",color="C0")
+h_train_bkg = Hist1D(preds_bkg_train, weights=train_bkg_weights*weights_raw_train[y_train==0], bins=bins)
 h_train_bkg *= float(counts_train_bkg.sum()/h_train_bkg.get_integral())
 # ax.errorbar( h_train_bkg.get_bin_centers(), h_train_bkg.counts, yerr=h_train_bkg.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="k",)
 
@@ -248,8 +271,8 @@ h_train_sig *= float(counts_train_sig.sum()/h_train_sig.get_integral())
 # ax.errorbar( h_train_sig.get_bin_centers(), h_train_sig.counts, yerr=h_train_sig.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="k",)
 
 # test bkg error bars
-counts_test_bkg,_,_ = ax.hist(preds_bkg_test, weights=weights_raw_test[y_test==0], bins=bins,histtype="step",alpha=1.0, density=density, label="bkg, test (KS prob = {:.2f})".format(pks_bkg),color="C0", lw=1.5, linestyle="solid")
-h_test_bkg = Hist1D(preds_bkg_test, weights=weights_raw_test[y_test==0], bins=bins)
+counts_test_bkg,_,_ = ax.hist(preds_bkg_test, weights=test_bkg_weights*weights_raw_test[y_test==0], bins=bins,histtype="step",alpha=1.0, density=density, label="bkg, test (KS prob = {:.2f})".format(pks_bkg),color="C0", lw=1.5, linestyle="solid")
+h_test_bkg = Hist1D(preds_bkg_test, weights=test_bkg_weights*weights_raw_test[y_test==0], bins=bins)
 h_test_bkg *= float(counts_test_bkg.sum()/h_test_bkg.get_integral())
 ax.errorbar( h_test_bkg.get_bin_centers(), h_test_bkg.counts, yerr=h_test_bkg.errors, marker="o", linestyle="", markersize=2, linewidth=1.5, color="C0",)
 

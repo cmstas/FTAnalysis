@@ -42,8 +42,55 @@ if __name__ == "__main__":
 
     from samples import data_2016, mc_2016, data_2017, mc_2017, data_2018, mc_2018, data_2016_94x, mc_2016_94x
 
-    year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
+    # year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
+    year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018)]
     # year_sample_map = [("2016_94x",data_2016_94x+mc_2016_94x)]
+    tag = "v3.13_all"
+    extra_args = ""
+    tag_match = ""
+    # extra_args = "--ignorebadfiles" # FIXME
+
+    # tag = "v3.09_newdeepflavv2"
+    # year_sample_map = [
+    #         ("2017",[
+    #     # ["/TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM|/hadoop/cms/store/group/snt/run2_mc2017//TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V09-04-18_newdeepflav/", "TTSL"],
+    #     # ["/TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTSL"],
+    #     ["/TTTT_TuneCP5_PSweights_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM","TTTTnew"],
+    #     ["/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTHtoNonBB"],
+    #     ["/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTWnlo"],
+    #     ["/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTZnlo"],
+    #     ]),
+    #         ("2018",[
+    #     # ["/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIIFall18MiniAOD-102X_upgrade2018_realistic_v12-v1/MINIAODSIM", "TTSL"],
+    #     ]),
+    #         ]
+    # tag_match = "CMS4*newdeep*"
+    # # extra_args = "--ignorescale1fb --ignorebadfiles"
+    # # split_func = lambda x: 5
+    # extra_args = ""
+
+    # tag = "v3.11_scalepdfunc"
+    # year_sample_map = [("2016",mc_2016)] + [("2017",mc_2017)]
+    # tag_match = ""
+    # extra_args = ""
+    # # extra_args = "--ignorebadfiles"
+
+    # tag = "v3.11_all"
+    # year_sample_map = [("2018",data_2018)]
+    # tag_match = ""
+    # extra_args = ""
+    # # extra_args = "--ignorebadfiles"
+
+    # tag = "v3.11_all"
+    # year_sample_map = [("2016",mc_2016)]
+    # tag_match = ""
+    # extra_args = ""
+    # # extra_args = "--ignorebadfiles"
+
+    # # s = SNTSample(dataset=year_sample_map[0][1][2][0],tag="CMS4*newdeep*")
+    # print s
+    # print s.get_files()
+    # sys.exit()
 
     # # FIXME FIXME
     # year_sample_map = [(y,sm[-1:]) for y,sm in year_sample_map]
@@ -61,19 +108,30 @@ if __name__ == "__main__":
     # year_sample_map = [("2017",mc_2017)]
     # tag = "v3.09_deepflav"
 
-    year_sample_map = [("2016",[
-        # ["/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTBAR_PH"],
-        # # ["/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTDL"],
-        # # ["/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtop"],
-        # # ["/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtopbar"],
-        # ["/TTTo2L2Nu_HT500Njet7_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTDLht500"],
-        ["/SMS-T6ttWW_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T6TTWW"],
-        ["/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T1TTTT"],
-        ])]
-    tag = "v3.09_fakesv4"
+    # year_sample_map = [("2017",[
+    #     # ["/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTBAR_PH"],
+    #     # # ["/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTDL"],
+    #     # # ["/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtop"],
+    #     # # ["/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM", "TTSLtopbar"],
+    #     # ["/TTTo2L2Nu_HT500Njet7_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTDLht500"],
+    #     # ["/SMS-T6ttWW_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T6TTWW"],
+    #     # ["/SMS-T1tttt_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "T1TTTT"],
+    #     ["/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM", "WJets_HT100To200"],
+    #     ["/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "WJets_HT200To400"],
+    #     ["/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "WJets_HT400To600"],
+    #     ["/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "WJets_HT600To800"],
+    #     ["/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "WJets_HT800To1200"],
+    #     ["/WJetsToLNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "WJets_HT1200To2500"],
+    #     ])]
+    # # tag = "v3.09_fakesv4"
+    # tag = "v3.10_prefire"
+
 
     # year_sample_map = [("2018",data_2018+mc_2018)]
     # tag = "v3.10_all"
+
+    # year_sample_map = [("2016",data_2016+mc_2016)]
+    # tag = "v3.10_prefire"
 
     # year_sample_map = [
     #         (2016, [
@@ -110,6 +168,8 @@ if __name__ == "__main__":
                 else:
                     sample = SNTSample(
                         dataset=dsname,
+                        exclude_tag_pattern="CMS4_V08-*", # ignore new samples by sicheng for 2016
+                        tag=tag_match,
                         # tag="CMS4_V09-04-13", # if not specified, get latest tag
                         )
                 skip_tail = "/SMS" in dsname
@@ -122,6 +182,9 @@ if __name__ == "__main__":
                         min_completion_fraction = 0.93 if skip_tail else 1.0,
                         condor_submit_params = {
                             "sites":"T2_US_UCSD,UCSB",  # I/O is hella faster
+                            # "sites":"T2_US_UCSD",  # I/O is hella faster
+                            # "sites":"UAF",  # I/O is hella faster
+                            "classads": [ ["metis_extraargs",extra_args], ],
                             # "classads": [ ["metis_extraargs","--ignorebadfiles"], ],
                             },
                         cmssw_version = "CMSSW_9_4_9",

@@ -27,6 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--shapes", help="make shape hists and copy to limit directory tag folder", action="store_true")
     parser.add_argument("-p", "--plots", help="make plots and copy to the limit directory tag folder", action="store_true")
     parser.add_argument("-f", "--fastsim", help="include fastsim scans", action="store_true")
+    parser.add_argument("-v", "--verbosity", help="verbosity level (0 = default,1,2)", default=0, type=int)
 
     args = parser.parse_args()
 
@@ -38,26 +39,37 @@ if __name__ == "__main__":
     import ROOT as r
     r.gROOT.SetBatch()
 
-    r.gROOT.ProcessLine(".L ../misc/class_files/v8.02/SS.cc+")
-    r.gROOT.ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+")
-    r.gROOT.ProcessLine(".L yieldMaker.C+")
+    if not args.noloop:
+        r.gROOT.ProcessLine(".L ../misc/class_files/v8.02/SS.cc+")
+        r.gROOT.ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+")
+        r.gROOT.ProcessLine(".L yieldMaker.C+")
 
 
     years_to_consider = [
-            "2016_94x",
+            # "2016_94x",
             2016,
             2017,
             2018,
             ]
 
     basedirs = {
-            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2016/",
-            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2017/",
-            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2018/",
+            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2016/",
+            # # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2017/",
+            # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2018/",
+            # "2016_94x": "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/",
+            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
+            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_lowpt3/output/year_2016/", # FIXME
+            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2017/",
+            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2018/",
+
             "2016_94x": "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/",
-            2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
-            2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2017/",
-            2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2018/",
+            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.11_all/output/year_2016/",
+            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.11_all/output/year_2017/",
+            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.11_all/output/year_2018/",
+            2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2016/",
+            2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2017/",
+            2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2018/",
+
             }
 
     outputdir = args.out
@@ -90,6 +102,12 @@ if __name__ == "__main__":
                     basedirs[2016]+"TTZnlo.root",
                     basedirs[2016]+"TTHtoNonBB.root",
                     ] , options=options[2016]+" doFakes doData "),
+                "fakes_app": make_obj([
+                    basedirs[2016]+"Data*.root",
+                    basedirs[2016]+"TTWnlo.root",
+                    basedirs[2016]+"TTZnlo.root",
+                    basedirs[2016]+"TTHtoNonBB.root",
+                    ] , options=options[2016]+" doFakesUnw doData "),
                 "flips": make_obj(basedirs[2016]+"Data*.root", options=options[2016]+" doFlips doData "),
                 "data": make_obj(basedirs[2016]+"Data*.root", options=options[2016] + " doData "),
                 "tttt": make_obj(basedirs[2016]+"TTTTnew.root", options=options[2016]),
@@ -99,18 +117,20 @@ if __name__ == "__main__":
                 "ttttfsrdn": make_obj(basedirs[2016]+"TTTTfsrdown.root", options=options[2016]),
                 # "fakes_mc": make_obj(basedirs[2016]+"TTBAR*.root", options=options[2016]+ " doFakesMC "),
                 "fakes_mc": make_obj([
-                    basedirs[2016]+"TTDL.root",
-                    basedirs[2016]+"TTSLtop.root",
-                    basedirs[2016]+"TTSLtopbar.root",
-                    ] , options=options[2016]+ " doTruthFake "),
+                    basedirs[2016]+"TTBAR_PH.root",
+                    basedirs[2016]+"TTSLht500.root",
+                    basedirs[2016]+"TTDLht500.root",
+                    ] , options=options[2016]+ " doTruthFake doStitch "),
                 "fakes_mchybrid": make_obj([
-                    basedirs[2016]+"TTDL.root",
-                    basedirs[2016]+"TTSLtop.root",
-                    basedirs[2016]+"TTSLtopbar.root",
-                    basedirs[2016]+"TTWnlo.root",
-                    basedirs[2016]+"TTZnlo.root",
-                    basedirs[2016]+"TTHtoNonBB.root",
-                    ] , options=options[2016]+ " doFakesMC "),
+                    basedirs[2016]+"TTBAR_PH.root",
+                    basedirs[2016]+"TTSLht500.root",
+                    basedirs[2016]+"TTDLht500.root",
+                    ] , options=options[2016]+ " doFakesMC doStitch "),
+                "fakes_mchybrid_app": make_obj([
+                    basedirs[2016]+"TTBAR_PH.root",
+                    basedirs[2016]+"TTSLht500.root",
+                    basedirs[2016]+"TTDLht500.root",
+                    ] , options=options[2016]+ " doFakesMCUnw doStitch "),
                 "ttw": make_obj(basedirs[2016]+"TTWnlo.root", options=options[2016]),
                 "tth": make_obj(basedirs[2016]+"TTHtoNonBB.root", options=options[2016]),
                 "ttz": make_obj([
@@ -130,6 +150,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"TTWH.root",
                     basedirs[2016]+"TTWW.root",
                     basedirs[2016]+"TTWZ.root",
+                    basedirs[2016]+"TTZH.root",
                     basedirs[2016]+"TTZZ.root",
                     ],options=options[2016]),
                 "rares": make_obj([
@@ -143,6 +164,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"WWZ.root",
                     basedirs[2016]+"WZ.root",
                     basedirs[2016]+"WZG.root",
+                    basedirs[2016]+"WWG.root",
                     basedirs[2016]+"WZZ.root",
                     basedirs[2016]+"ZZ.root",
                     basedirs[2016]+"ZZZ.root",
@@ -159,9 +181,14 @@ if __name__ == "__main__":
                     basedirs[2017]+"TTZnlo.root",
                     basedirs[2017]+"TTHtoNonBB.root",
                     ] , options=options[2017]+" doFakes doData "),
+                "fakes_app": make_obj([
+                    basedirs[2017]+"Data*.root",
+                    basedirs[2017]+"TTWnlo.root",
+                    basedirs[2017]+"TTZnlo.root",
+                    basedirs[2017]+"TTHtoNonBB.root",
+                    ] , options=options[2017]+" doFakesUnw doData "),
                 "flips": make_obj(basedirs[2017]+"Data*.root", options=options[2017]+" doFlips "),
                 "data": make_obj(basedirs[2017]+"Data*.root", options=options[2017]+" doData "),
-                "tttt": make_obj(basedirs[2017]+"TTTTnew.root", options=options[2017]),
                 # "fakes_mc": make_obj(basedirs[2017]+"TTBAR*.root", options=options[2017]+ " doFakesMC "),
                 "fakes_mc": make_obj([
                     basedirs[2017]+"TTDL.root",
@@ -172,22 +199,35 @@ if __name__ == "__main__":
                     basedirs[2017]+"TTDL.root",
                     basedirs[2017]+"TTSLtop.root",
                     basedirs[2017]+"TTSLtopbar.root",
-                    basedirs[2017]+"TTWnlo.root",
-                    basedirs[2017]+"TTZnlo.root",
-                    basedirs[2017]+"TTHtoNonBB.root",
                     ] , options=options[2017]+ " doFakesMC "),
+                "fakes_mchybrid_app": make_obj([
+                    basedirs[2017]+"TTDL.root",
+                    basedirs[2017]+"TTSLtop.root",
+                    basedirs[2017]+"TTSLtopbar.root",
+                    ] , options=options[2017]+ " doFakesMCUnw "),
+
+                "tttt": make_obj(basedirs[2017]+"TTTTnew.root", options=options[2017]),
                 "ttw": make_obj(basedirs[2017]+"TTWnlo.root", options=options[2017]),
                 "tth": make_obj(basedirs[2017]+"TTHtoNonBB.root", options=options[2017]),
                 "ttz": make_obj([
                     basedirs[2017]+"TTZnlo.root",
                     basedirs[2017]+"TTZLOW.root",
                     ] , options=options[2017]),
+
+                # "tttt": make_obj("/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_newdeepflavv2//output/year_2017/TTTTnew.root", options=options[2017]),
+                # "ttw": make_obj("/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_newdeepflavv2//output/year_2017/TTWnlo.root", options=options[2017]),
+                # "tth": make_obj("/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_newdeepflavv2//output/year_2017/TTHtoNonBB.root", options=options[2017]),
+                # "ttz": make_obj([
+                #     "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_newdeepflavv2//output/year_2017/TTZnlo.root",
+                #     basedirs[2017]+"TTZLOW.root",
+                #     ] , options=options[2017]),
+
                 "xg": make_obj([
                     basedirs[2017]+"TGext.root",
-                    # basedirs[2017]+"TTGdilep.root", # TODO Don't have this yet
+                    basedirs[2017]+"TTGdilep.root", # TODO This is LO since NLO doesn't exist yet
                     basedirs[2017]+"TTGsinglelepbar.root",
                     basedirs[2017]+"TTGsinglelep.root",
-                    # basedirs[2017]+"WGToLNuGext.root", # TODO Don't have this yet
+                    basedirs[2017]+"WGToLNuGext.root", # TODO This is LO since NLO doesn't exist yet
                     # basedirs[2017]+"ZG.root", # TODO Don't have this yet
                     ],options=options[2017] + " doXgamma "),
                 "ttvv": make_obj([
@@ -195,10 +235,11 @@ if __name__ == "__main__":
                     basedirs[2017]+"TTWH.root",
                     basedirs[2017]+"TTWW.root",
                     basedirs[2017]+"TTWZ.root",
+                    basedirs[2017]+"TTZH.root",
                     basedirs[2017]+"TTZZ.root",
                     ],options=options[2017]),
                 "rares": make_obj([
-                    # basedirs[2017]+"GGHtoZZto4L.root", # TODO Don't have this sample yet
+                    basedirs[2017]+"GGHtoZZto4L.root",
                     basedirs[2017]+"QQWW.root",
                     # basedirs[2017]+"TWZ.root", # TODO Don't have this yet
                     basedirs[2017]+"TZQ.root",
@@ -208,6 +249,7 @@ if __name__ == "__main__":
                     basedirs[2017]+"WWZ.root",
                     basedirs[2017]+"WZ.root",
                     basedirs[2017]+"WZG.root",
+                    basedirs[2017]+"WWG.root",
                     basedirs[2017]+"WZZ.root",
                     basedirs[2017]+"ZZ.root",
                     basedirs[2017]+"ZZZ.root",
@@ -225,6 +267,12 @@ if __name__ == "__main__":
                     basedirs[2017]+"TTZnlo.root",
                     basedirs[2017]+"TTHtoNonBB.root",
                     ] , options=options[2018]+" doFakes doData "),
+                "fakes_app": make_obj([
+                    basedirs[2018]+"Data*.root",
+                    basedirs[2017]+"TTWnlo.root",
+                    basedirs[2017]+"TTZnlo.root",
+                    basedirs[2017]+"TTHtoNonBB.root",
+                    ] , options=options[2018]+" doFakesUnw doData "),
                 "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
                 "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
                 "tttt": make_obj(basedirs[2017]+"TTTTnew.root", options=options[2018]),
@@ -238,10 +286,12 @@ if __name__ == "__main__":
                     basedirs[2017]+"TTDL.root",
                     basedirs[2017]+"TTSLtop.root",
                     basedirs[2017]+"TTSLtopbar.root",
-                    basedirs[2017]+"TTWnlo.root",
-                    basedirs[2017]+"TTZnlo.root",
-                    basedirs[2017]+"TTHtoNonBB.root",
                     ] , options=options[2018]+ " doFakesMC "),
+                "fakes_mchybrid_app": make_obj([
+                    basedirs[2017]+"TTDL.root",
+                    basedirs[2017]+"TTSLtop.root",
+                    basedirs[2017]+"TTSLtopbar.root",
+                    ] , options=options[2018]+ " doFakesMCUnw "),
                 "ttw": make_obj(basedirs[2017]+"TTWnlo.root", options=options[2018]),
                 "tth": make_obj(basedirs[2017]+"TTHtoNonBB.root", options=options[2018]),
                 "ttz": make_obj([
@@ -300,19 +350,34 @@ if __name__ == "__main__":
         strs = map(lambda x:"{}_m{}_m{}".format(procbase,x[0],x[1]), valid_points)
         return strs
 
+    fastsim_procnames = []
     if args.fastsim:
         fn = basedirs[2016]+"T1TTTT.root"
         procnames = get_fastsim_procnames(fn, procbase="fs_t1tttt")
-        for pn in procnames: chs[2016][pn] = make_obj(fn, options=options[2016])
+        procnames = [pn for pn in procnames if any(x in pn for x in [
+            # "m1600_m100",
+            # "m1550_m100",
+            # "m1450_m1050",
+            # "m1400_m1000",
+            # "m1400_m1200",
+            # "m1500_m1150",
+            # "m1200_m700",
+            # "m1200_m100",
+            ])]
+        for pn in procnames: 
+            chs[2016][pn] = make_obj(fn, options=options[2016])
+            fastsim_procnames.append(pn)
 
         fn = basedirs[2016]+"T6TTWW.root"
         procnames = get_fastsim_procnames(fn, procbase="fs_t6ttww")
-        for pn in procnames: chs[2016][pn] = make_obj(fn, options=options[2016])
-
-    # # chs[2016]["fs_t1tttt_m1200_m800"] = make_obj(basedirs[2016]+"T1TTTT.root", options=options[2016])
-    # chs[2016]["fs_t1tttt_m1200_m600"] = make_obj(basedirs[2016]+"T1TTTT.root", options=options[2016])
-    # # chs[2016]["fs_t1tttt_m1200_m700"] = make_obj(basedirs[2016]+"T1TTTT.root", options=options[2016])
-    # chs[2016]["fs_t6ttww_m1200_m600"] = make_obj(basedirs[2016]+"T6TTWW.root", options=options[2016])
+        procnames = [pn for pn in procnames if any(x in pn for x in [
+        #     "m850_m75",
+            # "m850_m750",
+            "m850_m700",
+            ])]
+        for pn in procnames:
+            chs[2016][pn] = make_obj(fn, options=options[2016])
+            fastsim_procnames.append(pn)
 
     def run_chain((index,info)):
         ch, options, outputdir = info
@@ -328,11 +393,15 @@ if __name__ == "__main__":
             # if (len(args.proc) > 0) and (proc != args.proc): continue
             if (len(args.proc) > 0) and not fnmatch.fnmatch(proc,args.proc): continue
             options = obj["options"]
+            if args.verbosity >= 1:
+                options = options.replace("quiet","")
             if args.year and args.proc and "*" not in args.proc:  # if one process, show the progress bar
                 options = options.replace("quiet","")
             # Change chain titles to proc so that we output the right root file name
             obj["ch"].SetTitle("{}".format(proc))
             to_run.append([obj["ch"], options, outputdir])
+            if args.verbosity >= 2:
+                print "Adding:", obj["ch"].GetTitle(), options, outputdir
 
     os.system("mkdir -p {}".format(outputdir))
 
@@ -359,31 +428,41 @@ if __name__ == "__main__":
 
     if not args.noloop:
 
-        if len(to_run) < 30:
-            def callback(ret):
-                ret, proc, t = ret
-                print "Processed {} in {:.1f} seconds".format(proc,t)
-        else:
-            def callback(ret):
-                pass
+        def callback(ret):
+            pass
+        # if len(to_run) < 30:
+        #     def callback(ret):
+        #         ret, proc, t = ret
+        #         print "Processed {} in {:.1f} seconds".format(proc,t)
+        # else:
+        #     def callback(ret):
+        #         pass
 
         # Now run them
         if len(to_run) == 1:
+            print "Running one chain"
             map(run_chain,enumerate(to_run))
+            print "Done"
         else:
-            runner = pyrun.Runner(nproc=min(20,len(to_run)), func=run_chain, dot_type=3)
+            runner = pyrun.Runner(nproc=min(25,len(to_run)), func=run_chain, dot_type=3)
             runner.add_args(to_run)
             runner.run(print_callback=callback)
 
     if args.tag:
         outdir_limits = "../limits/{}/".format(args.tag)
         os.system("mkdir -p {}".format(outdir_limits))
+        os.system("cp ../misc/signal_regions.h {}/".format(outdir_limits))
+        os.system("cp ../misc/bdt.h {}/".format(outdir_limits))
 
         if args.shapes:
             import make_shape_hists
+            regions = ["SRCR","SRDISC"] if not "noBDT" in extra_global_options else ["SRCR"]
             make_shape_hists.make_root_files(
                     outputdir=outdir_limits,
                     inputdir=args.out,
+                    extra_procs=fastsim_procnames,
+                    regions=regions,
+                    verbose=(args.verbosity >= 2)
                     )
 
         if args.plots:
@@ -394,11 +473,35 @@ if __name__ == "__main__":
             import sys
             sys.modules["numba"] = None
             import plot_all
+
+            plot_all.make_plots(
+                    outputdir="{}/plots/".format(outdir_limits),
+                    inputdir=args.out,
+                    year=2016,
+                    lumi="35.9",
+                    other_years = []
+                    )
+
+            plot_all.make_plots(
+                    outputdir="{}/plots/".format(outdir_limits),
+                    inputdir=args.out,
+                    year=2017,
+                    lumi="41.5",
+                    other_years = []
+                    )
+
             plot_all.make_plots(
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
                     year=2018,
-                    lumi="112.9", # 2016+2017+2018 --> 35.87+41.53+35.53 = 112.9
-                    other_years = [2016,2017],
+                    lumi="58.8",
+                    other_years = [],
                     )
 
+            plot_all.make_plots(
+                    outputdir="{}/plots/".format(outdir_limits),
+                    inputdir=args.out,
+                    year=2018,
+                    lumi="136.3", # 2016+2017+2018 --> 35.922+41.53+58.83 = 136.3
+                    other_years = [2016,2017],
+                    )

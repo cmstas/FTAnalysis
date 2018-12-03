@@ -4,6 +4,8 @@
 import sys
 import re
 import math
+import os
+import commands
 
 def round_sig(x, sig=2):
     if x < 0.001: return x
@@ -103,13 +105,13 @@ class Table():
         self.d_style["OUTER_TOP_LEFT"] = '+'
         self.d_style["OUTER_TOP_RIGHT"] = '+'
 
-    def set_theme_csv(self):
+    def set_theme_csv(self, delimiter=","):
         self.theme = "csv"
         self.use_color = False
 
         self.d_style["INNER_HORIZONTAL"] = ''
-        self.d_style["INNER_INTERSECT"] = ','
-        self.d_style["INNER_VERTICAL"] = ','
+        self.d_style["INNER_INTERSECT"] = delimiter
+        self.d_style["INNER_VERTICAL"] = delimiter
         self.d_style["OUTER_LEFT_INTERSECT"] = ''
         self.d_style["OUTER_LEFT_VERTICAL"] = ''
         self.d_style["OUTER_RIGHT_INTERSECT"] = ''
@@ -126,14 +128,13 @@ class Table():
     def set_theme_latex(self):
         self.theme = "latex"
         self.use_color = False
-
         self.d_style["INNER_HORIZONTAL"] = ''
         self.d_style["INNER_INTERSECT"] = ''
         self.d_style["INNER_VERTICAL"] = ' & '
         self.d_style["OUTER_LEFT_INTERSECT"] = ''
         self.d_style["OUTER_LEFT_VERTICAL"] = ''
-        self.d_style["OUTER_RIGHT_INTERSECT"] = ''
-        self.d_style["OUTER_RIGHT_VERTICAL"] = '\\\\ \\hline'
+        self.d_style["OUTER_RIGHT_INTERSECT"] = r'\hline'
+        self.d_style["OUTER_RIGHT_VERTICAL"] = r'\\ \hline'
         self.d_style["OUTER_BOTTOM_HORIZONTAL"] = ''
         self.d_style["OUTER_BOTTOM_INTERSECT"] = ''
         self.d_style["OUTER_BOTTOM_LEFT"] = ''
@@ -141,12 +142,74 @@ class Table():
         self.d_style["OUTER_TOP_HORIZONTAL"] = ''
         self.d_style["OUTER_TOP_INTERSECT"] = ''
         self.d_style["OUTER_TOP_LEFT"] = ''
-        self.d_style["OUTER_TOP_RIGHT"] = ''
+        self.d_style["OUTER_TOP_RIGHT"] = r'\hline'
 
+    def compile_latex(self, tstr, name="table", temp_folder_name="tmp"):
+        template = r"""
+        \documentclass{article}
+        \usepackage[table]{xcolor}
+        \usepackage{multirow}
+        \usepackage{graphicx}
+        \usepackage{slashed}
+        \newcommand{\met}{\slashed{E}_\mathrm{T}}
+        \newcommand{\mt}{m_\mathrm{T}}
+        \newcommand{\pt}{p_\mathrm{T}}
+        \newcommand{\mtmin}{m_{T}^\mathrm{min}}
+        \newcommand{\Ht}{H_\mathrm{T}}
+        \renewcommand{\arraystretch}{1.2}
+        \usepackage{helvet} \renewcommand{\familydefault}{\sfdefault}
+        \definecolor{white}{rgb}{1,1,1}
+        \definecolor{black}{rgb}{0,0,0}
+        \definecolor{red}{rgb}{0.96,0.10,0.12}
+        \definecolor{green}{rgb}{0.25,0.90,0.10}
+        \definecolor{blue}{rgb}{0.14,0.10,1.0}
+        \definecolor{orange}{rgb}{0.98,0.85,0.22}
+        \definecolor{yellow}{rgb}{1.0,0.98,0.28}
+        \definecolor{lightred}{rgb}{0.96,0.60,0.52}
+        \definecolor{lightgreen}{rgb}{0.75,0.90,0.60}
+        \definecolor{lightblue}{rgb}{0.64,0.80,1.0}
+        \definecolor{lightorange}{rgb}{0.98,0.85,0.62}
+        \definecolor{lightyellow}{rgb}{1.0,0.98,0.68}
+        \begin{document}
+        \pagenumbering{gobble}
+        \begin{table}[h]
+        \centering
+        \resizebox{\textwidth}{!}{
+            \begin{tabular}{%s}
+            \rowcolor{white} %% first row has bg so that it's easily selectable in keynote
+            %s
+            \end{tabular}
+        }
+        \end{table}
+        \end{document}
+        """
+        colstr = "|"+"c|"*len(self.get_column_names())
+        os.system("mkdir -p {}".format(temp_folder_name))
+        with open("{tmpname}/{name}.tex".format(tmpname=temp_folder_name,name=name),"w") as fh:
+            fh.write(template%(colstr,tstr))
+        status,out = commands.getstatusoutput("pdflatex -interaction=nonstopmode -output-directory={tmpname} {tmpname}/{name}.tex".format(tmpname=temp_folder_name,name=name))
+        if " Error" in out:
+            print "ERROR: Tried to compile, but failed. Last few lines of printout below."
+            print "_"*40
+            print "\n".join(out.split("\n")[-30:])
+        else:
+            status,out = commands.getstatusoutput("pdfcrop --margins 4 {tmpname}/{name}.pdf {name}.pdf >& /dev/null".format(tmpname=temp_folder_name,name=name))
+            return "{name}.pdf".format(name=name)
+        return ""
+
+    def print_pdf(self, **kwargs):
+        if self.theme != "latex":
+            raise Exception("Can't save themes other than latex to pdf")
+        tstr = self.get_table(**kwargs)
+        fname = self.compile_latex(tstr)
+        os.system("which ic >& /dev/null && ic {fname} || echo Made {fname}".format(fname=fname))
 
     def set_column_names(self, cnames):
         self.colnames = cnames
         self.update()
+
+    def get_column_names(self):
+        return self.colnames
 
     def add_row(self, row, color=None):
         self.matrix.append(row)
@@ -161,7 +224,7 @@ class Table():
         else:
             for irow in range(len(self.matrix)):
                 if irow < len(values): val = values[irow]
-                else: val = "-"
+                else: val = ""
                 self.matrix[irow].append(val)
         self.colnames.append(colname)
 
@@ -205,10 +268,13 @@ class Table():
         self.rowcolors = newrowcolors
         self.hlines = [oldtonewidx[hline] for hline in self.hlines]
 
-    def print_table(self, **kwargs):
-        print "".join(self.get_table_string(**kwargs))
+    def get_table(self, **kwargs):
+        return "".join(self.get_table_strings(**kwargs))
 
-    def get_table_string(self, bold_title=True, show_row_separators=False, show_alternating=False, ljustall=False, show_colnames=True):
+    def print_table(self, **kwargs):
+        print self.get_table(**kwargs)
+
+    def get_table_strings(self, bold_title=True, show_row_separators=False, show_alternating=False, ljustall=False, show_colnames=True):
         self.update()
         nrows = len(self.matrix) + 1
         draw_row_separators = True
@@ -273,8 +339,6 @@ if __name__ == "__main__":
     if(sys.stdin.isatty()):
 
         tab = Table()
-        # tab.set_theme_basic()
-        # tab.set_theme_latex()
         tab.set_column_names(["name", "age", "blahhhhhh"])
         for row in [
                 ["Alice", 42, 4293.9923344],
@@ -293,7 +357,29 @@ if __name__ == "__main__":
         # oh crap, forgot a field. no worries ;)
         tab.add_column("forgot this",range(8))
         tab.sort(column="age", descending=True)
-        tab.print_table(show_row_separators=False,show_alternating=True)
+        for w in [
+                tab.set_theme_basic,
+                tab.set_theme_fancy,
+                tab.set_theme_latex,
+                tab.set_theme_csv,
+                ]:
+            w()
+            tab.print_table(show_row_separators=False,show_alternating=True)
+
+        tab = Table()
+        tab.set_theme_latex()
+        tab.set_column_names(["col1","col2","col3","col4","col5","col6","col7"])
+        for row in [
+                [r"$\slashed{E}_T$", 4.2, r"\color{lightred}{4.2}"   , r"\cellcolor{lightred}{4.2}"   , r"\cellcolor{black}{\color{lightred}{4.2}}"   , r"\cellcolor{white}{\color{red}{4.2}}"   , 4.2],
+                [r"$\met$"         , 4.2, r"\color{lightblue}{4.2}"  , r"\cellcolor{lightblue}{4.2}"  , r"\cellcolor{black}{\color{lightblue}{4.2}}"  , r"\cellcolor{white}{\color{blue}{4.2}}"  , 4.2],
+                [r"$\mt$"          , 4.2, r"\color{lightgreen}{4.2}" , r"\cellcolor{lightgreen}{4.2}" , r"\cellcolor{black}{\color{lightgreen}{4.2}}" , r"\cellcolor{white}{\color{green}{4.2}}" , 4.2],
+                [r"$\pt$"          , 4.2, r"\color{lightorange}{4.2}", r"\cellcolor{lightorange}{4.2}", r"\cellcolor{black}{\color{lightorange}{4.2}}", r"\cellcolor{white}{\color{orange}{4.2}}", 4.2],
+                [r"$\Ht$"          , 4.2, r"\color{lightyellow}{4.2}", r"\cellcolor{lightyellow}{4.2}", r"\cellcolor{black}{\color{lightyellow}{4.2}}", r"\cellcolor{white}{\color{orange}{4.2}}", 4.2],
+                [r"$\mt$"          , 4.2, r"4.2$\pm$0.1"             , 4.2                            , 4.2                                           , 4.2                                      , 4.2],
+                ]:
+            tab.add_row(row)
+        tab.print_pdf(show_row_separators=False,show_alternating=False)
+
 
     else:
 

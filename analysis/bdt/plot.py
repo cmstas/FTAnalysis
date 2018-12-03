@@ -153,10 +153,11 @@ def sigmoid_corr(x,k=8.0):
     k[x<0.5] *= 0.5
     return 1.0/(1+np.exp(-k*(x-0.5)))+2.0*(x-0.5)/(1+np.exp(k/2))
 
-nbins, k = 13, 8.3
+# nbins, k = 13, 8.3
+nbins, k = 20, 8.3
 bins = np.linspace(0.,1.,nbins+1)
 # bins = sigmoid_corr(bins,k)
-bins = sigmoid_corr(bins,k)
+# bins = sigmoid_corr(bins,k)
 print bins
 bins[0] = 0.
 bins[-1] = 1.
@@ -183,9 +184,12 @@ print bins.shape
 # print new_ypred.min()
 # var = new_ypred
 
-# comsel = (pass_br) & (sr > 0)
-# bins = np.linspace(sr[comsel].min()-0.5,sr[comsel].max()+0.5,(sr[comsel].max()-sr[comsel].min())+2)
-# var = 1.0*sr
+use_srs = False
+
+if use_srs:
+    comsel = (pass_br) & (sr > 0)
+    bins = np.linspace(sr[comsel].min()-0.5,sr[comsel].max()+0.5,(sr[comsel].max()-sr[comsel].min())+2)
+    var = 1.0*sr
 
 def get_mean(sel):
     return " ($\\mu$={:.2f})".format(np.average(var[sel],weights=weight[sel]))
@@ -235,7 +239,8 @@ ax.set_ylim([0.2,1.0])
 ax.set_title("ROC curves for tmva, xgb")
 ax.legend()
 fig.set_tight_layout(True)
-fig.savefig(fname)
+# fig.savefig(fname)
+fig.savefig("roc_tmva_xgb.pdf")
 # os.system("ic {}".format(fname))
 
 
@@ -270,7 +275,7 @@ sigs = s/(s+b)**0.5
 ax.plot(thresholds_xgb,sigs, label="xgb $s/\\sqrt{{s+b}}$")
 am = np.nanargmax(sigs)
 ax.plot([0.,1.],[np.nanmax(sigs)]*2,color="C1",linestyle="dashed",lw=1, label="max = {:.3f}, cut = {:.3f}".format(np.nanmax(sigs), thresholds_xgb[am]))
-ax.plot(finterp(thresholds_xgb),sigs, label="xgb stretched $s/\\sqrt{{s+b}}$")
+# ax.plot(finterp(thresholds_xgb),sigs, label="xgb stretched $s/\\sqrt{{s+b}}$")
 # sigs = np.sqrt(2*(s+b)*np.log(1+s/b)-2*s)
 # # a = np.convolve(0.0001*np.ones(10000,"d"),sigs[np.isfinite(sigs)],mode="same")
 # ax.plot(thresholds_xgb[np.isfinite(sigs)][::1000],sigs[np.isfinite(sigs)][::1000], label="xgb $s/\\sqrt{s+b}$ better")
@@ -282,6 +287,7 @@ ax.set_title("cumulative significance vs threshold")
 ax.legend()
 fig.set_tight_layout(True)
 fig.savefig(fname)
+fig.savefig("sosb_tmva_xgb.pdf")
 # os.system("ic {}".format(fname))
 
 

@@ -2,14 +2,14 @@
 #include "TFile.h"
 #include "TH2.h"
 #include "TPaveText.h"
+#include "TString.h"
 #include "../../misc/common_utils.h"
 
-void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float muSF_mt, bool useIsoTrig){
+void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float muSF_mt, bool useIsoTrig, int year){
     bool do_qcd = true;
-    int year = 2018;
 
     for(int doPt = 0; doPt < 2; doPt++) {
-        gROOT->Reset();
+        // gROOT->Reset();
         gStyle->SetOptStat(0);
         gStyle->SetPaintTextFormat("4.2f");
 
@@ -185,7 +185,7 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
             muf_qcd->GetYaxis()->SetTitle("Muon #epsilon_{TL}");
             muf_qcd->GetXaxis()->SetTitle("Muon "+xname);
             if (var=="_jet"&&doPt) muf_qcd->GetXaxis()->SetTitle("jet "+xname);
-            muf_qcd->GetYaxis()->SetRangeUser(0,0.6);
+            muf_qcd->GetYaxis()->SetRangeUser(0,0.5);
             muf_qcd->SetMarkerStyle(21);
             muf_qcd->SetMarkerSize(1.5);
             muf_qcd->SetMarkerColor(kRed);
@@ -257,7 +257,7 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
             elf_qcd->GetYaxis()->SetTitle("Electron #epsilon_{TL}");
             elf_qcd->GetXaxis()->SetTitle("Electron "+xname);
             if (var=="_jet"&&doPt) elf_qcd->GetXaxis()->SetTitle("jet "+xname);
-            elf_qcd->GetYaxis()->SetRangeUser(0,0.6);
+            elf_qcd->GetYaxis()->SetRangeUser(0,0.5);
             elf_qcd->SetMarkerStyle(21);
             elf_qcd->SetMarkerSize(1.5);
             elf_qcd->SetMarkerColor(kRed);

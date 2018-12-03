@@ -62,11 +62,16 @@ EXTRAARGS="$(getjobad metis_extraargs)"
 INPUTFILENAMES=$(echo $INPUTFILENAMES | sed s/,/" "/g) # comma separated to space separated
 echo Executing ./main.exe $INPUTFILENAMES -o ${OUTPUTNAME}.root ${EXTRAARGS}
 ./main.exe $INPUTFILENAMES -o ${OUTPUTNAME}.root ${EXTRAARGS}
+RET=$?
 
-# if [ "$?" != "0" ]; then
-#     echo "Removing output file because ./main.exe didn't return exit code of 0"
-#     rm ${OUTPUTNAME}.root
-# fi
+if [ ${RET} != 0 ]; then
+    if [[ "${EXTRAARGS}" = *"ignorebadfiles"* ]]; then
+        echo "Ignoring exit code of ${RET}"
+    else
+        echo "Removing output file because ./main.exe returned exit code ${RET}"
+        rm ${OUTPUTNAME}.root
+    fi
+fi
 
 # Rigorous sweeproot which checks ALL branches for ALL events.
 # If GetEntry() returns -1, then there was an I/O problem, so we will delete it

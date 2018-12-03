@@ -1,8 +1,8 @@
-void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float muSF_mt, bool useIsoTrig) {
+void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float muSF_mt, bool useIsoTrig, int year) {
 
   for(int doMu = 0; doMu < 2; doMu++) {
 
-  gROOT->Reset();
+  // gROOT->Reset();
   gStyle->SetOptStat(0);
   gStyle->SetPaintTextFormat("4.2f");
 
@@ -52,10 +52,37 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   num_data_zp->Add(num_dy_zp,-1.*ewkSF_zp);
   for (int binx=1;binx<=num_data_zp->GetNbinsX();++binx) {
     for (int biny=1;biny<=num_data_zp->GetNbinsY();++biny) {
-      if (num_data_zp->GetBinContent(binx,biny)<0) num_data_zp->SetBinContent(binx,biny,0.);
+      if (num_data_zp->GetBinContent(binx,biny)<0) {
+          num_data_zp->SetBinContent(binx,biny,0.);
+      }
     }
   }
   num_data_zp->Divide(num_data_zp, den_data_zp, 1, 1, "B");
+
+  // check for ~0 fake rate due to oversubtraction and take the content from
+  // the adjacent bin with same eta and lower pt
+  for (int binx=1;binx<=num_data->GetNbinsX();++binx) {
+      for (int biny=1;biny<=num_data->GetNbinsY();++biny) {
+          if (num_data->GetBinContent(binx,biny)<1.0e-6) {
+              float pt = num_data->GetXaxis()->GetBinLowEdge(binx);
+              float eta = num_data->GetYaxis()->GetBinLowEdge(biny);
+              if (pt < 30.) continue; // low pt bins are supposed to be empty...
+              float newval = num_data->GetBinContent(binx-1,biny);
+              float newerr = num_data->GetBinError(binx-1,biny);
+              std::cout << Form("%i isotrig=%i mu=%i pt [%.0f,%.0f] eta [%.1f,%.1f] bin has 0 FR after subtraction, setting to %.3f+-%.3f",
+                      year, useIsoTrig, doMu,
+                      num_data->GetXaxis()->GetBinLowEdge(binx),
+                      num_data->GetXaxis()->GetBinUpEdge(binx),
+                      num_data->GetYaxis()->GetBinLowEdge(biny),
+                      num_data->GetYaxis()->GetBinUpEdge(biny),
+                      newval, newerr
+                      ) << std::endl;
+              num_data->SetBinContent(binx,biny,newval);
+              num_data->SetBinError(binx,biny,newerr);
+          }
+      }
+  }
+  // gStyle->SetPaintTextFormat("4.3f");
 
   num_data->SetTitle("EWK-corrected "+lepname+" fake rate");
   num_data->GetXaxis()->SetTitle(""+lepname+" p_{T}^{corr.} [GeV]");
@@ -69,6 +96,7 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
 
   num_data->Draw("textecolz");
 
+  // std::cout << "Saving pdfs/ewkCorFR_"+lepname+suffix+".pdf" << std::endl;
   c1.SaveAs("pdfs/ewkCorFR_"+lepname+suffix+".pdf");
   TFile out("ewkCorFR_"+lepname+suffix+".root","RECREATE");
   num_data->Write();

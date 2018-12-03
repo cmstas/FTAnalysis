@@ -11,6 +11,9 @@ def do_combine(
         regions="srcr",
         years = [2016,2017,2018],
         procs = ["data", "fakes", "fakes_mc", "flips", "rares", "tth", "tttt", "ttvv", "ttw", "ttz", "xg"],
+        cardname = "combined_card.txt",
+        correlate_all = False,
+        correlate_none = False,
         ):
 
     to_correlate = [
@@ -26,7 +29,8 @@ def do_combine(
             "TTVV",
             "fakes",
             ]
-    correlate_all = False
+    if correlate_none:
+        to_correlate = []
 
     basedirs = [basedir for _ in years]
 
@@ -107,7 +111,7 @@ def do_combine(
             os.system("mv {0}/{1}_tmp {0}/{1}".format(basedir,card_basename))
             to_combine.append("{}={}".format("y{}".format(year),card_basename))
 
-    cmd = "(cd {1} ; combineCards.py {0} > combined_card.txt) && text2workspace.py {1}/combined_card.txt".format(" ".join(to_combine), basedirs[0])
+    cmd = "(cd {basedir} ; combineCards.py {tocombine} > {cardname}) && text2workspace.py {basedir}/{cardname}".format(tocombine=" ".join(to_combine), basedir=basedirs[0], cardname=cardname)
     print "[!] Running: {}".format(cmd)
     stat, out = commands.getstatusoutput(cmd)
 
@@ -115,7 +119,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", help="card directory")
     parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits", default="srcr")
+    parser.add_argument("-c", "--cardname", help="name of card", default="combined_card.txt")
+    parser.add_argument(      "--correlate_all", help="correlate everything", action="store_true")
+    parser.add_argument(      "--correlate_none", help="correlate nothing", action="store_true")
     args, unknown = parser.parse_known_args()
     print "[?] Found some unknown args, but just ignoring them:", unknown
 
-    do_combine(args.directory,regions=args.regions)
+    do_combine(
+            args.directory,
+            regions=args.regions,
+            cardname=args.cardname,
+            correlate_all=args.correlate_all,
+            correlate_none=args.correlate_none,
+            )

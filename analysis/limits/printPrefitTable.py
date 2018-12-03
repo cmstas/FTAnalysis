@@ -25,7 +25,7 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=False):
         for line in fhin:
             line=line.strip()
 
-            if any(line.startswith(k) for k in ["bin", "observation", "imax", "jmax", "kmax", "rate", "-", "#"]):
+            if any(line.startswith(k) for k in ["bin", "observation", "imax", "jmax", "kmax", "rate", "-", "#", "Combination"]):
                 continue
 
             if any(k in line for k in ["autoMCStats", "rateParam"]):
@@ -38,7 +38,7 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=False):
                 hname = parts[4]
                 d_shapes[proc] = {"hname":hname, "rootfile":rootfile}
 
-            elif line.startswith("process"):
+            elif line.startswith("process") and ("tt" in line):
                 processes = line.split()[1:]
 
             else:
@@ -48,6 +48,9 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=False):
                 vals = parts[2:]
                 nuisances.append({"name":name, "kind":kind, "vals":vals})
 
+    # print d_shapes
+    # print processes
+    # print nuisances
     d_proc_nuisances = {}
     for nuisance in nuisances:
         if stats_only and "_stat" not in nuisance["name"]: continue
@@ -72,17 +75,21 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=False):
         upper = np.zeros(len(central))
         nbins = len(central)
         for ns in d_proc_nuisances[proc]:
-            nsname = ns["name"]
+            # nsname = ns["name"]
             kind = ns["kind"]
             val = ns["val"]
 
             if kind == "lnN":
                 up = val*central-central
-
-            if kind == "shape":
+            elif kind == "shape":
                 up = val*np.array(list(f1.Get(ns["name"]+"Up"))[1:-1])-central
+            else:
+                continue
 
             upper += up**2.0
+
+        statup = np.array(list(f1.Get(proc+"_statUp"))[1:-1])
+        upper += (statup-central)**2.0
 
         upper = upper**0.5
         d_yields[proc] = {}
@@ -120,9 +127,9 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
     # procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Fakes","Total","Data","$\\tttt$"]
-    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","FakesMC","Total","Data","$\\tttt$"]
-    procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
-    # procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes","bgtot","data","tttt"]
+    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Charge misid.","Nonprompt lep.","SM expected","Data","$\\tttt$"]
+    # procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
+    procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
     if slim:
         # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Fakes MC","Total","$\\tttt$"]
         # procs = ["ttw","ttz","tth","fakes_mc","bgtot","tttt"]
@@ -133,7 +140,7 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2):
         srnames = ["CRZ","CRW"]+["SR{}".format(i) for i in range(1,17)]
     elif regions == "srdisc":
         # srnames = ["SR{}".format(i) for i in range(1,15)]
-        srnames = ["SR{}".format(i) for i in range(1,14)]
+        srnames = ["SR{}".format(i) for i in range(1,18)]
 
     if not pretty:
         for ibin in range(nbins):

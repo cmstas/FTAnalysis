@@ -28,6 +28,8 @@ for y in 2016 2017 2018 ; do
 done
 wait
 
-./makeCombinedCard.py ${basedir} ${extra}
+./makeCombinedCard.py ${basedir} ${extra} --cardname card_tttt_${region}_run2.txt
 # NOTE make sure there's no --redocard, because we just made it
-./runLimits.py ${basedir}/combined_card.txt --redolimits ${extra}
+# ./runLimits.py ${basedir}/combined_card.txt --redolimits ${extra}
+# ./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits --noscan ${extra}
+./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits ${extra}

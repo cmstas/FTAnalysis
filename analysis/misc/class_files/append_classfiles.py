@@ -6,7 +6,8 @@ branch_to_copy_type = "float"
 # and use this pattern to squeeze in the following branches (and associated types)
 branches_to_add = [
 
-  ("lep4_coneCorrPt", "float"),
+  # ("lep4_coneCorrPt", "float"),
+  ("passfilter", "bool"),
 
   # ("bdt_jec_up_nbtags", "float"),
   # ("bdt_jec_dn_nbtags", "float"),

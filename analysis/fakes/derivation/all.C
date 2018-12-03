@@ -50,26 +50,44 @@
     // float mt_sf_mu_iso =    1.112;
     // float mt_sf_mu_noniso = 1.117;
 
-    // TString dir = "outputs/";
-    // float mt_sf_el_iso =    1.377;
-    // float mt_sf_el_noniso = 1.381;
-    // float mt_sf_mu_iso =    1.209;
-    // float mt_sf_mu_noniso = 1.209;
+    // TString dir = "outputs_2017_Oct31/";
+    // float mt_sf_el_iso =    1.332;
+    // float mt_sf_el_noniso = 1.338;
+    // float mt_sf_mu_iso =    1.204;
+    // float mt_sf_mu_noniso = 1.203;
+    // int year = 2017;
 
-    // 2018 with 2017 MC
-    TString dir = "outputs/";
-    float mt_sf_el_iso =    2.671;
-    float mt_sf_el_noniso = 2.653;
-    float mt_sf_mu_iso =    1.716;
-    float mt_sf_mu_noniso = 1.722;
 
+TString dir = "outputs_FT_2018/";
+float mt_sf_el_iso =    1.082;
+float mt_sf_el_noniso = 0.664;
+float mt_sf_mu_iso =    0.904;
+float mt_sf_mu_noniso = 0.561;
+int year = 2018;
+
+// TString dir = "outputs_FT_2017/";
+// float mt_sf_el_iso =    1.013;
+// float mt_sf_el_noniso = 1.018;
+// float mt_sf_mu_iso =    1.208;
+// float mt_sf_mu_noniso = 1.208;
+// int year = 2017;
+
+    // // 2018 with 2017 MC
+    // TString dir("outputs_2018_Oct31/");
+    // float mt_sf_el_iso =    1.084;
+    // float mt_sf_el_noniso = 1.076;
+    // float mt_sf_mu_iso =    0.904;
+    // float mt_sf_mu_noniso = 0.912;
+    // int year = 2018;
 
     plotFR(dir);
+    make1DplotFR(dir, 1.0, 1.0, mt_sf_el_noniso, mt_sf_mu_noniso, false, year);
+    plotEWKCorFR(dir, 1.0, 1.0, mt_sf_el_noniso, mt_sf_mu_noniso, false, year);
+    make1DplotFR(dir, 1.0, 1.0, mt_sf_el_iso, mt_sf_mu_iso, true, year);
+    plotEWKCorFR(dir, 1.0, 1.0, mt_sf_el_iso, mt_sf_mu_iso, true, year);
+    // dumpFunctions(dir);
 
-    make1DplotFR(dir, 1.0, 1.0, mt_sf_el_noniso, mt_sf_mu_noniso, false);
-    plotEWKCorFR(dir, 1.0, 1.0, mt_sf_el_noniso, mt_sf_mu_noniso, false);
-    make1DplotFR(dir, 1.0, 1.0, mt_sf_el_iso, mt_sf_mu_iso, true);
-    plotEWKCorFR(dir, 1.0, 1.0, mt_sf_el_iso, mt_sf_mu_iso, true);
-    dumpFunctions(dir);
+    gSystem->Exec("cp -r pdfs/ "+dir);
+    gSystem->Exec("cp ewkCorFR_*.root "+dir);
 
 }

@@ -6,6 +6,7 @@
 
 #include "misc/signal_regions.h"
 #include "misc/bdt.h"
+#include "misc/common_utils.h"
 
 using namespace tas;
 
@@ -52,6 +53,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("kfactor"                                                 , &kfactor                                                 );
   BabyTree->Branch("gen_met"                                                 , &gen_met                                                 );
   // BabyTree->Branch("genweights"                                              , &genweights                                              );
+  BabyTree->Branch("pdfweights"                                              , &pdfweights                                              );
   // BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
   BabyTree->Branch("gen_met_phi"                                             , &gen_met_phi                                             );
   BabyTree->Branch("skim"                                                   , &skim                                                   );
@@ -65,6 +67,15 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("hyp_class"                                               , &hyp_class                                               );
   BabyTree->Branch("lep1_p4"                                                 , &lep1_p4                                                 );
   BabyTree->Branch("lep2_p4"                                                 , &lep2_p4                                                 );
+  BabyTree->Branch("lep1_pt"                                                 , &lep1_pt                                                 );
+  BabyTree->Branch("lep2_pt"                                                 , &lep2_pt                                                 );
+  BabyTree->Branch("lep3_pt"                                                 , &lep3_pt                                                 );
+  BabyTree->Branch("lep1_eta"                                                 , &lep1_eta                                                 );
+  BabyTree->Branch("lep2_eta"                                                 , &lep2_eta                                                 );
+  BabyTree->Branch("lep3_eta"                                                 , &lep3_eta                                                 );
+  BabyTree->Branch("lep1_phi"                                                 , &lep1_phi                                                 );
+  BabyTree->Branch("lep2_phi"                                                 , &lep2_phi                                                 );
+  BabyTree->Branch("lep3_phi"                                                 , &lep3_phi                                                 );
   BabyTree->Branch("ht_raw"                                                  , &ht_raw                                                  );
   BabyTree->Branch("ht"                                                      , &ht                                                      );
   BabyTree->Branch("lep1_motherID"                                           , &lep1_motherID                                           );
@@ -92,6 +103,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("btags_disc"                                              , &btags_disc                                              );
   BabyTree->Branch("jets_flavor"                                               , &jets_flavor                                               );
   BabyTree->Branch("jets_disc"                                               , &jets_disc                                               );
+  BabyTree->Branch("jets_bsf"                                               , &jets_bsf                                               );
   BabyTree->Branch("jets_JEC"                                                , &jets_JEC                                                );
   BabyTree->Branch("btags_JEC"                                               , &btags_JEC                                               );
   BabyTree->Branch("jets_undoJEC"                                            , &jets_undoJEC                                            );
@@ -324,6 +336,19 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("weight_btagsf4"                                           , &weight_btagsf4                                                                           );
   BabyTree->Branch("weight_btagsf4_UP"                                        , &weight_btagsf4_UP                                                                        );
   BabyTree->Branch("weight_btagsf4_DN"                                        , &weight_btagsf4_DN                                                                        );
+
+  BabyTree->Branch("weight"                                        , &weight                                                                        );
+  BabyTree->Branch("weight_lepsf1"                                        , &weight_lepsf1                                                                        );
+  BabyTree->Branch("weight_lepsf2"                                        , &weight_lepsf2                                                                        );
+  BabyTree->Branch("weight_lepsf3"                                        , &weight_lepsf3                                                                        );
+  BabyTree->Branch("weight_lepsf"                                        , &weight_lepsf                                                                        );
+  BabyTree->Branch("weight_triggersf"                                        , &weight_triggersf                                                                        );
+  BabyTree->Branch("weight_pu"                                        , &weight_pu                                                                        );
+  BabyTree->Branch("weight_isrsf"                                        , &weight_isrsf                                                                        );
+
+  BabyTree->Branch("year"                                        , &year                                                                        );
+  BabyTree->Branch("yearlumi"                                        , &yearlumi                                                                        );
+
 
   // MC syst stuff
   BabyTree->Branch("weight_scale_UP"                                        , &weight_scale_UP                                                                        );
@@ -593,6 +618,7 @@ void babyMaker::InitBabyNtuple(){
     kfactor = -1;
     gen_met = -1;
     // genweights.clear();
+    pdfweights.clear();
     // genweightsID.clear();
     gen_met_phi = -1;
     skim = 0;
@@ -634,6 +660,7 @@ void babyMaker::InitBabyNtuple(){
     ht_raw = -1;
     jets_flavor.clear();
     jets_disc.clear();
+    jets_bsf.clear();
     jets_disc_mva.clear();
     jets_disc_ivf.clear();
     jets_JEC.clear();
@@ -1020,6 +1047,25 @@ void babyMaker::InitBabyNtuple(){
     bdt_disc_jer_up = 0.;
     bdt_disc_jec_dn = 0.;
     bdt_disc_jer_dn = 0.;
+    year = -1;
+    yearlumi = 0.;
+    weight_lepsf1 = 0.;
+    weight_lepsf2 = 0.;
+    weight_lepsf3 = 0.;
+    weight_lepsf = 0.;
+    weight_pu = 0.;
+    weight_triggersf = 0.;
+    weight_isrsf = 0.;
+    weight = 0.;
+    lep1_pt = -1.;
+    lep2_pt = -1.;
+    lep3_pt = -1.;
+    lep1_eta = -1.;
+    lep2_eta = -1.;
+    lep3_eta = -1.;
+    lep1_phi = -1.;
+    lep2_phi = -1.;
+    lep3_phi = -1.;
 }
 
 //Main function
@@ -1032,7 +1078,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   csErr_t babyErrorStruct;
 
   //Debug mode
-  if (verbose && evt_cut>0 && tas::evt_event() != evt_cut) return babyErrorStruct;
+  // if (verbose && evt_cut>0 && tas::evt_event() != evt_cut) return babyErrorStruct;
+  if (evt_cut>0 && tas::evt_event() != evt_cut) return babyErrorStruct;
 
   //Preliminary stuff
   if (tas::hyp_type().size() < 1) return babyErrorStruct;
@@ -1099,7 +1146,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     gen_met_phi = tas::gen_metPhi();
     // XXX for non tttt we don't need genweights, right?
     if (
-            true
+            !is_real_data
             // (filename.find("/TTTT") != std::string::npos)
             // || (filename.find("/TTW") != std::string::npos)
             // || (filename.find("/TTZ") != std::string::npos)
@@ -1110,22 +1157,34 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
         //These c-s errors
         int nweights = genweights.size();
-        if (!is_real_data && nweights>110) {
+        if (nweights>110) {
             float nom = genweights[0];
             float sum_pdf = 0.;
             float sum2_pdf = 0.;
             int N = 100;
             for (int ipdf = 9; ipdf < 9+N; ipdf++) {
-                sum_pdf += fabs(genweights[ipdf]);
+                sum_pdf += genweights[ipdf];
                 sum2_pdf += pow(genweights[ipdf],2);
             }
-            float rms = sqrt(sum2_pdf/N - pow(sum_pdf/N,2));
+            float rms = sqrt(max(sum2_pdf/N - pow(sum_pdf/N,2),(double)0.0));
+            // in 2017, variations are Hessian, so multiply by sqrt(N-1)
+            if (gconf.year == 2017) {
+                rms *= sqrt(99);
+            }
             weight_scale_UP = genweights[4] / nom;
             weight_scale_DN = genweights[8] / nom;
             weight_alphas_UP = genweights[110] / nom;
             weight_alphas_DN = genweights[109] / nom;
-            weight_pdf_UP = (sum_pdf/N+rms) / fabs(nom);
-            weight_pdf_DN = (sum_pdf/N-rms) / fabs(nom);
+            weight_pdf_UP = (sum_pdf/N+rms) / nom;
+            weight_pdf_DN = (sum_pdf/N-rms) / nom;
+
+
+             // // nom: 0.28559997678 sum_pdf: 28.693153381 sum2_pdf: 10.20197773 weight_pdf_UP: 5.893245697 weight_pdf_DN: -3.8839211464 N: 100 rms: 1.3961793184 genweights[15]: 0.2257399857 genweights[25]: 0.39736998081 genweights[50]: 0.39541998506
+            // if (weight_pdf_UP > 5) {
+             //    std::cout << event << std::endl;
+            // }
+            // std::cout <<  " nom: " << nom <<  " sum_pdf: " << sum_pdf <<  " sum2_pdf: " << sum2_pdf <<  " weight_pdf_UP: " << weight_pdf_UP <<  " weight_pdf_DN: " << weight_pdf_DN <<  " N: " << N <<  " rms: " << rms <<  " genweights[15]: " << genweights[15] <<  " genweights[25]: " << genweights[25] <<  " genweights[50]: " << genweights[50] <<  std::endl;
+
             if (nweights > 1000 and filename.find("PSweights") != std::string::npos) {
                 // 14 extra weights in PSweights samples (2+3*4)
                 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopModGen#Event_Generation
@@ -1145,9 +1204,21 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
                 }
                 weight_alphas_UP = genweights[119] / genweights[117];
                 weight_alphas_DN = genweights[114] / genweights[117];
+                // if (genweights.size() > 1009) {
+                //     for (int ipdf = 9; ipdf < 9+1000; ipdf++) {
+                //         pdfweights.push_back(genweights[ipdf]/nom);
+                //     }
+                // }
             }
             // kill extra crap
-            genweights.resize(120);
+            // genweights.resize(120);
+        } else {
+            weight_scale_UP = 1.;
+            weight_scale_DN = 1.;
+            weight_alphas_UP = 1.;
+            weight_alphas_DN = 1.;
+            weight_pdf_UP = 1.;
+            weight_pdf_DN = 1.;
         }
 
     }
@@ -1525,6 +1596,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           float mindR = 0.25;
           int bestidx = -1;
 
+          // Note, for wjets HT stitching, it's actually Events.Draw("Sum$(genps_p4.pt()*(genps_status==23)*(abs(genps_id)<=5 || genps_id==21))","","",10000)
+          
           genht += pt;
           if (pt > 30.) {
               ngenjets30++;
@@ -1594,8 +1667,24 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_flavor.push_back(jet_results.first.at(i).mcFlavor()); // NJA
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_disc.push_back(jet_results.first.at(i).disc());
 
+
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_JEC.push_back(jet_results.first.at(i).jec());
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_undoJEC.push_back(jet_results.first.at(i).undo_jec());
+
+  for (unsigned int i = 0; i < jet_results.first.size(); i++) {
+      auto jet = jet_results.first.at(i);
+      float bsf = 1.0;
+      if (gconf.year != 2016) {
+          float jet_pt = jet.p4().pt()*jet.undo_jec()*jet.jec();
+          float jet_eta = jet.p4().eta();
+          int jet_mcFlavour = jet.mcFlavor();
+          BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
+          if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
+          else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
+          bsf = btcr4->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
+      }
+      jets_bsf.push_back(bsf);
+  }
 
   for (unsigned int i = 0; i < jet_results.second.size(); i++) {
       auto jet = jet_results.second.at(i).p4();
@@ -2225,11 +2314,19 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     nGoodVertices++;
   }
 
-  bool failsFastSimJetFilter = 0;
-  if(isFastsim) {
+  if (!is_real_data) {
       std::tie(prefire2016_sf, prefire2016_sferr, prefire2016_njets) = getPrefireInfo(2016); // or gconf.year eventually;
       std::tie(prefire2017_sf, prefire2017_sferr, prefire2017_njets) = getPrefireInfo(2017);
-      std::tie(prefire2017ele_sf, prefire2017ele_sferr, prefire2017ele_njets) = getPrefireInfo(2017, false); // use ele/pho map, not jet
+      // std::tie(prefire2017ele_sf, prefire2017ele_sferr, prefire2017ele_njets) = getPrefireInfo(2017, false); // use ele/pho map, not jet
+  }
+
+  bool failsFastSimJetFilter = 0;
+  if(isFastsim) {
+
+      // std::tie(prefire2016_sf, prefire2016_sferr, prefire2016_njets) = getPrefireInfo(2016); // or gconf.year eventually;
+      // std::tie(prefire2017_sf, prefire2017_sferr, prefire2017_njets) = getPrefireInfo(2017);
+      // std::tie(prefire2017ele_sf, prefire2017ele_sferr, prefire2017ele_njets) = getPrefireInfo(2017, false); // use ele/pho map, not jet
+
       for (unsigned int i = 0; i < mostJets.size(); i++){
           if (mostJets_passCleaning.at(i) == 0) continue;
           if (mostJets_passID.at(i) == 0) continue;
@@ -2419,6 +2516,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   }
 
+  passfilter = 1;
   if (!is_real_data and (gconf.year == 2016)) {
       // don't take inclusive sample if 
       // ngenjets30>=7 && nleptonicW==2 && genht30>500
@@ -2428,8 +2526,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           passfilter = (ngenjets30 >= 7 && nleptonicW==2 && genht30>500);
           scale1fb *= 1.4960; //derived in samples.py -- check again after making babies
       }
+      if (filename.find("TTToSemiLepton_HT500Njet9") != std::string::npos) {
+          passfilter = (ngenjets30 >= 9 && nleptonicW==1 && genht30>500);
+          scale1fb *= 2.3486; //derived in samples.py -- check again after making babies
+      }
       if (filename.find("TT_TuneCUETP8M2T4_13TeV-powheg-pythia8") != std::string::npos) {
-          passfilter = !(ngenjets30 >= 7 && nleptonicW==2 && genht30>500);
+          passfilter = !(ngenjets30 >= 7 && nleptonicW==2 && genht30>500) && !(ngenjets30 >= 9 && nleptonicW==1 && genht30>500);
       }
   }
 
@@ -2505,6 +2607,34 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   bdt_disc_jec_dn = get_prediction( bdt_jec_dn_nbtags, bdt_jec_dn_njets, bdt_jec_dn_met, bdt_ptl2, bdt_jec_dn_nlb40, bdt_jec_dn_ntb40, bdt_nleps, bdt_jec_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
   bdt_disc_jer_dn = get_prediction( bdt_jer_dn_nbtags, bdt_jer_dn_njets, bdt_jer_dn_met, bdt_ptl2, bdt_jer_dn_nlb40, bdt_jer_dn_ntb40, bdt_nleps, bdt_jer_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
 
+  year = gconf.year;
+  yearlumi = getLumi(year);
+
+  lep1_pt = lep1_p4.pt();
+  lep2_pt = lep2_p4.pt();
+  lep3_pt = lep3_p4.pt();
+
+  lep1_eta = lep1_p4.eta();
+  lep2_eta = lep2_p4.eta();
+  lep3_eta = lep3_p4.eta();
+
+  lep1_phi = lep1_p4.phi();
+  lep2_phi = lep2_p4.phi();
+  lep3_phi = lep3_p4.phi();
+
+  weight_lepsf1 = leptonScaleFactor(year, lep1_id, lep1_coneCorrPt, lep1_eta, ht);
+  weight_lepsf2 = leptonScaleFactor(year, lep2_id, lep2_coneCorrPt, lep2_eta, ht);
+  weight_lepsf3 = ((lep3_passes_id && lep3_coneCorrPt > 20.) ? leptonScaleFactor(year, lep3_id, lep3_pt, lep3_eta, ht) : 1);
+  weight_lepsf = weight_lepsf1 * weight_lepsf2 * weight_lepsf3;
+
+  weight_triggersf = triggerScaleFactor(year, lep1_id, lep2_id, lep1_pt, lep2_pt, lep1_eta, lep2_eta, ht);
+  weight_pu = getTruePUw(year, trueNumInt[0], 0);
+
+  weight_isrsf = 1.;
+  if (filename.find("TTWJetsToLNu") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 1);
+  if (filename.find("TTZToLL") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 2);
+
+  weight = yearlumi * scale1fb * weight_lepsf * weight_triggersf * weight_pu * weight_btagsf * decayWSF * weight_isrsf;
 
   //Fill Baby
   BabyTree->Fill();

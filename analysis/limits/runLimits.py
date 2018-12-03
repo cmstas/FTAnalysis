@@ -171,7 +171,9 @@ if __name__ == "__main__":
     parser.add_argument(      "--scaletth", help="scale tth (default: %(default)s)", default=1.0, type=float)
     parser.add_argument(      "--nosyst", help="no systs at all, but note autoMCStats might be included (default: %(default)s)", action="store_true")
     parser.add_argument(      "--ignorefakes", help="ignore fake background entirely (default: %(default)s)", action="store_true")
-    args = parser.parse_args()
+    # args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
+    print "[?] Found some unknown args, but just ignoring them:", unknown
 
     # d_lims = get_lims(args)
     d_lims = get_lims(

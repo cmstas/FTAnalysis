@@ -191,7 +191,8 @@ float muonScaleFactor_RunBCDEF(float pt, float eta) {
   if (pt >= 60  && fabs(eta) >= 0.900 && fabs(eta) < 1.200) return 0.9957;
   if (pt >= 60  && fabs(eta) >= 1.200 && fabs(eta) < 2.100) return 0.9964;
   if (pt >= 60  && fabs(eta) >= 2.100 && fabs(eta) < 2.400) return 0.9810;
-  return 0.;
+  // return 0.;
+  return 1.;
 }
 
 float muonScaleFactorError_RunBCDEF(float pt, float eta) {

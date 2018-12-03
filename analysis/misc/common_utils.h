@@ -34,6 +34,9 @@ float isrWeight(int year, int nisrmatch, int sample) {
 float leptonScaleFactor(int year, int id, float pt, float eta, float ht) { 
     // FIXME Note: muon SFs do not go below pT of 20 - this is fine for four top, but
     // modify for SS!
+    // if (abs(id) == 13 and pt < 20.) {
+    //     std::cout << "SFs don't go below 20 for muons in 2017!!" << std::endl;
+    // }
     if (year == 2016) return y2016::leptonScaleFactor(id, pt, eta, ht);
     else if (year == 2017) return y2017::leptonScaleFactor(id, pt, eta, ht);
     else if (year == 2018) return y2018::leptonScaleFactor(id, pt, eta, ht);

@@ -7,8 +7,21 @@ import itertools
 
 do_prompt_sub = False # when using QCD MC template, don't subtract
 include_ttjets = True
-basedir = "outputs/"
-thedir = "plots_fit_2018_Sep19"
+# basedir = "outputs_2017_Oct31/"
+# thedir = "plots_fit_2017_Oct31"
+# basedir = "outputs_2018_Oct31/"
+# thedir = "plots_fit_2018_Oct31"
+
+# basedir = "outputs_SS_2018/"
+# thedir = "plots_mtfit/fit_SS_2018_Nov29"
+# basedir = "outputs_SS_2017/"
+# thedir = "plots_mtfit/fit_SS_2017_Nov29"
+
+basedir = "outputs_FT_2017/"
+thedir = "plots_mtfit/fit_FT_2017_Nov29"
+# basedir = "outputs_FT_2018/"
+# thedir = "plots_mtfit/fit_FT_2018_Nov29"
+
 d_postfits = {}
 d_sfs = {}
 
@@ -205,7 +218,45 @@ for flavstr,iso,extra,use_postfit,use_inviso_data_template in itertools.product(
 print d_sfs
 # os.system("niceplots plots_fit_ptthresh plots_test2_Apr23")
 
+
+# # iso
+# QCD template electrons  muons
+# MC           {:.02f}    {:.02f}
+# Data         {:.02f}    {:.02f}
+# # noniso
+# QCD template electrons  muons
+# MC           {:.02f}    {:.02f}
+# Data         {:.02f}    {:.02f}
+print r"""
+% iso
+      QCD template & electrons &  muons \\
+      \hline\hline
+      MC        & {:.2f} & {:.2f} \\
+      data      & {:.2f} & {:.2f} \\
+      \hline
+% noniso
+      QCD template & electrons &  muons \\
+      \hline\hline
+      MC        & {:.2f} & {:.2f} \\
+      data      & {:.2f} & {:.2f} \\
+      \hline
+""".format(
+        d_sfs[("el",True,False)][0],
+        d_sfs[("mu",True,False)][0],
+        d_sfs[("el",True,True)][0],
+        d_sfs[("mu",True,True)][0],
+        d_sfs[("el",False,False)][0],
+        d_sfs[("mu",False,False)][0],
+        d_sfs[("el",False,True)][0],
+        d_sfs[("mu",False,True)][0],
+        )
+
+print "TString dir = \"{}\";".format(basedir)
 print "float mt_sf_el_iso =    {:.3f};".format(d_sfs[("el",True,False)][0])
 print "float mt_sf_el_noniso = {:.3f};".format(d_sfs[("el",False,False)][0])
 print "float mt_sf_mu_iso =    {:.3f};".format(d_sfs[("mu",True,False)][0])
 print "float mt_sf_mu_noniso = {:.3f};".format(d_sfs[("mu",False,False)][0])
+print "int year = 201{};".format((basedir+thedir).split("201")[1][0])
+
+os.system("mkdir -p {}/mtfits/".format(basedir))
+os.system("cp -r {}/*.pdf {}/mtfits/".format(thedir,basedir))

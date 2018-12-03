@@ -2,7 +2,7 @@ import numpy as np
 from pytable import Table
 from analysis.limits.errors import E
 
-def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2,sep = u"\u00B1".encode("utf-8"), binedge_fmt="{}-{}", fix_negative=True):
+def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2,sep = u"\u00B1".encode("utf-8"), binedge_fmt="{}-{}", fix_negative=True, binlabels=[], show_errors=True, cell_callback=None):
     tab = Table()
     sumbgs = sum(bgs)
     databg = data/sumbgs
@@ -22,13 +22,20 @@ def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2
     tab.set_theme_basic()
     for ibin,binrow in enumerate(binpairs):
         row = [("[%s]"%binedge_fmt).format(binrow[0],binrow[1])]
+        if ibin < len(binlabels):
+            row = [binlabels[ibin]]
         for iproc,proc in enumerate(procs):
             if fix_negative:
                 cent = max(proc.counts[ibin],0.)
             else:
                 cent = proc.counts[ibin]
             err = proc.errors[ibin]
-            row.append(("{0:5.%if} {1}{2:%i.%if}" % (precision,precision+3,precision)).format(cent,sep,err))
+            if show_errors:
+                tmp = ("{0:5.%if} {1}{2:%i.%if}" % (precision,precision+3,precision)).format(cent,sep,err)
+            else:
+                tmp = ("{0:5.%if}" % (precision)).format(cent)
+            if cell_callback: tmp = cell_callback(tmp)
+            row.append(tmp)
         tab.add_row(row)
     tab.add_line()
 
@@ -39,16 +46,22 @@ def write_table(data, bgs, outname=None, signal=None, extra_hists=[],precision=2
             totdata = E(sum(data.counts))
             ratio = totdata/totbg
             cent, err = ratio[0], ratio[1]
-            precision = max(precision, 2)
+            precision = max(precision, 2) if precision != 0 else 0
         else:
             cent = sum(proc.counts)
             err = np.sum(proc.errors**2.)**0.5
-        row.append(("{0:5.%if} {1}{2:%i.%if}" % (precision,precision+3,precision)).format(cent,sep,err))
+        if show_errors:
+            tmp = ("{0:5.%if} {1}{2:%i.%if}" % (precision,precision+3,precision)).format(cent,sep,err)
+        else:
+            tmp = ("{0:5.%if}" % (precision)).format(cent)
+            if cell_callback: tmp = cell_callback(tmp)
+        row.append(tmp)
     tab.add_row(row)
 
     if outname:
         with open(outname,"w") as fhout:
-            towrite = "".join(tab.get_table_string(show_row_separators=False,show_alternating=False))
+            # towrite = "".join(tab.get_table_string(show_row_separators=False,show_alternating=False))
+            towrite = "".join(tab.get_table_strings(show_row_separators=False,show_alternating=False))
             fhout.write(towrite)
             parts = towrite.split("\n")
             header = parts[:3]

@@ -27,31 +27,32 @@ labels = {
     "nleps": "nleps",
     "pt1": "$p_T$(lep1)",
     "pt2": "$p_T$(lep2)",
-    "pt3": "$p_T$(lep3)",
     "pte": "$p_T$(e)",
     "ptm": "$p_T$(m)",
     # "eta1": r"$\eta$(lep1)",
     # "eta2": r"$\eta$(lep2)",
     "etae": r"$\eta$(e)",
     "etam": r"$\eta(\mu)$",
+    "etaelnt": r"loose leg $\eta$(e)",
+    "etamlnt": r"loose leg $\eta(\mu)$",
     "phie": r"$\phi$(e)",
     "phim": r"$\phi(\mu)$",
     "q1": "charge - lep 1",
     "nvtx": "# good vertices",
-    # "nisrjets": "Njets (ISR)",
-    # "nisrmatch": "Njets (ISR - Truth Matched)",
-    "rawmet": "Raw "+MET_LATEX,
+    "nisrjets": "Njets (ISR/FSR)",
+    "nisrmatch": "Njets (ISR/FSR - Truth Matched)",
+    # "rawmet": "Raw "+MET_LATEX,
     # "zmll": "$m_{ll} (Z-cand)$",
-    "ptrele": "$p_T$rel - e",
-    "ptrelm": r"$p_T$rel - $\mu$",
-    "ptratioe": "$p_T$ratio - e",
-    "ptratiom": r"$p_T$ratio - $\mu$",
-    "ptrelfaile": "$p_T$rel - e, fail $p_T$ratio",
-    "ptrelfailm": r"$p_T$rel - $\mu$, fail $p_T$ratio",
-    "miniisoe": "mini-iso - e",
-    "miniisom": r"mini-iso - $\mu$",
-    "nmiss1": "exp miss inner hits - lep 1",
-    "nmiss2": "exp miss inner hits - lep 2",
+    # "ptrele": "$p_T$rel - e",
+    # "ptrelm": r"$p_T$rel - $\mu$",
+    # "ptratioe": "$p_T$ratio - e",
+    # "ptratiom": r"$p_T$ratio - $\mu$",
+    # "ptrelfaile": "$p_T$rel - e, fail $p_T$ratio",
+    # "ptrelfailm": r"$p_T$rel - $\mu$, fail $p_T$ratio",
+    # "miniisoe": "mini-iso - e",
+    # "miniisom": r"mini-iso - $\mu$",
+    # "nmiss1": "exp miss inner hits - lep 1",
+    # "nmiss2": "exp miss inner hits - lep 2",
 
     # "ptrel1": "$p_T$rel - lep 1",
     # "ptrel2": "$p_T$rel - lep 2",
@@ -61,10 +62,31 @@ labels = {
     # "ptrelfail2": "$p_T$rel - lep 2, fail $p_T$ratio",
     # "miniiso1": "mini-iso - lep 1",
     # "miniiso2": "mini-iso - lep 2",
+
+    # "ptrellnt": "$p_T$rel - loose lep",
+    # "ptratiolnt": "$p_T$ratio - loose lep",
+    # "ptrelfaillnt": "$p_T$rel - loose lep, failing $p_T$ratio",
+    # "miniisolnt": "mini-iso - loose lep",
+
     # "htb": "$H_{T} B-Jets$",
     # "nlb40": "N-loose Btags, $p_T$>40",
     # "ntb40": "N-tight Btags, $p_T$>40",
     # "type3l": "3l type (mmm, mme, mee, eee)",
+
+"htb": r"$H_{T}$(b-jets)",
+"nlb40": r"N-loose b-tags, $p_{T}>40$",
+"ntb40": r"N-tight b-tags, $p_{T}>40$",
+"dphil1l2": r"$\Delta\phi(l_1,l_2)$",
+"detal1l2": r"$\Delta\eta(l_1,l_2)$",
+"q1": "charge - lep 1",
+"pt3": "$p_T$(lep3)",
+"maxmjoverpt": r"max($m_j/p_T$)",
+"ml1j1": r"m$(l_1,j_2)$",
+"ptj1": "$p_T$ - jet 1",
+"ptj6": "$p_T$ - jet 6",
+"ptj7": "$p_T$ - jet 7",
+"ptj8": "$p_T$ - jet 8",
+"eventbdt": "raw BDT discriminant",
 
 }
 
@@ -76,6 +98,7 @@ d_label_colors = {
             "singletop":               ("Single Top",      [1.0, 0.4, 0.0]),
             "tt":                      (r"$t\bar{t}$",     [0.8, 0.8, 0.8]),
             "ttfake":                   (r"$t\bar{t}$ Nonprompt", [0.85, 0.85, 0.85]),
+            "wjets":                   (r"W+jets",         [113./255,151./255,44./255]),
             "tth":                     (r"$t\bar{t}H$",    [0.4, 0.4, 0.6]),
             "ttw":                     (r"$t\bar{t}W$",    [0.0, 0.4, 0.0]),
             "ttz":                     (r"$t\bar{t}Z$",    [0.4, 0.8, 0.4]),
@@ -83,6 +106,9 @@ d_label_colors = {
         }
 
 bginfo = {
+        "hhos": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
+        "hhosloose": { k:d_label_colors[k] for k in [ "flips", "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
+        "hhtl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
         "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "os_noht": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "osloose": { k:d_label_colors[k] for k in [ "flips", "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
@@ -97,6 +123,7 @@ bginfo = {
         "br": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
         "sshh": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
         "sshhmc": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "ttfake", "rares", ] },
+        "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
         "tt_isr": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "tt_isr_reweight_check": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         }
@@ -136,19 +163,19 @@ def worker(info):
     if abs(sum(bgs).get_integral()) < 1e-6: return
 
     if other_files:
-        fname = "{}/run2_{}_{}_{}.png".format(outputdir,region,var,flav)
+        fname = "{}/run2_{}_{}_{}.pdf".format(outputdir,region,var,flav)
     else:
-        fname = "{}/y{}_{}_{}_{}.png".format(outputdir,year,region,var,flav)
+        fname = "{}/y{}_{}_{}_{}.pdf".format(outputdir,year,region,var,flav)
     plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
                cms_type = "Preliminary",
                lumi = lumi,
                ratio_range=[0.0,2.0],
                )
     # os.system("ic {}".format(fname))
-    table_info = write_table(data,bgs,outname=fname.replace(".png",".txt"))
+    table_info = write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
     return fname
 
-def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[]):
+def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[], flavs=["ee","em","mm","in"]):
     global files, other_files
 
     os.system("mkdir -p {}/".format(outputdir))
@@ -162,7 +189,7 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
     # for region in ["htnb1mc","htnb1","os","osloose","br","crw","crz","tt_isr_reweight_check"]:
     # regions = ["htnb1mc","htnb1","htnb1mcmu","htnb1mu","os","os_noht","osloose","br","crw","crz"]
     regions = regions or ["htnb1mc","htnb1","os","sshh","sshhmc","osloose","br","crw","crz"]
-    flavs = ["ee","em","mm","in"]
+    flavs = flavs or ["ee","em","mm","in"]
     varss = labels.keys()
     infos = [[outputdir,year,lumi]+list(x) for x in itertools.product(regions,flavs,varss)]
 
@@ -185,14 +212,32 @@ if __name__ == "__main__":
     #         regions = ["nj2","nj2mc"],
     #         )
 
-    make_plots(
-            outputdir="plots_temp",
-            inputdir="outputs_temp",
-            regions = ["htnb1","htnb1mu"],
-            year=2018,
-            lumi="112.9", # 2016+2017+2018 --> 35.87+41.53+35.53 = 112.9
-            other_years = [2016,2017],
-            )
+    # make_plots(
+    #         outputdir="plots_temp",
+    #         inputdir="outputs_temp",
+    #         regions = ["htnb1","htnb1mu"],
+    #         year=2018,
+    #         lumi="112.9", # 2016+2017+2018 --> 35.87+41.53+35.53 = 112.9
+    #         other_years = [2016,2017],
+    #         )
+
+    # make_plots(
+    #         outputdir="plots_ss2017",
+    #         inputdir="outputs_ss20172018",
+    #         regions = ["hhos","hhosloose","hhtl"],
+    #         flavs = ["ee","mm","in"],
+    #         year=2017,
+    #         lumi="41.5",
+    #         )
+
+    # make_plots(
+    #         outputdir="plots_ss2018",
+    #         inputdir="outputs_ss20172018",
+    #         regions = ["hhos","hhosloose","hhtl"],
+    #         flavs = ["ee","mm","in"],
+    #         year=2018,
+    #         lumi="51.0",
+    #         )
 
     # make_plots(
     #         outputdir="plots_2017_nmiss0",
@@ -205,41 +250,35 @@ if __name__ == "__main__":
     #         year=2017, lumi="41.5",
     #         )
 
-    # inputdir = "outputs_2018"
-    # # 2017 alone
-    # outputdir = "plots_2017"
-    # make_plots(
-    #         outputdir=outputdir,
-    #         inputdir=inputdir,
-    #         year=2017,
-    #         lumi="41.5",
-    #         )
-    # # 2018 alone
-    # outputdir = "plots_2018"
-    # make_plots(
-    #         outputdir=outputdir,
-    #         inputdir=inputdir,
-    #         year=2018,
-    #         lumi="35.5",
-    #         )
-    # # 2018 + 2017
-    # outputdir = "plots_20172018"
-    # make_plots(
-    #         outputdir=outputdir,
-    #         inputdir=inputdir,
-    #         year=2018,
-    #         lumi="77.1", # 2017+2018 --> 41.53+35.53 = 77.06
-    #         other_years = [2017],
-    #         )
-    # # 2016 + 2018 + 2017
-    # outputdir = "plots_run2"
-    # make_plots(
-    #         outputdir=outputdir,
-    #         inputdir=inputdir,
-    #         year=2018,
-    #         lumi="112.9", # 2016+2017+2018 --> 35.87+41.53+35.53 = 112.9
-    #         other_years = [2016,2017],
-    #         )
+    inputdir = "outputs_Nov29"
+    # 2017 alone
+    outputdir = "plots_ft_2017"
+    make_plots(
+            outputdir=outputdir,
+            inputdir=inputdir,
+            regions = ["os","tl","tt_isr"], flavs = ["in"],
+            year=2017,
+            lumi="41.5",
+            )
+    # 2018 alone
+    outputdir = "plots_ft_2018"
+    make_plots(
+            outputdir=outputdir,
+            inputdir=inputdir,
+            regions = ["os","tl","tt_isr"], flavs = ["in"],
+            year=2018,
+            lumi="58.8",
+            )
+    # 2016 + 2018 + 2017
+    outputdir = "plots_ft_run2"
+    make_plots(
+            outputdir=outputdir,
+            inputdir=inputdir,
+            regions = ["os","tl","tt_isr"], flavs = ["in"],
+            year=2018,
+            lumi="136.3",
+            other_years = [2016,2017],
+            )
     # os.system("niceplots plots_2017 plots_crs2017_Sep3")
     # os.system("niceplots plots_2018 plots_crs2018_Sep3")
     # os.system("niceplots plots_20172018 plots_crs20172018_Sep3")

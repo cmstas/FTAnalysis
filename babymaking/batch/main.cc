@@ -26,6 +26,7 @@ int main(int argc, char *argv[]){
     auto arg_files = std::vector<std::string>();
     std::string arg_output = "output.root";
     int arg_nevents = -1;
+    int arg_eventsel = 0;
     std::vector<TString> vfilenames;
 
 
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]){
             ("xrootd", "Use xrootd by force", cxxopts::value<bool>(arg_xrootd))
             ("o,output", "Output name", cxxopts::value<std::string>(arg_output)->default_value(arg_output))
             ("n,nevents", "Number of events", cxxopts::value<int>(arg_nevents)->default_value(std::to_string(arg_nevents)))
+            ("eventsel", "Select particular event by number", cxxopts::value<int>(arg_eventsel)->default_value(std::to_string(arg_eventsel)))
             ("f,files", "Files or file patterns", cxxopts::value<std::vector<std::string>>(arg_files))
             ;
         options.parse_positional({"files"});
@@ -206,26 +208,34 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_ptratio = 0.80;
         gconf.multiiso_mu_ptrel = 7.5;
         good_run_file = "goodRunList/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
-        jecEra = "Fall17_17Nov2017B_V6";
-        jecEraMC = "Fall17_17Nov2017_V6";
+        jecEra = "Fall17_17Nov2017B_V32";
+        jecEraMC = "Fall17_17Nov2017_V32";
         gconf.SS_innerlayers = 0;
     }
     if (year == 2018) {
         gconf.year = year;
         gconf.ea_version = 4;
+
         gconf.btag_disc_wp = 0.4941;
         gconf.WP_DEEPCSV_TIGHT  = 0.8001;
         gconf.WP_DEEPCSV_MEDIUM = 0.4941;
         gconf.WP_DEEPCSV_LOOSE  = 0.1522;
+
+        // gconf.btag_disc_wp = 0.3033;
+        // gconf.WP_DEEPCSV_TIGHT  = 0.7489;
+        // gconf.WP_DEEPCSV_MEDIUM = 0.3033;
+        // gconf.WP_DEEPCSV_LOOSE  = 0.0521;
+
         gconf.multiiso_el_minireliso = 0.09;
         gconf.multiiso_el_ptratio = 0.85;
         gconf.multiiso_el_ptrel = 9.2;
         gconf.multiiso_mu_minireliso = 0.12;
         gconf.multiiso_mu_ptratio = 0.80;
         gconf.multiiso_mu_ptrel = 7.5;
-        good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
-        jecEra = "Fall17_17Nov2017C_V6";
-        jecEraMC = "Fall17_17Nov2017_V6";
+        // good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
+        good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
+        jecEra = "Fall17_17Nov2017C_V32";
+        jecEraMC = "Fall17_17Nov2017_V32";
         gconf.SS_innerlayers = 0;
     }
 
@@ -261,6 +271,10 @@ int main(int argc, char *argv[]){
     if (arg_skipos) {
         mylooper->ignore_os = true;
         std::cout << ">>> [!] Skipping OS events for MC!" << std::endl;
+    }
+    if (arg_eventsel > 0) {
+        mylooper->evt_cut = arg_eventsel;
+        std::cout << ">>> [!] Only processing single event with evt_event==" << arg_eventsel << std::endl;
     }
 
     TChain *chain = new TChain("Events");
@@ -336,7 +350,8 @@ int main(int argc, char *argv[]){
         gconf.jet_corrector_L2L3 = jetCorrAG_L2L3;
     }
 
-    TH2F* count_hist = new TH2F("counts","",500,0,2500,500,0,2500);
+    TH2D* count_hist = new TH2D("counts","",500,0,2500,500,0,2500);
+    TH1D* weight_hist = new TH1D("weight","",1200,0,1200);
 
     auto t0 = std::chrono::steady_clock::now();
     auto tlast = std::chrono::steady_clock::now();
@@ -390,12 +405,12 @@ int main(int argc, char *argv[]){
                 else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = "Summer16_23Sep2016EFV4";
                 else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = "Summer16_23Sep2016GV4";
                 else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV4";
-                else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V6";
-                else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V6";
-                else if (tas::evt_run() <= 303434 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017D_V6";
-                else if (tas::evt_run() <= 304797 && tas::evt_run() >= 303824) jecEra = "Fall17_17Nov2017E_V6";
-                else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V6";
-                else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V6"; // FIXME 2018?
+                else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V32";
+                else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V32";
+                else if (tas::evt_run() <= 304797 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017DE_V32";
+                else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V32";
+
+                else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
                 else std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;
                 jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/"+jecEra+"_DATA/"+jecEra+"_DATA_Uncertainty_AK4PFchs.txt"); 
                 jetcorr_filenames_25ns_DATA_pfL1.clear();
@@ -475,6 +490,41 @@ int main(int argc, char *argv[]){
             } else {
                 count_hist->Fill(1,1);
             }
+
+            if (!tas::evt_isRealData()) {
+                auto genweights = tas::genweights();
+                if (genweights.size()>110) {
+                    float nom = genweights[0];
+                    float scale_up_raw = genweights[4];
+                    float scale_down_raw = genweights[8];
+
+                    float sum_pdf = 0.;
+                    float sum2_pdf = 0.;
+                    int N = 100;
+                    for (int ipdf = 9; ipdf < 9+N; ipdf++) {
+                        sum_pdf += genweights[ipdf];
+                        sum2_pdf += pow(genweights[ipdf],2);
+                    }
+                    // if (genweights.size() > 1009) {
+                    //     for (int ipdf = 9; ipdf < 9+1000; ipdf++) {
+                    //         weight_hist->Fill(0.5+ipdf, genweights[ipdf]);
+                    //     }
+                    // }
+                    float rms = sqrt(max(sum2_pdf/N - pow(sum_pdf/N,2),(double)0.0));
+                    // in 2017, variations are Hessian, so multiply by sqrt(N-1)
+                    if (year == 2017) {
+                        rms *= sqrt(99);
+                    }
+                    float pdf_up_raw = (sum_pdf/N+rms);
+                    float pdf_down_raw = (sum_pdf/N-rms);
+
+                    weight_hist->Fill(0.5, nom);
+                    weight_hist->Fill(1.5, scale_up_raw);
+                    weight_hist->Fill(2.5, scale_down_raw);
+                    weight_hist->Fill(3.5, pdf_up_raw);
+                    weight_hist->Fill(4.5, pdf_down_raw);
+                }
+            }
             
         } // event loop 
 
@@ -497,6 +547,7 @@ int main(int argc, char *argv[]){
     mylooper->BabyFile->cd();
     mylooper->BabyTree->Write();
     count_hist->Write();
+    weight_hist->Write();
     mylooper->BabyFile->Close();
 
     ////Open the baby file again

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from getPostFit import get_dict
+from getPostFit import get_dict, get_postfit_dict
 import glob
 import ROOT as r
 import numpy as np
@@ -24,8 +24,8 @@ def parse_yields(d_in):
 
 def print_table(d_yields, regions="srcr", pretty=False,unblinded=False):
     nbins = len(d_yields["ttz"]["central"])
-    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    # procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","total_background","data","tttt"]
+    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Charge misid.","Nonprompt lep.","SM expected","Data","$\\tttt$"]
+    allprocs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","total_background","data","tttt"]
 
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$", "tot s+b"]
     # allprocs = [["ttw"],["ttz"],["tth"],["ttvv"],["xg"],["rares"],["flips"],["fakes"],["total_background"],["data"],["tttt"],["total"]]
@@ -33,15 +33,15 @@ def print_table(d_yields, regions="srcr", pretty=False,unblinded=False):
     # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","FakesMC","Total","Data","$\\tttt$", "tot s+b"]
     # allprocs = [["ttw"],["ttz"],["tth"],["ttvv"],["xg"],["rares"],["flips"],["fakes_mc"],["total_background"],["data"],["tttt"],["total"]]
 
-    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Others","Total","Data","$\\tttt$", "tot s+b"]
-    allprocs = [["ttw"],["ttz"],["tth"],["ttvv","xg","rares","flips","fakes_mc"],["total_background"],["data"],["tttt"], ["total"]]
+    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Others","Total","Data","$\\tttt$", "tot s+b"]
+    # allprocs = [["ttw"],["ttz"],["tth"],["ttvv","xg","rares","flips","fakes_mc"],["total_background"],["data"],["tttt"], ["total"]]
 
     # srnames = ["CRZ","CRW","SR1","SR2","SR3","SR4","SR5","SR6","SR7","SR8"]
     if regions == "srcr":
         srnames = ["CRZ","CRW"]+["SR{}".format(i) for i in range(1,17)]
     elif regions == "srdisc":
         # srnames = ["SR{}".format(i) for i in range(1,15)]
-        srnames = ["SR{}".format(i) for i in range(1,14)]
+        srnames = ["SR{}".format(i) for i in range(1,17)]
 
     if not unblinded:
         d_yields["data"]["central"] *= 0
@@ -59,6 +59,8 @@ def print_table(d_yields, regions="srcr", pretty=False,unblinded=False):
             tojoin = [srnames[ibin]]
             for procs in allprocs:
                 tot_ve = E(0.,0.)
+                if type(procs) is not list:
+                    procs = [procs]
                 for subproc in procs:
                     ve = E(max(d_yields[subproc]["central"][ibin],0.), d_yields[subproc]["error"][ibin])
                     tot_ve += ve
@@ -106,28 +108,37 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", help="mlfit.root file location")
+    # parser.add_argument("--filename", help="mlfit.root file location",default="v3.13_Nov30_v1/mlfitname.root") # FIXME
     parser.add_argument("-r", "--regions", help="srcr or srdisc for SR+CR limits or BDT limits", default="srcr")
     parser.add_argument("-p", "--pretty", help="use pretty pytable", action="store_true")
     parser.add_argument("-u", "--unblinded", help="unblinded?", action="store_true")
     args = parser.parse_args()
-
     filename = args.filename
     # filename = "v0.10_Jul20/mlfit.root"
 
     datafile = r.TFile(glob.glob(filename.rsplit("/",1)[0]+"/data_*{}*.root".format(args.regions))[0])
 
-    for name,hname in [
-            ("b-only fit", "shapes_fit_b"),
-            ("prefit", "shapes_prefit"),
-            ("s+b fit", "shapes_fit_s"),
-            ]:
-        d = get_dict(filename,hname)
-        # covar = d["total_covar"]
-        # print list(covar)
-        print "--- {} ({}) ----".format(name, hname)
-        yields = parse_yields(d)
-        yields["data"] = {
-                "central": np.array(list(datafile.Get("sr"))[1:-1]),
-                "error": np.array(list(datafile.Get("sr"))[1:-1]),
-                }
-        print_table(yields, regions=args.regions, pretty=args.pretty, unblinded=args.unblinded)
+    print "b-only fit, but we're printing prefit so it doesn't matter"
+    d_prefit,d_postfit, ratios, ratios_errors = get_postfit_dict(filename,channels=["y2016","y2017","y2018"],bonly=True)
+    yields = parse_yields(d_prefit)
+    yields["data"] = {
+            "central": np.array(list(datafile.Get("sr"))[1:-1]),
+            "error": np.array(list(datafile.Get("sr"))[1:-1]),
+            }
+    print_table(yields, regions=args.regions, pretty=args.pretty, unblinded=args.unblinded)
+
+#     for name,hname in [
+#             ("b-only fit", "shapes_fit_b"),
+#             ("prefit", "shapes_prefit"),
+#             ("s+b fit", "shapes_fit_s"),
+#             ]:
+#         d = get_dict(filename,hname)
+#         # covar = d["total_covar"]
+#         # print list(covar)
+#         print "--- {} ({}) ----".format(name, hname)
+#         yields = parse_yields(d)
+#         yields["data"] = {
+#                 "central": np.array(list(datafile.Get("sr"))[1:-1]),
+#                 "error": np.array(list(datafile.Get("sr"))[1:-1]),
+#                 }
+#         print_table(yields, regions=args.regions, pretty=args.pretty, unblinded=args.unblinded)
