@@ -34,6 +34,12 @@ def parse_lims(lim_lines, fb=False):
     exp_sm1 = d.get("exp_16.0",-1)*XSEC_TTTT*mult
     exp_sp1 = d.get("exp_84.0",-1)*XSEC_TTTT*mult
     return {
+            "exprm2": d.get("exp_2.5",-1),
+            "exprm1": d.get("exp_16.0",-1),
+            "expr": d.get("exp_50.0",-1),
+            "exprp1": d.get("exp_84.0",-1),
+            "exprp2": d.get("exp_97.5",-1),
+            "exp84": d.get("exp_50.0",-1),
             "obs":obs, "exp":exp,
             "sp1":exp_sp1,"sm1":exp_sm1,
             "significance": d.get("significance",-1.),
@@ -47,6 +53,7 @@ def print_lims(d_lims, fb=False, unblinded=False):
     unit = "pb" if not fb else "fb"
     if unblinded:
         print "  Obs UL: %.2f %s" % (d_lims["obs"], unit)
+    print "  r < +%.2f" % (d_lims["expr"])
     print "  Exp UL: %.2f +%.2f -%.2f %s" % (d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"], unit)
     if d_lims.get("significance",-1) > 0.:
         print "  Sig: %.3f (p-value: %.4f)" % (d_lims["significance"], d_lims["pvalue"])
@@ -56,16 +63,16 @@ def print_lims(d_lims, fb=False, unblinded=False):
 def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False, ignorefakes=False,
         verbose=True, dolimits=True, dosignificance=True, doscan=True,
         unblinded=False,sig="tttt", allownegative=False, inject_tttt=False,
-        use_autostats=False, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=-1, nosyst=False):
+        use_autostats=True, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=-1, nosyst=False):
 
     params = locals()
 
     extra_base = ""
     # NOTE, can't do both or else need to combine the flags
-    if scalelumi != 1.0:
-        extra_base += " --setParameters lumiscale={0} --setParameterRanges lumiscale={0},{0} ".format(scalelumi)
-    elif scaletth != 1.0:
+    if scaletth != 1.0:
         extra_base = " --setParameters tthscale={0} --setParameterRanges tthscale={0},{0} ".format(scaletth)
+    # elif scalelumi != 1.0:
+    #     extra_base += " --setParameters lumiscale={0} --setParameterRanges lumiscale={0},{0} ".format(scalelumi)
 
     if nosyst:
         extra_base += " -S 0 "
@@ -83,15 +90,19 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
         if verbose: print ">>> Making card"
         dirname, cardname = card.rsplit("/",1)
         createCard.writeOneCard(dirname,cardname, kine=regions,domcfakes=domcfakes, signal=sig, inject_tttt=inject_tttt, use_autostats=use_autostats, thresh=thresh, year=year, ignorefakes=ignorefakes)
-        if verbose: print ">>> Making workspace"
-        # There was a bug with combine (https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/issues/491) which needed text2workspace to be explicitly
-        # run before using FitDiagnostics (for mu scan & pre/postfit), but this is fixed in the 81x branch (cherry pick 69c180a04c05d0bad6a6c38d97cdc431cfe4fb49 in 94x if
-        # needed). So we don't need this anymore and can switch .root -> .txt in all the below commands. Though, it's faster to run text2workspace first and not do it
-        # implicitly 3 times total.
-        cmd = "text2workspace.py {0} -o {1}".format(full_card_name,full_card_name_root)
-        stat, out = commands.getstatusoutput(cmd)
     else:
+        # if verbose: print ">>> [!] Card already made, so reusing (INCLUDING the workspace!!). Pass the --redocard flag to remake the card"
         if verbose: print ">>> [!] Card already made, so reusing. Pass the --redocard flag to remake the card"
+    if verbose: print ">>> Making workspace"
+    # There was a bug with combine (https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/issues/491) which needed text2workspace to be explicitly
+    # run before using FitDiagnostics (for mu scan & pre/postfit), but this is fixed in the 81x branch (cherry pick 69c180a04c05d0bad6a6c38d97cdc431cfe4fb49 in 94x if
+    # needed). So we don't need this anymore and can switch .root -> .txt in all the below commands. Though, it's faster to run text2workspace first and not do it
+    # implicitly 3 times total.
+    cmd = "text2workspace.py {0} -o {1}".format(full_card_name,full_card_name_root)
+    stat, out = commands.getstatusoutput(cmd)
+    if stat != 0:
+        print out
+        sys.exit()
 
     if not dolimits: return {}
 
@@ -119,13 +130,16 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
                 extra += " --expectSignal=1 -t -1 "
             if allownegative:
                 extra += " --rMin -2.0 --rMax +10.0"
-            mu_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} -n name --freezeParameters lumiscale,tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
+            # need --saveOverallShapes to get a covariance matrix for all bins ACROSS all 3 years (channels) so that we can compute the proper postfit plot uncertainties
+            # mu_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} --saveOverallShapes -n name --freezeParameters lumiscale,tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
+            mu_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} --saveOverallShapes -n name --freezeParameters tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
             if verbose: print ">>> Running combine for mu [{0}]".format(mu_cmd)
             stat, out_mu = commands.getstatusoutput(mu_cmd)
             commands.getstatusoutput("cp fitDiagnosticsname.root {0}/mlfitname.root".format(dirname))
             out += out_mu
             # While FitDiagnostics gives a mu (and pre/postfit stuff), it does not give the *scan*, so need to do this manually with MultiDimFit
-            scan_cmd = "combine  -M MultiDimFit {0} --algo grid --centeredRange=2.0 --saveFitResult --redefineSignalPOI r --robustFit=1 --freezeParameters lumiscale,tthscale -n name --saveNLL {1} 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
+            # scan_cmd = "combine  -M MultiDimFit {0} --algo grid --centeredRange=2.0 --saveFitResult --redefineSignalPOI r --robustFit=1 --freezeParameters lumiscale,tthscale -n name --saveNLL {1} 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
+            scan_cmd = "combine  -M MultiDimFit {0} --algo grid --centeredRange=2.0 --saveFitResult --redefineSignalPOI r --robustFit=1 --freezeParameters tthscale -n name --saveNLL {1} 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
             if verbose: print ">>> Running combine for scan [{0}]".format(scan_cmd)
             stat, out_scan = commands.getstatusoutput(scan_cmd)
             commands.getstatusoutput("cp higgsCombinename.MultiDimFit.mH120.root {0}/scandata.root".format(dirname))
@@ -171,6 +185,7 @@ if __name__ == "__main__":
     parser.add_argument(      "--scaletth", help="scale tth (default: %(default)s)", default=1.0, type=float)
     parser.add_argument(      "--nosyst", help="no systs at all, but note autoMCStats might be included (default: %(default)s)", action="store_true")
     parser.add_argument(      "--ignorefakes", help="ignore fake background entirely (default: %(default)s)", action="store_true")
+    parser.add_argument(      "--nolimits", help="skim running of limits (default: %(default)s)", action="store_true")
     # args = parser.parse_args()
     args, unknown = parser.parse_known_args()
     print "[?] Found some unknown args, but just ignoring them:", unknown
@@ -182,6 +197,7 @@ if __name__ == "__main__":
             regions=args.regions,
             redocard=args.redocard,
             redolimits=args.redolimits,
+            dolimits=(not args.nolimits),
             domcfakes=args.domcfakes,
             unblinded=args.unblinded,
             doscan=(not args.noscan),
@@ -197,6 +213,7 @@ if __name__ == "__main__":
             ignorefakes=args.ignorefakes,
             )
     print "card: {}".format(args.card.strip())
-    print "------------------------------"
-    print_lims(d_lims, fb=True, unblinded=args.unblinded)
-    print "------------------------------"
+    if not args.nolimits:
+        print "------------------------------"
+        print_lims(d_lims, fb=True, unblinded=args.unblinded)
+        print "------------------------------"

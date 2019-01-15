@@ -24,7 +24,8 @@ echo ">>> region: ${region}"
 # extra=" --unblinded "
 
 for y in 2016 2017 2018 ; do
-    ./runLimits.py ${basedir}/card_tttt_${region}_${y}.txt --year ${y} --redocard --noscan ${extra} &
+    # ./runLimits.py ${basedir}/card_tttt_${region}_${y}.txt --year ${y} --redocard --noscan ${extra} &
+    ./runLimits.py ${basedir}/card_tttt_${region}_${y}.txt --year ${y} --redocard --noscan ${extra} --nolimits &
 done
 wait
 

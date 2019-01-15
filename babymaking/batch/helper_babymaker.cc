@@ -7,6 +7,7 @@
 #include "misc/signal_regions.h"
 #include "misc/bdt.h"
 #include "misc/common_utils.h"
+#include "misc/toptagger.h"
 
 using namespace tas;
 
@@ -101,6 +102,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("bjets_jec_dn"                                            , &bjets_jec_dn                                            );
   BabyTree->Branch("btags_flavor"                                              , &btags_flavor                                              );
   BabyTree->Branch("btags_disc"                                              , &btags_disc                                              );
+  BabyTree->Branch("btags_cdisc"                                              , &btags_cdisc                                              );
   BabyTree->Branch("jets_flavor"                                               , &jets_flavor                                               );
   BabyTree->Branch("jets_disc"                                               , &jets_disc                                               );
   BabyTree->Branch("jets_bsf"                                               , &jets_bsf                                               );
@@ -138,8 +140,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep4_p4"                                                 , &lep4_p4                                                 );
   BabyTree->Branch("lep1_iso"                                                , &lep1_iso                                                );
   BabyTree->Branch("lep2_iso"                                                , &lep2_iso                                                );
-  BabyTree->Branch("lep1_tkIso"                                              , &lep1_tkIso                                              );
-  BabyTree->Branch("lep2_tkIso"                                              , &lep2_tkIso                                              );
+  // BabyTree->Branch("lep1_tkIso"                                              , &lep1_tkIso                                              );
+  // BabyTree->Branch("lep2_tkIso"                                              , &lep2_tkIso                                              );
   BabyTree->Branch("dilep_p4"                                                , &dilep_p4                                                );
   BabyTree->Branch("ncharginos"                                                , &ncharginos                                                );
   BabyTree->Branch("higgs_mass"                                                , &higgs_mass                                                );
@@ -181,10 +183,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_ip3d"                                               , &lep2_ip3d                                               );
   BabyTree->Branch("lep1_MVA"                                                , &lep1_MVA                                                );
   BabyTree->Branch("lep2_MVA"                                                , &lep2_MVA                                                );
-  BabyTree->Branch("lep1_MVA_miniaod"                                        , &lep1_MVA_miniaod                                        );
-  BabyTree->Branch("lep2_MVA_miniaod"                                        , &lep2_MVA_miniaod                                        );
-  BabyTree->Branch("lep1_passes_MVA"                                        , &lep1_passes_MVA                                        );
-  BabyTree->Branch("lep2_passes_MVA"                                        , &lep2_passes_MVA                                        );
+  // BabyTree->Branch("lep1_MVA_miniaod"                                        , &lep1_MVA_miniaod                                        );
+  // BabyTree->Branch("lep2_MVA_miniaod"                                        , &lep2_MVA_miniaod                                        );
+  // BabyTree->Branch("lep1_passes_MVA"                                        , &lep1_passes_MVA                                        );
+  // BabyTree->Branch("lep2_passes_MVA"                                        , &lep2_passes_MVA                                        );
   BabyTree->Branch("lep1_ip3d_err"                                           , &lep1_ip3d_err                                           );
   BabyTree->Branch("lep2_ip3d_err"                                           , &lep2_ip3d_err                                           );
   BabyTree->Branch("nVetoElectrons7"                                         , &nVetoElectrons7                                         );
@@ -290,15 +292,18 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep2_looseMuonPOG"  , &lep2_looseMuonPOG  );
   BabyTree->Branch("lep3_mediumMuonPOG"  , &lep3_mediumMuonPOG  );
 
+  BabyTree->Branch("prefire_sf"  , &prefire_sf  );
+  BabyTree->Branch("prefire_sfup"  , &prefire_sfup  );
+  BabyTree->Branch("prefire_sfdown"  , &prefire_sfdown  );
   BabyTree->Branch("prefire2016_sf"  , &prefire2016_sf  );
-  BabyTree->Branch("prefire2016_sferr"  , &prefire2016_sferr  );
-  BabyTree->Branch("prefire2016_njets"  , &prefire2016_njets  );
+  BabyTree->Branch("prefire2016_sfup"  , &prefire2016_sfup  );
+  BabyTree->Branch("prefire2016_sfdown"  , &prefire2016_sfdown  );
   BabyTree->Branch("prefire2017_sf"  , &prefire2017_sf  );
-  BabyTree->Branch("prefire2017_sferr"  , &prefire2017_sferr  );
-  BabyTree->Branch("prefire2017_njets"  , &prefire2017_njets  );
+  BabyTree->Branch("prefire2017_sfup"  , &prefire2017_sfup  );
+  BabyTree->Branch("prefire2017_sfdown"  , &prefire2017_sfdown  );
   BabyTree->Branch("prefire2017ele_sf"  , &prefire2017ele_sf  );
-  BabyTree->Branch("prefire2017ele_sferr"  , &prefire2017ele_sferr  );
-  BabyTree->Branch("prefire2017ele_njets"  , &prefire2017ele_njets  );
+  BabyTree->Branch("prefire2017ele_sfup"  , &prefire2017ele_sfup  );
+  BabyTree->Branch("prefire2017ele_sfdown"  , &prefire2017ele_sfdown  );
 
 
   BabyTree->Branch("is_fastsim", &is_fastsim);
@@ -319,7 +324,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
 
   //Triggers
   BabyTree->Branch("fired_trigger"                                           , &fired_trigger                                                                           );
-  BabyTree->Branch("fired_trigger_second"                                           , &fired_trigger_second                                                                           );
+  BabyTree->Branch("fired_trigger_ss"                                           , &fired_trigger_ss                                                                           );
   BabyTree->Branch("triggers"                                                , &triggers                                                                                );
   BabyTree->Branch("weight_btagsf"                                           , &weight_btagsf                                                                           );
   BabyTree->Branch("weight_btagsf_UP"                                        , &weight_btagsf_UP                                                                        );
@@ -336,6 +341,26 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("weight_btagsf4"                                           , &weight_btagsf4                                                                           );
   BabyTree->Branch("weight_btagsf4_UP"                                        , &weight_btagsf4_UP                                                                        );
   BabyTree->Branch("weight_btagsf4_DN"                                        , &weight_btagsf4_DN                                                                        );
+
+  BabyTree->Branch("weight_btagsf_iter_central",&weight_btagsf_iter_central);
+  BabyTree->Branch("weight_btagsf_iter_down_cferr1",&weight_btagsf_iter_down_cferr1);
+  BabyTree->Branch("weight_btagsf_iter_down_cferr2",&weight_btagsf_iter_down_cferr2);
+  BabyTree->Branch("weight_btagsf_iter_down_hf",&weight_btagsf_iter_down_hf);
+  BabyTree->Branch("weight_btagsf_iter_down_hfstats1",&weight_btagsf_iter_down_hfstats1);
+  BabyTree->Branch("weight_btagsf_iter_down_hfstats2",&weight_btagsf_iter_down_hfstats2);
+  BabyTree->Branch("weight_btagsf_iter_down_jes",&weight_btagsf_iter_down_jes);
+  BabyTree->Branch("weight_btagsf_iter_down_lf",&weight_btagsf_iter_down_lf);
+  BabyTree->Branch("weight_btagsf_iter_down_lfstats1",&weight_btagsf_iter_down_lfstats1);
+  BabyTree->Branch("weight_btagsf_iter_down_lfstats2",&weight_btagsf_iter_down_lfstats2);
+  BabyTree->Branch("weight_btagsf_iter_up_cferr1",&weight_btagsf_iter_up_cferr1);
+  BabyTree->Branch("weight_btagsf_iter_up_cferr2",&weight_btagsf_iter_up_cferr2);
+  BabyTree->Branch("weight_btagsf_iter_up_hf",&weight_btagsf_iter_up_hf);
+  BabyTree->Branch("weight_btagsf_iter_up_hfstats1",&weight_btagsf_iter_up_hfstats1);
+  BabyTree->Branch("weight_btagsf_iter_up_hfstats2",&weight_btagsf_iter_up_hfstats2);
+  BabyTree->Branch("weight_btagsf_iter_up_jes",&weight_btagsf_iter_up_jes);
+  BabyTree->Branch("weight_btagsf_iter_up_lf",&weight_btagsf_iter_up_lf);
+  BabyTree->Branch("weight_btagsf_iter_up_lfstats1",&weight_btagsf_iter_up_lfstats1);
+  BabyTree->Branch("weight_btagsf_iter_up_lfstats2",&weight_btagsf_iter_up_lfstats2);
 
   BabyTree->Branch("weight"                                        , &weight                                                                        );
   BabyTree->Branch("weight_lepsf1"                                        , &weight_lepsf1                                                                        );
@@ -362,6 +387,13 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("weight_fsrvar_UP"                                        , &weight_fsrvar_UP                                                                        );
   BabyTree->Branch("weight_fsrvar_DN"                                        , &weight_fsrvar_DN                                                                        );
 
+  // BabyTree->Branch("newweight_scale_UP"  , &newweight_scale_UP );
+  // BabyTree->Branch("newweight_scale_DN"  , &newweight_scale_DN );
+  // BabyTree->Branch("newweight_pdf_UP"    , &newweight_pdf_UP );
+  // BabyTree->Branch("newweight_pdf_DN"    , &newweight_pdf_DN );
+  // BabyTree->Branch("newweight_alphas_UP" , &newweight_alphas_UP );
+  // BabyTree->Branch("newweight_alphas_DN" , &newweight_alphas_DN );
+
   //SUSY stuff
   BabyTree->Branch("gl1_p4" , &gl1_p4 );
   BabyTree->Branch("gl2_p4" , &gl2_p4 );
@@ -384,7 +416,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep3_el_dzPV"            , &lep3_el_dzPV            );
   BabyTree->Branch("lep3_el_MVA_value"       , &lep3_el_MVA_value       );
   BabyTree->Branch("lep3_el_MVA"             , &lep3_el_MVA             );
-  BabyTree->Branch("lep3_iso_RA5"            , &lep3_iso_RA5            );
+  // BabyTree->Branch("lep3_iso_RA5"            , &lep3_iso_RA5            );
   BabyTree->Branch("lep3_passes_RA5"         , &lep3_passes_RA5         );
   BabyTree->Branch("lep3_mu_dxyPV"           , &lep3_mu_dxyPV           );
   BabyTree->Branch("lep3_mu_ip3d"            , &lep3_mu_ip3d            );
@@ -401,8 +433,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("lep4_el_dzPV"            , &lep4_el_dzPV            );
   BabyTree->Branch("lep4_el_MVA_value"       , &lep4_el_MVA_value       );
   BabyTree->Branch("lep4_el_MVA"             , &lep4_el_MVA             );
-  BabyTree->Branch("lep4_iso_RA5"            , &lep4_iso_RA5            );
-  BabyTree->Branch("lep4_passes_RA5"         , &lep4_passes_RA5         );
+  // BabyTree->Branch("lep4_iso_RA5"            , &lep4_iso_RA5            );
+  // BabyTree->Branch("lep4_passes_RA5"         , &lep4_passes_RA5         );
   BabyTree->Branch("lep4_mu_dxyPV"           , &lep4_mu_dxyPV           );
   BabyTree->Branch("lep4_mu_ip3d"            , &lep4_mu_ip3d            );
   BabyTree->Branch("lep4_mu_dzPV"            , &lep4_mu_dzPV            );
@@ -435,6 +467,21 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("decayWSF"       , &decayWSF       );
   BabyTree->Branch("njincone1"       , &njincone1       );
   BabyTree->Branch("njincone2"       , &njincone2       );
+
+  // trijet stuff
+  BabyTree->Branch("ntrijets", &ntrijets);
+  BabyTree->Branch("trijet_discs", &trijet_discs);
+  BabyTree->Branch("trijet_njetsnonb", &trijet_njetsnonb);
+  BabyTree->Branch("trijet_njetsb", &trijet_njetsb);
+  BabyTree->Branch("trijet_meandisc", &trijet_meandisc);
+  BabyTree->Branch("trijet_leadingdisc", &trijet_leadingdisc);
+  BabyTree->Branch("trijet_subleadingdisc", &trijet_subleadingdisc);
+  BabyTree->Branch("trijet_numhigh", &trijet_numhigh);
+  BabyTree->Branch("trijet_frachigh", &trijet_frachigh);
+
+  // maybe bdt variables?
+  BabyTree->Branch("bdt_nforwardjets20", &bdt_nforwardjets20);
+  BabyTree->Branch("bdt_avgcdisc", &bdt_avgcdisc);
 
   // bdt variables
   BabyTree->Branch("bdt_nbtags", &bdt_nbtags);
@@ -527,6 +574,11 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
     btcr4->load(*calib4, BTagEntry::JetFlavor::FLAV_B, "comb");
     btcr4->load(*calib4, BTagEntry::JetFlavor::FLAV_C, "comb");
     btcr4->load(*calib4, BTagEntry::JetFlavor::FLAV_UDSG, "incl");
+
+    btcr_test = new BTagCalibrationReader(BTagEntry::OP_RESHAPING, "central", {"down_cferr1", "down_cferr2", "down_hf", "down_hfstats1", "down_hfstats2", "down_jes", "down_lf", "down_lfstats1", "down_lfstats2", "up_cferr1", "up_cferr2", "up_hf", "up_hfstats1", "up_hfstats2", "up_jes", "up_lf", "up_lfstats1", "up_lfstats2"});
+    btcr_test->load(*calib4, BTagEntry::JetFlavor::FLAV_B, "iterativefit");
+    btcr_test->load(*calib4, BTagEntry::JetFlavor::FLAV_C, "iterativefit");
+    btcr_test->load(*calib4, BTagEntry::JetFlavor::FLAV_UDSG, "iterativefit");
 
     // calib_fs = new BTagCalibration("csvv2_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_csvv2_ttbar_26_1_2017.csv");
     calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_deepcsv_ttbar_26_1_2017.csv");
@@ -655,6 +707,7 @@ void babyMaker::InitBabyNtuple(){
     bjets_jec_dn.clear();
     btags_flavor.clear();
     btags_disc.clear();
+    btags_cdisc.clear();
     btags_disc_mva.clear();
     btags_disc_ivf.clear();
     ht_raw = -1;
@@ -700,8 +753,8 @@ void babyMaker::InitBabyNtuple(){
     lep4_mcidx = -1;
     lep1_iso = -1;
     lep2_iso = -1;
-    lep1_tkIso = -1;
-    lep2_tkIso = -1;
+    // lep1_tkIso = -1;
+    // lep2_tkIso = -1;
     ncharginos = -1;
     higgs_mass = -1;
     genps_p4.clear();
@@ -740,10 +793,10 @@ void babyMaker::InitBabyNtuple(){
     lep2_ip3d = -999998;
     lep1_MVA = -999998;
     lep2_MVA = -999998;
-    lep1_MVA_miniaod = -999998;
-    lep2_MVA_miniaod = -999998;
-    lep1_passes_MVA = false;
-    lep2_passes_MVA = false;
+    // lep1_MVA_miniaod = -999998;
+    // lep2_MVA_miniaod = -999998;
+    // lep1_passes_MVA = false;
+    // lep2_passes_MVA = false;
     lep1_ip3d_err = -999998;
     lep2_ip3d_err = -999998;
     lep1_el_conv_vtx_flag = 0;
@@ -844,7 +897,7 @@ void babyMaker::InitBabyNtuple(){
     lep2_trigMatch_noIsoReq = 0;
     lep2_trigMatch_isoReq = 0;
     fired_trigger = 0;
-    fired_trigger_second = 0;
+    fired_trigger_ss = 0;
     triggers = 0;
     passes_met_filters = 0;
     evt_egclean_pfmet = -1.0;
@@ -873,6 +926,27 @@ void babyMaker::InitBabyNtuple(){
     weight_btagsf4  = -9999.;
     weight_btagsf4_UP = -9999.;
     weight_btagsf4_DN = -9999.;
+
+    weight_btagsf_iter_central = -9999.;
+    weight_btagsf_iter_down_cferr1 = -9999.;
+    weight_btagsf_iter_down_cferr2 = -9999.;
+    weight_btagsf_iter_down_hf = -9999.;
+    weight_btagsf_iter_down_hfstats1 = -9999.;
+    weight_btagsf_iter_down_hfstats2 = -9999.;
+    weight_btagsf_iter_down_jes = -9999.;
+    weight_btagsf_iter_down_lf = -9999.;
+    weight_btagsf_iter_down_lfstats1 = -9999.;
+    weight_btagsf_iter_down_lfstats2 = -9999.;
+    weight_btagsf_iter_up_cferr1 = -9999.;
+    weight_btagsf_iter_up_cferr2 = -9999.;
+    weight_btagsf_iter_up_hf = -9999.;
+    weight_btagsf_iter_up_hfstats1 = -9999.;
+    weight_btagsf_iter_up_hfstats2 = -9999.;
+    weight_btagsf_iter_up_jes = -9999.;
+    weight_btagsf_iter_up_lf = -9999.;
+    weight_btagsf_iter_up_lfstats1 = -9999.;
+    weight_btagsf_iter_up_lfstats2 = -9999.;
+
     weight_isr  = -9999.;
     weight_isr_dy  = -9999.;
     weight_isr_tt  = -9999.;
@@ -884,6 +958,12 @@ void babyMaker::InitBabyNtuple(){
     weight_pdf_DN = -9999.;
     weight_alphas_UP = -9999.;
     weight_alphas_DN = -9999.;
+    // newweight_scale_UP = -9999.;
+    // newweight_scale_DN = -9999.;
+    // newweight_pdf_UP = -9999.;
+    // newweight_pdf_DN = -9999.;
+    // newweight_alphas_UP = -9999.;
+    // newweight_alphas_DN = -9999.;
     weight_isrvar_UP = -9999.;
     weight_isrvar_DN = -9999.;
     weight_fsrvar_UP = -9999.;
@@ -944,7 +1024,7 @@ void babyMaker::InitBabyNtuple(){
     lep3_el_dzPV = 0;
     lep3_el_MVA_value = 0;
     lep3_el_MVA = 0;
-    lep3_iso_RA5 = 0;
+    // lep3_iso_RA5 = 0;
     lep3_passes_RA5 = 0;
     lep3_mu_dxyPV = 0;
     lep3_mu_ip3d = 0;
@@ -959,8 +1039,8 @@ void babyMaker::InitBabyNtuple(){
     lep4_el_dzPV = 0;
     lep4_el_MVA_value = 0;
     lep4_el_MVA = 0;
-    lep4_iso_RA5 = 0;
-    lep4_passes_RA5 = 0;
+    // lep4_iso_RA5 = 0;
+    // lep4_passes_RA5 = 0;
     lep4_mu_dxyPV = 0;
     lep4_mu_ip3d = 0;
     lep4_mu_dzPV = 0;
@@ -990,15 +1070,29 @@ void babyMaker::InitBabyNtuple(){
     decayWSF = 0.;
     njincone1 = 0;
     njincone2 = 0;
+    prefire_sf = 1.;
+    prefire_sfup = 1.;
+    prefire_sfdown = 1;
     prefire2016_sf = 1.;
-    prefire2016_sferr = 0.;
-    prefire2016_njets = 0;
+    prefire2016_sfup = 1.;
+    prefire2016_sfdown = 1;
     prefire2017_sf = 1.;
-    prefire2017_sferr = 0.;
-    prefire2017_njets = 0;
+    prefire2017_sfup = 1.;
+    prefire2017_sfdown = 1;
     prefire2017ele_sf = 1.;
-    prefire2017ele_sferr = 0.;
-    prefire2017ele_njets = 0;
+    prefire2017ele_sfup = 1.;
+    prefire2017ele_sfdown = 1;
+    ntrijets = 0;
+    trijet_discs.clear();
+    trijet_njetsnonb = 0;
+    trijet_njetsb = 0;
+    trijet_meandisc = 0.;
+    trijet_leadingdisc = 0.;
+    trijet_subleadingdisc = 0.;
+    trijet_numhigh = 0;
+    trijet_frachigh = 0.;
+    bdt_nforwardjets20 = 0;
+    bdt_avgcdisc = 0.;
     bdt_nbtags = 0.;
     bdt_njets = 0.;
     bdt_met = 0.;
@@ -1079,7 +1173,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   //Debug mode
   // if (verbose && evt_cut>0 && tas::evt_event() != evt_cut) return babyErrorStruct;
-  if (evt_cut>0 && tas::evt_event() != evt_cut) return babyErrorStruct;
+  // if (evt_cut>0 && tas::evt_event() != evt_cut) return babyErrorStruct;
 
   //Preliminary stuff
   if (tas::hyp_type().size() < 1) return babyErrorStruct;
@@ -1136,129 +1230,153 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   if (hyp_class == 0 || hyp_class == -1) return babyErrorStruct;
 
 
+  year = gconf.year;
 
   if (!is_real_data){
-    float sgnMCweight = ((tas::genps_weight() > 0) - (tas::genps_weight() < 0));
-    genps_weight = tas::genps_weight();
-    trueNumInt = tas::puInfo_trueNumInteractions();
-    nPUvertices = puInfo_nPUvertices();
-    gen_met = tas::gen_met();
-    gen_met_phi = tas::gen_metPhi();
-    // XXX for non tttt we don't need genweights, right?
-    if (
-            !is_real_data
-            // (filename.find("/TTTT") != std::string::npos)
-            // || (filename.find("/TTW") != std::string::npos)
-            // || (filename.find("/TTZ") != std::string::npos)
-            // || (filename.find("/ttH") != std::string::npos)
-            ) {
-        auto genweights = tas::genweights();  // These two are 20% of the ntuple size
-        // genweightsID = tas::genweightsID(); // do we even need the IDs? they are just numbers from 1...N
+      float sgnMCweight = ((tas::genps_weight() > 0) - (tas::genps_weight() < 0));
+      genps_weight = tas::genps_weight();
+      trueNumInt = tas::puInfo_trueNumInteractions();
+      nPUvertices = puInfo_nPUvertices();
+      gen_met = tas::gen_met();
+      gen_met_phi = tas::gen_metPhi();
 
-        //These c-s errors
-        int nweights = genweights.size();
-        if (nweights>110) {
-            float nom = genweights[0];
-            float sum_pdf = 0.;
-            float sum2_pdf = 0.;
-            int N = 100;
-            for (int ipdf = 9; ipdf < 9+N; ipdf++) {
-                sum_pdf += genweights[ipdf];
-                sum2_pdf += pow(genweights[ipdf],2);
-            }
-            float rms = sqrt(max(sum2_pdf/N - pow(sum_pdf/N,2),(double)0.0));
-            // in 2017, variations are Hessian, so multiply by sqrt(N-1)
-            if (gconf.year == 2017) {
-                rms *= sqrt(99);
-            }
-            weight_scale_UP = genweights[4] / nom;
-            weight_scale_DN = genweights[8] / nom;
-            weight_alphas_UP = genweights[110] / nom;
-            weight_alphas_DN = genweights[109] / nom;
-            weight_pdf_UP = (sum_pdf/N+rms) / nom;
-            weight_pdf_DN = (sum_pdf/N-rms) / nom;
+      if (!has_lhe_branches) {
+
+          auto genweights = tas::genweights();  // These two are 20% of the ntuple size
+          // genweightsID = tas::genweightsID(); // do we even need the IDs? they are just numbers from 1...N
+
+          //These c-s errors
+          int nweights = genweights.size();
+          if (nweights>110) {
+              float nom = genweights[0];
+              float sum_pdf = 0.;
+              float sum2_pdf = 0.;
+              int N = 100;
+              for (int ipdf = 9; ipdf < 9+N; ipdf++) {
+                  sum_pdf += genweights[ipdf];
+                  sum2_pdf += pow(genweights[ipdf],2);
+              }
+              float rms = sqrt(max(sum2_pdf/N - pow(sum_pdf/N,2),(double)0.0));
+              // in 2017, variations are Hessian, so multiply by sqrt(N-1)
+              if (gconf.year == 2017) {
+                  rms *= sqrt(99);
+              }
+              weight_scale_UP = genweights[4] / nom;
+              weight_scale_DN = genweights[8] / nom;
+              weight_alphas_UP = genweights[110] / nom;
+              weight_alphas_DN = genweights[109] / nom;
+              weight_pdf_UP = (sum_pdf/N+rms) / nom;
+              weight_pdf_DN = (sum_pdf/N-rms) / nom;
+              weight_fsrvar_UP = 1.;
+              weight_fsrvar_DN = 1.;
+              weight_isrvar_UP = 1.;
+              weight_isrvar_DN = 1.;
+
+              if (fabs(weight_pdf_UP) > 8.) weight_pdf_UP = (weight_pdf_UP > 0 ? 8. : -8.);
+              if (fabs(weight_pdf_DN) > 8.) weight_pdf_DN = (weight_pdf_DN > 0 ? 8. : -8.);
+
+              if (read_psweights and nweights > 1000){
+                  // 14 extra weights in PSweights samples (2+3*4)
+                  // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopModGen#Event_Generation
+                  // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
+                  // go to https://twiki.cern.ch/twiki/pub/CMS/TopModGen/pwg-rwl.txt and grep for <weight id ... there should be ~1080
+                  float ps_nom = genweights[nweights-14];
+                  if (fabs(ps_nom - nom) < 0.05) {
+                      weight_fsrvar_UP = genweights[nweights-11]/ps_nom; // fsr reduced (by sqrt(2) according to recommendation in second link above)
+                      weight_fsrvar_DN = genweights[nweights-9]/ps_nom;
+                      weight_isrvar_UP = genweights[nweights-8]/ps_nom; // isr default
+                      weight_isrvar_DN = genweights[nweights-6]/ps_nom;
+                  }
+              }
+
+          } else {
+              weight_scale_UP = 1.;
+              weight_scale_DN = 1.;
+              weight_alphas_UP = 1.;
+              weight_alphas_DN = 1.;
+              weight_pdf_UP = 1.;
+              weight_pdf_DN = 1.;
+          }
+
+      } else {
+
+          float nom = tas::genHEPMCweight();
+          float gen_scale_up = tas::gen_LHEweight_QCDscale_muR2_muF2();
+          float gen_scale_dn = tas::gen_LHEweight_QCDscale_muR0p5_muF0p5();
+          float gen_pdf_up = tas::gen_LHEweight_PDFVariation_Up();
+          float gen_pdf_dn = tas::gen_LHEweight_PDFVariation_Dn();
+          float gen_alphas_up = tas::gen_LHEweight_AsMZ_Up();
+          float gen_alphas_dn = tas::gen_LHEweight_AsMZ_Dn();
+
+          weight_scale_UP = gen_scale_up;
+          weight_scale_DN = gen_scale_dn;
+          weight_alphas_UP = gen_alphas_up;
+          weight_alphas_DN = gen_alphas_dn;
+          weight_pdf_UP = gen_pdf_up;
+          weight_pdf_DN = gen_pdf_dn;
+
+          if (fabs(weight_pdf_UP) > 8.) weight_pdf_UP = (weight_pdf_UP > 0 ? 8. : -8.);
+          if (fabs(weight_pdf_DN) > 8.) weight_pdf_DN = (weight_pdf_DN > 0 ? 8. : -8.);
+
+          if (read_psweights) {
+              auto genweights = tas::genweights();
+              int nweights = genweights.size();
+              if (nweights > 1000){
+                  float ps_nom = genweights[nweights-14];
+                  if (fabs(ps_nom - nom) < 0.05) {
+                      weight_fsrvar_UP = genweights[nweights-11]/ps_nom; // fsr reduced (by sqrt(2) according to recommendation in second link above)
+                      weight_fsrvar_DN = genweights[nweights-9]/ps_nom;
+                      weight_isrvar_UP = genweights[nweights-8]/ps_nom; // isr default
+                      weight_isrvar_DN = genweights[nweights-6]/ps_nom;
+                  } else {
+                      weight_fsrvar_UP = 1.;
+                      weight_fsrvar_DN = 1.;
+                      weight_isrvar_UP = 1.;
+                      weight_isrvar_DN = 1.;
+                  }
+              }
+          }
 
 
-             // // nom: 0.28559997678 sum_pdf: 28.693153381 sum2_pdf: 10.20197773 weight_pdf_UP: 5.893245697 weight_pdf_DN: -3.8839211464 N: 100 rms: 1.3961793184 genweights[15]: 0.2257399857 genweights[25]: 0.39736998081 genweights[50]: 0.39541998506
-            // if (weight_pdf_UP > 5) {
-             //    std::cout << event << std::endl;
-            // }
-            // std::cout <<  " nom: " << nom <<  " sum_pdf: " << sum_pdf <<  " sum2_pdf: " << sum2_pdf <<  " weight_pdf_UP: " << weight_pdf_UP <<  " weight_pdf_DN: " << weight_pdf_DN <<  " N: " << N <<  " rms: " << rms <<  " genweights[15]: " << genweights[15] <<  " genweights[25]: " << genweights[25] <<  " genweights[50]: " << genweights[50] <<  std::endl;
 
-            if (nweights > 1000 and filename.find("PSweights") != std::string::npos) {
-                // 14 extra weights in PSweights samples (2+3*4)
-                // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopModGen#Event_Generation
-                // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics
-                // go to https://twiki.cern.ch/twiki/pub/CMS/TopModGen/pwg-rwl.txt and grep for <weight id ... there should be ~1080
-                float ps_nom = genweights[nweights-14];
-                if (fabs(ps_nom - nom) < 0.05) {
-                    weight_fsrvar_UP = genweights[nweights-11]/ps_nom; // fsr reduced (by sqrt(2) according to recommendation in second link above)
-                    weight_fsrvar_DN = genweights[nweights-9]/ps_nom;
-                    weight_isrvar_UP = genweights[nweights-8]/ps_nom; // isr default
-                    weight_isrvar_DN = genweights[nweights-6]/ps_nom;
-                } else {
-                    weight_fsrvar_UP = 1.;
-                    weight_fsrvar_DN = 1.;
-                    weight_isrvar_UP = 1.;
-                    weight_isrvar_DN = 1.;
-                }
-                weight_alphas_UP = genweights[119] / genweights[117];
-                weight_alphas_DN = genweights[114] / genweights[117];
-                // if (genweights.size() > 1009) {
-                //     for (int ipdf = 9; ipdf < 9+1000; ipdf++) {
-                //         pdfweights.push_back(genweights[ipdf]/nom);
-                //     }
-                // }
-            }
-            // kill extra crap
-            // genweights.resize(120);
-        } else {
-            weight_scale_UP = 1.;
-            weight_scale_DN = 1.;
-            weight_alphas_UP = 1.;
-            weight_alphas_DN = 1.;
-            weight_pdf_UP = 1.;
-            weight_pdf_DN = 1.;
-        }
+      }
+      if (!ignore_scale1fb && !isFastsim) {
+          scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+          xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+          neventstotal = sgnMCweight*df.getnEventsTotalFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+      }
+      if (isFastsim > 0){
+          sparms = tas::sparm_values();
 
-    }
-    if (!ignore_scale1fb && !isFastsim) {
-        scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
-        xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
-        neventstotal = sgnMCweight*df.getnEventsTotalFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
-    }
-    if (isFastsim > 0){
-        sparms = tas::sparm_values();
+          // T1tttt, T5qqqqVV, T5tttt, T5ttcc
+          if (isFastsim <= 6) xsec = go_xsec(sparms[0]).xsec;
+          if (isFastsim <= 6) xsec_error = go_xsec(sparms[0]).percErr;
+          // T6ttWW
+          if (isFastsim == 10) xsec = stop_xsec(sparms[0]).xsec;
+          if (isFastsim == 10) xsec_error = stop_xsec(sparms[0]).percErr;
+          // if (isFastsim <  100) scale1fb = 1000*xsec/nPoints(isFastsim, sparms[0], sparms[1]);
+          is_fastsim = 1;
+      }
+      kfactor = tas::evt_kfactor();
 
-        // T1tttt, T5qqqqVV, T5tttt, T5ttcc
-        if (isFastsim <= 6) xsec = go_xsec(sparms[0]).xsec;
-        if (isFastsim <= 6) xsec_error = go_xsec(sparms[0]).percErr;
-        // T6ttWW
-        if (isFastsim == 10) xsec = stop_xsec(sparms[0]).xsec;
-        if (isFastsim == 10) xsec_error = stop_xsec(sparms[0]).percErr;
-        // if (isFastsim <  100) scale1fb = 1000*xsec/nPoints(isFastsim, sparms[0], sparms[1]);
-        is_fastsim = 1;
-    }
-    kfactor = tas::evt_kfactor();
+      int higgs_scan = 0;
+      if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
+      if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
+      if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
 
-    int higgs_scan = 0;
-    if (filename.find("ttH_HToTT") != std::string::npos)  higgs_scan = 1;
-    if (filename.find("tHW_HToTT") != std::string::npos)  higgs_scan = 2;
-    if (filename.find("tHq_HToTT") != std::string::npos)  higgs_scan = 3;
-
-    if (higgs_scan > 0) {
-        for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
-            if (abs(tas::genps_id()[gp])==25) {
-                higgs_mass = floor(tas::genps_p4()[gp].M() + 0.5);
-                break;
-            }
-        }
-        xsec = xsec_higgs(higgs_scan, higgs_mass);
-        xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
-        if (isFastsim > 0) {
-            scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
-        }
-    }
+      if (higgs_scan > 0) {
+          for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
+              if (abs(tas::genps_id()[gp])==25) {
+                  higgs_mass = floor(tas::genps_p4()[gp].M() + 0.5);
+                  break;
+              }
+          }
+          xsec = xsec_higgs(higgs_scan, higgs_mass);
+          xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
+          if (isFastsim > 0) {
+              scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
+          }
+      }
 
   }
 
@@ -1320,8 +1438,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
   lep1_iso = abs(lep1_id) == 11 ? eleRelIso03(lep1_idx, SS) :  muRelIso03(lep1_idx, SS);
   lep2_iso = abs(lep2_id) == 11 ? eleRelIso03(lep2_idx, SS) :  muRelIso03(lep2_idx, SS);
-  lep1_tkIso = abs(lep1_id) == 11 ? els_tkIso().at(lep1_idx)/lep1_p4.pt() : mus_iso03_sumPt().at(lep1_idx)/lep1_p4.pt();
-  lep2_tkIso = abs(lep2_id) == 11 ? els_tkIso().at(lep2_idx)/lep2_p4.pt() : mus_iso03_sumPt().at(lep2_idx)/lep2_p4.pt();
+  // lep1_tkIso = abs(lep1_id) == 11 ? els_tkIso().at(lep1_idx)/lep1_p4.pt() : mus_iso03_sumPt().at(lep1_idx)/lep1_p4.pt();
+  // lep2_tkIso = abs(lep2_id) == 11 ? els_tkIso().at(lep2_idx)/lep2_p4.pt() : mus_iso03_sumPt().at(lep2_idx)/lep2_p4.pt();
   lep1_multiIso = abs(lep1_id) == 11 ? passMultiIso(11, lep1_idx, gconf.multiiso_el_minireliso, gconf.multiiso_el_ptratio, gconf.multiiso_el_ptrel, gconf.ea_version, 2) : passMultiIso(13, lep1_idx, gconf.multiiso_mu_minireliso, gconf.multiiso_mu_ptratio, gconf.multiiso_mu_ptrel, gconf.ea_version, 2);
   lep2_multiIso = abs(lep2_id) == 11 ? passMultiIso(11, lep2_idx, gconf.multiiso_el_minireliso, gconf.multiiso_el_ptratio, gconf.multiiso_el_ptrel, gconf.ea_version, 2) : passMultiIso(13, lep2_idx, gconf.multiiso_mu_minireliso, gconf.multiiso_mu_ptratio, gconf.multiiso_mu_ptrel, gconf.ea_version, 2);
   lep1_sip = abs(lep1_id) == 11 ? fabs(els_ip3d().at(lep1_idx))/els_ip3derr().at(lep1_idx) : fabs(mus_ip3d().at(lep1_idx))/mus_ip3derr().at(lep1_idx);
@@ -1331,25 +1449,26 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_passes_id = isGoodLepton(lep2_id, lep2_idx);
   lep1_MVA = abs(lep1_id) == 11 ? getMVAoutput(lep1_idx,true) : -9999;
   lep2_MVA = abs(lep2_id) == 11 ? getMVAoutput(lep2_idx,true) : -9999;
-  lep1_MVA_miniaod = lep1_MVA;
-  lep2_MVA_miniaod = lep2_MVA;
+  // lep1_MVA_miniaod = lep1_MVA;
+  // lep2_MVA_miniaod = lep2_MVA;
 
-  lep1_passes_MVA = abs(lep1_id) == 11 ? passesMVAforID(lep1_idx, SS_medium_noiso_v6) : true;
-  lep2_passes_MVA = abs(lep2_id) == 11 ? passesMVAforID(lep2_idx, SS_medium_noiso_v6) : true;
+  // lep1_passes_MVA = abs(lep1_id) == 11 ? passesMVAforID(lep1_idx, SS_medium_noiso_v6) : true;
+  // lep2_passes_MVA = abs(lep2_id) == 11 ? passesMVAforID(lep2_idx, SS_medium_noiso_v6) : true;
 
   //Reject events that fail trigger matching
+  bool isLLcc = lep1_coneCorrPt < 25. and lep2_coneCorrPt < 25.;
   if (gconf.year == 2016) {
       if (ht < 300 && hyp_type != 0){
           if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
           if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
       }
   } else if (gconf.year == 2017) {
-      if (hyp_type != 0){
+      if (hyp_type != 0 and !isLLcc){
           if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
           if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
       }
   } else if (gconf.year == 2018) {
-      if (hyp_type != 0){
+      if (hyp_type != 0 and !isLLcc){
           if (abs(lep1_id) == 11 && !isTriggerSafe_v1(lep1_idx)) return babyErrorStruct;
           if (abs(lep2_id) == 11 && !isTriggerSafe_v1(lep2_idx)) return babyErrorStruct;
       }
@@ -1441,7 +1560,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         lep3_el_dzPV             = (fabs(els_dzPV().at(lep3_idx)) < 0.1);
         lep3_el_MVA_value        = getMVAoutput(lep3_idx,true);
         lep3_el_MVA = (etaSC < 0.8) ? (lep3_el_MVA_value > mvacut(0.77,0.52,0.77,elpt)) : ((etaSC >= 0.8 && etaSC <= 1.479) ? lep3_el_MVA_value > mvacut(0.56,0.11,0.56,elpt) : lep3_el_MVA_value > mvacut(0.48,-0.01,0.48,elpt));
-        lep3_iso_RA5             = passMultiIso(11, lep3_idx, 0.12, 0.80, 7.2, gconf.ea_version, 2);
+        // lep3_iso_RA5             = passMultiIso(11, lep3_idx, 0.12, 0.80, 7.2, gconf.ea_version, 2);
         lep3_isTrigSafeNoIsov1   = isTriggerSafenoIso_v1(lep3_idx);
         lep3_isTrigSafev1        = isTriggerSafe_v1(lep3_idx);
         lep3_passes_RA5 = (lep3_el_etaSC && lep3_el_conv_vtx_flag && lep3_el_exp_innerlayers && lep3_el_threeChargeAgree && lep3_el_dxyPV && lep3_el_ip3d && lep3_el_dzPV && lep3_el_MVA && lep3_iso_RA5 && lep3_isTrigSafeNoIsov1);
@@ -1451,7 +1570,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         lep3_mu_ip3d  = (fabs(mus_ip3d().at(lep3_idx))/mus_ip3derr().at(lep3_idx) < 4);
         lep3_mu_dzPV  = (fabs(mus_dzPV().at(lep3_idx)) <= 0.1);
         lep3_mu_ptErr = (mus_ptErr().at(lep3_idx)/mus_trk_p4().at(lep3_idx).pt() < 0.2);
-        lep3_iso_RA5  = passMultiIso(13, lep3_idx, 0.16, 0.76, 7.2, gconf.ea_version, 2);
+        // lep3_iso_RA5  = passMultiIso(13, lep3_idx, 0.16, 0.76, 7.2, gconf.ea_version, 2);
         lep3_mediumMuonPOG = isMediumMuonPOG(lep3_idx);
         lep3_passes_RA5 = (lep3_mu_dxyPV && lep3_mu_ip3d && lep3_mu_dzPV && lep3_mu_ptErr && lep3_iso_RA5 && lep3_mediumMuonPOG);
       }
@@ -1476,18 +1595,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
         lep4_el_dzPV             = (fabs(els_dzPV().at(lep4_idx)) < 0.1);
         lep4_el_MVA_value        = getMVAoutput(lep4_idx,true);
         lep4_el_MVA              = ((etaSC < 0.8) ? (lep4_el_MVA_value > 0.87) : ((etaSC <= 1.479) ? (lep4_el_MVA_value > 0.60) : (lep4_el_MVA_value > 0.17)));
-        lep4_iso_RA5             = passMultiIso(11, lep4_idx, 0.16, 0.76, 7.2, gconf.ea_version, 2);
+        // lep4_iso_RA5             = passMultiIso(11, lep4_idx, 0.16, 0.76, 7.2, gconf.ea_version, 2);
         lep4_isTrigSafeNoIsov1   = isTriggerSafenoIso_v1(lep4_idx);
         lep4_isTrigSafev1        = isTriggerSafe_v1(lep4_idx);
-        lep4_passes_RA5 = (lep4_el_etaSC && lep4_el_conv_vtx_flag && lep4_el_exp_innerlayers && lep4_el_threeChargeAgree && lep4_el_dxyPV && lep4_el_ip3d && lep4_el_dzPV && lep4_el_MVA && lep4_iso_RA5 && lep4_isTrigSafeNoIsov1 && (ht > 400 || lep4_isTrigSafev1));
+        // lep4_passes_RA5 = (lep4_el_etaSC && lep4_el_conv_vtx_flag && lep4_el_exp_innerlayers && lep4_el_threeChargeAgree && lep4_el_dxyPV && lep4_el_ip3d && lep4_el_dzPV && lep4_el_MVA && lep4_iso_RA5 && lep4_isTrigSafeNoIsov1 && (ht > 400 || lep4_isTrigSafev1));
       }
       if (abs(lep4_id) == 13){
         lep4_mu_dxyPV = (fabs(mus_dxyPV().at(lep4_idx)) <= 0.05);
         lep4_mu_ip3d  = (fabs(mus_ip3d().at(lep4_idx))/mus_ip3derr().at(lep4_idx) < 4);
         lep4_mu_dzPV  = (fabs(mus_dzPV().at(lep4_idx)) <= 0.1);
         lep4_mu_ptErr = (mus_ptErr().at(lep4_idx)/mus_trk_p4().at(lep4_idx).pt() < 0.2);
-        lep4_iso_RA5  = passMultiIso(13, lep4_idx, 0.12, 0.80, 7.2, gconf.ea_version, 2);
-        lep4_passes_RA5 = (lep4_mu_dxyPV && lep4_mu_ip3d && lep4_mu_dzPV && lep4_mu_ptErr && lep4_iso_RA5);
+        // lep4_iso_RA5  = passMultiIso(13, lep4_idx, 0.12, 0.80, 7.2, gconf.ea_version, 2);
+        // lep4_passes_RA5 = (lep4_mu_dxyPV && lep4_mu_ip3d && lep4_mu_dzPV && lep4_mu_ptErr && lep4_iso_RA5);
       }
     }
   }
@@ -1666,32 +1785,44 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets.push_back(jet_results.first.at(i).p4());
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_flavor.push_back(jet_results.first.at(i).mcFlavor()); // NJA
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_disc.push_back(jet_results.first.at(i).disc());
+  vector<int> good_ijqs;
+  vector<int> good_ijbs;
+  for (unsigned int i = 0; i < jet_results.first.size(); i++) {
+      auto jet = jet_results.first.at(i);
+      if (!jet.isBtag()) good_ijqs.push_back(jet.idx());
+  }
+  for (unsigned int i = 0; i < jet_results.second.size(); i++) {
+      auto jet = jet_results.second.at(i);
+      good_ijbs.push_back(jet.idx());
+  }
 
 
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_JEC.push_back(jet_results.first.at(i).jec());
   for (unsigned int i = 0; i < jet_results.first.size(); i++) jets_undoJEC.push_back(jet_results.first.at(i).undo_jec());
 
-  for (unsigned int i = 0; i < jet_results.first.size(); i++) {
-      auto jet = jet_results.first.at(i);
-      float bsf = 1.0;
-      if (gconf.year != 2016) {
-          float jet_pt = jet.p4().pt()*jet.undo_jec()*jet.jec();
-          float jet_eta = jet.p4().eta();
-          int jet_mcFlavour = jet.mcFlavor();
-          BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
-          if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
-          else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
-          bsf = btcr4->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
-      }
-      jets_bsf.push_back(bsf);
-  }
+  // for (unsigned int i = 0; i < jet_results.first.size(); i++) {
+  //     auto jet = jet_results.first.at(i);
+  //     float bsf = 1.0;
+  //     if (gconf.year != 2016) {
+  //         float jet_pt = jet.p4().pt()*jet.undo_jec()*jet.jec();
+  //         float jet_eta = jet.p4().eta();
+  //         int jet_mcFlavour = jet.mcFlavor();
+  //         BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG;
+  //         if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B;
+  //         else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C;
+  //         bsf = btcr4->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
+  //     }
+  //     jets_bsf.push_back(bsf);
+  // }
 
   for (unsigned int i = 0; i < jet_results.second.size(); i++) {
       auto jet = jet_results.second.at(i).p4();
       auto disc = jet_results.second.at(i).disc();
+      auto cdisc = jet_results.second.at(i).cdisc();
       btags.push_back(jet);
       btags_flavor.push_back(jet_results.second.at(i).mcFlavor());
       btags_disc.push_back(disc);
+      btags_cdisc.push_back(cdisc);
       btags_JEC.push_back(jet_results.second.at(i).jec());
       btags_undoJEC.push_back(jet_results.second.at(i).undo_jec());
   }
@@ -1933,6 +2064,67 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       weight_btagsf_DN = weight_btagsf1_DN;
   }
 
+  if (false) {
+      weight_btagsf_iter_central = 1.;
+      weight_btagsf_iter_down_cferr1 = 1.;
+      weight_btagsf_iter_down_cferr2 = 1.;
+      weight_btagsf_iter_down_hf = 1.;
+      weight_btagsf_iter_down_hfstats1 = 1.;
+      weight_btagsf_iter_down_hfstats2 = 1.;
+      weight_btagsf_iter_down_jes = 1.;
+      weight_btagsf_iter_down_lf = 1.;
+      weight_btagsf_iter_down_lfstats1 = 1.;
+      weight_btagsf_iter_down_lfstats2 = 1.;
+      weight_btagsf_iter_up_cferr1 = 1.;
+      weight_btagsf_iter_up_cferr2 = 1.;
+      weight_btagsf_iter_up_hf = 1.;
+      weight_btagsf_iter_up_hfstats1 = 1.;
+      weight_btagsf_iter_up_hfstats2 = 1.;
+      weight_btagsf_iter_up_jes = 1.;
+      weight_btagsf_iter_up_lf = 1.;
+      weight_btagsf_iter_up_lfstats1 = 1.;
+      weight_btagsf_iter_up_lfstats2 = 1.;
+      for (unsigned int i = 0; i < jet_results.first.size(); i++) {
+          auto jet = jet_results.first.at(i);
+          if (is_real_data) continue;
+          float jet_pt = jet.p4().pt()*jet.undo_jec()*jet.jec();
+          if (jet_pt<bjetMinPt) continue;
+          float jet_eta = jet.eta();
+          float disc = jet.disc();
+          int jet_mcFlavour = cms3.pfjets_hadronFlavour().at(jet.idx());
+          BTagEntry::JetFlavor flavor = BTagEntry::FLAV_UDSG; // 2
+          if (abs(jet_mcFlavour) == 5) flavor = BTagEntry::FLAV_B; // 0
+          else if (abs(jet_mcFlavour) == 4) flavor = BTagEntry::FLAV_C; // 1
+          weight_btagsf_iter_central *= btcr_test->eval_auto_bounds("central", flavor, jet_eta, jet_pt, disc);
+          if (flavor == BTagEntry::FLAV_B) {
+              weight_btagsf_iter_down_lf *= btcr_test->eval_auto_bounds("down_lf", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_lf *= btcr_test->eval_auto_bounds("up_lf", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_down_hfstats1 *= btcr_test->eval_auto_bounds("down_hfstats1", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_down_hfstats2 *= btcr_test->eval_auto_bounds("down_hfstats2", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_up_hfstats1 *= btcr_test->eval_auto_bounds("up_hfstats1", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_up_hfstats2 *= btcr_test->eval_auto_bounds("up_hfstats2", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_down_jes *= btcr_test->eval_auto_bounds("down_jes", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_jes *= btcr_test->eval_auto_bounds("up_jes", flavor, jet_eta, jet_pt, disc);
+          }
+          else if (flavor == BTagEntry::FLAV_C) {
+              weight_btagsf_iter_down_cferr1 *= btcr_test->eval_auto_bounds("down_cferr1", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_down_cferr2 *= btcr_test->eval_auto_bounds("down_cferr2", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_cferr1 *= btcr_test->eval_auto_bounds("up_cferr1", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_cferr2 *= btcr_test->eval_auto_bounds("up_cferr2", flavor, jet_eta, jet_pt, disc);
+          }
+          else if (flavor == BTagEntry::FLAV_UDSG) {
+              weight_btagsf_iter_down_lfstats1 *= btcr_test->eval_auto_bounds("down_lfstats1", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_down_lfstats2 *= btcr_test->eval_auto_bounds("down_lfstats2", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_lfstats1 *= btcr_test->eval_auto_bounds("up_lfstats1", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_lfstats2 *= btcr_test->eval_auto_bounds("up_lfstats2", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_down_hf *= btcr_test->eval_auto_bounds("down_hf", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_hf *= btcr_test->eval_auto_bounds("up_hf", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_down_jes *= btcr_test->eval_auto_bounds("down_jes", flavor, jet_eta, jet_pt, disc);
+              weight_btagsf_iter_up_jes *= btcr_test->eval_auto_bounds("up_jes", flavor, jet_eta, jet_pt, disc);
+          }
+      }
+  }
+
   // ISR stuff for 2016
   // https://github.com/cmstas/MT2Analysis/blob/cmssw80x/babymaker/ScanChain.cc#L1870
   // https://github.com/cmstas/CORE/blob/master/MCSelections.cc#L438
@@ -1987,12 +2179,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
     //Save results
     mostJets.push_back(jet);
-    // if (rawpt*JEC > jetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
-    if (rawpt*JEC > bjetMinPt && isLoosePFJet_50nsV1(i))            mostJets_jet.push_back(Jet(i, JEC));
+    // if (rawpt*JEC > jetMinPt && pass_SS_jetID(i,isFastsim))            mostJets_jet.push_back(Jet(i, JEC));
+    if (rawpt*JEC > bjetMinPt && pass_SS_jetID(i,isFastsim))            mostJets_jet.push_back(Jet(i, JEC));
     else                                                     mostJets_jet.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1+jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_up.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1+jetUnc) > bjetMinPt && pass_SS_jetID(i,isFastsim)) mostJets_jet_up.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_up.push_back(Jet(-1, -9999));
-    if (rawpt*JEC*(1-jetUnc) > bjetMinPt && isLoosePFJet_50nsV1(i)) mostJets_jet_dn.push_back(Jet(i, JEC));
+    if (rawpt*JEC*(1-jetUnc) > bjetMinPt && pass_SS_jetID(i,isFastsim)) mostJets_jet_dn.push_back(Jet(i, JEC));
     else                                                     mostJets_jet_dn.push_back(Jet(-1, -9999));
     mostJets_rawp4.push_back(jet*tas::pfjets_undoJEC().at(i));
     mostJets_idx.push_back(i);
@@ -2000,7 +2192,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     mostJets_unc.push_back(jetUnc);
     mostJets_JEC.push_back(JEC);
     mostJets_undoJEC.push_back(tas::pfjets_undoJEC().at(i));
-    mostJets_passID.push_back(isLoosePFJet_50nsV1(i));
+    mostJets_passID.push_back(pass_SS_jetID(i,isFastsim));
   }
 
   //Separate cleaning for all the permutations
@@ -2132,14 +2324,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
             //Save results
             jer_mostJets.push_back(jet);
-            if (ptJER > bjetMinPt && isLoosePFJet_50nsV1(i))            jer_mostJets_jet.push_back(Jet(i, JEC));
+            if (ptJER > bjetMinPt && pass_SS_jetID(i,isFastsim))            jer_mostJets_jet.push_back(Jet(i, JEC));
             else                                                     jer_mostJets_jet.push_back(Jet(-1, -9999));
             jer_mostJets_idx.push_back(i);
             jer_mostJets_disc.push_back(Jet(i,JEC).disc());
             jer_mostJets_JEC.push_back(JEC);
             jer_mostJets_JER.push_back(JER);
             jer_mostJets_undoJEC.push_back(tas::pfjets_undoJEC().at(i));
-            jer_mostJets_passID.push_back(isLoosePFJet_50nsV1(i));
+            jer_mostJets_passID.push_back(pass_SS_jetID(i,isFastsim));
         }
 
         // Cleaning
@@ -2222,6 +2414,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   if (verbose) cout << "met: " << met << endl;
 
   //Make sure one of our triggers fired
+  bool isLL = lep1_p4.pt() < 25. and lep2_p4.pt() < 25;
 
   // https://indico.cern.ch/event/718554/contributions/3027981/attachments/1667626/2674497/leptontriggerreview.pdf#page=12
   if (gconf.year == 2016) {
@@ -2247,7 +2440,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
       fired_trigger = false;
       if (triggers != 0) {
-          if (ht<300) {
+          if (ht<300) { // First for FT
               if ( hyp_type==0 && ((triggers & 1<<3)==(1<<3) || (triggers & 1<<4)==(1<<4)) ) fired_trigger = true;
               if ( hyp_type==3 && (triggers & 1<<6)==(1<<6) ) fired_trigger = true;
               if ( (hyp_type==1 || hyp_type==2) && ((triggers & 1<<1)==(1<<1) || (triggers & 1<<2)==(1<<2)) ) fired_trigger = true;
@@ -2262,6 +2455,17 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               if ( (triggers & 1<<9)==(1<<9) ) fired_trigger = true;
               // for JetHT, just throw away the event if we didn't trigger...
               if (!fired_trigger) return babyErrorStruct;
+          }
+      }
+      if (triggers != 0) { // Again for SS
+          // Dilepton-only (iso)  triggers for HH and HL. For LL, dilepton+HT (with HT>400 threshold since HLT threshold moved up)
+          if ( hyp_type==0 && ((triggers & 1<<3)==(1<<3) || (triggers & 1<<4)==(1<<4)) ) fired_trigger_ss = true;
+          if ( hyp_type==3 && (triggers & 1<<6)==(1<<6) ) fired_trigger_ss = true;
+          if ( (hyp_type==1 || hyp_type==2) && ((triggers & 1<<1)==(1<<1) || (triggers & 1<<2)==(1<<2)) ) fired_trigger_ss = true;
+          if (isLL) {
+              if ( hyp_type==0 && (triggers & 1<<7)==(1<<7) ) fired_trigger_ss = true;
+              if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger_ss = true;
+              if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger_ss = true;
           }
       }
       if (isFastsim > 0) {
@@ -2286,9 +2490,16 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           if ( (hyp_type==1 || hyp_type==2) && ((triggers & 1<<1)==(1<<1) || (triggers & 1<<2)==(1<<2)) ) fired_trigger = true;
 
           // Store noniso triggers in secondary variable for convenience (even though we can always do the annoying trigger bit math)
-          if ( hyp_type==0 && (triggers & 1<<7)==(1<<7) ) fired_trigger_second = true;
-          if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger_second = true;
-          if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger_second = true;
+      }
+      if (triggers != 0) { // Again for SS
+          // For 2017, 2018 had been using isolated triggers, so copy the result; reset and recalculate if LL
+          fired_trigger_ss = fired_trigger;
+          if (isLL) {
+              fired_trigger_ss = false;
+              if ( hyp_type==0 && (triggers & 1<<7)==(1<<7) ) fired_trigger_ss = true;
+              if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger_ss = true;
+              if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger_ss = true;
+          }
       }
   } else if (gconf.year == 2018) {
       if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
@@ -2306,6 +2517,16 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           if ( hyp_type==3 && (triggers & 1<<6)==(1<<6) ) fired_trigger = true;
           if ( (hyp_type==1 || hyp_type==2) && ((triggers & 1<<1)==(1<<1) || (triggers & 1<<2)==(1<<2)) ) fired_trigger = true;
       }
+      if (triggers != 0) { // Again for SS
+          // For 2017, 2018 had been using isolated triggers, so copy the result; reset and recalculate if LL
+          fired_trigger_ss = fired_trigger;
+          if (isLL) {
+              fired_trigger_ss = false;
+              if ( hyp_type==0 && (triggers & 1<<7)==(1<<7) ) fired_trigger_ss = true;
+              if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger_ss = true;
+              if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger_ss = true;
+          }
+      }
   }
 
   //Number of good vertices
@@ -2315,8 +2536,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
   if (!is_real_data) {
-      std::tie(prefire2016_sf, prefire2016_sferr, prefire2016_njets) = getPrefireInfo(2016); // or gconf.year eventually;
-      std::tie(prefire2017_sf, prefire2017_sferr, prefire2017_njets) = getPrefireInfo(2017);
+      if (gconf.year == 2016) {
+          std::tie(prefire2016_sf, prefire2016_sfup, prefire2016_sfdown) = getPrefireInfo(gconf.year); // or gconf.year eventually;
+          prefire_sf = prefire2016_sf;
+          prefire_sfup = prefire2016_sfup;
+          prefire_sfdown = prefire2016_sfdown;
+      }
+      else if (gconf.year == 2017) {
+          std::tie(prefire2017_sf, prefire2017_sfup, prefire2017_sfdown) = getPrefireInfo(gconf.year);
+          prefire_sf = prefire2017_sf;
+          prefire_sfup = prefire2017_sfup;
+          prefire_sfdown = prefire2017_sfdown;
+      }
       // std::tie(prefire2017ele_sf, prefire2017ele_sferr, prefire2017ele_njets) = getPrefireInfo(2017, false); // use ele/pho map, not jet
   }
 
@@ -2342,28 +2573,31 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
   }
 
-  if (gconf.year == 2016) {
-      if (gconf.cmssw_ver == 94) {
-          passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*ignorechargedcandfilter=*/true, /*ignorebadmuonfilter=*/true);
-      } else {
-          passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*ignorechargedcandfilter=*/true);
-      }
-  } else if (gconf.year == 2017) {
-      passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2017(is_real_data);
-  } else if (gconf.year == 2018) {
-      passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2017(is_real_data);
-  }
+  // FIXME update with FastSim MET recommendations eventually
+  passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfiltersRun2(is_real_data);
+
+  // if (gconf.year == 2016) {
+  //     if (gconf.cmssw_ver == 94) {
+  //         passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*ignorechargedcandfilter=*/true, /*ignorebadmuonfilter=*/true);
+  //     } else {
+  //         passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2016(is_real_data, /*ignorechargedcandfilter=*/true);
+  //     }
+  // } else if (gconf.year == 2017) {
+  //     passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2017(is_real_data);
+  // } else if (gconf.year == 2018) {
+  //     passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfilters2017(is_real_data);
+  // }
   
 
-  if (is_real_data && isReMiniAOD) {
-      evt_egclean_pfmet = tas::evt_egclean_pfmet();
-      evt_muegclean_pfmet = tas::evt_muegclean_pfmet();
-      evt_muegcleanfix_pfmet = tas::evt_muegcleanfix_pfmet();
-      evt_uncorr_pfmet = tas::evt_uncorr_pfmet();
-      filt_noBadMuons = tas::filt_noBadMuons();
-      filt_duplicateMuons = tas::filt_duplicateMuons();
-      filt_badMuons = tas::filt_badMuons();
-  }
+  // if (is_real_data && isReMiniAOD) {
+  //     evt_egclean_pfmet = tas::evt_egclean_pfmet();
+  //     evt_muegclean_pfmet = tas::evt_muegclean_pfmet();
+  //     evt_muegcleanfix_pfmet = tas::evt_muegcleanfix_pfmet();
+  //     evt_uncorr_pfmet = tas::evt_uncorr_pfmet();
+  //     filt_noBadMuons = tas::filt_noBadMuons();
+  //     filt_duplicateMuons = tas::filt_duplicateMuons();
+  //     filt_badMuons = tas::filt_badMuons();
+  // }
 
   if (!is_real_data) {
 
@@ -2535,6 +2769,123 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
   }
 
+
+  if (false) {
+      // Top tagging
+      trijet_njetsnonb = good_ijqs.size();
+      trijet_njetsb = good_ijbs.size();
+      vector<vector<int>> trijet_indices;
+      for (int ijb : good_ijbs) {
+          for (int ij1 : good_ijqs) {
+              for (int ij2 : good_ijqs) {
+                  if (ij1 == ij2) continue;
+                  if (pfjets_p4()[ij1].pt() < pfjets_p4()[ij2].pt()) continue;
+                  // drop 3% of signal and keep 1/3 background with
+                  Trijet topcand(ijb,ij1,ij2);
+                  if (topcand.W().mass() > 130.) continue;
+                  if (topcand.top().mass() > 300.) continue;
+                  if (topcand.b().mass() < 0.8) continue;
+                  trijet_indices.push_back({ijb,ij1,ij2});
+              }
+          }
+      }
+      // Cache all the btag vector lookups in one go
+      vector<float> jets_deepcsvb;
+      vector<float> jets_deepcsvbb;
+      vector<float> jets_deepcsvc;
+      vector<float> jets_deepcsvl;
+      TString prefix = (gconf.year == 2016 ? "deepFlavourJetTags": "pfDeepCSVJetTags");
+      for (int ijet = 0; ijet < pfjets_p4().size(); ijet++) {
+          float db = getbtagvalue(prefix+":probb",ijet);
+          float dbb = getbtagvalue(prefix+":probbb",ijet);
+          jets_deepcsvb.push_back(db);
+          jets_deepcsvbb.push_back(dbb);
+          jets_deepcsvc.push_back(getbtagvalue(prefix+":probc",ijet));
+          jets_deepcsvl.push_back(getbtagvalue(prefix+":probudsg",ijet));
+      }
+      ntrijets = trijet_indices.size();
+      for (int iti = 0; iti < trijet_indices.size(); iti++) {
+          int ijb = trijet_indices[iti][0];
+          int ij1 = trijet_indices[iti][1];
+          int ij2 = trijet_indices[iti][2];
+          Trijet topcand(ijb,ij1,ij2);
+          float var_b_pt      = topcand.b().pt();
+          float var_b_mass    = topcand.b().mass();
+          // float var_b_ptD     = topcand.ji_ptD(0);
+          // float var_b_axis2   = topcand.ji_axis2(0);
+          // float var_b_mult    = topcand.ji_mult(0);
+          float var_b_npfcands     = topcand.ji_npfcands(0);
+          // float var_b_dcsv    = jets_deepcsvb.at(ijb) + jets_deepcsvbb.at(ijb);
+          // float var_b_dcvsb   = jets_deepcsvc.at(ijb) / (jets_deepcsvc.at(ijb) + var_b_dcsv);
+          // float var_b_dcvsl   = jets_deepcsvc.at(ijb) / (jets_deepcsvc.at(ijb) + jets_deepcsvl.at(ijb));
+          float var_j1_pt     = topcand.j1().pt();
+          // float var_j1_mult    = topcand.ji_mult(1);
+          float var_j1_npfcands     = topcand.ji_npfcands(1);
+          float var_j1_dcsv   = jets_deepcsvb.at(ij1) + jets_deepcsvbb.at(ij1);
+          float var_j1_dcvsb  = jets_deepcsvc.at(ij1) / (jets_deepcsvc.at(ij1) + var_j1_dcsv);
+          float var_j1_dcvsl  = jets_deepcsvc.at(ij1) / (jets_deepcsvc.at(ij1) + jets_deepcsvl.at(ij1));
+          // float var_j2_pt     = topcand.j2().pt();
+          // float var_j2_axis2   = topcand.ji_axis2(2);
+          // float var_j2_mult    = topcand.ji_mult(2);
+          float var_j2_npfcands     = topcand.ji_npfcands(2);
+          float var_j2_dcsv   = jets_deepcsvb.at(ij2) + jets_deepcsvbb.at(ij2);
+          float var_j2_dcvsb  = jets_deepcsvc.at(ij2) / (jets_deepcsvc.at(ij2) + var_j2_dcsv);
+          float var_j2_dcvsl  = jets_deepcsvc.at(ij2) / (jets_deepcsvc.at(ij2) + jets_deepcsvl.at(ij2));
+          float var_b_wcand_deltaR = topcand.b_W_deltaR();
+          float var_topcand_pt    = topcand.top().pt();
+          float var_wcand_deltaR = topcand.W_deltaR();
+          // float var_wcand_pt      = topcand.W().pt();
+          // float var_deta_j12 = topcand.deta_j12();
+          float var_topcand_mass  = topcand.top().mass();
+          float var_wcand_mass    = topcand.W().mass();
+          // float var_chi2 = topcand.chi2();
+          float var_logchi2 = topcand.logchi2();
+          float var_b_j1_mass = topcand.b_ji_mass(1);
+          float var_b_j2_mass = topcand.b_ji_mass(2);
+          // float var_top_radius = topcand.top_radius();
+          // float var_b_axis1   = 0.05;
+          // float var_j1_ptD     = 0.4;
+          // float var_j1_axis1   = 0.05;
+          // float var_j1_axis2   = 0.02;
+          // float var_j2_ptD     = 0.4;
+          // float var_j2_axis1   = 0.05;
+          // if (year == 2017) { // FIXME only exists for 2017 for now. 10-02-02 tag for 2018 will have it when we switch, but not 2016 until we get 94x rereco
+          //     float var_b_axis1   = topcand.ji_axis1(0);
+          //     float var_j1_ptD     = topcand.ji_ptD(1);
+          //     float var_j1_axis1   = topcand.ji_axis1(1);
+          //     float var_j1_axis2   = topcand.ji_axis2(1);
+          //     float var_j2_ptD     = topcand.ji_ptD(2);
+          //     float var_j2_axis1   = topcand.ji_axis1(2);
+          // }
+          float disc = get_prediction_trijet(
+                  var_b_j1_mass, var_b_j2_mass, var_b_mass, var_b_npfcands,
+                  var_b_pt, var_b_wcand_deltaR, var_j1_dcvsb, var_j1_dcvsl,
+                  var_j1_npfcands, var_j1_pt, var_j2_dcvsb, var_j2_dcvsl,
+                  var_j2_npfcands, var_logchi2, var_topcand_mass, var_topcand_pt,
+                  var_wcand_deltaR, var_wcand_mass
+                  );
+          trijet_discs.push_back(disc);
+      }
+      std::sort(trijet_discs.begin(), trijet_discs.end(), std::greater<float>());
+      trijet_meandisc = std::accumulate(trijet_discs.begin(),trijet_discs.end(),0.f)/trijet_discs.size();
+      trijet_leadingdisc = (trijet_discs.size() > 0 ? trijet_discs[0] : -1);
+      trijet_subleadingdisc = (trijet_discs.size() > 1 ? trijet_discs[1] : -1);
+      trijet_numhigh = std::count_if(trijet_discs.begin(), trijet_discs.end(), [](float disc){return disc > 0.3;});
+      trijet_frachigh = 1.0*trijet_numhigh/trijet_discs.size();
+      // More misc variables
+      bdt_nforwardjets20 = 0;
+      for (int ijet = 0; ijet < pfjets_p4().size(); ijet++) {
+          if (!pass_SS_jetID(ijet,isFastsim)) continue;
+          LorentzVector jet = tas::pfjets_p4().at(ijet);
+          if (fabs(jet.eta()) < 2.4) continue;
+          if (fabs(jet.eta()) > 3.0) continue;
+          float pt = jet.pt()*pfjets_undoJEC().at(ijet);
+          if (pt < 20.) continue;
+          bdt_nforwardjets20 += 1;
+      }
+      bdt_avgcdisc = std::accumulate(btags_cdisc.begin(),btags_cdisc.end(),0.f)/btags_cdisc.size();
+  }
+
   // Compute some variables to make it easier for draw statements and skimming
   skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
          (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50) and \
@@ -2546,7 +2897,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // BDT stuff
   float mjoverpt = 0.;
   for (unsigned int ijet = 0; ijet < jets.size(); ijet++) {
-      const auto& jet = jets[ijet];
+      const auto& jet = jets[ijet]*(jets_undoJEC[ijet]*jets_JEC[ijet]);
       mjoverpt = std::max(mjoverpt, jet.M()/jet.pt());
   }
   bdt_nbtags = nbtags;
@@ -2557,15 +2908,15 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   bdt_ntb40 = ntb40;
   bdt_nleps = nleps;
   bdt_htb = htb;
-  bdt_ml1j1 = (njets >= 1) ? (jets[0] + lep1_p4).M() : 0;
+  bdt_ml1j1 = (njets >= 1) ? (jets[0]*jets_undoJEC[0]*jets_JEC[0] + lep1_p4).M() : 0;
   bdt_dphil1l2 = DeltaPhi(lep1_p4.phi(),lep2_p4.phi());
   bdt_maxmjoverpt = mjoverpt;
   bdt_detal1l2 = fabs(lep1_p4.eta()-lep2_p4.eta());
   bdt_q1 = (lep1_id > 0) ? -1 : 1;
-  bdt_ptj1 = (njets > 0) ? jets[0].pt() : 0.;
-  bdt_ptj6 = (njets > 5) ? jets[5].pt() : 0.;
-  bdt_ptj7 = (njets > 6) ? jets[6].pt() : 0.;
-  bdt_ptj8 = (njets > 7) ? jets[7].pt() : 0.;
+  bdt_ptj1 = (njets > 0) ? jets[0].pt()*jets_undoJEC[0]*jets_JEC[0] : 0.;
+  bdt_ptj6 = (njets > 5) ? jets[5].pt()*jets_undoJEC[5]*jets_JEC[5] : 0.;
+  bdt_ptj7 = (njets > 6) ? jets[6].pt()*jets_undoJEC[6]*jets_JEC[6] : 0.;
+  bdt_ptj8 = (njets > 7) ? jets[7].pt()*jets_undoJEC[7]*jets_JEC[7] : 0.;
   bdt_ptl1 = lep1_coneCorrPt;
   bdt_ptl3 = lep3_coneCorrPt;
 
@@ -2607,7 +2958,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   bdt_disc_jec_dn = get_prediction( bdt_jec_dn_nbtags, bdt_jec_dn_njets, bdt_jec_dn_met, bdt_ptl2, bdt_jec_dn_nlb40, bdt_jec_dn_ntb40, bdt_nleps, bdt_jec_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
   bdt_disc_jer_dn = get_prediction( bdt_jer_dn_nbtags, bdt_jer_dn_njets, bdt_jer_dn_met, bdt_ptl2, bdt_jer_dn_nlb40, bdt_jer_dn_ntb40, bdt_nleps, bdt_jer_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
 
-  year = gconf.year;
   yearlumi = getLumi(year);
 
   lep1_pt = lep1_p4.pt();
@@ -2622,19 +2972,22 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep2_phi = lep2_p4.phi();
   lep3_phi = lep3_p4.phi();
 
-  weight_lepsf1 = leptonScaleFactor(year, lep1_id, lep1_coneCorrPt, lep1_eta, ht);
-  weight_lepsf2 = leptonScaleFactor(year, lep2_id, lep2_coneCorrPt, lep2_eta, ht);
-  weight_lepsf3 = ((lep3_passes_id && lep3_coneCorrPt > 20.) ? leptonScaleFactor(year, lep3_id, lep3_pt, lep3_eta, ht) : 1);
-  weight_lepsf = weight_lepsf1 * weight_lepsf2 * weight_lepsf3;
+  if (!is_real_data) {
+      weight_lepsf1 = leptonScaleFactor(year, lep1_id, lep1_coneCorrPt, lep1_eta, ht);
+      weight_lepsf2 = leptonScaleFactor(year, lep2_id, lep2_coneCorrPt, lep2_eta, ht);
+      weight_lepsf3 = ((lep3_passes_id && lep3_coneCorrPt > 20.) ? leptonScaleFactor(year, lep3_id, lep3_pt, lep3_eta, ht) : 1);
+      weight_lepsf = weight_lepsf1 * weight_lepsf2 * weight_lepsf3;
+      weight_triggersf = triggerScaleFactor(year, lep1_id, lep2_id, lep1_pt, lep2_pt, lep1_eta, lep2_eta, ht);
+      weight_pu = getTruePUw(year, trueNumInt[0], 0);
+      weight_isrsf = 1.;
+      if (filename.find("TTWJetsToLNu") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 1);
+      if (filename.find("TTZToLL") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 2);
+      weight = yearlumi * scale1fb * weight_lepsf * weight_triggersf * weight_pu * weight_btagsf * decayWSF * weight_isrsf;
+  } else {
+      weight = 1;
+  }
 
-  weight_triggersf = triggerScaleFactor(year, lep1_id, lep2_id, lep1_pt, lep2_pt, lep1_eta, lep2_eta, ht);
-  weight_pu = getTruePUw(year, trueNumInt[0], 0);
-
-  weight_isrsf = 1.;
-  if (filename.find("TTWJetsToLNu") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 1);
-  if (filename.find("TTZToLL") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 2);
-
-  weight = yearlumi * scale1fb * weight_lepsf * weight_triggersf * weight_pu * weight_btagsf * decayWSF * weight_isrsf;
+  // std::cout <<  " run: " << run <<  " lumi: " << lumi <<  " event: " << event <<  " lep1_id: " << lep1_id <<  " lep2_id: " << lep2_id <<  " lep1_pt: " << lep1_pt <<  " lep2_pt: " << lep2_pt <<  std::endl;
 
   //Fill Baby
   BabyTree->Fill();

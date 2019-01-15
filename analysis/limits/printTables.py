@@ -22,7 +22,11 @@ def parse_yields(d_in):
         d_yields[key]["error"] = errs
     return d_yields
 
-def print_table(d_yields, regions="srcr", pretty=False,unblinded=False):
+def print_table(d_yields, regions="srcr", pretty=False,unblinded=False, override_totbg=False,override_totbg_which="shapes_prefit",fit_filename=""):
+    # if override_totbg, use get_combined_prefit to override naive quadrature-sum total_background uncertainties with
+    # total s+b fit uncertainties using covariance matrix in fit output file. Use fit corresponding to `override_totbg_which`
+    # NOTE not quite right because we're using the covariance matrix for s+b (only one we can get) to get uncertainties on total_background (which
+    # does not have signal), though it won't be far off
     nbins = len(d_yields["ttz"]["central"])
     colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Charge misid.","Nonprompt lep.","SM expected","Data","$\\tttt$"]
     allprocs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","total_background","data","tttt"]
@@ -41,11 +45,15 @@ def print_table(d_yields, regions="srcr", pretty=False,unblinded=False):
         srnames = ["CRZ","CRW"]+["SR{}".format(i) for i in range(1,17)]
     elif regions == "srdisc":
         # srnames = ["SR{}".format(i) for i in range(1,15)]
-        srnames = ["SR{}".format(i) for i in range(1,17)]
+        srnames = ["CRZ"]+["SR{}".format(i) for i in range(1,18)]
 
     if not unblinded:
         d_yields["data"]["central"] *= 0
         d_yields["data"]["error"] *= 0
+
+    if override_totbg:
+        from get_combined_postfit import get_total_postfit_vals_errs
+        override_vals, override_errs = get_total_postfit_vals_errs(fit_filename, nchannels=3, which=override_totbg_which)
 
     if not pretty:
 
@@ -65,6 +73,9 @@ def print_table(d_yields, regions="srcr", pretty=False,unblinded=False):
                     ve = E(max(d_yields[subproc]["central"][ibin],0.), d_yields[subproc]["error"][ibin])
                     tot_ve += ve
                 cent,err = tot_ve
+                if override_totbg and procs == ["total_background"]:
+                    # print cent, err, override_vals[ibin], override_errs[ibin]
+                    err = override_errs[ibin]
                 if "data" in procs:
                     if unblinded:
                         tojoin.append("{0:.0f}".format(cent))
@@ -86,21 +97,26 @@ def print_table(d_yields, regions="srcr", pretty=False,unblinded=False):
         # sep = "+-"
 
         for ibin in range(nbins):
-            row = [srnames[ibin]]
+            tojoin = [srnames[ibin]]
             for procs in allprocs:
                 tot_ve = E(0.,0.)
+                if type(procs) is not list:
+                    procs = [procs]
                 for subproc in procs:
                     ve = E(max(d_yields[subproc]["central"][ibin],0.), d_yields[subproc]["error"][ibin])
                     tot_ve += ve
                 cent,err = tot_ve
+                if override_totbg and procs == ["total_background"]:
+                    print cent, err, override_vals[ibin], override_errs[ibin]
+                    err = override_errs[ibin]
                 if "data" in procs:
                     if unblinded:
-                        row.append(("{0:.0f}").format(cent,sep,err))
+                        tojoin.append(("{0:.0f}").format(cent,sep,err))
                     else:
-                        row.append("-")
+                        tojoin.append("-")
                 else:
-                    row.append(("{0:5.%if} {1}{2:%i.%if}" % (precision,precision+3,precision)).format(cent,sep,err))
-            tab.add_row(row)
+                    tojoin.append(("{0:5.%if} {1}{2:%i.%if}" % (precision,precision+3,precision)).format(cent,sep,err))
+            tab.add_row(tojoin)
         tab.print_table(show_row_separators=False,show_alternating=False)
 
 
@@ -117,7 +133,6 @@ if __name__ == "__main__":
     # filename = "v0.10_Jul20/mlfit.root"
 
     datafile = r.TFile(glob.glob(filename.rsplit("/",1)[0]+"/data_*{}*.root".format(args.regions))[0])
-
     print "b-only fit, but we're printing prefit so it doesn't matter"
     d_prefit,d_postfit, ratios, ratios_errors = get_postfit_dict(filename,channels=["y2016","y2017","y2018"],bonly=True)
     yields = parse_yields(d_prefit)
@@ -125,7 +140,23 @@ if __name__ == "__main__":
             "central": np.array(list(datafile.Get("sr"))[1:-1]),
             "error": np.array(list(datafile.Get("sr"))[1:-1]),
             }
-    print_table(yields, regions=args.regions, pretty=args.pretty, unblinded=args.unblinded)
+    print_table(yields, regions=args.regions, pretty=args.pretty, unblinded=args.unblinded,
+            override_totbg=True, override_totbg_which="shapes_prefit",fit_filename=args.filename,
+            # override_totbg=True, override_totbg_which="shapes_fit_s",fit_filename=args.filename,
+            )
+
+    # datafiles = []
+    # for fname in glob.glob(filename.rsplit("/",1)[0]+"/data_*{}*.root".format(args.regions)):
+    #     datafiles.append(r.TFile(fname))
+    # d_prefit,d_postfit, ratios, ratios_errors = get_postfit_dict(filename,channels=["y2016","y2017","y2018"],bonly=False)
+    # yields = parse_yields(d_prefit)
+    # yields["data"] = {
+    #         "central": sum([np.array(list(datafile.Get("sr"))[1:-1]) for datafile in datafiles]),
+    #         "error": sum([np.array(list(datafile.Get("sr"))[1:-1]) for datafile in datafiles]),
+    #         }
+    # print_table(yields, regions=args.regions, pretty=args.pretty, unblinded=args.unblinded,
+    #         override_totbg=True, override_totbg_which="shapes_fit_s",fit_filename=args.filename,
+    #         )
 
 #     for name,hname in [
 #             ("b-only fit", "shapes_fit_b"),

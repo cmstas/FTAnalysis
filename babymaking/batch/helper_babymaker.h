@@ -2,6 +2,7 @@
 #define SSBABYMAKER_H
 
 #include <vector>
+#include <functional>
 #include <algorithm>
 #include <chrono>
 #include <signal.h>
@@ -62,6 +63,9 @@
 #pragma link C++ typedef ROOT::Math::XYZTVectorF;
 #endif
 
+#define PI 3.14159265
+
+
 int nPoints_higgs(int sample, int mH);
 float xsec_higgs(int sample, int mH);
 
@@ -72,6 +76,80 @@ class BTagCalibration;
 class BTagCalibrationReader;
 
 using namespace std;
+using namespace tas;
+
+struct Trijet     {
+    int ijb = 0;
+    int ij1 = 0;
+    int ij2 = 0;
+    LorentzVector jb_p4;
+    LorentzVector j1_p4;
+    LorentzVector j2_p4;
+    Trijet(int ijb_, int ij1_, int ij2_) :
+        ijb(ijb_), ij1(ij1_), ij2(ij2_) {
+            jb_p4 = pfjets_p4().at(ijb_);
+            j1_p4 = pfjets_p4().at(ij1_);
+            j2_p4 = pfjets_p4().at(ij2_);
+        }
+    LorentzVector top() const {
+        return jb_p4+j1_p4+j2_p4;
+    }
+    LorentzVector W() const {
+        return j1_p4+j2_p4;
+    }
+    LorentzVector b() const {
+        return jb_p4;
+    }
+    LorentzVector j1() const {
+        return j1_p4;
+    }
+    LorentzVector j2() const {
+        return j2_p4;
+    }
+    float top_radius() {
+        float tr = -1;
+        for (const auto j : {ijb, ij1, ij2}) {
+            double dR = ROOT::Math::VectorUtil::DeltaR(pfjets_p4().at(j), top());
+            if (dR > tr) tr = dR;
+        }
+        return tr;
+    }
+    float deta_j12() {
+        return fabs(pfjets_p4().at(ij1).eta() - pfjets_p4().at(ij2).eta());
+    }
+    float chi2() {
+        // return std::pow((top().mass()-173.)/18., 2)+std::pow((W().mass()-83.)/11., 2);
+        return std::pow((top().mass()-169.8)/19.3, 2)+std::pow((W().mass()-80.5)/11.5, 2);
+    }
+    float logchi2() {
+        return log(chi2());
+    }
+    float b_ji_mass(int i) {
+        return (pfjets_p4().at(ijb) + pfjets_p4().at(i==1 ? ij1 : ij2)).mass();
+    }
+    float W_deltaR() {
+        return ROOT::Math::VectorUtil::DeltaR(pfjets_p4().at(ij1), pfjets_p4().at(ij2));
+    }
+    float b_W_deltaR() {
+        return ROOT::Math::VectorUtil::DeltaR(pfjets_p4().at(ijb), W());
+    }
+    float ji_ptD(int i) {
+        return pfjets_ptDistribution().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
+    }
+    float ji_axis1(int i) {
+        return pfjets_axis1().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
+    }
+    float ji_axis2(int i) {
+        return pfjets_axis2().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
+    }
+    float ji_mult(int i) {
+        return pfjets_totalMultiplicity().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
+    }
+    float ji_npfcands(int i) {
+        return pfjets_npfcands().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
+    }
+
+};
 
 struct csErr_t { float cs_scale_no = 0; float cs_scale_up = 0; float cs_scale_dn = 0; float cs_pdf[102] = {0}; int SR = -1; bool isGood = 0; };
 
@@ -95,6 +173,9 @@ class babyMaker {
 
     bool ignore_scale1fb = false;
     bool ignore_os = false;
+    bool read_psweights = false;
+    bool has_lhe_branches = false;
+    bool verbose = false;
     unsigned int evt_cut = 0;
 
     TFile* BabyFile;
@@ -107,7 +188,6 @@ class babyMaker {
 
     //Switches
     TString path;
-    bool verbose;
 
 
     // for btag SFs
@@ -124,6 +204,7 @@ class babyMaker {
     BTagCalibrationReader* btcr3;
     BTagCalibrationReader* btcr4;
     BTagCalibrationReader* btcr_fs;
+    BTagCalibrationReader* btcr_test;
 
     TH2D* h_btag_eff_b;
     TH2D* h_btag_eff_c;
@@ -165,15 +246,18 @@ class babyMaker {
     vector <float> pdfweights;
     vector <string> genweightsID;
     bool passedFilterList;
+    float prefire_sf;
+    float prefire_sfup;
+    float prefire_sfdown;
     float prefire2016_sf;
-    float prefire2016_sferr;
-    int prefire2016_njets;
+    float prefire2016_sfup;
+    float prefire2016_sfdown;
     float prefire2017_sf;
-    float prefire2017_sferr;
-    int prefire2017_njets;
+    float prefire2017_sfup;
+    float prefire2017_sfdown;
     float prefire2017ele_sf;
-    float prefire2017ele_sferr;
-    int prefire2017ele_njets;
+    float prefire2017ele_sfup;
+    float prefire2017ele_sfdown;
 
     //Pileup
     vector <float> trueNumInt;
@@ -374,6 +458,7 @@ class babyMaker {
     vector <LorentzVector> btags;
     vector <int> btags_flavor;
     vector <float> btags_disc;
+    vector <float> btags_cdisc;
     vector <float> btags_disc_mva;
     vector <float> btags_disc_ivf;
     vector <float> btags_JEC;
@@ -424,8 +509,8 @@ class babyMaker {
     //Isolation
     float lep1_iso;
     float lep2_iso;
-    float lep1_tkIso;
-    float lep2_tkIso;
+    // float lep1_tkIso;
+    // float lep2_tkIso;
 
     int higgs_mass;
     // //Gen Leptons
@@ -468,8 +553,8 @@ class babyMaker {
     bool lep4_veto;
     bool lep4_fo;
 
-    bool lep1_passes_MVA;
-    bool lep2_passes_MVA;
+    // bool lep1_passes_MVA;
+    // bool lep2_passes_MVA;
 
     //Imparct parameter
     float lep1_dxyPV;
@@ -481,8 +566,8 @@ class babyMaker {
     float lep1_ip3d;
     float lep1_MVA;
     float lep2_MVA;
-    float lep1_MVA_miniaod;
-    float lep2_MVA_miniaod;
+    // float lep1_MVA_miniaod;
+    // float lep2_MVA_miniaod;
     float lep1_ip3d_err;
     float lep2_ip3d;
     float lep2_ip3d_err;
@@ -560,7 +645,7 @@ class babyMaker {
 
     //Trigger matching
     bool fired_trigger;
-    bool fired_trigger_second;
+    bool fired_trigger_ss;
     unsigned int triggers;
     bool lep1_trigMatch_noIsoReq;
     bool lep1_trigMatch_isoReq;
@@ -605,6 +690,26 @@ class babyMaker {
     float weight_btagsf4_UP;
     float weight_btagsf4_DN;
 
+    float weight_btagsf_iter_central;
+    float weight_btagsf_iter_down_cferr1;
+    float weight_btagsf_iter_down_cferr2;
+    float weight_btagsf_iter_down_hf;
+    float weight_btagsf_iter_down_hfstats1;
+    float weight_btagsf_iter_down_hfstats2;
+    float weight_btagsf_iter_down_jes;
+    float weight_btagsf_iter_down_lf;
+    float weight_btagsf_iter_down_lfstats1;
+    float weight_btagsf_iter_down_lfstats2;
+    float weight_btagsf_iter_up_cferr1;
+    float weight_btagsf_iter_up_cferr2;
+    float weight_btagsf_iter_up_hf;
+    float weight_btagsf_iter_up_hfstats1;
+    float weight_btagsf_iter_up_hfstats2;
+    float weight_btagsf_iter_up_jes;
+    float weight_btagsf_iter_up_lf;
+    float weight_btagsf_iter_up_lfstats1;
+    float weight_btagsf_iter_up_lfstats2;
+
     float weight_scale_UP;
     float weight_scale_DN;
     float weight_pdf_UP;
@@ -615,6 +720,13 @@ class babyMaker {
     float weight_isrvar_DN;
     float weight_fsrvar_UP;
     float weight_fsrvar_DN;
+
+    // float newweight_scale_UP;
+    // float newweight_scale_DN;
+    // float newweight_pdf_UP;
+    // float newweight_pdf_DN;
+    // float newweight_alphas_UP;
+    // float newweight_alphas_DN;
 
     float weight_lepsf1;
     float weight_lepsf2;
@@ -684,6 +796,22 @@ class babyMaker {
     bool lep4_mu_ptErr;
     bool lep4_isTrigSafeNoIsov1;
     bool lep4_isTrigSafev1;
+
+    // trijet stuff
+    int ntrijets;
+    vector<float> trijet_discs;
+    int trijet_njetsnonb;
+    int trijet_njetsb;
+    float trijet_meandisc;
+    float trijet_leadingdisc;
+    float trijet_subleadingdisc;
+    int trijet_numhigh;
+    float trijet_frachigh;
+
+    // maybe bdt variables?
+    int bdt_nforwardjets20;
+    float bdt_avgcdisc;
+
 
     // bdt variables
     float bdt_nbtags;

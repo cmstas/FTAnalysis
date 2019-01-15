@@ -27,8 +27,8 @@ function check() {
 }
 
 function run() {
-    echo Running ./main.exe $(get_file $1 $2) $3 10000 $4
-    ./main.exe $(get_file $1 $2) -o $3 -n 10000 >& $4
+    echo Running ./main.exe $(get_file $1 $2) -o $3 -n 5000 '>&' $4
+    ./main.exe $(get_file $1 $2) -o $3 -n 5000 >& $4
     check $4
 }
 
@@ -47,10 +47,13 @@ run data_2016     "/DoubleMuon" ${outputdir}/test_2016_datamm.root     ${outputd
 # run data_2016_94x "/DoubleEG"   ${outputdir}/test_2016_94x_dataee.root ${outputdir}/log_2016_94x_dataee.txt &
 # run data_2016_94x "/DoubleMuon" ${outputdir}/test_2016_94x_datamm.root ${outputdir}/log_2016_94x_datamm.txt &
 run mc_2017       "/TTWJets"    ${outputdir}/test_2017_ttw.root        ${outputdir}/log_2017_ttw.txt        &
+run mc_2017       "/ttHToNonbb" ${outputdir}/test_2017_tth.root        ${outputdir}/log_2017_tth.txt        &
 run mc_2017       "/TTTT"       ${outputdir}/test_2017_tttt.root       ${outputdir}/log_2017_tttt.txt       &
 run data_2017     "/DoubleEG"   ${outputdir}/test_2017_dataee.root     ${outputdir}/log_2017_dataee.txt     &
 run data_2017     "/DoubleMuon" ${outputdir}/test_2017_datamm.root     ${outputdir}/log_2017_datamm.txt     &
 run data_2018     "/EGamma"     ${outputdir}/test_2018_dataee.root     ${outputdir}/log_2018_dataee.txt     &
 run data_2018     "/DoubleMuon" ${outputdir}/test_2018_datamm.root     ${outputdir}/log_2018_datamm.txt     &
+run mc_2018       "/TTTT"       ${outputdir}/test_2018_tttt.root       ${outputdir}/log_2018_tttt.txt       &
+run data_2018     "17Sep2018-v1" ${outputdir}/test_2018_datarereco.root     ${outputdir}/log_2018_datarereco.txt     &
 
 wait

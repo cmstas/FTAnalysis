@@ -114,6 +114,8 @@ def write_one_file(fname_in, fname_out, name, region, year):
         fout.Close()
         return
 
+    is_higgs = "higgs" in name
+
     # stat
     write_stat(h_nominal, name)
 
@@ -130,7 +132,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
                 if syst not in ["scale","pdf"]:
                     h_syst.Scale(h_nominal.Integral()/divz(h_syst.Integral()))
                 h_syst.Write()
-    elif name in ["ttw","ttz","tth","rares","xg","ttvv"]:
+    elif (name in ["ttw","ttz","tth","rares","xg","ttvv"]) or is_higgs:
         for syst in ["scale","pdf"]:
             for which in ["Up","Down"]:
                 h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,syst.upper(),which.replace("ow","").upper(),name))
@@ -142,7 +144,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
                 h_syst.Write()
     
     # If not doing data, flips, or fakes
-    if not any(x in name for x in ["data","flips","fakes"]):
+    if not any(x in name for x in ["data","flips","fakes","fakes_app"]):
         # btagSF
         for which in ["Up","Down"]:
             h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,"BTAGSF",which.replace("ow","").upper(),name))
@@ -152,8 +154,8 @@ def write_one_file(fname_in, fname_out, name, region, year):
             avoid_zero_integrals(h_nominal,h_syst)
             h_syst.Write()
 
-        # PU, JES, JER
-        for syst in ["pu","jes","jer"]:
+        # PU, JES, JER, Prefire SF for 2016, 2017
+        for syst in ["pu","jes","jer","prefire"]:
             for which in ["Up","Down"]:
                 h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,syst.upper(),which.replace("ow","").upper(),name))
                 h_syst = h_alt.Clone("{}{}".format(syst,which))
@@ -283,7 +285,7 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
 
     nmade = 0
     for year in [2016, 2017, 2018]:
-        for proc in ["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"]+extra_procs:
+        for proc in ["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv", "fakes_app"]+extra_procs:
             for region in regions:
                 if do_one(year,proc,region): nmade += 1
 

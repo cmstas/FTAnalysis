@@ -3,6 +3,7 @@
 #include "TTree.h"
 #include "TChain.h"
 #include "TFile.h"
+#include "TBranchElement.h"
 #include "TString.h"
 #include "helper_babymaker.h"
 #include "CORE/Tools/goodrun.h"
@@ -13,6 +14,8 @@
 #include "cxxopts.h"
 
 bool STOP_REQUESTED;
+
+int condor_chirp(std::string key, std::string value);
 
 int main(int argc, char *argv[]){
 
@@ -87,22 +90,6 @@ int main(int argc, char *argv[]){
             });
     STOP_REQUESTED = false;
 
-    // FactorizedJetCorrector * jc = makeJetCorrector({
-    //         "CORE/Tools/jetcorr/data/run2_25ns/Fall17_17Nov2017_V6_MC/Fall17_17Nov2017_V6_MC_L1FastJet_AK4PFchs.txt",
-    //         "CORE/Tools/jetcorr/data/run2_25ns/Fall17_17Nov2017_V6_MC/Fall17_17Nov2017_V6_MC_L2Relative_AK4PFchs.txt",
-    //         "CORE/Tools/jetcorr/data/run2_25ns/Fall17_17Nov2017_V6_MC/Fall17_17Nov2017_V6_MC_L3Absolute_AK4PFchs.txt",
-    //         });
-    // jc->setRho(23.2);
-    // jc->setJetA(0.5);
-    // jc->setJetPt(157.2);
-    // jc->setJetEta(-1.4);
-    // float corr = jc->getCorrection();
-    // std::cout <<  " corr: " << corr <<  std::endl;
-    // // for (auto c : corrs) {
-    // //     std::cout <<  " c: " << c <<  std::endl;
-    // // }
-    // return 0;
-
     TString filenames = vfilenames.at(0);
     TString outname(arg_output);
     unsigned int nevents_max = (arg_nevents > 0 ? arg_nevents : 0);
@@ -147,6 +134,7 @@ int main(int argc, char *argv[]){
             filenames.Contains("Run2018")
             || filenames.Contains("RunIISpring18")
             || filenames.Contains("RunIISummer18")
+            || filenames.Contains("Autumn18")
             || filenames.Contains("run2_mc2018")
        ) year = 2018;
 
@@ -165,6 +153,7 @@ int main(int argc, char *argv[]){
 
     if (year == 2016) {
         gconf.year = year;
+        gconf.cmssw_ver = 80;
         gconf.ea_version = 1;
         gconf.btag_disc_wp = 0.6324;
         gconf.WP_DEEPCSV_TIGHT  = 0.8958;
@@ -190,6 +179,7 @@ int main(int argc, char *argv[]){
     if (year == 2017) {
         gconf.year = year;
         gconf.ea_version = 4;
+        gconf.cmssw_ver = 94;
 
         gconf.btag_disc_wp = 0.4941;
         gconf.WP_DEEPCSV_TIGHT  = 0.8001;
@@ -201,20 +191,32 @@ int main(int argc, char *argv[]){
         // gconf.WP_DEEPCSV_MEDIUM = 0.3033;
         // gconf.WP_DEEPCSV_LOOSE  = 0.0521;
 
-        gconf.multiiso_el_minireliso = 0.09;
-        gconf.multiiso_el_ptratio = 0.85;
-        gconf.multiiso_el_ptrel = 9.2;
-        gconf.multiiso_mu_minireliso = 0.12;
-        gconf.multiiso_mu_ptratio = 0.80;
-        gconf.multiiso_mu_ptrel = 7.5;
+        // gconf.multiiso_el_minireliso = 0.09;
+        // gconf.multiiso_el_ptratio = 0.85;
+        // gconf.multiiso_el_ptrel = 9.2;
+        // gconf.multiiso_mu_minireliso = 0.12;
+        // gconf.multiiso_mu_ptratio = 0.80;
+        // gconf.multiiso_mu_ptrel = 7.5;
+
+        // From FT_jecprefire_18Dec6.pdf
+        gconf.multiiso_el_minireliso = 0.07;
+        gconf.multiiso_el_ptratio = 0.78;
+        gconf.multiiso_el_ptrel = 8.0;
+        gconf.multiiso_mu_minireliso = 0.11;
+        gconf.multiiso_mu_ptratio = 0.74;
+        gconf.multiiso_mu_ptrel = 6.8;
+
         good_run_file = "goodRunList/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1_snt.txt";
         jecEra = "Fall17_17Nov2017B_V32";
         jecEraMC = "Fall17_17Nov2017_V32";
+        // jecEra = "Fall17_17Nov2017B_V6";
+        // jecEraMC = "Fall17_17Nov2017_V6";
         gconf.SS_innerlayers = 0;
     }
     if (year == 2018) {
         gconf.year = year;
         gconf.ea_version = 4;
+        gconf.cmssw_ver = 102;
 
         gconf.btag_disc_wp = 0.4941;
         gconf.WP_DEEPCSV_TIGHT  = 0.8001;
@@ -226,16 +228,27 @@ int main(int argc, char *argv[]){
         // gconf.WP_DEEPCSV_MEDIUM = 0.3033;
         // gconf.WP_DEEPCSV_LOOSE  = 0.0521;
 
-        gconf.multiiso_el_minireliso = 0.09;
-        gconf.multiiso_el_ptratio = 0.85;
-        gconf.multiiso_el_ptrel = 9.2;
-        gconf.multiiso_mu_minireliso = 0.12;
-        gconf.multiiso_mu_ptratio = 0.80;
-        gconf.multiiso_mu_ptrel = 7.5;
+        // gconf.multiiso_el_minireliso = 0.09;
+        // gconf.multiiso_el_ptratio = 0.85;
+        // gconf.multiiso_el_ptrel = 9.2;
+        // gconf.multiiso_mu_minireliso = 0.12;
+        // gconf.multiiso_mu_ptratio = 0.80;
+        // gconf.multiiso_mu_ptrel = 7.5;
+
+        // From FT_jecprefire_18Dec6.pdf
+        gconf.multiiso_el_minireliso = 0.07;
+        gconf.multiiso_el_ptratio = 0.78;
+        gconf.multiiso_el_ptrel = 8.0;
+        gconf.multiiso_mu_minireliso = 0.11;
+        gconf.multiiso_mu_ptratio = 0.74;
+        gconf.multiiso_mu_ptrel = 6.8;
+
         // good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
         good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
         jecEra = "Fall17_17Nov2017C_V32";
         jecEraMC = "Fall17_17Nov2017_V32";
+        // jecEra = "Fall17_17Nov2017C_V6";
+        // jecEraMC = "Fall17_17Nov2017_V6";
         gconf.SS_innerlayers = 0;
     }
 
@@ -264,6 +277,11 @@ int main(int argc, char *argv[]){
     babyMaker *mylooper = new babyMaker();
     mylooper->MakeBabyNtuple(outname.Data(), isSignal);
 
+
+    if (verbose) {
+        mylooper->verbose = true;
+        std::cout << ">>> [!] Verbose mode" << std::endl;
+    }
     if (arg_ignorescale1fb) {
         mylooper->ignore_scale1fb = true;
         std::cout << ">>> [!] Ignoring scale1fb text file!" << std::endl;
@@ -277,6 +295,13 @@ int main(int argc, char *argv[]){
         std::cout << ">>> [!] Only processing single event with evt_event==" << arg_eventsel << std::endl;
     }
 
+    if (filenames.Contains("/TTTT") && filenames.Contains("PSweights")) {
+        mylooper->read_psweights = true;
+        std::cout << ">>> [!] This is a TTTT sample and PSweights exist, so reading them" << std::endl;
+    }
+
+
+
     TChain *chain = new TChain("Events");
 
     if (useXrootd) {
@@ -289,6 +314,18 @@ int main(int argc, char *argv[]){
         }
         auto nfiles = chain->Add(fname);
         std::cout << ">>> Adding " << nfiles << " file(s): " << fname << std::endl;  
+    }
+
+    TObjArray *listOfBranches = chain->GetListOfBranches();
+    TIter branchIter(listOfBranches);
+    TBranchElement *currentBranch = 0;
+    while ( (currentBranch = (TBranchElement*)branchIter.Next()) ) { 
+        TString bname = TString(currentBranch->GetName());
+        if (bname.Contains("genMaker_genHEPMCweight")) {
+            mylooper->has_lhe_branches = true;
+            std::cout << ">>> [!] This sample has the new gen_LHE_* branches, so using them" << std::endl;
+            break;
+        }
     }
 
     //Add good run list
@@ -332,9 +369,9 @@ int main(int argc, char *argv[]){
 
     //JECs
 
-    FactorizedJetCorrector *jetCorrAG;
-    FactorizedJetCorrector *jetCorrAG_L1;
-    FactorizedJetCorrector *jetCorrAG_L2L3;
+    FactorizedJetCorrector *jetCorrAG = nullptr;
+    FactorizedJetCorrector *jetCorrAG_L1 = nullptr;
+    FactorizedJetCorrector *jetCorrAG_L2L3 = nullptr;
     if (!isData) {
         if (!isSignal) {
             jetCorrAG_L1 = makeJetCorrector(jetcorr_filenames_25ns_MC_pfL1);
@@ -367,6 +404,7 @@ int main(int argc, char *argv[]){
 
     // Event Counting
     std::cout << ">>> Events in TChain: " << nEvents << std::endl;  
+
 
     // File Loop
     while ( (currentFile = (TFile*)fileIter.Next()) ) { 
@@ -405,13 +443,23 @@ int main(int argc, char *argv[]){
                 else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = "Summer16_23Sep2016EFV4";
                 else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = "Summer16_23Sep2016GV4";
                 else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV4";
+
                 else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V32";
                 else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V32";
                 else if (tas::evt_run() <= 304797 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017DE_V32";
                 else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V32";
-
                 else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
+
+
+                // else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V6";
+                // else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V6";
+                // else if (tas::evt_run() <= 303434 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017D_V6";
+                // else if (tas::evt_run() <= 304797 && tas::evt_run() >= 303824) jecEra = "Fall17_17Nov2017E_V6";
+                // else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V6";
+                // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V6"; // FIXME 2018?
+
                 else std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;
+
                 jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/"+jecEra+"_DATA/"+jecEra+"_DATA_Uncertainty_AK4PFchs.txt"); 
                 jetcorr_filenames_25ns_DATA_pfL1.clear();
                 jetcorr_filenames_25ns_DATA_pfL1.push_back("CORE/Tools/jetcorr/data/run2_25ns/"+jecEra+"_DATA/"+jecEra+"_DATA_L1FastJet_AK4PFchs.txt");
@@ -433,27 +481,10 @@ int main(int argc, char *argv[]){
 
             }
 
-            ////See if mass point exists already
-            //int idx = -1;
-            //if (!(tas::evt_isRealData())) {
-            //    if (!haveMadeErrStruct) {
-            //        csErr_info_t csErr; 
-            //        csErr.cs = new TH1F("cs","cs", 1, 0, 1);
-            //        csErr.cs->Sumw2(); 
-            //        csErr.cs_scale_up = 0;
-            //        csErr.cs_scale_dn = 0;
-            //        for (int i = 0; i < 102; i++) csErr.cs_pdf[i] = 0; 
-            //        csErr.results = new TH1F("csErr","csErr", 16000, 0, 16000); 
-            //        csErr.results->Sumw2(); 
-            //        csErr.nEntries = 0; 
-            //        idx = 0;
-            //        csErr_info_v.push_back(csErr); 
-            //        haveMadeErrStruct = true;
-            //    }
-            //}
-
             //If data, check good run list
             if (goodRunsOnly && isData && tas::evt_isRealData() && !goodrun(tas::evt_run(), tas::evt_lumiBlock())) continue;
+
+            if (mylooper->evt_cut>0 && tas::evt_event() != mylooper->evt_cut) continue;
 
             //Progress bar
             CMS3::progress(nEventsTotal, nEvents);
@@ -461,8 +492,17 @@ int main(int argc, char *argv[]){
             if (nEventsTotal % 5000 == 0) {
                 auto t1 = std::chrono::steady_clock::now();
                 float duration = 0.001*(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - tlast)).count();
+                float total_duration = 0.001*(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0)).count();
                 std::cout << "Begin processing entry " << nEventsTotal << " at " << time(0) << " (" << 0.001*round(5000/duration) << " kHz)." << std::endl;
                 tlast = t1;
+                if (total_duration > 1.5*3600 and nEventsTotal % 50000 == 0) {
+                    condor_chirp("ChirpCMSSWEvents",std::to_string((int)nEventsTotal));
+                    condor_chirp("ChirpCMSSWElapsed",std::to_string((int)total_duration));
+                    condor_chirp("ChirpCMSSWLastUpdate",std::to_string((int)(time(0))));
+                    condor_chirp("ChirpMetisStatus",std::string("\"running\""));
+                    condor_chirp("ChirpMetisExpectedNevents",std::to_string((int)nEventsToDo));
+                    condor_chirp("ChirpCMSSWEventRate",std::to_string(round(5000/duration))); // keep EventRate at end so we know when chirp train is done
+                }
             }
 
             // csErr_t csErr = mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
@@ -492,38 +532,54 @@ int main(int argc, char *argv[]){
             }
 
             if (!tas::evt_isRealData()) {
-                auto genweights = tas::genweights();
-                if (genweights.size()>110) {
-                    float nom = genweights[0];
-                    float scale_up_raw = genweights[4];
-                    float scale_down_raw = genweights[8];
 
-                    float sum_pdf = 0.;
-                    float sum2_pdf = 0.;
-                    int N = 100;
-                    for (int ipdf = 9; ipdf < 9+N; ipdf++) {
-                        sum_pdf += genweights[ipdf];
-                        sum2_pdf += pow(genweights[ipdf],2);
-                    }
-                    // if (genweights.size() > 1009) {
-                    //     for (int ipdf = 9; ipdf < 9+1000; ipdf++) {
-                    //         weight_hist->Fill(0.5+ipdf, genweights[ipdf]);
-                    //     }
-                    // }
-                    float rms = sqrt(max(sum2_pdf/N - pow(sum_pdf/N,2),(double)0.0));
-                    // in 2017, variations are Hessian, so multiply by sqrt(N-1)
-                    if (year == 2017) {
-                        rms *= sqrt(99);
-                    }
-                    float pdf_up_raw = (sum_pdf/N+rms);
-                    float pdf_down_raw = (sum_pdf/N-rms);
+                if (!mylooper->has_lhe_branches) {
 
-                    weight_hist->Fill(0.5, nom);
-                    weight_hist->Fill(1.5, scale_up_raw);
-                    weight_hist->Fill(2.5, scale_down_raw);
-                    weight_hist->Fill(3.5, pdf_up_raw);
-                    weight_hist->Fill(4.5, pdf_down_raw);
+                    auto genweights = tas::genweights();
+                    if (genweights.size()>110) {
+                        float nom = genweights[0];
+                        float scale_up_raw = genweights[4];
+                        float scale_down_raw = genweights[8];
+                        float sum_pdf = 0.;
+                        float sum2_pdf = 0.;
+                        int N = 100;
+                        for (int ipdf = 9; ipdf < 9+N; ipdf++) {
+                            sum_pdf += genweights[ipdf];
+                            sum2_pdf += pow(genweights[ipdf],2);
+                        }
+                        float rms = sqrt(max(sum2_pdf/N - pow(sum_pdf/N,2),(double)0.0));
+                        // in 2017, variations are Hessian, so multiply by sqrt(N-1)
+                        if (year == 2017) {
+                            rms *= sqrt(99);
+                        }
+                        float pdf_up_raw = (sum_pdf/N+rms);
+                        float pdf_down_raw = (sum_pdf/N-rms);
+                        if (fabs(pdf_up_raw/nom) > 8.) pdf_up_raw = (pdf_up_raw/nom > 0 ? 8.*nom : -8.*nom);
+                        if (fabs(pdf_down_raw/nom) > 8.) pdf_down_raw = (pdf_down_raw/nom > 0 ? 8.*nom : -8.*nom);
+                        weight_hist->Fill(0.5, nom);
+                        weight_hist->Fill(1.5, scale_up_raw);
+                        weight_hist->Fill(2.5, scale_down_raw);
+                        weight_hist->Fill(3.5, pdf_up_raw);
+                        weight_hist->Fill(4.5, pdf_down_raw);
+                    } 
+
+                } else {
+
+                        float nom = tas::genHEPMCweight();
+                        float scale_up_raw = tas::gen_LHEweight_QCDscale_muR2_muF2()*nom;
+                        float scale_down_raw = tas::gen_LHEweight_QCDscale_muR0p5_muF0p5()*nom;
+                        float pdf_up_raw = tas::gen_LHEweight_PDFVariation_Up()*nom;
+                        float pdf_down_raw = tas::gen_LHEweight_PDFVariation_Dn()*nom;
+                        if (fabs(pdf_up_raw/nom) > 8.) pdf_up_raw = (pdf_up_raw/nom > 0 ? 8.*nom : -8.*nom);
+                        if (fabs(pdf_down_raw/nom) > 8.) pdf_down_raw = (pdf_down_raw/nom > 0 ? 8.*nom : -8.*nom);
+                        weight_hist->Fill(0.5, nom);
+                        weight_hist->Fill(1.5, scale_up_raw);
+                        weight_hist->Fill(2.5, scale_down_raw);
+                        weight_hist->Fill(3.5, pdf_up_raw);
+                        weight_hist->Fill(4.5, pdf_down_raw);
+
                 }
+
             }
             
         } // event loop 
@@ -538,10 +594,19 @@ int main(int argc, char *argv[]){
     } // file loop
 
     auto t1 = std::chrono::steady_clock::now();
-    float duration = 0.001*(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0)).count();
-    std::cout << "Processed " << nEventsTotal << " events in " << duration << " seconds @ " << 0.001*round(nEventsTotal/duration) << " kHz" << std::endl;
-
+    float total_duration = 0.001*(std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0)).count();
+    std::cout << "Processed " << nEventsTotal << " events in " << total_duration << " seconds @ " << 0.001*round(nEventsTotal/total_duration) << " kHz" << std::endl;
     std::cout << "Stored " << mylooper->BabyTree->GetEntries() << " events in the output tree." << std::endl;
+
+    if (total_duration > 1.5*3600) {
+        condor_chirp("ChirpCMSSWEvents",std::to_string((int)nEventsTotal));
+        condor_chirp("ChirpCMSSWElapsed",std::to_string((int)total_duration));
+        condor_chirp("ChirpCMSSWLastUpdate",std::to_string((int)(time(0))));
+        condor_chirp("ChirpMetisStatus",std::string("\"done\""));
+        condor_chirp("ChirpMetisExpectedNevents",std::to_string((int)nEventsToDo));
+        condor_chirp("ChirpCMSSWEventRate",std::to_string(round(nEventsTotal/total_duration))); // keep EventRate at end so we know when chirp train is done
+    }
+
 
     // Cleanup
     mylooper->BabyFile->cd();
@@ -550,15 +615,7 @@ int main(int argc, char *argv[]){
     weight_hist->Write();
     mylooper->BabyFile->Close();
 
-    ////Open the baby file again
-    //TFile* BabyFile = new TFile(outname, "UPDATE");
-    //BabyFile->cd();
-    //for (unsigned int j = 0; j < csErr_info_v.size(); j++){
-    //    csErr_info_v[j].results->Write(); 
-    //}
-    // //count_hist->Write();
-
-    if (nEvents != nEventsTotal) {
+    if ((nEvents != nEventsTotal) || nEvents==0) {
         std::cout << "Number of input events in tree is " << nEvents << " but we processed " << nEventsTotal << ", ";
         std::cout << "so something went wrong and the return code will not be 0." << std::endl;
         return 1;
@@ -567,4 +624,12 @@ int main(int argc, char *argv[]){
     return 0;
 
 }
+
+int condor_chirp(std::string key, std::string value) {
+    std::string cmd = "condor_chirp set_attr_delayed " + key + " " + value;
+    std::cout << "Running: " << cmd << std::endl;
+    system(cmd.c_str());
+    return 0;
+}
+
 /* vim: set ft=cpp: */

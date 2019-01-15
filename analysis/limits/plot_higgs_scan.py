@@ -28,6 +28,13 @@ d_xsec = {
          510: 0.001*9.75,
          530: 0.001*7.78,
          550: 0.001*7.49,
+        570: 0.007207,
+        590: 0.006467,
+        610: 0.005803,
+        630: 0.005222,
+        650: 0.004728,
+        670: 0.004325,
+        690: 0.004020,
             },
         "thw": {
             350: 0.001*8.37,
@@ -41,6 +48,13 @@ d_xsec = {
             510: 0.001*4.19,
             530: 0.001*3.86,
             550: 0.001*3.41,
+        570: 0.003378,
+        590: 0.003095,
+        610: 0.002830,
+        630: 0.002585,
+        650: 0.002361,
+        670: 0.002157,
+        690: 0.001976,
             },
         "thq": {
             350: 0.001*15.8,
@@ -54,6 +68,13 @@ d_xsec = {
             510: 0.001*5.23,
             530: 0.001*4.59,
             550: 0.001*4.11,
+        570: 0.003786,
+        590: 0.003403,
+        610: 0.003071,
+        630: 0.002778,
+        650: 0.002514,
+        670: 0.002267,
+        690: 0.002024,
             },
         "tta": {
             350: 0.001*33.7,
@@ -67,6 +88,13 @@ d_xsec = {
             510: 0.001*12.6,
             530: 0.001*11.5,
             550: 0.001*10.0,
+        570: 0.009233,
+        590: 0.008270,
+        610: 0.007430,
+        630: 0.006705,
+        650: 0.006086,
+        670: 0.005564,
+        690: 0.005131,
             },
         "taw": {
                 350: 0.001*7.97,
@@ -80,6 +108,13 @@ d_xsec = {
                 510: 0.001*3.87,
                 530: 0.001*3.82,
                 550: 0.001*3.26,
+        570: 0.003167,
+        590: 0.002946,
+        610: 0.002739,
+        630: 0.002542,
+        650: 0.002348,
+        670: 0.002155,
+        690: 0.001958,
             },
         "taq": {
                 350: 0.001*9.28,
@@ -93,6 +128,13 @@ d_xsec = {
                 510: 0.001*3.67,
                 530: 0.001*3.27,
                 550: 0.001*2.94,
+        570: 0.002753,
+        590: 0.002508,
+        610: 0.002289,
+        630: 0.002090,
+        650: 0.001903,
+        670: 0.001723,
+        690: 0.001543,
             }
         }
 d_xsec["xsech"] = { mass:sum([d_xsec[proc].get(mass,0) for proc in ["tth","thq","thw"]]) for mass in set(sum([d_xsec[proc].keys() for proc in ["tth","thq","thw"]],[])) }
@@ -409,75 +451,32 @@ if __name__ == "__main__":
 
     tth = {
             "sig": "tth_scan",
-            "redolimits": False,
-            "mydir": "v9.06_Mar6_35p9_reminiaod_higgs",
-            "legendheader": "pp#rightarrow t#bar{t}H, BR(H #rightarrow t#bar{t})=1: exclusion limit",
-            "nolegendheader": False,
-            "mylumi": "17.3",
+            "redolimits": True,
+            "legendheader": "pp#rightarrow (t#bar{t}H/A,tWH/A,tqH/A), BR(H/A #rightarrow t#bar{t})=1: exclusion",
+            "nolegendheader": True,
+            "mylumi": "136.3",
             "verbose": False,
+            "hidepseudo": True,
             "scaletolumi": None,
-            "showobserved": True,
+            "showobserved": False,
             "postfix": "",
-            # "xmin": 250,
-            # "xmax": 1050,
-            # "ymax": 200,
-            "xmin": 300,
-            "xmax": 550,
-            "ymax": 200,
+            "xmin": 349.9,
+            "xmax": 650,
+            "ymax": 120,
             "overridelumi": None,
-            "stupid_label": "",
+            "stupid_label": "   ",
             "yaxistitle": "#sigma^{UL} limit at 95% CL (fb)",
             }
 
-
-    ### SCALAR
-
-    tth["mylumi"] = "136.3"
-    tth["redolimits"] = False
-
-
-
-
-    ### PSEUDOSCALAR
-
-
-    # thedir = "v0.10_Jul6_WSF"
-    # thedir = "v0.10_Jul10_higgstest"
-    # thedir = "v0.10_Jul20_tmp"
-    thedir = "v0.10_Jul20_fastsimhiggs"
-
-
     higgs = tth.copy()
     higgs["sig"] = "higgs_scan"
-    higgs["stupid_label"] = "   "
-    higgs["mydir"] = thedir
-    higgs["xmin"] = 349.9
-    higgs["xmax"] = 550
-    higgs["ymax"] = 160
-    higgs["legendheader"] = "pp#rightarrow (t#bar{t}H/A,tWH/A,tqH/A), BR(H/A #rightarrow t#bar{t})=1: exclusion"
-    higgs["nolegendheader"] = True
-    # higgs["yaxistitle"] = "#sigma(pp#rightarrow (t#bar{t},tW,tq)+H/A) #times BR(H/A#rightarrow t#bar{t}) [fb]"
     higgs["yaxistitle"] = "#sigma(pp#rightarrow (t#bar{t},tW,tq)+H) #times BR(H#rightarrow t#bar{t}) (fb)"
     higgs["xaxistitle"] = "m_{H} (GeV)"
-    higgs["hidepseudo"] = True
-    higgs["redolimits"] = True
-    higgs["showobserved"] = False
 
     higgs_ps = tth.copy()
     higgs_ps["sig"] = "higgs_ps_scan"
-    higgs_ps["stupid_label"] = "   "
-    higgs_ps["mydir"] = thedir
-    higgs_ps["xmin"] = 349.9
-    higgs_ps["xmax"] = 550
-    higgs_ps["ymax"] = 160
-    higgs_ps["legendheader"] = "pp#rightarrow (t#bar{t}H/A,tWH/A,tqH/A), BR(H/A #rightarrow t#bar{t})=1: exclusion"
-    higgs_ps["nolegendheader"] = True
-    # higgs_ps["yaxistitle"] = "#sigma(pp#rightarrow (t#bar{t},tW,tq)+H/A) #times BR(H/A#rightarrow t#bar{t}) [fb]"
     higgs_ps["yaxistitle"] = "#sigma(pp#rightarrow (t#bar{t},tW,tq)+A) #times BR(A#rightarrow t#bar{t}) (fb)"
     higgs_ps["xaxistitle"] = "m_{A} (GeV)"
-    higgs_ps["hidepseudo"] = True
-    higgs_ps["redolimits"] = True
-    higgs_ps["showobserved"] = False
 
     # which = "a"
     # ds = df[df["which"]==which]

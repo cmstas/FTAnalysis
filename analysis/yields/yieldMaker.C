@@ -18,6 +18,7 @@
 #include "../misc/common_utils.h"
 #include "../misc/signal_regions.h"
 #include "../misc/bdt.h"
+#include "../../babymaking/batch/nPoints.cc"
 
 #include <signal.h>
 #include <stdlib.h>
@@ -92,6 +93,8 @@ struct plots_t  {
     SR_t p_alphas_alt_up_SR;
     SR_t p_bb_alt_up_SR    ;
     SR_t p_bb_alt_dn_SR    ;
+    SR_t p_prefire_alt_up_SR    ;
+    SR_t p_prefire_alt_dn_SR    ;
     SR_t p_btagSF_alt_dn_SR;
     SR_t p_btagSF_alt_up_SR;
     SR_t p_fake_alt_up_SR  ;
@@ -334,6 +337,8 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
     plots.p_alphas_alt_up_SR.Write();
     plots.p_bb_alt_dn_SR.Write();
     plots.p_bb_alt_up_SR.Write();
+    plots.p_prefire_alt_dn_SR.Write();
+    plots.p_prefire_alt_up_SR.Write();
     plots.p_btagSF_alt_dn_SR.Write();
     plots.p_btagSF_alt_up_SR.Write();
     plots.p_fake_alt_up_SR.Write();
@@ -541,7 +546,18 @@ plots_t run(TChain *chain, int year, TString options){
 
     bool isHiggsScan = false;
     bool isHiggsPseudoscalar = false;
+    int higgs_mass = -1;
     vector<float> mysparms;
+    if (chainTitle.Contains("higgsh")) {
+        isHiggsScan = true;
+        higgs_mass = chainTitle.Copy().ReplaceAll("higgsh","").Atoi();
+        mysparms.push_back((float)higgs_mass);
+    } else if (chainTitle.Contains("higgsa")) {
+        isHiggsScan = true;
+        isHiggsPseudoscalar = true;
+        higgs_mass = chainTitle.Copy().ReplaceAll("higgsa","").Atoi();
+        mysparms.push_back((float)higgs_mass);
+    }
     if (isFastsim) {
         if ( chainTitle.Contains("higgs_scan") ||  chainTitle.Contains("higgs_ps_scan") 
                 || chainTitle.Contains("tth_scan") || chainTitle.Contains("thq_scan") || chainTitle.Contains("thw_scan")
@@ -749,6 +765,13 @@ plots_t run(TChain *chain, int year, TString options){
         p_result.p_bb_alt_up_SR.SRDISC     = new TH1F(Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
         p_result.p_bb_alt_dn_SR.SRDISC     = new TH1F(Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_BB_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
     }
+    //For prefiring SF variations for 2016, 2017
+    if (isData==0) {
+        p_result.p_prefire_alt_up_SR.SRCR     = new TH1F(Form("SRCR_PREFIRE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PREFIRE_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_prefire_alt_dn_SR.SRCR     = new TH1F(Form("SRCR_PREFIRE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRCR_PREFIRE_DN_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
+        p_result.p_prefire_alt_up_SR.SRDISC     = new TH1F(Form("SRDISC_PREFIRE_UP_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PREFIRE_UP_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+        p_result.p_prefire_alt_dn_SR.SRDISC     = new TH1F(Form("SRDISC_PREFIRE_DN_TOTAL_%s"   , chainTitleCh) , Form("SRDISC_PREFIRE_DN_TOTAL_%s"   , chainTitleCh) , nsrdisc,  0.5, nsrdisc+0.5 );
+    }
     //For PU variations
     if (doFakes == 1 || isData==0) {
         p_result.p_isr_alt_up_SR.SRCR     = new TH1F(Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , Form("SRCR_ISR_UP_TOTAL_%s"   , chainTitleCh) , nsr,  0.5, nsr+0.5 );
@@ -855,6 +878,25 @@ plots_t run(TChain *chain, int year, TString options){
         TTree *tree = (TTree*)file->Get("t");
         samesign.Init(tree);
 
+        int higgs_type = -1;
+        float higgs_weight = 0;
+        if (isHiggsScan) {
+            if (filename.Contains("ttH")) higgs_type = 1;
+            else if (filename.Contains("tHW")) higgs_type = 2;
+            else if (filename.Contains("tHq")) higgs_type = 3;
+            if (isHiggsPseudoscalar) higgs_type += 3;
+            float xsec = xsec_higgs(higgs_type, higgs_mass);
+            if (h_counts) {
+                higgs_weight = 1000. * xsec / h_counts->GetEntries();
+            } else {
+                std::cout << "No count histogram, so can't normalize this higgs sample!" << std::endl;
+                continue;
+            }
+            if (!quiet) {
+                std::cout << "This is a higgs scan of type,mass = " << higgs_type << "," << higgs_mass << " with xsec,scale1fb = " << xsec << "," << higgs_weight << std::endl;
+            }
+        }
+
         // Loop over Events in current file
         for(unsigned int event = 0; event < tree->GetEntriesFast(); event++){
 
@@ -886,15 +928,20 @@ plots_t run(TChain *chain, int year, TString options){
             if (!ss::passes_met_filters()) continue;
 
 
-            if (isHiggsScan) {
-                // make sure the higgs mass point we are considering is the same as chain title
-                if (fabs(mysparms[0]-ss::higgs_mass()) > 0.1) continue;
-            }
+            // if (isHiggsScan) {
+            //     // make sure the higgs mass point we are considering is the same as chain title
+            //     if (fabs(mysparms[0]-ss::higgs_mass()) > 0.1) continue;
+            // }
 
             float weight =  ss::is_real_data() ? 1.0 : ss::scale1fb()*lumiAG;
 
+
             if (isFastsim) {
                 weight = getSMSscale1fb()*lumiAG;
+            }
+
+            if (isHiggsScan) {
+                weight = higgs_weight*lumiAG;
             }
 
             if (istttt) {
@@ -942,7 +989,7 @@ plots_t run(TChain *chain, int year, TString options){
             //     weight *= 1.26;
             // }
 
-            if (isHiggsPseudoscalar) weight *= ss::xsec_ps()/ss::xsec();
+            // if (isHiggsPseudoscalar) weight *= ss::xsec_ps()/ss::xsec();
             if (ss::is_real_data()==0) {
                 // weight*=eventScaleFactor(lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
                 // missing trigger SF
@@ -961,6 +1008,31 @@ plots_t run(TChain *chain, int year, TString options){
                 if (lep1good) weight *= fastsim_leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ss::ht());
                 if (lep2good) weight *= fastsim_leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ss::ht());
                 if (lep3good && lep3ccpt>20) weight *= fastsim_leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
+            }
+
+            // // FIXME
+            // if (doFakes) {
+            //     weight *= 0.5;
+            // }
+
+            // Prefire stuff
+            float weight_prefire_up_alt = 1.;
+            float weight_prefire_dn_alt = 1.;
+
+            if (ss::is_real_data()==0) {
+                if (year == 2016) {
+                    // weight_prefire_up_alt = weight*ss::prefire2016_sfup();
+                    // weight_prefire_dn_alt = weight*ss::prefire2016_sfdown();
+                    weight_prefire_up_alt = 1.; // FIXME not in 2016 ntuples, but in 2017
+                    weight_prefire_dn_alt = 1.; // FIXME
+                    weight *= ss::prefire2016_sf(); // modify weight after setting up/down
+                } else if (year == 2017) {
+                    // weight_prefire_up_alt = weight*ss::prefire2017_sfup();
+                    // weight_prefire_dn_alt = weight*ss::prefire2017_sfdown();
+                    weight_prefire_up_alt = 1.; // FIXME
+                    weight_prefire_dn_alt = 1.; // FIXME
+                    weight *= ss::prefire2017_sf(); // modify weight after setting up/down
+                }
             }
 
             float weight_isr_up_alt = weight;
@@ -986,6 +1058,7 @@ plots_t run(TChain *chain, int year, TString options){
                     weight_bb_up_alt = (0.35+1)*weight;
                 }
             }
+
 
             float weight_alt_FR = weight;
             float weight_btag_up_alt = weight;
@@ -1370,6 +1443,8 @@ plots_t run(TChain *chain, int year, TString options){
                 if (isData  == 0 )            p_result.p_pu_alt_dn_SR.CatFill(1, SR, weight_pu_dn_alt);
                 if (isData  == 0 )            p_result.p_isr_alt_up_SR.CatFill(1, SR, weight_isr_up_alt);
                 if (isData  == 0 )            p_result.p_bb_alt_up_SR.CatFill(1, SR, weight_bb_up_alt);
+                if (isData  == 0 )            p_result.p_prefire_alt_up_SR.CatFill(1, SR, weight_prefire_up_alt);
+                if (isData  == 0 )            p_result.p_prefire_alt_dn_SR.CatFill(1, SR, weight_prefire_dn_alt);
                 if (isData  == 0 )            p_result.p_lep_alt_up_SR.CatFill(1, SR, weight_lep_up_alt);
                 // if (istttt || isttW || isttZ || isttH) {
                     p_result.p_scale_alt_up_SR.CatFill(1, SR,    (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP()/norm_scale_up : 1.0)*weight);
@@ -1394,6 +1469,8 @@ plots_t run(TChain *chain, int year, TString options){
                 if (isData  == 0 )            p_result.p_pu_alt_dn_SR.CatFill(2, SRdisc, weight_pu_dn_alt);
                 if (isData  == 0 )            p_result.p_isr_alt_up_SR.CatFill(2, SRdisc, weight_isr_up_alt);
                 if (isData  == 0 )            p_result.p_bb_alt_up_SR.CatFill(2, SRdisc, weight_bb_up_alt);
+                if (isData  == 0 )            p_result.p_prefire_alt_up_SR.CatFill(2, SRdisc, weight_prefire_up_alt);
+                if (isData  == 0 )            p_result.p_prefire_alt_dn_SR.CatFill(2, SRdisc, weight_prefire_dn_alt);
                 if (isData  == 0 )            p_result.p_lep_alt_up_SR.CatFill(2, SRdisc, weight_lep_up_alt);
                 // if (istttt || isttW || isttZ || isttH) {
                     p_result.p_scale_alt_up_SR.CatFill(2, SRdisc,    (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP()/norm_scale_up : 1.0)*weight);

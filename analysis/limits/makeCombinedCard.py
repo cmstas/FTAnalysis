@@ -11,6 +11,7 @@ def do_combine(
         regions="srcr",
         years = [2016,2017,2018],
         procs = ["data", "fakes", "fakes_mc", "flips", "rares", "tth", "tttt", "ttvv", "ttw", "ttz", "xg"],
+        extra_procs = [],
         cardname = "combined_card.txt",
         correlate_all = False,
         correlate_none = False,
@@ -29,8 +30,13 @@ def do_combine(
             "TTVV",
             "fakes",
             ]
+    # print "FIXME FIXME FIXME inside makeCombinedCard.py. remove eventually"
+    # # FIXME FIXME FIXME
+    # to_correlate += ["jes","jer","btag"]
     if correlate_none:
         to_correlate = []
+
+    procs += extra_procs
 
     basedirs = [basedir for _ in years]
 
@@ -70,7 +76,7 @@ def do_combine(
 
         card_basename = "card_tttt_{}_{}.txt".format(regions,year)
         with open("{}/{}".format(basedir,card_basename),"r") as fhin:
-            with open("{}/{}_tmp".format(basedir,card_basename),"w") as fhout:
+            with open("{}/tmp_{}".format(basedir,card_basename),"w") as fhout:
                 for line in fhin:
                     if not line.strip(): continue
 
@@ -108,8 +114,7 @@ def do_combine(
 
                     fhout.write(line)
 
-            os.system("mv {0}/{1}_tmp {0}/{1}".format(basedir,card_basename))
-            to_combine.append("{}={}".format("y{}".format(year),card_basename))
+            to_combine.append("{}=tmp_{}".format("y{}".format(year),card_basename))
 
     cmd = "(cd {basedir} ; combineCards.py {tocombine} > {cardname}) && text2workspace.py {basedir}/{cardname}".format(tocombine=" ".join(to_combine), basedir=basedirs[0], cardname=cardname)
     print "[!] Running: {}".format(cmd)

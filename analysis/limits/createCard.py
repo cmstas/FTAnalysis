@@ -355,7 +355,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
                 writeUncorrelatedFakesForProcess(thedir,card,kine,process,processes,lnN=1.6)
 
     card.write("tthscale rateParam * tth 1.0 [1.0,1.0]\n")
-    card.write("lumiscale rateParam * * 1.0 [1.0,1.0]\n")
+    # card.write("lumiscale rateParam * * 1.0 [1.0,1.0]\n")
 
     return
 
@@ -402,8 +402,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTVV = Process(num,"ttvv","ttvv_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     num += 1
     if inject_tttt:
-        os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
-        TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        # os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
+        # TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        TTTT = Process(9,"tttt","tttt_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
         num += 1
     #overwrite nuisances
     lumiunc = "1.025"
@@ -533,6 +534,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         TTTT.scale = "1"
         TTTT.alphas = "1"
         TTTT.pdf = "1"
+        signal.isrvar = "-"
+        signal.fsrvar = "-"
+        signal.alphas = "-"
     if not domcfakes:
         if not do_uncorrfakes:
             fakes.fakes = "1.30"

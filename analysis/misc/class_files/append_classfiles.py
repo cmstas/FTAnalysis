@@ -5,10 +5,21 @@ branch_to_copy = "met3p0"
 branch_to_copy_type = "float"
 # and use this pattern to squeeze in the following branches (and associated types)
 branches_to_add = [
+        
+        ("weight","float")
 
-  # ("lep4_coneCorrPt", "float"),
-  ("passfilter", "bool"),
+        # ("btags_cdisc", "vector<float>"), # note, need to pick another branch_to_copy, etc.
+        # ("trijet_discs", "vector<float>"),
 
+        # ("trijet_njetsnonb", "float"),
+        # ("trijet_njetsb", "float"),
+        # ("trijet_meandisc", "float"),
+        # ("trijet_leadingdisc", "float"),
+        # ("trijet_subleadingdisc", "float"),
+        # ("trijet_numhigh", "int"),
+        # ("trijet_frachigh", "float"),
+
+  # ("passfilter", "bool"),
   # ("bdt_jec_up_nbtags", "float"),
   # ("bdt_jec_dn_nbtags", "float"),
   # ("bdt_jer_up_nbtags", "float"),
@@ -108,3 +119,5 @@ const {0} &SSAG::{1}() {{
             else:
                 fhout.write(line)
 
+print "Now execute:"
+print 'rename "_new" "" {}_new.*'.format(cf_basename)

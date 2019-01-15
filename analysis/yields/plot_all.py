@@ -17,12 +17,12 @@ labels = {
 
 
         "TOTAL"        : [("SRCR","SR","SRDISC"), "TOTAL"],
-        "ht"              : [("ttzcr","ttwcr","sr","br","brpostfit"), "ht"],
-        "met"             : [("ttzcr","ttwcr","sr","br","brpostfit"), "met"],
+        "ht"              : [("ttzcr","ttwcr","sr","br","brpostfit"), "$H_{T}$"],
+        "met"             : [("ttzcr","ttwcr","sr","br","brpostfit"), MET_LATEX],
         "mtmin"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "mtmin"],
         "mll"             : [("ttzcr","ttwcr","sr","br","brpostfit"), "mll"],
-        "njets"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "njets"],
-        "nbtags"          : [("ttzcr","ttwcr","sr","br","brpostfit"), "nbtags"],
+        "njets"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "Njets"],
+        "nbtags"          : [("ttzcr","ttwcr","sr","br","brpostfit"), "Nbtags"],
         "type"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "type (mm, em, ee)"],
         "type3"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "type3 (mmm, mme, mee, eee)"],
         "charge"          : [("ttzcr","ttwcr","sr","br","brpostfit"), "charge"],
@@ -178,8 +178,8 @@ def worker(info):
                 #     ax.set_yscale("log", nonposy='clip'),
                 xticks = ["CRZ"]+range(1,25)
         if (region.lower() in ["srcr"]) and (var.lower() in ["total"]):
-            data._counts[2:] *= 0.
-            data._errors[2:] *= 0.
+            # data._counts[2:] *= 0.
+            # data._errors[2:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
             def ax_main_callback(ax):
                 ax.set_ylim([0.1,ax.get_ylim()[1]*1.5])

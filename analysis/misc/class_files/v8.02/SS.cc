@@ -1263,6 +1263,114 @@ void SSAG::Init(TTree *tree) {
     passfilter_branch = tree->GetBranch("passfilter");
     if (passfilter_branch) { passfilter_branch->SetAddress(&passfilter_); }
   }
+
+  prefire2017_sfdown_branch = 0;
+  if (tree->GetBranch("prefire2017_sfdown") != 0) {
+    prefire2017_sfdown_branch = tree->GetBranch("prefire2017_sfdown");
+    if (prefire2017_sfdown_branch) { prefire2017_sfdown_branch->SetAddress(&prefire2017_sfdown_); }
+  }
+
+  prefire2017_sfup_branch = 0;
+  if (tree->GetBranch("prefire2017_sfup") != 0) {
+    prefire2017_sfup_branch = tree->GetBranch("prefire2017_sfup");
+    if (prefire2017_sfup_branch) { prefire2017_sfup_branch->SetAddress(&prefire2017_sfup_); }
+  }
+
+  prefire2017_sf_branch = 0;
+  if (tree->GetBranch("prefire2017_sf") != 0) {
+    prefire2017_sf_branch = tree->GetBranch("prefire2017_sf");
+    if (prefire2017_sf_branch) { prefire2017_sf_branch->SetAddress(&prefire2017_sf_); }
+  }
+
+  prefire2016_sfdown_branch = 0;
+  if (tree->GetBranch("prefire2016_sfdown") != 0) {
+    prefire2016_sfdown_branch = tree->GetBranch("prefire2016_sfdown");
+    if (prefire2016_sfdown_branch) { prefire2016_sfdown_branch->SetAddress(&prefire2016_sfdown_); }
+  }
+
+  prefire2016_sfup_branch = 0;
+  if (tree->GetBranch("prefire2016_sfup") != 0) {
+    prefire2016_sfup_branch = tree->GetBranch("prefire2016_sfup");
+    if (prefire2016_sfup_branch) { prefire2016_sfup_branch->SetAddress(&prefire2016_sfup_); }
+  }
+
+  prefire2016_sf_branch = 0;
+  if (tree->GetBranch("prefire2016_sf") != 0) {
+    prefire2016_sf_branch = tree->GetBranch("prefire2016_sf");
+    if (prefire2016_sf_branch) { prefire2016_sf_branch->SetAddress(&prefire2016_sf_); }
+  }
+
+  btags_cdisc_branch = 0;
+  if (tree->GetBranch("btags_cdisc") != 0) {
+    btags_cdisc_branch = tree->GetBranch("btags_cdisc");
+    if (btags_cdisc_branch) { btags_cdisc_branch->SetAddress(&btags_cdisc_); }
+  }
+
+  bdt_nforwardjets20_branch = 0;
+  if (tree->GetBranch("bdt_nforwardjets20") != 0) {
+    bdt_nforwardjets20_branch = tree->GetBranch("bdt_nforwardjets20");
+    if (bdt_nforwardjets20_branch) { bdt_nforwardjets20_branch->SetAddress(&bdt_nforwardjets20_); }
+  }
+
+  bdt_avgcdisc_branch = 0;
+  if (tree->GetBranch("bdt_avgcdisc") != 0) {
+    bdt_avgcdisc_branch = tree->GetBranch("bdt_avgcdisc");
+    if (bdt_avgcdisc_branch) { bdt_avgcdisc_branch->SetAddress(&bdt_avgcdisc_); }
+  }
+
+  ntrijets_branch = 0;
+  if (tree->GetBranch("ntrijets") != 0) {
+    ntrijets_branch = tree->GetBranch("ntrijets");
+    if (ntrijets_branch) { ntrijets_branch->SetAddress(&ntrijets_); }
+  }
+
+  trijet_njetsnonb_branch = 0;
+  if (tree->GetBranch("trijet_njetsnonb") != 0) {
+    trijet_njetsnonb_branch = tree->GetBranch("trijet_njetsnonb");
+    if (trijet_njetsnonb_branch) { trijet_njetsnonb_branch->SetAddress(&trijet_njetsnonb_); }
+  }
+
+  trijet_njetsb_branch = 0;
+  if (tree->GetBranch("trijet_njetsb") != 0) {
+    trijet_njetsb_branch = tree->GetBranch("trijet_njetsb");
+    if (trijet_njetsb_branch) { trijet_njetsb_branch->SetAddress(&trijet_njetsb_); }
+  }
+
+  trijet_meandisc_branch = 0;
+  if (tree->GetBranch("trijet_meandisc") != 0) {
+    trijet_meandisc_branch = tree->GetBranch("trijet_meandisc");
+    if (trijet_meandisc_branch) { trijet_meandisc_branch->SetAddress(&trijet_meandisc_); }
+  }
+
+  trijet_leadingdisc_branch = 0;
+  if (tree->GetBranch("trijet_leadingdisc") != 0) {
+    trijet_leadingdisc_branch = tree->GetBranch("trijet_leadingdisc");
+    if (trijet_leadingdisc_branch) { trijet_leadingdisc_branch->SetAddress(&trijet_leadingdisc_); }
+  }
+
+  trijet_subleadingdisc_branch = 0;
+  if (tree->GetBranch("trijet_subleadingdisc") != 0) {
+    trijet_subleadingdisc_branch = tree->GetBranch("trijet_subleadingdisc");
+    if (trijet_subleadingdisc_branch) { trijet_subleadingdisc_branch->SetAddress(&trijet_subleadingdisc_); }
+  }
+
+  trijet_numhigh_branch = 0;
+  if (tree->GetBranch("trijet_numhigh") != 0) {
+    trijet_numhigh_branch = tree->GetBranch("trijet_numhigh");
+    if (trijet_numhigh_branch) { trijet_numhigh_branch->SetAddress(&trijet_numhigh_); }
+  }
+
+  trijet_frachigh_branch = 0;
+  if (tree->GetBranch("trijet_frachigh") != 0) {
+    trijet_frachigh_branch = tree->GetBranch("trijet_frachigh");
+    if (trijet_frachigh_branch) { trijet_frachigh_branch->SetAddress(&trijet_frachigh_); }
+  }
+
+  weight_branch = 0;
+  if (tree->GetBranch("weight") != 0) {
+    weight_branch = tree->GetBranch("weight");
+    if (weight_branch) { weight_branch->SetAddress(&weight_); }
+  }
 	met3p0_branch = 0;
 	if (tree->GetBranch("met3p0") != 0) {
 		met3p0_branch = tree->GetBranch("met3p0");
@@ -2171,6 +2279,24 @@ void SSAG::GetEntry(unsigned int idx)
 		lep2_trigMatch_noIsoReq_isLoaded = false;
 		lep2_trigMatch_isoReq_isLoaded = false;
 		met3p0_isLoaded = false;
+  weight_isLoaded = false;
+  btags_cdisc_isLoaded = false;
+  bdt_nforwardjets20_isLoaded = false;
+  bdt_avgcdisc_isLoaded = false;
+  ntrijets_isLoaded = false;
+  trijet_njetsnonb_isLoaded = false;
+  trijet_njetsb_isLoaded = false;
+  trijet_meandisc_isLoaded = false;
+  trijet_leadingdisc_isLoaded = false;
+  trijet_subleadingdisc_isLoaded = false;
+  trijet_numhigh_isLoaded = false;
+  trijet_frachigh_isLoaded = false;
+  prefire2017_sfdown_isLoaded = false;
+  prefire2017_sfup_isLoaded = false;
+  prefire2017_sf_isLoaded = false;
+  prefire2016_sfdown_isLoaded = false;
+  prefire2016_sfup_isLoaded = false;
+  prefire2016_sf_isLoaded = false;
   passfilter_isLoaded = false;
   lep4_coneCorrPt_isLoaded = false;
   bdt_jec_up_nbtags_isLoaded = false;
@@ -2561,6 +2687,24 @@ void SSAG::LoadAllBranches()
 	if (lep2_trigMatch_noIsoReq_branch != 0) lep2_trigMatch_noIsoReq();
 	if (lep2_trigMatch_isoReq_branch != 0) lep2_trigMatch_isoReq();
 	if (met3p0_branch != 0) met3p0();
+  if (weight_branch != 0) weight();
+  if (btags_cdisc_branch != 0) btags_cdisc();
+  if (bdt_nforwardjets20_branch != 0) bdt_nforwardjets20();
+  if (bdt_avgcdisc_branch != 0) bdt_avgcdisc();
+  if (ntrijets_branch != 0) ntrijets();
+  if (trijet_njetsnonb_branch != 0) trijet_njetsnonb();
+  if (trijet_njetsb_branch != 0) trijet_njetsb();
+  if (trijet_meandisc_branch != 0) trijet_meandisc();
+  if (trijet_leadingdisc_branch != 0) trijet_leadingdisc();
+  if (trijet_subleadingdisc_branch != 0) trijet_subleadingdisc();
+  if (trijet_numhigh_branch != 0) trijet_numhigh();
+  if (trijet_frachigh_branch != 0) trijet_frachigh();
+  if (prefire2017_sfdown_branch != 0) prefire2017_sfdown();
+  if (prefire2017_sfup_branch != 0) prefire2017_sfup();
+  if (prefire2017_sf_branch != 0) prefire2017_sf();
+  if (prefire2016_sfdown_branch != 0) prefire2016_sfdown();
+  if (prefire2016_sfup_branch != 0) prefire2016_sfup();
+  if (prefire2016_sf_branch != 0) prefire2016_sf();
   if (passfilter_branch != 0) passfilter();
   if (lep4_coneCorrPt_branch != 0) lep4_coneCorrPt();
   if (bdt_jec_up_nbtags_branch != 0) bdt_jec_up_nbtags();
@@ -5829,6 +5973,241 @@ const bool &SSAG::passfilter() {
   }
   return passfilter_;
 }
+
+const float &SSAG::prefire2017_sfdown() {
+  if (not prefire2017_sfdown_isLoaded) {
+    if (prefire2017_sfdown_branch != 0) {
+      prefire2017_sfdown_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2017_sfdown_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2017_sfdown_isLoaded = true;
+  }
+  return prefire2017_sfdown_;
+}
+
+const float &SSAG::prefire2017_sfup() {
+  if (not prefire2017_sfup_isLoaded) {
+    if (prefire2017_sfup_branch != 0) {
+      prefire2017_sfup_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2017_sfup_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2017_sfup_isLoaded = true;
+  }
+  return prefire2017_sfup_;
+}
+
+const float &SSAG::prefire2017_sf() {
+  if (not prefire2017_sf_isLoaded) {
+    if (prefire2017_sf_branch != 0) {
+      prefire2017_sf_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2017_sf_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2017_sf_isLoaded = true;
+  }
+  return prefire2017_sf_;
+}
+
+const float &SSAG::prefire2016_sfdown() {
+  if (not prefire2016_sfdown_isLoaded) {
+    if (prefire2016_sfdown_branch != 0) {
+      prefire2016_sfdown_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2016_sfdown_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2016_sfdown_isLoaded = true;
+  }
+  return prefire2016_sfdown_;
+}
+
+const float &SSAG::prefire2016_sfup() {
+  if (not prefire2016_sfup_isLoaded) {
+    if (prefire2016_sfup_branch != 0) {
+      prefire2016_sfup_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2016_sfup_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2016_sfup_isLoaded = true;
+  }
+  return prefire2016_sfup_;
+}
+
+const float &SSAG::prefire2016_sf() {
+  if (not prefire2016_sf_isLoaded) {
+    if (prefire2016_sf_branch != 0) {
+      prefire2016_sf_branch->GetEntry(index);
+    } else {
+      printf("branch prefire2016_sf_branch does not exist!\n");
+      exit(1);
+    }
+    prefire2016_sf_isLoaded = true;
+  }
+  return prefire2016_sf_;
+}
+
+const vector<float> &SSAG::btags_cdisc() {
+  if (not btags_cdisc_isLoaded) {
+    if (btags_cdisc_branch != 0) {
+      btags_cdisc_branch->GetEntry(index);
+    } else {
+      printf("branch btags_cdisc_branch does not exist!\n");
+      exit(1);
+    }
+    btags_cdisc_isLoaded = true;
+  }
+  return *btags_cdisc_;
+}
+
+const int &SSAG::bdt_nforwardjets20() {
+  if (not bdt_nforwardjets20_isLoaded) {
+    if (bdt_nforwardjets20_branch != 0) {
+      bdt_nforwardjets20_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_nforwardjets20_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_nforwardjets20_isLoaded = true;
+  }
+  return bdt_nforwardjets20_;
+}
+
+const float &SSAG::bdt_avgcdisc() {
+  if (not bdt_avgcdisc_isLoaded) {
+    if (bdt_avgcdisc_branch != 0) {
+      bdt_avgcdisc_branch->GetEntry(index);
+    } else {
+      printf("branch bdt_avgcdisc_branch does not exist!\n");
+      exit(1);
+    }
+    bdt_avgcdisc_isLoaded = true;
+  }
+  return bdt_avgcdisc_;
+}
+
+const int &SSAG::ntrijets() {
+  if (not ntrijets_isLoaded) {
+    if (ntrijets_branch != 0) {
+      ntrijets_branch->GetEntry(index);
+    } else {
+      printf("branch ntrijets_branch does not exist!\n");
+      exit(1);
+    }
+    ntrijets_isLoaded = true;
+  }
+  return ntrijets_;
+}
+
+
+const float &SSAG::trijet_njetsnonb() {
+  if (not trijet_njetsnonb_isLoaded) {
+    if (trijet_njetsnonb_branch != 0) {
+      trijet_njetsnonb_branch->GetEntry(index);
+    } else {
+      printf("branch trijet_njetsnonb_branch does not exist!\n");
+      exit(1);
+    }
+    trijet_njetsnonb_isLoaded = true;
+  }
+  return trijet_njetsnonb_;
+}
+
+const float &SSAG::trijet_njetsb() {
+  if (not trijet_njetsb_isLoaded) {
+    if (trijet_njetsb_branch != 0) {
+      trijet_njetsb_branch->GetEntry(index);
+    } else {
+      printf("branch trijet_njetsb_branch does not exist!\n");
+      exit(1);
+    }
+    trijet_njetsb_isLoaded = true;
+  }
+  return trijet_njetsb_;
+}
+
+const float &SSAG::trijet_meandisc() {
+  if (not trijet_meandisc_isLoaded) {
+    if (trijet_meandisc_branch != 0) {
+      trijet_meandisc_branch->GetEntry(index);
+    } else {
+      printf("branch trijet_meandisc_branch does not exist!\n");
+      exit(1);
+    }
+    trijet_meandisc_isLoaded = true;
+  }
+  return trijet_meandisc_;
+}
+
+const float &SSAG::trijet_leadingdisc() {
+  if (not trijet_leadingdisc_isLoaded) {
+    if (trijet_leadingdisc_branch != 0) {
+      trijet_leadingdisc_branch->GetEntry(index);
+    } else {
+      printf("branch trijet_leadingdisc_branch does not exist!\n");
+      exit(1);
+    }
+    trijet_leadingdisc_isLoaded = true;
+  }
+  return trijet_leadingdisc_;
+}
+
+const float &SSAG::trijet_subleadingdisc() {
+  if (not trijet_subleadingdisc_isLoaded) {
+    if (trijet_subleadingdisc_branch != 0) {
+      trijet_subleadingdisc_branch->GetEntry(index);
+    } else {
+      printf("branch trijet_subleadingdisc_branch does not exist!\n");
+      exit(1);
+    }
+    trijet_subleadingdisc_isLoaded = true;
+  }
+  return trijet_subleadingdisc_;
+}
+
+const int &SSAG::trijet_numhigh() {
+  if (not trijet_numhigh_isLoaded) {
+    if (trijet_numhigh_branch != 0) {
+      trijet_numhigh_branch->GetEntry(index);
+    } else {
+      printf("branch trijet_numhigh_branch does not exist!\n");
+      exit(1);
+    }
+    trijet_numhigh_isLoaded = true;
+  }
+  return trijet_numhigh_;
+}
+
+const float &SSAG::trijet_frachigh() {
+  if (not trijet_frachigh_isLoaded) {
+    if (trijet_frachigh_branch != 0) {
+      trijet_frachigh_branch->GetEntry(index);
+    } else {
+      printf("branch trijet_frachigh_branch does not exist!\n");
+      exit(1);
+    }
+    trijet_frachigh_isLoaded = true;
+  }
+  return trijet_frachigh_;
+}
+
+const float &SSAG::weight() {
+  if (not weight_isLoaded) {
+    if (weight_branch != 0) {
+      weight_branch->GetEntry(index);
+    } else {
+      printf("branch weight_branch does not exist!\n");
+      exit(1);
+    }
+    weight_isLoaded = true;
+  }
+  return weight_;
+}
 	const float &SSAG::met3p0()
 	{
 		if (not met3p0_isLoaded) {
@@ -7978,6 +8357,24 @@ namespace ss {
 	const bool &lep2_trigMatch_noIsoReq() { return samesign.lep2_trigMatch_noIsoReq(); }
 	const bool &lep2_trigMatch_isoReq() { return samesign.lep2_trigMatch_isoReq(); }
 	const float &met3p0() { return samesign.met3p0(); }
+  const float &weight() { return samesign.weight(); }
+  const vector<float> &btags_cdisc() { return samesign.btags_cdisc(); }
+  const int &bdt_nforwardjets20() { return samesign.bdt_nforwardjets20(); }
+  const float &bdt_avgcdisc() { return samesign.bdt_avgcdisc(); }
+  const int &ntrijets() { return samesign.ntrijets(); }
+  const float &trijet_njetsnonb() { return samesign.trijet_njetsnonb(); }
+  const float &trijet_njetsb() { return samesign.trijet_njetsb(); }
+  const float &trijet_meandisc() { return samesign.trijet_meandisc(); }
+  const float &trijet_leadingdisc() { return samesign.trijet_leadingdisc(); }
+  const float &trijet_subleadingdisc() { return samesign.trijet_subleadingdisc(); }
+  const int &trijet_numhigh() { return samesign.trijet_numhigh(); }
+  const float &trijet_frachigh() { return samesign.trijet_frachigh(); }
+  const float &prefire2017_sfdown() { return samesign.prefire2017_sfdown(); }
+  const float &prefire2017_sfup() { return samesign.prefire2017_sfup(); }
+  const float &prefire2017_sf() { return samesign.prefire2017_sf(); }
+  const float &prefire2016_sfdown() { return samesign.prefire2016_sfdown(); }
+  const float &prefire2016_sfup() { return samesign.prefire2016_sfup(); }
+  const float &prefire2016_sf() { return samesign.prefire2016_sf(); }
   const bool &passfilter() { return samesign.passfilter(); }
   const float &lep4_coneCorrPt() { return samesign.lep4_coneCorrPt(); }
   const float &bdt_jec_up_nbtags() { return samesign.bdt_jec_up_nbtags(); }

@@ -19,8 +19,9 @@
     std::cout << vtx_down->Integral() << std::endl;
 
     // MC
-    TFile *f_mc = TFile::Open("truenumint_mc2017.root");
-    TH1F* vtx_mc = (TH1F*) f_mc->Get("hnumints");
+    // TFile *f_mc = TFile::Open("truenumint_mc2017.root");
+    TFile *f_mc = TFile::Open("truenumint_mc2018.root");
+    TH1F* vtx_mc = (TH1F*) f_mc->Get("hnumints_true");
     vtx_mc->Sumw2();
     vtx_mc->Scale(1.0/vtx_mc->Integral());
     std::cout << vtx_mc->Integral() << std::endl;

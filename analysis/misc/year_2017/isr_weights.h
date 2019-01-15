@@ -1,27 +1,19 @@
 float isrWeight(int nisrmatch, int sample) {
-    return 1.; // TODO Still need to derive
     // see instructions in ../isr_weights/calc.py
     float scale = 1.;
-    if (sample == 1) { // ttW
-        scale = 1.;
-        if (nisrmatch == 0) { return scale*1.00; }
-        if (nisrmatch == 1) { return scale*0.86; }
-        if (nisrmatch == 2) { return scale*0.79; }
-        if (nisrmatch == 3) { return scale*0.75; }
-        if (nisrmatch == 4) { return scale*0.77; }
-        if (nisrmatch == 5) { return scale*0.74; }
-        if (nisrmatch == 6) { return scale*0.73; }
-        if (nisrmatch == 7) { return scale*0.56; }
-    } else if (sample == 2) { // ttZ
-        scale = 1.;
-        if (nisrmatch == 0) { return scale*1.00; }
-        if (nisrmatch == 1) { return scale*0.86; }
-        if (nisrmatch == 2) { return scale*0.79; }
-        if (nisrmatch == 3) { return scale*0.75; }
-        if (nisrmatch == 4) { return scale*0.77; }
-        if (nisrmatch == 5) { return scale*0.74; }
-        if (nisrmatch == 6) { return scale*0.73; }
-        if (nisrmatch == 7) { return scale*0.56; }
+    if (sample == 1) { // ttW -- 0 extra partons
+        scale = 0.989;
+        if (nisrmatch == 0) { return scale*1.056; }
+        if (nisrmatch == 1) { return scale*0.886; }
+        if (nisrmatch == 2) { return scale*1.007; }
+        if (nisrmatch >= 3) { return scale*1.417; }
+    } else if (sample == 2) { // ttZ -- 1 extra parton
+        scale = 1.001;
+        if (nisrmatch == 0) { return scale*1.080; }
+        if (nisrmatch == 1) { return scale*0.902; }
+        if (nisrmatch == 2) { return scale*0.934; }
+        if (nisrmatch == 3) { return scale*1.165; }
+        if (nisrmatch >= 4) { return scale*1.231; }
     }
     return scale;
 }

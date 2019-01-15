@@ -6,12 +6,8 @@ from tqdm import tqdm
 import sys
 
 # /nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep0jet.root
+def patch_files(oldfnames):
 
-if __name__ == "__main__":
-    oldfnames = [
-            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep0jet.root",
-            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep0jetext1.root",
-            ]
     dolds = {}
     for fname in oldfnames:
         dolds[fname] = {}
@@ -42,7 +38,7 @@ if __name__ == "__main__":
         print "Hmm, the old scale1fbs are already pretty much the same. You probably already scaled them. Not continuing."
         sys.exit()
 
-    # sys.exit()
+    # sys.exit() # FIXME
 
     for oldfname,dold in dolds.items():
         basename = os.path.basename(oldfname)
@@ -72,3 +68,14 @@ if __name__ == "__main__":
         os.system("mv {} {}".format(tmp_basename,oldfname))
         print "Done"
 
+
+if __name__ == "__main__":
+
+    patch_files([
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep0jet.root",
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep0jetext1.root",
+            ])
+    patch_files([
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep1jet.root",
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep1jetext1.root",
+            ])

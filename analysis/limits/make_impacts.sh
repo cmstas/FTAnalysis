@@ -11,22 +11,27 @@
 basedir="$1"
 extra="${@:2}"
 region="srcr"
+expectflags="-t -1 --expectSignal=1";
 if [[ ${extra} = *"srdisc"* ]]; then
     region="srdisc";
+fi
+if [[ ${extra} = *"unblinded"* ]]; then
+    expectflags=""
 fi
 echo ">>> base directory: ${basedir}"
 echo ">>> extra options: ${extra}"
 echo ">>> region: ${region}"
 
-card=${basename}/card_tttt_${region}_run2.txt
+cardname=${basedir}/card_tttt_${region}_run2.txt
+cardroot=${cardname/txt/root}
 
-text2workspace.py $card
+text2workspace.py ${cardname}
 # do initial fit (~20 secs)
-combineTool.py -d ${cardname} -M Impacts --robustFit 1 -t -1 --expectSignal=1 -m 125 --doInitialFit
+combineTool.py -d ${cardroot} -M Impacts --robustFit 1 ${expectflags} -m 125 --doInitialFit
 # do 15 parallel fits for all ~200 nuisances (~2 min)
-combineTool.py -d ${cardname} -M Impacts --robustFit 1 -t -1 --expectSignal=1 -m 125 --doFits --parallel 15
+combineTool.py -d ${cardroot} -M Impacts --robustFit 1 ${expectflags} -m 125 --doFits --parallel 15
 # there will be ~200 root files here, but we'll clean them up later
-combineTool.py -M Impacts -d ${cardname} -m 125 -o impacts.json
+combineTool.py -M Impacts -d ${cardroot} -m 125 -o impacts.json
 # make plots in `impacts.pdf`
 plotImpacts.py -i impacts.json -o impacts
 # clean up

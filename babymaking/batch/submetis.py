@@ -20,7 +20,9 @@ def get_event_rate(fname):
         for line in fhin:
             if line.startswith("Processed "):
                 parts = line.split()
-                rate = int(parts[1])/float(parts[4])
+                den = float(parts[4])
+                if den < 1e-6: break
+                rate = 1.0*int(parts[1])/den
                 break
     return rate
 
@@ -43,12 +45,42 @@ if __name__ == "__main__":
     from samples import data_2016, mc_2016, data_2017, mc_2017, data_2018, mc_2018, data_2016_94x, mc_2016_94x
 
     # year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
-    year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018)]
+    year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)]
     # year_sample_map = [("2016_94x",data_2016_94x+mc_2016_94x)]
-    tag = "v3.13_all"
+    # tag = "v3.16_all" # back to old V6 JECs
+    # tag = "v3.17_all" # V6 JECs, pdf weight clipping, fixed JetID for jec/jer up/down
+    # tag = "v3.19_all" # same as v17 with top tagging vars and 2 more potential bdt variables
+    # tag = "v3.19_newdata" # to validate event counts with new prompt 2018Dv2
+    # tag = "v3.20_jec32" # try JECv32 and new WPs with 2017, 2018 only
+    # tag = "v3.21" # v32 JECs. all years, new 10-02-04 MC, including some 2018 MC -- bugged 2017 missing 2 ele iso branches
+    # year_sample_map =  [("2017",data_2017+mc_2017)] # NOTE
+    # tag = "v3.21_fix2017" # 2017 only. fixing iso issues
+    year_sample_map =  [("2018",data_2018+mc_2018)] # NOTE
+    tag = "v3.22" # 2018 only. latest ID (v2), remade corruptions, all MC samples included I think
     extra_args = ""
     tag_match = ""
     # extra_args = "--ignorebadfiles" # FIXME
+
+    # year_sample_map[0][1][1:] = []
+    # tag = "v3.21_test"
+    # print year_sample_map
+
+    # year_sample_map = [
+    #         ("2017",[
+    #     ["/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM","WWW"],
+    #     ]),
+    #         ]
+
+    # year_sample_map = [
+    #         ("2018",[
+    #     ["/EGamma/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleEGDv2"],
+    #     ["/DoubleMuon/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleMuonDv2"],
+    #     ["/MuonEG/Run2018D-PromptReco-v2/MINIAOD", "DataMuonEGDv2"],
+    #     ]),
+    #         ]
+
+    # year_sample_map = [("2017",data_2017+mc_2017)] + [("2018",data_2018)]
+
 
     # tag = "v3.09_newdeepflavv2"
     # year_sample_map = [
@@ -181,10 +213,13 @@ if __name__ == "__main__":
                         tag = tag,
                         min_completion_fraction = 0.93 if skip_tail else 1.0,
                         condor_submit_params = {
-                            "sites":"T2_US_UCSD,UCSB",  # I/O is hella faster
-                            # "sites":"T2_US_UCSD",  # I/O is hella faster
+                            # "sites":"T2_US_UCSD,UCSB",  # I/O is hella faster
+                            "sites":"T2_US_UCSD",  # I/O is hella faster
                             # "sites":"UAF",  # I/O is hella faster
-                            "classads": [ ["metis_extraargs",extra_args], ],
+                            "classads": [ 
+                                ["metis_extraargs",extra_args],
+                                ["JobBatchName","FT_{}_{}".format(year,shortname)],
+                                ],
                             # "classads": [ ["metis_extraargs","--ignorebadfiles"], ],
                             },
                         cmssw_version = "CMSSW_9_4_9",
@@ -201,6 +236,7 @@ if __name__ == "__main__":
                         )
                 nsamples += 1
                 if not task.complete():
+                    task.additional_input_files = ["/home/users/namin/2018/fourtop/all/FTAnalysis/babymaking/batch/condor_chirp"]
                     task.process()
                 else:
                     if not merge_task.complete():

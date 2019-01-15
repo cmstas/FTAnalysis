@@ -11,7 +11,7 @@ CORE
 LinkDef_out_rdict.pcm
 goodRunList
 cxxopts.h
-$(find misc/ -name '*.h' -print)
+$(find misc/ -name '*.h' -not -path "*/bck/*" -print)
 "
 
 # du -csh $files
@@ -35,6 +35,11 @@ XZ_OPT=-9 tar -Jch \
     --exclude='CORE*.h' \
     --exclude='*.C' \
     --exclude '*.cxx' \
+    --exclude '*.pdf' \
+    --exclude '*.png' \
+    --exclude '*.md' \
+    --exclude '*.pyc' \
+    --exclude '*.py' \
     --exclude-vcs \
     -f $files
 
