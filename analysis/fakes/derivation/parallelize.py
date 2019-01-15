@@ -116,18 +116,26 @@ d_chain_strs[2018] = {
 # tag_mc = "v13"
 # tag_data = "v15"
 # tag_mc = "v15"
-tag_data = "v23"
-tag_mc = "v23"
+
+# tag_data = "v23"
+# tag_mc = "v23"
+
+# tag_data = "v25jec6"
+# tag_mc = "v25jec6"
+# outputtag = "v25jec6"
+tag_data = "v25jec32"
+tag_mc = "v25jec32"
+outputtag = "v25jec32"
 
 dopts = {
-        ("FT",2017,True): "doAbove18,useLooseEMVA,IsoTrigs",
-        ("FT",2018,True): "doAbove18,useLooseEMVA,IsoTrigs,noPUweight",
+        # ("FT",2017,True): "doAbove18,useLooseEMVA,IsoTrigs",
+        # ("FT",2018,True): "doAbove18,useLooseEMVA,IsoTrigs,noPUweight",
         ("SS",2017,True): "useLooseEMVA,IsoTrigs",
-        ("SS",2018,True): "useLooseEMVA,IsoTrigs,noPUweight",
-        ("FT",2017,False): "doAbove18,useLooseEMVA",
-        ("FT",2018,False): "doAbove18,useLooseEMVA,noPUweight",
+        # ("SS",2018,True): "useLooseEMVA,IsoTrigs,noPUweight",
+        # ("FT",2017,False): "doAbove18,useLooseEMVA",
+        # ("FT",2018,False): "doAbove18,useLooseEMVA,noPUweight",
         ("SS",2017,False): "useLooseEMVA",
-        ("SS",2018,False): "useLooseEMVA,noPUweight",
+        # ("SS",2018,False): "useLooseEMVA,noPUweight",
         }
 
 os.system("mkdir -p runners")
@@ -135,8 +143,9 @@ for ana in ["SS","FT"]:
     for year in [2017,2018]:
         for proc in d_chain_strs[year].keys():
             for iso in [True,False]:
+                if (ana,year,iso) not in dopts: continue
                 options = dopts[(ana,year,iso)]
-                outdir = "./outputs_{ana}_{year}".format(ana=ana,year=year)
+                outdir = "./{tag}/outputs_{ana}_{year}".format(tag=outputtag,ana=ana,year=year)
                 os.system("mkdir -p {}".format(outdir))
                 if iso:
                     footer = """
@@ -149,5 +158,7 @@ for ana in ["SS","FT"]:
 
                 full = "{\n" + header + d_chain_strs[year][proc].format(tag_data=tag_data,tag_mc=tag_mc) + footer + "\n}"
                 iso_str = "_iso" if iso else ""
-                with open("runners/parallel_doAll_{}_{}_{}{}.C".format(ana,year,proc,iso_str), "w") as fhout:
+                macroname = "runners/parallel_doAll_{}_{}_{}{}.C".format(ana,year,proc,iso_str)
+                print "Wrote {}".format(macroname)
+                with open(macroname, "w") as fhout:
                     fhout.write(full)

@@ -36,9 +36,12 @@ outputdir=outputs_test/
 mkdir -p ${outputdir}
 rm ${outputdir}/log*.txt
 
+run   mc_2016     "/DYJetsToLL"                       ${outputdir}/test_2016_dy.root              ${outputdir}/log_2016_dy.txt              &
 run   mc_2017     "/DYJetsToLL"                       ${outputdir}/test_2017_dy.root              ${outputdir}/log_2017_dy.txt              &
 run   mc_2017     "MuEnriched"                        ${outputdir}/test_2017_qcdmu.root           ${outputdir}/log_2017_qcdmu.txt           &
 run   mc_2017     "bcToE"                             ${outputdir}/test_2017_qcdbctoe.root        ${outputdir}/log_2017_qcdbctoe.txt        &
+run   data_2016   "/DoubleMuon/Run2016C"              ${outputdir}/test_2016_datamuc.root         ${outputdir}/log_2016_datamuc.txt         &
+run   data_2016   "/SingleElectron/Run2016C"          ${outputdir}/test_2016_dataelc.root         ${outputdir}/log_2016_dataelc.txt         &
 run   data_2017   "/DoubleMuon/Run2017C"              ${outputdir}/test_2017_datamuc.root         ${outputdir}/log_2017_datamuc.txt         &
 run   data_2017   "/SingleElectron/Run2017C"          ${outputdir}/test_2017_dataelc.root         ${outputdir}/log_2017_dataelc.txt         &
 run   mc_2018     "/DYJetsToLL"                       ${outputdir}/test_2018_dy.root              ${outputdir}/log_2018_dy.txt              &

@@ -52,7 +52,10 @@ using namespace std;
 // #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_ttbartest25_mid3.h"
 #include "/home/users/namin/2018/fourtop/94x/FTAnalysis/analysis/fakes/derivation/newfrs_qcd18.h"
 #include "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/insitu/frs.h"
-#include "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/derivation/testfrs.h"
+
+// #include "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/derivation/testfrs.h"
+#include "../derivation/newfrs_2017.h"
+// #include "../derivation/newfrs_2017_above18.h"
 
 bool inclHT = false;
 
@@ -61,7 +64,7 @@ bool doQCD = true; // XXX
 bool doHadFR = false;
 bool doHadApp = false;
 bool onlyMuMu = false;
-bool doAbove18 = true;
+bool doAbove18 = false; // XXX
 bool doNewP = false;
 bool doAbove25 = false;
 bool bypassTrigger = false;

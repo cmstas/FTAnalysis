@@ -17,7 +17,8 @@
 
     // TString tag = "v1.06_v2"; // new
     // TString tag = "v2.00_2017_insitu_v2"; // test single lept triggers
-    TString tag = "v3.13_all"; // test single lept triggers
+    // TString tag = "v3.13_all"; // test single lept triggers
+    TString tag = "v3.21_fix2017"; // test single lept triggers
     bool doBonly         = 0; // FIXME FIXME FIXME
     // TString tag = "v1.06_v2_oldisofix"; // old
 

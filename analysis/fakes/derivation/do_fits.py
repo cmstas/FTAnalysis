@@ -17,10 +17,19 @@ include_ttjets = True
 # basedir = "outputs_SS_2017/"
 # thedir = "plots_mtfit/fit_SS_2017_Nov29"
 
-basedir = "outputs_FT_2017/"
-thedir = "plots_mtfit/fit_FT_2017_Nov29"
+# basedir = "outputs_FT_2017/"
+# thedir = "plots_mtfit/fit_FT_2017_Nov29"
 # basedir = "outputs_FT_2018/"
 # thedir = "plots_mtfit/fit_FT_2018_Nov29"
+
+# basedir = "v25jec6/outputs_SS_2017/"
+# thedir = "v25jec6/plots_mtfit/fit_SS_2017_Nov29"
+# basedir = "v25jec32/outputs_SS_2017/"
+# thedir = "v25jec32/plots_mtfit/fit_SS_2017_Nov29"
+
+basedir = "outputs_test/"
+thedir = "outputs_test/plots_mtfit/fit_test_19Jan7"
+year = 2017
 
 d_postfits = {}
 d_sfs = {}
@@ -256,7 +265,7 @@ print "float mt_sf_el_iso =    {:.3f};".format(d_sfs[("el",True,False)][0])
 print "float mt_sf_el_noniso = {:.3f};".format(d_sfs[("el",False,False)][0])
 print "float mt_sf_mu_iso =    {:.3f};".format(d_sfs[("mu",True,False)][0])
 print "float mt_sf_mu_noniso = {:.3f};".format(d_sfs[("mu",False,False)][0])
-print "int year = 201{};".format((basedir+thedir).split("201")[1][0])
+print "int year = {};".format(year)
 
 os.system("mkdir -p {}/mtfits/".format(basedir))
 os.system("cp -r {}/*.pdf {}/mtfits/".format(thedir,basedir))

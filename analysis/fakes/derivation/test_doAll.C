@@ -93,10 +93,10 @@
     // ScanChain(ch7,"outputs_testttbar25/rate_tthad1tag_new.root", "doAbove25,requireTag,requireTwoJets,doHighMET,singleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
     // ScanChain(ch7,"outputs_testttbar25/rate_tthad2_fogeq2_new.root", "twoFO,doAbove25,requireTwoJets,doHighMET,doubleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
 
-    ScanChain(ch8,"outputs_testttbar25/rate_tthad2_abs_new.root", "absweight,doAbove25,requireTwoJets,doHighMET,doubleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
-    ScanChain(ch8,"outputs_testttbar25/rate_tthad2_abs_bonly_new.root", "absweight,doBonly,doAbove25,requireTwoJets,doHighMET,doubleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
-    ScanChain(ch8,"outputs_testttbar25/rate_tthad1_abs_fogeq2_new.root", "absweight,twoFO,doAbove25,requireTwoJets,doHighMET,singleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
-    ScanChain(ch8,"outputs_testttbar25/rate_tthad1_abs_fogeq2_bonly_new.root", "absweight,doBonly,twoFO,doAbove25,requireTwoJets,doHighMET,singleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
+    // ScanChain(ch8,"outputs_testttbar25/rate_tthad2_abs_new.root", "absweight,doAbove25,requireTwoJets,doHighMET,doubleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
+    // ScanChain(ch8,"outputs_testttbar25/rate_tthad2_abs_bonly_new.root", "absweight,doBonly,doAbove25,requireTwoJets,doHighMET,doubleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
+    // ScanChain(ch8,"outputs_testttbar25/rate_tthad1_abs_fogeq2_new.root", "absweight,twoFO,doAbove25,requireTwoJets,doHighMET,singleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
+    // ScanChain(ch8,"outputs_testttbar25/rate_tthad1_abs_fogeq2_bonly_new.root", "absweight,doBonly,twoFO,doAbove25,requireTwoJets,doHighMET,singleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
 
     // ScanChain(ch8,"outputs_testttbar25/rate_tthad1_fogeq2_new.root", "twoFO,doAbove25,requireTwoJets,doHighMET,singleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
     // ScanChain(ch8,"outputs_testttbar25/rate_tthad1_fogeq2_notrig_new.root", "bypassTriggers,twoFO,doAbove25,requireTwoJets,doHighMET,singleHadronic,requireMCMatch,useLooseEMVA,IsoTrigs");
@@ -110,5 +110,57 @@
     // ScanChain(ch4,"outputs_testallmetmt/rate_qcd_mu_old.root", "bypassLowMET,requireMCMatch,useLooseEMVA,IsoTrigs");
     
     // ScanChain(ch5,"outputs_test/rate_test.root", "requireTwoJets,doHighMET,requireMCMatch,useLooseEMVA,IsoTrigs");
+
+    // TChain* chtest = new TChain("t");
+    // chtest->Add("/home/users/namin/2017/ProjectMetis/LeptonBabyMaker/output_DoubleMuon_Run2017D_before.root");
+    // ScanChain(chtest,"outputs_test/rate_test_before.root", 2017, "doAbove18,useLooseEMVA,IsoTrigs");
+
+    // TChain* chtest = new TChain("t");
+    // // chtest->Add("/home/users/namin/2017/ProjectMetis/LeptonBabyMaker/output_DoubleEG_Run2017D_after.root");
+    // chtest->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-31Mar2018-v1_LEPTON_v24jec6//output_57.root");
+    // // chtest->Add("/home/users/namin/2017/ProjectMetis/LeptonBabyMaker/output_DoubleMuon_Run2017D_after3.root");
+    // // chtest->Add("/home/users/namin/2017/ProjectMetis/LeptonBabyMaker/output_DYJets_after.root");
+    // // ScanChain(chtest,"outputs_test/rate_test_after.root", 2017, "doAbove18,useLooseEMVA,IsoTrigs");
+    // ScanChain(chtest,"outputs_test/rate_test_after.root", 2017, "doAbove18,useLooseEMVA,IsoTrigs");
+
+    // TChain* chtest = new TChain("t");
+    // chtest->Add("/home/users/namin/2017/ProjectMetis/LeptonBabyMaker/output_qcdmu_synch.root");
+    // ScanChain(chtest,"outputs_test/rate_test_before.root", 2017, "doAbove18,useLooseEMVA,IsoTrigs");
+    // // chtest->Add("/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/babymaker/output_qcdmu_synch.root");
+    // // ScanChain(chtest,"outputs_test/rate_test_after.root", 2017, "doAbove18,useLooseEMVA,IsoTrigs");
+
+    TChain* chtest1 = new TChain("t");
+    chtest1->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/QCD_MuEnriched_*.root");
+    // ScanChain(chtest1,"outputs_test/rate_test_before.root", 2017, "doAbove18,useLooseEMVA,IsoTrigs");
+    ScanChain(chtest1,"outputs_test/rate_test_qcd_mu.root", 2017, "useLooseEMVA,IsoTrigs");
+    TChain* chtest2 = new TChain("t");
+    chtest2->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/QCD_EMEnriched_*.root");
+    chtest2->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/QCD_bcToE_*.root");
+    ScanChain(chtest2,"outputs_test/rate_test_qcd_el.root", 2017, "useLooseEMVA,IsoTrigs");
+    TChain* chtest3 = new TChain("t");
+    chtest3->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/WJets.root");
+    ScanChain(chtest3,"outputs_test/rate_test_wjets.root", 2017, "useLooseEMVA,IsoTrigs");
+    TChain* chtest4 = new TChain("t");
+    chtest4->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/DY_high.root");
+    ScanChain(chtest4,"outputs_test/rate_test_dy.root", 2017, "useLooseEMVA,IsoTrigs");
+    TChain* chtest5 = new TChain("t");
+    chtest5->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/DataDoubleEG*.root");
+    ScanChain(chtest5,"outputs_test/rate_test_data_el.root", 2017, "useLooseEMVA,IsoTrigs");
+    TChain* chtest6 = new TChain("t");
+    chtest6->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/DataDoubleMu*.root");
+    ScanChain(chtest6,"outputs_test/rate_test_data_mu.root", 2017, "useLooseEMVA,IsoTrigs");
+    TChain* chtest7 = new TChain("t");
+    chtest7->Add("/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/TT*.root");
+    ScanChain(chtest7,"outputs_test/rate_test_ttjets.root", 2017, "useLooseEMVA,IsoTrigs");
+
+    // TChain *ch = new TChain("t");
+    // // ch->Add("/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_WJets-2017v1_LEPTON_v25jec32/*.root");
+    // ch->Add("output_WJets.root");
+    // ScanChain(ch,"outputs_test/rate_test_wjets_before.root",2017,"useLooseEMVA,IsoTrigs");
+
+
+    // chtest->Add("/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/babymaker/output_qcdmu_synch.root");
+    // ScanChain(chtest,"outputs_test/rate_test_after.root", 2017, "doAbove18,useLooseEMVA,IsoTrigs");
+
 
 }

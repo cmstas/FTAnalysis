@@ -22,7 +22,8 @@ def dump_hist(h,name,do_errors=False):
 if __name__ == "__main__":
 
 
-    thedir = "./outputs_FT_2017/"
+    # thedir = "./outputs_FT_2017/"
+    thedir = "./outputs_test/"
     prefix = "QCDMC"
 
     for suffix in [

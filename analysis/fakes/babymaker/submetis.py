@@ -27,30 +27,25 @@ def get_event_rate(fname):
     return rate
 
 def split_func(dsname):
-    if any(x in dsname for x in [
-        "/W","/TT",
-        ]):
-        return 10
-    elif "/QCD" in dsname:
-        return 16
-    elif "/DY" in dsname:
-        return 6
-    elif "/EGamma" in dsname:
-        return 12
-    elif "/DoubleMu" in dsname:
-        return 9
-    else:
-        return 5
+    if "/W" in dsname: return 12
+    if "/TT" in dsname: return 10
+    if "/QCD" in dsname: return 20
+    if "/DY" in dsname: return 8
+    if "/EGamma" in dsname: return 15
+    if "/Single" in dsname: return 15
+    if "/DoubleMu" in dsname: return 11
+    return 10
 
 if __name__ == "__main__":
 
-    from samples import data_2016, mc_2016, data_2017, mc_2017, data_2018, mc_2018
+    from samples import *
 
-    year_sample_map = [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)]
-    tag = "v1.0_leptontree" # 2017, 2018 only
+    year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
+    # tag = "v1.0_leptontree" # 2017, 2018 only
+    tag = "v2.0_leptontree" # 2017, 2018 only
     extra_args = ""
     tag_match = ""
-    # extra_args = "--ignorebadfiles" # FIXME
+    extra_args = "--ignorebadfiles" # FIXME
 
     # Loop 'til we get dizzy
     for i in range(1000):
@@ -84,7 +79,10 @@ if __name__ == "__main__":
                             # "sites":"T2_US_UCSD,UCSB",  # I/O is hella faster
                             "sites":"T2_US_UCSD",  # I/O is hella faster
                             # "sites":"UAF",  # I/O is hella faster
-                            "classads": [ ["metis_extraargs",extra_args], ],
+                            "classads": [ 
+                                ["metis_extraargs",extra_args],
+                                ["JobBatchName","LT_{}_{}".format(year,shortname)],
+                                ],
                             },
                         additional_input_files = ["/home/users/namin/2018/fourtop/all/FTAnalysis/babymaking/batch/condor_chirp"],
                         cmssw_version = "CMSSW_9_4_9",
@@ -118,5 +116,5 @@ if __name__ == "__main__":
             print "All done!"
             sys.exit()
 
-        time.sleep(600 if i < 10 else 1.5*60*60)
+        time.sleep(600 if i < 10 else 1.0*60*60)
 

@@ -1,5 +1,5 @@
-#ifndef SSBABYMAKER_H
-#define SSBABYMAKER_H
+#ifndef LTBABYMAKER_H
+#define LTBABYMAKER_H
 
 #include <vector>
 #include <functional>
@@ -97,13 +97,13 @@ struct Lepton {
 };
 typedef std::vector<Lepton> Leptons;
 
-std::ostream& operator << (std::ostream& os, Lepton& lep)
-{
-    std::string lepstr = (abs(lep.id())==11) ? "Electron" : "Muon";
-    return os << "<" << lepstr << " id=" << std::showpos << setw(3) << lep.id() << std::noshowpos
-              << ", idx=" << setw(2) << lep.idx() << ", level=" << lep.idlevel()
-              << ", (pT,eta)=" << "(" << lep.pt() << ","<< lep.eta() << ")>";
-}
+// std::ostream& operator << (std::ostream& os, Lepton& lep)
+// {
+//     std::string lepstr = (abs(lep.id())==11) ? "Electron" : "Muon";
+//     return os << "<" << lepstr << " id=" << std::showpos << setw(3) << lep.id() << std::noshowpos
+//               << ", idx=" << setw(2) << lep.idx() << ", level=" << lep.idlevel()
+//               << ", (pT,eta)=" << "(" << lep.pt() << ","<< lep.eta() << ")>";
+// }
 
 //Classes
 class babyMaker {
@@ -161,6 +161,7 @@ class babyMaker {
     bool passes_any_trigger;
     bool evt_isRealData;
     float scale1fb;     
+    float qscale;     
     int njets;  
     int njets_recoil;  
     float ht_SS;  
@@ -180,6 +181,11 @@ class babyMaker {
     int motherID;
     bool have_tag;
     float tag_pt;
+    float p4_pt;
+    float p4_eta;
+
+    float mva;
+    float etaSC;
 
     bool passes_SS_tight_v6;
     bool passes_SS_tight_noiso_v6;

@@ -6,7 +6,8 @@ r.gROOT.ProcessLine(".L ../../misc/common_utils.h")
 
 import checks.TMultiDrawTreePlayer.api
 
-version ="v23"
+# version ="v23"
+version ="v25jec32"
 d_lumis = {
         2017: 41.5,
         2018: 35.5,
@@ -34,21 +35,22 @@ mu_trigs = [
 d_fpatts = {}
 d_fpatts[2017] = {
         "dy": "/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DYJets-2017v1_LEPTON_{version}/output*.root".format(version=version),
-        # "mu": """
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017B-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017D-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017E-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017F-31Mar2018-v1_LEPTON_{version}//output*.root,
-# """.format(version=version),
-        # "e": """
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017B-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017D-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017E-31Mar2018-v1_LEPTON_{version}//output*.root,
-# /hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017F-31Mar2018-v1_LEPTON_{version}//output*.root,
-# """.format(version=version),
+        "mu": """
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017B-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017C-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017D-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017E-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DoubleMuon_Run2017F-31Mar2018-v1_LEPTON_{version}//output*.root,
+""".format(version=version),
+        "e": """
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017B-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017C-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017D-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017E-31Mar2018-v1_LEPTON_{version}//output*.root,
+/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_SingleElectron_Run2017F-31Mar2018-v1_LEPTON_{version}//output*.root,
+""".format(version=version),
         }
+
 d_fpatts[2018] = {
         "dy": "/hadoop/cms/store/user/namin/fakerate/2017/ProjectMetis/FakeRate_DYJets-2017v1_LEPTON_{version}/output*.root".format(version=version),
         "mu": """

@@ -281,6 +281,16 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
         c1.SaveAs("pdfs/mu_1dfr"+var+postfix+(doPt ? "" : "_eta")+".pdf");
         c2.SaveAs("pdfs/el_1dfr"+var+postfix+(doPt ? "" : "_eta")+".pdf");
 
+
+        if (doPt) {
+            TFile out_el("hists_1DFR_electron"+suffix+".root","RECREATE");
+            elf_data->Write();
+            out_el.Close();
+            TFile out_mu("hists_1DFR_muon"+suffix+".root","RECREATE");
+            muf_data->Write();
+            out_mu.Close();
+        }
+
     }
 
 }

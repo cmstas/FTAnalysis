@@ -58,12 +58,26 @@
     // int year = 2017;
 
 
-TString dir = "outputs_FT_2018/";
-float mt_sf_el_iso =    1.082;
-float mt_sf_el_noniso = 0.664;
-float mt_sf_mu_iso =    0.904;
-float mt_sf_mu_noniso = 0.561;
-int year = 2018;
+// TString dir = "v25jec6/outputs_SS_2017/";
+// float mt_sf_el_iso =    1.024;
+// float mt_sf_el_noniso = 1.021;
+// float mt_sf_mu_iso =    1.216;
+// float mt_sf_mu_noniso = 1.207;
+// int year = 2017;
+
+// TString dir = "v25jec32/outputs_SS_2017/";
+// float mt_sf_el_iso =    1.007;
+// float mt_sf_el_noniso = 1.013;
+// float mt_sf_mu_iso =    1.214;
+// float mt_sf_mu_noniso = 1.197;
+// int year = 2017;
+
+// TString dir = "outputs_FT_2018/";
+// float mt_sf_el_iso =    1.082;
+// float mt_sf_el_noniso = 0.664;
+// float mt_sf_mu_iso =    0.904;
+// float mt_sf_mu_noniso = 0.561;
+// int year = 2018;
 
 // TString dir = "outputs_FT_2017/";
 // float mt_sf_el_iso =    1.013;
@@ -80,6 +94,13 @@ int year = 2018;
     // float mt_sf_mu_noniso = 0.912;
     // int year = 2018;
 
+    TString dir = "outputs_test/";
+    float mt_sf_el_iso =    1.098;
+    float mt_sf_el_noniso = 1.100;
+    float mt_sf_mu_iso =    1.220;
+    float mt_sf_mu_noniso = 1.203;
+    int year = 2017;
+
     plotFR(dir);
     make1DplotFR(dir, 1.0, 1.0, mt_sf_el_noniso, mt_sf_mu_noniso, false, year);
     plotEWKCorFR(dir, 1.0, 1.0, mt_sf_el_noniso, mt_sf_mu_noniso, false, year);
@@ -89,5 +110,6 @@ int year = 2018;
 
     gSystem->Exec("cp -r pdfs/ "+dir);
     gSystem->Exec("cp ewkCorFR_*.root "+dir);
+    gSystem->Exec("cp hists_1DFR*.root "+dir);
 
 }

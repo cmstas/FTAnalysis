@@ -32,6 +32,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("passes_any_trigger", &passes_any_trigger);  // XXX
   BabyTree->Branch("evt_isRealData"    , &evt_isRealData); // XXX
   BabyTree->Branch("scale1fb"          , &scale1fb); // XXX
+  BabyTree->Branch("qscale"          , &qscale); // XXX
   BabyTree->Branch("njets"             , &njets); // XXX
   BabyTree->Branch("njets_recoil"             , &njets_recoil); // XXX
   BabyTree->Branch("ht_SS"             , &ht_SS); // XXX
@@ -51,6 +52,11 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("motherID"                      , &motherID); // XXX
   BabyTree->Branch("have_tag"                      , &have_tag); // XXX
   BabyTree->Branch("tag_pt"                      , &tag_pt); // XXX
+  BabyTree->Branch("p4_pt"                      , &p4_pt); // XXX
+  BabyTree->Branch("p4_eta"                      , &p4_eta); // XXX
+
+  BabyTree->Branch("mva"                      , &mva); // XXX
+  BabyTree->Branch("etaSC"                      , &etaSC); // XXX
 
   BabyTree->Branch("passes_SS_tight_v6"            , &passes_SS_tight_v6); // XXX
   BabyTree->Branch("passes_SS_tight_noiso_v6"      , &passes_SS_tight_noiso_v6); // XXX
@@ -172,6 +178,7 @@ void babyMaker::InitBabyNtuple(){
     passes_any_trigger = 0;
     evt_isRealData = 0;
     scale1fb    = -1.;
+    qscale    = -1.;
     njets = -1;
     njets_recoil = -1;
     ht_SS = -1.;
@@ -238,7 +245,12 @@ void babyMaker::InitLeptonBranches(){
     idx = -1;
     motherID = -1;
     have_tag = 0;
-    tag_pt = 0;
+    tag_pt = 0.;
+    p4_pt = 0.;
+    p4_eta = 0.;
+
+    mva = -999.;
+    etaSC = -999.;
 
     passes_SS_tight_v6 = 0;
     passes_SS_tight_noiso_v6 = 0;
@@ -350,6 +362,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
       float sgnMCweight = ((tas::genps_weight() > 0) - (tas::genps_weight() < 0));
       scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
+      qscale = genps_qScale(); // for stitching the enriched QCD samples
   }
   passes_met_filters = evt_isRealData ? passesMETfiltersMoriond17(evt_isRealData) : 1;
 
@@ -385,7 +398,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       id = lep.id();
       idx = lep.idx();
       p4 = lep.p4();
-      mt = MT(p4.pt(), p4.phi(), evt_corrMET, evt_corrMETPhi);
+      p4_pt = lep.pt();
+      p4_eta = lep.eta();
+      mt = MT(p4_pt, p4.phi(), evt_corrMET, evt_corrMETPhi);
 
 
       // Loop and fill branches if there actually is a tight-tight Z pair
@@ -418,7 +433,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       float A = lep.is_el() ? gconf.multiiso_el_minireliso : gconf.multiiso_mu_minireliso;
       float B = lep.is_el() ? gconf.multiiso_el_ptratio : gconf.multiiso_mu_ptratio;
       float C = lep.is_el() ? gconf.multiiso_el_ptrel : gconf.multiiso_mu_ptrel;
-      float mva = lep.is_el() ? getMVAoutput(idx, true) : -1.;
+      mva = lep.is_el() ? getMVAoutput(idx, true) : -999.;
+      etaSC = lep.is_el() ? els_etaSC().at(idx) : -999.;
       close_jet_v5 = closestJet(lep.p4(), 0.4, 3.0, 2);
       ptrelv1 = ptRel(lep.p4(), close_jet_v5, true);
       ptratio_v5 = close_jet_v5.pt() > 0 ? lep.pt()/close_jet_v5.pt() : 1;

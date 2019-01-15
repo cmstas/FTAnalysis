@@ -67,7 +67,8 @@ bool isFake() {
 
 bool STOP_REQUESTED = false;
 
-int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool fast = true, int nEvents = -1) {//, string skimFilePrefix = "test") {
+// int ScanChain( TChain* chain, TString outfile, int year=-1, TString option="", bool fast = true, int nEvents = -1) {//, string skimFilePrefix = "test")
+int ScanChain( TChain* chain, TString option="", TString outfile="test.root", int year=-1, bool fast = true, int nEvents = -1) {//, string skimFilePrefix = "test") {
 
     // Benchmark
     TBenchmark *bmark = new TBenchmark();
@@ -148,6 +149,12 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
     bool singleHadronic = false;
     if (option.Contains("singleHadronic")) singleHadronic = true;
 
+    if (option.Contains("Data2016")) year = 2016;
+    if (option.Contains("Data2017")) year = 2017;
+    if (option.Contains("Data2018")) year = 2018;
+
+    bool quiet = option.Contains("quiet");
+
     bool anyPt = false;
 
     bool doJEC = false;
@@ -199,16 +206,29 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
     // float sf_HLT_Mu8 = 0.7048;
     // float sf_HLT_IsoMu27 = 1.1146;
 
-    // v23 with latest V1 electron SFs, but only medium muon ID SFs
-    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0475;
-    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0523;
-    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8384;
-    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8448;
-    float sf_HLT_Mu17_TrkIsoVVL = 1.0300;
-    float sf_HLT_Mu17 = 1.0296;
-    float sf_HLT_Mu8_TrkIsoVVL = 0.7059;
-    float sf_HLT_Mu8 = 0.7075;
-    float sf_HLT_IsoMu27 = 1.1188;
+    // // v23 with latest V1 electron SFs, but only medium muon ID SFs
+    // float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0475;
+    // float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0523;
+    // float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8384;
+    // float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8448;
+    // float sf_HLT_Mu17_TrkIsoVVL = 1.0300;
+    // float sf_HLT_Mu17 = 1.0296;
+    // float sf_HLT_Mu8_TrkIsoVVL = 0.7059;
+    // float sf_HLT_Mu8 = 0.7075;
+    // float sf_HLT_IsoMu27 = 1.1188;
+
+    // new looper with v32 JECs
+    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0259;
+    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.1322;
+    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1406;
+    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.1338;
+    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9540;
+    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.9492;
+    float sf_HLT_IsoMu27 = 1.1300;
+    float sf_HLT_Mu17 = 1.0362;
+    float sf_HLT_Mu17_TrkIsoVVL = 1.0358;
+    float sf_HLT_Mu8 = 0.7121;
+    float sf_HLT_Mu8_TrkIsoVVL = 0.7123;
 
     if (year == 2018) {
         // v23 2018
@@ -744,7 +764,7 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
     // Loop over events to Analyze
     unsigned int nEventsTotal = 0;
     unsigned int nEventsChain = chain->GetEntries();
-    std::cout <<  " nEventsChain: " << nEventsChain <<  std::endl;
+    if (not quiet) std::cout <<  " nEventsChain: " << nEventsChain <<  std::endl;
     if( nEvents >= 0 ) nEventsChain = nEvents;
     TObjArray *listOfFiles = chain->GetListOfFiles();
     TIter fileIter(listOfFiles);
@@ -769,12 +789,13 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
 
         // Apply JEC
         bool isDataFromFileName = TString(currentFile->GetTitle()).Contains("Run201") || 
-            TString(currentFile->GetTitle()).Contains("DoubleMu") || TString(currentFile->GetTitle()).Contains("DoubleEG") || TString(currentFile->GetTitle()).Contains("EGamma");
+            TString(currentFile->GetTitle()).Contains("DoubleMu") || TString(currentFile->GetTitle()).Contains("DoubleEG") || TString(currentFile->GetTitle()).Contains("EGamma") ||
+            TString(currentFile->GetTitle()).Contains("Data");
         bool isDoubleMuon = TString(currentFile->GetTitle()).Contains("DoubleMu");
         bool isQCD = TString(currentFile->GetTitle()).Contains("QCD");
         bool isQCDMu = TString(currentFile->GetTitle()).Contains("QCD_M");
         bool isQCDEl = TString(currentFile->GetTitle()).Contains("QCD_E") || TString(currentFile->GetTitle()).Contains("QCD_bcToE");
-        bool isTTbar = TString(currentFile->GetTitle()).Contains("TTJets") || TString(currentFile->GetTitle()).Contains("output_tt_");
+        bool isTTbar = TString(currentFile->GetTitle()).Contains("TTJets") || TString(currentFile->GetTitle()).Contains("output_tt_") || TString(currentFile->GetTitle()).Contains("TTBAR");
         bool isDY = TString(currentFile->GetTitle()).Contains("DY");
         bool isWjets = TString(currentFile->GetTitle()).Contains("WJets");
 
@@ -783,7 +804,7 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
         auto basename = ((TObjString*)(tokens->At(tokens->GetEntries()-1)))->String().Data();
         bar.set_label(basename);
 
-        cout << " => File: " << filename << endl;
+        if (not quiet) cout << " => File: " << filename << endl;
 
         // Loop over Events in current file   //ACTUALLY A LEPTON "EVENT" LOOP
         if( nEventsTotal >= nEventsChain ) continue;
@@ -800,7 +821,7 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
 
             // Progress
             // LeptonTree::progress( nEventsTotal, nEventsChain );
-            bar.progress(nEventsTotal, nEventsChain);
+            if (not quiet) bar.progress(nEventsTotal, nEventsChain);
 
             if (debug) cout << "event=" << evt_event() << " run=" << evt_run() << endl;
 
@@ -904,17 +925,19 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
             float weight = 1;
             // if (!isDataFromFileName) weight = getTruePUw(trueNumInt())*scale1fb()*getLumi();
             if (!isDataFromFileName) {
-                float mylumi = getLumi(year);
-                if (year == 2018) mylumi = 35.5;
+                // noPUweight = true; // FIXME
+                weight *= getLumi(year)*scale1fb();
+                // if (year == 2018) mylumi = 35.5; // FIXME
+                if (not noPUweight) weight *= getTruePUw(year, trueNumInt());
                 // if (noPUweight) weight = scale1fb()*getLumi();
                 // else weight = puweight()*scale1fb()*getLumi();
-                if (absweight) {
-                    if (noPUweight) weight = fabs(scale1fb())*mylumi;
-                    else weight = puweight()*fabs(scale1fb())*mylumi;
-                } else {
-                    if (noPUweight) weight = (scale1fb())*mylumi;
-                    else weight = puweight()*(scale1fb())*mylumi;
-                }
+                // if (absweight) {
+                //     if (noPUweight) weight = fabs(scale1fb())*mylumi;
+                //     else weight = puweight()*fabs(scale1fb())*mylumi;
+                // } else {
+                //     if (noPUweight) weight = (scale1fb())*mylumi;
+                //     else weight = puweight()*(scale1fb())*mylumi;
+                // }
             }
 
 
@@ -1052,9 +1075,10 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
             if (passId) {
                 //mt control region
                 if (evt_met > 30. && p4().pt()>30) {
-                    histo_mt_all->Fill( std::min(evt_mt,float(200.)), weight );
-                    if (abs(id())==11) histo_mt_all_el->Fill( std::min(evt_mt,float(200.)), weight );
-                    if (abs(id())==13) histo_mt_all_mu->Fill( std::min(evt_mt,float(200.)), weight );
+                    float lepsf = leptonScaleFactor(year, id(), p4().pt(), p4().eta(), -1.);
+                    histo_mt_all->Fill( std::min(evt_mt,float(200.)), weight*lepsf );
+                    if (abs(id())==11) histo_mt_all_el->Fill( std::min(evt_mt,float(200.)), weight*lepsf );
+                    if (abs(id())==13) histo_mt_all_mu->Fill( std::min(evt_mt,float(200.)), weight*lepsf );
                 }
                 if (evt_met < 20.) {
                     histo_mt_lm->Fill( std::min(evt_mt,float(200.)), weight );
@@ -1189,8 +1213,8 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
                     histo_met->Fill( std::min(evt_met,float(1000.)) );
                     histo_mt->Fill( std::min(evt_mt,float(1000.)) );
 
-                    if( abs( id() ) == 11 ) pTrelvsIso_histo_el->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
-                    if( abs( id() ) == 13 ) pTrelvsIso_histo_mu->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
+                    // if( abs( id() ) == 11 ) pTrelvsIso_histo_el->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
+                    // if( abs( id() ) == 13 ) pTrelvsIso_histo_mu->Fill( std::min(RelIso03EA(),float(0.99)), std::min(ptrel,float(29.9)) );
                     if( abs( id() ) == 11 ) pTrel_histo_el->Fill( std::min(ptrel,float(29.9)) );
                     if( abs( id() ) == 13 ) pTrel_histo_mu->Fill( std::min(ptrel,float(29.9)) );
                     if( abs( id() ) == 11 ) pTratio_histo_el->Fill( std::min(ptratio,float(29.9)) );
@@ -1244,10 +1268,10 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
                         if (p4().pt()>25.) Nl_jet_highpt_histo_e->Fill(getPt(closejetpt,false), getEta(fabs(p4().eta()),ht,false), weight);
                         else Nl_jet_lowpt_histo_e->Fill(getPt(closejetpt,false), getEta(fabs(p4().eta()),ht,false), weight);
 
-                        if (isSyncFile) {
-                            cout << Form("Electron FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f isNum=%1i met=%5.2f mt=%5.2f event %i",
-                                    p4().pt(),p4().pt()*(1+coneptcorr),p4().eta(),miniiso(),ptratio,ptrel,mva_25ns(),passId,evt_met,evt_mt,(int)evt_event()) << endl;
-                        }
+                        // if (isSyncFile) {
+                        //     cout << Form("Electron FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f isNum=%1i met=%5.2f mt=%5.2f event %i",
+                        //             p4().pt(),p4().pt()*(1+coneptcorr),p4().eta(),miniiso(),ptratio,ptrel,mva_25ns(),passId,evt_met,evt_mt,(int)evt_event()) << endl;
+                        // }
 
                         njets40_histo->Fill(njets40, weight);
 
@@ -1352,11 +1376,13 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
     e_e = Nt_e/(Nl_e);
     e_mu = Nt_mu/(Nl_mu);
 
-    cout<<"\nReco: "<<"Nt = "<<Nt<<", Nl = "<<Nl<<", e ="<<e<<endl;
-    cout<<"\nReco (el): "<<"Nt = "<<Nt_e<<", Nl = "<<Nl_e<<", e ="<<e_e<<endl;
-    cout<<"\nReco (mu): "<<"Nt = "<<Nt_mu<<", Nl = "<<Nl_mu<<", e ="<<e_mu<<endl<<endl;
-    cout<<"\nAve B abundance (els)= "<<Bs_e/(Bs_e + notBs_e)<<endl;
-    cout<<"Ave B abundance (mus)= "<<Bs_mu/(Bs_mu + notBs_mu)<<endl;
+    if (not quiet) {
+        cout<<"\nReco: "<<"Nt = "<<Nt<<", Nl = "<<Nl<<", e ="<<e<<endl;
+        cout<<"\nReco (el): "<<"Nt = "<<Nt_e<<", Nl = "<<Nl_e<<", e ="<<e_e<<endl;
+        cout<<"\nReco (mu): "<<"Nt = "<<Nt_mu<<", Nl = "<<Nl_mu<<", e ="<<e_mu<<endl<<endl;
+        cout<<"\nAve B abundance (els)= "<<Bs_e/(Bs_e + notBs_e)<<endl;
+        cout<<"Ave B abundance (mus)= "<<Bs_mu/(Bs_mu + notBs_mu)<<endl;
+    }
 
     //Histograms
     // TH2D *rate_histo = (TH2D*) Nt_histo->Clone("rate_histo");
@@ -1467,6 +1493,15 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
     njets40_histo->Draw("histE");
 
     //---save histos-------//
+    if (not outfile.Contains(".root")) {
+        TString procstr(chain->GetTitle());
+        TString isostr = (useIsoTrigs ? "_IsoTrigs" : "");
+        procstr.ReplaceAll("_iso","");
+        procstr.ReplaceAll("_2016","");
+        procstr.ReplaceAll("_2017","");
+        procstr.ReplaceAll("_2018","");
+        outfile += Form("/rate_histos_%s_LooseEMVA%s.root",procstr.Data(),isostr.Data());
+    }
     TFile *OutputFile = new TFile(outfile,"recreate");
     OutputFile->cd();
     Nl_histo_e->Write();
@@ -1609,12 +1644,14 @@ int ScanChain( TChain* chain, TString outfile, int year, TString option="", bool
 
     // return
     bmark->Stop("benchmark");
-    cout << endl;
-    cout << nEventsTotal << " Events Processed" << endl;
-    cout << "------------------------------" << endl;
-    cout << "CPU  Time:	" << Form( "%.01f", bmark->GetCpuTime("benchmark")  ) << endl;
-    cout << "Real Time:	" << Form( "%.01f", bmark->GetRealTime("benchmark") ) << endl;
-    cout << endl;
+    if (not quiet) {
+        cout << endl;
+        cout << nEventsTotal << " Events Processed" << endl;
+        cout << "------------------------------" << endl;
+        cout << "CPU  Time:	" << Form( "%.01f", bmark->GetCpuTime("benchmark")  ) << endl;
+        cout << "Real Time:	" << Form( "%.01f", bmark->GetRealTime("benchmark") ) << endl;
+        cout << endl;
+    }
     delete bmark;
     return 0;
 }
