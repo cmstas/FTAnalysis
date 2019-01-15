@@ -12,6 +12,7 @@ sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
 from matplottery.plotter import plot_stack
 from matplottery.utils import Hist1D, MET_LATEX
 
+np.set_printoptions(linewidth=200)
 
 labels = {
 
@@ -20,27 +21,51 @@ labels = {
     "mll": "$m_{ll}$",
     "njets": "Njets",
     "nbtags": "Nbtags",
-    "bdisc1": "Disc leading bjet",
     "type": "hyp type (mm, em, ee)",
-    # "matchtype": "unmatched/light, b, c",
-    # "mtmin": "$m_{T}^\\mathrm{min}$",
     "nleps": "nleps",
     "pt1": "$p_T$(lep1)",
     "pt2": "$p_T$(lep2)",
     "pte": "$p_T$(e)",
     "ptm": "$p_T$(m)",
+    # "bdisc1": "Disc leading bjet",
+    # "mtmin": "$m_{T}^\\mathrm{min}$",
     # "eta1": r"$\eta$(lep1)",
     # "eta2": r"$\eta$(lep2)",
-    "etae": r"$\eta$(e)",
-    "etam": r"$\eta(\mu)$",
-    "etaelnt": r"loose leg $\eta$(e)",
-    "etamlnt": r"loose leg $\eta(\mu)$",
-    "phie": r"$\phi$(e)",
-    "phim": r"$\phi(\mu)$",
-    "q1": "charge - lep 1",
-    "nvtx": "# good vertices",
-    "nisrjets": "Njets (ISR/FSR)",
-    "nisrmatch": "Njets (ISR/FSR - Truth Matched)",
+    # "etae": r"$\eta$(e)",
+    # "etam": r"$\eta(\mu)$",
+    # "etaelnt": r"loose leg $\eta$(e)",
+    # "etamlnt": r"loose leg $\eta(\mu)$",
+    # "phie": r"$\phi$(e)",
+    # "phim": r"$\phi(\mu)$",
+    # "q1": "charge - lep 1",
+    # "nvtx": "# good vertices",
+    # "nisrjets": "Njets (ISR/FSR)",
+    # "nisrmatch": "Njets (ISR/FSR - Truth Matched)",
+    # "htb": r"$H_{T}$(b-jets)",
+    # "nlb40": r"N-loose b-tags, $p_{T}>40$",
+    # "ntb40": r"N-tight b-tags, $p_{T}>40$",
+    # "dphil1l2": r"$\Delta\phi(l_1,l_2)$",
+    # "detal1l2": r"$\Delta\eta(l_1,l_2)$",
+    # "q1": "charge - lep 1",
+    # "pt3": "$p_T$(lep3)",
+    # "maxmjoverpt": r"max($m_j/p_T$)",
+    # "ml1j1": r"m$(l_1,j_2)$",
+    # "ptj1": "$p_T$ - jet 1",
+    # "ptj6": "$p_T$ - jet 6",
+    # "ptj7": "$p_T$ - jet 7",
+    # "ptj8": "$p_T$ - jet 8",
+    # "eventbdt": "raw BDT discriminant",
+
+    # "btagid": r"$20 N_\mathrm{b} + 5 N_\mathrm{charm} + N_\mathrm{light}$",
+    # "avgcdisc": "average DeepCSV c disc",
+    # "nforwardjets20": "number of jets with $2.4<\eta<3.0$, $p_{T}>20$",
+    # "ntrijets": "number of trijets",
+    # "trijet_meandisc": "mean trijet disc",
+    # "trijet_numhigh": "number of trijet with disc>0.3",
+    # "trijet_frachigh": "fraction of trijet with disc>0.3",
+    # "trijet_leadingdisc": "leading trijet disc",
+    # "trijet_subleadingdisc": "subleading trijet disc",
+
     # "rawmet": "Raw "+MET_LATEX,
     # "zmll": "$m_{ll} (Z-cand)$",
     # "ptrele": "$p_T$rel - e",
@@ -73,20 +98,7 @@ labels = {
     # "ntb40": "N-tight Btags, $p_T$>40",
     # "type3l": "3l type (mmm, mme, mee, eee)",
 
-"htb": r"$H_{T}$(b-jets)",
-"nlb40": r"N-loose b-tags, $p_{T}>40$",
-"ntb40": r"N-tight b-tags, $p_{T}>40$",
-"dphil1l2": r"$\Delta\phi(l_1,l_2)$",
-"detal1l2": r"$\Delta\eta(l_1,l_2)$",
-"q1": "charge - lep 1",
-"pt3": "$p_T$(lep3)",
-"maxmjoverpt": r"max($m_j/p_T$)",
-"ml1j1": r"m$(l_1,j_2)$",
-"ptj1": "$p_T$ - jet 1",
-"ptj6": "$p_T$ - jet 6",
-"ptj7": "$p_T$ - jet 7",
-"ptj8": "$p_T$ - jet 8",
-"eventbdt": "raw BDT discriminant",
+
 
 }
 
@@ -103,13 +115,15 @@ d_label_colors = {
             "ttw":                     (r"$t\bar{t}W$",    [0.0, 0.4, 0.0]),
             "ttz":                     (r"$t\bar{t}Z$",    [0.4, 0.8, 0.4]),
             "vv":                      (r"VV",             [0.0, 0.4, 0.8]),
+            "tttt":                      (r"$t\bar{t}t\bar{t}$",             [0.786,0.147,0.022]),
         }
 
 bginfo = {
         "hhos": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "hhosloose": { k:d_label_colors[k] for k in [ "flips", "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "hhtl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
-        "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
+        "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
+        "osnbrw": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
         "os_noht": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "osloose": { k:d_label_colors[k] for k in [ "flips", "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "nj2": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
@@ -151,28 +165,72 @@ def worker(info):
     if other_files:
         bgs = [
                 sum([Hist1D(files[proc][hname],label=label,color=color)] + [Hist1D(other_files[y][proc][hname],label=label,color=color) for y in other_files.keys()])
-                for proc,(label,color) in bginfo[region].items()
+                for proc,(label,color) in sorted(bginfo[region].items())
                 ]
         data = sum([Hist1D(files["data"][hname])] + [Hist1D(other_files[y]["data"][hname]) for y in other_files.keys()])
     else:
-        bgs = [Hist1D(files[proc][hname], label=label,color=color) for proc,(label,color) in bginfo[region].items()]
+        bgs = [Hist1D(files[proc][hname], label=label,color=color) for proc,(label,color) in sorted(bginfo[region].items())]
         data = Hist1D(files["data"][hname])
-    bgs = sorted(bgs, key=lambda bg: bg.get_integral())
     data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
     if data.get_integral() < 1e-6: return
     if abs(sum(bgs).get_integral()) < 1e-6: return
 
+
+    do_bkg_syst = False
+    try:
+        hname_up = hname.replace("{}_".format(var), "{}_btagup_".format(var))
+        bgs_btagup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
+        hname_up = hname.replace("{}_".format(var), "{}_jecup_".format(var))
+        bgs_jecup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
+        hname_up = hname.replace("{}_".format(var), "{}_jerup_".format(var))
+        bgs_jerup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
+        hname_up = hname.replace("{}_".format(var), "{}_scaledn_".format(var))
+        bgs_scaleup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
+        hname_up = hname.replace("{}_".format(var), "{}_bbup_".format(var))
+        bgs_bbup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
+        def relative_variation(hcent, hvar):
+            if hvar.get_integral() > 1.0e-5:
+                tmp = (hvar.counts/hcent.counts) * hcent.get_integral()/hvar.get_integral()
+                # tmp = (hvar.counts/hcent.counts)
+                tmp[np.isnan(tmp)] = 1.
+                tmp[tmp < 1.] = tmp[tmp<1.]**-1.0
+                tmp[np.isnan(tmp)] = 1.
+                tmp -= 1.
+                return tmp
+            return np.zeros(len(hvar.counts))
+        bgs_btagup = map(relative_variation, bgs,bgs_btagup)
+        bgs_jecup = map(relative_variation, bgs,bgs_jecup)
+        bgs_jerup = map(relative_variation, bgs,bgs_jerup)
+        bgs_scaleup = map(relative_variation, bgs,bgs_scaleup)
+        bgs_bbup = map(relative_variation, bgs,bgs_bbup)
+        def augment_errors(hcent, *relerrs):
+            hcent._errors = hcent.counts*((hcent.errors/hcent.counts)**2. + np.sum(np.array(relerrs)**2.,axis=0))**0.5
+            hcent._errors[np.isnan(hcent._errors)] = hcent._counts[np.isnan(hcent._errors)]
+        map(augment_errors, bgs, bgs_btagup,bgs_jecup,bgs_jerup,bgs_scaleup,bgs_bbup)
+        do_bkg_syst = True
+    except KeyError:
+        # didn't find btagup/btagdown
+        pass
+
+    bgs = sorted(bgs, key=lambda bg: bg.get_integral())
+    sf = data.get_integral()/sum(bgs).get_integral()
+    # bgs = [bg*sf for bg in bgs]
+    bgs = [bg*1 for bg in bgs]
+    title += " data/MC={:.2f}".format(sf)
     if other_files:
         fname = "{}/run2_{}_{}_{}.pdf".format(outputdir,region,var,flav)
     else:
         fname = "{}/y{}_{}_{}_{}.pdf".format(outputdir,year,region,var,flav)
     plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
                cms_type = "Preliminary",
+               do_bkg_syst=do_bkg_syst,
                lumi = lumi,
                ratio_range=[0.0,2.0],
+               # ratio_range=[0.5,1.5],
                )
     # os.system("ic {}".format(fname))
-    table_info = write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
+    # table_info = write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
+    write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
     return fname
 
 def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[], flavs=["ee","em","mm","in"]):
@@ -250,35 +308,54 @@ if __name__ == "__main__":
     #         year=2017, lumi="41.5",
     #         )
 
-    inputdir = "outputs_Nov29"
+    # inputdir = "outputs_Nov29"
+    # inputdir = "outputs_Dec10"
+    inputdir = "outputs_Dec19_v6"
+    # inputdir = "outputs_Dec19_v32"
+    # inputdir = "outputs_Dec17toptag"
+    # regions = ["osloose","os","tl","tt_isr"]
+    # regions = ["osloose","os","tl","osnbrw"]
+    # regions = ["osloose","os","tl", "osnbrw"] #,"osnbrw"]
+    # regions = ["os","osnbrw"]
+    regions = ["os","osloose", "tl", "htnb1", "htnb1mc"]
+    flavs = ["in"]
+
     # 2017 alone
-    outputdir = "plots_ft_2017"
+    outputdir = "plots_ft_jecv6_2017"
+    # outputdir = "plots_ft_jecv32_2017"
+    # outputdir = "plots_ft_2017_toptag"
     make_plots(
             outputdir=outputdir,
             inputdir=inputdir,
-            regions = ["os","tl","tt_isr"], flavs = ["in"],
+            regions = regions, flavs = flavs,
             year=2017,
             lumi="41.5",
             )
+
     # 2018 alone
-    outputdir = "plots_ft_2018"
+    outputdir = "plots_ft_jecv6_2018"
+    # outputdir = "plots_ft_jecv32_2018"
+    # outputdir = "plots_ft_2018_toptag"
     make_plots(
             outputdir=outputdir,
             inputdir=inputdir,
-            regions = ["os","tl","tt_isr"], flavs = ["in"],
+            regions = regions, flavs = flavs,
             year=2018,
             lumi="58.8",
             )
-    # 2016 + 2018 + 2017
-    outputdir = "plots_ft_run2"
-    make_plots(
-            outputdir=outputdir,
-            inputdir=inputdir,
-            regions = ["os","tl","tt_isr"], flavs = ["in"],
-            year=2018,
-            lumi="136.3",
-            other_years = [2016,2017],
-            )
+
+    # # 2016 + 2018 + 2017
+    # outputdir = "plots_ft_run2"
+    # # outputdir = "plots_ft_run2_toptag"
+    # make_plots(
+    #         outputdir=outputdir,
+    #         inputdir=inputdir,
+    #         regions = regions, flavs = flavs,
+    #         year=2018,
+    #         lumi="136.3",
+    #         other_years = [2016,2017],
+    #         )
+
     # os.system("niceplots plots_2017 plots_crs2017_Sep3")
     # os.system("niceplots plots_2018 plots_crs2018_Sep3")
     # os.system("niceplots plots_20172018 plots_crs20172018_Sep3")

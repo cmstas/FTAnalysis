@@ -9,7 +9,7 @@ r.gROOT.ProcessLine(".L ScanChain.C+")
 
 
 years_to_consider = [ # FIXME
-        2016,
+        # 2016,
         2017,
         2018,
         ]
@@ -29,16 +29,40 @@ basedirs ={
         # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2017/", # FIXME
         # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.10_all/output/year_2018/", # FIXME
         # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2016/", # FIXME
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2017/", # FIXME
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2018/", # FIXME
+
+        # # In AN from early Dec
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2016/", # FIXME
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2017/", # FIXME
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2018/", # FIXME
+
+        # # In AN from early Dec
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2016/", # FIXME
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2017/", # FIXME
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2018/", # FIXME
+
+        # # top tag stuff
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.19_all/output/year_2016/", # FIXME
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.19_all/output/year_2017/", # FIXME
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.19_all/output/year_2018/", # FIXME
+
+        # New v32 JECs for 2017, 2018
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21/output/year_2016/", # FIXME
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/", # FIXME
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21/output/year_2018/", # FIXME
+
         }
 
 # outputdir = "outputs_temp"
 # outputdir = "outputs_data2016_80x"
 # outputdir = "outputs_data2016_94x" # FIXME
 # outputdir = "outputs_ss20172018" # FIXME
-outputdir = "outputs_Nov29" # FIXME
+# outputdir = "outputs_Nov29" # FIXME
+
+# outputdir = "outputs_Dec10" # has isr rw derived from tt on 2017 2018
+# outputdir = "outputs_Dec19_v6" # v6 jec + wps, htnb1 region to check fake counts and compare with new ptratio points
+# outputdir = "outputs_Dec19_v32" # v32 jec + wps, htnb1 region to check fake counts and compare with new ptratio points
+# outputdir = "outputs_Dec17toptag" # 
+outputdir = "outputs_19Jan4_v3p21"
 
 # outputdir = "outputs_ss2018_afterhem" # FIXME
 # outputdir = "outputs_ss2018_beforehem" # FIXME
@@ -87,6 +111,9 @@ chs = {
                 basedirs[2016]+"WWDPS.root",
                 basedirs[2016]+"ZZ.root",
                 ],options=options[2016]),
+            "tttt": make_objs([
+                basedirs[2016]+"TTTTnew.root",
+                ],options=options[2016]),
             "rares": make_objs([
                 basedirs[2016]+"TTG.root",
                 basedirs[2016]+"WZG.root",
@@ -133,12 +160,10 @@ chs = {
             # "ttlomg": make_objs(basedirs[2017]+"TTLOMG.root", options=options[2017]),
             # "ttslph": make_objs(basedirs[2017]+"TTSLPH.root", options=options[2017]),
             "ttdl0jet": make_objs([
-                basedirs[2017]+"TTdilep0jet.root",
-                basedirs[2017]+"TTdilep0jetext2.root",
+                basedirs[2017]+"TTdilep0jet*.root",
                 ], options=options[2017]),
             "ttdl1jet": make_objs([
-                basedirs[2017]+"TTdilep1jet.root",
-                basedirs[2017]+"TTdilep1jetext2.root",
+                basedirs[2017]+"TTdilep1jet*.root",
                 ], options=options[2017]),
             "ttz": make_objs([
                 basedirs[2017]+"TTZnlo.root",
@@ -151,6 +176,9 @@ chs = {
                 basedirs[2017]+"WW.root",
                 basedirs[2017]+"WWDPS.root",
                 basedirs[2017]+"ZZ.root",
+                ],options=options[2017]),
+            "tttt": make_objs([
+                basedirs[2017]+"TTTTnew.root",
                 ],options=options[2017]),
             "rares": make_objs([
                 basedirs[2017]+"WZG.root",
@@ -176,7 +204,7 @@ chs = {
             },
         2018: {
 
-                # only tt dy wjets are from 2018 samples
+                # only tt ISR + data from 2018
 
             "fakes": make_objs(basedirs[2018]+"Data*.root", options=options[2018]+" doFakes"),
             "flips": make_objs(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips"),
@@ -197,6 +225,12 @@ chs = {
             #     "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.10_prefire/output/year_2017/WJets_HT*.root" # FIXME
             #     ], options=options[2018]),
             "ttfake": make_objs(basedirs[2017]+"TTBAR*.root", options=options[2018]+ "doTruthFake"),
+            "ttdl0jet": make_objs([
+                basedirs[2018]+"TTdilep0jet*.root",
+                ], options=options[2018]),
+            "ttdl1jet": make_objs([
+                basedirs[2018]+"TTdilep1jet*.root",
+                ], options=options[2018]),
             "ttz": make_objs([
                 basedirs[2017]+"TTZnlo.root",
                 basedirs[2017]+"TTZLOW.root",
@@ -207,6 +241,9 @@ chs = {
                 basedirs[2017]+"WW.root",
                 basedirs[2017]+"WWDPS.root",
                 basedirs[2017]+"ZZ.root",
+                ],options=options[2018]),
+            "tttt": make_objs([
+                basedirs[2017]+"TTTTnew.root",
                 ],options=options[2018]),
             "rares": make_objs([
                 basedirs[2017]+"WZG.root",

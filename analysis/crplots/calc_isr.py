@@ -18,11 +18,20 @@ np.set_printoptions(linewidth=150)
 which = "ttdl0jet"
 # which = "ttdl1jet"
 # which = "tt"
-procs = ["dy", "ttz", "tth", "ttw", "vv", "rares", "singletop"]
+others = ["wjets","vv"]
+procs = ["dy", "ttz", "tth", "ttw", "vv", "rares", "singletop", "tttt"]+others
 
-inputdir = "outputs_isr2017/"
+# inputdir = "outputs_Nov29/"
+inputdir = "outputs_19Jan4_v3p21/"
 year = 2017
+# year = 2018
 files = { proc:uproot.open("{}/histos_{}_{}.root".format(inputdir,proc,year)) for proc in procs+["data",which] }
+
+# # add up 2017, 2018 to check
+# # dir=outputs_19Jan4_v3p21/; for proc in wjets tttt singletop ttdl0jet dy ttw tth ttz ttdl1jet vv rares tt data ; do echo hadd -k -f ${dir}/histos_${proc}_1718.root ${dir}/histos_${proc}_{2017,2018}.root ; done
+# year = 1718
+# files = { proc:uproot.open("{}/histos_{}_{}.root".format(inputdir,proc,year)) for proc in procs+["data",which] }
+
 # print files
 # files = { proc:uproot.open("{}/histos_{}_{}.root".format(inputdir,proc,year)) for proc in (list(set(sum(map(lambda x:x.keys(),bginfo.values()),[])))+["data"]) }
     # hname = "{}_{}_{}".format(region,var,flav)
@@ -30,18 +39,21 @@ files = { proc:uproot.open("{}/histos_{}_{}.root".format(inputdir,proc,year)) fo
 hname = "tt_isr_nisrjets_in"
 # hname = "tt_isr_met_in"
 otherbgs = []
-for newname,tosum in [
-        ["rare", ["rares","vv","ttz","tth","ttw"]],
-        ["dy", ["dy"]],
-        ["singletop", ["singletop"]],
+for newname,tosum,color in [
+        ["other",others, [0.4,0.8,0.8]],
+        ["rare", ["rares","vv","ttz","tth","ttw","tttt"], [1.0,0.4,1.0]],
+        ["dy", ["dy"], [0.4,0.6,1.0]],
+        ["singletop", ["singletop"], [1.0,0.4,0.0]],
         ]:
     groupbg = sum([Hist1D(files[proc][hname]) for proc in tosum])
+    # if newname == "singletop": groupbg *= 15.
     groupbg.set_attr("label", newname)
+    groupbg.set_attr("color",color)
     otherbgs.append(groupbg)
 data = Hist1D(files["data"][hname],label="data")
 mc_isr = Hist1D(files[which][hname],label=which)
 
-# FIXME
+# scale ISR sample to data (well, to data-otherBGs)
 mc_isr *= (data-sum(otherbgs)).get_integral() / mc_isr.get_integral()
 
 bgs = otherbgs + [mc_isr]
@@ -70,17 +82,14 @@ tab = write_table(data, otherbgs+[mc_isr], extra_hists=[hsfs], binedge_fmt="{:.0
 tab.set_theme_csv()
 tab.print_table()
 
-otherbgs[0].set_attr("color", [1.0, 0.4, 1.0])
-otherbgs[1].set_attr("color", [0.4, 0.6, 1.0])
-otherbgs[2].set_attr("color", [1.0, 0.4, 0.0])
 mc_isr.set_attr("color",[0.8, 0.8, 0.8])
 
 ratio = data/sum(otherbgs+[mc_isr])
 def ax_ratio_callback(ratio):
     def f(ax):
-        for x,y in zip(ratio.get_bin_centers(),ratio.get_counts()):
+        for x,y,ye in zip(ratio.get_bin_centers(),ratio.get_counts(),ratio.get_errors()):
             if not (0. < y < 2.): continue
-            ax.text(x-0.3,y-0.1,"{:.2f}".format(y),
+            ax.text(x-0.32,y-0.1,"{:.2f}$\pm${:.2f}".format(y,ye),
                     color="black", ha="center", va="center", fontsize=7.0,
                     wrap=True)
     return f
@@ -93,6 +102,38 @@ plot_stack(bgs=otherbgs+[mc_isr], data=data, title="nisrjets", xlabel="nisrjets"
            lumi = "41.5",
            ratio_range=[0.0,2.0],
            ax_ratio_callback=ax_ratio_callback(ratio),
+           # do_bkg_syst=True,
            )
 os.system("ic {}".format(fname))
 
+print ratio
+
+# # ttZ has 0 extra partons
+# https://github.com/cms-sw/genproductions/blob/f2df23bf13242fd796b3a282593f40044527fc0a/bin/MadGraph5_aMCatNLO/cards/production/13TeV/TTZJets/TTZJetsToLLNuNu_5f_NLO/TTZJetsToLLNuNu_5f_NLO_proc_card.dat
+# # ttW has 1 extra parton
+# https://github.com/cms-sw/genproductions/blob/5fb3762c8be13dabb89a8580863856201d56f49c/bin/MadGraph5_aMCatNLO/cards/production/2017/13TeV/TTWJets/TTWJetsToLNu_5f_NLO_FXFX/TTWJetsToLNu_5f_NLO_FXFX_proc_card.dat
+if "0jet" in which:
+    vec = hsfs.get_counts().tolist()[:4]+[1., 1., 1., 1., 1.]
+else:
+    vec = [1.,1.,1.,1.]+hsfs.get_counts().tolist()[:5]
+print """
+float isrWeight(int nisrmatch, int sample) {{
+    // see instructions in analysis/misc/isr_weights/calc.py and script in analysis/crplots/calc_isr.py
+    float scale = 1.;
+    if (sample == 1) {{ // ttW -- 0 extra partons
+        scale = 1.;
+        if (nisrmatch == 0) {{ return scale*{:.3f}; }}
+        if (nisrmatch == 1) {{ return scale*{:.3f}; }}
+        if (nisrmatch == 2) {{ return scale*{:.3f}; }}
+        if (nisrmatch >= 3) {{ return scale*{:.3f}; }}
+    }} else if (sample == 2) {{ // ttZ -- 1 extra parton
+        scale = 1.;
+        if (nisrmatch == 0) {{ return scale*{:.3f}; }}
+        if (nisrmatch == 1) {{ return scale*{:.3f}; }}
+        if (nisrmatch == 2) {{ return scale*{:.3f}; }}
+        if (nisrmatch == 3) {{ return scale*{:.3f}; }}
+        if (nisrmatch >= 4) {{ return scale*{:.3f}; }}
+    }}
+    return scale;
+}}
+""".format(*vec)
