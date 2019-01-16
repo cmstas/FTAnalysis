@@ -11,6 +11,8 @@ float leptonScaleFactor(int pdgId, float pt, float eta, float ht, float rand=-1.
     else iera = 5; // F
 
     if (abs(pdgId)==13) {
+        // FIXME -- SFs don't go below 20
+        if (pt < 20.) return 1.;
         if (iera == 0) return muonScaleFactor_RunBCDEF(pt,eta);
         else if (iera == 1 || iera == 2) return muonScaleFactor_RunBC(pt,eta);
         else if (iera == 3 || iera == 4) return muonScaleFactor_RunDE(pt,eta);
@@ -36,6 +38,8 @@ float leptonScaleFactor_err(int pdgId, float pt, float eta, float ht, float rand
     else iera = 5; // F
 
     if (abs(pdgId)==13) {
+        // FIXME -- SFs don't go below 20 -- take 2% per lepton
+        if (pt < 20.) return 0.02;
         float e1 = 0.;
         float e2 = 0.;
         if (iera == 0) { e1=muonScaleFactorError_RunBCDEF(pt,eta); }

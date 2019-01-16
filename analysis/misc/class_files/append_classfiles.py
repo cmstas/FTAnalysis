@@ -1,12 +1,12 @@
 # edit the base class file name
 cf_basename = "v8.02/SS" # .cc, .h
 # copy the pattern for the following branch (make sure the type is correct)
-branch_to_copy = "met3p0"
-branch_to_copy_type = "float"
+branch_to_copy = "fired_trigger"
+branch_to_copy_type = "bool"
 # and use this pattern to squeeze in the following branches (and associated types)
 branches_to_add = [
         
-        ("weight","float")
+        ("fired_trigger_ss","bool")
 
         # ("btags_cdisc", "vector<float>"), # note, need to pick another branch_to_copy, etc.
         # ("trijet_discs", "vector<float>"),

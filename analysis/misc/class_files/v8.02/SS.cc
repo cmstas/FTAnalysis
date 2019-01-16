@@ -1756,6 +1756,12 @@ void SSAG::Init(TTree *tree) {
 		passed_id_inSituFR_lep2_branch = tree->GetBranch("passed_id_inSituFR_lep2");
 		if (passed_id_inSituFR_lep2_branch) {passed_id_inSituFR_lep2_branch->SetAddress(&passed_id_inSituFR_lep2_);}
 	}
+
+  fired_trigger_ss_branch = 0;
+  if (tree->GetBranch("fired_trigger_ss") != 0) {
+    fired_trigger_ss_branch = tree->GetBranch("fired_trigger_ss");
+    if (fired_trigger_ss_branch) { fired_trigger_ss_branch->SetAddress(&fired_trigger_ss_); }
+  }
 	fired_trigger_branch = 0;
 	if (tree->GetBranch("fired_trigger") != 0) {
 		fired_trigger_branch = tree->GetBranch("fired_trigger");
@@ -2428,6 +2434,7 @@ void SSAG::GetEntry(unsigned int idx)
 		passed_id_inSituFR_lep1_isLoaded = false;
 		passed_id_inSituFR_lep2_isLoaded = false;
 		fired_trigger_isLoaded = false;
+  fired_trigger_ss_isLoaded = false;
 		triggers_isLoaded = false;
 		triggers1lep_isLoaded = false;
 		weight_btagsf_isLoaded = false;
@@ -2836,6 +2843,7 @@ void SSAG::LoadAllBranches()
 	if (passed_id_inSituFR_lep1_branch != 0) passed_id_inSituFR_lep1();
 	if (passed_id_inSituFR_lep2_branch != 0) passed_id_inSituFR_lep2();
 	if (fired_trigger_branch != 0) fired_trigger();
+  if (fired_trigger_ss_branch != 0) fired_trigger_ss();
 	if (triggers_branch != 0) triggers();
 	if (triggers1lep_branch != 0) triggers1lep();
 	if (weight_btagsf_branch != 0) weight_btagsf();
@@ -7261,6 +7269,19 @@ const float &SSAG::weight() {
 		}
 		return passed_id_inSituFR_lep2_;
 	}
+
+const bool &SSAG::fired_trigger_ss() {
+  if (not fired_trigger_ss_isLoaded) {
+    if (fired_trigger_ss_branch != 0) {
+      fired_trigger_ss_branch->GetEntry(index);
+    } else {
+      printf("branch fired_trigger_ss_branch does not exist!\n");
+      exit(1);
+    }
+    fired_trigger_ss_isLoaded = true;
+  }
+  return fired_trigger_ss_;
+}
 	const bool &SSAG::fired_trigger()
 	{
 		if (not fired_trigger_isLoaded) {
@@ -8506,6 +8527,7 @@ namespace ss {
 	const bool &passed_id_inSituFR_lep1() { return samesign.passed_id_inSituFR_lep1(); }
 	const bool &passed_id_inSituFR_lep2() { return samesign.passed_id_inSituFR_lep2(); }
 	const bool &fired_trigger() { return samesign.fired_trigger(); }
+  const bool &fired_trigger_ss() { return samesign.fired_trigger_ss(); }
 	const unsigned int &triggers() { return samesign.triggers(); }
 	const unsigned int &triggers1lep() { return samesign.triggers1lep(); }
 	const float &weight_btagsf() { return samesign.weight_btagsf(); }

@@ -1033,6 +1033,9 @@ protected:
 	bool     fired_trigger_;
 	TBranch *fired_trigger_branch;
 	bool     fired_trigger_isLoaded;
+  bool fired_trigger_ss_;
+  TBranch *fired_trigger_ss_branch;
+  bool fired_trigger_ss_isLoaded;
 	unsigned int triggers_;
 	TBranch *triggers_branch;
 	bool     triggers_isLoaded;
@@ -1574,6 +1577,7 @@ void LoadAllBranches();
 	const bool &passed_id_inSituFR_lep1();
 	const bool &passed_id_inSituFR_lep2();
 	const bool &fired_trigger();
+  const bool &fired_trigger_ss();
 	const unsigned int &triggers();
 	const unsigned int &triggers1lep();
 	const float &weight_btagsf();
@@ -1986,6 +1990,7 @@ namespace ss {
 	const bool &passed_id_inSituFR_lep1();
 	const bool &passed_id_inSituFR_lep2();
 	const bool &fired_trigger();
+  const bool &fired_trigger_ss();
 	const unsigned int &triggers();
 	const unsigned int &triggers1lep();
 	const float &weight_btagsf();
