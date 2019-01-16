@@ -124,11 +124,19 @@ d_crpostfitsf_errs = {'fakes': 0.5330058353969307,
 
 # yuck, gotta make these global for multiprocessing since uproot file objects can't be pickled
 files = {}
+signame_ = None
 
 def worker(info):
-    global files
+    global files, signame_
 
     outputdir, year, lumi, (var, (regions, xlabel)) = info
+
+    if signame_ == "tttt":
+        sigstr = r"$t\bar{t}t\bar{t}$"
+    else:
+        m1,m2 = map(int,signame_.split("_m")[1:])
+        modelname = signame_.split("_m")[0].replace("fs_","").capitalize().replace("ww","WW")
+        sigstr = r"{} ({},{}) $\times 10$".format(modelname,m1,m2)
 
     fnames = []
     for region in regions:
@@ -155,18 +163,41 @@ def worker(info):
                     ]
 
         data = sum([Hist1D(files[y]["data"]["{}_{}_data".format(region_for_hist,var)]) for y in files.keys()])
-        sig = sum([Hist1D(files[y]["tttt"]["{}_{}_tttt".format(region_for_hist,var)],color="r") for y in files.keys()])
-        sig.set_attr("label", r"$t\bar{t}t\bar{t}$")
+        sig = sum([Hist1D(files[y][signame_]["{}_{}_{}".format(region_for_hist,var,signame_)],color="r") for y in files.keys()])
+        sig.set_attr("label", sigstr)
         bgs = sorted(bgs, key=lambda bg: bg.get_integral())
         data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
 
         # if data.get_integral() < 1e-6: return
-        if abs(sum(bgs).get_integral()) < 1e-6: return
+        if abs(sum(bgs).get_integral()) < 1e-6: continue
 
         ax_main_callback = None
+        ax_ratio_callback = None
+        mpl_legend_params = {}
+        ratio_range = [0.,2.]
         xticks = []
 
-        if region.lower() in ["sr","srdisc"]:
+        if region in ["SRHH","SRHL","SRLL","SRML","SRLM"] and (var == "TOTAL"):
+            data._counts *= 0.
+            data._errors *= 0.
+            data.set_attr("label", "Data (blind)")
+            mpl_legend_params["ncol"] = 2
+
+            def ax_main_callback(ax):
+                ax.set_ylim([0.1,ax.get_ylim()[1]*2.0])
+                ax.set_yscale("log", nonposy='clip'),
+
+            if region in ["SRML"]:
+                # xticks = range(1,50)
+                xticks = []
+                xticks += ["{}  ".format(x) if x not in [1,2,3,4,14,15,16] else ("{}A".format(x)) for x in range(1,16+1)]+["1B","2B","3B","4B","14B","15B","16B"]
+                xticks += ["{}  ".format(x) if x not in [1,2,3,4,14,15,16] else ("{}A".format(x)) for x in range(1,16+1)]+["1B","2B","3B","4B","14B","15B","16B"]
+                def ax_ratio_callback(ax):
+                    ax.text(11,2.35,"off-Z", color="blue", ha="center", va="center", fontsize=10.0, wrap=True)
+                    ax.text(10+23,2.35,"on-Z", color="blue", ha="center", va="center", fontsize=10.0, wrap=True)
+                    ax.axvline(x=23.5, color="blue", lw=1.5)
+
+        elif region.lower() in ["sr","srdisc"]:
             data._counts *= 0.
             data._errors *= 0.
             data.set_attr("label", "Data (blind)")
@@ -177,6 +208,7 @@ def worker(info):
                 #     ax.set_ylim([0.1,ax.get_ylim()[1]*1.5])
                 #     ax.set_yscale("log", nonposy='clip'),
                 xticks = ["CRZ"]+range(1,25)
+
         if (region.lower() in ["srcr"]) and (var.lower() in ["total"]):
             # data._counts[2:] *= 0.
             # data._errors[2:] *= 0.
@@ -198,13 +230,14 @@ def worker(info):
         plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
                    cms_type = "Preliminary",
                    lumi = lumi,
-                   ratio_range=[0.0,2.0],
+                   ratio_range=ratio_range,
                    sigs=[sig],
                    xticks=xticks,
                    mpl_sig_params={
                        # "hist":False,
                        },
                    ax_main_callback=ax_main_callback,
+                   mpl_legend_params=mpl_legend_params,
                     # mpl_legend_params={
                     #     "framealpha": 0.4,
                     #     "ncol": 2,
@@ -220,10 +253,13 @@ def worker(info):
         # return
 
         table_info = write_table(data,bgs,signal=sig,outname=fname.replace(".pdf",".txt"))
+        # table_info = write_table(data,bgs,signal=sig,outname=fname.replace(".pdf",".txt"),
+        #         binlabels=xticks,signame=sigstr.replace(r"$\times 10$","x10").replace(","," "),csv=True)
     return ", ".join(fnames)
 
-def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[]):
-    global files, other_files
+def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[], signame="tttt"):
+    global files, signame_, other_files
+    signame_ = signame
 
     os.system("mkdir -p {}/".format(outputdir))
 
@@ -241,15 +277,15 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
     infos = [[outputdir,year,lumi,x] for x in labels.items()]
     # print infos
 
-    # map(worker,infos)
+    map(worker,infos)
 
-    os.nice(10)
-    from multiprocessing import Pool as ThreadPool
-    pool = ThreadPool(25)
-    # print infos
-    for res in pool.imap_unordered(worker,infos):
-        if res:
-            print "Wrote {}".format(res)
+    # os.nice(10)
+    # from multiprocessing import Pool as ThreadPool
+    # pool = ThreadPool(25)
+    # # print infos
+    # for res in pool.imap_unordered(worker,infos):
+    #     if res:
+    #         print "Wrote {}".format(res)
 
 
 if __name__ == "__main__":

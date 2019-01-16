@@ -144,7 +144,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
                 h_syst.Write()
     
     # If not doing data, flips, or fakes
-    if not any(x in name for x in ["data","flips","fakes","fakes_app"]):
+    if not any(x in name for x in ["data","flips","fakes"]):
         # btagSF
         for which in ["Up","Down"]:
             h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,"BTAGSF",which.replace("ow","").upper(),name))
@@ -155,7 +155,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
             h_syst.Write()
 
         # PU, JES, JER, Prefire SF for 2016, 2017
-        for syst in ["pu","jes","jer","prefire"]:
+        for syst in ["pu","jes","jer"]:
             for which in ["Up","Down"]:
                 h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,syst.upper(),which.replace("ow","").upper(),name))
                 h_syst = h_alt.Clone("{}{}".format(syst,which))
@@ -164,12 +164,13 @@ def write_one_file(fname_in, fname_out, name, region, year):
                 h_syst.Write()
 
         # FastSim gen met
-        h_alt = fin.Get("{}_MET_UP_TOTAL_{}".format(region,name))
-        h_syst_up = h_alt.Clone("metUp".format(which))
-        h_syst_down = h_alt.Clone("metDown".format(which))
+        h_alt = fin.Get("{}_PREFIRE_UP_TOTAL_{}".format(region,name))
+        h_syst_up = h_alt.Clone("prefireUp".format(which))
+        h_syst_down = h_alt.Clone("prefireDown".format(which))
         fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
         h_syst_up.Write()
         h_syst_down.Write()
+
 
         # lepton SFs
         h_alt = fin.Get("{}_LEP_UP_TOTAL_{}".format(region,name))
@@ -202,6 +203,25 @@ def write_one_file(fname_in, fname_out, name, region, year):
         fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
         h_syst_up.Write()
         h_syst_down.Write()
+
+        if "fs_" in name:
+
+            # FastSim gen met
+            h_alt = fin.Get("{}_MET_UP_TOTAL_{}".format(region,name))
+            h_syst_up = h_alt.Clone("metUp".format(which))
+            h_syst_down = h_alt.Clone("metDown".format(which))
+            fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
+            h_syst_up.Write()
+            h_syst_down.Write()
+
+            # FastSim ISR reweighting
+            h_alt = fin.Get("{}_ISR_UP_TOTAL_{}".format(region,name))
+            h_syst_up = h_alt.Clone("isrUp".format(which))
+            h_syst_down = h_alt.Clone("isrDown".format(which))
+            h_syst_up.Scale(h_nominal.Integral()/divz(h_syst_up.Integral()))
+            h_syst_down.Scale(h_nominal.Integral()/divz(h_syst_down.Integral()))
+            h_syst_up.Write()
+            h_syst_down.Write()
 
         # HLT syst
         write_hthlt_syst(h_nominal,name)
@@ -262,12 +282,11 @@ def write_one_file(fname_in, fname_out, name, region, year):
         h_syst_up.Write()
         h_syst_down.Write()
 
-
     fout.Close()
 
     return True
 
-def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_tmp", regions=["SRCR","SRDISC"],verbose=True,extra_procs=[]):
+def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_tmp", regions=[],verbose=True,extra_procs=[], doss=False):
     global verbose_
     verbose_ = verbose
 
@@ -283,9 +302,16 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
                 year = year,
                 )
 
+    procs = []
+    if doss:
+        procs.extend(["ttw","ww","wz", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg"])
+        regions = ["SRHH","SRHL","SRLL","SRML","SRLM"]
+    else:
+        procs.extend(["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"])
+        regions = ["SRCR","SRDISC"]
     nmade = 0
     for year in [2016, 2017, 2018]:
-        for proc in ["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv", "fakes_app"]+extra_procs:
+        for proc in procs+extra_procs:
             for region in regions:
                 if do_one(year,proc,region): nmade += 1
 
