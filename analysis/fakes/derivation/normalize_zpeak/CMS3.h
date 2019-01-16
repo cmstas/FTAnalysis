@@ -13,7 +13,7 @@
 #include <unistd.h>
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 
-// Generated with file: v1.0_leptontree/year_2017/DY_high.root
+// Generated with file: /nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2017/DY_high.root
 
 using namespace std;
 class CMS3 {
@@ -23,18 +23,18 @@ protected:
   bool passes_SS_fo_looseMVA_noiso_v6_;
   TBranch *passes_SS_fo_looseMVA_noiso_v6_branch;
   bool passes_SS_fo_looseMVA_noiso_v6_isLoaded;
-  float miniiso_;
-  TBranch *miniiso_branch;
-  bool miniiso_isLoaded;
+  bool passes_SS_fo_noiso_v6_;
+  TBranch *passes_SS_fo_noiso_v6_branch;
+  bool passes_SS_fo_noiso_v6_isLoaded;
   ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > *tag_p4_;
   TBranch *tag_p4_branch;
   bool tag_p4_isLoaded;
   int njets_;
   TBranch *njets_branch;
   bool njets_isLoaded;
-  int HLT_Ele17_CaloIdM_TrackIdM_PFJet30_;
-  TBranch *HLT_Ele17_CaloIdM_TrackIdM_PFJet30_branch;
-  bool HLT_Ele17_CaloIdM_TrackIdM_PFJet30_isLoaded;
+  float p4_pt_;
+  TBranch *p4_pt_branch;
+  bool p4_pt_isLoaded;
   int HLT_Mu8_TrkIsoVVL_;
   TBranch *HLT_Mu8_TrkIsoVVL_branch;
   bool HLT_Mu8_TrkIsoVVL_isLoaded;
@@ -44,9 +44,9 @@ protected:
   bool passes_SS_fo_v6_;
   TBranch *passes_SS_fo_v6_branch;
   bool passes_SS_fo_v6_isLoaded;
-  int HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_;
-  TBranch *HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_branch;
-  bool HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_isLoaded;
+  float etaSC_;
+  TBranch *etaSC_branch;
+  bool etaSC_isLoaded;
   bool evt_isRealData_;
   TBranch *evt_isRealData_branch;
   bool evt_isRealData_isLoaded;
@@ -68,9 +68,9 @@ protected:
   int id_;
   TBranch *id_branch;
   bool id_isLoaded;
-  int HLT_Ele23_CaloIdM_TrackIdM_PFJet30_;
-  TBranch *HLT_Ele23_CaloIdM_TrackIdM_PFJet30_branch;
-  bool HLT_Ele23_CaloIdM_TrackIdM_PFJet30_isLoaded;
+  float qscale_;
+  TBranch *qscale_branch;
+  bool qscale_isLoaded;
   int HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_;
   TBranch *HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_branch;
   bool HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_isLoaded;
@@ -80,9 +80,15 @@ protected:
   int nloose_mu_;
   TBranch *nloose_mu_branch;
   bool nloose_mu_isLoaded;
+  float mt_;
+  TBranch *mt_branch;
+  bool mt_isLoaded;
   bool isTriggerSafenoIso_;
   TBranch *isTriggerSafenoIso_branch;
   bool isTriggerSafenoIso_isLoaded;
+  int HLT_Ele23_CaloIdM_TrackIdM_PFJet30_;
+  TBranch *HLT_Ele23_CaloIdM_TrackIdM_PFJet30_branch;
+  bool HLT_Ele23_CaloIdM_TrackIdM_PFJet30_isLoaded;
   bool passes_any_trigger_;
   TBranch *passes_any_trigger_branch;
   bool passes_any_trigger_isLoaded;
@@ -110,6 +116,9 @@ protected:
   float ptratio_v5_;
   TBranch *ptratio_v5_branch;
   bool ptratio_v5_isLoaded;
+  float miniiso_;
+  TBranch *miniiso_branch;
+  bool miniiso_isLoaded;
   int HLT_Mu17_TrkIsoVVL_;
   TBranch *HLT_Mu17_TrkIsoVVL_branch;
   bool HLT_Mu17_TrkIsoVVL_isLoaded;
@@ -158,6 +167,9 @@ protected:
   int ntight_el_;
   TBranch *ntight_el_branch;
   bool ntight_el_isLoaded;
+  int HLT_Ele17_CaloIdM_TrackIdM_PFJet30_;
+  TBranch *HLT_Ele17_CaloIdM_TrackIdM_PFJet30_branch;
+  bool HLT_Ele17_CaloIdM_TrackIdM_PFJet30_isLoaded;
   float ip3derr_;
   TBranch *ip3derr_branch;
   bool ip3derr_isLoaded;
@@ -206,9 +218,9 @@ protected:
   int HLT_Mu8_;
   TBranch *HLT_Mu8_branch;
   bool HLT_Mu8_isLoaded;
-  bool passes_SS_fo_noiso_v6_;
-  TBranch *passes_SS_fo_noiso_v6_branch;
-  bool passes_SS_fo_noiso_v6_isLoaded;
+  float p4_eta_;
+  TBranch *p4_eta_branch;
+  bool p4_eta_isLoaded;
   float evt_corrMETPhi_;
   TBranch *evt_corrMETPhi_branch;
   bool evt_corrMETPhi_isLoaded;
@@ -218,12 +230,15 @@ protected:
   int HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_;
   TBranch *HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_branch;
   bool HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_isLoaded;
-  float mt_;
-  TBranch *mt_branch;
-  bool mt_isLoaded;
+  float mva_;
+  TBranch *mva_branch;
+  bool mva_isLoaded;
   int HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30_;
   TBranch *HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30_branch;
   bool HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30_isLoaded;
+  int HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_;
+  TBranch *HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_branch;
+  bool HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_isLoaded;
   int evt_lumiBlock_;
   TBranch *evt_lumiBlock_branch;
   bool evt_lumiBlock_isLoaded;
@@ -253,14 +268,14 @@ public:
   void GetEntry(unsigned int idx);
   void LoadAllBranches();
   const bool &passes_SS_fo_looseMVA_noiso_v6();
-  const float &miniiso();
+  const bool &passes_SS_fo_noiso_v6();
   const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &tag_p4();
   const int &njets();
-  const int &HLT_Ele17_CaloIdM_TrackIdM_PFJet30();
+  const float &p4_pt();
   const int &HLT_Mu8_TrkIsoVVL();
   const float &evt_corrMET();
   const bool &passes_SS_fo_v6();
-  const int &HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ();
+  const float &etaSC();
   const bool &evt_isRealData();
   const int &HLT_Ele18_CaloIdL_TrackIdL_IsoVL_PFJet30();
   const float &ip3d();
@@ -268,11 +283,13 @@ public:
   const float &coneCorrPt();
   const int &HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ();
   const int &id();
-  const int &HLT_Ele23_CaloIdM_TrackIdM_PFJet30();
+  const float &qscale();
   const int &HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL();
   const int &HLT_Ele8_CaloIdM_TrackIdM_PFJet30();
   const int &nloose_mu();
+  const float &mt();
   const bool &isTriggerSafenoIso();
+  const int &HLT_Ele23_CaloIdM_TrackIdM_PFJet30();
   const bool &passes_any_trigger();
   const int &HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL();
   const int &evt_run();
@@ -282,6 +299,7 @@ public:
   const TString &sample();
   const int &HLT_DoubleMu8_Mass8_PFHT300();
   const float &ptratio_v5();
+  const float &miniiso();
   const int &HLT_Mu17_TrkIsoVVL();
   const int &HLT_Ele18_CaloIdM_TrackIdM_PFJet30();
   const int &nvtx();
@@ -298,6 +316,7 @@ public:
   const int &nFOs_SS();
   const int &HLT_IsoMu27();
   const int &ntight_el();
+  const int &HLT_Ele17_CaloIdM_TrackIdM_PFJet30();
   const float &ip3derr();
   const float &ptrelv1();
   const int &HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300();
@@ -314,12 +333,13 @@ public:
   const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &p4();
   const float &scale1fb();
   const int &HLT_Mu8();
-  const bool &passes_SS_fo_noiso_v6();
+  const float &p4_eta();
   const float &evt_corrMETPhi();
   const int &ntight_mu();
   const int &HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL();
-  const float &mt();
+  const float &mva();
   const int &HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30();
+  const int &HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ();
   const int &evt_lumiBlock();
   const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &dilep_p4();
   const float &trueNumInt();
@@ -338,14 +358,14 @@ extern CMS3 cms3;
 namespace tas {
 
   const bool &passes_SS_fo_looseMVA_noiso_v6();
-  const float &miniiso();
+  const bool &passes_SS_fo_noiso_v6();
   const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &tag_p4();
   const int &njets();
-  const int &HLT_Ele17_CaloIdM_TrackIdM_PFJet30();
+  const float &p4_pt();
   const int &HLT_Mu8_TrkIsoVVL();
   const float &evt_corrMET();
   const bool &passes_SS_fo_v6();
-  const int &HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ();
+  const float &etaSC();
   const bool &evt_isRealData();
   const int &HLT_Ele18_CaloIdL_TrackIdL_IsoVL_PFJet30();
   const float &ip3d();
@@ -353,11 +373,13 @@ namespace tas {
   const float &coneCorrPt();
   const int &HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ();
   const int &id();
-  const int &HLT_Ele23_CaloIdM_TrackIdM_PFJet30();
+  const float &qscale();
   const int &HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL();
   const int &HLT_Ele8_CaloIdM_TrackIdM_PFJet30();
   const int &nloose_mu();
+  const float &mt();
   const bool &isTriggerSafenoIso();
+  const int &HLT_Ele23_CaloIdM_TrackIdM_PFJet30();
   const bool &passes_any_trigger();
   const int &HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL();
   const int &evt_run();
@@ -367,6 +389,7 @@ namespace tas {
   const TString &sample();
   const int &HLT_DoubleMu8_Mass8_PFHT300();
   const float &ptratio_v5();
+  const float &miniiso();
   const int &HLT_Mu17_TrkIsoVVL();
   const int &HLT_Ele18_CaloIdM_TrackIdM_PFJet30();
   const int &nvtx();
@@ -383,6 +406,7 @@ namespace tas {
   const int &nFOs_SS();
   const int &HLT_IsoMu27();
   const int &ntight_el();
+  const int &HLT_Ele17_CaloIdM_TrackIdM_PFJet30();
   const float &ip3derr();
   const float &ptrelv1();
   const int &HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300();
@@ -399,12 +423,13 @@ namespace tas {
   const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &p4();
   const float &scale1fb();
   const int &HLT_Mu8();
-  const bool &passes_SS_fo_noiso_v6();
+  const float &p4_eta();
   const float &evt_corrMETPhi();
   const int &ntight_mu();
   const int &HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL();
-  const float &mt();
+  const float &mva();
   const int &HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30();
+  const int &HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ();
   const int &evt_lumiBlock();
   const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > &dilep_p4();
   const float &trueNumInt();

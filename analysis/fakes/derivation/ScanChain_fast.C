@@ -153,6 +153,8 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
     if (option.Contains("Data2017")) year = 2017;
     if (option.Contains("Data2018")) year = 2018;
 
+    bool isReReco = (option.Contains("ReReco"));
+
     bool quiet = option.Contains("quiet");
 
     bool anyPt = false;
@@ -229,6 +231,7 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
     float sf_HLT_Mu17_TrkIsoVVL = 1.0358;
     float sf_HLT_Mu8 = 0.7121;
     float sf_HLT_Mu8_TrkIsoVVL = 0.7123;
+    float sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1406;
 
     if (year == 2018) {
         // v23 2018
@@ -254,6 +257,67 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
         sf_HLT_IsoMu27 = 1.0;
 
     }
+
+
+    // From normalize_zpeak/
+
+    if (year == 2016) {
+// year = 2016
+    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 170.8142;
+    float sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 = 174.1874;
+    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 174.3728;
+    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 174.3723;
+    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 174.3712;
+    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 4283.5032;
+    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 4272.8598;
+    float sf_HLT_IsoMu27 = 1.0193;
+    float sf_HLT_Mu17 = 88.9215;
+    float sf_HLT_Mu17_TrkIsoVVL = 88.9254;
+    float sf_HLT_Mu8 = 55.6272;
+    float sf_HLT_Mu8_TrkIsoVVL = 57.0731;
+}
+if (year == 2017) {
+// year = 2017
+    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0259;
+    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.1322;
+    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1406;
+    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.1338;
+    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9540;
+    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.9492;
+    float sf_HLT_IsoMu27 = 1.1300;
+    float sf_HLT_Mu17 = 1.0362;
+    float sf_HLT_Mu17_TrkIsoVVL = 1.0358;
+    float sf_HLT_Mu8 = 0.7121;
+    float sf_HLT_Mu8_TrkIsoVVL = 0.7123;
+}
+if (year == 2018 and !isReReco) {
+// year = 2018
+    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8710;
+    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0038;
+    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0027;
+    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.0037;
+    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8481;
+    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8472;
+    float sf_HLT_IsoMu27 = 1.1954;
+    float sf_HLT_Mu17 = 1.1697;
+    float sf_HLT_Mu17_TrkIsoVVL = 1.1699;
+    float sf_HLT_Mu8 = 0.9427;
+    float sf_HLT_Mu8_TrkIsoVVL = 0.9554;
+}
+if (year == 2018 and  isReReco) {
+// year = rereco_2018
+    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8650;
+    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 0.9899;
+    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9904;
+    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 0.9939;
+    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8565;
+    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8440;
+    float sf_HLT_IsoMu27 = 1.1460;
+    float sf_HLT_Mu17 = 1.1200;
+    float sf_HLT_Mu17_TrkIsoVVL = 1.1202;
+    float sf_HLT_Mu8 = 0.8925;
+    float sf_HLT_Mu8_TrkIsoVVL = 0.9037;
+}
 
     if (false) {
         //this should be ok as long as there are less bins in the extrPtRel case
@@ -872,7 +936,11 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
                 //trigger selection
                 if (abs(id())==11) {
                     if (useIsoTrigs) {
-                        if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
+                        if (year == 2016) {
+                            if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
+                        } else {
+                            if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
+                        }
                     } else {
                         if (HLT_Ele8_CaloIdM_TrackIdM_PFJet30()<=0 && HLT_Ele17_CaloIdM_TrackIdM_PFJet30()<=0) continue;
                     }
@@ -976,10 +1044,18 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
                             prescale = HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30();
                             if (isData) prescale *= sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30;
                         }
-                        if ((anyPt || p4().pt() >= 25) && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
-                            passes_high = true;
-                            prescale = HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30();
-                            if (isData) prescale *= sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30;
+                        if (year == 2016) {
+                            if ((anyPt || p4().pt() >= 25) && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
+                                passes_high = true;
+                                prescale = HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30();
+                                if (isData) prescale *= sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30;
+                            }
+                        } else {
+                            if ((anyPt || p4().pt() >= 25) && HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
+                                passes_high = true;
+                                prescale = HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30();
+                                if (isData) prescale *= sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30;
+                            }
                         }
                         if (prescale>0) weight *= prescale;
                         else continue;	  

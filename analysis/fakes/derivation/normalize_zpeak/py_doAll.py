@@ -8,18 +8,20 @@ r.gROOT.ProcessLine(".L ScanChain.C+")
 
 
 years_to_consider = [
-        # 2016,
+        2016,
         2017,
-        # 2018,
+        2018,
+        "rereco_2018",
         ]
 procs_to_consider = [
         ]
 
 basedirs ={
 
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2016/",
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2017/",
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v1.0_leptontree/output/year_2018/",
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2016/",
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2017/",
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2018/",
+        "rereco_2018": "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2018/",
         }
 
 outputdir = "outputs_test"
@@ -35,9 +37,10 @@ options = {
         # 2016: " Data2016 doPUweight ",
         # 2017: " Data2017 doPUweight ",
         # 2018: " Data2018 doPUweight ",
-        2016: " Data2016 doPUweight doLeptonSF ",
-        2017: " Data2017 doPUweight doLeptonSF ",
-        2018: " Data2018 doPUweight doLeptonSF ",
+        2016: " quiet Data2016 doPUweight doLeptonSF ",
+        2017: " quiet Data2017 doPUweight doLeptonSF ",
+        2018: " quiet Data2018 doPUweight doLeptonSF ",
+        "rereco_2018": " quiet Data2018 doPUweight doLeptonSF ",
 
         }
 
@@ -64,6 +67,17 @@ chs = {
             "data_mu": make_objs(basedirs[2018]+"DataDoubleMu*.root", options=options[2018]+" onlyMu "),
             "data_el": make_objs(basedirs[2018]+"DataDoubleEG*.root", options=options[2018]+" onlyEl "),
             },
+        "rereco_2018": {
+            "dy": make_objs(basedirs[2018]+"DY*.root", options=options[2018]),
+            "data_mu": make_objs([
+                basedirs[2018]+"ReRecoDataDoubleMu*.root",
+                basedirs[2018]+"DataDoubleMuonD*.root",
+                ], options=options[2018]+" onlyMu "),
+            "data_el": make_objs([
+                basedirs[2018]+"ReRecoDataDoubleEG*.root",
+                basedirs[2018]+"DataDoubleEGD*.root",
+                ], options=options[2018]+" onlyEl "),
+            },
         }
 
 # Change chain titles to proc_year so that we output the right root file name
@@ -83,13 +97,23 @@ for year in years_to_consider:
 
 os.system("mkdir -p {}".format(outputdir))
 
-map(run_chain, enumerate(to_run))
+# map(run_chain, enumerate(to_run))
 
-# runner = pyrun.Runner(nproc=min(len(to_run),20), func=run_chain, dot_type=2)
-# runner.add_args(to_run)
-# runner.run()
+runner = pyrun.Runner(nproc=min(len(to_run),20), func=run_chain, dot_type=2)
+runner.add_args(to_run)
+runner.run()
 
 from compare import print_sfs
-print_sfs(outputdir)
+for year in years_to_consider:
+    if "2018" in str(year):
+        if "rereco" in str(year):
+            print "if (year == {} and  isReReco) {{".format(str(year).replace("rereco_",""))
+        else:
+            print "if (year == {} and !isReReco) {{".format(str(year).replace("rereco_",""))
+    else:
+        print "if (year == {}) {{".format(str(year).replace("rereco_",""))
+    print "// year = {}".format(year)
+    print_sfs(outputdir, year=year)
+    print "}"
 print "Remember to apply PUw in fr derivation looper"
 print "Remember to apply lepton SF to tight leptons (MTCR)"

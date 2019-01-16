@@ -118,7 +118,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             if (!evt_isRealData()) {
                 weight *= scale1fb()*lumiAG;
                 if (doPUweight) weight *= getTruePUw(year, trueNumInt());
-                if (doLeptonSF) weight *= leptonScaleFactor(year, id(), pt, p4().eta(), -1.);
+                if (doLeptonSF) weight *= leptonScaleFactor(year, id(), pt, p4_eta(), -1.);
                 if (doLeptonSF) weight *= leptonScaleFactor(year, id(), tag_pt(), tag_p4().eta(), -1.);
             }
 

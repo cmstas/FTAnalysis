@@ -7,7 +7,7 @@ def get_val_err(h):
     val = h.IntegralAndError(h.FindBin(91.2-15),h.FindBin(91.2+15),err)
     return val, err
 
-def print_sfs(outdir, year=2017, _persist=[]):
+def print_sfs(outdir, year=2017, _persist=[], prefix="    "):
     d_hists = {}
     for which in ["data_el","data_mu","dy"]:
         f = r.TFile("{}/histos_{}_{}.root".format(outdir,which,year))
@@ -27,7 +27,7 @@ def print_sfs(outdir, year=2017, _persist=[]):
         sf = (ve_dy/ve_data)
         sfs[k.replace("mll_","")] = sf[0]
     for trig,sf in sorted(sfs.items()):
-        print "float sf_{} = {:.4f};".format(trig,sf)
+        print "{}float sf_{} = {:.4f};".format(prefix,trig,sf)
 
 
 if __name__ == "__main__":

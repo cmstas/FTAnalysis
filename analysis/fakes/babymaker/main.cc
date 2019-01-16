@@ -215,10 +215,10 @@ int main(int argc, char *argv[]){
         gconf.year = year;
         gconf.ea_version = 4;
 
-        gconf.btag_disc_wp = 0.4941;
-        gconf.WP_DEEPCSV_TIGHT  = 0.8001;
-        gconf.WP_DEEPCSV_MEDIUM = 0.4941;
-        gconf.WP_DEEPCSV_LOOSE  = 0.1522;
+        gconf.btag_disc_wp = 0.4184;
+        gconf.WP_DEEPCSV_TIGHT  = 0.7527;
+        gconf.WP_DEEPCSV_MEDIUM = 0.4184;
+        gconf.WP_DEEPCSV_LOOSE  = 0.1241;
 
         // gconf.btag_disc_wp = 0.3033;
         // gconf.WP_DEEPCSV_TIGHT  = 0.7489;
