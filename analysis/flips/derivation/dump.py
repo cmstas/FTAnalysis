@@ -1,3 +1,13 @@
+# https://stackoverflow.com/questions/15760712/python-readline-module-prints-escape-character-during-import
+import sys
+if not sys.stdout.isatty():
+    import os
+    oldTerm = os.environ['TERM'] # remember the original setting
+    os.environ['TERM'] = ''
+    import readline
+    os.environ['TERM'] = oldTerm # restore the orignal TERM setting
+    del oldTerm
+
 import ROOT as r
 
 def print_flip_rate(hist, do_errors=False, scale=1.0):
@@ -38,8 +48,13 @@ if __name__ == "__main__":
     # print_flip_rate(ratio, do_errors=False, scale=predscale)
     # print_flip_rate(ratio, do_errors=True, scale=predscale)
 
-    f = r.TFile("outputs//histos_2018.root")
+    year = 2018
+    f = r.TFile("outputs//histos_{}.root".format(year))
     ratio = f.Get("ratio")
-    predscale = 1.39
+    predscale = dict(
+            y2016 = 1.01, # 2016
+            y2017 = 1.44, # 2017
+            y2018 = 1.41, # 2018
+            )["y"+str(year)]
     print_flip_rate(ratio, do_errors=False, scale=predscale)
     print_flip_rate(ratio, do_errors=True, scale=predscale)

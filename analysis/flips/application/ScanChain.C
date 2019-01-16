@@ -350,6 +350,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 weight *= leptonScaleFactor(year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
                 weight *= leptonScaleFactor(year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
                 weight *= ss::weight_btagsf();
+                if (year == 2016) weight *= ss::prefire2016_sf();
+                if (year == 2017) weight *= ss::prefire2017_sf();
             }
 
             // Reject duplicates
