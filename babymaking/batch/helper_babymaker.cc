@@ -58,6 +58,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   // BabyTree->Branch("genweightsID"                                            , &genweightsID                                            );
   BabyTree->Branch("gen_met_phi"                                             , &gen_met_phi                                             );
   BabyTree->Branch("skim"                                                   , &skim                                                   );
+  BabyTree->Branch("skim_nomet"                                                   , &skim_nomet                                                   );
   BabyTree->Branch("nleps"                                                   , &nleps                                                   );
   BabyTree->Branch("sr"                                                   , &sr                                                   );
   BabyTree->Branch("br"                                                   , &br                                                   );
@@ -468,17 +469,6 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("njincone1"       , &njincone1       );
   BabyTree->Branch("njincone2"       , &njincone2       );
 
-  // trijet stuff
-  BabyTree->Branch("ntrijets", &ntrijets);
-  BabyTree->Branch("trijet_discs", &trijet_discs);
-  BabyTree->Branch("trijet_njetsnonb", &trijet_njetsnonb);
-  BabyTree->Branch("trijet_njetsb", &trijet_njetsb);
-  BabyTree->Branch("trijet_meandisc", &trijet_meandisc);
-  BabyTree->Branch("trijet_leadingdisc", &trijet_leadingdisc);
-  BabyTree->Branch("trijet_subleadingdisc", &trijet_subleadingdisc);
-  BabyTree->Branch("trijet_numhigh", &trijet_numhigh);
-  BabyTree->Branch("trijet_frachigh", &trijet_frachigh);
-
   // maybe bdt variables?
   BabyTree->Branch("bdt_nforwardjets20", &bdt_nforwardjets20);
   BabyTree->Branch("bdt_avgcdisc", &bdt_avgcdisc);
@@ -674,6 +664,7 @@ void babyMaker::InitBabyNtuple(){
     // genweightsID.clear();
     gen_met_phi = -1;
     skim = 0;
+    skim_nomet = 0;
     nleps = 0;
     sr = 0;
     br = 0;
@@ -1082,15 +1073,6 @@ void babyMaker::InitBabyNtuple(){
     prefire2017ele_sf = 1.;
     prefire2017ele_sfup = 1.;
     prefire2017ele_sfdown = 1;
-    ntrijets = 0;
-    trijet_discs.clear();
-    trijet_njetsnonb = 0;
-    trijet_njetsb = 0;
-    trijet_meandisc = 0.;
-    trijet_leadingdisc = 0.;
-    trijet_subleadingdisc = 0.;
-    trijet_numhigh = 0;
-    trijet_frachigh = 0.;
     bdt_nforwardjets20 = 0;
     bdt_avgcdisc = 0.;
     bdt_nbtags = 0.;
@@ -1818,11 +1800,11 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   for (unsigned int i = 0; i < jet_results.second.size(); i++) {
       auto jet = jet_results.second.at(i).p4();
       auto disc = jet_results.second.at(i).disc();
-      auto cdisc = jet_results.second.at(i).cdisc();
+      // auto cdisc = jet_results.second.at(i).cdisc();
       btags.push_back(jet);
       btags_flavor.push_back(jet_results.second.at(i).mcFlavor());
       btags_disc.push_back(disc);
-      btags_cdisc.push_back(cdisc);
+      // btags_cdisc.push_back(cdisc);
       btags_JEC.push_back(jet_results.second.at(i).jec());
       btags_undoJEC.push_back(jet_results.second.at(i).undo_jec());
   }
@@ -2770,129 +2752,15 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
 
-  if (false) {
-      // Top tagging
-      trijet_njetsnonb = good_ijqs.size();
-      trijet_njetsb = good_ijbs.size();
-      vector<vector<int>> trijet_indices;
-      for (int ijb : good_ijbs) {
-          for (int ij1 : good_ijqs) {
-              for (int ij2 : good_ijqs) {
-                  if (ij1 == ij2) continue;
-                  if (pfjets_p4()[ij1].pt() < pfjets_p4()[ij2].pt()) continue;
-                  // drop 3% of signal and keep 1/3 background with
-                  Trijet topcand(ijb,ij1,ij2);
-                  if (topcand.W().mass() > 130.) continue;
-                  if (topcand.top().mass() > 300.) continue;
-                  if (topcand.b().mass() < 0.8) continue;
-                  trijet_indices.push_back({ijb,ij1,ij2});
-              }
-          }
-      }
-      // Cache all the btag vector lookups in one go
-      vector<float> jets_deepcsvb;
-      vector<float> jets_deepcsvbb;
-      vector<float> jets_deepcsvc;
-      vector<float> jets_deepcsvl;
-      TString prefix = (gconf.year == 2016 ? "deepFlavourJetTags": "pfDeepCSVJetTags");
-      for (int ijet = 0; ijet < pfjets_p4().size(); ijet++) {
-          float db = getbtagvalue(prefix+":probb",ijet);
-          float dbb = getbtagvalue(prefix+":probbb",ijet);
-          jets_deepcsvb.push_back(db);
-          jets_deepcsvbb.push_back(dbb);
-          jets_deepcsvc.push_back(getbtagvalue(prefix+":probc",ijet));
-          jets_deepcsvl.push_back(getbtagvalue(prefix+":probudsg",ijet));
-      }
-      ntrijets = trijet_indices.size();
-      for (int iti = 0; iti < trijet_indices.size(); iti++) {
-          int ijb = trijet_indices[iti][0];
-          int ij1 = trijet_indices[iti][1];
-          int ij2 = trijet_indices[iti][2];
-          Trijet topcand(ijb,ij1,ij2);
-          float var_b_pt      = topcand.b().pt();
-          float var_b_mass    = topcand.b().mass();
-          // float var_b_ptD     = topcand.ji_ptD(0);
-          // float var_b_axis2   = topcand.ji_axis2(0);
-          // float var_b_mult    = topcand.ji_mult(0);
-          float var_b_npfcands     = topcand.ji_npfcands(0);
-          // float var_b_dcsv    = jets_deepcsvb.at(ijb) + jets_deepcsvbb.at(ijb);
-          // float var_b_dcvsb   = jets_deepcsvc.at(ijb) / (jets_deepcsvc.at(ijb) + var_b_dcsv);
-          // float var_b_dcvsl   = jets_deepcsvc.at(ijb) / (jets_deepcsvc.at(ijb) + jets_deepcsvl.at(ijb));
-          float var_j1_pt     = topcand.j1().pt();
-          // float var_j1_mult    = topcand.ji_mult(1);
-          float var_j1_npfcands     = topcand.ji_npfcands(1);
-          float var_j1_dcsv   = jets_deepcsvb.at(ij1) + jets_deepcsvbb.at(ij1);
-          float var_j1_dcvsb  = jets_deepcsvc.at(ij1) / (jets_deepcsvc.at(ij1) + var_j1_dcsv);
-          float var_j1_dcvsl  = jets_deepcsvc.at(ij1) / (jets_deepcsvc.at(ij1) + jets_deepcsvl.at(ij1));
-          // float var_j2_pt     = topcand.j2().pt();
-          // float var_j2_axis2   = topcand.ji_axis2(2);
-          // float var_j2_mult    = topcand.ji_mult(2);
-          float var_j2_npfcands     = topcand.ji_npfcands(2);
-          float var_j2_dcsv   = jets_deepcsvb.at(ij2) + jets_deepcsvbb.at(ij2);
-          float var_j2_dcvsb  = jets_deepcsvc.at(ij2) / (jets_deepcsvc.at(ij2) + var_j2_dcsv);
-          float var_j2_dcvsl  = jets_deepcsvc.at(ij2) / (jets_deepcsvc.at(ij2) + jets_deepcsvl.at(ij2));
-          float var_b_wcand_deltaR = topcand.b_W_deltaR();
-          float var_topcand_pt    = topcand.top().pt();
-          float var_wcand_deltaR = topcand.W_deltaR();
-          // float var_wcand_pt      = topcand.W().pt();
-          // float var_deta_j12 = topcand.deta_j12();
-          float var_topcand_mass  = topcand.top().mass();
-          float var_wcand_mass    = topcand.W().mass();
-          // float var_chi2 = topcand.chi2();
-          float var_logchi2 = topcand.logchi2();
-          float var_b_j1_mass = topcand.b_ji_mass(1);
-          float var_b_j2_mass = topcand.b_ji_mass(2);
-          // float var_top_radius = topcand.top_radius();
-          // float var_b_axis1   = 0.05;
-          // float var_j1_ptD     = 0.4;
-          // float var_j1_axis1   = 0.05;
-          // float var_j1_axis2   = 0.02;
-          // float var_j2_ptD     = 0.4;
-          // float var_j2_axis1   = 0.05;
-          // if (year == 2017) { // FIXME only exists for 2017 for now. 10-02-02 tag for 2018 will have it when we switch, but not 2016 until we get 94x rereco
-          //     float var_b_axis1   = topcand.ji_axis1(0);
-          //     float var_j1_ptD     = topcand.ji_ptD(1);
-          //     float var_j1_axis1   = topcand.ji_axis1(1);
-          //     float var_j1_axis2   = topcand.ji_axis2(1);
-          //     float var_j2_ptD     = topcand.ji_ptD(2);
-          //     float var_j2_axis1   = topcand.ji_axis1(2);
-          // }
-          float disc = get_prediction_trijet(
-                  var_b_j1_mass, var_b_j2_mass, var_b_mass, var_b_npfcands,
-                  var_b_pt, var_b_wcand_deltaR, var_j1_dcvsb, var_j1_dcvsl,
-                  var_j1_npfcands, var_j1_pt, var_j2_dcvsb, var_j2_dcvsl,
-                  var_j2_npfcands, var_logchi2, var_topcand_mass, var_topcand_pt,
-                  var_wcand_deltaR, var_wcand_mass
-                  );
-          trijet_discs.push_back(disc);
-      }
-      std::sort(trijet_discs.begin(), trijet_discs.end(), std::greater<float>());
-      trijet_meandisc = std::accumulate(trijet_discs.begin(),trijet_discs.end(),0.f)/trijet_discs.size();
-      trijet_leadingdisc = (trijet_discs.size() > 0 ? trijet_discs[0] : -1);
-      trijet_subleadingdisc = (trijet_discs.size() > 1 ? trijet_discs[1] : -1);
-      trijet_numhigh = std::count_if(trijet_discs.begin(), trijet_discs.end(), [](float disc){return disc > 0.3;});
-      trijet_frachigh = 1.0*trijet_numhigh/trijet_discs.size();
-      // More misc variables
-      bdt_nforwardjets20 = 0;
-      for (int ijet = 0; ijet < pfjets_p4().size(); ijet++) {
-          if (!pass_SS_jetID(ijet,isFastsim)) continue;
-          LorentzVector jet = tas::pfjets_p4().at(ijet);
-          if (fabs(jet.eta()) < 2.4) continue;
-          if (fabs(jet.eta()) > 3.0) continue;
-          float pt = jet.pt()*pfjets_undoJEC().at(ijet);
-          if (pt < 20.) continue;
-          bdt_nforwardjets20 += 1;
-      }
-      bdt_avgcdisc = std::accumulate(btags_cdisc.begin(),btags_cdisc.end(),0.f)/btags_cdisc.size();
-  }
-
   // Compute some variables to make it easier for draw statements and skimming
   skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
          (met_unc_dn>=50 or met_JER_dn>=50 or met>=50 or met_unc_up>=50 or met_JER_up>=50) and \
          (hyp_class != 4 or is_real_data);
-  br = passes_baseline(njets, nbtags, met, ht, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
+  skim_nomet = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
+         (hyp_class != 4 or is_real_data);
+  br = passes_baseline_ft(njets, nbtags, met, ht, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt);
   nleps = (lep3_passes_id and lep3_coneCorrPt > 20) ? ((lep4_passes_id and lep4_coneCorrPt > 20) ? 4 : 3) : 2;
-  sr = signalRegionTest(njets, nbtags, met, ht, -1, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, nleps, hyp_class==6);
+  sr = signal_region_ft(njets, nbtags, met, ht, -1, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, nleps, hyp_class==6);
 
   // BDT stuff
   float mjoverpt = 0.;

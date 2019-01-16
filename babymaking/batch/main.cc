@@ -171,6 +171,11 @@ int main(int argc, char *argv[]){
                 filenames.Contains("94X")
                 ) {
             gconf.cmssw_ver = 94;
+            // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
+            // Uh, yeah... They changed in the 4th decimal only
+            gconf.WP_DEEPCSV_TIGHT  = 0.8953;
+            gconf.WP_DEEPCSV_MEDIUM = 0.6321;
+            gconf.WP_DEEPCSV_LOOSE  = 0.2217;
         }
         good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
         jecEra = "Summer16_23Sep2016BCDV4";
@@ -218,10 +223,10 @@ int main(int argc, char *argv[]){
         gconf.ea_version = 4;
         gconf.cmssw_ver = 102;
 
-        gconf.btag_disc_wp = 0.4941;
-        gconf.WP_DEEPCSV_TIGHT  = 0.8001;
-        gconf.WP_DEEPCSV_MEDIUM = 0.4941;
-        gconf.WP_DEEPCSV_LOOSE  = 0.1522;
+        gconf.btag_disc_wp = 0.4184;
+        gconf.WP_DEEPCSV_TIGHT  = 0.7527;
+        gconf.WP_DEEPCSV_MEDIUM = 0.4184;
+        gconf.WP_DEEPCSV_LOOSE  = 0.1241;
 
         // gconf.btag_disc_wp = 0.3033;
         // gconf.WP_DEEPCSV_TIGHT  = 0.7489;

@@ -54,6 +54,6 @@ run data_2017     "/DoubleMuon" ${outputdir}/test_2017_datamm.root     ${outputd
 run data_2018     "/EGamma"     ${outputdir}/test_2018_dataee.root     ${outputdir}/log_2018_dataee.txt     &
 run data_2018     "/DoubleMuon" ${outputdir}/test_2018_datamm.root     ${outputdir}/log_2018_datamm.txt     &
 run mc_2018       "/TTTT"       ${outputdir}/test_2018_tttt.root       ${outputdir}/log_2018_tttt.txt       &
-run data_2018     "17Sep2018-v1" ${outputdir}/test_2018_datarereco.root     ${outputdir}/log_2018_datarereco.txt     &
+# run data_2018     "17Sep2018-v1" ${outputdir}/test_2018_datarereco.root     ${outputdir}/log_2018_datarereco.txt     &
 
 wait

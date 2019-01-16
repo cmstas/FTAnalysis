@@ -78,79 +78,6 @@ class BTagCalibrationReader;
 using namespace std;
 using namespace tas;
 
-struct Trijet     {
-    int ijb = 0;
-    int ij1 = 0;
-    int ij2 = 0;
-    LorentzVector jb_p4;
-    LorentzVector j1_p4;
-    LorentzVector j2_p4;
-    Trijet(int ijb_, int ij1_, int ij2_) :
-        ijb(ijb_), ij1(ij1_), ij2(ij2_) {
-            jb_p4 = pfjets_p4().at(ijb_);
-            j1_p4 = pfjets_p4().at(ij1_);
-            j2_p4 = pfjets_p4().at(ij2_);
-        }
-    LorentzVector top() const {
-        return jb_p4+j1_p4+j2_p4;
-    }
-    LorentzVector W() const {
-        return j1_p4+j2_p4;
-    }
-    LorentzVector b() const {
-        return jb_p4;
-    }
-    LorentzVector j1() const {
-        return j1_p4;
-    }
-    LorentzVector j2() const {
-        return j2_p4;
-    }
-    float top_radius() {
-        float tr = -1;
-        for (const auto j : {ijb, ij1, ij2}) {
-            double dR = ROOT::Math::VectorUtil::DeltaR(pfjets_p4().at(j), top());
-            if (dR > tr) tr = dR;
-        }
-        return tr;
-    }
-    float deta_j12() {
-        return fabs(pfjets_p4().at(ij1).eta() - pfjets_p4().at(ij2).eta());
-    }
-    float chi2() {
-        // return std::pow((top().mass()-173.)/18., 2)+std::pow((W().mass()-83.)/11., 2);
-        return std::pow((top().mass()-169.8)/19.3, 2)+std::pow((W().mass()-80.5)/11.5, 2);
-    }
-    float logchi2() {
-        return log(chi2());
-    }
-    float b_ji_mass(int i) {
-        return (pfjets_p4().at(ijb) + pfjets_p4().at(i==1 ? ij1 : ij2)).mass();
-    }
-    float W_deltaR() {
-        return ROOT::Math::VectorUtil::DeltaR(pfjets_p4().at(ij1), pfjets_p4().at(ij2));
-    }
-    float b_W_deltaR() {
-        return ROOT::Math::VectorUtil::DeltaR(pfjets_p4().at(ijb), W());
-    }
-    float ji_ptD(int i) {
-        return pfjets_ptDistribution().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
-    }
-    float ji_axis1(int i) {
-        return pfjets_axis1().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
-    }
-    float ji_axis2(int i) {
-        return pfjets_axis2().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
-    }
-    float ji_mult(int i) {
-        return pfjets_totalMultiplicity().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
-    }
-    float ji_npfcands(int i) {
-        return pfjets_npfcands().at(i==0 ? ijb : (i==1 ? ij1 : ij2));
-    }
-
-};
-
 struct csErr_t { float cs_scale_no = 0; float cs_scale_up = 0; float cs_scale_dn = 0; float cs_pdf[102] = {0}; int SR = -1; bool isGood = 0; };
 
 //Classes
@@ -276,6 +203,7 @@ class babyMaker {
     float gen_met_phi;
 
     bool skim;
+    bool skim_nomet;
     bool br;
     int sr;
     int nleps;

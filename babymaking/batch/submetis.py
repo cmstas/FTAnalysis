@@ -55,8 +55,9 @@ if __name__ == "__main__":
     # tag = "v3.21" # v32 JECs. all years, new 10-02-04 MC, including some 2018 MC -- bugged 2017 missing 2 ele iso branches
     # year_sample_map =  [("2017",data_2017+mc_2017)] # NOTE
     # tag = "v3.21_fix2017" # 2017 only. fixing iso issues
-    year_sample_map =  [("2018",data_2018+mc_2018)] # NOTE
-    tag = "v3.22" # 2018 only. latest ID (v2), remade corruptions, all MC samples included I think
+    year_sample_map =  [("2016",data_2016+mc_2016)]+[("2018",data_2018+mc_2018)] # NOTE
+    # tag = "v3.22" # 2018 only. latest ID (v2), remade corruptions, all MC samples included I think
+    tag = "v3.23" # 2016,2018 only. for 2018, latest ID (v2), remade corruptions, all MC samples included I think -- latest 102X btag WPs
     extra_args = ""
     tag_match = ""
     # extra_args = "--ignorebadfiles" # FIXME
