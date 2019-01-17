@@ -42,6 +42,12 @@ if __name__ == "__main__":
 
 
     if not args.noloop:
+        if os.path.isfile(".lastcompile.tmp"):
+            with open(".lastcompile.tmp","r") as fh:
+                lastcompile = fh.read().strip()
+                if lastcompile != ("ss" if args.ss else "ft"):
+                    print "Last compilation was different, so doing `rm yieldMaker_C.so`"
+                    os.system("rm yieldMaker_C.so")
         if args.ss:
             print "Enabling SSLOOP preprocessor macro"
             # define SSLOOP preprocessor
@@ -51,6 +57,7 @@ if __name__ == "__main__":
         r.gROOT.ProcessLine(".L ../misc/class_files/v8.02/SS.cc+")
         r.gROOT.ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+")
         r.gROOT.ProcessLine(".L yieldMaker.C+")
+        with open(".lastcompile.tmp","w") as fh: fh.write("ss" if args.ss else "ft")
 
 
     years_to_consider = [
@@ -349,11 +356,14 @@ if __name__ == "__main__":
                     "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
                     "tttt": make_obj(basedirs[2018]+"TTTTnew.root", options=options[2018]),
                     # "fakes_mc": make_obj(basedirs[2017]+"TTBAR*.root", options=options[2018]+ " doFakesMC "),
+                    # "fakes_mc": make_obj([
+                    #     basedirs[2018]+"TTDL.root",
+                    #     basedirs[2018]+"TTSLtop.root",
+                    #     basedirs[2018]+"TTSLtopbar.root",
+                    #     ] , options=options[2018]+ " doTruthFake "),
                     "fakes_mc": make_obj([
-                        basedirs[2018]+"TTDL.root",
-                        basedirs[2018]+"TTSLtop.root",
-                        basedirs[2018]+"TTSLtopbar.root",
-                        ] , options=options[2018]+ " doTruthFake "),
+                        basedirs[2017]+"TTBAR*.root",
+                        ] , options=options[2017]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2018]+"TTDL.root",
                         basedirs[2018]+"TTSLtop.root",
@@ -437,10 +447,15 @@ if __name__ == "__main__":
 
     if args.ss:
 
+        # FIXME FIXME FIXME REMOVE minPtFake18 after fixing issue
+        # FIXME FIXME FIXME REMOVE minPtFake18
+        # FIXME FIXME FIXME REMOVE minPtFake18
+        # FIXME FIXME FIXME REMOVE minPtFake18
+        # FIXME FIXME FIXME REMOVE minPtFake18
         options = {
                 2016: "Data2016 quiet {} ".format(extra_global_options),
-                2017: "Data2017 quiet {} ".format(extra_global_options),
-                2018: "Data2018 quiet {} ".format(extra_global_options),
+                2017: "Data2017 quiet {} minPtFake18 ".format(extra_global_options),
+                2018: "Data2018 quiet {} minPtFake18 ".format(extra_global_options),
                 }
 
 
@@ -460,7 +475,7 @@ if __name__ == "__main__":
                     "data": make_obj(basedirs[2016]+"Data*.root", options=options[2016] + " doData "),
                     "fakes_mc": make_obj([
                         basedirs[2016]+"TTBAR_PH.root",
-                        ] , options=options[2016]+ " doTruthFake "),
+                        ] , options=options[2016]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2016]+"TTBAR_PH.root",
                         ] , options=options[2016]+ " doFakesMC "),
@@ -505,6 +520,7 @@ if __name__ == "__main__":
                         basedirs[2016]+"TTTJ.root",
                         basedirs[2016]+"TTTW.root",
                         ],options=options[2016]),
+                    "rpv_t1qqqql_m2300": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2300.root" ],options=options[2016]),
                     },
                 2017: {
 
@@ -518,10 +534,9 @@ if __name__ == "__main__":
                         ] , options=options[2017]+" doFakes doData "),
                     "flips": make_obj(basedirs[2017]+"Data*.root", options=options[2017]+" doFlips "),
                     "data": make_obj(basedirs[2017]+"Data*.root", options=options[2017]+" doData "),
-                    "tttt": make_obj(basedirs[2017]+"TTTTnew.root", options=options[2017]),
                     "fakes_mc": make_obj([
                         basedirs[2017]+"TTBAR*.root",
-                        ] , options=options[2017]+ " doTruthFake "),
+                        ] , options=options[2017]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2017]+"TTBAR*.root",
                         ] , options=options[2017]+ " doFakesMC "),
@@ -579,10 +594,9 @@ if __name__ == "__main__":
                         ] , options=options[2018]+" doFakes doData "),
                     "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
                     "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
-                    "tttt": make_obj(basedirs[2018]+"TTTTnew.root", options=options[2018]),
                     "fakes_mc": make_obj([
                         basedirs[2018]+"TTBAR*.root",
-                        ] , options=options[2018]+ " doTruthFake "),
+                        ] , options=options[2018]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2018]+"TTBAR*.root",
                         ] , options=options[2018]+ " doFakesMC "),
@@ -657,7 +671,7 @@ if __name__ == "__main__":
         fn = basedirs[2016]+"T1TTTT.root"
         procnames = get_fastsim_procnames(fn, procbase="fs_t1tttt")
         procnames = [pn for pn in procnames if any(x in pn for x in [
-            # "m1600_m100",
+            "m1600_m100",
             # "m1550_m100",
             # "m1450_m1050",
             # "m1400_m1000",
@@ -675,7 +689,7 @@ if __name__ == "__main__":
         procnames = [pn for pn in procnames if any(x in pn for x in [
         #     "m850_m75",
             # "m850_m750",
-            "m850_m700",
+            # "m850_m700",
             ])]
         for pn in procnames:
             chs[2016][pn] = make_obj(fn, options=options[2016])
@@ -780,12 +794,18 @@ if __name__ == "__main__":
             sys.modules["numba"] = None
             import plot_all
 
+            signame = "tttt"
+            if args.ss:
+                # signame = "fs_t1tttt_m1600_m100"
+                signame = fastsim_procnames[0]
             plot_all.make_plots(
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
                     year=2016,
                     lumi="35.9",
-                    other_years = []
+                    other_years = [],
+                    doss=args.ss,
+                    signame=signame,
                     )
 
             plot_all.make_plots(
@@ -793,7 +813,9 @@ if __name__ == "__main__":
                     inputdir=args.out,
                     year=2017,
                     lumi="41.5",
-                    other_years = []
+                    other_years = [],
+                    doss=args.ss,
+                    signame=signame,
                     )
 
             plot_all.make_plots(
@@ -802,6 +824,8 @@ if __name__ == "__main__":
                     year=2018,
                     lumi="58.8",
                     other_years = [],
+                    doss=args.ss,
+                    signame=signame,
                     )
 
             plot_all.make_plots(
@@ -810,4 +834,6 @@ if __name__ == "__main__":
                     year=2018,
                     lumi="136.3", # 2016+2017+2018 --> 35.922+41.53+58.83 = 136.3
                     other_years = [2016,2017],
+                    doss=args.ss,
+                    signame=signame,
                     )
