@@ -55,6 +55,8 @@ mc_2016 = [
             ["/TTTo2L2Nu_HT500Njet7_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTDLht500"],
             ["/TTToSemiLepton_HT500Njet9_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "TTSLht500"],
 
+            ["/PrivateT1qqqqL_mGluino2300/cms4-Private80X_Moriond17-ext1-v1/MINIAODSIM", "RPV_T1qqqqL_mGluino2300"],
+
             # ["/tHW_HToTT_0J_mH-350_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "Higgs_tHW_350"],
             # ["/tHW_HToTT_0J_mH-370_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "Higgs_tHW_370"],
             # ["/tHW_HToTT_0J_mH-390_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "Higgs_tHW_390"],
