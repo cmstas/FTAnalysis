@@ -39,7 +39,6 @@ float XSEC_TTTT = 11.97;
 float scaleLumi = 1; // 75/35.87
 TH2D *h_counts = 0;
 TH1D *h_weights = 0;
-bool doThirdLepton = true; // FIXME
 
 void avoidNegativeYields(TH1F* plot);
 
@@ -171,7 +170,7 @@ struct triple_t {
         if (hl) { hl->Write(); }
         if (ll) { ll->Write(); }
         if (ml) { ml->Write(); }
-        if (lm) { ml->Write(); }
+        if (lm) { lm->Write(); }
         if (mloffz) { mloffz->Write(); }
         if (mlonz) { mlonz->Write(); }
         if (sr) { sr->Write(); }
@@ -261,24 +260,28 @@ struct plots_t  {
     triple_t h_mva;
     triple_t h_mu_sip3d_lep1;
     triple_t h_mu_l1eta;
+    triple_t h_mu_l1phi;
     triple_t h_mu_lep1_miniIso;
     triple_t h_mu_lep1_ptRel;
     triple_t h_mu_lep1_ptRelfail;
     triple_t h_mu_lep1_ptRatio;
     triple_t h_el_sip3d_lep1;
     triple_t h_el_l1eta;
+    triple_t h_el_l1phi;
     triple_t h_el_lep1_miniIso;
     triple_t h_el_lep1_ptRel;
     triple_t h_el_lep1_ptRelfail;
     triple_t h_el_lep1_ptRatio;
     triple_t h_mu_sip3d_lep2;
     triple_t h_mu_l2eta;
+    triple_t h_mu_l2phi;
     triple_t h_mu_lep2_miniIso;
     triple_t h_mu_lep2_ptRel;
     triple_t h_mu_lep2_ptRelfail;
     triple_t h_mu_lep2_ptRatio;
     triple_t h_el_sip3d_lep2;
     triple_t h_el_l2eta;
+    triple_t h_el_l2phi;
     triple_t h_el_lep2_miniIso;
     triple_t h_el_lep2_ptRel;
     triple_t h_el_lep2_ptRelfail;
@@ -360,8 +363,10 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
     plots.h_disc.Write();
     plots.h_el_l1eta.Write();
     plots.h_el_l1pt.Write();
+    plots.h_el_l1phi.Write();
     plots.h_el_l2eta.Write();
     plots.h_el_l2pt.Write();
+    plots.h_el_l2phi.Write();
     plots.h_el_l3eta.Write();
     plots.h_el_l3pt.Write();
     plots.h_el_lep1_miniIso.Write();
@@ -402,8 +407,10 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
     plots.h_mtvis.Write();
     plots.h_mu_l1eta.Write();
     plots.h_mu_l1pt.Write();
+    plots.h_mu_l1phi.Write();
     plots.h_mu_l2eta.Write();
     plots.h_mu_l2pt.Write();
+    plots.h_mu_l2phi.Write();
     plots.h_mu_l3eta.Write();
     plots.h_mu_l3pt.Write();
     plots.h_mu_lep1_miniIso.Write();
@@ -668,50 +675,53 @@ plots_t run(TChain *chain, int year, TString options){
     plots_t  p_result;
 
     p_result.h_bjetpt.Init("bjetpt"     , chainTitle , 16 , 0.   , 200.);
-    p_result.h_charge3.Init("charge3"   , chainTitle , 3  , 0    , 3);
-    p_result.h_charge.Init("charge"     , chainTitle , 3  , -1   , 2);
-    p_result.h_ht.Init("ht"             , chainTitle , 15 , 100  , 1600);
+    p_result.h_category.Init("category", chainTitle, 7 , 0.5 , 7.5);
+    p_result.h_charge3.Init("charge3", chainTitle, 3 , -1 , 2);
+    p_result.h_charge.Init("charge", chainTitle, 3 , -1 , 2);
+    p_result.h_ht.Init("ht", chainTitle, 15, 100, 1600);
     p_result.h_isrw.Init("isrw"         , chainTitle , 50 , 0.7  , 1.3);
     p_result.h_jetpt.Init("jetpt"       , chainTitle , 20 , 0.   , 200.);
     p_result.h_l1pt.Init("l1pt"         , chainTitle , 15 , 0    , 150);
     p_result.h_l2pt.Init("l2pt"         , chainTitle , 15 , 0    , 150);
     p_result.h_l3pt.Init("l3pt"         , chainTitle , 7  , 0    , 140);
-    p_result.h_met.Init("met"           , chainTitle , 15 , 0    , 600);
+    p_result.h_met.Init("met", chainTitle, 20 , 0 , 500);
     p_result.h_metnm1.Init("metnm1"     , chainTitle , 40 , 0    , 400);
     p_result.h_mid1.Init("mid1"         , chainTitle , 5  , -2   , 3);
     p_result.h_mid2.Init("mid2"         , chainTitle , 5  , -2   , 3);
     p_result.h_mid3.Init("mid3"         , chainTitle , 5  , -2   , 3);
-    p_result.h_mll.Init("mll"           , chainTitle , 20 , 0    , 200);
-    p_result.h_mllos.Init("mllos"       , chainTitle , 20 , 0    , 200);
-    p_result.h_mtmin.Init("mtmin"       , chainTitle , 10 , 0    , 200);
-    p_result.h_mtmax.Init("mtmax", chainTitle, 75 , 0 , 200);
+    p_result.h_mll.Init("mll", chainTitle, 20 , 0 , 200);
+    p_result.h_mllos.Init("mllos", chainTitle, 20 , 0 , 200);
     p_result.h_mt2.Init("mt2", chainTitle, 10 , 0 , 200);
     p_result.h_mt2min.Init("mt2min", chainTitle, 10 , 0 , 200);
+    p_result.h_mtmax.Init("mtmax", chainTitle, 75 , 0 , 200);
+    p_result.h_mtmin.Init("mtmin"       , chainTitle , 10 , 0    , 200);
     p_result.h_mtop1.Init("mtop1"       , chainTitle , 15 , 100  , 250);
     p_result.h_mtop2.Init("mtop2"       , chainTitle , 15 , 100  , 250);
     p_result.h_mtvis.Init("mtvis"       , chainTitle , 20 , 300  , 2500);
     p_result.h_mva.Init("mva"           , chainTitle , 10 , 0    , 1.5);
     p_result.h_mvis.Init("mvis"         , chainTitle , 15 , 250  , 2750);
     p_result.h_mvis.Init("mvis"         , chainTitle , 25 , 0    , 2500);
-    p_result.h_nleptonicW.Init("nleptonicW", chainTitle, 5 , -0.5 , 4.5);
     p_result.h_nbtags.Init("nbtags"     , chainTitle , 7  , -0.5 , 6.5);
     p_result.h_njets.Init("njets"       , chainTitle , 10 , 1.5  , 11.5);
     p_result.h_nleps.Init("nleps"       , chainTitle , 6  , 0    , 6);
+    p_result.h_nleptonicW.Init("nleptonicW", chainTitle, 5 , -0.5 , 4.5);
     p_result.h_ntopness.Init("ntopness" , chainTitle , 15 , 0.   , 0.75);
     p_result.h_ntops.Init("ntops"       , chainTitle , 5  , -0.5 , 4.5);
+    p_result.h_q3.Init("q3", chainTitle, 3 , -1 , 2);
     p_result.h_nvtx.Init("nvtx"         , chainTitle , 20 , 0    , 80);
     p_result.h_puw.Init("puw"           , chainTitle , 50 , 0.7  , 1.3);
-    p_result.h_type.Init("type"         , chainTitle , 4  , 0    , 4);
-    p_result.h_type3.Init("type3"       , chainTitle , 4  , 0    , 4);
-
     p_result.h_topdisc1.Init("topdisc1" , chainTitle , 30 , -0.6 , 0.4);
     p_result.h_topdisc2.Init("topdisc2" , chainTitle , 30 , -0.6 , 0.4);
+    p_result.h_type3.Init("type3", chainTitle, 4 , 0 , 4);
+    p_result.h_type.Init("type", chainTitle, 4 , 0 , 4);
 
-    p_result.h_el_l1eta.Init("l1eta_el"                   , chainTitle , 12 , -2.5 , 2.5);
+    p_result.h_el_l1eta.Init("el_l1eta"                   , chainTitle , 12 , -2.5 , 2.5);
     p_result.h_el_l1pt.Init("el_l1pt"                     , chainTitle , 15 , 0    , 150);
-    p_result.h_el_l2eta.Init("l2eta_el"                   , chainTitle , 12 , -2.5 , 2.5);
+    p_result.h_el_l1phi.Init("el_l1phi"                     , chainTitle , 15 , -3.2    , 3.2);
+    p_result.h_el_l2eta.Init("el_l2eta"                   , chainTitle , 12 , -2.5 , 2.5);
     p_result.h_el_l2pt.Init("el_l2pt"                     , chainTitle , 15 , 0    , 150);
-    p_result.h_el_l3eta.Init("l3eta_el"                   , chainTitle , 8  , -2.5 , 2.5);
+    p_result.h_el_l2phi.Init("el_l2phi"                     , chainTitle , 15 , -3.2, 3.2);
+    p_result.h_el_l3eta.Init("el_l3eta"                   , chainTitle , 8  , -2.5 , 2.5);
     p_result.h_el_l3pt.Init("el_l3pt"                     , chainTitle , 7  , 0    , 140);
     p_result.h_el_lep1_miniIso.Init("lep1_el_miniIso"     , chainTitle , 15 , 0    , 0.2);
     p_result.h_el_lep1_ptRatio.Init("lep1_el_ptRatio"     , chainTitle , 30 , -0.5 , 1.5);
@@ -730,11 +740,13 @@ plots_t run(TChain *chain, int year, TString options){
     p_result.h_el_sip3d_lep2.Init("sip3d_el_lep2"         , chainTitle , 20 , 0    , 5);
     p_result.h_el_sip3d_lep3.Init("sip3d_el_lep3"         , chainTitle , 20 , 0    , 5);
 
-    p_result.h_mu_l1eta.Init("l1eta_mu"                   , chainTitle , 12 , -2.5 , 2.5);
+    p_result.h_mu_l1eta.Init("mu_l1eta"                   , chainTitle , 12 , -2.5 , 2.5);
     p_result.h_mu_l1pt.Init("mu_l1pt"                     , chainTitle , 15 , 0    , 150);
-    p_result.h_mu_l2eta.Init("l2eta_mu"                   , chainTitle , 12 , -2.5 , 2.5);
+    p_result.h_mu_l1phi.Init("mu_l1phi"                   , chainTitle , 15 , -3.2, 3.2);
+    p_result.h_mu_l2eta.Init("mu_l2eta"                   , chainTitle , 12 , -2.5 , 2.5);
     p_result.h_mu_l2pt.Init("mu_l2pt"                     , chainTitle , 15 , 0    , 150);
-    p_result.h_mu_l3eta.Init("l3eta_mu"                   , chainTitle , 8  , -2.5 , 2.5);
+    p_result.h_mu_l2phi.Init("mu_l2phi"                     , chainTitle , 15 , -3.2, 3.2);
+    p_result.h_mu_l3eta.Init("mu_l3eta"                   , chainTitle , 8  , -2.5 , 2.5);
     p_result.h_mu_l3pt.Init("mu_l3pt"                     , chainTitle , 7  , 0    , 140);
     p_result.h_mu_lep1_miniIso.Init("lep1_mu_miniIso"     , chainTitle , 15 , 0    , 0.2);
     p_result.h_mu_lep1_ptRatio.Init("lep1_mu_ptRatio"     , chainTitle , 30 , -0.5 , 1.5);
@@ -1089,6 +1101,10 @@ plots_t run(TChain *chain, int year, TString options){
             norm_scale_dn = getWeightNormalization(2);
             norm_pdf_up = getWeightNormalization(3);
             norm_pdf_dn = getWeightNormalization(4);
+            if (norm_scale_up <= 0.) norm_scale_up = 1.;
+            if (norm_scale_dn <= 0.) norm_scale_dn = 1.;
+            if (norm_pdf_up <= 0.) norm_pdf_up = 1.;
+            if (norm_pdf_dn <= 0.) norm_pdf_dn = 1.;
         }
         TString filename = currentFile->GetTitle();
         TTree *tree = (TTree*)file->Get("t");
@@ -1138,8 +1154,11 @@ plots_t run(TChain *chain, int year, TString options){
             //Reject not triggered
             if (!isFastsim) {
 #ifdef SSLOOP
-                // if (!ss::fired_trigger_ss()) continue;
-                if (!ss::fired_trigger()) continue; // FIXME
+                if (year == 2017) { // FIXME FIXME need to update tag
+                    if (!ss::fired_trigger()) continue;
+                } else {
+                    if (!ss::fired_trigger_ss()) continue;
+                }
 #else
                 if (!ss::fired_trigger()) continue;
 #endif
@@ -1196,7 +1215,6 @@ plots_t run(TChain *chain, int year, TString options){
 
 #ifdef SSLOOP
             int nleps = (lep3good) ? ((ss::lep4_passes_id() and (ss::lep4_p4().pt() > (abs(ss::lep4_id())==11 ? 15 : 10))) ? 4 : 3) : 2;
-            if (!doThirdLepton) nleps = 2;
 #else
             int nleps = (lep3good and lep3ccpt > 20) ? ((ss::lep4_passes_id() and ss::lep4_p4().pt() > 20) ? 4 : 3) : 2;
 #endif
@@ -1380,7 +1398,7 @@ plots_t run(TChain *chain, int year, TString options){
 #endif
 
             // Don't take leptons from photons if not x-gamma
-            if ((ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3) && !isGamma) {
+            if (!skipmatching && (ss::lep1_motherID()==-3 || ss::lep2_motherID()==-3) && !isGamma) {
                 continue;
             }
 
@@ -1555,7 +1573,7 @@ plots_t run(TChain *chain, int year, TString options){
             //
 #endif
 
-            if (!doFlips && !doFakes && exclude == 0) {
+            if (!skipmatching && !doFlips && !doFakes && exclude == 0) {
 #ifdef SSLOOP
                 if (categ == Multilepton) {
                     if (!isData && !isGamma && ss::lep3_motherID()==2) continue;
@@ -1735,12 +1753,12 @@ plots_t run(TChain *chain, int year, TString options){
             if (isData == 0 && SR >= 0) p_result.p_bb_alt_up_SR.CatFill(categ, SR, weight_bb_up_alt);
             if (isData == 0 && SR >= 0) p_result.p_lep_alt_up_SR.CatFill(categ, SR, weight_lep_up_alt);
             if (SR > 0) {
-                p_result.p_scale_alt_up_SR.CatFill(categ, SR, (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP() : 1.0)*weight);
-                p_result.p_scale_alt_dn_SR.CatFill(categ, SR, (ss::weight_scale_DN() > -9000 ? ss::weight_scale_DN() : 1.0)*weight);
+                p_result.p_scale_alt_up_SR.CatFill(categ, SR, (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP()/norm_scale_up : 1.0)*weight);
+                p_result.p_scale_alt_dn_SR.CatFill(categ, SR, (ss::weight_scale_DN() > -9000 ? ss::weight_scale_DN()/norm_scale_dn : 1.0)*weight);
                 p_result.p_alphas_alt_up_SR.CatFill(categ, SR, (ss::weight_alphas_UP() > -9000 ? ss::weight_alphas_UP() : 1.0)*weight);
                 p_result.p_alphas_alt_dn_SR.CatFill(categ, SR, (ss::weight_alphas_DN() > -9000 ? ss::weight_alphas_DN() : 1.0)*weight);
-                p_result.p_pdf_alt_up_SR.CatFill(categ, SR, (ss::weight_pdf_UP() > -9000 ? ss::weight_pdf_UP() : 1.0)*weight);
-                p_result.p_pdf_alt_dn_SR.CatFill(categ, SR, (ss::weight_pdf_DN() > -9000 ? ss::weight_pdf_DN() : 1.0)*weight);
+                p_result.p_pdf_alt_up_SR.CatFill(categ, SR, (ss::weight_pdf_UP() > -9000 ? ss::weight_pdf_UP()/norm_pdf_up : 1.0)*weight);
+                p_result.p_pdf_alt_dn_SR.CatFill(categ, SR, (ss::weight_pdf_DN() > -9000 ? ss::weight_pdf_DN()/norm_pdf_dn : 1.0)*weight);
                 p_result.SR.CatFill(categ, SR, weight);
             }
 
@@ -1748,16 +1766,23 @@ plots_t run(TChain *chain, int year, TString options){
             int kcategs = kBaseline;
             if (categ == Multilepton && SR > 0) {
                 kcategs |= kMultilepton;
-                if (SR > 23) kcategs |= kMultileptonOnZ;
+                if (SR > 21) kcategs |= kMultileptonOnZ;
                 else kcategs |= kMultileptonOffZ;
             }
-            if (SR > 0) kcategs |= kSignalRegion;
-            if (categ == HighHigh) kcategs |= kHighHigh;
-            if (categ == HighLow) kcategs |= kHighLow;
-            if (categ == LowLow) kcategs |= kLowLow;
+            if (SR > 0) {
+                kcategs |= kSignalRegion;
+                if (categ == HighHigh) kcategs |= kHighHigh;
+                else if (categ == HighLow) kcategs |= kHighLow;
+                else if (categ == LowLow) kcategs |= kLowLow;
+                else if (categ == LowMet) kcategs |= kLowMet;
+            }
 
             // Only plot 3rd lepton if event is in ML region
             bool plotlep3 = categ == Multilepton;
+
+            // if (categ == LowMet) {
+            //     std::cout <<  " ss::run(): " << ss::run() <<  " ss::event(): " << ss::event() <<  " ss::lumi(): " << ss::lumi() <<  " ss::hyp_class(): " << ss::hyp_class() <<  " SR: " << SR <<  " categ: " << categ <<  " lep1ccpt: " << lep1ccpt <<  " lep2ccpt: " << lep2ccpt <<  " lep3ccpt: " << lep3ccpt <<  " lep1pt: " << lep1pt <<  " lep2pt: " << lep2pt <<  " lep3pt: " << lep3pt <<  " lep1eta: " << lep1eta <<  " lep2eta: " << lep2eta <<  " lep3eta: " << lep3eta <<  " lep1id: " << lep1id <<  " lep2id: " << lep2id <<  " lep3id: " << lep3id <<  " lep1good: " << lep1good <<  " lep2good: " << lep2good <<  " lep3good: " << lep3good <<  " ss::njets(): " << ss::njets() <<  " ss::nbtags(): " << ss::nbtags() <<  " ss::met(): " << ss::met() <<  " ss::ht(): " << ss::ht() <<  std::endl;
+            // }
 
             // Fill based on categories
             p_result.h_l1pt.CatFill(kcategs, pto1, weight);
@@ -1766,16 +1791,20 @@ plots_t run(TChain *chain, int year, TString options){
             if (abs(ss::lep1_id()) == 11) {
                 p_result.h_el_l1eta.CatFill(kcategs, lep1eta, weight);
                 p_result.h_el_l1pt.CatFill(kcategs, lep1ccpt, weight);
+                p_result.h_el_l1phi.CatFill(kcategs, ss::lep1_p4().phi(), weight);
             } else {
                 p_result.h_mu_l1eta.CatFill(kcategs, lep1eta, weight);
                 p_result.h_mu_l1pt.CatFill(kcategs, lep1ccpt, weight);
+                p_result.h_mu_l1phi.CatFill(kcategs, ss::lep1_p4().phi(), weight);
             }
             if (abs(ss::lep2_id()) == 11) {
                 p_result.h_el_l2eta.CatFill(kcategs, lep2eta, weight);
                 p_result.h_el_l2pt.CatFill(kcategs, lep2ccpt, weight);
+                p_result.h_el_l2phi.CatFill(kcategs, ss::lep2_p4().phi(), weight);
             } else {
                 p_result.h_mu_l2eta.CatFill(kcategs, lep2eta, weight);
                 p_result.h_mu_l2pt.CatFill(kcategs, lep2ccpt, weight);
+                p_result.h_mu_l2phi.CatFill(kcategs, ss::lep2_p4().phi(), weight);
             }
             if (plotlep3) {
                 p_result.h_q3.CatFill(kcategs, lep3id > 0 ? -0.5 : 0.5, weight);
@@ -1966,7 +1995,9 @@ plots_t run(TChain *chain, int year, TString options){
                 if (abs(lep1id) == 11) p_result.h_mva.br->Fill(ss::lep1_MVA()                                                     , weight);
                 if(abs(lep1id) == 13) {
                     p_result.h_mu_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
+                    p_result.h_mu_l1pt.br       ->Fill(lep1pt                                                                     , weight);
                     p_result.h_mu_l1eta.br       ->Fill(lep1eta                                                                     , weight);
+                    p_result.h_mu_l1phi.br       ->Fill(lep1phi                                                                     , weight);
                     p_result.h_mu_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_mu_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
                     p_result.h_mu_lep1_ptRatio.br->Fill(ss::lep1_ptratio()                                                                               , weight);
@@ -1974,6 +2005,7 @@ plots_t run(TChain *chain, int year, TString options){
                     p_result.h_el_sip3d_lep1.br  ->Fill(ss::lep1_sip()                                                                          , weight);
                     p_result.h_el_l1pt.br        ->Fill(lep1ccpt                                                                                 , weight);
                     p_result.h_el_l1eta.br       ->Fill(lep1eta                                                                     , weight);
+                    p_result.h_el_l1phi.br       ->Fill(lep1phi                                                                     , weight);
                     p_result.h_el_lep1_miniIso.br->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_el_lep1_ptRel.br  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
                     p_result.h_el_lep1_ptRatio.br->Fill(ss::lep1_ptratio()                                                                               , weight);
@@ -1982,12 +2014,14 @@ plots_t run(TChain *chain, int year, TString options){
                 if(abs(lep2id) == 13) {
                     p_result.h_mu_sip3d_lep2.br  ->Fill(ss::lep2_sip()                                                                          , weight);
                     p_result.h_mu_l2eta.br       ->Fill(lep2eta                                                                     , weight);
+                    p_result.h_mu_l2phi.br       ->Fill(lep2phi                                                                     , weight);
                     p_result.h_mu_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_mu_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
                     p_result.h_mu_lep2_ptRatio.br->Fill(ss::lep2_ptratio()                                                                               , weight);
                 } else {
                     p_result.h_el_sip3d_lep2.br  ->Fill(ss::lep2_sip()                                                                          , weight);
                     p_result.h_el_l2eta.br       ->Fill(lep2eta                                                                     , weight);
+                    p_result.h_el_l2phi.br       ->Fill(lep2phi                                                                     , weight);
                     p_result.h_el_lep2_miniIso.br->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_el_lep2_ptRel.br  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
                     p_result.h_el_lep2_ptRatio.br->Fill(ss::lep2_ptratio()                                                                               , weight);
@@ -2090,12 +2124,14 @@ plots_t run(TChain *chain, int year, TString options){
                 if(abs(lep1id) == 13) {
                     p_result.h_mu_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
                     p_result.h_mu_l1eta.sr       ->Fill(lep1eta                                                                     , weight);
+                    p_result.h_mu_l1phi.sr       ->Fill(lep1phi                                                                     , weight);
                     p_result.h_mu_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_mu_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
                     p_result.h_mu_lep1_ptRatio.sr->Fill(ss::lep1_ptratio()                                                                               , weight);
                 } else {
                     p_result.h_el_sip3d_lep1.sr  ->Fill(ss::lep1_sip()                                                                          , weight);
                     p_result.h_el_l1eta.sr       ->Fill(lep1eta                                                                     , weight);
+                    p_result.h_el_l1phi.sr       ->Fill(lep1phi                                                                     , weight);
                     p_result.h_el_lep1_miniIso.sr->Fill(ss::lep1_miniIso()                                                                      , weight);
                     p_result.h_el_lep1_ptRel.sr  ->Fill(ss::lep1_ptrel_v1()                                                                     , weight);
                     p_result.h_el_lep1_ptRatio.sr->Fill(ss::lep1_ptratio()                                                                               , weight);
@@ -2104,12 +2140,14 @@ plots_t run(TChain *chain, int year, TString options){
                 if(abs(lep2id) == 13) {
                     p_result.h_mu_sip3d_lep2.sr  ->Fill(ss::lep2_sip()                                                                          , weight);
                     p_result.h_mu_l2eta.sr       ->Fill(lep2eta                                                                     , weight);
+                    p_result.h_mu_l2phi.sr       ->Fill(lep2phi                                                                     , weight);
                     p_result.h_mu_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_mu_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
                     p_result.h_mu_lep2_ptRatio.sr->Fill(ss::lep2_ptratio()                                                                               , weight);
                 } else {
                     p_result.h_el_sip3d_lep2.sr  ->Fill(ss::lep2_sip()                                                                          , weight);
                     p_result.h_el_l2eta.sr       ->Fill(lep2eta                                                                     , weight);
+                    p_result.h_el_l2phi.sr       ->Fill(lep2phi                                                                     , weight);
                     p_result.h_el_lep2_miniIso.sr->Fill(ss::lep2_miniIso()                                                                      , weight);
                     p_result.h_el_lep2_ptRel.sr  ->Fill(ss::lep2_ptrel_v1()                                                                     , weight);
                     p_result.h_el_lep2_ptRatio.sr->Fill(ss::lep2_ptratio()                                                                               , weight);
