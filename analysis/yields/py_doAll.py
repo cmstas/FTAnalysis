@@ -4,6 +4,7 @@ import os
 import analysis.utils.pyrun as pyrun
 import argparse
 import fnmatch
+import ast
 import time
 
 def make_obj(fpatts=[],options="",treename="t"):
@@ -18,6 +19,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--out", help="output directory", default="outputs")
     parser.add_argument("-e", "--extra_options", help="quoted string of extra options", default="")
+    parser.add_argument(      "--plot_kwargs", help="""kwargs to pass to plotter e.g., '{"show_mcfakes": True,}'""", default="")
     parser.add_argument("-t", "--tag", help="tag for bookkeeping and output directory location", default="v3.08_allyears_tmp")
     parser.add_argument(      "--ss", help="same-sign instead of four top looping", action="store_true")
 
@@ -31,6 +33,8 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbosity", help="verbosity level (0 = default,1,2)", default=0, type=int)
 
     args = parser.parse_args()
+
+    plot_kwargs = {} if not args.plot_kwargs else ast.literal_eval(args.plot_kwargs)
 
     try:
         args.year = int(args.year)
@@ -806,6 +810,7 @@ if __name__ == "__main__":
                     other_years = [],
                     doss=args.ss,
                     signame=signame,
+                    **plot_kwargs
                     )
 
             plot_all.make_plots(
@@ -816,6 +821,7 @@ if __name__ == "__main__":
                     other_years = [],
                     doss=args.ss,
                     signame=signame,
+                    **plot_kwargs
                     )
 
             plot_all.make_plots(
@@ -826,6 +832,7 @@ if __name__ == "__main__":
                     other_years = [],
                     doss=args.ss,
                     signame=signame,
+                    **plot_kwargs
                     )
 
             plot_all.make_plots(
@@ -836,4 +843,5 @@ if __name__ == "__main__":
                     other_years = [2016,2017],
                     doss=args.ss,
                     signame=signame,
+                    **plot_kwargs
                     )
