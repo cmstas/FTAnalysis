@@ -1460,6 +1460,8 @@ plots_t run(TChain *chain, int year, TString options){
                             float fra = alternativeFakeRate(year, lep3id, lep3ccpt, lep3eta, ss::ht());
                             if (!ignoreFakeFactor) weight *= fr / (1-fr);
                             if (!ignoreFakeFactor) weight_alt_FR *= fra/(1.-fra);
+                            // XXX now we bump nleps to 3 since this is a 3 lepton fake event
+                            nleps = 3;
                         } else {
                             continue;
                         }
