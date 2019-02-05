@@ -4,6 +4,7 @@ import os
 import analysis.utils.pyrun as pyrun
 import argparse
 import fnmatch
+import operator
 import ast
 import time
 
@@ -13,6 +14,35 @@ def make_obj(fpatts=[],options="",treename="t"):
     for fpatt in fpatts:
         ch.Add(fpatt)
     return {"ch": ch, "options": options}
+
+def get_fastsim_procnames_single(fname, procbase="fs_t1tttt", range1=[], range2=[]):
+    f = r.TFile(fname)
+    counts = f.Get("counts")
+    xaxis = counts.GetXaxis()
+    yaxis = counts.GetYaxis()
+    valid_points = []
+    for ix in range(1,counts.GetNbinsX()+1):
+        for iy in range(1,counts.GetNbinsY()+1):
+            v = counts.GetBinContent(ix,iy)
+            if v < 100: continue
+            ex = xaxis.GetBinLowEdge(ix)
+            ey = yaxis.GetBinLowEdge(iy)
+            m1, m2 = int(ex),int(max(ey,1))
+            if len(range1) == 2 and not (range1[0] <= m1 <= range1[1]): continue
+            if len(range2) == 2 and not (range2[0] <= m2 <= range2[1]): continue
+            valid_points.append([m1,m2])
+    strs = map(lambda x:"{}_m{}_m{}".format(procbase,x[0],x[1]), valid_points)
+    return strs
+
+def get_fastsim_procnames(fnames, procbase="fs_t1tttt", range1=[], range2=[]):
+    # calls _single implementation and takes set union of all fnames fed in
+    # if fnames is not a list (just one thing), then make it a list to keep this reverse compatible
+    if type(fnames) is not list: fnames = [fnames]
+    return sorted(list(reduce(
+            operator.__and__,
+            [ set(get_fastsim_procnames_single(fname, procbase=procbase, range1=range1, range2=range2))
+                for fname in fnames ]
+            )))
 
 if __name__ == "__main__":
 
@@ -25,6 +55,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-y", "--year", help="year, if you only want to run one", default="")
     parser.add_argument(      "--proc", help="process, if you only want to run one/some. accepts wildcards if quoted.", default="", type=str)
+    parser.add_argument(      "--excludeproc", help="opposite of proc", default="", type=str)
 
     parser.add_argument("-n", "--noloop", help="skip looping/scanchain", action="store_true")
     parser.add_argument("-s", "--shapes", help="make shape hists and copy to limit directory tag folder", action="store_true")
@@ -58,6 +89,8 @@ if __name__ == "__main__":
             r.gSystem.SetFlagsOpt(r.gSystem.GetFlagsOpt() + " -DSSLOOP=1")
             r.gROOT.ProcessLine(".L ../../common/CORE/Tools/MT2/MT2Utility.cc+")
             r.gROOT.ProcessLine(".L ../../common/CORE/Tools/MT2/MT2.cc+")
+        r.gROOT.ProcessLine(".L ../../common/CORE/Tools/goodrun.cc+")
+        # r.gROOT.ProcessLine(".L ../../common/CORE/Tools/goodrun.cc++") # FIXME uaf-1 vs uaf-10
         r.gROOT.ProcessLine(".L ../misc/class_files/v8.02/SS.cc+")
         r.gROOT.ProcessLine(".L ../../common/CORE/Tools/dorky/dorky.cc+")
         r.gROOT.ProcessLine(".L yieldMaker.C+")
@@ -73,53 +106,64 @@ if __name__ == "__main__":
 
     basedirs = {
 
-            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2016/",
-            # # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2017/",
-            # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.08_all/output/year_2018/",
-            # "2016_94x": "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/",
-            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
-            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_lowpt3/output/year_2016/", # FIXME
-            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2017/",
-            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2018/",
-
             "2016_94x": "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/",
-            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.11_all/output/year_2016/",
-            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.11_all/output/year_2017/",
-            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.11_all/output/year_2018/",
 
-            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2016/",
-            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.14_all/output/year_2016/",
-            # # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2017/",
-            # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2018/",
-            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2017/",
-            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2018/",
+            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
+            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
+            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/",
+            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/",
+            # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23_oldbwp2018//output/year_2018/",
 
-            2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
-            2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/",
-            2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/",
+            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
+            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/skim/",
+            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/skim/",
+            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/skim/",
+            # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23_oldbwp2018//output/year_2018/",
 
-            # secondary basedirs for debugging
-            20162: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.14_all/output/year_2016/",
-            20172: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.14_all/output/year_2017/",
-            20182: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.14_all/output/year_2018/",
+            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
+            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/skim/",
+            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/skim/",
+            # # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2017/skim/",
+            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/skim/",
+            # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23_oldbwp2018//output/year_2018/", # FIXME FIXME FIXME
 
-            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.15_all/output/year_2016/",
-            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.15_all/output/year_2017/",
-            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.15_all/output/year_2018/",
+            2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/skim/",
+            2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/skim/",
+            2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/skim/",
+
+            # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
+            # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
+            # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/",
+            # # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2017/",
+            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/",
+            # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23_oldbwp2018//output/year_2018/", # FIXME FIXME FIXME
+
             # # secondary basedirs for debugging
-            # 20162: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.15_all/output/year_2016/",
-            # 20172: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.15_all/output/year_2017/",
-            # 20182: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.15_all/output/year_2018/",
+            # 20162: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.14_all/output/year_2016/",
+            # 20172: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.14_all/output/year_2017/",
+            # 20182: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.14_all/output/year_2018/",
 
             }
+
+
 
     outputdir = args.out
     extra_global_options = args.extra_options
     options = {
             "2016_94x": "Data2016 94x quiet {} evaluateBDT ".format(extra_global_options),
+
+            # 2016: "Data2016 quiet {} evaluateBDT ".format(extra_global_options),
+            # 2017: "Data2017 quiet {} evaluateBDT minPtFake18 ".format(extra_global_options),
+            # 2018: "Data2018 quiet {} evaluateBDT minPtFake18 ".format(extra_global_options),
+
             2016: "Data2016 quiet {} evaluateBDT ".format(extra_global_options),
             2017: "Data2017 quiet {} evaluateBDT minPtFake18 ".format(extra_global_options),
             2018: "Data2018 quiet {} evaluateBDT minPtFake18 ".format(extra_global_options),
+
+                # 2016: "Data2016 quiet {} new2016FRBins ".format(extra_global_options),
+                # 2017: "Data2017 quiet {} partialUnblind ".format(extra_global_options),
+                # 2018: "Data2018 quiet {} partialUnblind ".format(extra_global_options),
+
             }
 
 
@@ -130,7 +174,7 @@ if __name__ == "__main__":
                 "2016_94x": {
 
                     "fakes": make_obj([
-                        basedirs["2016_94x"]+"Data*.root", # FIXME eventually need to add TTV,TTH for EWK subtraction
+                        basedirs["2016_94x"]+"Data*.root",
                         ] , options=options["2016_94x"]+" doFakes doData "),
                     "flips": make_obj(basedirs["2016_94x"]+"Data*.root", options=options["2016_94x"]+" doFlips doData "),
                     "data": make_obj(basedirs["2016_94x"]+"Data*.root", options=options["2016_94x"] + " doData "),
@@ -250,11 +294,14 @@ if __name__ == "__main__":
                     "flips": make_obj(basedirs[2017]+"Data*.root", options=options[2017]+" doFlips "),
                     "data": make_obj(basedirs[2017]+"Data*.root", options=options[2017]+" doData "),
                     # "fakes_mc": make_obj(basedirs[2017]+"TTBAR*.root", options=options[2017]+ " doFakesMC "),
+                    # "fakes_mc": make_obj([
+                    #     basedirs[2017]+"TTDL.root",
+                    #     basedirs[2017]+"TTSLtop.root",
+                    #     basedirs[2017]+"TTSLtopbar.root",
+                    #     ] , options=options[2017]+ " doTruthFake "),
                     "fakes_mc": make_obj([
-                        basedirs[2017]+"TTDL.root",
-                        basedirs[2017]+"TTSLtop.root",
-                        basedirs[2017]+"TTSLtopbar.root",
-                        ] , options=options[2017]+ " doTruthFake "),
+                        basedirs[2017]+"TTBAR*.root",
+                        ] , options=options[2017]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2017]+"TTDL.root",
                         basedirs[2017]+"TTSLtop.root",
@@ -283,7 +330,7 @@ if __name__ == "__main__":
                         basedirs[2017]+"TTGsinglelepbar.root",
                         basedirs[2017]+"TTGsinglelep.root",
                         basedirs[2017]+"WGToLNuGext.root",
-                        # basedirs[2017]+"ZG.root", # TODO Don't have this yet
+                        basedirs[2018]+"ZG.root", # TODO FIXME using 2018 Zgamma for now
                         ],options=options[2017] + " doXgamma "),
                     "ttvv": make_obj([
                         basedirs[2017]+"TTHH.root",
@@ -349,7 +396,6 @@ if __name__ == "__main__":
                     },
                 2018: {
 
-                    # 2017 for everything other than data for now, because...uh...there's no usable 2018 MC, even though it's almost 2019 :)
                     "fakes": make_obj([
                         basedirs[2018]+"Data*.root",
                         basedirs[2018]+"TTWnlo.root",
@@ -358,6 +404,17 @@ if __name__ == "__main__":
                         ] , options=options[2018]+" doFakes doData "),
                     "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
                     "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
+
+                    # "fakes": make_obj([
+                    #     basedirs[2018]+"ReRecoData*.root",
+                    #     basedirs[2018]+"Data*Dv2.root",
+                    #     basedirs[2018]+"TTWnlo.root",
+                    #     basedirs[2018]+"TTZnlo.root",
+                    #     basedirs[2018]+"TTHtoNonBB.root",
+                    #     ] , options=options[2018]+" doFakes doData "),
+                    # "flips": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doFlips "),
+                    # "data": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doData "),
+
                     "tttt": make_obj(basedirs[2018]+"TTTTnew.root", options=options[2018]),
                     # "fakes_mc": make_obj(basedirs[2017]+"TTBAR*.root", options=options[2018]+ " doFakesMC "),
                     # "fakes_mc": make_obj([
@@ -366,8 +423,8 @@ if __name__ == "__main__":
                     #     basedirs[2018]+"TTSLtopbar.root",
                     #     ] , options=options[2018]+ " doTruthFake "),
                     "fakes_mc": make_obj([
-                        basedirs[2017]+"TTBAR*.root",
-                        ] , options=options[2017]+ " doSkipMatching "),
+                        basedirs[2018]+"TTBAR*.root",
+                        ] , options=options[2018]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2018]+"TTDL.root",
                         basedirs[2018]+"TTSLtop.root",
@@ -451,15 +508,17 @@ if __name__ == "__main__":
 
     if args.ss:
 
-        # FIXME FIXME FIXME REMOVE minPtFake18 after fixing issue
-        # FIXME FIXME FIXME REMOVE minPtFake18
-        # FIXME FIXME FIXME REMOVE minPtFake18
-        # FIXME FIXME FIXME REMOVE minPtFake18
-        # FIXME FIXME FIXME REMOVE minPtFake18
         options = {
-                2016: "Data2016 quiet {} ".format(extra_global_options),
-                2017: "Data2017 quiet {} minPtFake18 ".format(extra_global_options),
-                2018: "Data2018 quiet {} minPtFake18 ".format(extra_global_options),
+                # 2016: "Data2016 quiet {} ".format(extra_global_options),
+                # 2017: "Data2017 quiet {} minPtFake18 ".format(extra_global_options),
+                # 2018: "Data2018 quiet {} minPtFake18 ".format(extra_global_options),
+                # 2016: "Data2016 quiet {} ".format(extra_global_options),
+                # 2017: "Data2017 quiet {} minPtFake18 partialUnblind ".format(extra_global_options),
+                # 2018: "Data2018 quiet {} minPtFake18 partialUnblind ".format(extra_global_options),
+
+                2016: "Data2016 quiet {} new2016FRBins ".format(extra_global_options),
+                2017: "Data2017 quiet {} partialUnblind ".format(extra_global_options),
+                2018: "Data2018 quiet {} partialUnblind ".format(extra_global_options),
                 }
 
 
@@ -479,6 +538,8 @@ if __name__ == "__main__":
                     "data": make_obj(basedirs[2016]+"Data*.root", options=options[2016] + " doData "),
                     "fakes_mc": make_obj([
                         basedirs[2016]+"TTBAR_PH.root",
+                        basedirs[2016]+"WJets_HT*.root",
+                        basedirs[2016]+"ST*.root",
                         ] , options=options[2016]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2016]+"TTBAR_PH.root",
@@ -540,6 +601,8 @@ if __name__ == "__main__":
                     "data": make_obj(basedirs[2017]+"Data*.root", options=options[2017]+" doData "),
                     "fakes_mc": make_obj([
                         basedirs[2017]+"TTBAR*.root",
+                        basedirs[2017]+"WJets_HT*.root",
+                        basedirs[2017]+"ST*.root",
                         ] , options=options[2017]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2017]+"TTBAR*.root",
@@ -560,7 +623,7 @@ if __name__ == "__main__":
                         basedirs[2017]+"TTGsinglelepbar.root",
                         basedirs[2017]+"TTGsinglelep.root",
                         basedirs[2017]+"WGToLNuGext.root",
-                        # basedirs[2017]+"ZG.root", # TODO
+                        basedirs[2018]+"ZG.root", # TODO FIXME using 2018 Zgamma for now
                         ],options=options[2017] + " doXgamma "),
                     "rares": make_obj([
                         basedirs[2017]+"GGHtoZZto4L.root",
@@ -588,18 +651,34 @@ if __name__ == "__main__":
 
                     },
                 2018: {
+
+                    # "fakes": make_obj([
+                    #     basedirs[2018]+"Data*.root",
+                    #     basedirs[2018]+"TTWnlo.root",
+                    #     basedirs[2018]+"TTZnlo.root",
+                    #     basedirs[2018]+"TTHtoNonBB.root",
+                    #     basedirs[2018]+"QQWW.root",
+                    #     basedirs[2018]+"WZ.root",
+                    #     ] , options=options[2018]+" doFakes doData "),
+                    # "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
+                    # "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
+
                     "fakes": make_obj([
-                        basedirs[2018]+"Data*.root",
+                        basedirs[2018]+"ReRecoData*.root",
+                        basedirs[2018]+"Data*Dv2.root",
                         basedirs[2018]+"TTWnlo.root",
                         basedirs[2018]+"TTZnlo.root",
                         basedirs[2018]+"TTHtoNonBB.root",
                         basedirs[2018]+"QQWW.root",
                         basedirs[2018]+"WZ.root",
                         ] , options=options[2018]+" doFakes doData "),
-                    "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
-                    "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
+                    "flips": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doFlips "),
+                    "data": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doData "),
+
                     "fakes_mc": make_obj([
                         basedirs[2018]+"TTBAR*.root",
+                        basedirs[2018]+"WJets.root",
+                        basedirs[2018]+"ST*.root",
                         ] , options=options[2018]+ " doSkipMatching "),
                     "fakes_mchybrid": make_obj([
                         basedirs[2018]+"TTBAR*.root",
@@ -654,50 +733,86 @@ if __name__ == "__main__":
     #         print "\t", proc, "\t\t", ",".join(sorted(map(lambda x:x.split("/")[-1].split(".")[0],[x.GetTitle() for x in obj["ch"].GetListOfFiles()])))
     # sys.exit()
 
-    def get_fastsim_procnames(fname, procbase="fs_t1tttt"):
-        f = r.TFile(fname)
-        counts = f.Get("counts")
-        xaxis = counts.GetXaxis()
-        yaxis = counts.GetYaxis()
-        valid_points = []
-        for ix in range(1,counts.GetNbinsX()+1):
-            for iy in range(1,counts.GetNbinsY()+1):
-                v = counts.GetBinContent(ix,iy)
-                if v < 100: continue
-                ex = xaxis.GetBinLowEdge(ix)
-                ey = yaxis.GetBinLowEdge(iy)
-                valid_points.append([int(ex),int(max(ey,1))])
-        strs = map(lambda x:"{}_m{}_m{}".format(procbase,x[0],x[1]), valid_points)
-        return strs
 
     fastsim_procnames = []
     if args.fastsim:
-        fn = basedirs[2016]+"T1TTTT.root"
-        procnames = get_fastsim_procnames(fn, procbase="fs_t1tttt")
+
+        procnames = get_fastsim_procnames(
+                [
+                    basedirs[2016]+"T1TTTT.root",
+                    basedirs[2017]+"T1TTTT.root",
+                    ], procbase="fs_t1tttt", range1=[1150,2100])
+        # FIXME
         procnames = [pn for pn in procnames if any(x in pn for x in [
             "m1600_m100",
-            # "m1550_m100",
-            # "m1450_m1050",
-            # "m1400_m1000",
-            # "m1400_m1200",
-            # "m1500_m1150",
-            # "m1200_m700",
-            # "m1200_m100",
             ])]
         for pn in procnames: 
-            chs[2016][pn] = make_obj(fn, options=options[2016])
-            fastsim_procnames.append(pn)
+            for y in [2016,2017,2018]:
+                # for now, use 2016 SFs/sample/etc but fake the lumi to be for 2017/2018 also
+                if y in [2018]:
+                    opts = " {} FakeLumi{} ".format(options[2016],y)
+                    chs[y][pn] = make_obj(basedirs[2016]+"T1TTTT.root", options=opts)
+                else:
+                    chs[y][pn] = make_obj(basedirs[y]+"T1TTTT.root", options=options[y])
+                fastsim_procnames.append(pn)
 
-        fn = basedirs[2016]+"T6TTWW.root"
-        procnames = get_fastsim_procnames(fn, procbase="fs_t6ttww")
-        procnames = [pn for pn in procnames if any(x in pn for x in [
-        #     "m850_m75",
-            # "m850_m750",
-            # "m850_m700",
-            ])]
-        for pn in procnames:
-            chs[2016][pn] = make_obj(fn, options=options[2016])
-            fastsim_procnames.append(pn)
+        # fn = basedirs[2016]+"T6TTWW.root"
+        # procnames = get_fastsim_procnames(fn, procbase="fs_t6ttww", range1=[750,1300])
+        # for pn in procnames: 
+        #     for y in [2016,2017,2018]:
+        #         # for now, use 2016 SFs/sample/etc but fake the lumi to be for 2017/2018 also
+        #         opts = options[2016]
+        #         if y in [2017, 2018]:
+        #             opts += " FakeLumi{} ".format(y)
+        #         chs[y][pn] = make_obj(fn, options=opts)
+        #         fastsim_procnames.append(pn)
+
+        # fn = basedirs[2016]+"T1TTTT.root"
+        # procnames = get_fastsim_procnames(fn, procbase="fs_t1tttt")
+        # # procnames = [pn for pn in procnames if any(x in pn for x in [
+        # #     "m1600_m100",
+        # #     "m1400_m1200",
+        # #     # "m1550_m100",
+        # #     # "m1450_m1050",
+        # #     # "m1400_m1000",
+        # #     # "m1500_m1150",
+        # #     # "m1200_m700",
+        # #     # "m1200_m100",
+        # #     ])]
+        # for pn in procnames: 
+        #     chs[2016][pn] = make_obj(fn, options=options[2016])
+        #     fastsim_procnames.append(pn)
+
+        # fn = basedirs[2016]+"T6TTWW.root"
+        # procnames = get_fastsim_procnames(fn, procbase="fs_t6ttww")
+        # # procnames = [pn for pn in procnames if any(x in pn for x in [
+        # # #     "m850_m75",
+        # #     # "m850_m750",
+        # #     # "m850_m700",
+        # #     ])]
+        # for pn in procnames:
+        #     chs[2016][pn] = make_obj(fn, options=options[2016])
+        #     fastsim_procnames.append(pn)
+
+        # fn = basedirs[2016]+"T5QQQQVV_main.root"
+        # procnames = get_fastsim_procnames(fn, procbase="fs_t5qqqqvv")
+        # procnames = [pn for pn in procnames if any(x in pn for x in [
+        #     "m1450_m1",
+        #     "m1250_m1050",
+        #     ])]
+        # for pn in procnames:
+        #     chs[2016][pn] = make_obj(fn, options=options[2016])
+        #     fastsim_procnames.append(pn)
+
+        # fn = basedirs[2016]+"T5QQQQVV_dm20.root"
+        # procnames = get_fastsim_procnames(fn, procbase="fs_t5qqqqvv_dm20")
+        # procnames = [pn for pn in procnames if any(x in pn for x in [
+        #     "m950_m850",
+        #     "m1450_m1",
+        #     ])]
+        # for pn in procnames:
+        #     chs[2016][pn] = make_obj(fn, options=options[2016])
+        #     fastsim_procnames.append(pn)
 
     def run_chain((index,info)):
         ch, options, outputdir = info
@@ -712,16 +827,17 @@ if __name__ == "__main__":
         for proc,obj in chs[year].items():
             # if (len(args.proc) > 0) and (proc != args.proc): continue
             if (len(args.proc) > 0) and not fnmatch.fnmatch(proc,args.proc): continue
-            options = obj["options"]
+            if (len(args.excludeproc) > 0) and fnmatch.fnmatch(proc,args.excludeproc): continue
+            opts = obj["options"]
             if args.verbosity >= 1:
-                options = options.replace("quiet","")
+                opts = opts.replace("quiet","")
             if args.year and args.proc and "*" not in args.proc:  # if one process, show the progress bar
-                options = options.replace("quiet","")
+                opts = opts.replace("quiet","")
             # Change chain titles to proc so that we output the right root file name
             obj["ch"].SetTitle("{}".format(proc))
-            to_run.append([obj["ch"], options, outputdir])
+            to_run.append([obj["ch"], opts, outputdir])
             if args.verbosity >= 2:
-                print "Adding:", obj["ch"].GetTitle(), options, outputdir
+                print "Adding:", obj["ch"].GetTitle(), opts, outputdir
 
     os.system("mkdir -p {}".format(outputdir))
 
@@ -766,7 +882,8 @@ if __name__ == "__main__":
             map(run_chain,enumerate(to_run))
             print "Done"
         else:
-            runner = pyrun.Runner(nproc=min(25,len(to_run)), func=run_chain, dot_type=3)
+            os.nice(10)
+            runner = pyrun.Runner(nproc=min(25,len(to_run)), func=run_chain, dot_type=(3 if len(to_run)<500 else 0))
             runner.add_args(to_run)
             runner.run(print_callback=callback)
 
@@ -798,10 +915,14 @@ if __name__ == "__main__":
             sys.modules["numba"] = None
             import plot_all
 
-            signame = "tttt"
+
+            if "partialUnblind" in options[2017]:
+                plot_kwargs["unblindall"] = True
+
+            signames = ["tttt"]
             if args.ss:
-                # signame = "fs_t1tttt_m1600_m100"
-                signame = fastsim_procnames[0]
+                signames = ["fs_t1tttt_m1600_m100"]
+                # signames = fastsim_procnames[:1]
             plot_all.make_plots(
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
@@ -809,7 +930,7 @@ if __name__ == "__main__":
                     lumi="35.9",
                     other_years = [],
                     doss=args.ss,
-                    signame=signame,
+                    signames=signames,
                     **plot_kwargs
                     )
 
@@ -817,10 +938,10 @@ if __name__ == "__main__":
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
                     year=2017,
-                    lumi="41.5",
+                    lumi=("41.5" if "partialUnblind" not in options[2017] else "10.0"),
                     other_years = [],
                     doss=args.ss,
-                    signame=signame,
+                    signames=signames,
                     **plot_kwargs
                     )
 
@@ -828,10 +949,10 @@ if __name__ == "__main__":
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
                     year=2018,
-                    lumi="58.8",
+                    lumi=("58.8" if "partialUnblind" not in options[2018] else "15.4"),
                     other_years = [],
                     doss=args.ss,
-                    signame=signame,
+                    signames=signames,
                     **plot_kwargs
                     )
 
@@ -839,9 +960,10 @@ if __name__ == "__main__":
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
                     year=2018,
-                    lumi="136.3", # 2016+2017+2018 --> 35.922+41.53+58.83 = 136.3
+                    # lumi="136.3", # 2016+2017+2018 --> 35.922+41.53+58.83 = 136.3
+                    lumi=("136.3" if "partialUnblind" not in options[2017] else "61.3"),
                     other_years = [2016,2017],
                     doss=args.ss,
-                    signame=signame,
+                    signames=signames,
                     **plot_kwargs
                     )

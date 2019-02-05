@@ -4,13 +4,14 @@ import os
 import numpy as np
 import itertools
 import uproot
+import re
 
 from analysis.utils.plotting_utils import write_table
 
 import sys
 sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
 from matplottery.plotter import plot_stack
-from matplottery.utils import Hist1D, MET_LATEX
+from matplottery.utils import Hist1D, MET_LATEX, binomial_obs_z
 
 
 labels = {}
@@ -91,47 +92,66 @@ labels["ft"] = {
         # "jetpt"           : [("sr","br"), "jetpt"],
 }
 
+def remove(rs1,rs2):
+    return list(set(rs1)-set(rs2))
+ssregions = ("ssbr","br","ml","mlonz","mloffz","hh","lm")
+# ssregions = ("lm",)
 labels["ss"] = {
 
+
+        # "mu_l2pt"    : [ssregions, r"unsorted $p_{T}$(lep2, $\mu$)"],
+        # "mu_l2eta"   : [ssregions, r"unsorted $\eta $(lep2, $\mu$)"],
+        # "mu_l2phi"   : [ssregions, "mu_l2phi"],
+
         "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "TOTAL"],
-        "category"   : [("sr",                     ), r"HH,HL,LL,MLoffZ,MLonZ"],
-        "ht"         : [("br","ml","mlonz","mloffz","hh","lm"), r"$H_T$"],
-        "met"        : [("br","ml","mlonz","mloffz","hh","lm"), MET_LATEX],
-        "mll"        : [("br","ml","mlonz","mloffz","hh","lm"), r"$m_{ll}$"],
-        "mllos"      : [("br","ml","mlonz","mloffz","hh","lm"), r"$m_{ll}$(OS)"],
-        "njets"      : [("br","ml","mlonz","mloffz","hh","lm"), r"$N_\mathrm{jets}$"],
-        "nbtags"     : [("br","ml","mlonz","mloffz","hh","lm"), r"$N_\mathrm{btags}$"],
-        "type"       : [("br","ml","mlonz","mloffz","hh","lm"), r"$\mu\mu,\mu e,e\mu,ee$"],
-        "type3"      : [("br","ml","mlonz","mloffz","hh","lm"), r"$\mu\mu\mu,\mu\mu e,\mu ee,eee$"],
-        "charge"     : [("br","ml","mlonz","mloffz","hh","lm"), r"SS charge"],
-        "q3"         : [("br","ml","mlonz","mloffz","hh","lm"), r"lep 3 charge"],
-        "charge3"    : [("br","ml","mlonz","mloffz","hh","lm"), r"$\pm\pm\pm$, $\pm\pm\mp$"],
-        "nleps"      : [("br","ml","mlonz","mloffz","hh","lm"), r"$N_\mathrm{leps}$"],
-        "l1pt"       : [("br","ml","mlonz","mloffz","hh","lm"), r"ordered $p_{T}$(lep1)"],
-        "l2pt"       : [("br","ml","mlonz","mloffz","hh","lm"), r"ordered $p_{T}$(lep2)"],
-        "l3pt"       : [("br","ml","mlonz","mloffz","hh","lm"), r"ordered $p_{T}$(lep3)"],
-        "mt2"        : [("br","ml","mlonz","mloffz","hh","lm"), r"$m_{T}^{2}$"],
-        "mt2min"     : [("br","ml","mlonz","mloffz","hh","lm"), r"$m_{T}^{2,\mathrm{min}}$"],
-        "mtmin"      : [("br","ml","mlonz","mloffz","hh","lm"), r"$m_{T}^\mathrm{min}$"],
-        "el_l1pt"    : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $p_{T}$(lep1, e)"],
-        "el_l2pt"    : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $p_{T}$(lep2, e)"],
-        "el_l3pt"    : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $p_{T}$(lep3, e)"],
-        "el_l1eta"   : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $\eta $(lep1, e)"],
-        "el_l2eta"   : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $\eta $(lep2, e)"],
-        "el_l3eta"   : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $\eta $(lep3, e)"],
-        "mu_l1pt"    : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $p_{T}$(lep1, \mu)"],
-        "mu_l2pt"    : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $p_{T}$(lep2, \mu)"],
-        "mu_l3pt"    : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $p_{T}$(lep3, \mu)"],
-        "mu_l1eta"   : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $\eta $(lep1, \mu)"],
-        "mu_l2eta"   : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $\eta $(lep2, \mu)"],
-        "mu_l3eta"   : [("br","ml","mlonz","mloffz","hh","lm"), r"unsorted $\eta $(lep3, \mu)"],
+        "category"   : [("sr",), r"HH,HL,LL,MLoffZ,MLonZ,LM"],
+        "mtmin"      : [ssregions, r"$m_{T}^\mathrm{min}$"],
+        "ht"         : [ssregions, r"$H_T$"],
+        "njets"      : [ssregions, r"$N_\mathrm{jets}$"],
+        "met"        : [ssregions, MET_LATEX],
+        "mll"        : [ssregions, r"$m_{ll}$"],
+        "mllbig"     : [ssregions, r"$m_{ll}$"],
+        "mllos"      : [ssregions, r"$m_{ll}$(OS)"],
+        "nbtags"     : [ssregions, r"$N_\mathrm{btags}$"],
+        "type"       : [ssregions, r"$\mu\mu,\mu e,e\mu,ee$"],
+        "charge"     : [ssregions, r"SS charge"],
+        "el_charge"  : [ssregions, r"SS el charge"],
+        "mu_charge"  : [ssregions, r"SS mu charge"],
+        "dphi"       : [ssregions, r"dphi(l1,l2)"],
+        "nleps"      : [ssregions, r"$N_\mathrm{leps}$"],
+        "l1pt"       : [ssregions, r"ordered $p_{T}$(lep1)"],
+        "l2pt"       : [ssregions, r"ordered $p_{T}$(lep2)"],
+        "el_l1pt"    : [ssregions, r"unsorted $p_{T}$(lep1, e)"],
+        "el_l2pt"    : [ssregions, r"unsorted $p_{T}$(lep2, e)"],
+        "el_l1eta"   : [ssregions, r"unsorted $\eta $(lep1, e)"],
+        "el_l2eta"   : [ssregions, r"unsorted $\eta $(lep2, e)"],
+        "mu_l1pt"    : [ssregions, r"unsorted $p_{T}$(lep1, $\mu$)"],
+        "mu_l2pt"    : [ssregions, r"unsorted $p_{T}$(lep2, $\mu$)"],
+        "mu_l1eta"   : [ssregions, r"unsorted $\eta $(lep1, $\mu$)"],
+        "mu_l2eta"   : [ssregions, r"unsorted $\eta $(lep2, $\mu$)"],
+        "el_l1phi"   : [ssregions, "el_l1phi"],
+        "el_l2phi"   : [ssregions, "el_l2phi"],
+        "mu_l1phi"   : [ssregions, "mu_l1phi"],
+        "mu_l2phi"   : [ssregions, "mu_l2phi"],
+        "nvtx"       : [ssregions, r"nvtx"],
+        "lumiblock"  : [ssregions, "lumiblock"],
+        "run"        : [ssregions, "run"],
+        "class"      : [ssregions, r"hypclass"],
+        "l3pt"       : [ssregions, r"ordered $p_{T}$(lep3)"],
+        "type3"      : [remove(ssregions,("lm",)), r"$\mu\mu\mu,\mu\mu e,\mu ee,eee$"],
+        "q3"         : [remove(ssregions,("lm",)), r"lep 3 charge"],
+        "charge3"    : [remove(ssregions,("lm",)), r"$\pm\pm\pm$, $\pm\pm\mp$"],
+        "el_l3pt"    : [remove(ssregions,("lm",)), r"unsorted $p_{T}$(lep3, e)"],
+        "el_l3eta"   : [remove(ssregions,("lm",)), r"unsorted $\eta $(lep3, e)"],
+        "mu_l3pt"    : [remove(ssregions,("lm",)), r"unsorted $p_{T}$(lep3, $\mu$)"],
+        "mu_l3eta"   : [remove(ssregions,("lm",)), r"unsorted $\eta $(lep3, $\mu$)"],
 
 }
 
 d_label_colors = {}
 d_label_colors["ft"] = {
         "fakes" : (r"Nonprompt lep.", [0.85, 0.85, 0.85]),
-        # "fakes_mc" : (r"$t\bar{t}$", [0.85, 0.85, 0.85]),
+        # "fakes_mc" : (r"MC fakes", [0.85, 0.85, 0.85]),
         "flips" : (r"Charge misid.", [0.4, 0.4, 0.4]),
         "rares" : (r"Rare", [1.0, 0.4, 1.0]),
         "tth"   : (r"$t\bar{t}H$", [0.4, 0.4, 0.6]),
@@ -142,7 +162,7 @@ d_label_colors["ft"] = {
         }
 d_label_colors["ss"] = {
         "fakes" : (r"Nonprompt lep.", [0.85, 0.85, 0.85]),
-        # "fakes_mc" : (r"$t\bar{t}$", [0.85, 0.85, 0.85]),
+        # "fakes_mc" : (r"MC fakes", [0.85, 0.85, 0.85]),
         "flips" : (r"Charge misid.", [0.4, 0.4, 0.4]),
         "rares" : (r"Rare", [1.0, 0.4, 1.0]),
         "tth"   : (r"$t\bar{t}H$", [0.4, 0.4, 0.6]),
@@ -168,58 +188,96 @@ d_flat_systematics["ss"] = {
         "fakes": 0.3,
         "flips": 0.2,
         "rares": 0.5,
-        "ww": 0.2,
-        "ttw": 0.13,
+        "ww": 0.3,
+        "ttw": 0.3,
         "ttz": 0.3,
-        "wz": 0.13,
+        "wz": 0.3,
         "tth": 0.3,
         "xg": 0.5,
         }
 # "fakes/ttZ/ttH (30%); flips/WW (20%); WZ/ttW (13%); Xg/Rares (50%)"
 
-# from python getPostFit.py 
+# from ../limits/test/crfit/
 # after doing testcrbins.py to reduce bins (3 bins from crwsplit)
 # and run_all_limits.sh with extra containing --unblinded
-d_crpostfitsf = {'fakes': 1.1948199139074693,
-        'flips': 1.020599049200507,
-        'rares': 1.1224350665249947,
-        'total': 1.2794573639702325,
-        'total_background': 1.3056080457107933,
-        'total_signal': 0.0,
-        'tth': 1.155083830402133,
-        'tttt': 0.0,
-        'ttvv': 1.0550142330872638,
-        'ttw': 1.4807971683302559,
-        'ttz': 1.3958306982737914,
-        'xg': 1.0842022472153388}
-d_crpostfitsf_errs = {'fakes': 0.5330058353969307,
-        'flips': 0.14395684087751284,
-        'rares': 0.3343497393873837,
-        'total': 0.14901268940160062,
-        'total_background': 0.1538191984828496,
-        'total_signal': 0.0,
-        'tth': 0.30185266795309806,
-        'tttt': 0.0,
-        'ttvv': 0.28627852193747866,
-        'ttw': 0.28537781734630363,
-        'ttz': 0.2800949349793666,
-        'xg': 0.3090238224979612}
+
+# d_crpostfitsf = {'fakes': 1.1948199139074693,
+#         'flips': 1.020599049200507,
+#         'rares': 1.1224350665249947,
+#         'total': 1.2794573639702325,
+#         'total_background': 1.3056080457107933,
+#         'total_signal': 0.0,
+#         'tth': 1.155083830402133,
+#         'tttt': 0.0,
+#         'ttvv': 1.0550142330872638,
+#         'ttw': 1.4807971683302559,
+#         'ttz': 1.3958306982737914,
+#         'xg': 1.0842022472153388}
+# d_crpostfitsf_errs = {'fakes': 0.5330058353969307,
+#         'flips': 0.14395684087751284,
+#         'rares': 0.3343497393873837,
+#         'total': 0.14901268940160062,
+#         'total_background': 0.1538191984828496,
+#         'total_signal': 0.0,
+#         'tth': 0.30185266795309806,
+#         'tttt': 0.0,
+#         'ttvv': 0.28627852193747866,
+#         'ttw': 0.28537781734630363,
+#         'ttz': 0.2800949349793666,
+#         'xg': 0.3090238224979612}
+
+d_crpostfitsf = {'fakes': 1.1887430404510724,
+ 'flips': 1.034058340048447,
+ 'rares': 1.0520979051157986,
+ 'total': 1.2039836025074864,
+ 'total_background': 1.2254378772947825,
+ 'total_signal': 0.0,
+ 'tth': 1.067226056010255,
+ 'tttt': 0.0,
+ 'ttvv': 1.0331088148013614,
+ 'ttw': 1.3331521252844587,
+ 'ttz': 1.3291216173351943,
+ 'xg': 1.0394166879436677}
+d_crpostfitsf_errs = {'fakes': 0.6836929317614069,
+ 'flips': 0.5375067661493199,
+ 'rares': 0.2513117714751323,
+ 'total': 0.18140301518082388,
+ 'total_background': 0.18528878200425344,
+ 'total_signal': 0.0,
+ 'tth': 0.31260232283875494,
+ 'tttt': 0.0,
+ 'ttvv': 0.1789620767510818,
+ 'ttw': 0.5355134476152815,
+ 'ttz': 0.348624399392768,
+ 'xg': 0.2526828586109242}
 
 # yuck, gotta make these global for multiprocessing since uproot file objects can't be pickled
 files = {}
-signame_ = None
+signames_ = []
 
 def worker(info):
-    global files, signame_
+    global files, signames_
 
-    analysis, outputdir, year, lumi, (var, (regions, xlabel)) = info
+    analysis, outputdir, year, lumi, unblindall, (var, (regions, xlabel)) = info
 
-    if signame_ == "tttt":
-        sigstr = r"$t\bar{t}t\bar{t}$"
+    if signames_ == ["tttt"]:
+        sigstrs = [r"$t\bar{t}t\bar{t}$"]
     else:
-        m1,m2 = map(int,signame_.split("_m")[1:])
-        modelname = signame_.split("_m")[0].replace("fs_","").capitalize().replace("ww","WW")
-        sigstr = r"{} ({},{}) $\times 10$".format(modelname,m1,m2)
+        sigstrs = []
+        for signame in signames_:
+            # print signame
+            sigtag = signame.split("_m")[0].replace("fs_","")
+            # print sigtag
+            massstr =  ",".join(re.findall("_m([0-9]*)",signame))
+            modelname = {
+                    "t1tttt": "T1tttt",
+                    "t6ttww": "T6ttWW",
+                    "t5qqqqvv": "T5qqqqVV",
+                    "t5qqqqvv_dm20": "T5qqqqVV, $\Delta$m=20",
+                    "rpv_t1qqqql": "T1qqqqL",
+                    }.get(sigtag,sigtag)
+            sigstr = r"{} ({}) $\times 10$".format(modelname,massstr)
+            sigstrs.append(sigstr)
 
     fnames = []
     for region in regions:
@@ -247,14 +305,21 @@ def worker(info):
                     ]
 
         data = sum([Hist1D(files[y]["data"]["{}_{}_data".format(region_for_hist,var)]) for y in files.keys()])
-        sig = sum([Hist1D(files[y][signame_]["{}_{}_{}".format(region_for_hist,var,signame_)],color="r") for y in files.keys()])
-        sig.set_attr("label", sigstr)
-        if signame_ != "tttt":
-            sig *= 10.
+        sigcolors = ["red","#5863F8","#FCCA46","#04A777","#944BBB","#233D4D"]
+        # print sigcolors
+        sigs = [
+                sum([Hist1D(files[y][signame]["{}_{}_{}".format(region_for_hist,var,signame)],color=sigcolors[isig]) for y in files.keys()])
+                for isig,signame in enumerate(signames_)
+                ]
+        for isig,sigstr in enumerate(sigstrs):
+            sigs[isig].set_attr("label", sigstr)
+            if signames_[isig] != "tttt":
+                sigs[isig] *= 10.
+
         bgs = sorted(bgs, key=lambda bg: bg.get_integral())
         for bg in bgs:
             # add flat systematic to stat unc in quadrature
-            bg._errors = np.hypot(d_flat_systematics[analysis].get(bg.get_attr("dummy"),0.),bg._errors)
+            bg._errors = np.hypot(bg._counts*d_flat_systematics[analysis].get(bg.get_attr("dummy"),0.),bg._errors)
 
         data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
 
@@ -264,19 +329,30 @@ def worker(info):
         ax_main_callback = None
         ax_ratio_callback = None
         mpl_legend_params = {}
-        ratio_range = [0.,2.]
+        ratio_range = [0.,3.]
         xticks = []
+
+        # FIXME FIXME FIXME
+        if analysis == "ss" and year != 2016 and not unblindall:
+            data._counts *= 0.
+            data._errors *= 0.
+            data.set_attr("label", "Data (blind)")
 
         if region in ["SRHH","SRHL","SRLL","SRML","SRLM"] and (var == "TOTAL"):
             ratio_range = [0.,3.]
-            mpl_legend_params["fontsize"] = 9
-            mpl_legend_params["framealpha"] = 0.5
+            mpl_legend_params["fontsize"] = 8
+            mpl_legend_params["framealpha"] = 0.4
             mpl_legend_params["ncol"] = 2
-            mpl_legend_params["labelspacing"] = 0.15
+            mpl_legend_params["labelspacing"] = 0.12
 
-            data.convert_to_poisson_errors()
+            data.poissonify()
 
-            if year != 2016:
+            sbgs = sum(bgs)
+            pulls = binomial_obs_z(data.counts,sbgs.counts,sbgs.errors)
+            mu_pulls = pulls.mean()
+            sig_pulls = pulls.std()
+
+            if year != 2016 and not unblindall:
                 data._counts *= 0.
                 data._errors *= 0.
                 data.set_attr("label", "Data (blind)")
@@ -287,19 +363,22 @@ def worker(info):
 
             if region in ["SRML","SRLM","SRLL","SRHL","SRHH"]:
                 xticks = range(1,70)
+                def ax_ratio_callback(ax):
+                    ax.text(0.18, -0.6,r"pulls $\mu,\sigma$ = {:.2f},{:.2f}".format(mu_pulls,sig_pulls), color="red", ha="center", va="center", fontsize=10.0, transform = ax.transAxes)
             # if region in ["SRML"]:
-                # xticks = []
-                # xticks += ["{}  ".format(x) if x not in [1,2,3,4,14,15,16] else ("{}A".format(x)) for x in range(1,16+1)]+["1B","2B","3B","4B","14B","15B","16B"]
-                # xticks += ["{}  ".format(x) if x not in [1,2,3,4,14,15,16] else ("{}A".format(x)) for x in range(1,16+1)]+["1B","2B","3B","4B","14B","15B","16B"]
-                # def ax_ratio_callback(ax):
-                #     ax.text(11,2.35,"off-Z", color="blue", ha="center", va="center", fontsize=10.0, wrap=True)
-                #     ax.text(10+23,2.35,"on-Z", color="blue", ha="center", va="center", fontsize=10.0, wrap=True)
-                #     ax.axvline(x=23.5, color="blue", lw=1.5)
+            #     def ax_ratio_callback(ax):
+            #         ax.text(0.4, -0.6,"off-Z", color="blue", ha="center", va="center", fontsize=10.0, wrap=True, transform = ax.transAxes)
+            #         ax.text(0.55, -0.6,"on-Z", color="blue", ha="center", va="center", fontsize=10.0, wrap=True, transform = ax.transAxes)
+            #         ax.axvline(x=21.5, color="blue", lw=1.0)
+            #         ax.text(0.18, -0.6,"pulls $\mu,\sigma$ = {:.2f},{:.2f}$".format(mu_pulls,sig_pulls), color="red", ha="center", va="center", fontsize=10.0, transform = ax.transAxes)
 
         elif region.lower() in ["sr","srdisc"]:
-            # data._counts *= 0.
-            # data._errors *= 0.
-            data.set_attr("label", "Data (blind)")
+            if not unblindall:
+                data._counts *= 0.
+                data._errors *= 0.
+            if not unblindall:
+                data.set_attr("label", "Data (blind)")
+            data.convert_to_poisson_errors()
             if var.lower() in ["total"]:
                 xticks = range(1,20)
             if region.lower() in ["srdisc"]:
@@ -309,16 +388,18 @@ def worker(info):
                 xticks = ["CRZ"]+range(1,25)
 
         if (region.lower() in ["srcr"]) and (var.lower() in ["total"]):
-            # data._counts[2:] *= 0.
-            # data._errors[2:] *= 0.
+            if not unblindall:
+                data._counts[2:] *= 0.
+                data._errors[2:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
             def ax_main_callback(ax):
                 ax.set_ylim([0.1,ax.get_ylim()[1]*1.5])
                 ax.set_yscale("log", nonposy='clip'),
             xticks = ["CRZ","CRW"]+range(1,20)
         if (var.lower() in ["disc"]) and (region.lower() not in ["ttwcr","ttzcr"]):
-            data._counts[-10:] *= 0.
-            data._errors[-10:] *= 0.
+            if not unblindall:
+                data._counts[-10:] *= 0.
+                data._errors[-10:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
 
         if len(files.keys()) > 1:
@@ -330,7 +411,7 @@ def worker(info):
                    cms_type = "Preliminary",
                    lumi = lumi,
                    ratio_range=ratio_range,
-                   sigs=[sig],
+                   sigs=sigs,
                    xticks=xticks,
                    mpl_sig_params={
                        # "hist":False,
@@ -346,14 +427,14 @@ def worker(info):
         # print data
         # return
 
-        table_info = write_table(data,bgs,signal=sig,outname=fname.replace(".pdf",".txt"))
+        table_info = write_table(data,bgs,signal=(None if not sigs else sigs[0]),outname=fname.replace(".pdf",".txt"))
         # table_info = write_table(data,bgs,signal=sig,outname=fname.replace(".pdf",".txt"),
-        #         binlabels=xticks,signame=sigstr.replace(r"$\times 10$","x10").replace(","," "),csv=True)
+        #         binlabels=xticks,signame=sigstrs[0].replace(r"$\times 10$","x10").replace(","," "),csv=True)
     return ", ".join(fnames)
 
-def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[], signame="tttt", doss=False, show_mcfakes=False):
-    global files, signame_, other_files
-    signame_ = signame
+def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[], signames="tttt", doss=False, show_mcfakes=False, unblindall=False):
+    global files, signames_, other_files
+    signames_ = signames
 
     os.system("mkdir -p {}/".format(outputdir))
 
@@ -362,39 +443,44 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
 
     if show_mcfakes and ("fakes" in d_label_colors[analysis]):
         del d_label_colors[analysis]["fakes"]
-        d_label_colors[analysis]["fakes_mc"] = (r"$t\bar{t}$", [0.85, 0.85, 0.85])
+        d_label_colors[analysis]["fakes_mc"] = (r"MC fakes", [0.85, 0.85, 0.85])
 
     files = {}
     for y in [year]+other_years:
         files[y] = { }
-        for proc in d_label_colors[analysis].keys()+["data",signame_]:
+        for proc in d_label_colors[analysis].keys()+["data"]+signames_:
             # try:
             ystr = str(y)
-            if "fs_" in proc: ystr = "2016"
+            if any(x in proc for x in ["fs_","rpv_"]): ystr = "2016"
             files[y][proc] = uproot.open("{}/output_{}_{}.root".format(inputdir,ystr,proc))
             # except IOError:
             #     print("{}/output_{}_{}.root doesn't exist, but ignoring because it's probably signal".format(inputdir,y,proc))
 
+    infos = [[analysis,outputdir,year,lumi,unblindall,x] for x in labels[analysis].items()]
 
-    # print files
-
-    # # for region in ["htnb1mc","htnb1","os","osloose","br","crw","crz","tt_isr_reweight_check"]:
-    # # regions = ["htnb1mc","htnb1","htnb1mcmu","htnb1mu","os","os_noht","osloose","br","crw","crz"]
-    # regions = regions or ["htnb1mc","htnb1","os","sshh","sshhmc","osloose","br","crw","crz"]
-    # flavs = ["ee","em","mm","in"]
-    # varss = labels_ft.keys()
-    infos = [[analysis,outputdir,year,lumi,x] for x in labels[analysis].items()]
     # print infos
+
+    # # Smarter. Run the first couple without thread pool so that it doesn't obscure errors when crashing
+    # # Then run rest in parallel
+    # # wtf. Can't do this because of https://github.com/uqfoundation/pathos/issues/153
+    # map(worker,infos[:2])
+    # os.nice(10)
+    # from multiprocessing import Pool as ThreadPool
+    # pool = ThreadPool(15)
+    # for res in pool.imap_unordered(worker,infos[1:]):
+    #     if res:
+    #         print "Wrote {}".format(res)
 
     # map(worker,infos)
 
     os.nice(10)
     from multiprocessing import Pool as ThreadPool
-    pool = ThreadPool(25)
+    pool = ThreadPool(15)
     # print infos
     for res in pool.imap_unordered(worker,infos):
         if res:
             print "Wrote {}".format(res)
+
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 import os
 import ROOT as r
+from tqdm import tqdm
+import itertools
 
 verbose_ = True
 
@@ -98,9 +100,10 @@ def write_one_file(fname_in, fname_out, name, region, year):
     h = fin.Get("{}_TOTAL_{}".format(region,name))
     h_nominal = h.Clone("sr")
     if abs(h_nominal.Integral()) < 1e-6:
-        if verbose_: print "[!] Nominal yields for {}, {}, {} are 0, skipping".format(name, region, year)
-        fout.Close()
-        return
+        # if verbose_: print "[!] Nominal yields for {}, {}, {} are 0, skipping".format(name, region, year)
+        # fout.Close()
+        # return
+        if verbose_: print "[!] Nominal yields for {}, {}, {} are 0, but writing empty histograms anyway".format(name, region, year)
     avoid_negative_yields(h_nominal)
     modify_central(h_nominal, fname_in=fname_in, name=name, region=region, year=year)
 
@@ -115,6 +118,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
         return
 
     is_higgs = "higgs" in name
+    is_fastsim = "fs_" in name
 
     # stat
     write_stat(h_nominal, name)
@@ -132,7 +136,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
                 if syst not in ["scale","pdf"]:
                     h_syst.Scale(h_nominal.Integral()/divz(h_syst.Integral()))
                 h_syst.Write()
-    elif (name in ["ttw","ttz","tth","rares","xg","ttvv"]) or is_higgs:
+    elif (name in ["ttw","ttz","tth","rares","xg","ttvv","wz","ww"]) or is_higgs or is_fastsim:
         for syst in ["scale","pdf"]:
             for which in ["Up","Down"]:
                 h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,syst.upper(),which.replace("ow","").upper(),name))
@@ -145,14 +149,37 @@ def write_one_file(fname_in, fname_out, name, region, year):
     
     # If not doing data, flips, or fakes
     if not any(x in name for x in ["data","flips","fakes"]):
-        # btagSF
-        for which in ["Up","Down"]:
-            h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,"BTAGSF",which.replace("ow","").upper(),name))
-            # h_alt.Scale(h_nominal.Integral()/divz(h_alt.Integral()))
-            h_syst = h_alt.Clone("btag{}".format(which))
-            h_syst.SetTitle("btag{}".format(which))
-            avoid_zero_integrals(h_nominal,h_syst)
-            h_syst.Write()
+
+        split_btagsf = True
+        if split_btagsf:
+            # btagSF heavy
+            for which in ["Up","Down"]:
+                h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,"BTAGSFHEAVY",which.replace("ow","").upper(),name))
+                # h_alt.Scale(h_nominal.Integral()/divz(h_alt.Integral()))
+                h_syst = h_alt.Clone("btaghf{}".format(which))
+                h_syst.SetTitle("btaghf{}".format(which))
+                avoid_zero_integrals(h_nominal,h_syst)
+                h_syst.Write()
+
+            # btagSF light
+            for which in ["Up","Down"]:
+                h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,"BTAGSFLIGHT",which.replace("ow","").upper(),name))
+                # h_alt.Scale(h_nominal.Integral()/divz(h_alt.Integral()))
+                h_syst = h_alt.Clone("btaglf{}".format(which))
+                h_syst.SetTitle("btaglf{}".format(which))
+                avoid_zero_integrals(h_nominal,h_syst)
+                h_syst.Write()
+        else:
+            # btagSF
+            for which in ["Up","Down"]:
+                h_alt = fin.Get("{}_{}_{}_TOTAL_{}".format(region,"BTAGSF",which.replace("ow","").upper(),name))
+                # h_alt.Scale(h_nominal.Integral()/divz(h_alt.Integral()))
+                h_syst = h_alt.Clone("btag{}".format(which))
+                h_syst.SetTitle("btag{}".format(which))
+                avoid_zero_integrals(h_nominal,h_syst)
+                h_syst.Write()
+
+
 
         # PU, JES, JER, Prefire SF for 2016, 2017
         for syst in ["pu","jes","jer"]:
@@ -163,7 +190,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
                 avoid_zero_integrals(h_nominal,h_syst)
                 h_syst.Write()
 
-        # FastSim gen met
+        # prefiring
         h_alt = fin.Get("{}_PREFIRE_UP_TOTAL_{}".format(region,name))
         h_syst_up = h_alt.Clone("prefireUp".format(which))
         h_syst_down = h_alt.Clone("prefireDown".format(which))
@@ -171,6 +198,13 @@ def write_one_file(fname_in, fname_out, name, region, year):
         h_syst_up.Write()
         h_syst_down.Write()
 
+        # trigger
+        h_alt = fin.Get("{}_TRIGGER_UP_TOTAL_{}".format(region,name))
+        h_syst_up = h_alt.Clone("trigUp".format(which))
+        h_syst_down = h_alt.Clone("trigDown".format(which))
+        fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
+        h_syst_up.Write()
+        h_syst_down.Write()
 
         # lepton SFs
         h_alt = fin.Get("{}_LEP_UP_TOTAL_{}".format(region,name))
@@ -180,7 +214,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
         h_syst_up.Write()
         h_syst_down.Write()
 
-        # ttbb/ttjj ~ 1.0pm0.35
+        # ttbb/ttjj
         h_alt = fin.Get("{}_BB_UP_TOTAL_{}".format(region,name))
         h_syst_up = h_alt.Clone("bbUp".format(which))
         h_syst_down = h_alt.Clone("bbDown".format(which))
@@ -273,14 +307,20 @@ def write_one_file(fname_in, fname_out, name, region, year):
             map(lambda x: x.Write(), [h_isrup,h_isrdn,h_fsrup,h_fsrdn])
             map(lambda x: x.Close(), [f_isrup,f_isrdn,f_fsrup,f_fsrdn])
 
-    # EWK subtraction
     if name in ["fakes"]:
+
+        # EWK subtraction
         h_alt = fin.Get("{}_FR_TOTAL_{}".format(region,name))
         h_syst_up = h_alt.Clone("fakes_EWKUp")
         h_syst_down = h_alt.Clone("fakes_EWKDown")
         fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
         h_syst_up.Write()
         h_syst_down.Write()
+
+        # Raw counts for gmN
+        h_alt = fin.Get("{}_UNWFR_TOTAL_{}".format(region,name))
+        h_counts = h_alt.Clone("fakes_unwcounts")
+        h_counts.Write()
 
     fout.Close()
 
@@ -310,10 +350,12 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
         procs.extend(["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"])
         regions = ["SRCR","SRDISC"]
     nmade = 0
-    for year in [2016, 2017, 2018]:
-        for proc in procs+extra_procs:
-            for region in regions:
-                if do_one(year,proc,region): nmade += 1
+    years = [2016, 2017, 2018]
+    allprocs = procs+extra_procs
+
+    for year,proc in tqdm(list(itertools.product(years,allprocs))):
+        for region in regions:
+            if do_one(year,proc,region): nmade += 1
 
     # for year in [2016]:
     #     for proc in ["fs_t6ttww_m875_m775"]:
