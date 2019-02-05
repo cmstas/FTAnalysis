@@ -35,6 +35,7 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix="", lu
             ["leppt", "$p_T$(lep)"],
             ["lepeta", "$\\eta$(lep)"],
             ["lepphi", "$\\phi$(lep)"],
+            ["dlepphi", "$\\Delta\\phi$"],
             ["mll", "$m_{ll}$"],
             ["nvtx", "# good vertices"],
             # ["lep1nmiss", "lep1 nmiss"],
@@ -90,6 +91,7 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix="", lu
                 lumi = lumi,
                 title=year,
                 ratio_range=ratio_range,
+                do_bkg_syst=True,
                 ax_main_callback = lambda ax: ax.add_artist(
                     matplotlib.offsetbox.AnchoredText(
                         "$\\frac{\\mathrm{data}}{\\mathrm{MC}} = %.2f$" % sf_os,
@@ -107,6 +109,11 @@ if __name__ == "__main__":
     make_plots("plots", "outputs/histos_2016.root", year=2016,  prefix="y2016_", lumi="35.9")
     make_plots("plots", "outputs/histos_2017.root", year=2017,  prefix="y2017_", lumi="41.5")
     make_plots("plots", "outputs/histos_2018.root", year=2018,  prefix="y2018_", lumi="58.8")
+
+    # make_plots("plots", "outputs/histos_2016_mu.root", year=2016,  prefix="mu_y2016_", lumi="35.9")
+    # make_plots("plots", "outputs/histos_2017_mu.root", year=2017,  prefix="mu_y2017_", lumi="41.5")
+    # make_plots("plots", "outputs/histos_2018_mu.root", year=2018,  prefix="mu_y2018_", lumi="58.8")
+
     # make_plots("plots", "outputs/histos_2016_94x.root", year="2016 (94x)",  prefix="y201694x_", lumi="35.9")
     # make_plots("plots", "outputs/histos_2016_tail.root", year="2016 (tail)",  prefix="y2016tail_", lumi="35.9")
     # make_plots("plots", "outputs/histos_2016_mu.root", year="2016 (mu)",  prefix="y2016mu_", lumi="35.9")

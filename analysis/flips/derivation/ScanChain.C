@@ -137,7 +137,8 @@ void flip(TChain *ch, int year, int which=11) {
     bar.finish();
 
 
-    TFile* f1 = new TFile(Form("outputs/histos_%s.root",ch->GetTitle()),"RECREATE");
+    TString fname = Form("outputs/histos_%s.root",ch->GetTitle());
+    TFile* f1 = new TFile(fname,"RECREATE");
 
     TH2D* ratio = (TH2D*)(numer->Clone("ratio"));
     ratio->Divide(numer, denom, 1, 1, "b"); 

@@ -58,7 +58,6 @@ def plot(fname_in, fname_out, year):
 
 if __name__ == "__main__":
     for year in [2016,2017,2018]:
-    # for year in ["2016_94x"]:
-    # for year in ["2016_tail"]:
-    # for year in [2016,2017,2018,"2016_mu","2017_mu"]:
+        plot("outputs/histos_{}.root".format(year), "plots/fliprate_{}.pdf".format(year), year)
+    for year in ["2016_mu","2017_mu","2018_mu"]:
         plot("outputs/histos_{}.root".format(year), "plots/fliprate_{}.pdf".format(year), year)

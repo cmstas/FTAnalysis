@@ -30,6 +30,13 @@ using namespace std;
 bool overflow = true;
 bool debugCounter = false;
 
+float calcDeltaPhi(float phi1, float phi2){
+  float dPhi = phi1 - phi2;
+  while (dPhi  >  TMath::Pi()) dPhi -= 2*TMath::Pi();
+  while (dPhi <= -TMath::Pi()) dPhi += 2*TMath::Pi();
+  return fabs(dPhi);
+}
+
 TH1D * evtCounter = new TH1D("","",1000,0,1000); 
 map<TString, int> evtBinMap;
 int evtBin = 0;
@@ -92,6 +99,12 @@ float getFlipFactor(TH2D* rate){
 }
 
 void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root", int year=2016, float minrun=-1, float maxrun=-1, float lumi=-1, int which=11) {
+    float lowmll = 80;
+    float highmll = 100;
+    if (which == 13) {
+        lowmll = 100;
+        highmll = 150;
+    }
     initCounter();
     TRandom *tr1 = new TRandom();
 
@@ -104,9 +117,9 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
     // Closure vs. inv mass plot
     constexpr int clos_mll_nBinsX = 20;
-    TH1F* clos_mll_MC   = new TH1F("clos_mll_plot_MC"  , "clos_mll_plot_MC"  , clos_mll_nBinsX, 70, 115); 
-    TH1F* clos_mll_MCp  = new TH1F("clos_mll_plot_MCp" , "clos_mll_plot_MCp" , clos_mll_nBinsX, 70, 115); 
-    TH1F* clos_mll_data = new TH1F("clos_mll_plot_data", "clos_mll_plot_data", clos_mll_nBinsX, 70, 115); 
+    TH1F* clos_mll_MC   = new TH1F("clos_mll_plot_MC"  , "clos_mll_plot_MC"  , clos_mll_nBinsX, (which == 11 ? 70 : 100), (which == 11 ? 115 : 150)); 
+    TH1F* clos_mll_MCp  = new TH1F("clos_mll_plot_MCp" , "clos_mll_plot_MCp" , clos_mll_nBinsX, (which == 11 ? 70 : 100), (which == 11 ? 115 : 150)); 
+    TH1F* clos_mll_data = new TH1F("clos_mll_plot_data", "clos_mll_plot_data", clos_mll_nBinsX, (which == 11 ? 70 : 100), (which == 11 ? 115 : 150)); 
     TH1F* osee_mll_data = new TH1F("osee_mll_plot_data", "osee_mll_plot_data", 45, 70, 115); 
     TH1F* osee_mll_MC   = new TH1F("osee_mll_plot_MC"  , "osee_mll_plot_MC"  , 45, 70, 115); 
     clos_mll_MC->Sumw2();
@@ -131,6 +144,14 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     TH1F* osee_lepeta_data = new TH1F("osee_lepeta_plot_data", "osee_lepeta_plot_data", 150, -2.5, 2.5); 
     clos_lepeta_MC->Sumw2();
     clos_lepeta_MCp->Sumw2();
+
+    TH1F* clos_dlepphi_MC   = new TH1F("clos_dlepphi_plot_MC"  , "clos_dlepphi_plot_MC"  , 30, -3.14, 3.14); 
+    TH1F* clos_dlepphi_MCp  = new TH1F("clos_dlepphi_plot_MCp" , "clos_dlepphi_plot_MCp" , 30, -3.14, 3.14); 
+    TH1F* clos_dlepphi_data = new TH1F("clos_dlepphi_plot_data", "clos_dlepphi_plot_data", 30, -3.14, 3.14); 
+    TH1F* osee_dlepphi_MC   = new TH1F("osee_dlepphi_plot_MC"  , "osee_dlepphi_plot_MC"  , 150, -3.14, 3.14); 
+    TH1F* osee_dlepphi_data = new TH1F("osee_dlepphi_plot_data", "osee_dlepphi_plot_data", 150, -3.14, 3.14); 
+    clos_dlepphi_MC->Sumw2();
+    clos_dlepphi_MCp->Sumw2();
 
     TH1F* clos_lepphi_MC   = new TH1F("clos_lepphi_plot_MC"  , "clos_lepphi_plot_MC"  , 30, -3.14, 3.14); 
     TH1F* clos_lepphi_MCp  = new TH1F("clos_lepphi_plot_MCp" , "clos_lepphi_plot_MCp" , 30, -3.14, 3.14); 
@@ -370,7 +391,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 float mll = (ss::lep1_p4() + ss::lep2_p4()).M();
                 if (ss::is_real_data()) {
                     clos_mll_data->Fill(mll, weight); 
-                    if (mll > 80 && mll < 100) {
+                    if (mll > lowmll && mll < highmll) {
                         nObs += weight; 
                         if (fabs(ss::lep1_p4().eta()) < 0.8 && fabs(ss::lep2_p4().eta()) < 0.8 && ss::lep1_p4().pt() < 60 && ss::lep2_p4().pt() < 60) {
                             dataCounterSS_bin->Fill(0.5, weight);
@@ -382,6 +403,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         nSS_run_data->Fill(ss::run());
                         clos_lepphi_data->Fill(ss::lep1_p4().phi(), weight); 
                         clos_lepphi_data->Fill(ss::lep2_p4().phi(), weight);  
+                        clos_dlepphi_data->Fill(calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi()), weight); 
                         clos_ht_data->Fill(ss::ht(), weight); 
                         clos_met_data->Fill(ss::met(), weight); 
                         clos_rawmet_data->Fill(ss::rawmet(), weight); 
@@ -393,7 +415,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     }
                 } else {
                     clos_mll_MCp->Fill(mll, weight); 
-                    if (mll > 80 && mll < 100) {
+                    if (mll > lowmll && mll < highmll) {
                         nObsMC += weight; 
                         mcCounterSS->Fill(0.5, weight);
                         if (fabs(ss::lep1_p4().eta()) < 0.8 && fabs(ss::lep2_p4().eta()) < 0.8 && ss::lep1_p4().pt() < 60 && ss::lep2_p4().pt() < 60) {
@@ -405,6 +427,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         clos_lepeta_MCp->Fill(ss::lep2_p4().eta(), weight); 
                         clos_lepphi_MCp->Fill(ss::lep1_p4().phi(), weight); 
                         clos_lepphi_MCp->Fill(ss::lep2_p4().phi(), weight); 
+                        clos_dlepphi_MCp->Fill(calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi()), weight); 
                         clos_ht_MCp->Fill(ss::ht(), weight); 
                         clos_met_MCp->Fill(ss::met(), weight); 
                         clos_rawmet_MCp->Fill(ss::rawmet(), weight); 
@@ -442,7 +465,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 if (bin_in_errors < 0) overflow ? bin_in_errors = 0 : bin_in_errors = 999;
                 if (bin_in_errors != 999) errors[bin_in_errors]->Fill(pt1, eta1, weight);
                 if (bin_in_errors != 999) errors[bin_in_errors]->Fill(pt2, eta2, weight);
-                if (mll > 80 && mll < 100) {
+                if (mll > lowmll && mll < highmll) {
 
                     osee_mll_data->Fill(mll, weight);
                     osee_leppt_data->Fill(ss::lep1_p4().pt(), weight); 
@@ -451,6 +474,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_lepeta_data->Fill(ss::lep2_p4().eta(), weight); 
                     osee_lepphi_data->Fill(ss::lep1_p4().phi(), weight); 
                     osee_lepphi_data->Fill(ss::lep2_p4().phi(), weight); 
+                    osee_dlepphi_data->Fill(calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi()), weight); 
                     osee_ht_data->Fill(ss::ht(), weight); 
                     osee_met_data->Fill(ss::met(), weight); 
                     osee_rawmet_data->Fill(ss::rawmet(), weight); 
@@ -468,6 +492,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     clos_lepeta_MC->Fill(ss::lep2_p4().eta(), ff*weight); 
                     clos_lepphi_MC->Fill(ss::lep1_p4().phi(), ff*weight); 
                     clos_lepphi_MC->Fill(ss::lep2_p4().phi(), ff*weight); 
+                    clos_dlepphi_MC->Fill(calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi()), ff*weight); 
                     clos_ht_MC->Fill(ss::ht(), ff*weight); 
                     clos_met_MC->Fill(ss::met(), ff*weight); 
                     clos_rawmet_MC->Fill(ss::rawmet(), ff*weight); 
@@ -503,7 +528,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 float mll = (ss::lep1_p4() + ss::lep2_p4()).M();
 
 
-                if (mll > 80 && mll < 100) {
+                if (mll > lowmll && mll < highmll) {
 
                     osee_mll_MC->Fill(mll, weight);
                     osee_leppt_MC->Fill(ss::lep1_p4().pt(), weight); 
@@ -512,6 +537,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_lepeta_MC->Fill(ss::lep2_p4().eta(), weight); 
                     osee_lepphi_MC->Fill(ss::lep1_p4().phi(), weight); 
                     osee_lepphi_MC->Fill(ss::lep2_p4().phi(), weight); 
+                    osee_dlepphi_MC->Fill(calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi()), weight); 
                     osee_ht_MC->Fill(ss::ht(), weight); 
                     osee_met_MC->Fill(ss::met(), weight); 
                     osee_rawmet_MC->Fill(ss::rawmet(), weight); 
@@ -607,6 +633,9 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     clos_lepphi_data->Write();
     clos_lepphi_MC->Write();
     clos_lepphi_MCp->Write();
+    clos_dlepphi_data->Write();
+    clos_dlepphi_MC->Write();
+    clos_dlepphi_MCp->Write();
     clos_ht_data->Write();
     clos_ht_MC->Write();
     clos_ht_MCp->Write();
@@ -640,6 +669,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     osee_lepeta_data->Write();
     osee_lepphi_MC->Write();
     osee_lepphi_data->Write();
+    osee_dlepphi_MC->Write();
+    osee_dlepphi_data->Write();
     osee_ht_MC->Write();
     osee_ht_data->Write();
     osee_met_MC->Write();
