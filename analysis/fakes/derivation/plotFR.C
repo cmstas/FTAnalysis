@@ -1,4 +1,5 @@
-void plotFR(TString dir) {
+void plotFR(TString dir, int year) {
+    TString ystr = Form("y%i_",year);
     for(int i = 0; i < 4; i++) {
         for(int doIso = 0; doIso < 2; doIso++) {
 
@@ -22,7 +23,7 @@ void plotFR(TString dir) {
             var="_cone";
 
 
-            TFile* f = new TFile(dir+"/rate_histos_"+sample+postfix+".root");
+            TFile* f = new TFile(dir+"/"+ystr+"rate_histos_"+sample+postfix+".root");
 
             if (sample.Contains("_el")==0) {
                 TH2F* muf = (TH2F*) f->Get("rate"+var+"_histo_mu");
@@ -40,7 +41,7 @@ void plotFR(TString dir) {
                 if (postfix!="_extrPtRel") muf->GetXaxis()->SetNdivisions(6,0);
                 muf->Draw("texte,colz");
                 c1.RedrawAxis();
-                c1.SaveAs("pdfs/mu_fr"+var+"_"+sample+postfix+".pdf");
+                c1.SaveAs("pdfs/"+ystr+"mu_fr"+var+"_"+sample+postfix+".pdf");
             }
 
             if (sample.Contains("_mu")==0) {
@@ -59,7 +60,7 @@ void plotFR(TString dir) {
                 if (postfix!="_extrPtRel") elf->GetXaxis()->SetNdivisions(6,0);
                 elf->Draw("texte,colz");
                 c2.RedrawAxis();
-                c2.SaveAs("pdfs/el_fr"+var+"_"+sample+postfix+".pdf");
+                c2.SaveAs("pdfs/"+ystr+"el_fr"+var+"_"+sample+postfix+".pdf");
             }
 
 

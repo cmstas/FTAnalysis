@@ -11,12 +11,13 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   TString lname = (doMu ? "_mu" : "_e");
   TString lepname = (doMu ? "muon" : "electron");
   TString lepstr = (doMu ? "_mu" : "_el");
+  TString ystr = Form("y%i_",year);
 
   TCanvas c1("c1","c1",600,600);
 
-  TFile *_file_data = TFile::Open(dir+"/rate_histos_data"+lepstr+"_LooseEMVA"+suffix+".root");
-  TFile *_file_wj = TFile::Open(dir+"/rate_histos_wjets_LooseEMVA"+suffix+".root");
-  TFile *_file_dy = TFile::Open(dir+"/rate_histos_dy_LooseEMVA"+suffix+".root");
+  TFile *_file_data = TFile::Open(dir+"/"+ystr+"rate_histos_data"+lepstr+"_LooseEMVA"+suffix+".root");
+  TFile *_file_wj = TFile::Open(dir+"/"+ystr+"rate_histos_wjets_"+"LooseEMVA"+suffix+".root");
+  TFile *_file_dy = TFile::Open(dir+"/"+ystr+"rate_histos_dy_"+"LooseEMVA"+suffix+".root");
 
   TH2F* den_data = (TH2F*) _file_data->Get("Nl_cone_histo"+lname);
   TH2F* den_wj = (TH2F*) _file_wj->Get("Nl_cone_histo"+lname);
@@ -63,20 +64,33 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   // the adjacent bin with same eta and lower pt
   for (int binx=1;binx<=num_data->GetNbinsX();++binx) {
       for (int biny=1;biny<=num_data->GetNbinsY();++biny) {
-          if (num_data->GetBinContent(binx,biny)<1.0e-6) {
+          float val = num_data->GetBinContent(binx,biny);
+          float err = num_data->GetBinError(binx,biny);
+          if (val<1.0e-6 or (err/val)>3.0) {
               float pt = num_data->GetXaxis()->GetBinLowEdge(binx);
               float eta = num_data->GetYaxis()->GetBinLowEdge(biny);
               if (pt < 30.) continue; // low pt bins are supposed to be empty...
               float newval = num_data->GetBinContent(binx-1,biny);
               float newerr = num_data->GetBinError(binx-1,biny);
-              std::cout << Form("%i isotrig=%i mu=%i pt [%.0f,%.0f] eta [%.1f,%.1f] bin has 0 FR after subtraction, setting to %.3f+-%.3f",
-                      year, useIsoTrig, doMu,
-                      num_data->GetXaxis()->GetBinLowEdge(binx),
-                      num_data->GetXaxis()->GetBinUpEdge(binx),
-                      num_data->GetYaxis()->GetBinLowEdge(biny),
-                      num_data->GetYaxis()->GetBinUpEdge(biny),
-                      newval, newerr
-                      ) << std::endl;
+              if (val<1.0e-6) {
+                  std::cout << Form("%i isotrig=%i mu=%i pt [%.0f,%.0f] eta [%.1f,%.1f] bin has 0 FR after subtraction, setting to %.3f+-%.3f",
+                          year, useIsoTrig, doMu,
+                          num_data->GetXaxis()->GetBinLowEdge(binx),
+                          num_data->GetXaxis()->GetBinUpEdge(binx),
+                          num_data->GetYaxis()->GetBinLowEdge(biny),
+                          num_data->GetYaxis()->GetBinUpEdge(biny),
+                          newval, newerr
+                          ) << std::endl;
+              } else {
+                  std::cout << Form("%i isotrig=%i mu=%i pt [%.0f,%.0f] eta [%.1f,%.1f] bin has >300 percent error after subtraction, setting to %.3f+-%.3f",
+                          year, useIsoTrig, doMu,
+                          num_data->GetXaxis()->GetBinLowEdge(binx),
+                          num_data->GetXaxis()->GetBinUpEdge(binx),
+                          num_data->GetYaxis()->GetBinLowEdge(biny),
+                          num_data->GetYaxis()->GetBinUpEdge(biny),
+                          newval, newerr
+                          ) << std::endl;
+              }
               num_data->SetBinContent(binx,biny,newval);
               num_data->SetBinError(binx,biny,newerr);
           }
@@ -97,8 +111,8 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   num_data->Draw("textecolz");
 
   // std::cout << "Saving pdfs/ewkCorFR_"+lepname+suffix+".pdf" << std::endl;
-  c1.SaveAs("pdfs/ewkCorFR_"+lepname+suffix+".pdf");
-  TFile out("ewkCorFR_"+lepname+suffix+".root","RECREATE");
+  c1.SaveAs("pdfs/"+ystr+"ewkCorFR_"+lepname+suffix+".pdf");
+  TFile out("pdfs/"+ystr+"ewkCorFR_"+lepname+suffix+".root","RECREATE");
   num_data->Write();
   num_data_zp->SetTitle("Alternative EWK-corrected "+lepname+" fake rate");
   num_data_zp->Write();
@@ -111,7 +125,7 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   den_wj->GetZaxis()->SetLabelSize(0.025);
   den_wj->SetMarkerSize(1.5);
   den_wj->Draw("textecolz");
-  c1.SaveAs("pdfs/den_wj_"+lepname+suffix+".pdf");
+  c1.SaveAs("pdfs/"+ystr+"den_wj_"+lepname+suffix+".pdf");
 
   den_dy->SetTitle("DY "+lepname+" denominator");
   den_dy->GetXaxis()->SetTitle(""+lepname+" p_{T}^{corr.} [GeV]");
@@ -120,7 +134,7 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   den_dy->GetZaxis()->SetLabelSize(0.025);
   den_dy->SetMarkerSize(1.5);
   den_dy->Draw("textecolz");
-  c1.SaveAs("pdfs/den_dy_"+lepname+suffix+".pdf");
+  c1.SaveAs("pdfs/"+ystr+"den_dy_"+lepname+suffix+".pdf");
 
   num_wj->SetTitle("WJets "+lepname+" numerator");
   num_wj->GetXaxis()->SetTitle(""+lepname+" p_{T}^{corr.} [GeV]");
@@ -129,7 +143,7 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   num_wj->GetZaxis()->SetLabelSize(0.025);
   num_wj->SetMarkerSize(1.5);
   num_wj->Draw("textecolz");
-  c1.SaveAs("pdfs/num_wj_"+lepname+suffix+".pdf");
+  c1.SaveAs("pdfs/"+ystr+"num_wj_"+lepname+suffix+".pdf");
 
   num_dy->SetTitle("DY "+lepname+" numerator");
   num_dy->GetXaxis()->SetTitle(""+lepname+" p_{T}^{corr.} [GeV]");
@@ -138,7 +152,7 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   num_dy->GetZaxis()->SetLabelSize(0.025);
   num_dy->SetMarkerSize(1.5);
   num_dy->Draw("textecolz");
-  c1.SaveAs("pdfs/num_dy_"+lepname+suffix+".pdf");
+  c1.SaveAs("pdfs/"+ystr+"num_dy_"+lepname+suffix+".pdf");
 
   den_data->SetTitle("Data "+lepname+" denominator");
   den_data->GetXaxis()->SetTitle(""+lepname+" p_{T}^{corr.} [GeV]");
@@ -147,7 +161,7 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   den_data->GetZaxis()->SetLabelSize(0.025);
   den_data->SetMarkerSize(1.5);
   den_data->Draw("textecolz");
-  c1.SaveAs("pdfs/den_data_"+lepname+suffix+".pdf");
+  c1.SaveAs("pdfs/"+ystr+"den_data_"+lepname+suffix+".pdf");
 
   num_data_raw->SetTitle("Data "+lepname+" numerator");
   num_data_raw->GetXaxis()->SetTitle(""+lepname+" p_{T}^{corr.} [GeV]");
@@ -156,7 +170,7 @@ void plotEWKCorFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
   num_data_raw->GetZaxis()->SetLabelSize(0.025);
   num_data_raw->SetMarkerSize(1.5);
   num_data_raw->Draw("textecolz");
-  c1.SaveAs("pdfs/num_data_"+lepname+suffix+".pdf");
+  c1.SaveAs("pdfs/"+ystr+"num_data_"+lepname+suffix+".pdf");
 
   }
 

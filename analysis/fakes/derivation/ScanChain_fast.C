@@ -77,8 +77,8 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
     bool useRelIso = false;
     if (option.Contains("useRelIso")) useRelIso = true;
 
-    bool useLooseEMVA = false;
-    if (option.Contains("useLooseEMVA")) useLooseEMVA = true;
+    bool useLooseEMVA = true;
+    // if (option.Contains("useLooseEMVA")) useLooseEMVA = true;
 
     bool requireMCMatch = false;
     if (option.Contains("requireMCMatch")) requireMCMatch = true;
@@ -100,9 +100,6 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
 
     bool noConeCorr = false;
     if (option.Contains("noConeCorr")) noConeCorr = true;
-
-    bool newPrescription = false;
-    if (option.Contains("newPrescription")) newPrescription = true;
 
     bool usePtRatioCor = false;
     if (option.Contains("usePtRatioCor")) usePtRatioCor = true;
@@ -263,60 +260,60 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
 
     if (year == 2016) {
 // year = 2016
-    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 170.8142;
-    float sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 = 174.1874;
-    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 174.3728;
-    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 174.3723;
-    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 174.3712;
-    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 4283.5032;
-    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 4272.8598;
-    float sf_HLT_IsoMu27 = 1.0193;
-    float sf_HLT_Mu17 = 88.9215;
-    float sf_HLT_Mu17_TrkIsoVVL = 88.9254;
-    float sf_HLT_Mu8 = 55.6272;
-    float sf_HLT_Mu8_TrkIsoVVL = 57.0731;
+    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 170.1279;
+    sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 = 172.6997;
+    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 173.0246;
+    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 172.9588;
+    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 173.0231;
+    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 4241.8406;
+    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 4231.5585;
+    sf_HLT_IsoMu27 = 1.0268;
+    sf_HLT_Mu17 = 89.5843;
+    sf_HLT_Mu17_TrkIsoVVL = 89.5883;
+    sf_HLT_Mu8 = 56.0419;
+    sf_HLT_Mu8_TrkIsoVVL = 57.4986;
 }
 if (year == 2017) {
 // year = 2017
-    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0259;
-    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.1322;
-    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1406;
-    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.1338;
-    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9540;
-    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.9492;
-    float sf_HLT_IsoMu27 = 1.1300;
-    float sf_HLT_Mu17 = 1.0362;
-    float sf_HLT_Mu17_TrkIsoVVL = 1.0358;
-    float sf_HLT_Mu8 = 0.7121;
-    float sf_HLT_Mu8_TrkIsoVVL = 0.7123;
+    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0259;
+    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.1322;
+    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1406;
+    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.1338;
+    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9540;
+    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.9492;
+    sf_HLT_IsoMu27 = 1.1300;
+    sf_HLT_Mu17 = 1.0362;
+    sf_HLT_Mu17_TrkIsoVVL = 1.0358;
+    sf_HLT_Mu8 = 0.7121;
+    sf_HLT_Mu8_TrkIsoVVL = 0.7123;
 }
 if (year == 2018 and !isReReco) {
 // year = 2018
-    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8710;
-    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0038;
-    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0027;
-    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.0037;
-    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8481;
-    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8472;
-    float sf_HLT_IsoMu27 = 1.1954;
-    float sf_HLT_Mu17 = 1.1697;
-    float sf_HLT_Mu17_TrkIsoVVL = 1.1699;
-    float sf_HLT_Mu8 = 0.9427;
-    float sf_HLT_Mu8_TrkIsoVVL = 0.9554;
+    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8710;
+    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0038;
+    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0027;
+    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.0037;
+    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8481;
+    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8472;
+    sf_HLT_IsoMu27 = 1.1954;
+    sf_HLT_Mu17 = 1.1697;
+    sf_HLT_Mu17_TrkIsoVVL = 1.1699;
+    sf_HLT_Mu8 = 0.9427;
+    sf_HLT_Mu8_TrkIsoVVL = 0.9554;
 }
 if (year == 2018 and  isReReco) {
 // year = rereco_2018
-    float sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8650;
-    float sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 0.9899;
-    float sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9904;
-    float sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 0.9939;
-    float sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8565;
-    float sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8440;
-    float sf_HLT_IsoMu27 = 1.1460;
-    float sf_HLT_Mu17 = 1.1200;
-    float sf_HLT_Mu17_TrkIsoVVL = 1.1202;
-    float sf_HLT_Mu8 = 0.8925;
-    float sf_HLT_Mu8_TrkIsoVVL = 0.9037;
+    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8650;
+    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 0.9899;
+    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9904;
+    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 0.9939;
+    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8565;
+    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8440;
+    sf_HLT_IsoMu27 = 1.1460;
+    sf_HLT_Mu17 = 1.1200;
+    sf_HLT_Mu17_TrkIsoVVL = 1.1202;
+    sf_HLT_Mu8 = 0.8925;
+    sf_HLT_Mu8_TrkIsoVVL = 0.9037;
 }
 
     if (false) {
@@ -856,9 +853,8 @@ if (year == 2018 and  isReReco) {
             TString(currentFile->GetTitle()).Contains("DoubleMu") || TString(currentFile->GetTitle()).Contains("DoubleEG") || TString(currentFile->GetTitle()).Contains("EGamma") ||
             TString(currentFile->GetTitle()).Contains("Data");
         bool isDoubleMuon = TString(currentFile->GetTitle()).Contains("DoubleMu");
-        bool isQCD = TString(currentFile->GetTitle()).Contains("QCD");
-        bool isQCDMu = TString(currentFile->GetTitle()).Contains("QCD_M");
-        bool isQCDEl = TString(currentFile->GetTitle()).Contains("QCD_E") || TString(currentFile->GetTitle()).Contains("QCD_bcToE");
+        bool isQCDMu = TString(currentFile->GetTitle()).Contains("QCD_Mu");
+        bool isQCDEl = TString(currentFile->GetTitle()).Contains("QCD_EM") || TString(currentFile->GetTitle()).Contains("QCD_bcToE");
         bool isTTbar = TString(currentFile->GetTitle()).Contains("TTJets") || TString(currentFile->GetTitle()).Contains("output_tt_") || TString(currentFile->GetTitle()).Contains("TTBAR");
         bool isDY = TString(currentFile->GetTitle()).Contains("DY");
         bool isWjets = TString(currentFile->GetTitle()).Contains("WJets");
@@ -936,10 +932,15 @@ if (year == 2018 and  isReReco) {
                 //trigger selection
                 if (abs(id())==11) {
                     if (useIsoTrigs) {
-                        if (year == 2016) {
+                        // if (year == 2016) {
+                        //     if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
+                        // } else {
+                        //     if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
+                        // }
+                        if (false) {
                             if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
                         } else {
-                            if (HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
+                            if (HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0 && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()<=0) continue;
                         }
                     } else {
                         if (HLT_Ele8_CaloIdM_TrackIdM_PFJet30()<=0 && HLT_Ele17_CaloIdM_TrackIdM_PFJet30()<=0) continue;
@@ -991,23 +992,26 @@ if (year == 2018 and  isReReco) {
             if (fabs(ip3d()/ip3derr())>4. ) continue;
 
             float weight = 1;
-            // if (!isDataFromFileName) weight = getTruePUw(trueNumInt())*scale1fb()*getLumi();
             if (!isDataFromFileName) {
-                // noPUweight = true; // FIXME
                 weight *= getLumi(year)*scale1fb();
-                // if (year == 2018) mylumi = 35.5; // FIXME
                 if (not noPUweight) weight *= getTruePUw(year, trueNumInt());
-                // if (noPUweight) weight = scale1fb()*getLumi();
-                // else weight = puweight()*scale1fb()*getLumi();
-                // if (absweight) {
-                //     if (noPUweight) weight = fabs(scale1fb())*mylumi;
-                //     else weight = puweight()*fabs(scale1fb())*mylumi;
-                // } else {
-                //     if (noPUweight) weight = (scale1fb())*mylumi;
-                //     else weight = puweight()*(scale1fb())*mylumi;
-                // }
-            }
 
+                // Soften super high weight events
+                if (weight > 10000) {
+                    weight *= 0.3;
+                }
+
+                if (year == 2016) {
+                    // to match https://github.com/cmstas/SSAnalysis/blob/master/FakeRate/measurement_region/ScanChain.C
+                    // take MuPt5 (20toInf) below pT15 and other bins above
+                    if (isQCDMu) {
+                        if (p4().pt()<15. &&  scale1fb() > 13.6 && scale1fb() < 13.9 ) continue;  //take only Mu15 above pT=15
+                        if (p4().pt()>15. && (scale1fb() < 13.6 || scale1fb() > 13.9)) continue;  //take only Mu5 below pT=15
+                        if (scale1fb() < 1.03 || scale1fb() > 600.) continue; //avoid extreme ranges and weights
+                    }
+                }
+
+            }
 
             LorentzVector closejet = close_jet_v5();
             float ptrel =  ptrelv1();
@@ -1018,18 +1022,6 @@ if (year == 2018 and  isReReco) {
             float closejetpt = closejet.pt(); // V5
             float ptratio = ptratio_v5();
 
-            if (newPrescription) {
-                // From Gio: So a realistic proposal in the "not extrapolating" setup would be to have pT bins: [20, 25] (with pTraw>20), [25, 35] (with pTraw>25), and require pTraw>25 for all higher bins.
-                // I would suggest to see what FR values we would get with this, in 2D, compare with the map with pT>18, check the closures, and then decide.
-                if (coneCorrPt() < 25. && coneCorrPt() >= 20.0) {
-                    if (p4().pt() < 20) continue;
-                } else if (coneCorrPt() < 35. && coneCorrPt() >= 25.0) {
-                    if (p4().pt() < 25) continue;
-                } else if (coneCorrPt() >= 35.0) {
-                    if (p4().pt() < 25) continue;
-                }
-            }
-
 
             bool passes_low = false;
             bool passes_high = false;
@@ -1039,24 +1031,35 @@ if (year == 2018 and  isReReco) {
             if (!bypassTriggers) {
                 if (abs(id())==11) {
                     if (useIsoTrigs) {
-                        if (p4().pt() >= 10 && p4().pt() < 25 && HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) { 
-                            passes_low = true;
-                            prescale = HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30();
-                            if (isData) prescale *= sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30;
-                        }
-                        if (year == 2016) {
+
+                        if (false) {
+
+                            if (p4().pt() >= 10 && p4().pt() < 25 && HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) { 
+                                passes_low = true;
+                                prescale = HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30();
+                                if (isData) prescale *= sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30;
+                            }
                             if ((anyPt || p4().pt() >= 25) && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
                                 passes_high = true;
                                 prescale = HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30();
                                 if (isData) prescale *= sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30;
                             }
+
                         } else {
-                            if ((anyPt || p4().pt() >= 25) && HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
-                                passes_high = true;
-                                prescale = HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30();
-                                if (isData) prescale *= sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30;
+
+                            if (p4().pt() >= 10 && p4().pt() < 25 && HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) { 
+                                passes_low = true;
+                                prescale = HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30();
+                                if (isData) prescale *= sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30;
                             }
+                            if ((anyPt || p4().pt() >= 25) && HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30()>0) {
+                                passes_high = true;
+                                prescale = HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30();
+                                if (isData) prescale *= sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30;
+                            }
+
                         }
+
                         if (prescale>0) weight *= prescale;
                         else continue;	  
                     } else {
@@ -1125,6 +1128,8 @@ if (year == 2018 and  isReReco) {
                 passFO_noiso = passHltCuts && passes_SS_fo_looseMVA_noiso_v6();
             }
 
+            if (!passFO) continue;
+
             float evt_met = evt_corrMET();
             float evt_metPhi = evt_corrMETPhi();
             float evt_mt = mt();
@@ -1151,22 +1156,24 @@ if (year == 2018 and  isReReco) {
             if (passId) {
                 //mt control region
                 if (evt_met > 30. && p4().pt()>30) {
-                    float lepsf = leptonScaleFactor(year, id(), p4().pt(), p4().eta(), -1.);
-                    histo_mt_all->Fill( std::min(evt_mt,float(200.)), weight*lepsf );
-                    if (abs(id())==11) histo_mt_all_el->Fill( std::min(evt_mt,float(200.)), weight*lepsf );
-                    if (abs(id())==13) histo_mt_all_mu->Fill( std::min(evt_mt,float(200.)), weight*lepsf );
+                    float myweight = (isDataFromFileName ? weight : weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), ht));
+                    // float myweight = weight;
+                    histo_mt_all->Fill( std::min(evt_mt,float(200.)), myweight );
+                    if (abs(id())==11) histo_mt_all_el->Fill( std::min(evt_mt,float(200.)), myweight );
+                    if (abs(id())==13) histo_mt_all_mu->Fill( std::min(evt_mt,float(200.)), myweight );
                 }
-                if (evt_met < 20.) {
-                    histo_mt_lm->Fill( std::min(evt_mt,float(200.)), weight );
-                    if (abs(id())==11) histo_mt_lm_el->Fill( std::min(evt_mt,float(200.)), weight );
-                    if (abs(id())==13) histo_mt_lm_mu->Fill( std::min(evt_mt,float(200.)), weight );
-                }
+                // if (evt_met < 20.) {
+                //     histo_mt_lm->Fill( std::min(evt_mt,float(200.)), weight );
+                //     if (abs(id())==11) histo_mt_lm_el->Fill( std::min(evt_mt,float(200.)), weight );
+                //     if (abs(id())==13) histo_mt_lm_mu->Fill( std::min(evt_mt,float(200.)), weight );
+                // }
                 if (evt_met > MTCR_MET_CUT && p4().pt()>MTCR_PT_CUT) {
                     histo_mt_cr->Fill( std::min(evt_mt,float(200.)), weight );
                     histo_mt_cr_pt->Fill( p4().pt(), weight );
                     histo_mt_cr_met->Fill( evt_met, weight );
                     histo_mt_cr_dphi->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
-                    float myweight = weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), 100.);
+                    float myweight = (isDataFromFileName ? weight : weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), ht));
+                    // float myweight = weight;
                     if (abs(id())==11) {
                         histo_mt_cr_el->Fill( std::min(evt_mt,float(200.)), myweight );
                         if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_el->Fill( std::min(evt_mt,float(200.)), myweight );
@@ -1223,7 +1230,6 @@ if (year == 2018 and  isReReco) {
                 }
             } 
 
-            if (!passFO) continue;
 
             //------------------------------------------------------------------------------------------
             //---------------------------------Find e = f(const)---------------------------------------
@@ -1576,7 +1582,8 @@ if (year == 2018 and  isReReco) {
         procstr.ReplaceAll("_2016","");
         procstr.ReplaceAll("_2017","");
         procstr.ReplaceAll("_2018","");
-        outfile += Form("/rate_histos_%s_LooseEMVA%s.root",procstr.Data(),isostr.Data());
+        // outfile += Form("/rate_histos_%s_LooseEMVA%s.root",procstr.Data(),isostr.Data());
+        outfile += Form("/y%i_rate_histos_%s_LooseEMVA%s.root",year,procstr.Data(),isostr.Data());
     }
     TFile *OutputFile = new TFile(outfile,"recreate");
     OutputFile->cd();

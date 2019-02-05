@@ -117,6 +117,34 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"              , &HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ); // XXX
   BabyTree->Branch("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL"                 , &HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL); // XXX
 
+  BabyTree->Branch("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL"                 , &HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL); // XXX
+
+  BabyTree->Branch("el_pass_trigsafenoiso", &el_pass_trigsafenoiso);
+  BabyTree->Branch("el_pass_trigsafeiso", &el_pass_trigsafeiso);
+  BabyTree->Branch("el_pass_v2trigsafenoiso", &el_pass_v2trigsafenoiso);
+  BabyTree->Branch("el_pass_v2trigsafeiso", &el_pass_v2trigsafeiso);
+  BabyTree->Branch("el_pass_miniiso", &el_pass_miniiso);
+  BabyTree->Branch("el_pass_convvtx", &el_pass_convvtx);
+  BabyTree->Branch("el_pass_expinner", &el_pass_expinner);
+  BabyTree->Branch("el_pass_dxy", &el_pass_dxy);
+  BabyTree->Branch("el_pass_dz", &el_pass_dz);
+  BabyTree->Branch("el_pass_eta", &el_pass_eta);
+  BabyTree->Branch("el_pass_sip", &el_pass_sip);
+  BabyTree->Branch("el_pass_threecharge", &el_pass_threecharge);
+  BabyTree->Branch("el_pass_mva", &el_pass_mva);
+  BabyTree->Branch("el_loose", &el_loose);
+  BabyTree->Branch("el_tight", &el_tight);
+  BabyTree->Branch("el_loosewo_trigsafenoiso", &el_loosewo_trigsafenoiso);
+  BabyTree->Branch("el_loosewo_miniiso", &el_loosewo_miniiso);
+  BabyTree->Branch("el_loosewo_convvtx", &el_loosewo_convvtx);
+  BabyTree->Branch("el_loosewo_expinner", &el_loosewo_expinner);
+  BabyTree->Branch("el_loosewo_dxy", &el_loosewo_dxy);
+  BabyTree->Branch("el_loosewo_dz", &el_loosewo_dz);
+  BabyTree->Branch("el_loosewo_eta", &el_loosewo_eta);
+  BabyTree->Branch("el_loosewo_sip", &el_loosewo_sip);
+  BabyTree->Branch("el_loosewo_threecharge", &el_loosewo_threecharge);
+  BabyTree->Branch("el_loosewo_mva", &el_loosewo_mva);
+
   // Load scale1fbs/xsecs from file
   df.loadFromFile("CORE/Tools/datasetinfo/scale1fbs.txt");
 
@@ -271,7 +299,139 @@ void babyMaker::InitLeptonBranches(){
     isTriggerSafenoIso = 0;
     dilep_mass = -1.;
 
+    el_pass_trigsafenoiso = 0;
+    el_pass_trigsafeiso = 0;
+    el_pass_v2trigsafenoiso = 0;
+    el_pass_v2trigsafeiso = 0;
+    el_pass_miniiso = 0;
+    el_pass_convvtx = 0;
+    el_pass_expinner = 0;
+    el_pass_dxy = 0;
+    el_pass_dz = 0;
+    el_pass_eta = 0;
+    el_pass_sip = 0;
+    el_pass_threecharge = 0;
+    el_pass_mva = 0;
+    el_loose = 0;
+    el_tight = 0;
+    el_loosewo_trigsafenoiso = 0;
+    el_loosewo_miniiso = 0;
+    el_loosewo_convvtx = 0;
+    el_loosewo_expinner = 0;
+    el_loosewo_dxy = 0;
+    el_loosewo_dz = 0;
+    el_loosewo_eta = 0;
+    el_loosewo_sip = 0;
+    el_loosewo_threecharge = 0;
+    el_loosewo_mva = 0;
+
 }
+
+////Main function
+//csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty* jecUnc, int isFastsim){
+
+//  //Initialize variables
+//  InitBabyNtuple();
+
+//  csErr_t babyErrorStruct;
+
+//  //Preliminary stuff
+//  if (verbose) std::cout << "--------------\nEVENT: " << tas::evt_run() << ":" << tas::evt_lumiBlock() << ":" << tas::evt_event() << "\n--------------" << std::endl;
+
+//  // Fill trigger branches
+//  fillTriggerBranches();
+//  passes_any_trigger = (HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+//          HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+//          HLT_Ele17_CaloIdM_TrackIdM_PFJet30 or
+//          HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+//          HLT_Ele23_CaloIdM_TrackIdM_PFJet30 or
+//          HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+//          HLT_Ele8_CaloIdM_TrackIdM_PFJet30 or
+//          HLT_IsoMu27 or
+//          HLT_Mu17 or
+//          HLT_Mu17_TrkIsoVVL or
+//          HLT_Mu8 or
+//          HLT_Mu8_TrkIsoVVL or
+//          HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30);
+//  if (not passes_any_trigger) return babyErrorStruct;
+
+//  // nloose_el = 0; // num loose el with pt>10
+//  // ntight_el = 0; // num tight el with pt>10
+//  // vector<Lepton> leps;
+
+//  //MET variables
+//  // for old 09-04-17 tag QCD, use 3 to bypass any alternative MET collection selection
+//  // and for newer tags (-19) use 2 to get EE noise fixed MET
+//  bool isOldTag = filename_in.find("09-04-17") != std::string::npos;
+//  int use_cleaned_met = (isOldTag ? 3 : 2);
+//  pair<float,float> corrMETPair = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
+//  evt_corrMET    = corrMETPair.first;
+//  evt_corrMETPhi = corrMETPair.second;
+
+//  for (int ilep = 0; ilep < els_p4().size(); ilep++) {
+
+//      float pt = els_p4()[ilep].pt();
+//      if (pt < 25.) continue;
+//      Lepton lep = Lepton(-11*els_charge()[ilep],ilep);
+
+//      InitLeptonBranches();
+
+//      id = lep.id();
+//      idx = lep.idx();
+//      p4 = lep.p4();
+//      p4_pt = lep.pt();
+//      p4_eta = lep.eta();
+//      mt = MT(p4_pt, p4.phi(), evt_corrMET, evt_corrMETPhi);
+//      coneCorrPt = getConeCorrPt(id,idx);
+
+//        // SS_fo_looseMVA_v5
+//      el_pass_trigsafenoiso = isTriggerSafenoIso_v1(ilep);
+//      el_pass_trigsafeiso = isTriggerSafe_v1(ilep);
+//      el_pass_v2trigsafenoiso = isTriggerSafenoIso_v2(ilep);
+//      el_pass_v2trigsafeiso = isTriggerSafe_v2(ilep);
+//      el_pass_miniiso = !(elMiniRelIsoCMS3_EA(ilep,gconf.ea_version) >= 0.40);
+//      el_pass_convvtx = !els_conv_vtx_flag().at(ilep);
+//      el_pass_expinner = !(els_exp_innerlayers().at(ilep) > 0);
+//      el_pass_dxy = !(fabs(els_dxyPV().at(ilep)) >= 0.05);
+//      el_pass_dz = !(fabs(els_dzPV().at(ilep)) >= 0.1);
+//      el_pass_eta = !(fabs(els_etaSC().at(ilep)) > 2.5);
+//      el_pass_sip = !(fabs(els_ip3d().at(ilep))/els_ip3derr().at(ilep) >= 4);
+//      el_pass_threecharge = !(threeChargeAgree(ilep)==0);
+//      el_pass_mva = false;
+//      float aeta = fabs(els_etaSC().at(ilep));
+//      float disc = getMVAoutput(ilep, true);
+
+//      if (gconf.year == 2016) {
+//          if ((aeta >= 0.8 && aeta <= 1.479)) el_pass_mva = (disc > -0.91);
+//          if (aeta < 0.8) el_pass_mva = (disc > -0.85);
+//          if (aeta > 1.479) el_pass_mva = (disc > -0.83);
+//      } else if (gconf.year == 2017) {
+//          if (aeta < 0.8) el_pass_mva = (disc > -0.64);
+//          if ((aeta >= 0.8 && aeta <= 1.479)) el_pass_mva = (disc > -0.775);
+//          if (aeta > 1.479) el_pass_mva = (disc > -0.733);
+//      }
+
+//      el_loose = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx && el_pass_expinner && el_pass_dxy && el_pass_dz && el_pass_eta && el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_tight = isGoodLepton(11,ilep);
+
+//      el_loosewo_trigsafenoiso =                          el_pass_miniiso && el_pass_convvtx && el_pass_expinner && el_pass_dxy && el_pass_dz && el_pass_eta && el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_loosewo_miniiso       = el_pass_trigsafenoiso &&                    el_pass_convvtx && el_pass_expinner && el_pass_dxy && el_pass_dz && el_pass_eta && el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_loosewo_convvtx       = el_pass_trigsafenoiso && el_pass_miniiso &&                    el_pass_expinner && el_pass_dxy && el_pass_dz && el_pass_eta && el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_loosewo_expinner      = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx &&                     el_pass_dxy && el_pass_dz && el_pass_eta && el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_loosewo_dxy           = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx && el_pass_expinner &&                el_pass_dz && el_pass_eta && el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_loosewo_dz            = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx && el_pass_expinner && el_pass_dxy &&               el_pass_eta && el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_loosewo_eta           = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx && el_pass_expinner && el_pass_dxy && el_pass_dz &&                el_pass_sip && el_pass_threecharge && el_pass_mva;
+//      el_loosewo_sip           = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx && el_pass_expinner && el_pass_dxy && el_pass_dz && el_pass_eta &&                el_pass_threecharge && el_pass_mva;
+//      el_loosewo_threecharge   = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx && el_pass_expinner && el_pass_dxy && el_pass_dz && el_pass_eta && el_pass_sip &&                        el_pass_mva;
+//      el_loosewo_mva           = el_pass_trigsafenoiso && el_pass_miniiso && el_pass_convvtx && el_pass_expinner && el_pass_dxy && el_pass_dz && el_pass_eta && el_pass_sip && el_pass_threecharge               ;
+
+//      //Fill Baby
+//      BabyTree->Fill();
+
+//  }
+
+//  return babyErrorStruct;
+//}
 
 //Main function
 csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty* jecUnc, int isFastsim){
@@ -480,6 +640,14 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       if (!evt_isRealData){
           motherID = lepMotherID_v2(Lep(id,idx)).first;
       }
+
+
+      // // debug
+      // if (!passes_SS_tight_v6 and coneCorrPt<25 and abs(id)==11) {
+      //     float mvant = els_VIDNonTrigMvaValue().at(idx);
+      //     float mvagp = els_VIDSpring16GPMvaValue().at(idx);
+      //     std::cout <<  " mvant: " << mvant <<  " mvagp: " << mvagp <<  " p4_pt: " << p4_pt <<  " p4_eta: " << p4_eta <<  std::endl;
+      // }
 
       //Fill Baby
       BabyTree->Fill();

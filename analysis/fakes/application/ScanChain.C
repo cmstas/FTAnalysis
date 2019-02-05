@@ -57,9 +57,13 @@ using namespace std;
 #include "../derivation/newfrs_2017.h"
 // #include "../derivation/newfrs_2017_above18.h"
 
+namespace frs2017 {
+#include "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/fakes/derivation/frs_2017_ss.h"
+}
+
 bool inclHT = false;
 
-bool doNew = true;
+bool doNew = false;
 bool doQCD = true; // XXX
 bool doHadFR = false;
 bool doHadApp = false;
@@ -68,7 +72,7 @@ bool doAbove18 = false; // XXX
 bool doNewP = false;
 bool doAbove25 = false;
 bool bypassTrigger = false;
-bool absweight = true; // XXX
+bool absweight = false; // XXX
 bool ignoreConeCorr = false;
 
 TH1D * evtCounter = new TH1D("","",1000,0,1000); 
@@ -142,7 +146,8 @@ float getFakeRate(int id, float pt, float eta, float ht, bool extrPtRel = false,
         fact = (abs(id)==13) ? numer1_mu_siplow_FakeRate(pt,eta) : numer1_el_siplow_FakeRate(pt,eta);
     } else {
         // fact = (abs(id)==13) ? muonQCDMCFakeRate_18noanypt_new(pt,eta) : electronQCDMCFakeRate_18noanypt_new(pt,eta);
-        fact = (abs(id)==13) ? mytest::muonQCDMCFakeRate(pt,eta) : mytest::electronQCDMCFakeRate(pt,eta);
+        // fact = (abs(id)==13) ? mytest::muonQCDMCFakeRate(pt,eta) : mytest::electronQCDMCFakeRate(pt,eta);
+        fact = (abs(id)==13) ? frs2017::muonQCDMCFakeRate_IsoTrigs(pt,eta) : frs2017::electronQCDMCFakeRate_IsoTrigs(pt,eta);
     }
 
     if (fact > 0.8) fact = 0.8;
@@ -167,7 +172,8 @@ float getFakeRateError(int id, float pt, float eta, float ht, bool doInSitu = fa
     }
     // else return fakeRateError(id, pt, eta, ht);
     // fact = (abs(id)==13) ? muonQCDMCFakeRateError_18noanypt_new(pt,eta) : electronQCDMCFakeRateError_18noanypt_new(pt,eta);
-    fact = (abs(id)==13) ? mytest::muonQCDMCFakeRateError(pt,eta) : mytest::electronQCDMCFakeRateError(pt,eta);
+    // fact = (abs(id)==13) ? mytest::muonQCDMCFakeRateError(pt,eta) : mytest::electronQCDMCFakeRateError(pt,eta);
+    fact = (abs(id)==13) ? frs2017::muonQCDMCFakeRate_IsoTrigs(pt,eta) : frs2017::electronQCDMCFakeRate_IsoTrigs(pt,eta);
     return fact;
 }
 
@@ -305,7 +311,8 @@ void printClosureNumbers(std::vector<TString> filenames) {
         
         // std::string tag = "muonTTbarMCFakeRatehad1_abs_fogeq2_new";
         // std::string tag = "muonTTbarMCFakeRatehad2_abs_new";
-        std::string tag = "testfrs18";
+        // std::string tag = "testfrs18";
+        std::string tag = "testfrsall";
         // std::string tag = "muonTTbarMCFakeRatehad1_abs_fogeq2_bonly_new";
         // std::string tag = "muonTTbarMCFakeRatehad2_abs_bonly_new";
 
@@ -399,24 +406,24 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       hists.push_back( histCreator("Npn_histo_sr_obs_el"     + fname, "Observed Prompt-NonPrompt Background (Single el)"  , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_sr_pred_el"           , "Predicted Prompt-NonPrompt Background (Single el)" , nsr, 0.5,   nsr+0.5) );
       hists.push_back( histCreator("Npn_histo_sr_pred_unw_el"           , "Predicted Prompt-NonPrompt Background (Single el)" , nsr, 0.5,   nsr+0.5) );
-      hists.push_back( histCreator("Npn_histo_HT_obs"        + fname, "Observed Prompt-NonPrompt Background"              , 15, 0, 800) );
-      hists.push_back( histCreator("Npn_histo_HT_pred"              , "Predicted Prompt-NonPrompt Background"             , 15, 0, 800) );
-      hists.push_back( histCreator("Npn_histo_HT_obs_mu"     + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0, 800) );
-      hists.push_back( histCreator("Npn_histo_HT_pred_mu"           , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0, 800) );
-      hists.push_back( histCreator("Npn_histo_HT_obs_el"     + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0, 800) );
-      hists.push_back( histCreator("Npn_histo_HT_pred_el"           , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0, 800) );
-      hists.push_back( histCreator("Npn_histo_MET_obs"       + fname, "Observed Prompt-NonPrompt Background"              , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MET_pred"             , "Predicted Prompt-NonPrompt Background"             , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MET_obs_mu"    + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MET_pred_mu"          , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MET_obs_el"    + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MET_pred_el"          , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MTMIN_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MTMIN_pred"           , "Predicted Prompt-NonPrompt Background"             , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MTMIN_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MTMIN_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MTMIN_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_MTMIN_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_HT_obs"        + fname, "Observed Prompt-NonPrompt Background"              , 15, 0, 600) );
+      hists.push_back( histCreator("Npn_histo_HT_pred"              , "Predicted Prompt-NonPrompt Background"             , 15, 0, 600) );
+      hists.push_back( histCreator("Npn_histo_HT_obs_mu"     + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0, 600) );
+      hists.push_back( histCreator("Npn_histo_HT_pred_mu"           , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0, 600) );
+      hists.push_back( histCreator("Npn_histo_HT_obs_el"     + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0, 600) );
+      hists.push_back( histCreator("Npn_histo_HT_pred_el"           , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0, 600) );
+      hists.push_back( histCreator("Npn_histo_MET_obs"       + fname, "Observed Prompt-NonPrompt Background"              , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MET_pred"             , "Predicted Prompt-NonPrompt Background"             , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MET_obs_mu"    + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MET_pred_mu"          , "Predicted Prompt-NonPrompt Background (Single mu)" , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MET_obs_el"    + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MET_pred_el"          , "Predicted Prompt-NonPrompt Background (Single el)" , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MTMIN_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MTMIN_pred"           , "Predicted Prompt-NonPrompt Background"             , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MTMIN_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MTMIN_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MTMIN_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 20, 0,   200) );
+      hists.push_back( histCreator("Npn_histo_MTMIN_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 20, 0,   200) );
       hists.push_back( histCreator("Npn_histo_NJET_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 8, 0,   8) );
       hists.push_back( histCreator("Npn_histo_NJET_pred"           , "Predicted Prompt-NonPrompt Background"             , 8, 0,   8) );
       hists.push_back( histCreator("Npn_histo_NJET_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 8, 0,   8) );
@@ -429,30 +436,30 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
       hists.push_back( histCreator("Npn_histo_MATCH_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 5, 0,   5) );
       hists.push_back( histCreator("Npn_histo_MATCH_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 5, 0,   5) );
       hists.push_back( histCreator("Npn_histo_MATCH_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 5, 0,   5) );
-      hists.push_back( histCreator("Npn_histo_L1PT_obs"      + fname, "Observed Prompt-NonPrompt Background"              , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L1PT_pred"            , "Predicted Prompt-NonPrompt Background"             , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L1PT_obs_mu"   + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L1PT_pred_mu"         , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L1PT_obs_el"   + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L1PT_pred_el"         , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L2PT_obs"      + fname, "Observed Prompt-NonPrompt Background"              , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L2PT_pred"            , "Predicted Prompt-NonPrompt Background"             , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L2PT_obs_mu"   + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L2PT_pred_mu"         , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L2PT_obs_el"   + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_L2PT_pred_el"         , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0,   200) );
-      hists.push_back( histCreator("Npn_histo_LTrue_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LTrue_pred"           , "Predicted Prompt-NonPrompt Background"             , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LTrue_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LTrue_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LTrue_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LTrue_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LFake_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LFake_pred"           , "Predicted Prompt-NonPrompt Background"             , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LFake_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LFake_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LFake_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 15, 0,  200) );
-      hists.push_back( histCreator("Npn_histo_LFake_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 15, 0,  200) );
+      hists.push_back( histCreator("Npn_histo_L1PT_obs"      + fname, "Observed Prompt-NonPrompt Background"              , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L1PT_pred"            , "Predicted Prompt-NonPrompt Background"             , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L1PT_obs_mu"   + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L1PT_pred_mu"         , "Predicted Prompt-NonPrompt Background (Single mu)" , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L1PT_obs_el"   + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L1PT_pred_el"         , "Predicted Prompt-NonPrompt Background (Single el)" , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L2PT_obs"      + fname, "Observed Prompt-NonPrompt Background"              , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L2PT_pred"            , "Predicted Prompt-NonPrompt Background"             , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L2PT_obs_mu"   + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L2PT_pred_mu"         , "Predicted Prompt-NonPrompt Background (Single mu)" , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L2PT_obs_el"   + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_L2PT_pred_el"         , "Predicted Prompt-NonPrompt Background (Single el)" , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LTrue_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LTrue_pred"           , "Predicted Prompt-NonPrompt Background"             , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LTrue_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LTrue_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LTrue_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LTrue_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LFake_obs"     + fname, "Observed Prompt-NonPrompt Background"              , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LFake_pred"           , "Predicted Prompt-NonPrompt Background"             , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LFake_obs_mu"  + fname, "Observed Prompt-NonPrompt Background (Single mu)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LFake_pred_mu"        , "Predicted Prompt-NonPrompt Background (Single mu)" , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LFake_obs_el"  + fname, "Observed Prompt-NonPrompt Background (Single el)"  , 30, 0,   150) );
+      hists.push_back( histCreator("Npn_histo_LFake_pred_el"        , "Predicted Prompt-NonPrompt Background (Single el)" , 30, 0,   150) );
       hists.push_back( histCreator("NBs_NB_histo_e"                 , "Number of FOs from B's vs Nbtags (els)"            ,  4, 0,    4) );
       hists.push_back( histCreator("NBs_NB_histo_mu"                , "Number of FOs from B's vs Nbtags (muons)"          ,  4, 0,    4) );
       hists.push_back( histCreator("NnotBs_NB_histo_e"              , "Number of FOs NOT from B's vs Nbtags (els)"        ,  4, 0,    4) );
@@ -824,8 +831,10 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
 
       if (!ss::is_real_data()) {
           weight *= getTruePUw(year,ss::trueNumInt()[0]);
-          weight *= leptonScaleFactor(year,abs(ss::lep1_id()), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht());
-          weight *= leptonScaleFactor(year,abs(ss::lep2_id()), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht());
+          // if (ss::hyp_class() == 3) {
+              weight *= leptonScaleFactor(year,abs(ss::lep1_id()), ss::lep1_p4().pt(), ss::lep1_p4().eta(), ss::ht());
+              weight *= leptonScaleFactor(year,abs(ss::lep2_id()), ss::lep2_p4().pt(), ss::lep2_p4().eta(), ss::ht());
+          // }
           weight *= ss::weight_btagsf();
       }
 
@@ -909,7 +918,7 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           }
       }
 
-      if (lep1_pT < 25 || lep2_pT < 25) continue;
+      // if (lep1_pT < 25 || lep2_pT < 25) continue;
 
       if (abs(ss::lep1_id())==11 && lep1_pT<15.) continue;
       if (abs(ss::lep2_id())==11 && lep2_pT<15.) continue;
@@ -930,25 +939,29 @@ int ScanChain( TChain* chain, TString option = "", TString ptRegion = "HH", bool
           std::cout << " lep1prompt: " << lep1prompt << " lep2prompt: " << lep2prompt << " lep1nonprompt: " << lep1nonprompt << " lep2nonprompt: " << lep2nonprompt << std::endl;
       }
 
-      if (!passIsolatedFO(ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA(), ss::lep1_p4().pt())) continue;
-      if (!passIsolatedFO(ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA(), ss::lep2_p4().pt())) continue;
+      // if (!passIsolatedFO(ss::lep1_id(), ss::lep1_p4().eta(), ss::lep1_MVA(), ss::lep1_p4().pt())) continue;
+      // if (!passIsolatedFO(ss::lep2_id(), ss::lep2_p4().eta(), ss::lep2_MVA(), ss::lep2_p4().pt())) continue;
 
 
       //Determine mtMin
       float mtmin = ss::mt() > ss::mt_l2() ? ss::mt_l2() : ss::mt();
-      if (coneCorr){
-          if (!ignoreConeCorr) {
-              float mtl1 = MT(lep1_pT, ss::lep1_p4().phi(), ss::met(), ss::metPhi());
-              float mtl2 = MT(lep2_pT, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
-              mtmin = mtl1 > mtl2 ? mtl2 : mtl1;
-          }
-      }
+      // if (coneCorr){
+      //     if (!ignoreConeCorr) {
+      //         float mtl1 = MT(lep1_pT, ss::lep1_p4().phi(), ss::met(), ss::metPhi());
+      //         float mtl2 = MT(lep2_pT, ss::lep2_p4().phi(), ss::met(), ss::metPhi());
+      //         mtmin = mtl1 > mtl2 ? mtl2 : mtl1;
+      //     }
+      // }
 
       //Determine SR and BR
       anal_type_t ac_base = analysisCategory(ss::lep1_id(), ss::lep2_id(), lep1_pT, lep2_pT);
-      int br = baselineRegion(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pT, lep2_pT, true);
+      // int br = baselineRegion(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::lep1_id(), ss::lep2_id(), lep1_pT, lep2_pT, true);
+      int br = min(ss::nbtags(),3);
+      if (ss::njets() < 2) continue;
+      if (ss::met() < 50) continue;
       if (br<0) continue;
-      int sr = signalRegion2016(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pT, lep2_pT);
+      // int sr = signalRegion2016(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, ss::lep1_id(), ss::lep2_id(), lep1_pT, lep2_pT);
+      int sr = 1;
 
       if (verbose) std::cout << " inSitu: " << inSitu << " br: " << br << " ac_base: " << ac_base << " ss::hyp_class(): " << ss::hyp_class() << std::endl;
 

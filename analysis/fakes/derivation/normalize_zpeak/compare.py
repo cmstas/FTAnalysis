@@ -27,7 +27,7 @@ def print_sfs(outdir, year=2017, _persist=[], prefix="    "):
         sf = (ve_dy/ve_data)
         sfs[k.replace("mll_","")] = sf[0]
     for trig,sf in sorted(sfs.items()):
-        print "{}float sf_{} = {:.4f};".format(prefix,trig,sf)
+        print "{} sf_{} = {:.4f};".format(prefix,trig,sf)
 
 
 if __name__ == "__main__":

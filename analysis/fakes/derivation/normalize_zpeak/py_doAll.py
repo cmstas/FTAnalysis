@@ -37,6 +37,7 @@ options = {
         # 2016: " Data2016 doPUweight ",
         # 2017: " Data2017 doPUweight ",
         # 2018: " Data2018 doPUweight ",
+
         2016: " quiet Data2016 doPUweight doLeptonSF ",
         2017: " quiet Data2017 doPUweight doLeptonSF ",
         2018: " quiet Data2018 doPUweight doLeptonSF ",

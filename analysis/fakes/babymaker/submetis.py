@@ -29,7 +29,7 @@ def get_event_rate(fname):
 def split_func(dsname):
     if "/W" in dsname: return 12
     if "/TT" in dsname: return 10
-    if "/QCD" in dsname: return 20
+    if "/QCD" in dsname: return 15
     if "/DY" in dsname: return 8
     if "/EGamma" in dsname: return 15
     if "/Single" in dsname: return 15
@@ -42,10 +42,17 @@ if __name__ == "__main__":
 
     year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
     # tag = "v1.0_leptontree" # 2017, 2018 only
-    tag = "v2.0_leptontree" # 2017, 2018 only
+    # tag = "v2.0_leptontree" # 2017, 2018 only
     extra_args = ""
     tag_match = ""
-    extra_args = "--ignorebadfiles" # FIXME
+
+    # year_sample_map = [("2018",mc_2018)]
+    year_sample_map = [("2016",data_2016)]
+    tag = "v2.0_leptontree"
+
+    # extra_args = "--ignorebadfiles" # FIXME
+    # year_sample_map = [("2016",data_2016)]
+    # tag = "v2.1_test2016gpmva" # 2016 testing GP mva instead of nontrig branch
 
     # Loop 'til we get dizzy
     for i in range(1000):

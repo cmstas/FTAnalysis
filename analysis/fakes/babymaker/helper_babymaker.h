@@ -246,6 +246,32 @@ class babyMaker {
     int HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;
     int HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL;
 
+    bool el_pass_trigsafenoiso;
+    bool el_pass_trigsafeiso;
+    bool el_pass_v2trigsafenoiso;
+    bool el_pass_v2trigsafeiso;
+    bool el_pass_miniiso;
+    bool el_pass_convvtx;
+    bool el_pass_expinner;
+    bool el_pass_dxy;
+    bool el_pass_dz;
+    bool el_pass_eta;
+    bool el_pass_sip;
+    bool el_pass_threecharge;
+    bool el_pass_mva;
+    bool el_loose;
+    bool el_tight;
+    bool el_loosewo_trigsafenoiso;
+    bool el_loosewo_miniiso;
+    bool el_loosewo_convvtx;
+    bool el_loosewo_expinner;
+    bool el_loosewo_dxy;
+    bool el_loosewo_dz;
+    bool el_loosewo_eta;
+    bool el_loosewo_sip;
+    bool el_loosewo_threecharge;
+    bool el_loosewo_mva;
+
 };
 
 #endif

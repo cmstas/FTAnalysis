@@ -1,4 +1,5 @@
-void dumpFunctions(TString dir) {
+void dumpFunctions(TString dir,int year) {
+    TString ystr = Form("y%i_",year);
 
     for (int doIso=0;doIso<2;doIso++) {
 
@@ -10,7 +11,7 @@ void dumpFunctions(TString dir) {
             TString l = doMu ? "mu" : "e";
             TString ll = doMu ? "mu" : "el";
 
-            TFile* f = TFile::Open(dir+"/ewkCorFR_"+lep+suffix+".root");
+            TFile* f = TFile::Open(dir+"/pdfs/"+ystr+"ewkCorFR_"+lep+suffix+".root");
 
             TH2D* centr = (TH2D*) f->Get("Nt_histo_"+l);
 
@@ -71,7 +72,7 @@ void dumpFunctions(TString dir) {
 
             f->Close();
 
-            TFile* fmc = TFile::Open(dir+"/rate_histos_qcd_"+ll+"_LooseEMVA"+suffix+".root");
+            TFile* fmc = TFile::Open(dir+"/"+ystr+"rate_histos_qcd_"+ll+"_LooseEMVA"+suffix+".root");
             TH2D* mc = (TH2D*) fmc->Get("rate_cone_histo_"+l);
             cout << "float "+lep+"QCDMCFakeRate"+suffix+"(float pt, float eta) {" << endl;
             for (int xbin=1;xbin<=mc->GetNbinsX();xbin++) {

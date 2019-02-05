@@ -20,6 +20,7 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
         // postfix+="_doBonly";
         // postfix+="_doLightonly";
         TString var = "";
+        TString ystr = Form("y%i_",year);
         var="_cone";
 
         TString suffix = (useIsoTrig ? "_IsoTrigs" : "");
@@ -28,8 +29,8 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
         TH1D *muf_qcd;
         TH1D *elf_qcd;
         if (do_qcd) {
-            TFile* f_qcd_mu = TFile::Open(dir+"/rate_histos_qcd_mu"+postfix+".root");
-            TFile* f_qcd_el = TFile::Open(dir+"/rate_histos_qcd_el"+postfix+".root");
+            TFile* f_qcd_mu = TFile::Open(dir+"/"+ystr+"rate_histos_qcd_mu"+postfix+".root");
+            TFile* f_qcd_el = TFile::Open(dir+"/"+ystr+"rate_histos_qcd_el"+postfix+".root");
 
             TH2F* mud_qcd = (TH2F*) f_qcd_mu->Get("Nl"+var+"_histo_mu");  
             TH2F* eld_qcd = (TH2F*) f_qcd_el->Get("Nl"+var+"_histo_e");
@@ -51,10 +52,10 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
             elf_qcd->Divide(eln1d_qcd,eld1d_qcd,1,1,"B");
         }
 
-        TFile* f_data_el = TFile::Open(dir+"/rate_histos_data_el"+postfix+".root");
-        TFile* f_data_mu = TFile::Open(dir+"/rate_histos_data_mu"+postfix+".root");
-        TFile* f_dy = TFile::Open(dir+"/rate_histos_dy"+postfix+".root");
-        TFile* f_wj = TFile::Open(dir+"/rate_histos_wjets"+postfix+".root");
+        TFile* f_data_el = TFile::Open(dir+"/"+ystr+"rate_histos_data_el"+postfix+".root");
+        TFile* f_data_mu = TFile::Open(dir+"/"+ystr+"rate_histos_data_mu"+postfix+".root");
+        TFile* f_dy = TFile::Open(dir+"/"+ystr+"rate_histos_dy"+postfix+".root");
+        TFile* f_wj = TFile::Open(dir+"/"+ystr+"rate_histos_wjets"+postfix+".root");
 
         TH2F* mud_data = (TH2F*) f_data_mu->Get("Nl"+var+"_histo_mu");
         TH2F* mud_wj = (TH2F*) f_wj->Get("Nl"+var+"_histo_mu");
@@ -185,7 +186,7 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
             muf_qcd->GetYaxis()->SetTitle("Muon #epsilon_{TL}");
             muf_qcd->GetXaxis()->SetTitle("Muon "+xname);
             if (var=="_jet"&&doPt) muf_qcd->GetXaxis()->SetTitle("jet "+xname);
-            muf_qcd->GetYaxis()->SetRangeUser(0,0.5);
+            muf_qcd->GetYaxis()->SetRangeUser(0,0.6);
             muf_qcd->SetMarkerStyle(21);
             muf_qcd->SetMarkerSize(1.5);
             muf_qcd->SetMarkerColor(kRed);
@@ -257,7 +258,7 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
             elf_qcd->GetYaxis()->SetTitle("Electron #epsilon_{TL}");
             elf_qcd->GetXaxis()->SetTitle("Electron "+xname);
             if (var=="_jet"&&doPt) elf_qcd->GetXaxis()->SetTitle("jet "+xname);
-            elf_qcd->GetYaxis()->SetRangeUser(0,0.5);
+            elf_qcd->GetYaxis()->SetRangeUser(0,0.6);
             elf_qcd->SetMarkerStyle(21);
             elf_qcd->SetMarkerSize(1.5);
             elf_qcd->SetMarkerColor(kRed);
@@ -278,15 +279,15 @@ void make1DplotFR(TString dir, float elSF_zp,float muSF_zp,float elSF_mt, float 
         latex.SetTextSize(1.2*0.044*0.75);
         latex.DrawLatex(0.24, 0.91, "Supplementary");
 
-        c1.SaveAs("pdfs/mu_1dfr"+var+postfix+(doPt ? "" : "_eta")+".pdf");
-        c2.SaveAs("pdfs/el_1dfr"+var+postfix+(doPt ? "" : "_eta")+".pdf");
+        c1.SaveAs("pdfs/"+ystr+"mu_1dfr"+var+postfix+(doPt ? "" : "_eta")+".pdf");
+        c2.SaveAs("pdfs/"+ystr+"el_1dfr"+var+postfix+(doPt ? "" : "_eta")+".pdf");
 
 
         if (doPt) {
-            TFile out_el("hists_1DFR_electron"+suffix+".root","RECREATE");
+            TFile out_el("pdfs/"+ystr+"hists_1DFR_electron"+suffix+".root","RECREATE");
             elf_data->Write();
             out_el.Close();
-            TFile out_mu("hists_1DFR_muon"+suffix+".root","RECREATE");
+            TFile out_mu("pdfs/"+ystr+"hists_1DFR_muon"+suffix+".root","RECREATE");
             muf_data->Write();
             out_mu.Close();
         }
