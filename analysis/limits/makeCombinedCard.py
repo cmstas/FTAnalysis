@@ -11,13 +11,7 @@ def do_combine(
         regions="srcr",
         years = [2016,2017,2018],
         procs = ["data", "fakes", "fakes_mc", "flips", "rares", "tth", "tttt", "ttvv", "ttw", "ttz", "xg"],
-        extra_procs = [],
-        cardname = "combined_card.txt",
-        correlate_all = False,
-        correlate_none = False,
-        ):
-
-    to_correlate = [
+        to_correlate = [
             "scale",
             "pdf",
             "alphas",
@@ -29,10 +23,14 @@ def do_combine(
             "XG",
             "TTVV",
             "fakes",
-            ]
-    # print "FIXME FIXME FIXME inside makeCombinedCard.py. remove eventually"
-    # # FIXME FIXME FIXME
-    # to_correlate += ["jes","jer","btag"]
+            ],
+        extra_procs = [],
+        cardname = "combined_card.txt",
+        correlate_all = False,
+        correlate_none = False,
+        signal="tttt",
+        ):
+
     if correlate_none:
         to_correlate = []
 
@@ -74,7 +72,7 @@ def do_combine(
 
             fin.Close()
 
-        card_basename = "card_tttt_{}_{}.txt".format(regions,year)
+        card_basename = "card_{}_{}_{}.txt".format(signal,regions,year)
         with open("{}/{}".format(basedir,card_basename),"r") as fhin:
             with open("{}/tmp_{}".format(basedir,card_basename),"w") as fhout:
                 for line in fhin:

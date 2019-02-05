@@ -61,6 +61,7 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=True):
             if proc not in d_proc_nuisances: d_proc_nuisances[proc] = []
             d_proc_nuisances[proc].append({"name":name, "val":float(val), "kind":kind})
 
+    # print d_proc_nuisances
     d_yields = {}
 
     nbins = None
@@ -131,23 +132,15 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=True):
 
 def print_table(d_yields, slim, pretty, regions="srcr",precision=2,blinded=True):
     nbins = len(d_yields["ttz"]["central"])
-    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Flips","Fakes","Total","Data","$\\tttt$"]
-    # procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
-    # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Fakes","Total","Data","$\\tttt$"]
-    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\ttVV$","X+$\\gamma$","Rares","Charge misid.","Nonprompt lep.","SM expected","Data","$\\tttt$"]
-    # procs = ["ttw","ttz","tth","ttvv","xg","rares","fakes_mc","bgtot","data","tttt"]
-    procs = ["ttw","ttz","tth","ttvv","xg","rares","flips","fakes","bgtot","data","tttt"]
+    colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","$\\WZ$","WW","X+$\\gamma$","Rares","Charge misid.","Nonprompt lep.","SM expected","Data"]
+    procs = ["ttw","ttz","tth","wz","ww","xg","rares","flips","fakes","bgtot","data"]
     if slim:
         # colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Fakes MC","Total","$\\tttt$"]
         # procs = ["ttw","ttz","tth","fakes_mc","bgtot","tttt"]
         colnames = ["","$\\ttW$","$\\ttZ$","$\\ttH$","Total","$\\tttt$"]
         procs = ["ttw","ttz","tth","bgtot","tttt"]
     # srnames = ["CRZ","CRW","SR1","SR2","SR3","SR4","SR5","SR6","SR7","SR8"]
-    if regions == "srcr":
-        srnames = ["CRZ","CRW"]+["SR{}".format(i) for i in range(1,17)]
-    elif regions == "srdisc":
-        # srnames = ["SR{}".format(i) for i in range(1,15)]
-        srnames = ["SR{}".format(i) for i in range(1,18)]
+    srnames = ["SR{}".format(i) for i in range(1,100)]
 
     print
     if not pretty:
@@ -165,10 +158,10 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2,blinded=True)
                 cent = max(d_yields[proc]["central"][ibin],0.)
                 err = d_yields[proc]["error"][ibin]
                 if "data" in proc:
-                    if ibin in [0,1] or not blinded:
-                        tojoin.append("{0:.0f}".format(cent))
-                    else:
+                    if blinded:
                         tojoin.append("-".format(cent))
+                    else:
+                        tojoin.append("{:.0f}".format(cent))
                 else:
                     tojoin.append("{0:5.2f}$\\pm${1:5.2f}".format(cent,err))
             print " & ".join(tojoin),

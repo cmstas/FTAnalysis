@@ -29,8 +29,18 @@ for y in 2016 2017 2018 ; do
 done
 wait
 
-./makeCombinedCard.py ${basedir} ${extra} --cardname card_tttt_${region}_run2.txt
-# NOTE make sure there's no --redocard, because we just made it
-# ./runLimits.py ${basedir}/combined_card.txt --redolimits ${extra}
-# ./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits --noscan ${extra}
-./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits ${extra}
+if [[ ${extra} = *"--single"* ]]; then
+    echo "Removing *${region}_run2.root files from the directory so they can get remade"
+    rm ${basedir}/*${region}_run2.root
+    ./makeSingleCombinedCard.py ${basedir} ${extra} --cardname card_tttt_${region}_run2.txt
+    # NOTE make sure there's no --redocard, because we just made it
+    # ./runLimits.py ${basedir}/combined_card.txt --redolimits ${extra}
+    # ./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits --noscan ${extra}
+    ./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits ${extra}
+else
+    ./makeCombinedCard.py ${basedir} ${extra} --cardname card_tttt_${region}_run2.txt
+    # NOTE make sure there's no --redocard, because we just made it
+    # ./runLimits.py ${basedir}/combined_card.txt --redolimits ${extra}
+    # ./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits --noscan ${extra}
+    ./runLimits.py ${basedir}/card_tttt_${region}_run2.txt --redolimits ${extra}
+fi
