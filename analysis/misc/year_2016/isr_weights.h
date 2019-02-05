@@ -5,8 +5,8 @@ float isrWeight(int nisrmatch, int sample) {
         scale = 1.09063;
     } else if (sample == 2) { // ttZ
         scale = 1.10315;
-    } else if (sample == 3) { // ttH
-        scale = 1.10286;
+    } else if (sample == 10) { // ttbar sample
+        scale = 1.0643;
     }
     if (nisrmatch == 0) { return scale*1.00; }
     if (nisrmatch == 1) { return scale*0.86; }

@@ -3,6 +3,9 @@
 
 namespace y2016 {
 #include "fake_rates.h"
+namespace newbins {
+#include "new_fake_rates.h"
+}
 #include "flip_rates.h"
 #include "lepton_sf.h"
 #include "puw.h"

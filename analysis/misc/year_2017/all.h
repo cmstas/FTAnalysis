@@ -3,6 +3,9 @@
 
 namespace y2017 {
 #include "fake_rates.h"
+namespace allpt {
+#include "new_fake_rates.h"
+}
 #include "flip_rates.h"
 #include "lepton_sf.h"
 #include "puw.h"

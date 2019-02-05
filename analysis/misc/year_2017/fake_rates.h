@@ -481,33 +481,33 @@ float muonQCDMCFakeRateError_IsoTrigs(float pt, float eta) {
 }
 
 
-float fakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronFakeRate_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonFakeRate_IsoTrigs(pt,eta);
+float fakeRate(int id, float pt, float eta, float ht, bool isLL) { 
+    if (abs(id)==11) return (isLL ? electronFakeRate(pt,eta) : electronFakeRate_IsoTrigs(pt,eta));
+    else if (abs(id)==13) return (isLL ? muonFakeRate(pt,eta) : muonFakeRate_IsoTrigs(pt,eta));
     else return 0.;
 }
 
-float fakeRateError(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronFakeRateError_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonFakeRateError_IsoTrigs(pt,eta);
+float fakeRateError(int id, float pt, float eta, float ht, bool isLL) { 
+    if (abs(id)==11) return (isLL ? electronFakeRateError(pt,eta) : electronFakeRateError_IsoTrigs(pt,eta));
+    else if (abs(id)==13) return (isLL ? muonFakeRateError(pt,eta) : muonFakeRateError_IsoTrigs(pt,eta));
     else return 0.;
 }
 
-float alternativeFakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronAlternativeFakeRate_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonAlternativeFakeRate_IsoTrigs(pt,eta);
+float alternativeFakeRate(int id, float pt, float eta, float ht, bool isLL) { 
+    if (abs(id)==11) return (isLL ? electronAlternativeFakeRate(pt,eta) : electronAlternativeFakeRate_IsoTrigs(pt,eta));
+    else if (abs(id)==13) return (isLL ? muonAlternativeFakeRate(pt,eta) : muonAlternativeFakeRate_IsoTrigs(pt,eta));
     else return 0.;
 }
 
-float qcdMCFakeRate(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronQCDMCFakeRate_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonQCDMCFakeRate_IsoTrigs(pt,eta);
+float qcdMCFakeRate(int id, float pt, float eta, float ht, bool isLL) { 
+    if (abs(id)==11) return (isLL ? electronQCDMCFakeRate(pt,eta) : electronQCDMCFakeRate_IsoTrigs(pt,eta));
+    else if (abs(id)==13) return (isLL ? muonQCDMCFakeRate(pt,eta) : muonQCDMCFakeRate_IsoTrigs(pt,eta));
     else return 0.;
 }
 
-float qcdMCFakeRateError(int id, float pt, float eta, float ht) { 
-    if (abs(id)==11) return electronQCDMCFakeRateError_IsoTrigs(pt,eta);
-    else if (abs(id)==13) return muonQCDMCFakeRateError_IsoTrigs(pt,eta);
+float qcdMCFakeRateError(int id, float pt, float eta, float ht, bool isLL) { 
+    if (abs(id)==11) return (isLL ? electronQCDMCFakeRateError(pt,eta) : electronQCDMCFakeRateError_IsoTrigs(pt,eta));
+    else if (abs(id)==13) return (isLL ? muonQCDMCFakeRateError(pt,eta) : muonQCDMCFakeRateError_IsoTrigs(pt,eta));
     else return 0.;
 }
 
