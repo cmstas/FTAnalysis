@@ -618,6 +618,27 @@ class babyMaker {
     float weight_btagsf4_UP;
     float weight_btagsf4_DN;
 
+    float weight_btagsf_light_UP;
+    float weight_btagsf_light_DN;
+    float weight_btagsf1_light_UP;
+    float weight_btagsf1_light_DN;
+    float weight_btagsf2_light_UP;
+    float weight_btagsf2_light_DN;
+    float weight_btagsf3_light_UP;
+    float weight_btagsf3_light_DN;
+    float weight_btagsf4_light_UP;
+    float weight_btagsf4_light_DN;
+    float weight_btagsf_heavy_UP;
+    float weight_btagsf_heavy_DN;
+    float weight_btagsf1_heavy_UP;
+    float weight_btagsf1_heavy_DN;
+    float weight_btagsf2_heavy_UP;
+    float weight_btagsf2_heavy_DN;
+    float weight_btagsf3_heavy_UP;
+    float weight_btagsf3_heavy_DN;
+    float weight_btagsf4_heavy_UP;
+    float weight_btagsf4_heavy_DN;
+
     float weight_btagsf_iter_central;
     float weight_btagsf_iter_down_cferr1;
     float weight_btagsf_iter_down_cferr2;
@@ -798,6 +819,11 @@ class babyMaker {
     float bdt_disc_jec_dn;
     float bdt_disc_jer_dn;
 
+    float bdt_run2_disc;
+    float bdt_run2_disc_jec_up;
+    float bdt_run2_disc_jer_up;
+    float bdt_run2_disc_jec_dn;
+    float bdt_run2_disc_jer_dn;
 
 };
 

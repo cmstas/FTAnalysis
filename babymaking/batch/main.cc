@@ -223,6 +223,13 @@ int main(int argc, char *argv[]){
         gconf.ea_version = 4;
         gconf.cmssw_ver = 102;
 
+        // // XXX Copied from 2017
+        // gconf.btag_disc_wp = 0.4941;
+        // gconf.WP_DEEPCSV_TIGHT  = 0.8001;
+        // gconf.WP_DEEPCSV_MEDIUM = 0.4941;
+        // gconf.WP_DEEPCSV_LOOSE  = 0.1522;
+
+        // XXX New recommendation
         gconf.btag_disc_wp = 0.4184;
         gconf.WP_DEEPCSV_TIGHT  = 0.7527;
         gconf.WP_DEEPCSV_MEDIUM = 0.4184;
@@ -326,7 +333,7 @@ int main(int argc, char *argv[]){
     TBranchElement *currentBranch = 0;
     while ( (currentBranch = (TBranchElement*)branchIter.Next()) ) { 
         TString bname = TString(currentBranch->GetName());
-        if (bname.Contains("genMaker_genHEPMCweight")) {
+        if (bname.Contains("genMaker_genHEPMCweight") and isSignal==0) {
             mylooper->has_lhe_branches = true;
             std::cout << ">>> [!] This sample has the new gen_LHE_* branches, so using them" << std::endl;
             break;
@@ -545,6 +552,12 @@ int main(int argc, char *argv[]){
                         float nom = genweights[0];
                         float scale_up_raw = genweights[4];
                         float scale_down_raw = genweights[8];
+                        if (isSignal > 0) {
+                            // fastsim shifted by 1
+                            nom = genweights[1];
+                            scale_up_raw = genweights[5];
+                            scale_down_raw = genweights[9];
+                        }
                         float sum_pdf = 0.;
                         float sum2_pdf = 0.;
                         int N = 100;

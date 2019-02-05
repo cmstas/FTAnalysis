@@ -6,6 +6,9 @@
 
 #include "misc/signal_regions.h"
 #include "misc/bdt.h"
+namespace bdtrun2 {
+#include "misc/bdt_run2.h"
+}
 #include "misc/common_utils.h"
 #include "misc/toptagger.h"
 
@@ -327,21 +330,42 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("fired_trigger"                                           , &fired_trigger                                                                           );
   BabyTree->Branch("fired_trigger_ss"                                           , &fired_trigger_ss                                                                           );
   BabyTree->Branch("triggers"                                                , &triggers                                                                                );
+
   BabyTree->Branch("weight_btagsf"                                           , &weight_btagsf                                                                           );
-  BabyTree->Branch("weight_btagsf_UP"                                        , &weight_btagsf_UP                                                                        );
-  BabyTree->Branch("weight_btagsf_DN"                                        , &weight_btagsf_DN                                                                        );
-  BabyTree->Branch("weight_btagsf1"                                           , &weight_btagsf1                                                                           );
-  BabyTree->Branch("weight_btagsf1_UP"                                        , &weight_btagsf1_UP                                                                        );
-  BabyTree->Branch("weight_btagsf1_DN"                                        , &weight_btagsf1_DN                                                                        );
-  BabyTree->Branch("weight_btagsf2"                                           , &weight_btagsf2                                                                           );
-  BabyTree->Branch("weight_btagsf2_UP"                                        , &weight_btagsf2_UP                                                                        );
-  BabyTree->Branch("weight_btagsf2_DN"                                        , &weight_btagsf2_DN                                                                        );
-  BabyTree->Branch("weight_btagsf3"                                           , &weight_btagsf3                                                                           );
-  BabyTree->Branch("weight_btagsf3_UP"                                        , &weight_btagsf3_UP                                                                        );
-  BabyTree->Branch("weight_btagsf3_DN"                                        , &weight_btagsf3_DN                                                                        );
-  BabyTree->Branch("weight_btagsf4"                                           , &weight_btagsf4                                                                           );
-  BabyTree->Branch("weight_btagsf4_UP"                                        , &weight_btagsf4_UP                                                                        );
-  BabyTree->Branch("weight_btagsf4_DN"                                        , &weight_btagsf4_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf_UP"                                        , &weight_btagsf_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf_DN"                                        , &weight_btagsf_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf1"                                           , &weight_btagsf1                                                                           );
+  // BabyTree->Branch("weight_btagsf1_UP"                                        , &weight_btagsf1_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf1_DN"                                        , &weight_btagsf1_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf2"                                           , &weight_btagsf2                                                                           );
+  // BabyTree->Branch("weight_btagsf2_UP"                                        , &weight_btagsf2_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf2_DN"                                        , &weight_btagsf2_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf3"                                           , &weight_btagsf3                                                                           );
+  // BabyTree->Branch("weight_btagsf3_UP"                                        , &weight_btagsf3_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf3_DN"                                        , &weight_btagsf3_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf4"                                           , &weight_btagsf4                                                                           );
+  // BabyTree->Branch("weight_btagsf4_UP"                                        , &weight_btagsf4_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf4_DN"                                        , &weight_btagsf4_DN                                                                        );
+  BabyTree->Branch("weight_btagsf_light_UP"                                        , &weight_btagsf_light_UP                                                                        );
+  BabyTree->Branch("weight_btagsf_light_DN"                                        , &weight_btagsf_light_DN                                                                        );
+  BabyTree->Branch("weight_btagsf_heavy_UP"                                        , &weight_btagsf_heavy_UP                                                                        );
+  BabyTree->Branch("weight_btagsf_heavy_DN"                                        , &weight_btagsf_heavy_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf1_light_UP"                                        , &weight_btagsf1_light_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf1_light_DN"                                        , &weight_btagsf1_light_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf2_light_UP"                                        , &weight_btagsf2_light_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf2_light_DN"                                        , &weight_btagsf2_light_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf3_light_UP"                                        , &weight_btagsf3_light_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf3_light_DN"                                        , &weight_btagsf3_light_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf4_light_UP"                                        , &weight_btagsf4_light_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf4_light_DN"                                        , &weight_btagsf4_light_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf1_heavy_UP"                                        , &weight_btagsf1_heavy_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf1_heavy_DN"                                        , &weight_btagsf1_heavy_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf2_heavy_UP"                                        , &weight_btagsf2_heavy_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf2_heavy_DN"                                        , &weight_btagsf2_heavy_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf3_heavy_UP"                                        , &weight_btagsf3_heavy_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf3_heavy_DN"                                        , &weight_btagsf3_heavy_DN                                                                        );
+  // BabyTree->Branch("weight_btagsf4_heavy_UP"                                        , &weight_btagsf4_heavy_UP                                                                        );
+  // BabyTree->Branch("weight_btagsf4_heavy_DN"                                        , &weight_btagsf4_heavy_DN                                                                        );
 
   BabyTree->Branch("weight_btagsf_iter_central",&weight_btagsf_iter_central);
   BabyTree->Branch("weight_btagsf_iter_down_cferr1",&weight_btagsf_iter_down_cferr1);
@@ -522,6 +546,11 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("bdt_disc_jer_up",&bdt_disc_jer_up);
   BabyTree->Branch("bdt_disc_jec_dn",&bdt_disc_jec_dn);
   BabyTree->Branch("bdt_disc_jer_dn",&bdt_disc_jer_dn);
+  BabyTree->Branch("bdt_run2_disc",&bdt_run2_disc);
+  BabyTree->Branch("bdt_run2_disc_jec_up",&bdt_run2_disc_jec_up);
+  BabyTree->Branch("bdt_run2_disc_jer_up",&bdt_run2_disc_jer_up);
+  BabyTree->Branch("bdt_run2_disc_jec_dn",&bdt_run2_disc_jec_dn);
+  BabyTree->Branch("bdt_run2_disc_jer_dn",&bdt_run2_disc_jer_dn);
 
   if (applyBtagSFs) {
     // setup btag calibration readers
@@ -587,7 +616,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
         } else if (gconf.year == 2017) {
             f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_amc_94X_deepCSV.root");
         } else if (gconf.year == 2018) {
-            f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_amc_94X_deepCSV.root");
+            f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_amc_102X_deepCSV.root");
         }
         TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
         TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
@@ -600,7 +629,11 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
         f_btag_eff->Close();
     }
     if (isFastsim >  0 ) {
-        f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1bbbb-T1qqqq_fastsim.root");
+        if (gconf.year == 2016) {
+            f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1tttt_2016_80X_deepCSV.root");
+        } else if (gconf.year == 2017) {
+            f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1tttt_2017_94X_deepCSV.root");
+        }
         TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
         TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
         TH2D* h_btag_eff_udsg_temp = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_udsg");
@@ -617,11 +650,11 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
       res.loadResolutionFile("CORE/Tools/JetResolution/data/Summer16_25nsV1_MC_PtResolution_AK4PFchs.txt");
       res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Summer16_25nsV1_MC_SF_AK4PFchs.txt");
   } else if (gconf.year == 2017) {
-      res.loadResolutionFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_PtResolution_AK4PFchs.txt");
-      res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_SF_AK4PFchs.txt");
+      res.loadResolutionFile("CORE/Tools/JetResolution/data/Fall17_V3_MC_PtResolution_AK4PFchs.txt");
+      res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Fall17_V3_MC_SF_AK4PFchs.txt");
   } else if (gconf.year == 2018) {
-      res.loadResolutionFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_PtResolution_AK4PFchs.txt");
-      res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Fall17_25nsV1_MC_SF_AK4PFchs.txt");
+      res.loadResolutionFile("CORE/Tools/JetResolution/data/Fall17_V3_MC_PtResolution_AK4PFchs.txt");
+      res.loadScaleFactorFile("CORE/Tools/JetResolution/data/Fall17_V3_MC_SF_AK4PFchs.txt");
   }
 
   // Load scale1fbs/xsecs from file
@@ -918,6 +951,27 @@ void babyMaker::InitBabyNtuple(){
     weight_btagsf4_UP = -9999.;
     weight_btagsf4_DN = -9999.;
 
+    weight_btagsf_light_UP = -9999.;
+    weight_btagsf_light_DN = -9999.;
+    weight_btagsf1_light_UP = -9999.;
+    weight_btagsf1_light_DN = -9999.;
+    weight_btagsf2_light_UP = -9999.;
+    weight_btagsf2_light_DN = -9999.;
+    weight_btagsf3_light_UP = -9999.;
+    weight_btagsf3_light_DN = -9999.;
+    weight_btagsf4_light_UP = -9999.;
+    weight_btagsf4_light_DN = -9999.;
+    weight_btagsf_heavy_UP = -9999.;
+    weight_btagsf_heavy_DN = -9999.;
+    weight_btagsf1_heavy_UP = -9999.;
+    weight_btagsf1_heavy_DN = -9999.;
+    weight_btagsf2_heavy_UP = -9999.;
+    weight_btagsf2_heavy_DN = -9999.;
+    weight_btagsf3_heavy_UP = -9999.;
+    weight_btagsf3_heavy_DN = -9999.;
+    weight_btagsf4_heavy_UP = -9999.;
+    weight_btagsf4_heavy_DN = -9999.;
+
     weight_btagsf_iter_central = -9999.;
     weight_btagsf_iter_down_cferr1 = -9999.;
     weight_btagsf_iter_down_cferr2 = -9999.;
@@ -1123,6 +1177,11 @@ void babyMaker::InitBabyNtuple(){
     bdt_disc_jer_up = 0.;
     bdt_disc_jec_dn = 0.;
     bdt_disc_jer_dn = 0.;
+    bdt_run2_disc = 0.;
+    bdt_run2_disc_jec_up = 0.;
+    bdt_run2_disc_jer_up = 0.;
+    bdt_run2_disc_jec_dn = 0.;
+    bdt_run2_disc_jer_dn = 0.;
     year = -1;
     yearlumi = 0.;
     weight_lepsf1 = 0.;
@@ -1231,6 +1290,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           int nweights = genweights.size();
           if (nweights>110) {
               float nom = genweights[0];
+              // fastsim shifted by 1
+              if (isFastsim > 0) nom = genweights[1];
               float sum_pdf = 0.;
               float sum2_pdf = 0.;
               int N = 100;
@@ -1243,10 +1304,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               if (gconf.year == 2017) {
                   rms *= sqrt(99);
               }
-              weight_scale_UP = genweights[4] / nom;
-              weight_scale_DN = genweights[8] / nom;
-              weight_alphas_UP = genweights[110] / nom;
-              weight_alphas_DN = genweights[109] / nom;
+              if (isFastsim > 0) {
+                  // fastsim shifted by 1
+                  weight_scale_UP = genweights[5] / nom;
+                  weight_scale_DN = genweights[9] / nom;
+                  weight_alphas_UP = genweights[111] / nom;
+                  weight_alphas_DN = genweights[110] / nom;
+              } else {
+                  weight_scale_UP = genweights[4] / nom;
+                  weight_scale_DN = genweights[8] / nom;
+                  weight_alphas_UP = genweights[110] / nom;
+                  weight_alphas_DN = genweights[109] / nom;
+              }
               weight_pdf_UP = (sum_pdf/N+rms) / nom;
               weight_pdf_DN = (sum_pdf/N-rms) / nom;
               weight_fsrvar_UP = 1.;
@@ -1437,7 +1506,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // lep1_passes_MVA = abs(lep1_id) == 11 ? passesMVAforID(lep1_idx, SS_medium_noiso_v6) : true;
   // lep2_passes_MVA = abs(lep2_id) == 11 ? passesMVAforID(lep2_idx, SS_medium_noiso_v6) : true;
 
-  //Reject events that fail trigger matching
+  // Reject events that fail trigger matching
   bool isLLcc = lep1_coneCorrPt < 25. and lep2_coneCorrPt < 25.;
   if (gconf.year == 2016) {
       if (ht < 300 && hyp_type != 0){
@@ -1834,13 +1903,19 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // for applying btagging SFs, using Method 1a from the twiki below:
   //   https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods#1a_Event_reweighting_using_scale
   //   https://twiki.cern.ch/twiki/pub/CMS/BTagSFMethods/Method1aExampleCode_CSVM.cc.txt
+  // Moved from additive to multiplicative uncertainties and split heavy/light by stealing from
+  // https://github.com/cmstas/MT2Analysis/blob/master/babymaker/ScanChain.cc#L2235
   jet_results = SSJetsCalculator(jetCorr, 1, 0, 1);
-  for (int reader_id=1; reader_id<=4; reader_id++) { // Loop over each light flavor id file
+  for (int reader_id=1; reader_id<=4; reader_id++) { // Loop over each id file
     float btagprob_data = 1.;
-    float btagprob_err_heavy_UP = 0.;
-    float btagprob_err_heavy_DN = 0.;
-    float btagprob_err_light_UP = 0.;
-    float btagprob_err_light_DN = 0.;
+    // float btagprob_err_heavy_UP = 0.;
+    // float btagprob_err_heavy_DN = 0.;
+    // float btagprob_err_light_UP = 0.;
+    // float btagprob_err_light_DN = 0.;
+    float btagprob_err_heavy_UP = 1.;
+    float btagprob_err_heavy_DN = 1.;
+    float btagprob_err_light_UP = 1.;
+    float btagprob_err_light_DN = 1.;
     float btagprob_mc = 1.;
     for (unsigned int i = 0; i < jet_results.first.size(); i++) {
        if (is_real_data) continue;
@@ -1913,31 +1988,48 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
        if (jet_results.first.at(i).isBtag()) {
          btagprob_data *= weight_cent * eff;
          btagprob_mc *= eff;
-         float abserr_UP = weight_UP - weight_cent;
-         float abserr_DN = weight_cent - weight_DN;
+         // float abserr_UP = weight_UP - weight_cent;
+         // float abserr_DN = weight_cent - weight_DN;
          if (flavor == BTagEntry::FLAV_UDSG) {
-           btagprob_err_light_UP += abserr_UP/weight_cent;
-           btagprob_err_light_DN += abserr_DN/weight_cent;
+             btagprob_err_light_UP *= weight_UP * eff;
+             btagprob_err_light_DN *= weight_DN * eff;
+             btagprob_err_heavy_UP *= weight_cent * eff;
+             btagprob_err_heavy_DN *= weight_cent * eff;
+           // btagprob_err_light_UP += abserr_UP/weight_cent;
+           // btagprob_err_light_DN += abserr_DN/weight_cent;
          }
          else {
-           btagprob_err_heavy_UP += abserr_UP/weight_cent;
-           btagprob_err_heavy_DN += abserr_DN/weight_cent;
+             btagprob_err_light_UP *= weight_cent * eff;
+             btagprob_err_light_DN *= weight_cent * eff;
+             btagprob_err_heavy_UP *= weight_UP * eff;
+             btagprob_err_heavy_DN *= weight_DN * eff;
+           // btagprob_err_heavy_UP += abserr_UP/weight_cent;
+           // btagprob_err_heavy_DN += abserr_DN/weight_cent;
          }
        }
        else {
          btagprob_data *= (1. - weight_cent * eff);
          btagprob_mc *= (1. - eff);
-         float abserr_UP = weight_UP - weight_cent;
-         float abserr_DN = weight_cent - weight_DN;
+         // float abserr_UP = weight_UP - weight_cent;
+         // float abserr_DN = weight_cent - weight_DN;
          if (flavor == BTagEntry::FLAV_UDSG) {
-           btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-           btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+           btagprob_err_light_UP *= (1. - weight_UP * eff);
+           btagprob_err_light_DN *= (1. - weight_DN * eff);
+           btagprob_err_heavy_UP *= (1. - weight_cent * eff);
+           btagprob_err_heavy_DN *= (1. - weight_cent * eff);
+           // btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+           // btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
          }
          else {
-           btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-           btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
+           btagprob_err_light_UP *= (1. - weight_cent * eff);
+           btagprob_err_light_DN *= (1. - weight_cent * eff);
+           btagprob_err_heavy_UP *= (1. - weight_UP * eff);
+           btagprob_err_heavy_DN *= (1. - weight_DN * eff);
+           // btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
+           // btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
          }
        }
+       // std::cout <<  " i: " << i <<  " jet_results.first.at(i).isBtag(): " << jet_results.first.at(i).isBtag() <<  " weight_cent: " << weight_cent <<  " eff: " << eff <<  " weight_UP: " << weight_UP <<  " weight_DN: " << weight_DN <<  " btagprob_err_heavy_UP: " << btagprob_err_heavy_UP <<  std::endl;
 
        if (verbose) {
            cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
@@ -1948,48 +2040,108 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     if (gconf.year == 2016) {
         if (reader_id == 1) {
             weight_btagsf1 = btagprob_data / btagprob_mc;
-            weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-            weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
+            weight_btagsf1_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf1_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf1_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf1_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf1_UP = sqrt(pow(weight_btagsf1_heavy_UP,2)+pow(weight_btagsf1_light_UP,2));
+            // weight_btagsf1_DN = sqrt(pow(weight_btagsf1_heavy_DN,2)+pow(weight_btagsf1_light_DN,2));
+            // weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
+            // weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
         } else if (reader_id == 2) {
             weight_btagsf2 = btagprob_data / btagprob_mc;
-            weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-            weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
+            weight_btagsf2_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf2_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf2_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf2_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf2_UP = sqrt(pow(weight_btagsf2_heavy_UP,2)+pow(weight_btagsf2_light_UP,2));
+            // weight_btagsf2_DN = sqrt(pow(weight_btagsf2_heavy_DN,2)+pow(weight_btagsf2_light_DN,2));
+            // weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
+            // weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
         }
     } else if (gconf.year == 2017) {
         if (reader_id == 1) {
             weight_btagsf1 = btagprob_data / btagprob_mc;
-            weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-            weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
+            weight_btagsf1_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf1_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf1_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf1_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf1_UP = sqrt(pow(weight_btagsf1_heavy_UP,2)+pow(weight_btagsf1_light_UP,2));
+            // weight_btagsf1_DN = sqrt(pow(weight_btagsf1_heavy_DN,2)+pow(weight_btagsf1_light_DN,2));
+            // weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
+            // weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
         } else if (reader_id == 2) {
             weight_btagsf2 = btagprob_data / btagprob_mc;
-            weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-            weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
+            weight_btagsf2_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf2_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf2_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf2_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf2_UP = sqrt(pow(weight_btagsf2_heavy_UP,2)+pow(weight_btagsf2_light_UP,2));
+            // weight_btagsf2_DN = sqrt(pow(weight_btagsf2_heavy_DN,2)+pow(weight_btagsf2_light_DN,2));
+            // weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
+            // weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
         } else if (reader_id == 3) {
             weight_btagsf3 = btagprob_data / btagprob_mc;
-            weight_btagsf3_UP = weight_btagsf3 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf3);
-            weight_btagsf3_DN = weight_btagsf3 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf3);
+            weight_btagsf3_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf3_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf3_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf3_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf3_UP = sqrt(pow(weight_btagsf3_heavy_UP,2)+pow(weight_btagsf3_light_UP,2));
+            // weight_btagsf3_DN = sqrt(pow(weight_btagsf3_heavy_DN,2)+pow(weight_btagsf3_light_DN,2));
+            // weight_btagsf3_UP = weight_btagsf3 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf3);
+            // weight_btagsf3_DN = weight_btagsf3 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf3);
         } else if (reader_id == 4) {
             weight_btagsf4 = btagprob_data / btagprob_mc;
-            weight_btagsf4_UP = weight_btagsf4 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf4);
-            weight_btagsf4_DN = weight_btagsf4 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf4);
+            weight_btagsf4_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf4_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf4_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf4_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf4_UP = sqrt(pow(weight_btagsf4_heavy_UP,2)+pow(weight_btagsf4_light_UP,2));
+            // weight_btagsf4_DN = sqrt(pow(weight_btagsf4_heavy_DN,2)+pow(weight_btagsf4_light_DN,2));
+            // weight_btagsf4_UP = weight_btagsf4 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf4);
+            // weight_btagsf4_DN = weight_btagsf4 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf4);
         }
     } else if (gconf.year == 2018) {
         if (reader_id == 1) {
             weight_btagsf1 = btagprob_data / btagprob_mc;
-            weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-            weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
+            weight_btagsf1_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf1_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf1_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf1_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf1_UP = sqrt(pow(weight_btagsf1_heavy_UP,2)+pow(weight_btagsf1_light_UP,2));
+            // weight_btagsf1_DN = sqrt(pow(weight_btagsf1_heavy_DN,2)+pow(weight_btagsf1_light_DN,2));
+            // weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
+            // weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
         } else if (reader_id == 2) {
             weight_btagsf2 = btagprob_data / btagprob_mc;
-            weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-            weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
+            weight_btagsf2_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf2_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf2_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf2_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf2_UP = sqrt(pow(weight_btagsf2_heavy_UP,2)+pow(weight_btagsf2_light_UP,2));
+            // weight_btagsf2_DN = sqrt(pow(weight_btagsf2_heavy_DN,2)+pow(weight_btagsf2_light_DN,2));
+            // weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
+            // weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
         } else if (reader_id == 3) {
             weight_btagsf3 = btagprob_data / btagprob_mc;
-            weight_btagsf3_UP = weight_btagsf3 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf3);
-            weight_btagsf3_DN = weight_btagsf3 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf3);
+            weight_btagsf3_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf3_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf3_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf3_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf3_UP = sqrt(pow(weight_btagsf3_heavy_UP,2)+pow(weight_btagsf3_light_UP,2));
+            // weight_btagsf3_DN = sqrt(pow(weight_btagsf3_heavy_DN,2)+pow(weight_btagsf3_light_DN,2));
+            // weight_btagsf3_UP = weight_btagsf3 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf3);
+            // weight_btagsf3_DN = weight_btagsf3 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf3);
         } else if (reader_id == 4) {
             weight_btagsf4 = btagprob_data / btagprob_mc;
-            weight_btagsf4_UP = weight_btagsf4 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf4);
-            weight_btagsf4_DN = weight_btagsf4 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf4);
+            weight_btagsf4_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+            weight_btagsf4_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+            weight_btagsf4_light_UP = btagprob_err_light_UP / btagprob_mc;
+            weight_btagsf4_light_DN = btagprob_err_light_DN / btagprob_mc;
+            // weight_btagsf4_UP = sqrt(pow(weight_btagsf4_heavy_UP,2)+pow(weight_btagsf4_light_UP,2));
+            // weight_btagsf4_DN = sqrt(pow(weight_btagsf4_heavy_DN,2)+pow(weight_btagsf4_light_DN,2));
+            // weight_btagsf4_UP = weight_btagsf4 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf4);
+            // weight_btagsf4_DN = weight_btagsf4 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf4);
         }
     }
   }
@@ -2004,12 +2156,20 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       if (rand < 0.55) {
           // B-F is 55% of the lumi
           weight_btagsf =    weight_btagsf1;
-          weight_btagsf_UP = weight_btagsf1_UP;
-          weight_btagsf_DN = weight_btagsf1_DN;
+          // weight_btagsf_UP = weight_btagsf1_UP;
+          // weight_btagsf_DN = weight_btagsf1_DN;
+          weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
+          weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
+          weight_btagsf_light_UP = weight_btagsf1_light_UP;
+          weight_btagsf_light_DN = weight_btagsf1_light_DN;
       } else {
           weight_btagsf =    weight_btagsf2;
-          weight_btagsf_UP = weight_btagsf2_UP;
-          weight_btagsf_DN = weight_btagsf2_DN;
+          // weight_btagsf_UP = weight_btagsf2_UP;
+          // weight_btagsf_DN = weight_btagsf2_DN;
+          weight_btagsf_heavy_UP = weight_btagsf2_heavy_UP;
+          weight_btagsf_heavy_DN = weight_btagsf2_heavy_DN;
+          weight_btagsf_light_UP = weight_btagsf2_light_UP;
+          weight_btagsf_light_DN = weight_btagsf2_light_DN;
       }
   }
 
@@ -2027,26 +2187,42 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       // 1,2,3,4 are period1,period2,period3, or inclusive
       if (rand < 0.1154) {
           weight_btagsf =    weight_btagsf1;
-          weight_btagsf_UP = weight_btagsf1_UP;
-          weight_btagsf_DN = weight_btagsf1_DN;
+          // weight_btagsf_UP = weight_btagsf1_UP;
+          // weight_btagsf_DN = weight_btagsf1_DN;
+          weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
+          weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
+          weight_btagsf_light_UP = weight_btagsf1_light_UP;
+          weight_btagsf_light_DN = weight_btagsf1_light_DN;
       } else if (rand < 0.6385) {
           weight_btagsf =    weight_btagsf2;
-          weight_btagsf_UP = weight_btagsf2_UP;
-          weight_btagsf_DN = weight_btagsf2_DN;
+          // weight_btagsf_UP = weight_btagsf2_UP;
+          // weight_btagsf_DN = weight_btagsf2_DN;
+          weight_btagsf_heavy_UP = weight_btagsf2_heavy_UP;
+          weight_btagsf_heavy_DN = weight_btagsf2_heavy_DN;
+          weight_btagsf_light_UP = weight_btagsf2_light_UP;
+          weight_btagsf_light_DN = weight_btagsf2_light_DN;
       } else {
           weight_btagsf =    weight_btagsf3;
-          weight_btagsf_UP = weight_btagsf3_UP;
-          weight_btagsf_DN = weight_btagsf3_DN;
+          // weight_btagsf_UP = weight_btagsf3_UP;
+          // weight_btagsf_DN = weight_btagsf3_DN;
+          weight_btagsf_heavy_UP = weight_btagsf3_heavy_UP;
+          weight_btagsf_heavy_DN = weight_btagsf3_heavy_DN;
+          weight_btagsf_light_UP = weight_btagsf3_light_UP;
+          weight_btagsf_light_DN = weight_btagsf3_light_DN;
       }
   }
 
   if (gconf.year == 2018) {
       weight_btagsf =    weight_btagsf1;
-      weight_btagsf_UP = weight_btagsf1_UP;
-      weight_btagsf_DN = weight_btagsf1_DN;
+      // weight_btagsf_UP = weight_btagsf1_UP;
+      // weight_btagsf_DN = weight_btagsf1_DN;
+      weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
+      weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
+      weight_btagsf_light_UP = weight_btagsf1_light_UP;
+      weight_btagsf_light_DN = weight_btagsf1_light_DN;
   }
 
-  if (false) {
+  if (true) {
       weight_btagsf_iter_central = 1.;
       weight_btagsf_iter_down_cferr1 = 1.;
       weight_btagsf_iter_down_cferr2 = 1.;
@@ -2095,10 +2271,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               weight_btagsf_iter_up_cferr2 *= btcr_test->eval_auto_bounds("up_cferr2", flavor, jet_eta, jet_pt, disc);
           }
           else if (flavor == BTagEntry::FLAV_UDSG) {
-              weight_btagsf_iter_down_lfstats1 *= btcr_test->eval_auto_bounds("down_lfstats1", flavor, jet_eta, jet_pt, disc);
-              weight_btagsf_iter_down_lfstats2 *= btcr_test->eval_auto_bounds("down_lfstats2", flavor, jet_eta, jet_pt, disc);
-              weight_btagsf_iter_up_lfstats1 *= btcr_test->eval_auto_bounds("up_lfstats1", flavor, jet_eta, jet_pt, disc);
-              weight_btagsf_iter_up_lfstats2 *= btcr_test->eval_auto_bounds("up_lfstats2", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_down_lfstats1 *= btcr_test->eval_auto_bounds("down_lfstats1", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_down_lfstats2 *= btcr_test->eval_auto_bounds("down_lfstats2", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_up_lfstats1 *= btcr_test->eval_auto_bounds("up_lfstats1", flavor, jet_eta, jet_pt, disc);
+              // weight_btagsf_iter_up_lfstats2 *= btcr_test->eval_auto_bounds("up_lfstats2", flavor, jet_eta, jet_pt, disc);
               weight_btagsf_iter_down_hf *= btcr_test->eval_auto_bounds("down_hf", flavor, jet_eta, jet_pt, disc);
               weight_btagsf_iter_up_hf *= btcr_test->eval_auto_bounds("up_hf", flavor, jet_eta, jet_pt, disc);
               weight_btagsf_iter_down_jes *= btcr_test->eval_auto_bounds("down_jes", flavor, jet_eta, jet_pt, disc);
@@ -2455,15 +2631,17 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           fired_trigger = true;
       }
   } else if (gconf.year == 2017) {
-      if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
-              passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
-      if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")))              (triggers |= 1<<3);
-      if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")))        (triggers |= 1<<6);
+      if (isFastsim == 0) {
+          if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
+                  passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
+          if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v")))              (triggers |= 1<<3);
+          if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")))        (triggers |= 1<<6);
 
-      if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_v")) ||
-              passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
-      if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v")))    (triggers |= 1<<5);
-      if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
+          if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_v")) ||
+                  passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
+          if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v")))    (triggers |= 1<<5);
+          if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
+      }
       fired_trigger = false;
       if (triggers != 0) {
           // Pure dilepton triggers for all HT
@@ -2482,6 +2660,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               if ( hyp_type==3 && (triggers & 1<<5)==(1<<5) ) fired_trigger_ss = true;
               if ( (hyp_type==1 || hyp_type==2) && (triggers & 1<<0)==(1<<0) ) fired_trigger_ss = true;
           }
+      }
+      if (isFastsim > 0) {
+          // There's no trigger emulation in 80X fastsim, but we'll just set the branch to 1 for convenience
+          fired_trigger = true;
       }
   } else if (gconf.year == 2018) {
       if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
@@ -2826,6 +3008,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   bdt_disc_jec_dn = get_prediction( bdt_jec_dn_nbtags, bdt_jec_dn_njets, bdt_jec_dn_met, bdt_ptl2, bdt_jec_dn_nlb40, bdt_jec_dn_ntb40, bdt_nleps, bdt_jec_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
   bdt_disc_jer_dn = get_prediction( bdt_jer_dn_nbtags, bdt_jer_dn_njets, bdt_jer_dn_met, bdt_ptl2, bdt_jer_dn_nlb40, bdt_jer_dn_ntb40, bdt_nleps, bdt_jer_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
 
+  bdt_run2_disc = bdtrun2::get_prediction( bdt_nbtags, bdt_njets, bdt_met, bdt_ptl2, bdt_nlb40, bdt_ntb40, bdt_nleps, bdt_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_run2_disc_jec_up = bdtrun2::get_prediction( bdt_jec_up_nbtags, bdt_jec_up_njets, bdt_jec_up_met, bdt_ptl2, bdt_jec_up_nlb40, bdt_jec_up_ntb40, bdt_nleps, bdt_jec_up_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_run2_disc_jer_up = bdtrun2::get_prediction( bdt_jer_up_nbtags, bdt_jer_up_njets, bdt_jer_up_met, bdt_ptl2, bdt_jer_up_nlb40, bdt_jer_up_ntb40, bdt_nleps, bdt_jer_up_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_run2_disc_jec_dn = bdtrun2::get_prediction( bdt_jec_dn_nbtags, bdt_jec_dn_njets, bdt_jec_dn_met, bdt_ptl2, bdt_jec_dn_nlb40, bdt_jec_dn_ntb40, bdt_nleps, bdt_jec_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+  bdt_run2_disc_jer_dn = bdtrun2::get_prediction( bdt_jer_dn_nbtags, bdt_jer_dn_njets, bdt_jer_dn_met, bdt_ptl2, bdt_jer_dn_nlb40, bdt_jer_dn_ntb40, bdt_nleps, bdt_jer_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+
   yearlumi = getLumi(year);
 
   lep1_pt = lep1_p4.pt();
@@ -2850,6 +3038,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       weight_isrsf = 1.;
       if (filename.find("TTWJetsToLNu") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 1);
       if (filename.find("TTZToLL") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 2);
+      if (filename.find("TTJets") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 10);
+      if (filename.find("TT_TuneCUETP8M2T4_13TeV-powheg") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 10);
       weight = yearlumi * scale1fb * weight_lepsf * weight_triggersf * weight_pu * weight_btagsf * decayWSF * weight_isrsf;
   } else {
       weight = 1;

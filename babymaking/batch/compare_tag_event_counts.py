@@ -15,12 +15,19 @@ tags = [
 # "v3.08_all", # Good
 # "v3.10_all", # Good
 # "v3.11_all", # Good, with 52ifb 2018
-"v3.13_all", # Good, with 58ifb 2018
+# "v3.13_all", # Good, with 58ifb 2018
 # "v3.14_all",
 # "v3.15_all", #       with 58ifb 2018, latest prefiring recipe, latest JECs (v32 instead of v6)
 # "v3.17_all", #       with 58ifb 2018, latest prefiring recipe, v6 jecs
 # "v3.19_all", # Good. same as v17 with top tagger
-"v3.21", # Good. v32 jecs new MC, data -- 2017 stuff is bugged. so this is only good for 2018 :(
+
+# "v3.21", # Good. v32 jecs new MC, data -- 2017 stuff is bugged. so this is only good for 2018 :(
+# "v3.23", # Good. v32 jecs new MC, data -- 2017 stuff is bugged. so this is only good for 2018 :(
+# "v3.21_fix2017", # Good. v32 jecs new MC, data -- 2017 stuff is bugged. so this is only good for 2018 :(
+"v3.23", # Good. v32 jecs new MC, data -- 2017 stuff is bugged. so this is only good for 2018 :(
+
+"v3.24",
+
 ]
 
 d_names = {}

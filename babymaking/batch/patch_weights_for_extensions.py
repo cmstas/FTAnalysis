@@ -72,10 +72,10 @@ def patch_files(oldfnames):
 if __name__ == "__main__":
 
     patch_files([
-            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep0jet.root",
-            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep0jetext1.root",
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/TTdilep0jet.root",
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/TTdilep0jetext1.root",
             ])
     patch_files([
-            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep1jet.root",
-            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/TTdilep1jetext1.root",
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/TTdilep1jet.root",
+            "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/TTdilep1jetext1.root",
             ])
