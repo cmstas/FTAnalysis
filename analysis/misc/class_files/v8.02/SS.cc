@@ -1787,6 +1787,30 @@ void SSAG::Init(TTree *tree) {
 		weight_btagsf_UP_branch = tree->GetBranch("weight_btagsf_UP");
 		if (weight_btagsf_UP_branch) {weight_btagsf_UP_branch->SetAddress(&weight_btagsf_UP_);}
 	}
+
+  weight_btagsf_heavy_UP_branch = 0;
+  if (tree->GetBranch("weight_btagsf_heavy_UP") != 0) {
+    weight_btagsf_heavy_UP_branch = tree->GetBranch("weight_btagsf_heavy_UP");
+    if (weight_btagsf_heavy_UP_branch) { weight_btagsf_heavy_UP_branch->SetAddress(&weight_btagsf_heavy_UP_); }
+  }
+
+  weight_btagsf_heavy_DN_branch = 0;
+  if (tree->GetBranch("weight_btagsf_heavy_DN") != 0) {
+    weight_btagsf_heavy_DN_branch = tree->GetBranch("weight_btagsf_heavy_DN");
+    if (weight_btagsf_heavy_DN_branch) { weight_btagsf_heavy_DN_branch->SetAddress(&weight_btagsf_heavy_DN_); }
+  }
+
+  weight_btagsf_light_UP_branch = 0;
+  if (tree->GetBranch("weight_btagsf_light_UP") != 0) {
+    weight_btagsf_light_UP_branch = tree->GetBranch("weight_btagsf_light_UP");
+    if (weight_btagsf_light_UP_branch) { weight_btagsf_light_UP_branch->SetAddress(&weight_btagsf_light_UP_); }
+  }
+
+  weight_btagsf_light_DN_branch = 0;
+  if (tree->GetBranch("weight_btagsf_light_DN") != 0) {
+    weight_btagsf_light_DN_branch = tree->GetBranch("weight_btagsf_light_DN");
+    if (weight_btagsf_light_DN_branch) { weight_btagsf_light_DN_branch->SetAddress(&weight_btagsf_light_DN_); }
+  }
 	weight_btagsf_DN_branch = 0;
 	if (tree->GetBranch("weight_btagsf_DN") != 0) {
 		weight_btagsf_DN_branch = tree->GetBranch("weight_btagsf_DN");
@@ -2440,6 +2464,10 @@ void SSAG::GetEntry(unsigned int idx)
 		weight_btagsf_isLoaded = false;
 		weight_btagsf_UP_isLoaded = false;
 		weight_btagsf_DN_isLoaded = false;
+  weight_btagsf_heavy_UP_isLoaded = false;
+  weight_btagsf_heavy_DN_isLoaded = false;
+  weight_btagsf_light_UP_isLoaded = false;
+  weight_btagsf_light_DN_isLoaded = false;
 		weight_scale_UP_isLoaded = false;
 		weight_scale_DN_isLoaded = false;
 		weight_fsrvar_UP_isLoaded = false;
@@ -2849,6 +2877,10 @@ void SSAG::LoadAllBranches()
 	if (weight_btagsf_branch != 0) weight_btagsf();
 	if (weight_btagsf_UP_branch != 0) weight_btagsf_UP();
 	if (weight_btagsf_DN_branch != 0) weight_btagsf_DN();
+  if (weight_btagsf_heavy_UP_branch != 0) weight_btagsf_heavy_UP();
+  if (weight_btagsf_heavy_DN_branch != 0) weight_btagsf_heavy_DN();
+  if (weight_btagsf_light_UP_branch != 0) weight_btagsf_light_UP();
+  if (weight_btagsf_light_DN_branch != 0) weight_btagsf_light_DN();
 	if (weight_scale_UP_branch != 0) weight_scale_UP();
 	if (weight_scale_DN_branch != 0) weight_scale_DN();
 	if (weight_fsrvar_UP_branch != 0) weight_fsrvar_UP();
@@ -7347,6 +7379,58 @@ const bool &SSAG::fired_trigger_ss() {
 		}
 		return weight_btagsf_UP_;
 	}
+
+const float &SSAG::weight_btagsf_heavy_UP() {
+  if (not weight_btagsf_heavy_UP_isLoaded) {
+    if (weight_btagsf_heavy_UP_branch != 0) {
+      weight_btagsf_heavy_UP_branch->GetEntry(index);
+    } else {
+      printf("branch weight_btagsf_heavy_UP_branch does not exist!\n");
+      exit(1);
+    }
+    weight_btagsf_heavy_UP_isLoaded = true;
+  }
+  return weight_btagsf_heavy_UP_;
+}
+
+const float &SSAG::weight_btagsf_heavy_DN() {
+  if (not weight_btagsf_heavy_DN_isLoaded) {
+    if (weight_btagsf_heavy_DN_branch != 0) {
+      weight_btagsf_heavy_DN_branch->GetEntry(index);
+    } else {
+      printf("branch weight_btagsf_heavy_DN_branch does not exist!\n");
+      exit(1);
+    }
+    weight_btagsf_heavy_DN_isLoaded = true;
+  }
+  return weight_btagsf_heavy_DN_;
+}
+
+const float &SSAG::weight_btagsf_light_UP() {
+  if (not weight_btagsf_light_UP_isLoaded) {
+    if (weight_btagsf_light_UP_branch != 0) {
+      weight_btagsf_light_UP_branch->GetEntry(index);
+    } else {
+      printf("branch weight_btagsf_light_UP_branch does not exist!\n");
+      exit(1);
+    }
+    weight_btagsf_light_UP_isLoaded = true;
+  }
+  return weight_btagsf_light_UP_;
+}
+
+const float &SSAG::weight_btagsf_light_DN() {
+  if (not weight_btagsf_light_DN_isLoaded) {
+    if (weight_btagsf_light_DN_branch != 0) {
+      weight_btagsf_light_DN_branch->GetEntry(index);
+    } else {
+      printf("branch weight_btagsf_light_DN_branch does not exist!\n");
+      exit(1);
+    }
+    weight_btagsf_light_DN_isLoaded = true;
+  }
+  return weight_btagsf_light_DN_;
+}
 	const float &SSAG::weight_btagsf_DN()
 	{
 		if (not weight_btagsf_DN_isLoaded) {
@@ -8533,6 +8617,10 @@ namespace ss {
 	const float &weight_btagsf() { return samesign.weight_btagsf(); }
 	const float &weight_btagsf_UP() { return samesign.weight_btagsf_UP(); }
 	const float &weight_btagsf_DN() { return samesign.weight_btagsf_DN(); }
+  const float &weight_btagsf_heavy_UP() { return samesign.weight_btagsf_heavy_UP(); }
+  const float &weight_btagsf_heavy_DN() { return samesign.weight_btagsf_heavy_DN(); }
+  const float &weight_btagsf_light_UP() { return samesign.weight_btagsf_light_UP(); }
+  const float &weight_btagsf_light_DN() { return samesign.weight_btagsf_light_DN(); }
 	const float &weight_scale_UP() { return samesign.weight_scale_UP(); }
 	const float &weight_scale_DN() { return samesign.weight_scale_DN(); }
 	const float &weight_fsrvar_UP() { return samesign.weight_fsrvar_UP(); }

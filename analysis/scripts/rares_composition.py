@@ -1,8 +1,8 @@
 import sys
+import numpy as np
 sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
 
 import os
-import numpy as np
 import pandas as pd
 from mytqdm import tqdm
 
@@ -60,13 +60,13 @@ def transform_label(x):
 
 for which,info in zip(["multitop","multiboson"],[info_multitop,info_multiboson]):
     hists = []
-    bins = np.arange(0.5,17.5,1)
+    bins = np.arange(0.5,17.5-2,1)
     for stag,color in info:
         tmp = []
-        for year in [2016,2017]:
-            fname_patt = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_%i/{}.root" % year
+        for year in [2016,2017,2018]:
+            fname_patt = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_%i/{}.root" % year
             try:
-                arr = rn.root2array(fname_patt.format(stag),"t",branches=["sr-2", "{}*scale1fb".format({2016:35.9,2017:41.5}[year])],
+                arr = rn.root2array(fname_patt.format(stag),"t",branches=["sr-2", "{}*scale1fb".format({2016:35.9,2017:41.5,2018:58.8}[year])],
                     selection="hyp_class==3 && br && fired_trigger && passes_met_filters && sr>2")
                 arr.dtype.names = ( "sr-2", "weight",)
                 label = transform_label(stag)
@@ -82,11 +82,11 @@ for which,info in zip(["multitop","multiboson"],[info_multitop,info_multiboson])
     plot_stack(
             bgs=hists[::-1],
             filename=fname,
-            logy=False,
+            do_log=False,
             # xlabel="SR",
             ylabel="Events",
             title="{}".format(which),
-            lumi = 35.9+41.5,
+            lumi = 35.9+41.5+58.8,
             cms_type = "Preliminary",
             do_bkg_syst=True,
             xticks = ["SR{}".format(i) for i in range(1,20)],

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull
 
 from matplottery.plotter import set_defaults
-set_defaults()
+# set_defaults()
 
 srs = {2: {}, 3:{}}
 
@@ -26,7 +26,7 @@ triplets = list(itertools.product(nlepsall,nbs,njs))
 d_points = {2: {}, 3: {}}
 r.gROOT.ProcessLine(".L ../misc/signal_regions.h ")
 for nleps,nbtags,njets in triplets:
-    sr = r.signalRegionTest(njets,nbtags, 100.0, 500.0, 100, 11, 11, 30, 30, 30, nleps, False)
+    sr = r.signal_region_ft(njets,nbtags, 100.0, 500.0, 100, 11, 11, 30, 30, 30, nleps, False)
     if sr < 0: continue
     if sr not in d_points[nleps]: d_points[nleps][sr] = []
     d_points[nleps][sr].append((nbtags+0.5,njets+0.5))

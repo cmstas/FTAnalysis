@@ -1,26 +1,30 @@
 {
 
-    TFile *f_central = TFile::Open("MyDataPileupHistogram.root");
+    TString basedir = "./";
+    // TString basedir = "./2016/";
+
+    TFile *f_central = TFile::Open(basedir+"/MyDataPileupHistogram.root");
     TH1F* vtx_central = (TH1F*) f_central->Get("pileup");
     vtx_central->Sumw2();
     vtx_central->Scale(1.0/vtx_central->Integral());
     std::cout << vtx_central->Integral() << std::endl;
 
     // up
-    TFile *f_up = TFile::Open("MyDataPileupHistogramUp.root");
+    TFile *f_up = TFile::Open(basedir+"/MyDataPileupHistogramUp.root");
     TH1F* vtx_up = (TH1F*) f_up->Get("pileup");
     vtx_up->Scale(1.0/vtx_up->Integral());
     std::cout << vtx_up->Integral() << std::endl;
 
     // down
-    TFile *f_down = TFile::Open("MyDataPileupHistogramDown.root");
+    TFile *f_down = TFile::Open(basedir+"/MyDataPileupHistogramDown.root");
     TH1F* vtx_down = (TH1F*) f_down->Get("pileup");
     vtx_down->Scale(1.0/vtx_down->Integral());
     std::cout << vtx_down->Integral() << std::endl;
 
     // MC
-    // TFile *f_mc = TFile::Open("truenumint_mc2017.root");
-    TFile *f_mc = TFile::Open("truenumint_mc2018.root");
+    // TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2017.root");
+    TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2018.root");
+    // TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2016.root");
     TH1F* vtx_mc = (TH1F*) f_mc->Get("hnumints_true");
     vtx_mc->Sumw2();
     vtx_mc->Scale(1.0/vtx_mc->Integral());

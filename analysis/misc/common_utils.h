@@ -1,9 +1,16 @@
 #ifndef _commonUtils_h_
 #define _commonUtils_h_
 
+// needed inside the below includes
+enum ana_t { SSANA, FTANA };
+
 #include "year_2016/all.h"
 #include "year_2017/all.h"
 #include "year_2018/all.h"
+namespace yrun2 {
+#include "year_run2/trigeffandsf.h"
+}
+
 
 float getTruePUw(int year, int nvtx, int which=0) { 
     // which = 0, 1, -1 for nominal, up, down
@@ -56,11 +63,11 @@ float leptonScaleFactorError(int year, int id, float pt, float eta, float ht) {
     else return 0.;
 }
 
-float triggerScaleFactor(int year, int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) { 
-    if (year == 2016) return y2016::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
-    else if (year == 2017) return y2017::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
-    else if (year == 2018) return y2018::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
-    else return 0.;
+float triggerScaleFactor(int year, int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht, ana_t ana, int syst=0) { 
+    // 0 - central, +1 and -1 for up and down variations
+    // For 3 lepton events, don't scale, and take a 2% uncertainty
+    if (ana == FTANA and year == 2016) return y2016::triggerScaleFactor(pdgId1, pdgId2, pt1, pt2, eta1, eta2, ht);
+    return yrun2::TriggerWeight(pdgId1, pt1, eta1, pdgId2, pt2, eta2, ht, year, true, syst);
 }
 
 float fastsim_triggerScaleFactor(int year, int id1, int id2, float pt1, float pt2, float eta1, float eta2, float ht) {
@@ -85,37 +92,37 @@ float flipRateError(int year, float pt, float eta) {
     else return 0.;
 }
 
-float fakeRate(int year, int id, float pt, float eta, float ht) { 
-    if (year == 2016) return y2016::fakeRate(id, pt, eta, ht);
-    else if (year == 2017) return y2017::fakeRate(id, pt, eta, ht);
-    else if (year == 2018) return y2018::fakeRate(id, pt, eta, ht);
+float fakeRate(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (year == 2016) return (newbins ? y2016::newbins::fakeRate(id, pt, eta, ht, ana, isLL) : y2016::fakeRate(id, pt, eta, ht, ana, isLL));
+    else if (year == 2017) return (allpt ? y2017::allpt::fakeRate(id, pt, eta, ht, isLL) : y2017::fakeRate(id, pt, eta, ht, isLL));
+    else if (year == 2018) return (allpt ? y2018::allpt::fakeRate(id, pt, eta, ht, isLL) : y2018::fakeRate(id, pt, eta, ht, isLL));
     else return 0.;
 }
-float fakeRateError(int year, int id, float pt, float eta, float ht) { 
-    if (year == 2016) return y2016::fakeRateError(id, pt, eta, ht);
-    else if (year == 2017) return y2017::fakeRateError(id, pt, eta, ht);
-    else if (year == 2018) return y2018::fakeRateError(id, pt, eta, ht);
-    else return 0.;
-}
-
-float alternativeFakeRate(int year, int id, float pt, float eta, float ht) { 
-    if (year == 2016) return y2016::alternativeFakeRate(id, pt, eta, ht);
-    else if (year == 2017) return y2017::alternativeFakeRate(id, pt, eta, ht);
-    else if (year == 2018) return y2018::alternativeFakeRate(id, pt, eta, ht);
+float fakeRateError(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (year == 2016) return (newbins ? y2016::newbins::fakeRateError(id, pt, eta, ht, ana, isLL) : y2016::fakeRateError(id, pt, eta, ht, ana, isLL));
+    else if (year == 2017) return (allpt ? y2017::allpt::fakeRateError(id, pt, eta, ht, isLL) : y2017::fakeRateError(id, pt, eta, ht, isLL));
+    else if (year == 2018) return (allpt ? y2018::allpt::fakeRateError(id, pt, eta, ht, isLL) : y2018::fakeRateError(id, pt, eta, ht, isLL));
     else return 0.;
 }
 
-float qcdMCFakeRate(int year, int id, float pt, float eta, float ht) { 
-    if (year == 2016) return y2016::qcdMCFakeRate(id, pt, eta, ht);
-    else if (year == 2017) return y2017::qcdMCFakeRate(id, pt, eta, ht);
-    else if (year == 2018) return y2018::qcdMCFakeRate(id, pt, eta, ht);
+float alternativeFakeRate(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (year == 2016) return (newbins ? y2016::newbins::alternativeFakeRate(id, pt, eta, ht, ana, isLL) : y2016::alternativeFakeRate(id, pt, eta, ht, ana, isLL));
+    else if (year == 2017) return (allpt ? y2017::allpt::alternativeFakeRate(id, pt, eta, ht, isLL) : y2017::alternativeFakeRate(id, pt, eta, ht, isLL));
+    else if (year == 2018) return (allpt ? y2018::allpt::alternativeFakeRate(id, pt, eta, ht, isLL) : y2018::alternativeFakeRate(id, pt, eta, ht, isLL));
     else return 0.;
 }
 
-float qcdMCFakeRateError(int year, int id, float pt, float eta, float ht) { 
-    if (year == 2016) return y2016::qcdMCFakeRateError(id, pt, eta, ht);
-    else if (year == 2017) return y2017::qcdMCFakeRateError(id, pt, eta, ht);
-    else if (year == 2018) return y2018::qcdMCFakeRateError(id, pt, eta, ht);
+float qcdMCFakeRate(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (year == 2016) return (newbins ? y2016::newbins::qcdMCFakeRate(id, pt, eta, ht, ana, isLL) : y2016::qcdMCFakeRate(id, pt, eta, ht, ana, isLL));
+    else if (year == 2017) return (allpt ? y2017::allpt::qcdMCFakeRate(id, pt, eta, ht, isLL) : y2017::qcdMCFakeRate(id, pt, eta, ht, isLL));
+    else if (year == 2018) return (allpt ? y2018::allpt::qcdMCFakeRate(id, pt, eta, ht, isLL) : y2018::qcdMCFakeRate(id, pt, eta, ht, isLL));
+    else return 0.;
+}
+
+float qcdMCFakeRateError(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (year == 2016) return (newbins ? y2016::newbins::qcdMCFakeRateError(id, pt, eta, ht, ana, isLL) : y2016::qcdMCFakeRateError(id, pt, eta, ht, ana, isLL));
+    else if (year == 2017) return (allpt ? y2017::allpt::qcdMCFakeRateError(id, pt, eta, ht, isLL) : y2017::qcdMCFakeRateError(id, pt, eta, ht, isLL));
+    else if (year == 2018) return (allpt ? y2018::allpt::qcdMCFakeRateError(id, pt, eta, ht, isLL) : y2018::qcdMCFakeRateError(id, pt, eta, ht, isLL));
     else return 0.;
 }
 

@@ -1,8 +1,8 @@
 import sys
+import numpy as np
 sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
 
 import os
-import numpy as np
 import pandas as pd
 from mytqdm import tqdm
 
@@ -48,7 +48,7 @@ def filter_arrs(arrs,sel):
 # print weights
 # print arrs
 
-fname_in = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2016/TTWnlo.root"
+fname_in = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/TTWnlo.root"
 arr2016 = rn.root2array(fname_in,"t", branches=[
     "nbtags",
     "Sum$(abs(btags_flavor)==5)",
@@ -66,7 +66,7 @@ arr2016.dtype.names = (
         "weight",
         )
 
-fname_in = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2017/TTWnlo.root"
+fname_in = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/TTWnlo.root"
 arr2017 = rn.root2array(fname_in,"t", branches=[
     "nbtags",
     "Sum$(abs(btags_flavor)==5)",
@@ -83,7 +83,26 @@ arr2017.dtype.names = (
         "ntruelight",
         "weight",
         )
-arr = np.hstack([arr2016,arr2017])
+
+fname_in = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/TTWnlo.root"
+arr2018 = rn.root2array(fname_in,"t", branches=[
+    "nbtags",
+    "Sum$(abs(btags_flavor)==5)",
+    "Sum$(abs(btags_flavor)==4)",
+    "nbtags-(Sum$(abs(btags_flavor)==5)+Sum$(abs(btags_flavor)==4))",
+    "(41.5)*scale1fb",
+    ],
+    selection="hyp_class==3 && br && fired_trigger && passes_met_filters",
+    )
+arr2018.dtype.names = (
+        "nbtags",
+        "ntrueb",
+        "ntruec",
+        "ntruelight",
+        "weight",
+        )
+
+arr = np.hstack([arr2016,arr2017,arr2018])
 
 # sel = (arr["ntrueb"]==2)
 # sel = (arr["ntruelight"]==2)
@@ -124,11 +143,11 @@ for color,(ntb,ntc,ntl) in zip(colors,[
 plot_stack(
         bgs=hists[::-1],
         filename="plots_btag/ttw_btag_composition.pdf",
-        logy=True,
+        do_log=True,
         xlabel=r"$\mathrm{N_b}$",
         ylabel="Events",
         cms_type = "Preliminary",
-        lumi = 35.9+41.5,
+        lumi = 35.9+41.5+58.8,
         xticks = range(2,5),
         mpl_xtick_params=dict(fontsize=14),
         )

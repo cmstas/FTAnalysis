@@ -102,6 +102,7 @@ class Runner(object):
                 char = ("\u"+hex(0x2800+reduce(lambda x,y:x|y,[1<<(x-1) for x in on],0))[2:]).decode("unicode-escape")
                 chars += char
             return u" "+color+chars+u"\033[0m"
+        return ""
 
     def run(self, print_callback=None):
         if not self.t0: 

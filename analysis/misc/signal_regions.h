@@ -28,6 +28,8 @@ region_t analysis_category_ss(int id1, int id2, float lep1pt, float lep2pt, floa
     // Want 25, 15/10, 15/10 (babymaker guarantees everything is above 15/10)
     // meaning >=1 of the 3 has to be >25 and >=2 have to be >20
     int numhigh = (lep1pt > 25.) + (lep2pt > 25.);
+
+    // New categories
     if ( nleps > 2
             and (numhigh>=1)
             // and ((lep1pt>25.)+(lep2pt>25.)+(lep3pt>25.))>=1
@@ -39,6 +41,12 @@ region_t analysis_category_ss(int id1, int id2, float lep1pt, float lep2pt, floa
     }
     if (numhigh == 1) return HighLow;
     return LowLow;
+
+    // // 2016 categories
+    // if (numhigh == 2) return HighHigh;
+    // if (numhigh == 1) return HighLow;
+    // return LowLow;
+
 }
 
 
@@ -51,7 +59,7 @@ bool passes_baseline_ss(int njets, int nbtags, float met, float ht, int id1, int
   return true;
 }
 
-int getNsrsLM() { return 16; }
+int getNsrsLM() { return 11; }
 int signal_region_lowmet(int njets, int nbtags, float met, float ht, float lep1pt, float lep2pt) {
     // pg 12 of https://indico.cern.ch/event/766192/contributions/3180522/attachments/1735903/2807690/20181019_RA5_LucienLo_draft.pdf
     if (!is_in_lowmet(lep1pt, lep2pt, ht, met)) return -1;
@@ -71,77 +79,67 @@ int signal_region_lowmet(int njets, int nbtags, float met, float ht, float lep1p
     }
     else if (ht < 1300.) {
         if (njets < 5) return 8;
-        else if (njets <= 6) return 9;
-        else return 10;
-    }
-    else if (ht < 1600.) {
-        if (njets < 5) return 11; // no stats? -- see pg 4 of https://indico.cern.ch/event/766192/contributions/3181844/attachments/1735995/2807861/20181017_RPV_LucienLo.pdf
-        else if (njets <= 6) return 12;
-        else return 13;
+        else return 9;
     }
     else {
-        if (njets < 5) return 14;
-        else if (njets <= 6) return 15;
-        else return 16;
+        if (njets < 5) return 10;
+        else return 11;
     }
     return -1;
 }
 
-int getNsrsML() { return 42; } // (16+7)*2
+int getNsrsML() { return 44; }
 int signal_region_multilepton(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, bool isClass6) {
     if (met < 50) return -1; 
     // pg 6 of https://arxiv.org/pdf/1710.09154.pdf
     // note mtmin is the mt of the lepton that doesnt' make the z if it's a class6 event
     // off z is 1-23; onz is 24-46
-    bool highmt = mt_min > 120.;
-    int z = (isClass6 ? 23 : 0);
-    if (met > 300) return (highmt ? 23+z : 16+z);
-    if (met > 150) {
-        if (ht > 600) return (highmt ? 22+z : 15+z);
-        if (nbtags == 0) {
-            if (ht < 400) return (highmt ? 18+z : 2+z);
-            if (ht > 400) return (highmt ? 20+z : 4+z);
+    int imt = mt_min > 120.;
+    bool onz = isClass6;
+    if (not onz) {
+        if (met > 300) return 20+imt;
+        if (ht > 600) {
+            if (met > 150) return 18+imt;
+            else return 16+imt;
         }
-        if (nbtags == 1) {
-            if (ht < 400) return 6+z;
-            if (ht > 400) return 8+z;
+        if (nbtags >= 3) return 15;
+        if (nbtags == 0 and ht < 400 and met < 150) return 1+imt;
+        if (nbtags == 0 and ht < 400 and met > 150) return 3+imt;
+        if (nbtags == 0 and ht > 400 and met < 150) return 5;
+        if (nbtags == 0 and ht > 400 and met > 150) return 6;
+        if (nbtags == 1 and ht < 400 and met < 150) return 7;
+        if (nbtags == 1 and ht < 400 and met > 150) return 8;
+        if (nbtags == 1 and ht > 400 and met < 150) return 9;
+        if (nbtags == 1 and ht > 400 and met > 150) return 10;
+        if (nbtags == 2 and ht < 400 and met < 150) return 11;
+        if (nbtags == 2 and ht < 400 and met > 150) return 12;
+        if (nbtags == 2 and ht > 400 and met < 150) return 13;
+        if (nbtags == 2 and ht > 400 and met > 150) return 14;
+    } else {
+        if (met > 300) return 43+imt;
+        if (ht > 600) {
+            if (met > 150) return 41+imt;
+            else return 39+imt;
         }
-        if (nbtags == 2) {
-            if (ht < 400) return 10+z;
-            if (ht > 400) return 12+z;
-        }
-        if (nbtags >= 3) {
-            return 13+z;
-        }
-    }
-    float minmet = 50;
-    if (isClass6 and (met < 150) and (nbtags <= 1) and (ht < 400)) {
-        // onZ SR1 or 5 have met>70 rather than >50
-        minmet += 20;
-    }
-    if (met > minmet) {
-        if (ht > 600) return (highmt ? 21+z : 14+z);
-        if (nbtags == 0) {
-            if (ht < 400) return (highmt ? 17+z : 1+z);
-            if (ht > 400) return (highmt ? 19+z : 3+z);
-        }
-        if (nbtags == 1) {
-            if (ht < 400) return 5+z;
-            if (ht > 400) return 7+z;
-        }
-        if (nbtags == 2) {
-            if (ht < 400) return 9+z;
-            if (ht > 400) return 11+z;
-        }
-        if (nbtags >= 3) {
-            return 13+z;
-        }
+        if (nbtags >= 3) return 38;
+        if (nbtags == 0 and ht < 400 and met < 150) return 22+imt;
+        if (nbtags == 0 and ht < 400 and met > 150) return 24+imt;
+        if (nbtags == 0 and ht > 400 and met < 150) return 26+imt;
+        if (nbtags == 0 and ht > 400 and met > 150) return 28+imt;
+        if (nbtags == 1 and ht < 400 and met < 150) return 30;
+        if (nbtags == 1 and ht < 400 and met > 150) return 31;
+        if (nbtags == 1 and ht > 400 and met < 150) return 32;
+        if (nbtags == 1 and ht > 400 and met > 150) return 33;
+        if (nbtags == 2 and ht < 400 and met < 150) return 34;
+        if (nbtags == 2 and ht < 400 and met > 150) return 35;
+        if (nbtags == 2 and ht > 400 and met < 150) return 36;
+        if (nbtags == 2 and ht > 400 and met > 150) return 37;
     }
     return -1;
 }
 
 int getNsrsHH() { return 62; }
-int getNsrsHL() { return 44; }
+int getNsrsHL() { return 43; }
 int getNsrsLL() { return 8; }
 int signal_region_ss(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, bool isClass6, float mtnonz) {
 
@@ -153,9 +151,9 @@ int signal_region_ss(int njets, int nbtags, float met, float ht, float mt_min, i
         return signal_region_multilepton(njets, nbtags, met, ht, mtnonz, id1, id2, lep1pt, lep2pt, lep3pt, nleps, isClass6);
     }
 
-    if (lep_pt == LowMet and not isClass6) {
+    if (lep_pt == LowMet and not isClass6 and nleps == 2) {
         // according to https://twiki.cern.ch/twiki/bin/view/CMS/RA5Run2
-        // no low met region if the event is onZ
+        // no low met region if the event is onZ, or even if it just has a 3rd tight lepton
         int lmsr = signal_region_lowmet(njets, nbtags, met, ht, lep1pt, lep2pt);
         if (lmsr > 0) return lmsr;
     }
@@ -253,12 +251,12 @@ int signal_region_ss(int njets, int nbtags, float met, float ht, float mt_min, i
                 else return 35+mm;
             } else {
                 if (met < 500) return 37+mm;
-                else return 39+mm;
+                else return 39;
             }
         }
         if (ht >= 1125) {
-            if (ht < 1300) return 41+mm;
-            else return 43+mm;
+            if (ht < 1300) return 40+mm;
+            else return 42+mm;
         }
         if (ht < 300){ 
             if (mt_min >= 120) return 31;
@@ -291,7 +289,7 @@ int signal_region_ss(int njets, int nbtags, float met, float ht, float mt_min, i
 
   // Low-Low
   if (lep_pt == LowLow) {
-      if (ht < 300) return -1; 
+      if (ht < 400) return -1;  // Raise threshold since turn on worse in 2017/2018
       if (mt_min > 120) return 8; 
       if (nbtags == 0 && met < 200) return 1;
       if (nbtags == 0 && met >= 200) return 2;
@@ -302,7 +300,7 @@ int signal_region_ss(int njets, int nbtags, float met, float ht, float mt_min, i
       if (nbtags >= 3) return 7;
   }
 
-  //Otherwise undefined
+  // Otherwise undefined
   cout << "WARNING: SR UNDEFINED (should never get here)" << endl;
   cout << "  --> lepton pts are: " << lep1pt << " " << lep2pt << endl;
   cout << "  --> ht & met are: " << ht << " " << met << endl;
@@ -322,7 +320,6 @@ bool passes_baseline_ft(int njets, int nbtags, float met, float ht, int id1, int
 }
 
 bool passes_baseline_ss(int njets, int nbtags, float met, float ht, int id1, int id2, float lep1_pt, float lep2_pt, float metcut) {
-  //Kinematic cuts
   if (lep1_pt < ptcut(id1)) return false;
   if (lep2_pt < ptcut(id2)) return false;
   if (njets < 2) return false;
@@ -600,42 +597,42 @@ int getBDTBin(int nbins, float disc, bool crz) {
 }
 
 
-// nominal
-int signal_region_ft(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, int isClass6){
-    if (lep1pt < 25.) return -1;
-    if (lep2pt < 20.) return -1;
-    if (njets < 2) return -1;
-    if (nbtags < 2) return -1;
-    if (ht < 300) return -1;
-    if (met < 50) return -1;
-    if (isClass6) {
-        if (lep3pt >= 20.) return 1;
-        else return -1;
-    }
-    if (nleps == 2) {
-        if (nbtags == 2) {
-            if (njets <= 5) return 2;
-            if (njets == 6) return 3;
-            if (njets == 7) return 4;
-            if (njets >= 8) return 5;
-        } else if (nbtags == 3) {
-            if (njets == 5) return 6;
-            if (njets == 6) return 6;
-            if (njets >= 7) return 7;
-        } else if (nbtags >= 4) {
-            if (njets >= 5) return 8;
-        }
-    } else {
-        if (nbtags == 2) {
-            if (njets >= 5) return 9;
-        } else if (nbtags >= 3) {
-            if (njets >= 4) return 10;
-        }
-    }
-    return -1;
-}
-int getNsrs() { return 10; } // note that this includes CRs
-int getNCRs() { return 2; }
+// // nominal
+// int signal_region_ft(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, int isClass6){
+//     if (lep1pt < 25.) return -1;
+//     if (lep2pt < 20.) return -1;
+//     if (njets < 2) return -1;
+//     if (nbtags < 2) return -1;
+//     if (ht < 300) return -1;
+//     if (met < 50) return -1;
+//     if (isClass6) {
+//         if (lep3pt >= 20.) return 1;
+//         else return -1;
+//     }
+//     if (nleps == 2) {
+//         if (nbtags == 2) {
+//             if (njets <= 5) return 2;
+//             if (njets == 6) return 3;
+//             if (njets == 7) return 4;
+//             if (njets >= 8) return 5;
+//         } else if (nbtags == 3) {
+//             if (njets == 5) return 6;
+//             if (njets == 6) return 6;
+//             if (njets >= 7) return 7;
+//         } else if (nbtags >= 4) {
+//             if (njets >= 5) return 8;
+//         }
+//     } else {
+//         if (nbtags == 2) {
+//             if (njets >= 5) return 9;
+//         } else if (nbtags >= 3) {
+//             if (njets >= 4) return 10;
+//         }
+//     }
+//     return -1;
+// }
+// int getNsrs() { return 10; } // note that this includes CRs
+// int getNCRs() { return 2; }
 
 // // 18 bins
 // int signal_region_ft(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, bool isClass6){
@@ -682,48 +679,48 @@ int getNCRs() { return 2; }
 // int getNCRs() { return 2; }
 // // int getNsrsDisc() { return 13; }
 
-// // 16 bins -- MERGING the three 4-b fake dominated bins
-// int signal_region_ft(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, bool isClass6){
-//     if (lep1pt < 25.) return -1;
-//     if (lep2pt < 20.) return -1;
-//     if (njets < 2) return -1;
-//     if (nbtags < 2) return -1;
-//     if (ht < 300) return -1;
-//     if (met < 50) return -1;
-//     if (isClass6) {
-//         if (lep3pt >= 20.) return 1;
-//         else return -1;
-//     }
-//     if (nleps == 2) {
-//         if (nbtags == 2) {
-//             if (njets <= 5) return 2;
-//             if (njets == 6) return 3;
-//             if (njets == 7) return 4;
-//             if (njets >= 8) return 5;
-//         } else if (nbtags == 3) {
-//             if (njets == 5) return 6;
-//             if (njets == 6) return 7;
-//             if (njets == 7) return 8;
-//             if (njets >= 8) return 9;
-//         } else if (nbtags >= 4) {
-//             return 10;
-//         }
-//     } else {
-//         if (nbtags == 2) {
-//             if (njets == 5) return 11;
-//             if (njets == 6) return 12;
-//             if (njets >= 7) return 13;
-//         } else if (nbtags >= 3) {
-//             if (njets == 4) return 14;
-//             if (njets == 5) return 15;
-//             if (njets >= 6) return 16;
-//         }
-//     }
-//     return -1;
-// }
-// int getNsrs() { return 16; } // note that this includes CRs
-// int getNCRs() { return 2; }
-// // int getNsrsDisc() { return 13; }
+// 16 bins -- MERGING the three 4-b fake dominated bins
+int signal_region_ft(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, bool isClass6){
+    if (lep1pt < 25.) return -1;
+    if (lep2pt < 20.) return -1;
+    if (njets < 2) return -1;
+    if (nbtags < 2) return -1;
+    if (ht < 300) return -1;
+    if (met < 50) return -1;
+    if (isClass6) {
+        if (lep3pt >= 20.) return 1;
+        else return -1;
+    }
+    if (nleps == 2) {
+        if (nbtags == 2) {
+            if (njets <= 5) return 2;
+            if (njets == 6) return 3;
+            if (njets == 7) return 4;
+            if (njets >= 8) return 5;
+        } else if (nbtags == 3) {
+            if (njets == 5) return 6;
+            if (njets == 6) return 7;
+            if (njets == 7) return 8;
+            if (njets >= 8) return 9;
+        } else if (nbtags >= 4) {
+            if (njets >= 5) return 10;
+        }
+    } else {
+        if (nbtags == 2) {
+            if (njets == 5) return 11;
+            if (njets == 6) return 12;
+            if (njets >= 7) return 13;
+        } else if (nbtags >= 3) {
+            if (njets == 4) return 14;
+            if (njets == 5) return 15;
+            if (njets >= 6) return 16;
+        }
+    }
+    return -1;
+}
+int getNsrs() { return 16; } // note that this includes CRs
+int getNCRs() { return 2; }
+// int getNsrsDisc() { return 13; }
 
 // // 16 bins -- DROPPING the three 4-b fake dominated bins
 // int signal_region_ft(int njets, int nbtags, float met, float ht, float mt_min, int id1, int id2, float lep1pt, float lep2pt, float lep3pt, int nleps, bool isClass6){
