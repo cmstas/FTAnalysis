@@ -19,42 +19,48 @@ labels = {
     "ht": "$H_{T}$",
     "met": MET_LATEX,
     "mll": "$m_{ll}$",
+    "m3l": "$m_{lll}$",
     "njets": "Njets",
     "nbtags": "Nbtags",
     "type": "hyp type (mm, em, ee)",
     "nleps": "nleps",
     "pt1": "$p_T$(lep1)",
     "pt2": "$p_T$(lep2)",
+    "pt3": "$p_T$(lep3)",
     "pte": "$p_T$(e)",
     "ptm": "$p_T$(m)",
-    # "bdisc1": "Disc leading bjet",
-    # "mtmin": "$m_{T}^\\mathrm{min}$",
-    # "eta1": r"$\eta$(lep1)",
-    # "eta2": r"$\eta$(lep2)",
-    # "etae": r"$\eta$(e)",
-    # "etam": r"$\eta(\mu)$",
-    # "etaelnt": r"loose leg $\eta$(e)",
-    # "etamlnt": r"loose leg $\eta(\mu)$",
-    # "phie": r"$\phi$(e)",
-    # "phim": r"$\phi(\mu)$",
-    # "q1": "charge - lep 1",
-    # "nvtx": "# good vertices",
+    "mtmin": "$m_{T}^\\mathrm{min}$",
+    "zmll": "$m_{ll} (Z-cand)$",
+    "nvtx": "# good vertices",
+    "eta1": r"$\eta$(lep1)",
+    "eta2": r"$\eta$(lep2)",
+    "dphil1l2": r"$\Delta\phi(l_1,l_2)$",
+    "dphil1met": r"$\Delta\phi(l_1,${}$)$".format(MET_LATEX),
+    "dphil2met": r"$\Delta\phi(l_2,${}$)$".format(MET_LATEX),
+    "phie": r"$\phi$(e)",
+    "phim": r"$\phi(\mu)$",
+    "etae": r"$\eta$(e)",
+    "etam": r"$\eta(\mu)$",
+    "q1": "charge - lep 1",
+    "htb": r"$H_{T}$(b-jets)",
+    "nlb40": r"N-loose b-tags, $p_{T}>40$",
+    "ntb40": r"N-tight b-tags, $p_{T}>40$",
+    "detal1l2": r"$\Delta\eta(l_1,l_2)$",
+    "maxmjoverpt": r"max($m_j/p_T$)",
+    "ml1j1": r"m$(l_1,j_2)$",
+    "ptj1": "$p_T$ - jet 1",
+    "ptj6": "$p_T$ - jet 6",
+    "ptj7": "$p_T$ - jet 7",
+    "ptj8": "$p_T$ - jet 8",
+    "eventbdt": "raw BDT discriminant",
+
+    # "nbnj": r"bin%5=Nj, bin//5=Nb",
     # "nisrjets": "Njets (ISR/FSR)",
     # "nisrmatch": "Njets (ISR/FSR - Truth Matched)",
-    # "htb": r"$H_{T}$(b-jets)",
-    # "nlb40": r"N-loose b-tags, $p_{T}>40$",
-    # "ntb40": r"N-tight b-tags, $p_{T}>40$",
-    # "dphil1l2": r"$\Delta\phi(l_1,l_2)$",
-    # "detal1l2": r"$\Delta\eta(l_1,l_2)$",
-    # "q1": "charge - lep 1",
-    # "pt3": "$p_T$(lep3)",
-    # "maxmjoverpt": r"max($m_j/p_T$)",
-    # "ml1j1": r"m$(l_1,j_2)$",
-    # "ptj1": "$p_T$ - jet 1",
-    # "ptj6": "$p_T$ - jet 6",
-    # "ptj7": "$p_T$ - jet 7",
-    # "ptj8": "$p_T$ - jet 8",
-    # "eventbdt": "raw BDT discriminant",
+    # "bdisc1": "Disc leading bjet",
+    # "etaelnt": r"loose leg $\eta$(e)",
+    # "etamlnt": r"loose leg $\eta(\mu)$",
+
 
     # "btagid": r"$20 N_\mathrm{b} + 5 N_\mathrm{charm} + N_\mathrm{light}$",
     # "avgcdisc": "average DeepCSV c disc",
@@ -67,7 +73,6 @@ labels = {
     # "trijet_subleadingdisc": "subleading trijet disc",
 
     # "rawmet": "Raw "+MET_LATEX,
-    # "zmll": "$m_{ll} (Z-cand)$",
     # "ptrele": "$p_T$rel - e",
     # "ptrelm": r"$p_T$rel - $\mu$",
     # "ptratioe": "$p_T$ratio - e",
@@ -114,15 +119,20 @@ d_label_colors = {
             "tth":                     (r"$t\bar{t}H$",    [0.4, 0.4, 0.6]),
             "ttw":                     (r"$t\bar{t}W$",    [0.0, 0.4, 0.0]),
             "ttz":                     (r"$t\bar{t}Z$",    [0.4, 0.8, 0.4]),
+            "wz":                      (r"WZ" ,             [1.0,0.8,0.0]),
             "vv":                      (r"VV",             [0.0, 0.4, 0.8]),
+            "vvnowz":                   (r"VV",             [0.0, 0.4, 0.8]),
             "tttt":                      (r"$t\bar{t}t\bar{t}$",             [0.786,0.147,0.022]),
+            "wgamma":                   (r"W+$\gamma$",             "#9D7ABF"),
+            "zgamma":                   (r"Z+$\gamma$",             "#8154AD"),
+            "othergamma":                   (r"Other X+$\gamma$",             "#54267F"),
+            "raresnoxg":                   ("Rare",            [1.0, 0.4, 1.0]),
         }
 
 bginfo = {
         "hhos": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "hhosloose": { k:d_label_colors[k] for k in [ "flips", "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "hhtl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
-        "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
         "osnbrw": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
         "os_noht": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "osloose": { k:d_label_colors[k] for k in [ "flips", "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
@@ -130,16 +140,33 @@ bginfo = {
         "nj2mc": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "ttfake", "rares", ] },
         "htnb1": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
         "htnb1mu": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
-        "htnb1mc": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "ttfake", "rares", "singletop", ] },
+        "htnb1mc": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "tt", "wjets", "rares", "singletop", ] },
         "htnb1mcmu": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "ttfake", "rares", "singletop", ] },
         "crz": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
         "crw": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
         "br": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
         "sshh": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "fakes", "rares", ] },
         "sshhmc": { k:d_label_colors[k] for k in [ "flips", "ttz", "tth", "ttw", "vv", "ttfake", "rares", ] },
-        "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
         "tt_isr": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "tt_isr_reweight_check": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
+        "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
+        "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
+        # "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
+        # "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "tlmet": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
+        "osmet": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "osmet100": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "osmet100mtmin200": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "tlnomet": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
+        "osnomet": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "osnomethighmt": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "osnometmtlt120": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "osnometmtgt120": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
+        "mlonz": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vvnowz","wz", "rares", "singletop" ] },
+        "oshtnb3": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
+        "lowmetlowht": { k:d_label_colors[k] for k in [ "fakes", "flips", "vv", "ttz","tth","ttw", "rares", ] }, # NOTE data-driven fakes
+        "lowmetallht": { k:d_label_colors[k] for k in [ "fakes", "flips", "vv", "ttz","tth","ttw", "rares", ] }, # NOTE data-driven fakes
+        "xgcr": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "wjets", "ttw", "vv","zgamma","wgamma","othergamma","raresnoxg", "singletop" ] },
         }
 
 # yuck, gotta make these global for multiprocessing since uproot file objects can't be pickled
@@ -176,10 +203,12 @@ def worker(info):
     if abs(sum(bgs).get_integral()) < 1e-6: return
 
 
-    do_bkg_syst = False
+    do_bkg_syst = True
     try:
-        hname_up = hname.replace("{}_".format(var), "{}_btagup_".format(var))
-        bgs_btagup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
+        hname_up = hname.replace("{}_".format(var), "{}_btagheavyup_".format(var))
+        bgs_btagheavyup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
+        hname_up = hname.replace("{}_".format(var), "{}_btaglightup_".format(var))
+        bgs_btaglightup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
         hname_up = hname.replace("{}_".format(var), "{}_jecup_".format(var))
         bgs_jecup = [ sum([Hist1D(files[proc][hname_up],label=label,color=color)] + [Hist1D(other_files[y][proc][hname_up],label=label,color=color) for y in other_files.keys()]) for proc,(label,color) in sorted(bginfo[region].items()) ]
         hname_up = hname.replace("{}_".format(var), "{}_jerup_".format(var))
@@ -198,7 +227,8 @@ def worker(info):
                 tmp -= 1.
                 return tmp
             return np.zeros(len(hvar.counts))
-        bgs_btagup = map(relative_variation, bgs,bgs_btagup)
+        bgs_btagheavyup = map(relative_variation, bgs,bgs_btagheavyup)
+        bgs_btaglightup = map(relative_variation, bgs,bgs_btaglightup)
         bgs_jecup = map(relative_variation, bgs,bgs_jecup)
         bgs_jerup = map(relative_variation, bgs,bgs_jerup)
         bgs_scaleup = map(relative_variation, bgs,bgs_scaleup)
@@ -206,7 +236,7 @@ def worker(info):
         def augment_errors(hcent, *relerrs):
             hcent._errors = hcent.counts*((hcent.errors/hcent.counts)**2. + np.sum(np.array(relerrs)**2.,axis=0))**0.5
             hcent._errors[np.isnan(hcent._errors)] = hcent._counts[np.isnan(hcent._errors)]
-        map(augment_errors, bgs, bgs_btagup,bgs_jecup,bgs_jerup,bgs_scaleup,bgs_bbup)
+        map(augment_errors, bgs, bgs_btagheavyup,bgs_btaglightup,bgs_jecup,bgs_jerup,bgs_scaleup,bgs_bbup)
         do_bkg_syst = True
     except KeyError:
         # didn't find btagup/btagdown
@@ -214,8 +244,8 @@ def worker(info):
 
     bgs = sorted(bgs, key=lambda bg: bg.get_integral())
     sf = data.get_integral()/sum(bgs).get_integral()
-    # bgs = [bg*sf for bg in bgs]
-    bgs = [bg*1 for bg in bgs]
+    bgs = [bg*sf for bg in bgs]
+    # bgs = [bg*1 for bg in bgs]
     title += " data/MC={:.2f}".format(sf)
     if other_files:
         fname = "{}/run2_{}_{}_{}.pdf".format(outputdir,region,var,flav)
@@ -223,9 +253,11 @@ def worker(info):
         fname = "{}/y{}_{}_{}_{}.pdf".format(outputdir,year,region,var,flav)
     plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
                cms_type = "Preliminary",
+               # do_log=True,
                do_bkg_syst=do_bkg_syst,
                lumi = lumi,
                ratio_range=[0.0,2.0],
+               mpl_title_params=dict(fontsize=(8 if len(str(lumi))>=5 else 9)),
                # ratio_range=[0.5,1.5],
                )
     # os.system("ic {}".format(fname))
@@ -310,30 +342,71 @@ if __name__ == "__main__":
 
     # inputdir = "outputs_Nov29"
     # inputdir = "outputs_Dec10"
-    inputdir = "outputs_Dec19_v6"
+    # inputdir = "outputs_Dec19_v6"
     # inputdir = "outputs_Dec19_v32"
     # inputdir = "outputs_Dec17toptag"
     # regions = ["osloose","os","tl","tt_isr"]
     # regions = ["osloose","os","tl","osnbrw"]
     # regions = ["osloose","os","tl", "osnbrw"] #,"osnbrw"]
     # regions = ["os","osnbrw"]
-    regions = ["os","osloose", "tl", "htnb1", "htnb1mc"]
-    flavs = ["in"]
+    # regions = ["os","osloose", "tl", "htnb1", "htnb1mc"]
+    # regions = ["osnomet","tlnomet","osmet","tlmet","mlonz"] #,"mlonzhigh","mlonz0j"]
 
-    # 2017 alone
-    outputdir = "plots_ft_jecv6_2017"
-    # outputdir = "plots_ft_jecv32_2017"
-    # outputdir = "plots_ft_2017_toptag"
-    make_plots(
-            outputdir=outputdir,
-            inputdir=inputdir,
-            regions = regions, flavs = flavs,
-            year=2017,
-            lumi="41.5",
-            )
+    ## SAME SIGN NOTE
+    regions = [
+            "osmet",
+            "osnomet",
+            "xgcr",
+            "tlmet",
+            "tlnomet",
+            "mlonz",
+            "lowmetallht",
+            "lowmetlowht",
+            ]
+    flavs = ["in"]
+    # flavs = ["ee","em","mm","in"]
+    inputdir = "outputs_19Jan18_v3p24_ss"
+    outputdir = "plots_ss_3p24_19Jan18"
+    # inputdir = "outputs_19Jan18_v3p24_ss_2018nvtx"
+    # outputdir = "plots_ss_3p24_19Jan18_2018nvtx"
+
+    # ## FOUR TOP NOTE
+    # regions = [
+    #         "os",
+    #         "tl",
+    #         "htnb1",
+    #         "htnb1mc",
+    #         ]
+    # flavs = ["in"]
+    # inputdir = "outputs_19Jan18_v3p24_ft"
+    # outputdir = "plots_ft_3p24_19Jan18"
+
+    # # 2016 alone
+    # # outputdir = "plots_ft_jecv6_2017"
+    # # outputdir = "plots_ft_jecv32_2017"
+    # # outputdir = "plots_ft_2017_toptag"
+    # make_plots(
+    #         outputdir=outputdir,
+    #         inputdir=inputdir,
+    #         regions = regions, flavs = flavs,
+    #         year=2016,
+    #         lumi="35.9",
+    #         )
+
+    # # 2017 alone
+    # # outputdir = "plots_ft_jecv6_2017"
+    # # outputdir = "plots_ft_jecv32_2017"
+    # # outputdir = "plots_ft_2017_toptag"
+    # make_plots(
+    #         outputdir=outputdir,
+    #         inputdir=inputdir,
+    #         regions = regions, flavs = flavs,
+    #         year=2017,
+    #         lumi="41.5",
+    #         )
 
     # 2018 alone
-    outputdir = "plots_ft_jecv6_2018"
+    # outputdir = "plots_ft_jecv6_2018"
     # outputdir = "plots_ft_jecv32_2018"
     # outputdir = "plots_ft_2018_toptag"
     make_plots(
@@ -344,9 +417,9 @@ if __name__ == "__main__":
             lumi="58.8",
             )
 
-    # # 2016 + 2018 + 2017
-    # outputdir = "plots_ft_run2"
-    # # outputdir = "plots_ft_run2_toptag"
+    # # # 2016 + 2018 + 2017
+    # # outputdir = "plots_ft_run2"
+    # # # outputdir = "plots_ft_run2_toptag"
     # make_plots(
     #         outputdir=outputdir,
     #         inputdir=inputdir,
