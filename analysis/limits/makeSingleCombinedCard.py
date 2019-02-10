@@ -90,22 +90,25 @@ def do_combine(
             # NOTE, only Write if writable below, then
         summed_files[proc] = r.TFile(rname,method)
 
-    def make_hist(name,which="Up",exclude_year=-1):
+    def make_hist(name,which="Up",spec_year=-1):
         hnames_to_sum = []
         outhname = "{}{}".format(name,which)
-        if exclude_year > 0:
-            outhname = "y{}_{}{}".format(exclude_year,name,which)
+        if spec_year > 0:
+            outhname = "y{}_{}{}".format(spec_year,name,which)
         for year in years:
-            if exclude_year > 0 and year == exclude_year:
-                hname = "sr"
-            else:
+            if spec_year > 0 and year == spec_year:
                 hname = "{}{}".format(name,which)
+            else:
+                hname = "sr"
             hnames_to_sum.append(hname)
         isnorm = systs[name]["kind"] == "lnN"
-        scale = 1.0
+        scales = [1.0 for y in years]
         procs = [p for p,v in systs[name]["procs"].items() if ((v != 0.) or (name in ["sr"]))]
         if isnorm:
-            scale = next(v for v in systs[name]["procs"].values() if v != 0.)
+            scales = [next(v for v in yearly_systs[y][name]["procs"].values() if v != 0.)**(-1 if which == "Down" else 1.)
+                    for y in years]
+            for i,y in enumerate(years):
+                if y != spec_year: scales[i] = 1.
         if isnorm or (name in ["sr"]):
             hnames_to_sum = ["sr" for _ in years]
             procs += ["data_obs"]
@@ -113,16 +116,17 @@ def do_combine(
             summed_files[proc].cd()
 
             hists = [yearly_files[year][proc].Get(hname) for year,hname in zip(years,hnames_to_sum)]
-            hout = hists[0].Clone(outhname)
-            for h in hists[1:]:
+            copy_hists = [h.Clone("{}{}".format(outhname,"" if i == 0 else i)) for i,h in enumerate(hists)]
+
+            if which in ["Up","Down"]:
+                for ih,s in enumerate(scales):
+                    copy_hists[ih].Scale(s) # inverse of s is already calculated above
+            hout = copy_hists[0]
+            for h in copy_hists[1:]:
                 hout.Add(h)
-            if which == "Up":
-                hout.Scale(scale)
-            elif which == "Down":
-                hout.Scale(1./scale)
             # if verbose:
-            #     print "Nuisance={}, proc={}, summing {} scaled by {} into {} (integrals {}={:.2f})".format(
-            #             name, proc, hnames_to_sum, scale, outhname,
+            #     print "Year={}, nuisance={}, proc={}, summing {} scaled by {} into {} (integrals {}={:.2f})".format(
+            #             spec_year, name, proc, hnames_to_sum, scales, outhname,
             #             "+".join(map(lambda x: "{:.2f}".format(x.Integral()), hists)),
             #             hout.Integral()
             #             )
@@ -151,7 +155,7 @@ def do_combine(
             # print "uncorrelated"
             for y in years:
                 for which in ["Up","Down"]:
-                    output_nuisance_name, procs = make_hist(name, which=which, exclude_year=y)
+                    output_nuisance_name, procs = make_hist(name, which=which, spec_year=y)
                 nuisance_info[output_nuisance_name] = procs
     make_hist("sr", which="")
 
@@ -202,6 +206,7 @@ if __name__ == "__main__":
     # parser.add_argument("--directory", help="card directory",default="v3.13_Nov30_v1/") # FIXME
     parser.add_argument("-r", "--regions", help="srcr or disc for SR+CR limits or BDT limits", default="srcr")
     parser.add_argument("-c", "--cardname", help="name of card", default="single_card.txt")
+    parser.add_argument("-s", "--sig", help="signal name (default: %(default)s)", default="tttt")
     parser.add_argument(      "--correlate_all", help="correlate everything", action="store_true")
     parser.add_argument(      "--correlate_none", help="correlate nothing", action="store_true")
     parser.add_argument(      "--autothresh", help="autoMCstats threshold", default="0")
@@ -212,6 +217,7 @@ if __name__ == "__main__":
             args.directory,
             regions=args.regions,
             cardname=args.cardname,
+            signal=args.sig,
             correlate_all=args.correlate_all,
             correlate_none=args.correlate_none,
             autothresh=args.autothresh,
