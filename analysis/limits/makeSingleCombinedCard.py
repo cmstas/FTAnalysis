@@ -108,7 +108,7 @@ def do_combine(
             scales = [next(v for v in yearly_systs[y][name]["procs"].values() if v != 0.)**(-1 if which == "Down" else 1.)
                     for y in years]
             for i,y in enumerate(years):
-                if y != spec_year: scales[i] = 1.
+                if spec_year > 0 and y != spec_year: scales[i] = 1.
         if isnorm or (name in ["sr"]):
             hnames_to_sum = ["sr" for _ in years]
             procs += ["data_obs"]
