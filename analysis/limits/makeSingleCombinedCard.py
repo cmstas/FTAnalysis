@@ -101,6 +101,9 @@ def do_combine(
             else:
                 hname = "sr"
             hnames_to_sum.append(hname)
+        if "prefire" in name and spec_year == 2018:  
+            # NOTE this is hardcoded to avoid prefiring syst for 2018
+            hnames_to_sum = ["sr" for year in years]
         isnorm = systs[name]["kind"] == "lnN"
         scales = [1.0 for y in years]
         procs = [p for p,v in systs[name]["procs"].items() if ((v != 0.) or (name in ["sr"]))]
