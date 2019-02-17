@@ -22,15 +22,17 @@
     std::cout << vtx_down->Integral() << std::endl;
 
     // MC
-    // TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2017.root");
-    TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2018.root");
+    TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2017.root");
+    // TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2018.root");
     // TFile *f_mc = TFile::Open(basedir+"/truenumint_mc2016.root");
     TH1F* vtx_mc = (TH1F*) f_mc->Get("hnumints_true");
+    // TH1F* vtx_mc = (TH1F*) f_mc->Get("hnumints_cms4");
     vtx_mc->Sumw2();
     vtx_mc->Scale(1.0/vtx_mc->Integral());
     std::cout << vtx_mc->Integral() << std::endl;
 
-    TFile *fout = new TFile("puw_2018.root", "RECREATE");
+    // TFile *fout = new TFile("puw_2018.root", "RECREATE");
+    TFile *fout = new TFile("puw_2017.root", "RECREATE");
 
     TH1F* data_central = (TH1F*) vtx_central->Clone("data_central");
     TH1F* mc_central = (TH1F*) vtx_mc->Clone("mc_central");
