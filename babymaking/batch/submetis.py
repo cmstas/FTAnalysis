@@ -66,7 +66,8 @@ if __name__ == "__main__":
     # tag = "v3.23_oldbwp2018" # v3.23 with old (matching 2017) btag WP for 2018
     year_sample_map = [("2016",mc_2016),("2017",mc_2017),("2018",mc_2018)]
     # year_sample_map = [("2016",mc_2016)]
-    year_sample_map = [("2017",mc_2017)]
+    # year_sample_map = [("2017",mc_2017)]
+    year_sample_map = [("2016",mc_2016),("2017",mc_2017)]
     tag = "v3.24" # all 3 years. split btag unc, fastsim 2016/2017
     extra_args = ""
     tag_match = ""
@@ -118,7 +119,7 @@ if __name__ == "__main__":
                         files_per_output = split_func(dsname),
                         output_name = "output.root",
                         tag = tag,
-                        min_completion_fraction = 0.93 if skip_tail else 1.0,
+                        min_completion_fraction = 0.95 if skip_tail else 1.0,
                         condor_submit_params = {
                             # "sites":"T2_US_UCSD,UCSB",  # I/O is hella faster
                             "sites":"T2_US_UCSD",  # I/O is hella faster
