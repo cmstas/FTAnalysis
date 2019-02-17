@@ -582,6 +582,16 @@ if (year == 2018 and  isReReco) {
     histo_mt_cr_mu->SetDirectory(rootdir);
     histo_mt_cr_mu->Sumw2();
 
+    Double_t dbins_el[] = {0., 0.8, 1.479, 2.5};
+    TH2D *histo_mteta_cr_el = new TH2D("histo_mteta_cr_el", "Eta vs MT (electrons)", 20,0.,200.,netabins,dbins_el);
+    histo_mteta_cr_el->SetDirectory(rootdir);
+    histo_mteta_cr_el->Sumw2();
+
+    Double_t dbins_mu[] = {0., 1.2, 2.1, 2.4};
+    TH2D *histo_mteta_cr_mu = new TH2D("histo_mteta_cr_mu", "Eta vs MT (muons)", 20,0.,200.,netabins,dbins_mu);
+    histo_mteta_cr_mu->SetDirectory(rootdir);
+    histo_mteta_cr_mu->Sumw2();
+
     TH1F *histo_mt_cr2_el = new TH1F("histo_mt_cr2_el", "MT", 20,0,200);
     histo_mt_cr2_el->SetDirectory(rootdir);
     histo_mt_cr2_el->Sumw2();
@@ -1176,6 +1186,7 @@ if (year == 2018 and  isReReco) {
                     // float myweight = weight;
                     if (abs(id())==11) {
                         histo_mt_cr_el->Fill( std::min(evt_mt,float(200.)), myweight );
+                        histo_mteta_cr_el->Fill(std::min(evt_mt,float(200.)), getEta(fabs(p4().eta()),ht,false), myweight);
                         if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_el->Fill( std::min(evt_mt,float(200.)), myweight );
                         histo_mt_cr_pt_el->Fill( p4().pt(), myweight );
                         histo_mt_cr_met_el->Fill( evt_met, myweight );
@@ -1183,6 +1194,7 @@ if (year == 2018 and  isReReco) {
                     }
                     if (abs(id())==13) {
                         histo_mt_cr_mu->Fill( std::min(evt_mt,float(200.)), myweight );
+                        histo_mteta_cr_mu->Fill(std::min(evt_mt,float(200.)), getEta(fabs(p4().eta()),ht,false), myweight);
                         if (p4().pt()>MTCR_PT_CUT) histo_mt_cr2_mu->Fill( std::min(evt_mt,float(200.)), myweight );
                         histo_mt_cr_pt_mu->Fill( p4().pt(), myweight );
                         histo_mt_cr_met_mu->Fill( evt_met, myweight );
@@ -1662,7 +1674,9 @@ if (year == 2018 and  isReReco) {
     histo_mt_lm_mu->Write();
     histo_mt_cr->Write();
     histo_mt_cr_el->Write();
+    histo_mteta_cr_el->Write();
     histo_mt_cr_mu->Write();
+    histo_mteta_cr_mu->Write();
     histo_mt_cr2_el->Write();
     histo_mt_cr2_mu->Write();
     histo_mt_cr_dphi->Write();

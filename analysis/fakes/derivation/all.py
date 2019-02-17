@@ -59,7 +59,8 @@ if __name__ == "__main__":
 
     if do_ss:
         # inputdir = "outputs_19Jan28/";
-        inputdir = "outputs_ssrereco_19Jan28/";
+        # inputdir = "outputs_ssrereco_19Jan28/";
+        inputdir = "outputs_ssrereco_19Feb6//";
     else:
         inputdir = "outputs_ft_19Feb2//";
 
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     d_infos[2016][("el",True,True)][0] = 1.28
     d_infos[2016][("mu",False,True)][0] = 1.17
     d_infos[2016][("mu",True,True)][0] = 1.19
-    print "FIXME pinning 2018 MTSFs to certain values"
+    print "FIXME pinning 2018 MTSFs to 10%"
     d_infos[2018][("el",False,True)][0] = 1.1
     d_infos[2018][("el",True,True)][0] = 1.1
     years = [2016,2017,2018]
@@ -85,6 +86,13 @@ if __name__ == "__main__":
             r.plotEWKCorFR(inputdir, 1.0, 1.0, mt_sf_el, mt_sf_mu, iso, year)
     os.system("mkdir -p {}/pdfs/".format(inputdir))
     os.system("cp pdfs/* {}/pdfs/".format(inputdir))
+
+    # os.system("ic {}/pdfs/y2016_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
+    # os.system("ic {}/pdfs/y2016_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
+    # os.system("ic {}/pdfs/y2017_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
+    # os.system("ic {}/pdfs/y2017_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
+    # os.system("ic {}/pdfs/y2018_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
+    # os.system("ic {}/pdfs/y2018_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
 
     if do_ss:
         for year in [2016,2017,2018]:
