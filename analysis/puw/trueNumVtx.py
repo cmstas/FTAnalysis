@@ -63,7 +63,8 @@ def make_2017():
     print "Drawing from cms4"
     ch = r.TChain("Events")
     for i in range(1,15):
-        ch.Add("/hadoop/cms/store/group/snt/run2_mc2017//TTJets_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V10-02-05/merged_ntuple_{}.root".format(i))
+        # ch.Add("/hadoop/cms/store/group/snt/run2_mc2017//TTJets_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V10-02-05/merged_ntuple_{}.root".format(i))
+        ch.Add("/hadoop/cms/store/group/snt/run2_mc2017//TTZToLLNuNu_M-10_TuneCP5_PSweights_13TeV-amcatnlo-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V10-02-05/merged_ntuple_{}.root".format(i))
         # ch.Add("/hadoop/cms/store/group/snt/run2_mc2017//TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V10-02-05/merged_ntuple_{}.root".format(i))
     ch.Draw("puInfo_trueNumInteractions[0]>>hnumints_cms4","","norme")
 
