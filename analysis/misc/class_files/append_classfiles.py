@@ -6,10 +6,9 @@ branch_to_copy_type = "float"
 # and use this pattern to squeeze in the following branches (and associated types)
 branches_to_add = [
         
-        ("weight_btagsf_heavy_UP","float"),
-        ("weight_btagsf_heavy_DN","float"),
-        ("weight_btagsf_light_UP","float"),
-        ("weight_btagsf_light_DN","float"),
+        ("prefire_sf","float"),
+        # ("prefire_sfdown","float"),
+        # ("prefire_sfup","float"),
 
         # ("btags_cdisc", "vector<float>"), # note, need to pick another branch_to_copy, etc.
         # ("trijet_discs", "vector<float>"),
