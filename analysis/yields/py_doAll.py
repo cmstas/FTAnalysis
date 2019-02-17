@@ -603,9 +603,9 @@ if __name__ == "__main__":
                     "rpv_t1qqqql_m2400": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2400.root" ],options=options[2016]),
                     "rpv_t1qqqql_m2500": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2500.root" ],options=options[2016]),
 
-                    # "rpv_t1tbs_m1000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1000.root" ],options=options[2016]),
+                    "rpv_t1tbs_m1000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1000.root" ],options=options[2016]),
                     "rpv_t1tbs_m1100": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1100.root" ],options=options[2016]),
-                    # "rpv_t1tbs_m1200": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1200.root" ],options=options[2016]),
+                    "rpv_t1tbs_m1200": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1200.root" ],options=options[2016]),
                     "rpv_t1tbs_m1300": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1300.root" ],options=options[2016]),
                     "rpv_t1tbs_m1400": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1400.root" ],options=options[2016]),
                     # "rpv_t1tbs_m1500": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1500.root" ],options=options[2016]),
