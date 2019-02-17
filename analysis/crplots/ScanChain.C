@@ -284,6 +284,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         "xgcr",
         "tlnomet",
         "osnomet",
+        "osnomethighmt",
         "lowmetlowht",
         "lowmetallht",
         "tlmet",
@@ -1063,6 +1064,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 }
             }
             if (njets >= 2 and               hyp_class == 4) fill_region("osnomet", weight);
+            if (njets >= 2 and               hyp_class == 4 and ss::mtmin() > 150.) fill_region("osnomethighmt", weight);
             if (njets >= 2 and               hyp_class == 2) fill_region("tlnomet", weight);
             if (njets >= 2 and met > 50. and hyp_class == 4) fill_region("osmet", weight);
             if (njets >= 2 and met > 50. and hyp_class == 2) fill_region("tlmet", weight);

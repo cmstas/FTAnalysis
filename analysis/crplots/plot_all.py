@@ -356,6 +356,7 @@ if __name__ == "__main__":
     regions = [
             "osmet",
             "osnomet",
+            "osnomethighmt",
             "xgcr",
             "tlmet",
             "tlnomet",
@@ -365,8 +366,13 @@ if __name__ == "__main__":
             ]
     flavs = ["in"]
     # flavs = ["ee","em","mm","in"]
+
     inputdir = "outputs_19Jan18_v3p24_ss"
     outputdir = "plots_ss_3p24_19Jan18"
+
+    # inputdir = "outputs_19Jan18_v3p24_ss_promptreco"
+    # outputdir = "plots_ss_3p24_19Jan18_promptreco"
+
     # inputdir = "outputs_19Jan18_v3p24_ss_2018nvtx"
     # outputdir = "plots_ss_3p24_19Jan18_2018nvtx"
 
@@ -381,29 +387,29 @@ if __name__ == "__main__":
     # inputdir = "outputs_19Jan18_v3p24_ft"
     # outputdir = "plots_ft_3p24_19Jan18"
 
-    # # 2016 alone
-    # # outputdir = "plots_ft_jecv6_2017"
-    # # outputdir = "plots_ft_jecv32_2017"
-    # # outputdir = "plots_ft_2017_toptag"
-    # make_plots(
-    #         outputdir=outputdir,
-    #         inputdir=inputdir,
-    #         regions = regions, flavs = flavs,
-    #         year=2016,
-    #         lumi="35.9",
-    #         )
+    # 2016 alone
+    # outputdir = "plots_ft_jecv6_2017"
+    # outputdir = "plots_ft_jecv32_2017"
+    # outputdir = "plots_ft_2017_toptag"
+    make_plots(
+            outputdir=outputdir,
+            inputdir=inputdir,
+            regions = regions, flavs = flavs,
+            year=2016,
+            lumi="35.9",
+            )
 
-    # # 2017 alone
-    # # outputdir = "plots_ft_jecv6_2017"
-    # # outputdir = "plots_ft_jecv32_2017"
-    # # outputdir = "plots_ft_2017_toptag"
-    # make_plots(
-    #         outputdir=outputdir,
-    #         inputdir=inputdir,
-    #         regions = regions, flavs = flavs,
-    #         year=2017,
-    #         lumi="41.5",
-    #         )
+    # 2017 alone
+    # outputdir = "plots_ft_jecv6_2017"
+    # outputdir = "plots_ft_jecv32_2017"
+    # outputdir = "plots_ft_2017_toptag"
+    make_plots(
+            outputdir=outputdir,
+            inputdir=inputdir,
+            regions = regions, flavs = flavs,
+            year=2017,
+            lumi="41.5",
+            )
 
     # 2018 alone
     # outputdir = "plots_ft_jecv6_2018"
@@ -417,17 +423,17 @@ if __name__ == "__main__":
             lumi="58.8",
             )
 
-    # # # 2016 + 2018 + 2017
-    # # outputdir = "plots_ft_run2"
-    # # # outputdir = "plots_ft_run2_toptag"
-    # make_plots(
-    #         outputdir=outputdir,
-    #         inputdir=inputdir,
-    #         regions = regions, flavs = flavs,
-    #         year=2018,
-    #         lumi="136.3",
-    #         other_years = [2016,2017],
-    #         )
+    # # 2016 + 2018 + 2017
+    # outputdir = "plots_ft_run2"
+    # # outputdir = "plots_ft_run2_toptag"
+    make_plots(
+            outputdir=outputdir,
+            inputdir=inputdir,
+            regions = regions, flavs = flavs,
+            year=2018,
+            lumi="136.3",
+            other_years = [2016,2017],
+            )
 
     # os.system("niceplots plots_2017 plots_crs2017_Sep3")
     # os.system("niceplots plots_2018 plots_crs2018_Sep3")

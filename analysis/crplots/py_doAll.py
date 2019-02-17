@@ -68,6 +68,7 @@ basedirs ={
 # outputdir = "outputs_19Jan4_v3p21" # ISR REWEIGHTING
 
 outputdir = "outputs_19Jan18_v3p24_ss" # FOR SS
+# outputdir = "outputs_19Jan18_v3p24_ss_promptreco" # FOR SS
 # outputdir = "outputs_19Jan18_v3p24_ft" # FOR FT
 
 # outputdir = "outputs_19Jan18_v3p24_ss_2018nvtx" # FOR SS
@@ -309,13 +310,14 @@ chs = {
             },
         2018: {
 
-                # only tt ISR + data from 2018
-
             "fakes": make_objs([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doFakes"),
             "flips": make_objs([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doFlips"),
             "data": make_objs([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]),
-            # 2017 for everything other than data for now, because...uh...there's no usable 2018 MC, even though it's almost 2019 :)
-            # "tt": make_objs(basedirs[2018]+"TTBAR*.root", options=options[2018]),
+
+            # "fakes": make_objs([basedirs[2018]+"Data*.root"], options=options[2018]+" doFakes"),
+            # "flips": make_objs([basedirs[2018]+"Data*.root"], options=options[2018]+" doFlips"),
+            # "data": make_objs([basedirs[2018]+"Data*.root"], options=options[2018]),
+
             "tt": make_objs([
                 basedirs[2018]+"TTBAR*.root",
                 ], options=options[2018]),
