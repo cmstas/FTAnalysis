@@ -55,12 +55,13 @@ def avoid_zero_integrals(h,h_var):
         h_var.Scale(-1)
     avoid_negative_yields(h_var)
 
-def modify_central(h, fname_in, name, region, year):
+def modify_central(h, fname_in, name, region, year, f_nominal=None):
     if name == "fakes":
         f = r.TFile(fname_in.replace("fakes","fakes_mc"))
         fhybrid = r.TFile(fname_in.replace("fakes","fakes_mchybrid"))
         h_mc = f.Get("{}_TOTAL_{}".format(region,"fakes_mc"))
         h_mchybrid = fhybrid.Get("{}_TOTAL_{}".format(region,"fakes_mchybrid"))
+        h_app = f_nominal.Get("{}_UNWFR_TOTAL_{}".format(region,name))
         # h_mchybrid_app = fhybrid.Get("{}_UNWFR_TOTAL_{}".format(region,"fakes_mchybrid"))
         # print list(h_mchybrid)
         # print h.Integral(),h_mc.Integral(),h_mchybrid.Integral()
@@ -73,20 +74,27 @@ def modify_central(h, fname_in, name, region, year):
             ve_mc = h_mc.GetBinError(ix)
             v_mchybrid = h_mchybrid.GetBinContent(ix)
             ve_mchybrid = h_mchybrid.GetBinError(ix)
+            v_app = h_app.GetBinContent(ix)
+            if v_app == 0.: v = 0.
             # v_mchybrid_app = h_mchybrid_app.GetBinContent(ix)
             # ve_mchybrid_app = h_mchybrid_app.GetBinError(ix)
             # print ">>> Bin {} of {} has yield {:.3f}+-{:.3f} (mc has {:.3f}+-{:.3f}) (HYBRID mc has {:.3f}+-{:.3f}, app {:.1f}+-{:.1f})".format(ix,h,v,ve,v_mc,ve_mc,v_mchybrid,ve_mchybrid,v_mchybrid_app,ve_mchybrid_app)
             if v < 1e-6:
                 if v_mc > 1e-6:
                     if verbose_: print "[!] Bin {} of {} has yield {}+-{} (mc has {}+-{}), so setting value to 0 and error to mc value of {}".format(ix,h,v,ve,v_mc,ve_mc,v_mc)
-                    h.SetBinContent(ix,0.)
-                    h.SetBinError(ix,v_mc)
-                elif v_mchybrid > 1e-6:
+                    # 1.5 for poisson
+                    h.SetBinContent(ix,1e-6)
+                    h.SetBinError(ix,1.5*v_mc)
+                elif v_mchybrid > 1e-3:
                     if verbose_: print "[!] Bin {} of {} has yield {}+-{} (HYBRID mc has {}+-{}), so setting value to 0 and error to HYBRID mc value of {}".format(ix,h,v,ve,v_mchybrid,ve_mchybrid,v_mchybrid)
-                    h.SetBinContent(ix,0.)
-                    h.SetBinError(ix,v_mchybrid)
+                    h.SetBinContent(ix,1e-6)
+                    h.SetBinError(ix,1.5*v_mchybrid)
                 else:
-                    if verbose_: print "[!] Bin {} of {} has yield {}+-{} and no yields in MC either".format(ix,h,v,ve)
+                    # avg transfer factor is 0.045
+                    avgtf = 0.045
+                    if verbose_: print "[!] Bin {} of {} has yield {}+-{} and no yields in MC either, so setting value to 0 and error to avg tf of {}".format(ix,h,v,ve,avgtf)
+                    ve = h.GetBinError(ix)
+                    h.SetBinError(ix,avgtf)
 
 def write_one_file(fname_in, fname_out, name, region, year):
     if not os.path.exists(fname_in):
@@ -104,12 +112,40 @@ def write_one_file(fname_in, fname_out, name, region, year):
         # fout.Close()
         # return
         if verbose_: print "[!] Nominal yields for {}, {}, {} are 0, but writing empty histograms anyway".format(name, region, year)
+
+
     avoid_negative_yields(h_nominal)
-    modify_central(h_nominal, fname_in=fname_in, name=name, region=region, year=year)
+    modify_central(h_nominal, fname_in=fname_in, name=name, region=region, year=year, f_nominal=fin)
+    # print list(h_nominal)
+    # print [h_nominal.GetBinError(ibin) for ibin in range(1,h_nominal.GetNbinsX()+1)]
 
     # make sure we write to fout
     fout.cd()
 
+    # # FIXME FIXME FIXME
+    # if name == "fakes" and region.upper() == "SRHH":
+    #     print year
+    #     if year  in [2018]:
+    #         print "SETTING SRHH52 and 53 in fakes to 0.01pm0.5!!!"
+    #         h_nominal.SetBinContent(52,0.01)
+    #         h_nominal.SetBinContent(53,0.01)
+    #         h_nominal.SetBinError(52,0.5)
+    #         h_nominal.SetBinError(53,0.5)
+
+    # # FIXME FIXME FIXME
+    # if name == "data" and region.upper() == "SRHH":
+    #     print year
+    #     if year  in [2016,2017]:
+    #         print "SETTING SRHH52 and 53 in data to 0!!!"
+    #         h_nominal.SetBinContent(52,0)
+    #         h_nominal.SetBinContent(53,0)
+    #     else:
+    #         print "SETTING SRHH52 and 53 in data to 1,1!!!"
+    #         h_nominal.SetBinContent(52,1)
+    #         h_nominal.SetBinContent(53,1)
+
+
+    # print [h_nominal.GetBinError(ibin) for ibin in range(1,h_nominal.GetNbinsX()+1)]
     h_nominal.Write()
 
     # only write counts for data
@@ -226,17 +262,19 @@ def write_one_file(fname_in, fname_out, name, region, year):
         h_syst_up.Write()
         h_syst_down.Write()
 
-        # ISR - take half the deviation
-        h_alt = fin.Get("{}_ISR_UP_TOTAL_{}".format(region,name))
-        h_syst_up = h_alt.Clone("isrUp".format(which))
-        h_syst_down = h_alt.Clone("isrDown".format(which))
-        for ix in range(1,h_syst_up.GetNbinsX()+1):
-            nomval = h_nominal.GetBinContent(ix)
-            upval = h_syst_up.GetBinContent(ix)
-            h_syst_up.SetBinContent(ix, 0.5*(nomval+upval))
-        fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
-        h_syst_up.Write()
-        h_syst_down.Write()
+        if all(x not in name for x in ["fs_","rpv_"]):
+
+            # ISR - take half the deviation
+            h_alt = fin.Get("{}_ISR_UP_TOTAL_{}".format(region,name))
+            h_syst_up = h_alt.Clone("isrUp".format(which))
+            h_syst_down = h_alt.Clone("isrDown".format(which))
+            for ix in range(1,h_syst_up.GetNbinsX()+1):
+                nomval = h_nominal.GetBinContent(ix)
+                upval = h_syst_up.GetBinContent(ix)
+                h_syst_up.SetBinContent(ix, 0.5*(nomval+upval))
+            fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
+            h_syst_up.Write()
+            h_syst_down.Write()
 
         if "fs_" in name:
 
@@ -326,7 +364,7 @@ def write_one_file(fname_in, fname_out, name, region, year):
 
     return True
 
-def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_tmp", regions=[],verbose=True,extra_procs=[], doss=False):
+def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_tmp", regions=[],verbose=True,extra_procs=[], doss=False,years=[2016,2017,2018]):
     global verbose_
     verbose_ = verbose
 
@@ -350,7 +388,7 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
         procs.extend(["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"])
         regions = ["SRCR","SRDISC"]
     nmade = 0
-    years = [2016, 2017, 2018]
+    # years = [2016, 2017, 2018]
     allprocs = procs+extra_procs
 
     for year,proc in tqdm(list(itertools.product(years,allprocs))):
@@ -376,7 +414,31 @@ if __name__ == "__main__":
     # outputdir = "../limits/v3.05_allyears_ttwttz1p3_v2"
     # outputdir = "../limits/v3.05_allyears_19bins_v2"
     # outputdir = "../limits/v3.05_allyears_v1"
-    outputdir = "../limits/v3.09_v0/"
+    # outputdir = "../limits/v3.09_v0/"
 
-    make_root_files(inputdir, outputdir)
+    # make_root_files(inputdir, outputdir)
 
+    # write_one_file(
+    #         fname_in = "{}/output_{}_{}.root".format("outputs",2018,"fakes"),
+    #         fname_out = "{}/{}_histos_{}_{}.root".format("outputs","fakes","srhh".lower(),2018),
+    #         name = "fakes",
+    #         region = "srhh".upper(),
+    #         year = 2018,
+    #         )
+
+
+    verbose_ = True
+    year = 2016
+    inputdir = "outputs/"
+    region = "srcr"
+    proc = "fakes"
+    fname_in = "{}/output_{}_{}.root".format(inputdir,year,proc)
+    fname_out = "{}/{}_histos_{}_{}.root".format(inputdir,proc,region.lower(),year)
+    if verbose_: print "Converting {} -> {}".format(fname_in,fname_out)
+    write_one_file(
+            fname_in = fname_in,
+            fname_out = fname_out,
+            name = proc,
+            region = region.upper(),
+            year = year,
+            )

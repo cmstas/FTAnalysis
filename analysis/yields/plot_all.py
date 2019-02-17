@@ -283,6 +283,7 @@ def worker(info):
     for region in regions:
 
         title = region.upper()
+        lumi_ = str(lumi)
 
         region_for_hist = region[:]
         if region == "brpostfit":
@@ -321,6 +322,11 @@ def worker(info):
             # add flat systematic to stat unc in quadrature
             bg._errors = np.hypot(bg._counts*d_flat_systematics[analysis].get(bg.get_attr("dummy"),0.),bg._errors)
 
+        if analysis == "ss" and region in ["SRML","ml","mlonz","mloffz"]:
+            # remove flips and ww since they are 0 for multilepton regions
+            new_bgs = [bg for bg in bgs if (bg.get_attr("dummy") not in ["flips","ww"])]
+            bgs = new_bgs
+
         data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
 
         # if data.get_integral() < 1e-6: return
@@ -345,12 +351,14 @@ def worker(info):
             mpl_legend_params["ncol"] = 2
             mpl_legend_params["labelspacing"] = 0.12
 
+            if region == "SRLL" and lumi == "136.3": lumi_ = "131.5"
+
             data.poissonify()
 
-            sbgs = sum(bgs)
-            pulls = binomial_obs_z(data.counts,sbgs.counts,sbgs.errors)
-            mu_pulls = pulls.mean()
-            sig_pulls = pulls.std()
+            # sbgs = sum(bgs)
+            # pulls = binomial_obs_z(data.counts,sbgs.counts,sbgs.errors)
+            # mu_pulls = pulls.mean()
+            # sig_pulls = pulls.std()
 
             if year != 2016 and not unblindall:
                 data._counts *= 0.
@@ -363,8 +371,8 @@ def worker(info):
 
             if region in ["SRML","SRLM","SRLL","SRHL","SRHH"]:
                 xticks = range(1,70)
-                def ax_ratio_callback(ax):
-                    ax.text(0.18, -0.6,r"pulls $\mu,\sigma$ = {:.2f},{:.2f}".format(mu_pulls,sig_pulls), color="red", ha="center", va="center", fontsize=10.0, transform = ax.transAxes)
+                # def ax_ratio_callback(ax):
+                #     ax.text(0.18, -0.6,r"pulls $\mu,\sigma$ = {:.2f},{:.2f}".format(mu_pulls,sig_pulls), color="red", ha="center", va="center", fontsize=10.0, transform = ax.transAxes)
             # if region in ["SRML"]:
             #     def ax_ratio_callback(ax):
             #         ax.text(0.4, -0.6,"off-Z", color="blue", ha="center", va="center", fontsize=10.0, wrap=True, transform = ax.transAxes)
@@ -373,10 +381,9 @@ def worker(info):
             #         ax.text(0.18, -0.6,"pulls $\mu,\sigma$ = {:.2f},{:.2f}$".format(mu_pulls,sig_pulls), color="red", ha="center", va="center", fontsize=10.0, transform = ax.transAxes)
 
         elif region.lower() in ["sr","srdisc"]:
-            if not unblindall:
+            if not (unblindall or year == 2016):
                 data._counts *= 0.
                 data._errors *= 0.
-            if not unblindall:
                 data.set_attr("label", "Data (blind)")
             data.convert_to_poisson_errors()
             if var.lower() in ["total"]:
@@ -388,7 +395,7 @@ def worker(info):
                 xticks = ["CRZ"]+range(1,25)
 
         if (region.lower() in ["srcr"]) and (var.lower() in ["total"]):
-            if not unblindall:
+            if not (unblindall or year == 2016):
                 data._counts[2:] *= 0.
                 data._errors[2:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
@@ -397,7 +404,7 @@ def worker(info):
                 ax.set_yscale("log", nonposy='clip'),
             xticks = ["CRZ","CRW"]+range(1,20)
         if (var.lower() in ["disc"]) and (region.lower() not in ["ttwcr","ttzcr"]):
-            if not unblindall:
+            if not (unblindall or year == 2016):
                 data._counts[-10:] *= 0.
                 data._errors[-10:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
@@ -409,7 +416,7 @@ def worker(info):
         fnames.append(fname)
         plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
                    cms_type = "Preliminary",
-                   lumi = lumi,
+                   lumi = lumi_,
                    ratio_range=ratio_range,
                    sigs=sigs,
                    xticks=xticks,
@@ -451,7 +458,7 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
         for proc in d_label_colors[analysis].keys()+["data"]+signames_:
             # try:
             ystr = str(y)
-            if any(x in proc for x in ["fs_","rpv_"]): ystr = "2016"
+            # if any(x in proc for x in ["fs_","rpv_"]): ystr = "2016"
             files[y][proc] = uproot.open("{}/output_{}_{}.root".format(inputdir,ystr,proc))
             # except IOError:
             #     print("{}/output_{}_{}.root doesn't exist, but ignoring because it's probably signal".format(inputdir,y,proc))
@@ -485,6 +492,7 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
 
 if __name__ == "__main__":
 
+    # 131.5
 
     make_plots(
             outputdir="plots_temp",

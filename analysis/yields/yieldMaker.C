@@ -189,6 +189,7 @@ struct tree_t {
     TTree* out_tree;
     float tree_weight = -1.;
     TString tree_name = "";
+    int tree_year = -1;
     int tree_stype = -1;
     int tree_SR = -1;
     int tree_SRdisc = -1;
@@ -199,11 +200,13 @@ struct tree_t {
         out_tree = new TTree("t", "tree_yieldMaker");
         out_tree->Branch("weight" , &tree_weight );
         out_tree->Branch("name" , &tree_name );
+        out_tree->Branch("year" , &tree_year );
         out_tree->Branch("stype" , &tree_stype );
         out_tree->Branch("SR" , &tree_SR );
         out_tree->Branch("SRdisc" , &tree_SRdisc );
         out_tree->Branch("hyp_class" , &tree_hyp_class );
         tree_name = chainTitle;
+        tree_year = year;
         if (chainTitle == "tttt") tree_stype = 0;
         if (chainTitle == "fakes") tree_stype = 1;
         if (chainTitle == "flips") tree_stype = 2;
@@ -383,6 +386,7 @@ plots_t run(TChain *chain, int year, TString options);
 float calcDeltaPhi(float phi1, float phi2);
 float calcMT(float pt1, float phi1, float pt2, float phi2);
 float getSMSscale1fb();
+float getRPVscale1fb();
 float getWeightNormalization(int idx);
 std::pair<float,float> getTrijetDiscs(TMVA::Reader* reader);
 
@@ -612,6 +616,7 @@ plots_t run(TChain *chain, int year, TString options){
     int doFakes = 0;
     int exclude = 0;
     bool isFastsim = 0;
+    bool isRPV = 0;
     bool isGamma = 0;
     bool truthfake = 0;
     bool skipmatching = 0;
@@ -731,6 +736,10 @@ plots_t run(TChain *chain, int year, TString options){
     }
 
 
+    if (chainTitle.Contains("rpv_")) {
+        if (!quiet) std::cout << "RPV fullsim sample detected" << std::endl;
+        isRPV = true;
+    }
 
     if (chainTitle.Contains("fs_")) {
         if (!quiet) std::cout << "Fastsim sample detected" << std::endl;
@@ -746,23 +755,28 @@ plots_t run(TChain *chain, int year, TString options){
     bool istttt = (chainTitle=="tttt");
     bool isttVV = (chainTitle=="ttvv");
     bool isttW = (chainTitle=="ttw");
+    bool isWW = (chainTitle=="ww");
     bool isttZ = (chainTitle=="ttz");
     bool isWZ = (chainTitle=="wz");
     bool isXgamma = (chainTitle=="xg");
 
     float invFilterEff = 1.;
-    float weightScale = 1.;
+    // float weightScale = 1.;
     if (chainTitle.Contains("fs_t5qqqqvv")) {
-      invFilterEff = 9./4.;
+        // http://uaf-8.t2.ucsd.edu/~namin/dis/?query=%2FSMS-T5qqqqVV_TuneCUETP8M1_13TeV-madgraphMLM-pythia8%2FRunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1%2FMINIAODSIM&type=mcm&short=short
+        // Do we need the line below still? I think that was for filtering ncharginos (W's, so we would write it as T5qqqqWW, but now we're ok with WW,WZ,ZZ (VV))
+      // invFilterEff = 9./4.;
     }
     if (chainTitle.Contains("fs_t5qqqqvv_dm20")) {
-      invFilterEff = 9./4.;
+        // http://uaf-8.t2.ucsd.edu/~namin/dis/?query=%2FSMS-T5qqqqVV_dM20_TuneCUETP8M1_13TeV-madgraphMLM-pythia8%2FRunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1%2FMINIAODSIM&type=mcm&short=short
+        // Do we need the line below still? I think that was for filtering ncharginos (W's, so we would write it as T5qqqqWW, but now we're ok with WW,WZ,ZZ (VV))
+      // invFilterEff = 9./4.;
       invFilterEff *= 0.446; // efficiency of 1 lepton filter according to MCM for this sample
     }
-    if (chainTitle.Contains("rpv_")) {
-        // FIXME this is just an adhoc scaling since I don't have xsecs
-      weightScale = 0.000002;
-    }
+    // if (chainTitle.Contains("rpv_")) {
+    //     // FIXME this is just an adhoc scaling since I don't have xsecs
+    //   weightScale = 0.000002;
+    // }
 
     bool isHiggsScan = false;
     bool isHiggsPseudoscalar = false;
@@ -835,7 +849,7 @@ plots_t run(TChain *chain, int year, TString options){
     p_result.h_l1pt.Init("l1pt"         , chainTitle , 15 , 0    , 150);
     p_result.h_l2pt.Init("l2pt"         , chainTitle , 15 , 0    , 150);
     p_result.h_l3pt.Init("l3pt"         , chainTitle , 7  , 0    , 140);
-    p_result.h_met.Init("met", chainTitle, 20 , 0 , 500);
+    p_result.h_met.Init("met", chainTitle, 20 , 0 , 600);
     p_result.h_metnm1.Init("metnm1"     , chainTitle , 40 , 0    , 400);
     p_result.h_mid1.Init("mid1"         , chainTitle , 5  , -2   , 3);
     p_result.h_mid2.Init("mid2"         , chainTitle , 5  , -2   , 3);
@@ -1390,7 +1404,10 @@ plots_t run(TChain *chain, int year, TString options){
                 weight *= invFilterEff;
             }
 
-            weight *= weightScale;
+            if (isRPV) {
+                weight = getRPVscale1fb()*lumiAG;
+            }
+
 
             if (isHiggsScan) {
                 weight = higgs_weight*lumiAG;
@@ -1401,6 +1418,7 @@ plots_t run(TChain *chain, int year, TString options){
                 weight *= XSEC_TTTT / fabs(1000.0*ss::xsec());
             }
             weight*=scaleLumi;
+            // weight *= weightScale;
 
             float lep1ccpt = ss::lep1_coneCorrPt();
             float lep2ccpt = ss::lep2_coneCorrPt();
@@ -1456,6 +1474,10 @@ plots_t run(TChain *chain, int year, TString options){
                     weight *= 1-0.116;
                 }
             }
+            region_t categ_unc_up = categ;
+            region_t categ_unc_dn = categ;
+            region_t categ_JER_up = categ;
+            region_t categ_JER_dn = categ;
 
 
             // // FIXME
@@ -1515,6 +1537,31 @@ plots_t run(TChain *chain, int year, TString options){
               weight_isr_up_alt *= ss::weight_isr_UP()*fastsim_isr_norm_up;
               weight_isr_dn_alt *= ss::weight_isr_DN()*fastsim_isr_norm_down;
             }
+            // FIXME
+            // FIXME
+            // FIXME
+            // FIXME
+            // FIXME
+            // FIXME
+            // FIXME
+            // FIXME
+            // if (isttW) {
+            //     // later on in a script, we take 50% of the effect as unc, and since we scale
+            //     // nominal weight, scale up twice
+            //     float w = isrWeight(year, ss::nisrMatch(), 1);
+            //     weight_isr_up_alt *= w*w;
+            //     weight *= w;
+            // }
+            // if (isttZ) {
+            //     float w = isrWeight(year, ss::nisrMatch(), 2);
+            //     weight_isr_up_alt *= w*w;
+            //     weight *= w;
+            // }
+            // if (istt) {
+            //     float w = isrWeight(year, ss::nisrMatch(), 10);
+            //     weight_isr_up_alt *= w*w;
+            //     weight *= w;
+            // }
 #else
             float weight_isr_up_alt = weight;
             if (isttW) {
@@ -1556,28 +1603,33 @@ plots_t run(TChain *chain, int year, TString options){
             // Done modifying weights, so consider up and down variations
 
             // Trigger stuff
-            float weight_trigger_up_alt = 1.;
-            float weight_trigger_dn_alt = 1.;
+            float weight_trigger_up_alt = weight;
+            float weight_trigger_dn_alt = weight;
 
             // Prefire stuff
-            float weight_prefire_up_alt = 1.;
-            float weight_prefire_dn_alt = 1.;
+            float weight_prefire_up_alt = weight;
+            float weight_prefire_dn_alt = weight;
 
             if (ss::is_real_data()==0) {
 
                 // Prefire
-                // weight_prefire_up_alt = weight*ss::prefire_sfup()/ss::prefire_sf();
-                // weight_prefire_dn_alt = weight*ss::prefire_sfdown()/ss::prefire_sf();
-                weight_prefire_up_alt = weight; // FIXME starting only in v3.23 tags
-                weight_prefire_dn_alt = weight; // FIXME
+                weight_prefire_up_alt = weight*ss::prefire_sfup()/ss::prefire_sf();
+                weight_prefire_dn_alt = weight*ss::prefire_sfdown()/ss::prefire_sf();
+                // weight_prefire_up_alt = weight; // FIXME starting only in v3.23 tags
+                // weight_prefire_dn_alt = weight; // FIXME
 
                 // Trigger
+                weight_trigger_up_alt = weight;
+                weight_trigger_dn_alt = weight;
                 if ((isSS and (categ==Multilepton)) || (!isSS and lep3good and lep3ccpt>20)) {
                     weight_trigger_up_alt = weight*1.02;
                     weight_trigger_dn_alt = weight/1.02;
                 } else {
-                    weight_trigger_up_alt = weight/nomtrigsf*triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht(), analysis, 1);
-                    weight_trigger_dn_alt = weight/nomtrigsf*triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht(), analysis, -1);
+                    if (year == 2016 and analysis == FTANA) nomtrigsf = triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht(), analysis, 2);
+                    if (nomtrigsf >= 1.e-4) {
+                        weight_trigger_up_alt = weight/nomtrigsf*triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht(), analysis, 1);
+                        weight_trigger_dn_alt = weight/nomtrigsf*triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht(), analysis, -1);
+                    }
                 }
 
             }
@@ -1658,6 +1710,8 @@ plots_t run(TChain *chain, int year, TString options){
                     }
                 }
             }
+            if (doFlips and isSS and (categ == Multilepton)) continue; // no flips for multilepton regions
+            if (isWW and isSS and (categ == Multilepton)) continue; // no ww for multilepton regions
 #else
             if (!doFlips && !doFakes && exclude == 0 && !truthfake) {
                 if (ss::hyp_class() != ssclass && !isClass6) continue;
@@ -1932,6 +1986,9 @@ plots_t run(TChain *chain, int year, TString options){
             // }
             int SR_unc_up = signal_region_ss(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
             int SR_unc_dn = signal_region_ss(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
+            // JEC can migrate between low and high MET categories (HH and LM)
+            categ_unc_up = analysis_category_ss(lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, ss::ht_unc_up(), ss::met_unc_up());
+            categ_unc_dn = analysis_category_ss(lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, ss::ht_unc_dn(), ss::met_unc_dn());
 #else
             int SR_unc_up = signal_region_ft(ss::njets_unc_up(), ss::nbtags_unc_up(), ss::met_unc_up(), ss::ht_unc_up(), mtmin_unc_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
             int SR_unc_dn = signal_region_ft(ss::njets_unc_dn(), ss::nbtags_unc_dn(), ss::met_unc_dn(), ss::ht_unc_dn(), mtmin_unc_dn, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
@@ -1957,6 +2014,9 @@ plots_t run(TChain *chain, int year, TString options){
 #ifdef SSLOOP
                 SR_JER_up = signal_region_ss(ss::njets_JER_up(), ss::nbtags_JER_up(),     met_JER_up  , ss::ht_JER_up(), mtmin_JER_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
                 SR_JER_dn = signal_region_ss(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6, mtnonz);
+                // JER can migrate between low and high MET categories (HH and LM)
+                categ_JER_up = analysis_category_ss(lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, ss::ht_JER_up(), met_JER_up);
+                categ_JER_dn = analysis_category_ss(lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, ss::ht_JER_dn(), ss::met_JER_dn());
 #else
                 SR_JER_up = signal_region_ft(ss::njets_JER_up(), ss::nbtags_JER_up(),     met_JER_up  , ss::ht_JER_up(), mtmin_JER_up, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
                 SR_JER_dn = signal_region_ft(ss::njets_JER_dn(), ss::nbtags_JER_dn(), ss::met_JER_dn(), ss::ht_JER_dn(), mtmin_JER_dn, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt,  nleps, isClass6);
@@ -1990,8 +2050,10 @@ plots_t run(TChain *chain, int year, TString options){
                 float f_detal1l2 = ss::bdt_detal1l2();
                 float f_ptj8 = ss::bdt_ptj8();
                 float f_ptl3 = ss::bdt_ptl3();
-                mvavalue = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
-                // mvavalue = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+
+                bool dotestbdt = false;
+                if (dotestbdt) mvavalue = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                else mvavalue = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
 
                 f_nbtags = ss::bdt_jec_up_nbtags();
                 f_njets = ss::bdt_jec_up_njets();
@@ -1999,8 +2061,8 @@ plots_t run(TChain *chain, int year, TString options){
                 f_htb = ss::bdt_jec_up_htb();
                 f_nlb40 = ss::bdt_jec_up_nlb40();
                 f_ntb40 = ss::bdt_jec_up_ntb40();
-                mvavalueup = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
-                // mvavalueup = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                if (dotestbdt) mvavalueup = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                else mvavalueup = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
 
                 f_nbtags = ss::bdt_jec_dn_nbtags();
                 f_njets = ss::bdt_jec_dn_njets();
@@ -2008,8 +2070,8 @@ plots_t run(TChain *chain, int year, TString options){
                 f_htb = ss::bdt_jec_dn_htb();
                 f_nlb40 = ss::bdt_jec_dn_nlb40();
                 f_ntb40 = ss::bdt_jec_dn_ntb40();
-                mvavaluedn = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
-                // mvavaluedn = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                if (dotestbdt) mvavaluedn = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                else mvavaluedn = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
 
                 f_nbtags = ss::bdt_jer_up_nbtags();
                 f_njets = ss::bdt_jer_up_njets();
@@ -2017,8 +2079,8 @@ plots_t run(TChain *chain, int year, TString options){
                 f_htb = ss::bdt_jer_up_htb();
                 f_nlb40 = ss::bdt_jer_up_nlb40();
                 f_ntb40 = ss::bdt_jer_up_ntb40();
-                mvavalueJERup = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
-                // mvavalueJERup = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                if (dotestbdt) mvavalueJERup = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                else mvavalueJERup = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
 
                 f_nbtags = ss::bdt_jer_dn_nbtags();
                 f_njets = ss::bdt_jer_dn_njets();
@@ -2026,8 +2088,8 @@ plots_t run(TChain *chain, int year, TString options){
                 f_htb = ss::bdt_jer_dn_htb();
                 f_nlb40 = ss::bdt_jer_dn_nlb40();
                 f_ntb40 = ss::bdt_jer_dn_ntb40();
-                mvavalueJERdn = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
-                // mvavalueJERdn = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                if (dotestbdt) mvavalueJERdn = testbdt::get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                else mvavalueJERdn = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
 
                 p_result.h_disc.br->Fill(mvavalue,weight);
             }
@@ -2076,10 +2138,10 @@ plots_t run(TChain *chain, int year, TString options){
 #endif
 
 #ifdef SSLOOP
-            if (isData == 0 && SR_unc_up > 0) p_result.p_jes_alt_up_SR.CatFill(categ, SR_unc_up, weight);
-            if (isData == 0 && SR_unc_dn > 0) p_result.p_jes_alt_dn_SR.CatFill(categ, SR_unc_dn, weight);
-            if (isData == 0 && SR_JER_up > 0) p_result.p_jer_alt_up_SR.CatFill(categ, SR_JER_up, weight);
-            if (isData == 0 && SR_JER_dn > 0) p_result.p_jer_alt_dn_SR.CatFill(categ, SR_JER_dn, weight);
+            if (isData == 0 && SR_unc_up > 0) p_result.p_jes_alt_up_SR.CatFill(categ_unc_up, SR_unc_up, weight);
+            if (isData == 0 && SR_unc_dn > 0) p_result.p_jes_alt_dn_SR.CatFill(categ_unc_dn, SR_unc_dn, weight);
+            if (isData == 0 && SR_JER_up > 0) p_result.p_jer_alt_up_SR.CatFill(categ_JER_up, SR_JER_up, weight);
+            if (isData == 0 && SR_JER_dn > 0) p_result.p_jer_alt_dn_SR.CatFill(categ_JER_dn, SR_JER_dn, weight);
             if (isData == 0 && SRgenmet > 0) p_result.p_met_alt_up_SR.CatFill(categ, SRgenmet, weight);
             if (doFakes == 1 && SR >= 0) p_result.p_fake_alt_up_SR.CatFill(categ, SR, weight_alt_FR);
             if (doFakes == 1 && SR >= 0 && ss::is_real_data()) p_result.p_fake_unw_up_SR.CatFill(categ, SR, weight > 0 ? 1 : 0);
@@ -2095,6 +2157,10 @@ plots_t run(TChain *chain, int year, TString options){
             if (isFastsim && SR >= 0) p_result.p_isr_alt_dn_SR.CatFill(categ, SR, weight_isr_dn_alt);
             if (isData == 0 && SR >= 0) p_result.p_bb_alt_up_SR.CatFill(categ, SR, weight_bb_up_alt);
             if (isData == 0 && SR >= 0) p_result.p_lep_alt_up_SR.CatFill(categ, SR, weight_lep_up_alt);
+            if (isData  == 0 && SR >= 0) p_result.p_prefire_alt_up_SR.CatFill(categ, SR, weight_prefire_up_alt);
+            if (isData  == 0 && SR >= 0) p_result.p_prefire_alt_dn_SR.CatFill(categ, SR, weight_prefire_dn_alt);
+            if (isData  == 0 && SR >= 0) p_result.p_trigger_alt_up_SR.CatFill(categ, SR, weight_trigger_up_alt);
+            if (isData  == 0 && SR >= 0) p_result.p_trigger_alt_dn_SR.CatFill(categ, SR, weight_trigger_dn_alt);
             if (SR > 0) {
                 p_result.p_scale_alt_up_SR.CatFill(categ, SR, (ss::weight_scale_UP() > -9000 ? ss::weight_scale_UP()/norm_scale_up : 1.0)*weight);
                 p_result.p_scale_alt_dn_SR.CatFill(categ, SR, (ss::weight_scale_DN() > -9000 ? ss::weight_scale_DN()/norm_scale_dn : 1.0)*weight);
@@ -2122,6 +2188,10 @@ plots_t run(TChain *chain, int year, TString options){
 
             // Only plot 3rd lepton if event is in ML region
             bool plotlep3 = categ == Multilepton;
+
+            // if (ss::is_real_data() and !doFakes and !doFlips and categ == HighHigh and (SR==52 or SR==53)) {
+            //     std::cout <<  " ss::run(): " << ss::run() <<  " ss::lumi(): " << ss::lumi() <<  " ss::event(): " << ss::event() <<  " nleps: " << nleps <<  " SR: " << SR <<  " categ: " << categ <<  " lep1ccpt: " << lep1ccpt <<  " lep2ccpt: " << lep2ccpt <<  " lep1eta: " << lep1eta <<  " lep2eta: " << lep2eta <<  " lep1id: " << lep1id <<  " lep2id: " << lep2id <<  " lep1phi: " << lep1phi <<  " lep2phi: " << lep2phi <<  " mtmin: " << mtmin <<  " ss::njets(): " << ss::njets() <<  " ss::nbtags(): " << ss::nbtags() <<  " ss::met(): " << ss::met() <<  " ss::ht(): " << ss::ht() <<  " year: " << year <<  " ss::hyp_class(): " << ss::hyp_class() <<  std::endl;
+            // }
 
             // if (categ == LowMet) {
             //     if (ss::is_real_data() and !doFakes and !doFlips and year==2016) {
@@ -2259,10 +2329,10 @@ plots_t run(TChain *chain, int year, TString options){
                     p_result.p_alphas_alt_dn_SR.CatFill(1, SR,    (ss::weight_alphas_DN() > -9000 ? ss::weight_alphas_DN() : 1.0)*weight);
                     p_result.p_pdf_alt_up_SR.CatFill(1, SR,      (ss::weight_pdf_UP() > -9000 ? ss::weight_pdf_UP()/norm_pdf_up : 1.0)*weight);
                     p_result.p_pdf_alt_dn_SR.CatFill(1, SR,      (ss::weight_pdf_DN() > -9000 ? ss::weight_pdf_DN()/norm_pdf_dn : 1.0)*weight);
-                    p_result.p_isrvar_alt_up_SR.CatFill(1, SR      , ss::weight_isrvar_UP()*weight);
-                    p_result.p_isrvar_alt_dn_SR.CatFill(1, SR      , ss::weight_isrvar_DN()*weight);
-                    p_result.p_fsrvar_alt_up_SR.CatFill(1, SR      , ss::weight_fsrvar_UP()*weight);
-                    p_result.p_fsrvar_alt_dn_SR.CatFill(1, SR      , ss::weight_fsrvar_DN()*weight);
+                    p_result.p_isrvar_alt_up_SR.CatFill(1, SR      , (year != 2018 ? ss::weight_isrvar_UP()*weight : weight));
+                    p_result.p_isrvar_alt_dn_SR.CatFill(1, SR      , (year != 2018 ? ss::weight_isrvar_DN()*weight : weight));
+                    p_result.p_fsrvar_alt_up_SR.CatFill(1, SR      , (year != 2018 ? ss::weight_fsrvar_UP()*weight : weight));
+                    p_result.p_fsrvar_alt_dn_SR.CatFill(1, SR      , (year != 2018 ? ss::weight_fsrvar_DN()*weight : weight));
                 // }
             }
             if (SRdisc >= 0) {
@@ -2291,10 +2361,10 @@ plots_t run(TChain *chain, int year, TString options){
                     p_result.p_alphas_alt_dn_SR.CatFill(2, SRdisc,    (ss::weight_alphas_DN() > -9000 ? ss::weight_alphas_DN() : 1.0)*weight);
                     p_result.p_pdf_alt_up_SR.CatFill(2, SRdisc,      (ss::weight_pdf_UP() > -9000 ? ss::weight_pdf_UP()/norm_pdf_up : 1.0)*weight);
                     p_result.p_pdf_alt_dn_SR.CatFill(2, SRdisc,      (ss::weight_pdf_DN() > -9000 ? ss::weight_pdf_DN()/norm_pdf_dn : 1.0)*weight);
-                    p_result.p_isrvar_alt_up_SR.CatFill(2, SRdisc, ss::weight_isrvar_UP()*weight);
-                    p_result.p_isrvar_alt_dn_SR.CatFill(2, SRdisc, ss::weight_isrvar_DN()*weight);
-                    p_result.p_fsrvar_alt_up_SR.CatFill(2, SRdisc, ss::weight_fsrvar_UP()*weight);
-                    p_result.p_fsrvar_alt_dn_SR.CatFill(2, SRdisc, ss::weight_fsrvar_DN()*weight);
+                    p_result.p_isrvar_alt_up_SR.CatFill(2, SRdisc, (year != 2018 ? ss::weight_isrvar_UP()*weight : weight));
+                    p_result.p_isrvar_alt_dn_SR.CatFill(2, SRdisc, (year != 2018 ? ss::weight_isrvar_DN()*weight : weight));
+                    p_result.p_fsrvar_alt_up_SR.CatFill(2, SRdisc, (year != 2018 ? ss::weight_fsrvar_UP()*weight : weight));
+                    p_result.p_fsrvar_alt_dn_SR.CatFill(2, SRdisc, (year != 2018 ? ss::weight_fsrvar_DN()*weight : weight));
                 // }
             }
 
@@ -2568,6 +2638,15 @@ float getSMSscale1fb() {
         exit(1);
     }
     float count = h_counts->GetBinContent(h_counts->FindBin(ss::sparms()[0],ss::sparms()[1]));
+    return 1000.0*ss::xsec()/count;
+}
+
+float getRPVscale1fb() {
+    if (!h_counts) {
+        std::cerr << "Count histogram (h_counts) isn't loaded!" << std::endl;
+        exit(1);
+    }
+    float count = h_counts->GetBinContent(h_counts->FindBin(1,1));
     return 1000.0*ss::xsec()/count;
 }
 
