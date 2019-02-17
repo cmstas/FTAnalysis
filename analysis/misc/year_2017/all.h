@@ -9,6 +9,7 @@ namespace allpt {
 #include "flip_rates.h"
 #include "lepton_sf.h"
 #include "puw.h"
+// #include "new_puw.h" // FIXME
 #include "trigger_sf.h"
 #include "isr_weights.h"
 float getLumi() { return 41.53; }
