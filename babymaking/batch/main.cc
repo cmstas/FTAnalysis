@@ -268,8 +268,10 @@ int main(int argc, char *argv[]){
 
     if (filenames.Contains("/SMS")) {
         if (filenames.Contains("SMS-T1tttt_")) iSignal = 1;
-        else if (filenames.Contains("SMS-T5qqqqVV_Tune")) iSignal = 2;
-        else if (filenames.Contains("SMS-T5qqqqVV_dM20_Tune")) iSignal = 3;
+        else if (filenames.Contains("SMS-T5qqqqVV_")) {
+            iSignal = 2;
+            if (filenames.Contains("_dM20_")) iSignal = 3;
+        }
         else if (filenames.Contains("SMS-T6ttWW")) iSignal = 10;
         else if (filenames.Contains("SMS-T1ttbb_Tune")) iSignal = 6;
         else if (filenames.Contains("SMS-T5tttt_dM175_Tune")) iSignal = 5;
