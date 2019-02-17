@@ -355,6 +355,16 @@ def write_one_file(fname_in, fname_out, name, region, year):
         h_syst_up.Write()
         h_syst_down.Write()
 
+        # FR lnN 1.3 separately for Nb0,1,2,>=3
+        for i in [0,1,2,3]:
+            h_alt = fin.Get("{}_FRNORMNB{}_TOTAL_{}".format(region,i,name))
+            h_syst_up = h_alt.Clone("fakes_normNB{}Up".format(i))
+            h_syst_down = h_alt.Clone("fakes_normNB{}Down".format(i))
+            fill_down_mirror_up(h_nominal,h_syst_up,h_syst_down)
+            h_syst_up.Write()
+            h_syst_down.Write()
+
+
         # Raw counts for gmN
         h_alt = fin.Get("{}_UNWFR_TOTAL_{}".format(region,name))
         h_counts = h_alt.Clone("fakes_unwcounts")

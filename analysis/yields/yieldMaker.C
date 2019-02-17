@@ -252,6 +252,10 @@ struct plots_t  {
     SR_t p_btagSFlight_alt_up_SR;
     SR_t p_btagSFlight_alt_dn_SR;
     SR_t p_fake_alt_up_SR  ;
+    SR_t p_fake_nb0_up_SR  ;
+    SR_t p_fake_nb1_up_SR  ;
+    SR_t p_fake_nb2_up_SR  ;
+    SR_t p_fake_nb3_up_SR  ;
     SR_t p_fake_unw_up_SR  ;
     SR_t p_fsrvar_alt_dn_SR;
     SR_t p_fsrvar_alt_up_SR;
@@ -548,6 +552,10 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
     plots.p_btagSFlight_alt_up_SR.Write();
     plots.p_btagSFlight_alt_dn_SR.Write();
     plots.p_fake_alt_up_SR.Write();
+    plots.p_fake_nb0_up_SR.Write();
+    plots.p_fake_nb1_up_SR.Write();
+    plots.p_fake_nb2_up_SR.Write();
+    plots.p_fake_nb3_up_SR.Write();
     plots.p_fake_unw_up_SR.Write();
     plots.p_fsrvar_alt_dn_SR.Write();
     plots.p_fsrvar_alt_up_SR.Write();
@@ -965,6 +973,37 @@ plots_t run(TChain *chain, int year, TString options){
         p_result.p_fake_alt_up_SR.ML        = new TH1F(Form("SRML_FR_TOTAL_%s"      , chainTitleCh) , Form("SRML_FR_TOTAL_%s"      , chainTitleCh) , nMLsr   , 0.5, nMLsr+0.5 ); p_result.p_fake_alt_up_SR.ML->SetDirectory(0);
         p_result.p_fake_alt_up_SR.LM        = new TH1F(Form("SRLM_FR_TOTAL_%s"      , chainTitleCh) , Form("SRLM_FR_TOTAL_%s"      , chainTitleCh) , nLMsr   , 0.5, nLMsr+0.5 ); p_result.p_fake_alt_up_SR.LM->SetDirectory(0);
     }
+    //For FR lnN1.3 separately for Nb0,1,2,3+
+    if (doFakes == 1) {
+        p_result.p_fake_nb0_up_SR.SRCR      = new TH1F(Form("SRCR_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , Form("SRCR_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , nsr     , 0.5, nsr+0.5 );     p_result.p_fake_nb0_up_SR.SRCR->SetDirectory(0);
+        p_result.p_fake_nb0_up_SR.SRDISC    = new TH1F(Form("SRDISC_FRNORMNB0_TOTAL_%s"    , chainTitleCh) , Form("SRDISC_FRNORMNB0_TOTAL_%s"    , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 ); p_result.p_fake_nb0_up_SR.SRDISC->SetDirectory(0);
+        p_result.p_fake_nb0_up_SR.HH        = new TH1F(Form("SRHH_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , Form("SRHH_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , nHHsr   , 0.5, nHHsr+0.5 );   p_result.p_fake_nb0_up_SR.HH->SetDirectory(0);
+        p_result.p_fake_nb0_up_SR.HL        = new TH1F(Form("SRHL_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , Form("SRHL_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , nHLsr   , 0.5, nHLsr+0.5 );   p_result.p_fake_nb0_up_SR.HL->SetDirectory(0);
+        p_result.p_fake_nb0_up_SR.LL        = new TH1F(Form("SRLL_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , Form("SRLL_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , nLLsr   , 0.5, nLLsr+0.5 );   p_result.p_fake_nb0_up_SR.LL->SetDirectory(0);
+        p_result.p_fake_nb0_up_SR.ML        = new TH1F(Form("SRML_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , Form("SRML_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , nMLsr   , 0.5, nMLsr+0.5 );   p_result.p_fake_nb0_up_SR.ML->SetDirectory(0);
+        p_result.p_fake_nb0_up_SR.LM        = new TH1F(Form("SRLM_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , Form("SRLM_FRNORMNB0_TOTAL_%s"      , chainTitleCh) , nLMsr   , 0.5, nLMsr+0.5 );   p_result.p_fake_nb0_up_SR.LM->SetDirectory(0);
+        p_result.p_fake_nb1_up_SR.SRCR      = new TH1F(Form("SRCR_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , Form("SRCR_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , nsr     , 0.5, nsr+0.5 );     p_result.p_fake_nb1_up_SR.SRCR->SetDirectory(0);
+        p_result.p_fake_nb1_up_SR.SRDISC    = new TH1F(Form("SRDISC_FRNORMNB1_TOTAL_%s"    , chainTitleCh) , Form("SRDISC_FRNORMNB1_TOTAL_%s"    , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 ); p_result.p_fake_nb1_up_SR.SRDISC->SetDirectory(0);
+        p_result.p_fake_nb1_up_SR.HH        = new TH1F(Form("SRHH_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , Form("SRHH_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , nHHsr   , 0.5, nHHsr+0.5 );   p_result.p_fake_nb1_up_SR.HH->SetDirectory(0);
+        p_result.p_fake_nb1_up_SR.HL        = new TH1F(Form("SRHL_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , Form("SRHL_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , nHLsr   , 0.5, nHLsr+0.5 );   p_result.p_fake_nb1_up_SR.HL->SetDirectory(0);
+        p_result.p_fake_nb1_up_SR.LL        = new TH1F(Form("SRLL_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , Form("SRLL_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , nLLsr   , 0.5, nLLsr+0.5 );   p_result.p_fake_nb1_up_SR.LL->SetDirectory(0);
+        p_result.p_fake_nb1_up_SR.ML        = new TH1F(Form("SRML_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , Form("SRML_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , nMLsr   , 0.5, nMLsr+0.5 );   p_result.p_fake_nb1_up_SR.ML->SetDirectory(0);
+        p_result.p_fake_nb1_up_SR.LM        = new TH1F(Form("SRLM_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , Form("SRLM_FRNORMNB1_TOTAL_%s"      , chainTitleCh) , nLMsr   , 0.5, nLMsr+0.5 );   p_result.p_fake_nb1_up_SR.LM->SetDirectory(0);
+        p_result.p_fake_nb2_up_SR.SRCR      = new TH1F(Form("SRCR_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , Form("SRCR_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , nsr     , 0.5, nsr+0.5 );     p_result.p_fake_nb2_up_SR.SRCR->SetDirectory(0);
+        p_result.p_fake_nb2_up_SR.SRDISC    = new TH1F(Form("SRDISC_FRNORMNB2_TOTAL_%s"    , chainTitleCh) , Form("SRDISC_FRNORMNB2_TOTAL_%s"    , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 ); p_result.p_fake_nb2_up_SR.SRDISC->SetDirectory(0);
+        p_result.p_fake_nb2_up_SR.HH        = new TH1F(Form("SRHH_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , Form("SRHH_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , nHHsr   , 0.5, nHHsr+0.5 );   p_result.p_fake_nb2_up_SR.HH->SetDirectory(0);
+        p_result.p_fake_nb2_up_SR.HL        = new TH1F(Form("SRHL_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , Form("SRHL_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , nHLsr   , 0.5, nHLsr+0.5 );   p_result.p_fake_nb2_up_SR.HL->SetDirectory(0);
+        p_result.p_fake_nb2_up_SR.LL        = new TH1F(Form("SRLL_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , Form("SRLL_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , nLLsr   , 0.5, nLLsr+0.5 );   p_result.p_fake_nb2_up_SR.LL->SetDirectory(0);
+        p_result.p_fake_nb2_up_SR.ML        = new TH1F(Form("SRML_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , Form("SRML_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , nMLsr   , 0.5, nMLsr+0.5 );   p_result.p_fake_nb2_up_SR.ML->SetDirectory(0);
+        p_result.p_fake_nb2_up_SR.LM        = new TH1F(Form("SRLM_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , Form("SRLM_FRNORMNB2_TOTAL_%s"      , chainTitleCh) , nLMsr   , 0.5, nLMsr+0.5 );   p_result.p_fake_nb2_up_SR.LM->SetDirectory(0);
+        p_result.p_fake_nb3_up_SR.SRCR      = new TH1F(Form("SRCR_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , Form("SRCR_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , nsr     , 0.5, nsr+0.5 );     p_result.p_fake_nb3_up_SR.SRCR->SetDirectory(0);
+        p_result.p_fake_nb3_up_SR.SRDISC    = new TH1F(Form("SRDISC_FRNORMNB3_TOTAL_%s"    , chainTitleCh) , Form("SRDISC_FRNORMNB3_TOTAL_%s"    , chainTitleCh) , nsrdisc , 0.5, nsrdisc+0.5 ); p_result.p_fake_nb3_up_SR.SRDISC->SetDirectory(0);
+        p_result.p_fake_nb3_up_SR.HH        = new TH1F(Form("SRHH_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , Form("SRHH_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , nHHsr   , 0.5, nHHsr+0.5 );   p_result.p_fake_nb3_up_SR.HH->SetDirectory(0);
+        p_result.p_fake_nb3_up_SR.HL        = new TH1F(Form("SRHL_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , Form("SRHL_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , nHLsr   , 0.5, nHLsr+0.5 );   p_result.p_fake_nb3_up_SR.HL->SetDirectory(0);
+        p_result.p_fake_nb3_up_SR.LL        = new TH1F(Form("SRLL_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , Form("SRLL_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , nLLsr   , 0.5, nLLsr+0.5 );   p_result.p_fake_nb3_up_SR.LL->SetDirectory(0);
+        p_result.p_fake_nb3_up_SR.ML        = new TH1F(Form("SRML_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , Form("SRML_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , nMLsr   , 0.5, nMLsr+0.5 );   p_result.p_fake_nb3_up_SR.ML->SetDirectory(0);
+        p_result.p_fake_nb3_up_SR.LM        = new TH1F(Form("SRLM_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , Form("SRLM_FRNORMNB3_TOTAL_%s"      , chainTitleCh) , nLMsr   , 0.5, nLMsr+0.5 );   p_result.p_fake_nb3_up_SR.LM->SetDirectory(0);
+    }
     //For unw FR application counts
     if (doFakes == 1) {
         p_result.p_fake_unw_up_SR.SRCR        = new TH1F(Form("SRCR_UNWFR_TOTAL_%s"      , chainTitleCh) , Form("SRCR_UNWFR_TOTAL_%s"      , chainTitleCh) , nsr   , 0.5, nsr+0.5 ); p_result.p_fake_unw_up_SR.SRCR->SetDirectory(0);
@@ -1272,6 +1311,10 @@ plots_t run(TChain *chain, int year, TString options){
     p_result.p_pu_alt_dn_SR.InitHistError(doPoisson);
     p_result.p_fake_unw_up_SR.InitHistError(doPoisson);
     p_result.p_fake_alt_up_SR.InitHistError(doPoisson);
+    p_result.p_fake_nb0_up_SR.InitHistError(doPoisson);
+    p_result.p_fake_nb1_up_SR.InitHistError(doPoisson);
+    p_result.p_fake_nb2_up_SR.InitHistError(doPoisson);
+    p_result.p_fake_nb3_up_SR.InitHistError(doPoisson);
     p_result.p_pdf_alt_up_SR.InitHistError(doPoisson);
     p_result.p_pdf_alt_dn_SR.InitHistError(doPoisson);
     p_result.p_scale_alt_up_SR.InitHistError(doPoisson);
@@ -2144,6 +2187,10 @@ plots_t run(TChain *chain, int year, TString options){
             if (isData == 0 && SR_JER_dn > 0) p_result.p_jer_alt_dn_SR.CatFill(categ_JER_dn, SR_JER_dn, weight);
             if (isData == 0 && SRgenmet > 0) p_result.p_met_alt_up_SR.CatFill(categ, SRgenmet, weight);
             if (doFakes == 1 && SR >= 0) p_result.p_fake_alt_up_SR.CatFill(categ, SR, weight_alt_FR);
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb0_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 0 ? 1.3 : 1);
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb1_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 1 ? 1.3 : 1);
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb2_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 2 ? 1.3 : 1);
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb3_up_SR.CatFill(categ, SR, weight*(ss::nbtags() >= 3 ? 1.3 : 1);
             if (doFakes == 1 && SR >= 0 && ss::is_real_data()) p_result.p_fake_unw_up_SR.CatFill(categ, SR, weight > 0 ? 1 : 0);
             if (isData == 0 && SR >= 0) p_result.p_btagSF_alt_up_SR.CatFill(categ, SR, weight_btag_up_alt);
             if (isData == 0 && SR >= 0) p_result.p_btagSF_alt_dn_SR.CatFill(categ, SR, weight_btag_dn_alt);
