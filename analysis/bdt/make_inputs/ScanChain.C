@@ -25,6 +25,8 @@ using namespace std;
 
 int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
 
+    ana_t analysis = FTANA;
+
     int tree_year = -1;
     int tree_stype = -1;
     float tree_weight = -1;
@@ -94,6 +96,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     if (proc == "xg")    tree_stype = 6;
     if (proc == "ttvv")  tree_stype = 7;
     if (proc == "rares") tree_stype = 8;
+
+    bool useTTBB = (proc == "ttw") || (proc == "ttz") || (proc == "tth") || (proc == "fakes");
 
     TFile* out_file = new TFile(Form("%s/output_%s.root",outputdir.Data(),proc.Data()), "RECREATE");
     out_file->cd();
@@ -176,6 +180,16 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
             // float weight = ss::is_real_data() ? 1.0 : lumi*(ss::scale1fb())*ss::weight_btagsf();
             float weight = ss::is_real_data() ? 1.0 : lumi*(ss::scale1fb());
 
+            if (!ss::is_real_data()) {
+                weight *= getTruePUw(tree_year, ss::trueNumInt()[0]);
+                if (ss::lep1_passes_id()) weight *= leptonScaleFactor(tree_year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
+                if (ss::lep2_passes_id()) weight *= leptonScaleFactor(tree_year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                weight *= ss::weight_btagsf();
+                if (tree_year == 2016) weight *= ss::prefire2016_sf();
+                if (tree_year == 2017) weight *= ss::prefire2017_sf();
+                if (useTTBB and (ss::extragenb() >= 2)) weight *= 1.7;
+            }
+
             if (tree_stype == 5) {
                 // Flips
                 if (ss::hyp_class() != 4) continue;
@@ -196,12 +210,12 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
                 bool found_fake = false;
                 if (!ss::lep1_passes_id() && ss::lep1_p4().pt()>min_pt_fake) {
                     found_fake = true;
-                    float fr = fakeRate(tree_year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
+                    float fr = fakeRate(tree_year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht(), analysis);
                     weight *= fr/(1.-fr);
                 }
                 if (!ss::lep2_passes_id() && ss::lep2_p4().pt()>min_pt_fake) {
                     found_fake = true;
-                    float fr = fakeRate(tree_year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                    float fr = fakeRate(tree_year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht(), analysis);
                     weight *= fr/(1.-fr);
                 }
                 if (!found_fake) continue;
@@ -209,7 +223,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
                 if (tree_stype == 0 && allowOSsignal) {
                     if (!(ss::hyp_class() == 3 || ss::hyp_class() == 4)) continue;
                 } else {
-                    // Tight
                     if (ss::hyp_class() != 3) continue;
                 }
             }
@@ -223,7 +236,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
             //     if (ngoodlegs == 2) continue;
             // }
 
-            bool br = passes_baseline(
+            bool br = passes_baseline_ft(
                     ss::njets(),
                     ss::nbtags(),
                     ss::met(),
@@ -237,7 +250,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
                 br = br && (ss::hyp_class() == 3);
             }
 
-            int SR = signalRegionTest(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::mtmin(), ss::lep1_id(), ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(), ss::lep3_coneCorrPt(), ss::bdt_nleps(), ss::hyp_class() == 6);
+            int SR = signal_region_ft(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::mtmin(), ss::lep1_id(), ss::lep2_id(), ss::lep1_coneCorrPt(), ss::lep2_coneCorrPt(), ss::lep3_coneCorrPt(), ss::bdt_nleps(), ss::hyp_class() == 6);
 
 
             tree_nbtags = ss::bdt_nbtags();
@@ -271,7 +284,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
             tree_class = ss::hyp_class();
             tree_br = br;
 
-            tree_disc_tmva = reader.EvaluateMVA("BDT");
+            // tree_disc_tmva = reader.EvaluateMVA("BDT");
             tree_disc = binary::get_prediction(tree_nbtags,tree_njets,tree_met,tree_ptl2,tree_nlb40,tree_ntb40,tree_nleps,tree_htb,tree_q1,tree_ptj1,tree_ptj6,tree_ptj7,tree_ml1j1,tree_dphil1l2,tree_maxmjoverpt,tree_ptl1,tree_detal1l2,tree_ptj8,tree_ptl3);
             // tree_classprobs = multiclass::get_prediction(tree_nbtags,tree_njets,tree_met,tree_ptl2,tree_nlb40,tree_ntb40,tree_nleps,tree_htb,tree_q1,tree_ptj1,tree_ptj6,tree_ptj7,tree_ml1j1,tree_dphil1l2,tree_maxmjoverpt,tree_ptl1,tree_detal1l2,tree_ptj8,tree_ptl3);
 
