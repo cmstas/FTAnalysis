@@ -9,8 +9,11 @@ from analysis.utils.pytable import Table
 # import uproot
 # from matplottery.matplotter.utils import Hist1D
 
+dglob = {}
 
 def print_table(fname):
+    global dglob
+
     opts = type("opts", (object,), dict(bin=True,noJMax=False,stat=False,nuisancesToExclude=[]))
     with open(fname,"r") as fh:
         dc = parseCard(fh, opts)
@@ -31,13 +34,21 @@ def print_table(fname):
 
     def hist_array(x): return np.array(list(x)[1:-1])
 
-    def get_median_percent_diff(proc,nuisance):
+    def get_nomupdown_diffs(proc,nuisance):
         up = hist_array(files[proc].Get("{}Up".format(nuisance if "stat" not in nuisance else "{}_{}".format(proc,nuisance))))
         down = hist_array(files[proc].Get("{}Down".format(nuisance if "stat" not in nuisance else "{}_{}".format(proc,nuisance))))
         sr = hist_array(files[proc].Get("sr"))
+        return sr,up,down
+
+    def get_percent_diffs(proc,nuisance):
+        sr,up,down = get_nomupdown_diffs(proc,nuisance)
         ratios = np.r_[up/sr,sr/down]
         ratios[ratios < 1] = 1./ratios[ratios<1]
         pct = (ratios - 1.)*100.
+        return pct
+
+    def get_median_percent_diff(proc,nuisance):
+        pct = get_percent_diffs(proc,nuisance)
         pct[pct > 150.] = np.nan
         return np.nanmedian(pct)
 
@@ -74,6 +85,9 @@ def print_table(fname):
         for proc in procs:
             diff = get_median_percent_diff(proc,nuisance)
             dline[proc] = diff
+            if nuisance == "jes":
+                if fname not in dglob: dglob[fname] = {}
+                dglob[fname][proc] = np.c_[get_nomupdown_diffs(proc,nuisance)]
         line = [nuisance] + [format_val(v) for k,v in sorted(dline.items())]
         tab.add_row(line)
     tab.print_table(show_row_separators=False,show_alternating=False)
@@ -91,9 +105,20 @@ if __name__ == "__main__":
     # print_table("v3.13_Nov30_v1/card_tttt_srcr_2016.txt")
     # print_table("v3.13_Nov30_v1/card_tttt_srcr_2017.txt")
     # print_table("v3.13_Nov30_v1/card_tttt_srcr_2018.txt")
-    print_table("v3.13_Nov30_v1/card_tttt_srdisc_2016.txt")
-    print_table("v3.13_Nov30_v1/card_tttt_srdisc_2017.txt")
-    print_table("v3.13_Nov30_v1/card_tttt_srdisc_2018.txt")
+    # print_table("v3.13_Nov30_v1/card_tttt_srdisc_2016.txt")
+    # print_table("v3.13_Nov30_v1/card_tttt_srdisc_2017.txt")
+    # print_table("v3.13_Nov30_v1/card_tttt_srdisc_2018.txt")
+
+    for region in ["srhh","srhl","srll","srml","srlm"]:
+    # for region in ["srhh"]:
+        for y in [2016,2017,2018]:
+        # for y in [2017]:
+            print_table("v3.24_unblindfull_v1/card_fs_t1tttt_m1600_m100_{}_{}.txt".format(region,y))
+            # print_table("v3.24_unblindfull_v1/card_fs_t1tttt_m1600_m100_srhh_2017.txt")
+    print dglob
+    import pickle
+    with open("blah.pkl","w") as fh:
+        pickle.dump(dglob,fh)
 
     # print_table("v3.08_bdtscan_v1_16/card_tttt_srdisc_2016.txt")
     # print_table("v3.08_bdtscan_v1_16/card_tttt_srdisc_2017.txt")

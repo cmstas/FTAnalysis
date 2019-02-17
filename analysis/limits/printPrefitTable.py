@@ -144,10 +144,10 @@ def print_table(d_yields, slim, pretty, regions="srcr",precision=2,blinded=True)
         procs = ["ttw","ttz","tth","bgtot","tttt"]
     # srnames = ["CRZ","CRW","SR1","SR2","SR3","SR4","SR5","SR6","SR7","SR8"]
     if regions == "srcr":
-        srnames = ["CRZ","CRW"]+["SR{}".format(i) for i in range(1,17)]
+        srnames = ["CRZ","CRW"]+["SR{}".format(i) for i in range(1,20)]
     elif regions == "srdisc":
         # srnames = ["SR{}".format(i) for i in range(1,15)]
-        srnames = ["SR{}".format(i) for i in range(1,18)]
+        srnames = ["CRZ"]+["SR{}".format(i) for i in range(1,20)]
 
     print
     if not pretty:

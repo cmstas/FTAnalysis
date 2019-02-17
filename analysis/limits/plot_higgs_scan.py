@@ -5,6 +5,7 @@ import array
 import re
 import time
 import random
+import glob
 
 import pandas as pd
 import numpy as np
@@ -14,6 +15,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 import ROOT as r
+from runLimits import parse_lims
 
 d_xsec = {
         "tth": {
@@ -394,6 +396,24 @@ if __name__ == "__main__":
     df = df.sort_values("mass")
     print df
 
+    # note, if not using r value keys, then the tttt xsec is multiplied in,
+    # but we're only using r values anyway, so we're good
+
+    basedir = "v3.24_fthiggs_v1/"
+    logs = glob.glob("{}/card_higgs*_run2.log".format(basedir))
+    infos = []
+    for log in logs:
+        tmp = log.rsplit("/",1)[-1].split("_")[1].replace("higgs","")
+        d = parse_lims(open(log).readlines())
+        d["which"] = tmp[0]
+        d["mass"] = int(tmp[1:])
+        infos.append(d)
+    df = pd.DataFrame(infos)
+    df["obs"] *= 0.
+    df = df.sort_values("mass")
+
+    # sys.exit()
+
     # print df[df["which"]=="h"]["expr"]
 
     # which = "h"
@@ -478,15 +498,15 @@ if __name__ == "__main__":
     higgs_ps["yaxistitle"] = "#sigma(pp#rightarrow (t#bar{t},tW,tq)+A) #times BR(A#rightarrow t#bar{t}) (fb)"
     higgs_ps["xaxistitle"] = "m_{A} (GeV)"
 
-    # which = "a"
-    # ds = df[df["which"]==which]
-    # ds["xsec"] = ds["mass"].apply(lambda x: 1000.*d_xsec["xsec"+which][x])
-    # make_plot(ds, higgs_ps)
-
-    which = "h"
+    which = "a"
     ds = df[df["which"]==which]
     ds["xsec"] = ds["mass"].apply(lambda x: 1000.*d_xsec["xsec"+which][x])
-    make_plot(ds, higgs)
+    make_plot(ds, higgs_ps)
+
+    # which = "h"
+    # ds = df[df["which"]==which]
+    # ds["xsec"] = ds["mass"].apply(lambda x: 1000.*d_xsec["xsec"+which][x])
+    # make_plot(ds, higgs)
     
 
 

@@ -4,8 +4,9 @@
 
 mkdir -p plots
 
-basedir=v3.05_allyears_v2
-inpfile=${basedir}/mlfitname.root
+# basedir=v3.05_allyears_v2
+# inpfile=${basedir}/mlfitname.root
+inpfile=fitDiagnosticsss.root
 outname=nuisance_output.root
 
 python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py -a -g ${outname} -f html ${inpfile} > nuisances.html

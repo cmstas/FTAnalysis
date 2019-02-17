@@ -30,6 +30,8 @@ class Process(object):
         self.hlt  = "-"
         # self.lephlt  = "-"
         self.hthlt  = "-"
+        self.trigsf  = "-"
+        self.prefire  = "-"
         self.fs_hlt  = "-"
         self.fs_lepeff  = "-"
         self.btag = "-"
@@ -270,10 +272,25 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
         for process in processes: card.write("%-15s " % (process.fs_hlt))
         card.write("\n")
 
-    #nuisance hthlt
-    card.write("%-40s %-5s " % ("hthlt","shape"))
-    for process in processes: card.write("%-15s " % (process.hthlt))
-    card.write("\n")
+    use_trigsf = True
+    if use_trigsf:
+        #nuisance trigsf
+        card.write("%-40s %-5s " % ("trig","shape"))
+        for process in processes: card.write("%-15s " % (process.trigsf))
+        card.write("\n")
+    else:
+        #nuisance hthlt
+        card.write("%-40s %-5s " % ("hthlt","shape"))
+        for process in processes: card.write("%-15s " % (process.hthlt))
+        card.write("\n")
+
+    use_prefireunc = True
+    if use_prefireunc:
+        #nuisance prefire
+        card.write("%-40s %-5s " % ("prefire","shape"))
+        for process in processes: card.write("%-15s " % (process.prefire))
+        card.write("\n")
+
     split_btagsf = True
     if split_btagsf:
         #nuisance btagheavy
@@ -400,6 +417,7 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     return
 
 def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfakes=False, do_expected_data=False, inject_tttt=False, use_autostats=True, thresh=0.0,year=-1, ignorefakes=False,analysis="ft"):
+    signame = signal[:]
     # For SS, tttt is already in rares # NOTE
     if analysis == "ft":
         # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
@@ -417,7 +435,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     num = -1
     data = Process(num,"data","data_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     num += 1
-    signal = Process(num,signal,signal+"_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    signal = Process(num,signame,signame+"_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     num += 1
     TTW = Process(num,"ttw","ttw_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
     num += 1
@@ -455,7 +473,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
             TTTT = Process(9,"tttt","tttt_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
         num += 1
     #overwrite nuisances
-    lumiunc = "1.025"
+    if year == 2016: lumiunc = "1.025"
+    if year == 2017: lumiunc = "1.023"
+    if year == 2018: lumiunc = "1.050"
     signal.lumi  = "1"
     # signal.lephlt  = "1.04"
     signal.hlt  = "1.03"
@@ -463,6 +483,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     signal.jer  = "1"
     signal.lepeff  = "1"
     signal.hthlt  = "1"
+    signal.trigsf  = "1"
+    if year != 2018: signal.prefire  = "1"
     signal.btag = "1"
     signal.btagheavy = "1"
     signal.btaglight = "1"
@@ -471,14 +493,14 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         signal.scale = "1"
         signal.pdf = "1"
         signal.alphas = "1"
-    if analysis == "ss":
+    if analysis == "ss" and ("fs_" in signame):
         signal.fs_hlt = "1.05"
         signal.isr = "1"
         if kine == "srhh": signal.fs_lepeff = "1.08"
         if kine == "srhl": signal.fs_lepeff = "1.15"
         if kine == "srll": signal.fs_lepeff = "1.20"
         if kine == "srml": signal.fs_lepeff = "1.08"
-        if kine == "srlm": signal.fs_lepeff = "1.15"
+        if kine == "srlm": signal.fs_lepeff = "1.20"
         signal.met = "1"
     signal.isrvar = "1"
     signal.fsrvar = "1"
@@ -491,7 +513,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         ttw_sf = "1.40"
     TTW.TTWSF          = ttw_sf
     TTW.lumi         = lumiunc
-    TTW.isr         = "1"
+    if analysis == "ft":
+        TTW.isr         = "1"
     TTW.scale         = "1"
     TTW.pdf         = "1"
     # TTW.alphas         = "1"
@@ -503,13 +526,16 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTW.hlt  = "1.03"
     if analysis == "ss":
         TTW.hthlt  = "1"
+    TTW.trigsf  = "1"
+    if year != 2018: TTW.prefire  = "1"
     TTW.btag = "1"
     TTW.btagheavy = "1"
     TTW.btaglight = "1"
     TTW.pu = "1"
     TTZ.TTZSF          = ttz_sf
     TTZ.lumi          = lumiunc
-    TTZ.isr  = "1"
+    if analysis == "ft":
+        TTZ.isr  = "1"
     TTZ.bb  = "1"
     TTZ.jes  = "1"
     TTZ.jer  = "1"
@@ -521,6 +547,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.hlt  = "1.03"
     if analysis == "ss":
         TTZ.hthlt  = "1"
+    TTZ.trigsf  = "1"
+    if year != 2018: TTZ.prefire  = "1"
     TTZ.btag = "1"
     TTZ.btagheavy = "1"
     TTZ.btaglight = "1"
@@ -541,6 +569,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # TTH.alphas  = "1"
     TTH.hlt  = "1.03"
     TTH.hthlt  = "1"
+    TTH.trigsf  = "1"
+    if year != 2018: TTH.prefire  = "1"
     TTH.btag = "1"
     TTH.btagheavy = "1"
     TTH.btaglight = "1"
@@ -554,6 +584,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         # TTVV.lephlt  = "1.04"
         TTVV.hlt  = "1.03"
         TTVV.hthlt  = "1"
+        TTVV.trigsf  = "1"
+        if year != 2018: TTVV.prefire  = "1"
         TTVV.btag = "1"
         TTVV.btagheavy = "1"
         TTVV.btaglight = "1"
@@ -569,6 +601,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         WZ.btagheavy = "1"
         WZ.btaglight = "1"
         WZ.pu = "1"
+        WZ.trigsf  = "1"
+        if year != 2018: WZ.prefire  = "1"
         WW.WW = "1.30"
         WW.lumi = lumiunc
         WW.jes  = "1"
@@ -578,6 +612,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         # WW.lephlt  = "1.04"
         WW.hlt  = "1.03"
         WW.hthlt  = "1"
+        WW.trigsf  = "1"
+        if year != 2018: WW.prefire  = "1"
         WW.btag = "1"
         WW.btagheavy = "1"
         WW.btaglight = "1"
@@ -590,6 +626,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # XG.lephlt  = "1.04"
     XG.hlt  = "1.03"
     XG.hthlt  = "1"
+    XG.trigsf  = "1"
+    if year != 2018: XG.prefire  = "1"
     XG.btag = "1"
     XG.btagheavy = "1"
     XG.btaglight = "1"
@@ -607,6 +645,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     # rares.lephlt  = "1.04"
     rares.hlt  = "1.03"
     rares.hthlt  = "1"
+    rares.trigsf  = "1"
+    if year != 2018: rares.prefire  = "1"
     rares.btag = "1"
     rares.btagheavy = "1"
     rares.btaglight = "1"
@@ -623,6 +663,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         TTTT.jer  = "1"
         TTTT.lepeff  = "1"
         TTTT.hthlt  = "1"
+        TTTT.trigsf  = "1"
+        if year != 2018: TTTT.prefire  = "1"
         TTTT.btag = "1"
         TTTT.btagheavy = "1"
         TTTT.btaglight = "1"

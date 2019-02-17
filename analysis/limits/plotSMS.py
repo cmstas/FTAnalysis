@@ -25,7 +25,7 @@ def parse_log(fname):
     exp_sm2 = d.get("exp_2.5",-1)
     exp_sp2 = d.get("exp_97.5",-1)
     # FIXME unblind later
-    obs = exp
+    # obs = exp
     return {
             "obs":obs, "exp":exp,
             "sp1":exp_sp1,"sm1":exp_sm1,
@@ -477,53 +477,56 @@ if __name__ == "__main__":
 
     # print parse_log("v3.23_ss_fastsim_19Jan22/card_fs_t1tttt_m1750_m400_all_run2.log")
 
-    indir = "v3.23_ss_fastsim_19Jan22"
+    # indir = "v3.23_ss_fastsim_19Jan22"
+    indir = "v3.24_fullsignals_v1/"
     outdir = "scanplots"
     os.system("mkdir -p {}".format(outdir))
 
     # FIXME can only plot one at a time because pyROOT has weird memory management
 
-    # draw_limits(
-    #     indir = indir,
-    #     glob_pattern = "*fs_t6ttww_m*.log",
-    #     is_gluino = False,
-    #     outname = "{}/t6ttww_scan_xsec_run2.pdf".format(outdir),
-    #     minx = 300,
-    #     maxx = 1325,
-    #     miny = 75,
-    #     maxy = 1175,
-    #     diag_x1 = 300,
-    #     diag_y1 = 300-85,
-    #     diag_x2 = 960,
-    #     diag_y2 = 970-85,
-    #     lumi = 136.3,
-    #     label_mass = "m_{#tilde{#chi}^{0}_{1}} = 50 GeV",
-    #     label_diag = "m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
-    #     label_xaxis = "m_{#tilde{b}_{1}} (GeV)",
-    #     label_yaxis = "m_{#tilde{#chi}_{1}^{#pm}} (GeV)",
-    #     label_process = "pp #rightarrow #tilde{b}_{1}#bar{#tilde{b}}_{1}, #tilde{b}_{1}#rightarrow tW#tilde{#chi}^{0}_{1}      ",
-    #     )
-
     draw_limits(
         indir = indir,
-        glob_pattern = "*fs_t1tttt_m*.log",
-        is_gluino = True,
-        outname = "{}/t1tttt_scan_xsec_run2.pdf".format(outdir),
-        minx = 600,
-        maxx = 2300+25,
-        miny = 0,
-        maxy = 1900+25,
-        diag_x1 = 600,
-        diag_y1 = 600-170,
-        diag_x2 = 1700,
-        diag_y2 = 1700-170,
+        glob_pattern = "*fs_t6ttww_m*.log",
+        is_gluino = False,
+        outname = "{}/t6ttww_scan_xsec_run2.pdf".format(outdir),
+        minx = 300,
+        maxx = 1325,
+        miny = 75,
+        maxy = 1175,
+        diag_x1 = 300,
+        diag_y1 = 300-85,
+        diag_x2 = 960,
+        diag_y2 = 970-85,
         lumi = 136.3,
-        label_mass = "",
-        label_diag = "m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
-        label_xaxis = "m_{#tilde{g}} (GeV)",
-        label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
-        label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow t#bar{t}#tilde{#chi}^{0}_{1}        ",
+        label_mass = "m_{#tilde{#chi}^{0}_{1}} = 50 GeV",
+        label_diag = "m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
+        label_xaxis = "m_{#tilde{b}_{1}} (GeV)",
+        label_yaxis = "m_{#tilde{#chi}_{1}^{#pm}} (GeV)",
+        label_process = "pp #rightarrow #tilde{b}_{1}#bar{#tilde{b}}_{1}, #tilde{b}_{1}#rightarrow tW#tilde{#chi}^{0}_{1}      ",
+        blinded=False,
         )
+
+    # draw_limits(
+    #     indir = indir,
+    #     glob_pattern = "*fs_t1tttt_m*.log",
+    #     is_gluino = True,
+    #     outname = "{}/t1tttt_scan_xsec_run2.pdf".format(outdir),
+    #     minx = 600,
+    #     maxx = 2300+25,
+    #     miny = 0,
+    #     maxy = 1900+25,
+    #     diag_x1 = 600,
+    #     diag_y1 = 600-170,
+    #     diag_x2 = 1700,
+    #     diag_y2 = 1700-170,
+    #     lumi = 136.3,
+    #     label_mass = "",
+    #     label_diag = "m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
+    #     label_xaxis = "m_{#tilde{g}} (GeV)",
+    #     label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
+    #     label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow t#bar{t}#tilde{#chi}^{0}_{1}        ",
+    #     blinded=False,
+    #     )
 
 #     fname = "test.pdf"
 #     # compare_two_scans("v3.09_ML_fullscan", "v3.09_prefire2017_v2", glob_pattern="*fs_t1tttt_*.log", fname=fname)

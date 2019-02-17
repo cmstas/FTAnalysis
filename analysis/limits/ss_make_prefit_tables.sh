@@ -5,14 +5,18 @@
 
 
 
-basedir=v3.23_testss_v1
+# basedir=v3.23_testss_v1 # AN v2
+# basedir=v3.24_ssnominal_v1 # AN v3
+# basedir=v3.24_unblindfull_v1
+basedir=v3.24_testss_v1
 model=fs_t1tttt_m1600_m100
 
 # year="2016"
 # blindstr=" --unblinded "
 
 year="run2"
-blindstr=""
+# blindstr=""
+blindstr=" --unblinded "
 
 # region=srhh
 # ./ss_printPrefitTable.py ${basedir}/card_${model}_${region}_${year}.txt ${blindstr}

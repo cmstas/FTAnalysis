@@ -63,6 +63,7 @@ def print_lims(d_lims, fb=False, unblinded=False):
 def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=True, domcfakes=False, ignorefakes=False,
         verbose=True, dolimits=True, dosignificance=True, doscan=True,
         unblinded=False,sig="tttt", allownegative=False, inject_tttt=False,
+        tagfit="name",
         use_autostats=True, thresh=0.0, scalelumi=1.0, scaletth=1.0, year=-1, nosyst=False):
 
     params = locals()
@@ -132,17 +133,18 @@ def get_lims(card, regions="srcr", doupperlimit=True, redocard=True, redolimits=
                 extra += " --rMin -2.0 --rMax +10.0"
             # need --saveOverallShapes to get a covariance matrix for all bins ACROSS all 3 years (channels) so that we can compute the proper postfit plot uncertainties
             # mu_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} --saveOverallShapes -n name --freezeParameters lumiscale,tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
-            mu_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} --saveOverallShapes -n name --freezeParameters tthscale 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
+            mu_cmd = "combine -M FitDiagnostics {0} --robustFit=1 --saveShapes --saveWithUncertainties {1} --saveOverallShapes -n {2} --freezeParameters tthscale 2>&1 | tee -a {3}".format(full_card_name_root, extra, tagfit, full_log_name)
             if verbose: print ">>> Running combine for mu [{0}]".format(mu_cmd)
             stat, out_mu = commands.getstatusoutput(mu_cmd)
-            commands.getstatusoutput("cp fitDiagnosticsname.root {0}/mlfitname.root".format(dirname))
+            commands.getstatusoutput("cp fitDiagnostics{tagfit}.root {dirname}/mlfit{tagfit}.root".format(dirname=dirname,tagfit=tagfit))
+            commands.getstatusoutput("cp fitDiagnostics{tagfit}.root {dirname}/mlfit{tagfit}_{regions}.root".format(dirname=dirname,regions=regions,tagfit=tagfit))
             out += out_mu
             # While FitDiagnostics gives a mu (and pre/postfit stuff), it does not give the *scan*, so need to do this manually with MultiDimFit
             # scan_cmd = "combine  -M MultiDimFit {0} --algo grid --centeredRange=2.0 --saveFitResult --redefineSignalPOI r --robustFit=1 --freezeParameters lumiscale,tthscale -n name --saveNLL {1} 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
             scan_cmd = "combine  -M MultiDimFit {0} --algo grid --centeredRange=2.0 --saveFitResult --redefineSignalPOI r --robustFit=1 --freezeParameters tthscale -n name --saveNLL {1} 2>&1 | tee -a {2}".format(full_card_name_root, extra, full_log_name)
             if verbose: print ">>> Running combine for scan [{0}]".format(scan_cmd)
             stat, out_scan = commands.getstatusoutput(scan_cmd)
-            commands.getstatusoutput("cp higgsCombinename.MultiDimFit.mH120.root {0}/scandata.root".format(dirname))
+            commands.getstatusoutput("cp higgsCombinename.MultiDimFit.mH120.root {dirname}/scandata{tagfit}.root".format(dirname=dirname,tagfit=tagfit))
             out += out_scan
     else:
         if verbose: print ">>> [!] Limits already run, so reusing. Pass the --redolimits flag to redo the limits"
@@ -181,6 +183,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--thresh", help="threshold for autoMCstats (default: %(default)s)", default=0.0)
     parser.add_argument("-s", "--sig", help="signal name (default: %(default)s)", default="tttt")
     parser.add_argument("-y", "--year", help="year (default: %(default)s)", default=-1, type=int)
+    parser.add_argument(      "--tagfit", help="tag for fit root file name", default="name", type=str)
     parser.add_argument(      "--scalelumi", help="scale luminosity (default: %(default)s)", default=1.0, type=float)
     parser.add_argument(      "--scaletth", help="scale tth (default: %(default)s)", default=1.0, type=float)
     parser.add_argument(      "--nosyst", help="no systs at all, but note autoMCStats might be included (default: %(default)s)", action="store_true")
@@ -211,6 +214,7 @@ if __name__ == "__main__":
             year=args.year,
             nosyst=args.nosyst,
             ignorefakes=args.ignorefakes,
+            tagfit=args.tagfit,
             )
     print "card: {}".format(args.card.strip())
     if not args.nolimits:

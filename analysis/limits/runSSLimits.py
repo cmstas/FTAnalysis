@@ -37,16 +37,19 @@ def make_card(basedir,sig,finalcard,verbose=True):
                 signal = sig,
                 verbose = verbose,
                 skiptext2workspace = True,
+                autothresh = 3.0,
                 to_correlate = [
                         "scale",
                         "pdf",
                         "TTH",
                         "TTWSF",
                         "TTZSF",
+                        "WZSF", # NOTE
+                        "WW", # NOTE
+                        "fakes",
                         "rares",
                         "XG",
                         "TTVV",
-                        "fakes",
                         ],
                 )
 
@@ -122,7 +125,7 @@ def get_lims(basedir, doupperlimit=True, redolimits=True,
         os.system("cat {0}".format(full_log_name))
         raise Exception("Combine error!")
 
-    if not unblinded: d_lims["obs"] = d_lims["exp"]
+    # if not unblinded: d_lims["obs"] = d_lims["exp"]
 
     if did_run_limits and os.path.exists(full_log_name):
         with open(full_log_name,"a") as fh:
@@ -135,11 +138,53 @@ def get_lims(basedir, doupperlimit=True, redolimits=True,
 if __name__ == "__main__":
     pass
 
+    parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=35, width=150))
+    parser.add_argument("basedir", help="basedir")
+    parser.add_argument("-s", "--sig", help="signal name (default: %(default)s)", default="tttt")
+    parser.add_argument(      "--clean", help="if using same directory, clean the old root files to remake them (default: %(default)s)", action="store_true")
+    args = parser.parse_args()
+
+    basedir = args.basedir
+    sig= args.sig
+    if args.clean:
+        print "[!] Removing {}/*_run2.root files from the directory so they can get remade".format(basedir)
+        os.system("rm {}/*_run2.root".format(basedir))
+    print get_lims(basedir,sig=sig,verbose=True,redolimits=True)
+
+    """
     # basedir = "v3.23_testss_v1"
-    basedir = "v3.24_unblindpartialrereco_v1"
+    # basedir = "v3.24_unblindpartialrereco_v1"
+    basedir = "v3.24_unblindfull_v1"
+    # basedir = "v3.24_ssnominal_v1/"
     sig = "fs_t1tttt_m1600_m100"
+    # sig = "fs_t1tttt_m1800_m1250"
+
+    basedir = "v3.24_fullsignals_v1"
+    # sig = "fs_t1tttt_m1800_m1"
+    sig = "fs_t1tttt_m1800_m1250"
+
+    # print "[!] Removing {}/*_run2.root files from the directory so they can get remade".format(basedir)
+    # os.system("rm {}/*_run2.root".format(basedir))
+
+
     # print get_lims(basedir,sig=sig,verbose=False,redolimits=False)
     print get_lims(basedir,sig=sig,verbose=True,redolimits=True)
+    """
+
+    """
+    basedir = "v3.24_testss_v1/"
+    # basedir = "v3.24_testssisr_v1/"
+    # basedir = "v3.24_unblindfull_v1"
+    sig = "fs_t1tttt_m1600_m100"
+    # sig = "fs_t1tttt_m1800_m100"
+
+    print "[!] Removing {}/*_run2.root files from the directory so they can get remade".format(basedir)
+    os.system("rm {}/*_run2.root".format(basedir))
+
+
+    # print get_lims(basedir,sig=sig,verbose=False,redolimits=False)
+    print get_lims(basedir,sig=sig,verbose=True,redolimits=True)
+    """
 
     # parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=35, width=150))
     # parser.add_argument("card", help="card name in directory")

@@ -22,7 +22,10 @@ def fix_spacing(ss):
         ])
 
 def get_info(fname):
-    opts = type("opts", (object,), dict(bin=True,noJMax=False,stat=False,nuisancesToExclude=[]))
+    if "rpv_" in fname:
+        opts = type("opts", (object,), dict(bin=True,noJMax=False,stat=False,nuisancesToExclude=[],allowNoSignal=True))
+    else:
+        opts = type("opts", (object,), dict(bin=True,noJMax=False,stat=False,nuisancesToExclude=[]))
     with open(fname,"r") as fh:
         dc = parseCard(fh, opts)
         # print dc.print_structure()
@@ -101,9 +104,6 @@ def do_combine(
             else:
                 hname = "sr"
             hnames_to_sum.append(hname)
-        if "prefire" in name and spec_year == 2018:  
-            # NOTE this is hardcoded to avoid prefiring syst for 2018
-            hnames_to_sum = ["sr" for year in years]
         isnorm = systs[name]["kind"] == "lnN"
         scales = [1.0 for y in years]
         procs = [p for p,v in systs[name]["procs"].items() if ((v != 0.) or (name in ["sr"]))]
@@ -161,6 +161,7 @@ def do_combine(
                     output_nuisance_name, procs = make_hist(name, which=which, spec_year=y)
                 nuisance_info[output_nuisance_name] = procs
     make_hist("sr", which="")
+    del nuisance_info["y2018_prefire"]
 
     # map from proc to nominal yield
     yields = {proc:tfile.Get("sr").Integral() for proc,tfile in summed_files.items()}
