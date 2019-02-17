@@ -27,36 +27,10 @@ procs_to_consider = [ # FIXME
 
 basedirs ={
 
-        # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
-        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/", # FIXME
-        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2017/", # FIXME
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.10_all/output/year_2018/", # FIXME
-        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016/",
-
-        # # In AN from early Dec
-        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2016/", # FIXME
-        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2017/", # FIXME
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.13_all/output/year_2018/", # FIXME
-
-        # # In AN from early Dec
-        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2016/", # FIXME
-        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2017/", # FIXME
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.20_jec32/output/year_2018/", # FIXME
-
-        # # top tag stuff
-        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.19_all/output/year_2016/", # FIXME
-        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.19_all/output/year_2017/", # FIXME
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.19_all/output/year_2018/", # FIXME
-
-        # # New v32 JECs for 2017, 2018
-        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
-        # # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017/output/year_2017/",
-        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2017/",
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/",
-
         2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/",
         2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/",
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/", # Autumn18V3 JECs
 
         }
 
@@ -67,12 +41,13 @@ basedirs ={
 
 # outputdir = "outputs_19Jan4_v3p21" # ISR REWEIGHTING
 
-outputdir = "outputs_19Jan18_v3p24_ss" # FOR SS
+# outputdir = "outputs_19Jan18_v3p24_ss" # FOR SS
 # outputdir = "outputs_19Jan18_v3p24_ss_promptreco" # FOR SS
 # outputdir = "outputs_19Jan18_v3p24_ft" # FOR FT
 
 # outputdir = "outputs_19Jan18_v3p24_ss_2018nvtx" # FOR SS
 
+outputdir = "outputs_19Feb16_v3p26_ft" # FOR FT
 
 options = {
 
@@ -80,15 +55,15 @@ options = {
         # 2017: "useInclusiveSFs doBDT Data2017 minPtFake18 quiet ",
         # 2018: "useInclusiveSFs doBDT Data2018 minPtFake18 quiet ",
 
-        # for SS
-        2016: " noLeptonPtCut doSS Data2016 new2016FRBins quiet ",
-        2017: " noLeptonPtCut doSS Data2017 quiet ",
-        2018: " noLeptonPtCut doSS Data2018 quiet ",
+        # # for SS
+        # 2016: " noLeptonPtCut doSS Data2016 new2016FRBins quiet ",
+        # 2017: " noLeptonPtCut doSS Data2017 quiet ",
+        # 2018: " noLeptonPtCut doSS Data2018 quiet ",
 
-        # # for FT
-        # 2016: " Data2016 new2016FRBins quiet ",
-        # 2017: " Data2017 minPtFake18 quiet ",
-        # 2018: " Data2018 minPtFake18 quiet ",
+        # for FT
+        2016: " Data2016 new2016FRBins quiet ",
+        2017: " Data2017 minPtFake18 quiet ",
+        2018: " Data2018 minPtFake18 quiet ",
 
         # 2018: "useInclusiveSFs Data2018 minPtFake18 quiet doHEMAfter ", # FIXME
         # 2018: "useInclusiveSFs Data2018 minPtFake18 quiet doHEMBefore ", # FIXME

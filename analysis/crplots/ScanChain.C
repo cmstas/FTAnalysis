@@ -281,10 +281,10 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         // // "osnbrw",                          // OS tight-tight and variants
 
         // for SS
-        "xgcr",
+        // "xgcr",
         "tlnomet",
         "osnomet",
-        "osnomethighmt",
+        // "osnomethighmt",
         "lowmetlowht",
         "lowmetallht",
         "tlmet",
