@@ -154,6 +154,8 @@ class babyMaker {
     TString sample;
     float evt_corrMET;
     float evt_corrMETPhi;
+    float evt_rawMET;
+    float evt_rawMETPhi;
     int evt_event;
     int evt_lumiBlock;
     int evt_run;
@@ -197,6 +199,7 @@ class babyMaker {
     float ip3d;
     float ip3derr;
     float mt;
+    float mt_raw;
     float ptrelv1;
     float coneCorrPt;
     float miniiso;

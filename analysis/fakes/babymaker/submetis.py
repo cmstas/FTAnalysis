@@ -40,15 +40,17 @@ if __name__ == "__main__":
 
     from samples import *
 
-    year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
+    # year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
+    year_sample_map = [("2016",data_2016+mc_2016)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)]
     # tag = "v1.0_leptontree" # 2017, 2018 only
     # tag = "v2.0_leptontree" # 2017, 2018 only
     extra_args = ""
     tag_match = ""
 
     # year_sample_map = [("2018",mc_2018)]
-    year_sample_map = [("2016",data_2016)]
-    tag = "v2.0_leptontree"
+    # year_sample_map = [("2016",data_2016)]
+    # tag = "v2.0_leptontree"
+    tag = "v3.0_leptontree"
 
     # extra_args = "--ignorebadfiles" # FIXME
     # year_sample_map = [("2016",data_2016)]

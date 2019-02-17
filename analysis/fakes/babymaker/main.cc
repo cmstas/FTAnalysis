@@ -123,6 +123,7 @@ int main(int argc, char *argv[]){
             || filenames.Contains("RunIISummer16")
             || filenames.Contains("run2_data2016")
             || filenames.Contains("run2_moriond17")
+            || filenames.Contains("2016_mc_rpv")
        ) year = 2016;
     if (
             filenames.Contains("Run2017")
@@ -153,6 +154,7 @@ int main(int argc, char *argv[]){
 
     if (year == 2016) {
         gconf.year = year;
+        gconf.cmssw_ver = 80;
         gconf.ea_version = 1;
         gconf.btag_disc_wp = 0.6324;
         gconf.WP_DEEPCSV_TIGHT  = 0.8958;
@@ -170,6 +172,11 @@ int main(int argc, char *argv[]){
                 filenames.Contains("94X")
                 ) {
             gconf.cmssw_ver = 94;
+            // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
+            // Uh, yeah... They changed in the 4th decimal only
+            gconf.WP_DEEPCSV_TIGHT  = 0.8953;
+            gconf.WP_DEEPCSV_MEDIUM = 0.6321;
+            gconf.WP_DEEPCSV_LOOSE  = 0.2217;
         }
         good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
         jecEra = "Summer16_23Sep2016BCDV4";
@@ -178,6 +185,7 @@ int main(int argc, char *argv[]){
     if (year == 2017) {
         gconf.year = year;
         gconf.ea_version = 4;
+        gconf.cmssw_ver = 94;
 
         gconf.btag_disc_wp = 0.4941;
         gconf.WP_DEEPCSV_TIGHT  = 0.8001;
@@ -214,7 +222,15 @@ int main(int argc, char *argv[]){
     if (year == 2018) {
         gconf.year = year;
         gconf.ea_version = 4;
+        gconf.cmssw_ver = 102;
 
+        // // XXX Copied from 2017
+        // gconf.btag_disc_wp = 0.4941;
+        // gconf.WP_DEEPCSV_TIGHT  = 0.8001;
+        // gconf.WP_DEEPCSV_MEDIUM = 0.4941;
+        // gconf.WP_DEEPCSV_LOOSE  = 0.1522;
+
+        // XXX New recommendation
         gconf.btag_disc_wp = 0.4184;
         gconf.WP_DEEPCSV_TIGHT  = 0.7527;
         gconf.WP_DEEPCSV_MEDIUM = 0.4184;
@@ -242,10 +258,10 @@ int main(int argc, char *argv[]){
 
         // good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
         good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
-        jecEra = "Fall17_17Nov2017C_V32";
-        jecEraMC = "Fall17_17Nov2017_V32";
-        // jecEra = "Fall17_17Nov2017C_V6";
-        // jecEraMC = "Fall17_17Nov2017_V6";
+        // jecEra = "Fall17_17Nov2017C_V32";
+        // jecEraMC = "Fall17_17Nov2017_V32";
+        jecEra = "Autumn18_V3";
+        jecEraMC = "Autumn18_V3";
         gconf.SS_innerlayers = 0;
     }
 
@@ -445,15 +461,8 @@ int main(int argc, char *argv[]){
                 else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V32";
                 else if (tas::evt_run() <= 304797 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017DE_V32";
                 else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V32";
-                else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
-
-
-                // else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V6";
-                // else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V6";
-                // else if (tas::evt_run() <= 303434 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017D_V6";
-                // else if (tas::evt_run() <= 304797 && tas::evt_run() >= 303824) jecEra = "Fall17_17Nov2017E_V6";
-                // else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V6";
-                // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V6"; // FIXME 2018?
+                // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
+                else if (tas::evt_run() > 306462) jecEra = "Autumn18_V3"; // FIXME 2018?
 
                 else std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;
 

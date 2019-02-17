@@ -24,7 +24,9 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
 
   BabyTree->Branch("sample"            , &sample); // XXX
   BabyTree->Branch("evt_corrMET"       , &evt_corrMET); // XXX
+  BabyTree->Branch("evt_rawMET"       , &evt_rawMET); // XXX
   BabyTree->Branch("evt_corrMETPhi"    , &evt_corrMETPhi); // XXX
+  BabyTree->Branch("evt_rawMETPhi"    , &evt_rawMETPhi); // XXX
   BabyTree->Branch("evt_event"         , &evt_event); // XXX
   BabyTree->Branch("evt_lumiBlock"     , &evt_lumiBlock); // XXX
   BabyTree->Branch("evt_run"           , &evt_run); // XXX
@@ -68,6 +70,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("ip3d"                          , &ip3d); // XXX
   BabyTree->Branch("ip3derr"                       , &ip3derr); // XXX
   BabyTree->Branch("mt"                            , &mt); // XXX
+  BabyTree->Branch("mt_raw"                            , &mt_raw); // XXX
   BabyTree->Branch("ptrelv1"                       , &ptrelv1); // XXX
   BabyTree->Branch("coneCorrPt"                       , &coneCorrPt); // XXX
   BabyTree->Branch("miniiso"                       , &miniiso); // XXX
@@ -199,6 +202,8 @@ void babyMaker::InitBabyNtuple(){
     sample = "";
     evt_corrMET = -1.;
     evt_corrMETPhi = -1.;
+    evt_rawMET = -1.;
+    evt_rawMETPhi = -1.;
     evt_event = -1;
     evt_lumiBlock = -1;
     evt_run = -1;
@@ -290,6 +295,7 @@ void babyMaker::InitLeptonBranches(){
     ip3d = -1;
     ip3derr = -1;
     mt = -1;
+    mt_raw = -1;
     ptrelv1 = -1;
     coneCorrPt = -1;
     miniiso = -1;
@@ -524,7 +530,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
       qscale = genps_qScale(); // for stitching the enriched QCD samples
   }
-  passes_met_filters = evt_isRealData ? passesMETfiltersMoriond17(evt_isRealData) : 1;
+  passes_met_filters = passesMETfiltersRun2(evt_isRealData);
 
   // Jets
   vector<Jet> jets = SSJetsCalculator(jetCorr, 1).first;
@@ -543,6 +549,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   pair<float,float> corrMETPair = getT1CHSMET_fromMINIAOD(jetCorr, NULL, 0, false, use_cleaned_met);
   evt_corrMET    = corrMETPair.first;
   evt_corrMETPhi = corrMETPair.second;
+  evt_rawMET    = tas::evt_pfmet_raw();
+  evt_rawMETPhi = tas::evt_pfmetPhi_raw();
 
   // Now for each loose loose lepton, fill branches
   // And if one of the loose leptons is also tight AND has another tight lepton forming a Z with it, then flag this as a Z and store Z stuff
@@ -561,6 +569,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       p4_pt = lep.pt();
       p4_eta = lep.eta();
       mt = MT(p4_pt, p4.phi(), evt_corrMET, evt_corrMETPhi);
+      mt_raw = MT(p4_pt, p4.phi(), evt_rawMET, evt_rawMETPhi);
 
 
       // Loop and fill branches if there actually is a tight-tight Z pair
