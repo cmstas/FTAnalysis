@@ -129,13 +129,32 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     TH1F* nSS_run_data = new TH1F("nSS_run_data_plot", "nSS_run_data_plot", 500,272007,324432); 
     TH1F* nOS_run_data = new TH1F("nOS_run_data_plot", "nOS_run_data_plot", 500,272007,324432); 
 
-    TH1F* clos_leppt_MC   = new TH1F("clos_leppt_plot_MC"  , "clos_leppt_plot_MC"  , 20, 0, 100); 
-    TH1F* clos_leppt_MCp  = new TH1F("clos_leppt_plot_MCp" , "clos_leppt_plot_MCp" , 20, 0, 100); 
-    TH1F* clos_leppt_data = new TH1F("clos_leppt_plot_data", "clos_leppt_plot_data", 20, 0, 100); 
+    TH1F* nSS_run_data_big = new TH1F("nSS_run_data_plot_big", "nSS_run_data_plot_big", 52425,272007,324432); 
+    TH1F* nOS_run_data_big = new TH1F("nOS_run_data_plot_big", "nOS_run_data_plot_big", 52425,272007,324432); 
+
+    TH1F* clos_leppt_MC   = new TH1F("clos_leppt_plot_MC"  , "clos_leppt_plot_MC"  , 50, 0, 100); 
+    TH1F* clos_leppt_MCp  = new TH1F("clos_leppt_plot_MCp" , "clos_leppt_plot_MCp" , 50, 0, 100); 
+    TH1F* clos_leppt_data = new TH1F("clos_leppt_plot_data", "clos_leppt_plot_data", 50, 0, 100); 
     TH1F* osee_leppt_MC   = new TH1F("osee_leppt_plot_MC"  , "osee_leppt_plot_MC"  , 100, 0, 100); 
     TH1F* osee_leppt_data = new TH1F("osee_leppt_plot_data", "osee_leppt_plot_data", 100, 0, 100); 
     clos_leppt_MC->Sumw2();
     clos_leppt_MCp->Sumw2();
+
+    TH1F* clos_lepptbarrel_MC   = new TH1F("clos_lepptbarrel_plot_MC"  , "clos_lepptbarrel_plot_MC"  , 50, 0, 100); 
+    TH1F* clos_lepptbarrel_MCp  = new TH1F("clos_lepptbarrel_plot_MCp" , "clos_lepptbarrel_plot_MCp" , 50, 0, 100); 
+    TH1F* clos_lepptbarrel_data = new TH1F("clos_lepptbarrel_plot_data", "clos_lepptbarrel_plot_data", 50, 0, 100); 
+    TH1F* osee_lepptbarrel_MC   = new TH1F("osee_lepptbarrel_plot_MC"  , "osee_lepptbarrel_plot_MC"  , 100, 0, 100); 
+    TH1F* osee_lepptbarrel_data = new TH1F("osee_lepptbarrel_plot_data", "osee_lepptbarrel_plot_data", 100, 0, 100); 
+    clos_lepptbarrel_MC->Sumw2();
+    clos_lepptbarrel_MCp->Sumw2();
+
+    TH1F* clos_lepptendcap_MC   = new TH1F("clos_lepptendcap_plot_MC"  , "clos_lepptendcap_plot_MC"  , 50, 0, 100); 
+    TH1F* clos_lepptendcap_MCp  = new TH1F("clos_lepptendcap_plot_MCp" , "clos_lepptendcap_plot_MCp" , 50, 0, 100); 
+    TH1F* clos_lepptendcap_data = new TH1F("clos_lepptendcap_plot_data", "clos_lepptendcap_plot_data", 50, 0, 100); 
+    TH1F* osee_lepptendcap_MC   = new TH1F("osee_lepptendcap_plot_MC"  , "osee_lepptendcap_plot_MC"  , 100, 0, 100); 
+    TH1F* osee_lepptendcap_data = new TH1F("osee_lepptendcap_plot_data", "osee_lepptendcap_plot_data", 100, 0, 100); 
+    clos_lepptendcap_MC->Sumw2();
+    clos_lepptendcap_MCp->Sumw2();
 
     TH1F* clos_lepeta_MC   = new TH1F("clos_lepeta_plot_MC"  , "clos_lepeta_plot_MC"  , 25, -2.5, 2.5); 
     TH1F* clos_lepeta_MCp  = new TH1F("clos_lepeta_plot_MCp" , "clos_lepeta_plot_MCp" , 25, -2.5, 2.5); 
@@ -398,9 +417,14 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         }
                         clos_leppt_data->Fill(ss::lep1_p4().pt(), weight); 
                         clos_leppt_data->Fill(ss::lep2_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) < 1.2) clos_lepptbarrel_data->Fill(ss::lep1_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) < 1.2) clos_lepptbarrel_data->Fill(ss::lep2_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) > 1.2) clos_lepptendcap_data->Fill(ss::lep1_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) > 1.2) clos_lepptendcap_data->Fill(ss::lep2_p4().pt(), weight); 
                         clos_lepeta_data->Fill(ss::lep1_p4().eta(), weight); 
                         clos_lepeta_data->Fill(ss::lep2_p4().eta(), weight);
                         nSS_run_data->Fill(ss::run());
+                        nSS_run_data_big->Fill(ss::run());
                         clos_lepphi_data->Fill(ss::lep1_p4().phi(), weight); 
                         clos_lepphi_data->Fill(ss::lep2_p4().phi(), weight);  
                         clos_dlepphi_data->Fill(calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi()), weight); 
@@ -423,6 +447,10 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         }
                         clos_leppt_MCp->Fill(ss::lep1_p4().pt(), weight); 
                         clos_leppt_MCp->Fill(ss::lep2_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) < 1.2) clos_lepptbarrel_MCp->Fill(ss::lep1_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) < 1.2) clos_lepptbarrel_MCp->Fill(ss::lep2_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) > 1.2) clos_lepptendcap_MCp->Fill(ss::lep1_p4().pt(), weight); 
+                        if (fabs(ss::lep1_p4().eta()) > 1.2) clos_lepptendcap_MCp->Fill(ss::lep2_p4().pt(), weight); 
                         clos_lepeta_MCp->Fill(ss::lep1_p4().eta(), weight); 
                         clos_lepeta_MCp->Fill(ss::lep2_p4().eta(), weight); 
                         clos_lepphi_MCp->Fill(ss::lep1_p4().phi(), weight); 
@@ -470,6 +498,10 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_mll_data->Fill(mll, weight);
                     osee_leppt_data->Fill(ss::lep1_p4().pt(), weight); 
                     osee_leppt_data->Fill(ss::lep2_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) < 1.2) osee_lepptbarrel_data->Fill(ss::lep1_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) < 1.2) osee_lepptbarrel_data->Fill(ss::lep2_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) > 1.2) osee_lepptendcap_data->Fill(ss::lep1_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) > 1.2) osee_lepptendcap_data->Fill(ss::lep2_p4().pt(), weight); 
                     osee_lepeta_data->Fill(ss::lep1_p4().eta(), weight); 
                     osee_lepeta_data->Fill(ss::lep2_p4().eta(), weight); 
                     osee_lepphi_data->Fill(ss::lep1_p4().phi(), weight); 
@@ -484,10 +516,15 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_lep2nmiss_data->Fill(ss::lep2_el_exp_innerlayers(), weight); 
                     osee_nvtx_data->Fill(ss::nGoodVertices(), weight); 
                     nOS_run_data->Fill(ss::run());
+                    nOS_run_data_big->Fill(ss::run());
 
                     nPred += ff*weight;
                     clos_leppt_MC->Fill(ss::lep1_p4().pt(), ff*weight); 
                     clos_leppt_MC->Fill(ss::lep2_p4().pt(), ff*weight); 
+                    if (fabs(ss::lep1_p4().eta()) < 1.2) clos_lepptbarrel_MC->Fill(ss::lep1_p4().pt(), ff*weight); 
+                    if (fabs(ss::lep1_p4().eta()) < 1.2) clos_lepptbarrel_MC->Fill(ss::lep2_p4().pt(), ff*weight); 
+                    if (fabs(ss::lep1_p4().eta()) > 1.2) clos_lepptendcap_MC->Fill(ss::lep1_p4().pt(), ff*weight); 
+                    if (fabs(ss::lep1_p4().eta()) > 1.2) clos_lepptendcap_MC->Fill(ss::lep2_p4().pt(), ff*weight); 
                     clos_lepeta_MC->Fill(ss::lep1_p4().eta(), ff*weight); 
                     clos_lepeta_MC->Fill(ss::lep2_p4().eta(), ff*weight); 
                     clos_lepphi_MC->Fill(ss::lep1_p4().phi(), ff*weight); 
@@ -533,6 +570,10 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_mll_MC->Fill(mll, weight);
                     osee_leppt_MC->Fill(ss::lep1_p4().pt(), weight); 
                     osee_leppt_MC->Fill(ss::lep2_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) < 1.2) osee_lepptbarrel_MC->Fill(ss::lep1_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) < 1.2) osee_lepptbarrel_MC->Fill(ss::lep2_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) > 1.2) osee_lepptendcap_MC->Fill(ss::lep1_p4().pt(), weight); 
+                    if (fabs(ss::lep1_p4().eta()) > 1.2) osee_lepptendcap_MC->Fill(ss::lep2_p4().pt(), weight); 
                     osee_lepeta_MC->Fill(ss::lep1_p4().eta(), weight); 
                     osee_lepeta_MC->Fill(ss::lep2_p4().eta(), weight); 
                     osee_lepphi_MC->Fill(ss::lep1_p4().phi(), weight); 
@@ -620,6 +661,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
     nSS_run_data->Write();
     nOS_run_data->Write();
+    nSS_run_data_big->Write();
+    nOS_run_data_big->Write();
 
     clos_mll_data->Write();
     clos_mll_MC->Write();
@@ -687,6 +730,18 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     osee_lep2nmiss_data->Write();
     osee_nvtx_MC->Write();
     osee_nvtx_data->Write();
+
+    clos_lepptendcap_data->Write();
+    clos_lepptendcap_MC->Write();
+    clos_lepptendcap_MCp->Write();
+    osee_lepptendcap_MC->Write();
+    osee_lepptendcap_data->Write();
+
+    clos_lepptbarrel_data->Write();
+    clos_lepptbarrel_MC->Write();
+    clos_lepptbarrel_MCp->Write();
+    osee_lepptbarrel_MC->Write();
+    osee_lepptbarrel_data->Write();
 
     f1->Close();
 

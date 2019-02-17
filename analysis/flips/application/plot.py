@@ -33,6 +33,8 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix="", lu
             ["njets", "Njets"],
             ["nbtags", "Nbtags"],
             ["leppt", "$p_T$(lep)"],
+            ["lepptbarrel", "$p_T$(barrel lep)"],
+            ["lepptendcap", "$p_T$(endcap lep)"],
             ["lepeta", "$\\eta$(lep)"],
             ["lepphi", "$\\phi$(lep)"],
             ["dlepphi", "$\\Delta\\phi$"],
