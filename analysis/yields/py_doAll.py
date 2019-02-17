@@ -129,7 +129,8 @@ if __name__ == "__main__":
 
             2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/skim/",
             2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/skim/",
-            2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/skim/",
+            # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/skim/",
+            2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/skim/",
 
             # # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
             # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/",
@@ -396,24 +397,24 @@ if __name__ == "__main__":
                     },
                 2018: {
 
-                    "fakes": make_obj([
-                        basedirs[2018]+"Data*.root",
-                        basedirs[2018]+"TTWnlo.root",
-                        basedirs[2018]+"TTZnlo.root",
-                        basedirs[2018]+"TTHtoNonBB.root",
-                        ] , options=options[2018]+" doFakes doData "),
-                    "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
-                    "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
-
                     # "fakes": make_obj([
-                    #     basedirs[2018]+"ReRecoData*.root",
-                    #     basedirs[2018]+"Data*Dv2.root",
+                    #     basedirs[2018]+"Data*.root",
                     #     basedirs[2018]+"TTWnlo.root",
                     #     basedirs[2018]+"TTZnlo.root",
                     #     basedirs[2018]+"TTHtoNonBB.root",
                     #     ] , options=options[2018]+" doFakes doData "),
-                    # "flips": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doFlips "),
-                    # "data": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doData "),
+                    # "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
+                    # "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
+
+                    "fakes": make_obj([
+                        basedirs[2018]+"ReRecoData*.root",
+                        basedirs[2018]+"Data*Dv2.root",
+                        basedirs[2018]+"TTWnlo.root",
+                        basedirs[2018]+"TTZnlo.root",
+                        basedirs[2018]+"TTHtoNonBB.root",
+                        ] , options=options[2018]+" doFakes doData "),
+                    "flips": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doFlips "),
+                    "data": make_obj([basedirs[2018]+"ReRecoData*.root",basedirs[2018]+"Data*Dv2.root"], options=options[2018]+" doData "),
 
                     "tttt": make_obj(basedirs[2018]+"TTTTnew.root", options=options[2018]),
                     # "fakes_mc": make_obj(basedirs[2017]+"TTBAR*.root", options=options[2018]+ " doFakesMC "),
