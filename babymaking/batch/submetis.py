@@ -64,11 +64,22 @@ if __name__ == "__main__":
     # tag = "v3.22" # 2018 only. latest ID (v2), remade corruptions, all MC samples included I think
     # tag = "v3.23" # 2016,2018 only. for 2018, latest ID (v2), remade corruptions, all MC samples included I think -- latest 102X btag WPs
     # tag = "v3.23_oldbwp2018" # v3.23 with old (matching 2017) btag WP for 2018
-    year_sample_map = [("2018",mc_2018)]
+    year_sample_map = [("2016",mc_2016),("2017",mc_2017),("2018",mc_2018)]
+    # year_sample_map = [("2016",mc_2016)]
+    year_sample_map = [("2017",mc_2017)]
     tag = "v3.24" # all 3 years. split btag unc, fastsim 2016/2017
     extra_args = ""
     tag_match = ""
-    # extra_args = "--ignorebadfiles" # FIXME
+
+    # # year_sample_map = [("2018",mc_2018)]
+    # # year_sample_map = [("2018",data_2018)]
+    # year_sample_map = [("2018",data_2018+mc_2018)]
+    # # tag = "v3.25" # 2018 only, preliminary jecs without residuals, before they were announced (so they could be wrong) -- bugged Autumn18_V1 JECs (but identical to V2 actually)
+    # tag = "v3.26" # 2018 only, preliminary jecs without residuals -- bugfixed Autumn18_V3 JECs
+    # # extra_args = ""
+    # # extra_args = "--xrootd" # cabinet nodes have messed up hadoop mapping
+    # tag_match = ""
+    # # extra_args = "--ignorebadfiles" # FIXME
 
 
     # extra_args = "--ignorebadfiles" # FIXME
@@ -123,7 +134,7 @@ if __name__ == "__main__":
                         input_executable = "inputs/condor_executable_metis.sh",
                         tarfile = "inputs/package.tar.xz",
                         special_dir = "FTbabies/{}/".format(tag),
-                        # recopy_inputs = True,
+                        recopy_inputs = True,
                 )
                 merge_task = LocalMergeTask(
                         input_filenames=task.get_outputs(),

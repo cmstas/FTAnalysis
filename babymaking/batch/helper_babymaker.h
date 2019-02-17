@@ -89,14 +89,14 @@ class babyMaker {
       verbose = debug;
       evt_cut = 0;
     }
-    void MakeBabyNtuple(const char* output_name, int isFastsim);
+    void MakeBabyNtuple(const char* output_name, bool isFastsim, int iSignal);
     void InitBabyNtuple();
     void CloseBabyNtuple () {
         BabyFile->cd();
         BabyTree->Write();
         BabyFile->Close();
     }
-    csErr_t ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty *jetUnc, int isFastsim = 0);
+    csErr_t ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty *jetUnc, bool isFastsim = 0, int iSignal = 0);
 
     bool ignore_scale1fb = false;
     bool ignore_os = false;
@@ -207,6 +207,11 @@ class babyMaker {
     bool br;
     int sr;
     int nleps;
+
+    int ss_nleps;
+    bool ss_br;
+    int ss_region;
+    int ss_sr;
 
     int extragenb;
     int ngenjets;

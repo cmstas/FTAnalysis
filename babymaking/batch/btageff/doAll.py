@@ -35,10 +35,20 @@ if __name__ == "__main__":
     # outputdir = "outputs_2016"
     # outputname = "btageff__SMS-T1tttt_2016_80X_deepCSV.root"
 
-    options = "2017,quiet"
-    fnames = glob.glob("/hadoop/cms/store/group/snt/run2_mc2017//SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3_MINIAODSIM_CMS4_V10-02-05/merged_ntuple_1*.root")
-    outputdir = "outputs_2017"
-    outputname = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
+    # options = "2017,quiet"
+    # fnames = glob.glob("/hadoop/cms/store/group/snt/run2_mc2017//SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8_RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3_MINIAODSIM_CMS4_V10-02-05/merged_ntuple_1*.root")
+    # outputdir = "outputs_2017"
+    # outputname = "btageff__SMS-T1tttt_2017_94X_deepCSV.root"
+
+    # options = "2017,quiet"
+    # fnames = glob.glob("/hadoop/cms/store/group/snt/run2_mc2017//QCD_Pt_80to120_TuneCP5_13TeV_pythia8_RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1_MINIAODSIM_CMS4_V10-02-05//*.root")
+    # outputdir = "outputs_2017_qcd"
+    # outputname = "btageff__qcd_2017_94X_deepCSV.root"
+
+    options = "2018,quiet"
+    fnames = glob.glob("/hadoop/cms/store/group/snt/run2_mc2018//QCD_Pt_80to120_TuneCP5_13TeV_pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_CMS4_V10-02-04/*.root")
+    outputdir = "outputs_2018_qcd"
+    outputname = "btageff__qcd_2018_102X_deepCSV.root"
 
     chunks = make_chunks(fnames,size=1)
 

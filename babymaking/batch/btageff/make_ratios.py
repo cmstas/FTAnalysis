@@ -30,12 +30,12 @@ def embed_ratios(fname):
                 print "Wrote {}".format(eff.GetName())
     f1.Close()
 
-def make_two_year_ratio():
-    embed_ratios("output_tt_2017.root")
-    embed_ratios("output_tt_2018.root")
+def make_two_year_ratio(fname1,fname2,fnameout):
+    embed_ratios(fname1)
+    embed_ratios(fname2)
 
-    f17 = r.TFile("output_tt_2017.root")
-    f18 = r.TFile("output_tt_2018.root")
+    f17 = r.TFile(fname1)
+    f18 = r.TFile(fname2)
 
     b_eff_17 = f17.Get("h2_BTaggingEff_csv_med_Eff_b")
     b_eff_18 = f18.Get("h2_BTaggingEff_csv_med_Eff_b")
@@ -44,7 +44,7 @@ def make_two_year_ratio():
     l_eff_17 = f17.Get("h2_BTaggingEff_csv_med_Eff_udsg")
     l_eff_18 = f18.Get("h2_BTaggingEff_csv_med_Eff_udsg")
 
-    fratio = r.TFile("hists_bcl_eff_ratios_18over17.root", "recreate")
+    fratio = r.TFile(fnameout, "recreate")
 
     b_eff_ratio = b_eff_18.Clone("b_eff_ratio_18over17")
     b_eff_ratio.Divide(b_eff_17)
@@ -66,6 +66,19 @@ if __name__ == "__main__":
 
     # embed_ratios("btageff__ttbar_amc_102X_deepCSV.root")
     # embed_ratios("btageff__SMS-T1tttt_2016_80X_deepCSV.root")
-    embed_ratios("btageff__SMS-T1tttt_2017_94X_deepCSV.root")
+    # embed_ratios("btageff__SMS-T1tttt_2017_94X_deepCSV.root")
+    # embed_ratios("btageff__qcd_2017_94X_deepCSV.root")
+
+    # make_two_year_ratio(
+    #         "output_tt_2017.root",
+    #         "output_tt_2018.root",
+    #         "hists_bcl_eff_ratios_18over17.root",
+    #         )
+
+    make_two_year_ratio(
+            "btageff__qcd_2017_94X_deepCSV.root",
+            "btageff__qcd_2018_102X_deepCSV.root",
+            "hists_qcd_bcl_eff_ratios_18over17.root",
+            )
 
 

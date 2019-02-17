@@ -115,7 +115,8 @@ int main(int argc, char *argv[]){
     std::cout << "     nevents_max: " << nevents_max << std::endl;
 
     bool isData = filenames.Contains("run2_data") || filenames.Contains("Run201");
-    int isSignal = 0; 
+    int iSignal = 0; 
+    bool isFastsim = 0; 
     int year = -1;
     if (
             filenames.Contains("Run2016")
@@ -123,6 +124,7 @@ int main(int argc, char *argv[]){
             || filenames.Contains("RunIISummer16")
             || filenames.Contains("run2_data2016")
             || filenames.Contains("run2_moriond17")
+            || filenames.Contains("2016_mc_rpv")
        ) year = 2016;
     if (
             filenames.Contains("Run2017")
@@ -257,37 +259,51 @@ int main(int argc, char *argv[]){
 
         // good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
         good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
-        jecEra = "Fall17_17Nov2017C_V32";
-        jecEraMC = "Fall17_17Nov2017_V32";
-        // jecEra = "Fall17_17Nov2017C_V6";
-        // jecEraMC = "Fall17_17Nov2017_V6";
+        // jecEra = "Fall17_17Nov2017C_V32";
+        // jecEraMC = "Fall17_17Nov2017_V32";
+        jecEra = "Autumn18_V3";
+        jecEraMC = "Autumn18_V3";
         gconf.SS_innerlayers = 0;
     }
 
     if (filenames.Contains("/SMS")) {
-        if (filenames.Contains("SMS-T1tttt_")) isSignal = 1;
-        else if (filenames.Contains("SMS-T5qqqqVV_Tune")) isSignal = 2;
-        else if (filenames.Contains("SMS-T5qqqqVV_dM20_Tune")) isSignal = 3;
-        else if (filenames.Contains("SMS-T6ttWW")) isSignal = 10;
-        else if (filenames.Contains("SMS-T1ttbb_Tune")) isSignal = 6;
-        else if (filenames.Contains("SMS-T5tttt_dM175_Tune")) isSignal = 5;
-        else if (filenames.Contains("SMS-T5ttcc_Tune")) isSignal = 4;
+        if (filenames.Contains("SMS-T1tttt_")) iSignal = 1;
+        else if (filenames.Contains("SMS-T5qqqqVV_Tune")) iSignal = 2;
+        else if (filenames.Contains("SMS-T5qqqqVV_dM20_Tune")) iSignal = 3;
+        else if (filenames.Contains("SMS-T6ttWW")) iSignal = 10;
+        else if (filenames.Contains("SMS-T1ttbb_Tune")) iSignal = 6;
+        else if (filenames.Contains("SMS-T5tttt_dM175_Tune")) iSignal = 5;
+        else if (filenames.Contains("SMS-T5ttcc_Tune")) iSignal = 4;
+        else if (filenames.Contains("SMS-T1tbs")) iSignal = -1; // set later
         else {
             std::cout << ">>> [!] Can't figure out which signal sample this is!" << std::endl;
             return 1;
         }
+        isFastsim = true;
     }
-    // if (filenames.Contains("_HToTT_")) isSignal = 101; // isSignal > 100 used only for non SMS stuff
-    if (filenames.Contains("_HToTT_") && filenames.Contains("Summer16Fast")) isSignal = 101; // fastsim higgs vs fullsim higgs
+    // if (filenames.Contains("_HToTT_")) iSignal = 101; // iSignal > 100 used only for non SMS stuff
+    if (filenames.Contains("_HToTT_") && filenames.Contains("Summer16Fast")) {
+        iSignal = 101; // fastsim higgs vs fullsim higgs
+        isFastsim = true;
+    }
+    if (filenames.Contains("T1qqqqL")) {
+        iSignal = 201; // RPV sample
+        isFastsim = false;
+    }
+    if (filenames.Contains("T1tbs")) {
+        iSignal = 301; // RPV sample
+        isFastsim = false;
+    }
 
     if (arg_notfastsim) {
-        isSignal = 0;
+        iSignal = 0;
+        isFastsim = false;
         std::cout << ">>> [!] Not actually a signal file!" << std::endl;
     }
 
     //Set up file and tree
     babyMaker *mylooper = new babyMaker();
-    mylooper->MakeBabyNtuple(outname.Data(), isSignal);
+    mylooper->MakeBabyNtuple(outname.Data(), isFastsim, iSignal);
 
 
     if (verbose) {
@@ -333,7 +349,7 @@ int main(int argc, char *argv[]){
     TBranchElement *currentBranch = 0;
     while ( (currentBranch = (TBranchElement*)branchIter.Next()) ) { 
         TString bname = TString(currentBranch->GetName());
-        if (bname.Contains("genMaker_genHEPMCweight") and isSignal==0) {
+        if (bname.Contains("genMaker_genHEPMCweight") and iSignal==0) {
             mylooper->has_lhe_branches = true;
             std::cout << ">>> [!] This sample has the new gen_LHE_* branches, so using them" << std::endl;
             break;
@@ -347,7 +363,7 @@ int main(int argc, char *argv[]){
     //Make Jet Energy Uncertainties
     JetCorrectionUncertainty *jecUnc = 0;
     if (!isData)      jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/"+jecEraMC+"_MC/"+jecEraMC+"_MC_Uncertainty_AK4PFchs.txt"); 
-    if (isSignal > 0) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_Uncertainty_AK4PFchs.txt"); 
+    if (iSignal > 0) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_Uncertainty_AK4PFchs.txt"); 
 
     //Init MVA
     createAndInitMVA("./CORE", true, true, 80);
@@ -385,7 +401,7 @@ int main(int argc, char *argv[]){
     FactorizedJetCorrector *jetCorrAG_L1 = nullptr;
     FactorizedJetCorrector *jetCorrAG_L2L3 = nullptr;
     if (!isData) {
-        if (!isSignal) {
+        if (!iSignal) {
             jetCorrAG_L1 = makeJetCorrector(jetcorr_filenames_25ns_MC_pfL1);
             jetCorrAG_L2L3 = makeJetCorrector(jetcorr_filenames_25ns_MC_pfL2L3);
             jetCorrAG = makeJetCorrector(jetcorr_filenames_25ns_MC_pfL1L2L3);
@@ -460,15 +476,8 @@ int main(int argc, char *argv[]){
                 else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V32";
                 else if (tas::evt_run() <= 304797 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017DE_V32";
                 else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V32";
-                else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
-
-
-                // else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V6";
-                // else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V6";
-                // else if (tas::evt_run() <= 303434 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017D_V6";
-                // else if (tas::evt_run() <= 304797 && tas::evt_run() >= 303824) jecEra = "Fall17_17Nov2017E_V6";
-                // else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V6";
-                // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V6"; // FIXME 2018?
+                // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
+                else if (tas::evt_run() > 306462) jecEra = "Autumn18_V3"; // FIXME 2018?
 
                 else std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;
 
@@ -517,9 +526,9 @@ int main(int argc, char *argv[]){
                 }
             }
 
-            // csErr_t csErr = mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
+            // csErr_t csErr = mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, iSignal); 
             try {
-                mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isSignal); 
+                mylooper->ProcessBaby(filename.Data(), jetCorrAG, jecUnc, isFastsim, iSignal); 
             } catch (const std::ios_base::failure& e) {
                 std::cout << "Got an I/O error!" << std::endl;
                 std::cout << e.what() << std::endl;
@@ -532,7 +541,7 @@ int main(int argc, char *argv[]){
             // bool isGood = csErr.isGood; 
 
             //c-s error variables
-            if (isSignal > 0) {
+            if (isFastsim) {
                 vector<float> sparms = tas::sparm_values();
                 float s1 = 1.;
                 float s2 = 1.;
@@ -552,7 +561,7 @@ int main(int argc, char *argv[]){
                         float nom = genweights[0];
                         float scale_up_raw = genweights[4];
                         float scale_down_raw = genweights[8];
-                        if (isSignal > 0) {
+                        if (isFastsim) {
                             // fastsim shifted by 1
                             nom = genweights[1];
                             scale_up_raw = genweights[5];

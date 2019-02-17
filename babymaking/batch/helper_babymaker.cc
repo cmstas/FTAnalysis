@@ -10,14 +10,14 @@ namespace bdtrun2 {
 #include "misc/bdt_run2.h"
 }
 #include "misc/common_utils.h"
-#include "misc/toptagger.h"
+// #include "misc/toptagger.h"
 
 using namespace tas;
 
 const bool applyBtagSFs = true;
 
 //Main functions
-void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
+void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSignal){
 
   //Create Baby
   BabyFile = new TFile(Form("%s/%s", path.Data(), output_name), "RECREATE");
@@ -65,6 +65,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("nleps"                                                   , &nleps                                                   );
   BabyTree->Branch("sr"                                                   , &sr                                                   );
   BabyTree->Branch("br"                                                   , &br                                                   );
+  BabyTree->Branch("ss_nleps"                                                   , &ss_nleps                                                   );
+  BabyTree->Branch("ss_br"                                                   , &ss_br                                                   );
+  BabyTree->Branch("ss_sr"                                                   , &ss_sr                                                   );
+  BabyTree->Branch("ss_region"                                                   , &ss_region                                                   );
   BabyTree->Branch("njets"                                                   , &njets                                                   );
   BabyTree->Branch("njetsAG"                                                   , &njetsAG                                                   );
   BabyTree->Branch("nbtagsAG"                                                   , &nbtagsAG                                                   );
@@ -609,7 +613,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
 
     // get btag efficiencies
     TFile* f_btag_eff = 0;
-    if (isFastsim == 0) {
+    if (not isFastsim) {
 
         if (gconf.year == 2016) {
             f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_25ns/btageff__ttbar_powheg_pythia8_25ns_Moriond17_deepCSV.root");
@@ -628,7 +632,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
         h_btag_eff_udsg            = (TH2D*) h_btag_eff_udsg_temp->Clone("h_btag_eff_udsg");
         f_btag_eff->Close();
     }
-    if (isFastsim >  0 ) {
+    if (isFastsim) {
         if (gconf.year == 2016) {
             f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1tttt_2016_80X_deepCSV.root");
         } else if (gconf.year == 2017) {
@@ -701,6 +705,10 @@ void babyMaker::InitBabyNtuple(){
     nleps = 0;
     sr = 0;
     br = 0;
+    ss_nleps = -1;
+    ss_br = 0;
+    ss_sr = -1;
+    ss_region = -1;
     njets = -1;
     njetsAG = -1;
     nbtagsAG = -1;
@@ -1204,7 +1212,7 @@ void babyMaker::InitBabyNtuple(){
 }
 
 //Main function
-csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty* jecUnc, int isFastsim){
+csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCorr, JetCorrectionUncertainty* jecUnc, bool isFastsim, int iSignal){
 
 
   //Initialize variables
@@ -1291,7 +1299,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           if (nweights>110) {
               float nom = genweights[0];
               // fastsim shifted by 1
-              if (isFastsim > 0) nom = genweights[1];
+              if (isFastsim) nom = genweights[1];
               float sum_pdf = 0.;
               float sum2_pdf = 0.;
               int N = 100;
@@ -1304,7 +1312,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               if (gconf.year == 2017) {
                   rms *= sqrt(99);
               }
-              if (isFastsim > 0) {
+              if (isFastsim) {
                   // fastsim shifted by 1
                   weight_scale_UP = genweights[5] / nom;
                   weight_scale_DN = genweights[9] / nom;
@@ -1391,23 +1399,52 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
 
       }
-      if (!ignore_scale1fb && !isFastsim) {
+      if (!ignore_scale1fb && iSignal==0) {
           scale1fb = sgnMCweight*df.getScale1fbFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
           xsec = sgnMCweight*df.getXsecFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
           neventstotal = sgnMCweight*df.getnEventsTotalFromFile(tas::evt_dataset()[0].Data(),tas::evt_CMS3tag()[0].Data());
       }
-      if (isFastsim > 0){
-          sparms = tas::sparm_values();
+      if (iSignal > 0){
+          if (isFastsim) {
+              sparms = tas::sparm_values();
+          }
 
           // T1tttt, T5qqqqVV, T5tttt, T5ttcc
-          if (isFastsim <= 6) xsec = go_xsec(sparms[0]).xsec;
-          if (isFastsim <= 6) xsec_error = go_xsec(sparms[0]).percErr;
+          if (iSignal <= 6) xsec = go_xsec(sparms[0]).xsec;
+          if (iSignal <= 6) xsec_error = go_xsec(sparms[0]).percErr;
+          if ((iSignal == 201) or (iSignal == 301)) {
+              // RPV T1qqqqLL, T1tbs
+              float mass = -1;
+              if (filename.find("mGluino1000") != std::string::npos) mass = 1000;
+              else if (filename.find("mGluino1100") != std::string::npos) mass = 1100;
+              else if (filename.find("mGluino1200") != std::string::npos) mass = 1200;
+              else if (filename.find("mGluino1300") != std::string::npos) mass = 1300;
+              else if (filename.find("mGluino1400") != std::string::npos) mass = 1400;
+              else if (filename.find("mGluino1500") != std::string::npos) mass = 1500;
+              else if (filename.find("mGluino1600") != std::string::npos) mass = 1600;
+              else if (filename.find("mGluino1700") != std::string::npos) mass = 1700;
+              else if (filename.find("mGluino1800") != std::string::npos) mass = 1800;
+              else if (filename.find("mGluino1900") != std::string::npos) mass = 1900;
+              else if (filename.find("mGluino2000") != std::string::npos) mass = 2000;
+              else if (filename.find("mGluino2100") != std::string::npos) mass = 2100;
+              else if (filename.find("mGluino2200") != std::string::npos) mass = 2200;
+              else if (filename.find("mGluino2300") != std::string::npos) mass = 2300;
+              else if (filename.find("mGluino2400") != std::string::npos) mass = 2400;
+              else if (filename.find("mGluino2500") != std::string::npos) mass = 2500;
+              else if (filename.find("mGluino2600") != std::string::npos) mass = 2600;
+              else {
+                  std::cout << "Error, couldn't parse mass from this RPV sample filename" << std::endl;
+              }
+              xsec = go_xsec(mass).xsec;
+              xsec_error = go_xsec(mass).percErr;
+              sparms = { mass };
+          }
           // T6ttWW
-          if (isFastsim == 10) xsec = stop_xsec(sparms[0]).xsec;
-          if (isFastsim == 10) xsec_error = stop_xsec(sparms[0]).percErr;
-          // if (isFastsim <  100) scale1fb = 1000*xsec/nPoints(isFastsim, sparms[0], sparms[1]);
-          is_fastsim = 1;
+          if (iSignal == 10) xsec = stop_xsec(sparms[0]).xsec;
+          if (iSignal == 10) xsec_error = stop_xsec(sparms[0]).percErr;
+          // if (iSignal <  100) scale1fb = 1000*xsec/nPoints(iSignal, sparms[0], sparms[1]);
       }
+      is_fastsim = isFastsim;
       kfactor = tas::evt_kfactor();
 
       int higgs_scan = 0;
@@ -1424,7 +1461,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           }
           xsec = xsec_higgs(higgs_scan, higgs_mass);
           xsec_ps = xsec_higgs(higgs_scan+3, higgs_mass);
-          if (isFastsim > 0) {
+          if (iSignal > 0) {
               scale1fb = 1000*xsec/nPoints_higgs(higgs_scan, higgs_mass);
           }
       }
@@ -1810,7 +1847,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
 
 
-  if (!is_real_data && isFastsim > 0) {
+  if (!is_real_data && iSignal > 0) {
       ncharginos = 0;
       for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
           if (abs(tas::genps_id()[gp])==1000024 && tas::genps_status()[gp]==22) ncharginos++;
@@ -1818,7 +1855,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   }
 
   //Determine and save jet and b-tag variables, raw
-  std::pair <vector <Jet>, vector <Jet> > jet_results = SSJetsCalculator(jetCorr, 2, (isFastsim > 0));
+  std::pair <vector <Jet>, vector <Jet> > jet_results = SSJetsCalculator(jetCorr, 2, isFastsim);
   vector <LorentzVector> jets_raw;
   vector <LorentzVector> btags_raw;
   vector <float> jets_undoJEC_raw;
@@ -2944,6 +2981,22 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   nleps = (lep3_passes_id and lep3_coneCorrPt > 20) ? ((lep4_passes_id and lep4_coneCorrPt > 20) ? 4 : 3) : 2;
   sr = signal_region_ft(njets, nbtags, met, ht, -1, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, nleps, hyp_class==6);
 
+  float mtnonz = mtmin;
+  if (hyp_class==6) {
+      float zmass23 = lep2_id == -lep3_id ? (lep2_p4+lep3_p4).mass() : -999.0;
+      float zmass31 = lep3_id == -lep1_id ? (lep3_p4+lep1_p4).mass() : -999.0;
+      if (fabs(zmass31 - 91.2) < fabs(zmass23 - 91.2)) {
+          mtnonz = MT(lep2_coneCorrPt, lep2_p4.phi(), met, metPhi);
+      } else {
+          mtnonz = MT(lep1_coneCorrPt, lep1_p4.phi(), met, metPhi);
+      }
+  }
+  ss_nleps = (lep3_passes_id) ? (lep4_passes_id ? 4 : 3) : 2;
+  ss_region = analysis_category_ss(lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, ss_nleps, ht, met);
+  ss_br = passes_baseline_ss(njets, nbtags, met, ht, lep1_id, lep2_id, lep1_coneCorrPt, lep1_coneCorrPt);
+  if (ss_region != LowMet and met < 50.) ss_br = 0;
+  ss_sr = signal_region_ss(njets, nbtags, met, ht, mtmin, lep1_id, lep2_id, lep1_coneCorrPt, lep2_coneCorrPt, lep3_coneCorrPt, ss_nleps, hyp_class==6, mtnonz);
+
   // BDT stuff
   float mjoverpt = 0.;
   for (unsigned int ijet = 0; ijet < jets.size(); ijet++) {
@@ -3033,7 +3086,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       weight_lepsf2 = leptonScaleFactor(year, lep2_id, lep2_coneCorrPt, lep2_eta, ht);
       weight_lepsf3 = ((lep3_passes_id && lep3_coneCorrPt > 20.) ? leptonScaleFactor(year, lep3_id, lep3_pt, lep3_eta, ht) : 1);
       weight_lepsf = weight_lepsf1 * weight_lepsf2 * weight_lepsf3;
-      weight_triggersf = triggerScaleFactor(year, lep1_id, lep2_id, lep1_pt, lep2_pt, lep1_eta, lep2_eta, ht);
+      weight_triggersf = 1.; // FIXME
+      // weight_triggersf = triggerScaleFactor(year, lep1_id, lep2_id, lep1_pt, lep2_pt, lep1_eta, lep2_eta, ht);
       weight_pu = getTruePUw(year, trueNumInt[0], 0);
       weight_isrsf = 1.;
       if (filename.find("TTWJetsToLNu") != std::string::npos) weight_isrsf = isrWeight(year, nisrMatch, 1);

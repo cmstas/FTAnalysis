@@ -29,6 +29,7 @@ XZ_OPT=-9 tar -Jch \
     --exclude='*run2_50ns*' \
     --exclude='*AK8PF*.txt' \
     --exclude='*UncertaintySources*txt' \
+    --exclude='*JECDatabase*' \
     --exclude='*Summer16_23Sep2016*V3_*txt' \
     --exclude='*PFPuppi*.txt' \
     --exclude='*.cc' \
