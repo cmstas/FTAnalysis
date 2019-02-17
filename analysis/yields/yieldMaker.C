@@ -2187,10 +2187,10 @@ plots_t run(TChain *chain, int year, TString options){
             if (isData == 0 && SR_JER_dn > 0) p_result.p_jer_alt_dn_SR.CatFill(categ_JER_dn, SR_JER_dn, weight);
             if (isData == 0 && SRgenmet > 0) p_result.p_met_alt_up_SR.CatFill(categ, SRgenmet, weight);
             if (doFakes == 1 && SR >= 0) p_result.p_fake_alt_up_SR.CatFill(categ, SR, weight_alt_FR);
-            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb0_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 0 ? 1.3 : 1);
-            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb1_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 1 ? 1.3 : 1);
-            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb2_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 2 ? 1.3 : 1);
-            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb3_up_SR.CatFill(categ, SR, weight*(ss::nbtags() >= 3 ? 1.3 : 1);
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb0_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 0 ? 1.3 : 1));
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb1_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 1 ? 1.3 : 1));
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb2_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 2 ? 1.3 : 1));
+            if (doFakes == 1 && SR >= 0) p_result.p_fake_nb3_up_SR.CatFill(categ, SR, weight*(ss::nbtags() >= 3 ? 1.3 : 1));
             if (doFakes == 1 && SR >= 0 && ss::is_real_data()) p_result.p_fake_unw_up_SR.CatFill(categ, SR, weight > 0 ? 1 : 0);
             if (isData == 0 && SR >= 0) p_result.p_btagSF_alt_up_SR.CatFill(categ, SR, weight_btag_up_alt);
             if (isData == 0 && SR >= 0) p_result.p_btagSF_alt_dn_SR.CatFill(categ, SR, weight_btag_dn_alt);
