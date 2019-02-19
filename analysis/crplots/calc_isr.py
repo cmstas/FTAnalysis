@@ -39,8 +39,8 @@ def do(inputdir,outputdir,which,year):
         # hname = "{}_{}_{}".format(region,var,flav)
 
     # hname = "tt_isr_reweight_check_nisrjets_in"
-    # hname = "tt_isr_nisrjets_in"
     hname = "tt_isr_nisrjets_in"
+    # hname = "tt_isr_nisrjets_em"
     # hname = "tt_isr_ht_in"
     # hname = "tt_isr_etae_in"
     # hname = "tt_isr_nisrmatch_in"
@@ -150,15 +150,21 @@ def do(inputdir,outputdir,which,year):
     """.format(*vec)
 
 if __name__ == "__main__":
-    for year in [2017,2018]:
-        for which in ["tt","ttdl0jet","ttdl1jet"]:
-    # for year in [2017]:
-    #     for which in ["ttdl0jet"]:
-    # for year in [2016]:
-    #     for which in ["tt"]:
-            do(
-                    inputdir="outputs_19Jan18_v3p24_ft",
-                    outputdir="plots_ft_3p24_19Jan18",
-                    which=which,
-                    year=year,
-                    )
+
+    # for year in [2017,2018]:
+    #     for which in ["tt","ttdl0jet","ttdl1jet"]:
+    # # for year in [2017]:
+    # #     for which in ["ttdl0jet"]:
+    # # for year in [2016]:
+    # #     for which in ["tt"]:
+    #         do(
+    #                 # inputdir="outputs_19Jan18_v3p24_ft",
+    #                 # outputdir="plots_ft_3p24_19Jan18",
+    #                 inputdir="outputs_19Feb16_v3p26_ft",
+    #                 outputdir="plots_ft_3p26_19Feb16",
+    #                 which=which,
+    #                 year=year,
+    #                 )
+
+    # do( inputdir="outputs_19Feb16_v3p26_ft", outputdir="plots_ft_3p26_19Feb16", which="tt", year=2016,)
+    do( inputdir="outputs_19Feb16_v3p26_ft", outputdir="plots_ft_3p26_19Feb16", which="ttmg", year=2016,)

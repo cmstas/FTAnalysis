@@ -93,6 +93,11 @@ chs = {
                 ], options=options[2016]),
             "wjets": make_objs(basedirs[2016]+"WJets_HT*.root", options=options[2016]),
             "ttfake": make_objs(basedirs[2016]+"TTBAR*.root", options=options[2016]+ "doTruthFake"),
+            "ttmg": make_objs([
+                basedirs[2016]+"TTDL.root",
+                basedirs[2016]+"TTSLtop.root",
+                basedirs[2016]+"TTSLtopbar.root",
+                ], options=options[2016]),
             # "ttlomg": make_objs(basedirs[2016]+"TTLOMG.root", options=options[2016]),
             # "ttslph": make_objs(basedirs[2016]+"TTSLPH.root", options=options[2016]),
             "ttz": make_objs([
