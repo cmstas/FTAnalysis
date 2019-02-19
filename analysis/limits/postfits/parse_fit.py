@@ -282,23 +282,23 @@ def pdgRound(value, error) :
     return (formatValue(value, expVal, nDigitsValue(expVal, expErr, nD), extraRound),
             formatValue(error,expErr, nD, extraRound))
 
-def print_slim_table(d,x="shapes_fit_b"):
+def print_slim_table(d):
     buff = ""
-    v_hh_obs = d[x]["srhh"]["data"].counts
-    v_hh_exp = d[x]["srhh"]["total_background"].counts
-    e_hh_exp = d[x]["srhh"]["total_background"].errors
-    v_hl_obs = d[x]["srhl"]["data"].counts
-    v_hl_exp = d[x]["srhl"]["total_background"].counts
-    e_hl_exp = d[x]["srhl"]["total_background"].errors
-    v_ll_obs = d[x]["srll"]["data"].counts
-    v_ll_exp = d[x]["srll"]["total_background"].counts
-    e_ll_exp = d[x]["srll"]["total_background"].errors
-    v_ml_obs = d[x]["srml"]["data"].counts
-    v_ml_exp = d[x]["srml"]["total_background"].counts
-    e_ml_exp = d[x]["srml"]["total_background"].errors
-    v_lm_obs = d[x]["srlm"]["data"].counts
-    v_lm_exp = d[x]["srlm"]["total_background"].counts
-    e_lm_exp = d[x]["srlm"]["total_background"].errors
+    v_hh_obs = d["srhh"]["data"].counts
+    v_hh_exp = d["srhh"]["total_background"].counts
+    e_hh_exp = d["srhh"]["total_background"].errors
+    v_hl_obs = d["srhl"]["data"].counts
+    v_hl_exp = d["srhl"]["total_background"].counts
+    e_hl_exp = d["srhl"]["total_background"].errors
+    v_ll_obs = d["srll"]["data"].counts
+    v_ll_exp = d["srll"]["total_background"].counts
+    e_ll_exp = d["srll"]["total_background"].errors
+    v_ml_obs = d["srml"]["data"].counts
+    v_ml_exp = d["srml"]["total_background"].counts
+    e_ml_exp = d["srml"]["total_background"].errors
+    v_lm_obs = d["srlm"]["data"].counts
+    v_lm_exp = d["srlm"]["total_background"].counts
+    e_lm_exp = d["srlm"]["total_background"].errors
     for i in range(len(v_hh_obs)):
         srs = "SR{}".format(i+1)
         hh_exp = ""
@@ -338,7 +338,7 @@ if __name__ == "__main__":
             buff = print_table(d_yields,regions=region)
             fh.write("\n\n----- {} {} -----\n\n".format(region.upper(),x))
             fh.write(buff)
-        buff = print_slim_table(d_hists)
+        buff = print_slim_table(d_hists[x])
         fh.write("\n\n----- SUMMARY SLIM TABLE for {} {} -----\n\n".format(region.upper(),x))
         fh.write(buff)
     fh.close()
