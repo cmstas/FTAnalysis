@@ -131,6 +131,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
 
     TH1F* nSS_run_data_big = new TH1F("nSS_run_data_plot_big", "nSS_run_data_plot_big", 52425,272007,324432); 
     TH1F* nOS_run_data_big = new TH1F("nOS_run_data_plot_big", "nOS_run_data_plot_big", 52425,272007,324432); 
+    TH1F* nSS_lumi_data_big = new TH1F("nSS_lumi_data_plot_big", "nSS_lumi_data_plot_big", 3000,0,3000); 
+    TH1F* nOS_lumi_data_big = new TH1F("nOS_lumi_data_plot_big", "nOS_lumi_data_plot_big", 3000,0,3000); 
 
     TH1F* clos_leppt_MC   = new TH1F("clos_leppt_plot_MC"  , "clos_leppt_plot_MC"  , 50, 0, 100); 
     TH1F* clos_leppt_MCp  = new TH1F("clos_leppt_plot_MCp" , "clos_leppt_plot_MCp" , 50, 0, 100); 
@@ -425,6 +427,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                         clos_lepeta_data->Fill(ss::lep2_p4().eta(), weight);
                         nSS_run_data->Fill(ss::run());
                         nSS_run_data_big->Fill(ss::run());
+                        nSS_lumi_data_big->Fill(ss::lumi());
                         clos_lepphi_data->Fill(ss::lep1_p4().phi(), weight); 
                         clos_lepphi_data->Fill(ss::lep2_p4().phi(), weight);  
                         clos_dlepphi_data->Fill(calcDeltaPhi(ss::lep1_p4().phi(),ss::lep2_p4().phi()), weight); 
@@ -517,6 +520,7 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                     osee_nvtx_data->Fill(ss::nGoodVertices(), weight); 
                     nOS_run_data->Fill(ss::run());
                     nOS_run_data_big->Fill(ss::run());
+                    nOS_lumi_data_big->Fill(ss::lumi());
 
                     nPred += ff*weight;
                     clos_leppt_MC->Fill(ss::lep1_p4().pt(), ff*weight); 
@@ -663,6 +667,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
     nOS_run_data->Write();
     nSS_run_data_big->Write();
     nOS_run_data_big->Write();
+    nSS_lumi_data_big->Write();
+    nOS_lumi_data_big->Write();
 
     clos_mll_data->Write();
     clos_mll_MC->Write();

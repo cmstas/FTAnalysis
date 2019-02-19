@@ -34,9 +34,19 @@ for y in [2017]:
         tot_den.Add(nos_)
 
 
-# tot_num.Rebin(5)
-# tot_den.Rebin(5)
+rebinfac = 100
+tot_num.Rebin(rebinfac)
+tot_den.Rebin(rebinfac)
 tot_num.Divide(tot_num,tot_den,1,1,"B")
+
+for i in range(1,tot_num.GetNbinsX()+1):
+    if tot_num.GetBinContent(i) == 0: continue
+    print "[{},{}] {:3.4e} +- {:3.4e}".format(
+            int(tot_num.GetXaxis().GetBinLowEdge(i)),
+            int(tot_num.GetXaxis().GetBinUpEdge(i)),
+            tot_num.GetBinContent(i),
+            tot_num.GetBinError(i),
+            )
 
 if tot_num_94x:
     tot_num_94x.Rebin(5)
@@ -47,7 +57,15 @@ c1 = r.TCanvas()
 tot_num.SetLineColor(r.kBlack)
 tot_num.Draw("PE")
 
+
 tot_num.SetAxisRange(297000,307000,"X")
+
+f1 = r.TF1("f1","[0]+[1]*(x-297000)",0.,6e-4)
+tot_num.Fit("f1")
+p0 = f1.GetParameter(0)
+p1 = f1.GetParameter(1)
+p0e = f1.GetParError(0)
+p1e = f1.GetParError(1)
 
 
 if tot_num_94x:
@@ -65,7 +83,7 @@ tot_num.SetTitle("Flip rate vs time")
 r.gStyle.SetOptStat(0)
 # c1.BuildLegend()
 line = r.TLine()
-line.SetLineColor(r.kRed)
+line.SetLineColor(r.kBlue)
 line.SetLineWidth(2)
 # line.DrawLine(272007,mcrate[2016],284044,mcrate[2016])
 line.DrawLine(297020,mcrate[2017],306462,mcrate[2017])
@@ -83,18 +101,19 @@ t.DrawLatex(0.5*(297020+306462),0.0002,"2017")
 # t.DrawLatex(0.5*(315252+325175),0.0002,"2018")
 
 k = 0.01
-leg = r.TLegend(0.5+k,0.75,0.83+k,0.85)
+leg = r.TLegend(0.35+k,0.70,0.88+k,0.85)
 # leg.SetNColumns(2)
 leg.SetTextFont(42)
 leg.SetBorderSize(0)
 # leg.AddEntry(tot_num, "nominal data, #color[4]{94X 2016}","LPE")
-leg.AddEntry(tot_num, "data (80X, 94X, 102X)","LPE")
+leg.AddEntry(tot_num, "data (94X)","LPE")
 tmp = tot_num.Clone("tmp")
 tmp.SetLineWidth(3)
-tmp.SetMarkerColor(r.kRed)
-tmp.SetLineColor(r.kRed)
+tmp.SetMarkerColor(r.kBlue)
+tmp.SetLineColor(r.kBlue)
 # leg.AddEntry(tmp, "nominal MC, #color[4]{94X 2016}")
-leg.AddEntry(tmp, "MC (80X, 94X, 102X)")
+leg.AddEntry(tmp, "MC (94X)")
+leg.AddEntry(f1, "y=({:.1e}#pm{:.1e})(x-297e3) + ({:.1e}#pm{:.1e})".format(p1,p1e,p0,p0e))
 leg.Draw()
 
 c1.SaveAs("fliprate_vs_time_2017.pdf")
