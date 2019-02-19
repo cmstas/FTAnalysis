@@ -767,6 +767,7 @@ plots_t run(TChain *chain, int year, TString options){
     bool isttZ = (chainTitle=="ttz");
     bool isWZ = (chainTitle=="wz");
     bool isXgamma = (chainTitle=="xg");
+    bool isT5qqqqWW = false;
 
     float invFilterEff = 1.;
     // float weightScale = 1.;
@@ -775,10 +776,19 @@ plots_t run(TChain *chain, int year, TString options){
         // Do we need the line below still? I think that was for filtering ncharginos (W's, so we would write it as T5qqqqWW, but now we're ok with WW,WZ,ZZ (VV))
       // invFilterEff = 9./4.;
     }
-    if (chainTitle.Contains("fs_t5qqqqvv_dm20")) {
+    if (chainTitle.Contains("fs_t5qqqqvvdm20")) {
         // http://uaf-8.t2.ucsd.edu/~namin/dis/?query=%2FSMS-T5qqqqVV_dM20_TuneCUETP8M1_13TeV-madgraphMLM-pythia8%2FRunIISpring16MiniAODv2-PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1%2FMINIAODSIM&type=mcm&short=short
         // Do we need the line below still? I think that was for filtering ncharginos (W's, so we would write it as T5qqqqWW, but now we're ok with WW,WZ,ZZ (VV))
       // invFilterEff = 9./4.;
+      invFilterEff *= 0.446; // efficiency of 1 lepton filter according to MCM for this sample
+    }
+    if (chainTitle.Contains("fs_t5qqqqww")) {
+        isT5qqqqWW = true;
+      invFilterEff = 9./4.;
+    }
+    if (chainTitle.Contains("fs_t5qqqqwwdm20")) {
+        isT5qqqqWW = true;
+      invFilterEff = 9./4.;
       invFilterEff *= 0.446; // efficiency of 1 lepton filter according to MCM for this sample
     }
     // if (chainTitle.Contains("rpv_")) {
@@ -1445,6 +1455,10 @@ plots_t run(TChain *chain, int year, TString options){
             if (isFastsim) {
                 weight = getSMSscale1fb()*lumiAG;
                 weight *= invFilterEff;
+                if (isT5qqqqWW) {
+                    // filter for 2 Ws when running on VV to get WW (and multiply by filter eff above)
+                    if (ss::ncharginos() < 2) continue;
+                }
             }
 
             if (isRPV) {
@@ -2237,6 +2251,12 @@ plots_t run(TChain *chain, int year, TString options){
             bool plotlep3 = categ == Multilepton;
 
             // if (ss::is_real_data() and !doFakes and !doFlips and categ == HighHigh and (SR==52 or SR==53)) {
+            //     std::cout <<  " ss::run(): " << ss::run() <<  " ss::lumi(): " << ss::lumi() <<  " ss::event(): " << ss::event() <<  " nleps: " << nleps <<  " SR: " << SR <<  " categ: " << categ <<  " lep1ccpt: " << lep1ccpt <<  " lep2ccpt: " << lep2ccpt <<  " lep1eta: " << lep1eta <<  " lep2eta: " << lep2eta <<  " lep1id: " << lep1id <<  " lep2id: " << lep2id <<  " lep1phi: " << lep1phi <<  " lep2phi: " << lep2phi <<  " mtmin: " << mtmin <<  " ss::njets(): " << ss::njets() <<  " ss::nbtags(): " << ss::nbtags() <<  " ss::met(): " << ss::met() <<  " ss::ht(): " << ss::ht() <<  " year: " << year <<  " ss::hyp_class(): " << ss::hyp_class() <<  std::endl;
+            // }
+            
+            // // FIXME FIXME
+            // if (categ == Multilepton and SR!=20) continue;
+            // if (ss::is_real_data() and !doFakes and !doFlips and categ == Multilepton and (SR==20)) {
             //     std::cout <<  " ss::run(): " << ss::run() <<  " ss::lumi(): " << ss::lumi() <<  " ss::event(): " << ss::event() <<  " nleps: " << nleps <<  " SR: " << SR <<  " categ: " << categ <<  " lep1ccpt: " << lep1ccpt <<  " lep2ccpt: " << lep2ccpt <<  " lep1eta: " << lep1eta <<  " lep2eta: " << lep2eta <<  " lep1id: " << lep1id <<  " lep2id: " << lep2id <<  " lep1phi: " << lep1phi <<  " lep2phi: " << lep2phi <<  " mtmin: " << mtmin <<  " ss::njets(): " << ss::njets() <<  " ss::nbtags(): " << ss::nbtags() <<  " ss::met(): " << ss::met() <<  " ss::ht(): " << ss::ht() <<  " year: " << year <<  " ss::hyp_class(): " << ss::hyp_class() <<  std::endl;
             // }
 
