@@ -37,7 +37,7 @@ def make_card(basedir,sig,finalcard,verbose=True):
                 signal = sig,
                 verbose = verbose,
                 skiptext2workspace = True,
-                autothresh = 3.0,
+                # autothresh = 3.0,
                 to_correlate = [
                         "scale",
                         "pdf",
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     if args.clean:
         print "[!] Removing {}/*_run2.root files from the directory so they can get remade".format(basedir)
         os.system("rm {}/*_run2.root".format(basedir))
-    print get_lims(basedir,sig=sig,verbose=True,redolimits=True)
+    print get_lims(basedir,sig=sig,verbose=True,redolimits=True,unblinded=True)
 
     """
     # basedir = "v3.23_testss_v1"

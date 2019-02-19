@@ -22,10 +22,7 @@ def fix_spacing(ss):
         ])
 
 def get_info(fname):
-    if "rpv_" in fname:
-        opts = type("opts", (object,), dict(bin=True,noJMax=False,stat=False,nuisancesToExclude=[],allowNoSignal=True))
-    else:
-        opts = type("opts", (object,), dict(bin=True,noJMax=False,stat=False,nuisancesToExclude=[]))
+    opts = type("opts", (object,), dict(bin=True,noJMax=False,stat=False,nuisancesToExclude=[],allowNoSignal=True))
     with open(fname,"r") as fh:
         dc = parseCard(fh, opts)
         # print dc.print_structure()
@@ -161,7 +158,8 @@ def do_combine(
                     output_nuisance_name, procs = make_hist(name, which=which, spec_year=y)
                 nuisance_info[output_nuisance_name] = procs
     make_hist("sr", which="")
-    del nuisance_info["y2018_prefire"]
+    if 2018 in years:
+        del nuisance_info["y2018_prefire"]
 
     # map from proc to nominal yield
     yields = {proc:tfile.Get("sr").Integral() for proc,tfile in summed_files.items()}

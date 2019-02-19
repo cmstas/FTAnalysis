@@ -1,15 +1,23 @@
 import sys
 import os
+import numpy as np
+import sys
+sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import matplotlib.patheffects as meffects
+import matplotlib.font_manager as mfm
 import pandas as pd
 import glob
 import ast
+
+
+import os
+import matplotlib.pyplot as plt
+
 
 GREEN = (0.,0.8,0.)
 YELLOW = (1.,0.8,0.)
@@ -34,12 +42,20 @@ def set_defaults():
     rcParams['figure.max_open_warning'] = 0
     rcParams['figure.dpi'] = 125
     rcParams["axes.formatter.limits"] = [-5,4] # scientific notation if log(y) outside this
+    # print rcParams
+    # rcParams["pdf.fonttype"] = 42
+    # rcParams["pdf.use14corefonts"] = True # this one uses helvetica for pdf saving
+    # pdf.fonttype       : 3         ## Output Type 3 (Type3) or Type 42 (TrueType)
+    # pdf.use14corefonts : False
 
-def add_cms_info(ax, typ="Preliminary", lumi="136.3", xtype=0.11):
+def add_cms_info(ax, typ="Preliminary", lumi="136.3", xtype=0.12):
     ax.text(0.0, 1.01,"CMS", horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, weight="bold", size="x-large")
     ax.text(xtype, 1.01,typ, horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, style="italic", size="x-large")
     ax.text(0.99, 1.01,"%s fb${}^{-1}$ (13 TeV)" % (lumi), horizontalalignment='right', verticalalignment='bottom', transform = ax.transAxes, size="x-large")
 
+def get_fig_ax():
+    fig, ax = plt.subplots(gridspec_kw={"top":0.92,"bottom":0.14,"left":0.15,"right":0.95},figsize=(5.5,5.5))
+    return fig, ax
 
 class DoubleBandObject(object): pass
 class DoubleBandObjectHandler(object):
@@ -113,7 +129,7 @@ def make_yukawa_plot(scaninfo):
     theory_down = calc_sigma(kts_fine,gza_13tev_down,int_13tev_down,higgs_13tev_down)
     theory_up = calc_sigma(kts_fine,gza_13tev_up,int_13tev_up,higgs_13tev_up)
 
-    fig, ax = plt.subplots(gridspec_kw={"top":0.92,"bottom":0.14,"left":0.15,},figsize=(5.5,5.5))
+    fig,ax = get_fig_ax()
     add_cms_info(ax, lumi="35.9")
     p3 = ax.fill_between(kts, obs_down, obs_up, linewidth=0., facecolor="k", alpha=0.25)
     p4 = ax.plot(kts, obs_cent, linestyle="-", marker="",color="k",solid_capstyle="butt")
@@ -348,7 +364,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
     mhs = df["mass"].values
     theory = df["xsec"].values
 
-    fig, ax = plt.subplots(gridspec_kw={"top":0.92,"bottom":0.14,"left":0.15,},figsize=(5.5,5.5))
+    fig,ax = get_fig_ax()
     add_cms_info(ax, lumi="136.3")
     pe2 = ax.fill_between(mhs, sm2, sp2, linewidth=0., facecolor=YELLOW, alpha=1.0)
     pe1 = ax.fill_between(mhs, sm1, sp1, linewidth=0., facecolor=GREEN, alpha=1.0)
@@ -445,12 +461,16 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
                 }
 
     fnames = glob.glob("{}/{}".format(basedir,globber))
+    # print fnames
     infos = []
     for fname in fnames:
-        d = parse_lims(open(fname,"r").readlines())
-        infos.append(d)
+        try:
+            d = parse_lims(open(fname,"r").readlines())
+            infos.append(d)
+        except: pass
     df = pd.DataFrame(infos)
     df = df.sort_values("mass")
+    # print df
 
 
     obs = (df["obs"]).values
@@ -463,7 +483,7 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
     theory = df["xsec"].values
 
 
-    fig, ax = plt.subplots(gridspec_kw={"top":0.92,"bottom":0.14,"left":0.15,},figsize=(5.5,5.5))
+    fig,ax = get_fig_ax()
     add_cms_info(ax, lumi="136.3")
 
     pe2 = ax.fill_between(mgs, sm2, sp2, linewidth=0., facecolor=YELLOW, alpha=1.0)
@@ -475,7 +495,7 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
     if do_tbs:
         procstr = "T1tbs"
     else:
-        procstr = "T1qqqqL w/ SS requirement"
+        procstr = "T1qqqqL"
 
     legend = ax.legend(
             [
@@ -490,14 +510,23 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
             labelspacing=0.6,
+            loc="upper center",
             )
 
     ax.set_yscale("log")
     ax.set_title("")
+
+    # fpath = os.path.join("/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/limits/arial.ttf")
+    # prop = mfm.FontProperties(fname=fpath)
+    # print prop
+    # # ax.set_title("title", fontproperties=prop)
+    # # ax.set_title("title", fontname="Helvetica")
+    # # ax.set_title("title")
+
     if do_tbs:
-        fname = "plots/rpv_t1tbs_run2.png"
+        fname = "scanplots/rpv_t1tbs_run2.pdf"
     else:
-        fname = "plots/rpv_t1qqqql_run2.png"
+        fname = "scanplots/rpv_t1qqqql_run2.pdf"
     ax.set_ylabel(r"$\sigma$ (fb)")
     ax.set_xlabel(r"$\mathrm{m}_\tilde{\mathrm{g}}$ (GeV)")
     fig.set_tight_layout(True)
@@ -505,15 +534,18 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
     fig.savefig(fname)
     fig.savefig(fname_png)
     os.system("ic {}".format(fname_png))
+    # os.system("ic {}".format(fname))
     print "Saved {}".format(fname)
 
 if __name__ == "__main__":
 
     set_defaults()
 
-    os.system("mkdir -p plots/")
-    make_yukawa_plot(scaninfo="scaninfo.txt")
-    make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
-    make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
-    make_rpv_plot(basedir="v3.24_sstest_v1",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
-    make_rpv_plot(basedir="v3.24_sstest_v1",globber="card_rpv_t1qqqql_*_all_run2.log",do_tbs=False)
+    # os.system("mkdir -p plots/")
+    # make_yukawa_plot(scaninfo="scaninfo.txt")
+    # make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
+    # make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
+
+    os.system("mkdir -p scanplots/")
+    make_rpv_plot(basedir="v3.26_feb15_sst1t5rpv_v1/",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
+    # make_rpv_plot(basedir="v3.26_feb15_sst1t5rpv_v1/",globber="card_rpv_t1qqqql_*_all_run2.log",do_tbs=False)

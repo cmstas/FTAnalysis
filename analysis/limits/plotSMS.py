@@ -74,24 +74,24 @@ def get_smoothed(graph, nsmooth=3, algo="k5b", diagonal_fudge=50, return_hist=Fa
         persist.append(h2)
         return h2
 
-    # Trick to avoid zeros above the diagonal that would affect the smoothing
-    # Smear diagonal straight upwards so that contour will go up vertically rather than
-    # to the top right (parallel to diagonal)
-    for xbin in range(1,h2.GetNbinsX()+1):
-        for ybin in range(2,h2.GetNbinsY()+1):
-            if h2.GetBinContent(xbin,ybin) < 1.e-6:
-                h2.SetBinContent(xbin,ybin,h2.GetBinContent(xbin,ybin-1))
+    # # Trick to avoid zeros above the diagonal that would affect the smoothing
+    # # Smear diagonal straight upwards so that contour will go up vertically rather than
+    # # to the top right (parallel to diagonal)
+    # for xbin in range(1,h2.GetNbinsX()+1):
+    #     for ybin in range(2,h2.GetNbinsY()+1):
+    #         if h2.GetBinContent(xbin,ybin) < 1.e-6:
+    #             h2.SetBinContent(xbin,ybin,h2.GetBinContent(xbin,ybin-1))
 
     # Now get the contour
     cont = r.TGraph2D(h2).GetContourList(1.0)
     if not cont:
         return None
 
-    # Then reset empty bins back to 0 to fix that trick from above
-    for xbin in range(1,h2.GetNbinsX()+1):
-        for ybin in range(1,h2.GetNbinsY()+1):
-            if (xbin,ybin) in emptybins:
-                h2.SetBinContent(xbin,ybin,0)
+    # # Then reset empty bins back to 0 to fix that trick from above
+    # for xbin in range(1,h2.GetNbinsX()+1):
+    #     for ybin in range(1,h2.GetNbinsY()+1):
+    #         if (xbin,ybin) in emptybins:
+    #             h2.SetBinContent(xbin,ybin,0)
 
     # Get list of x,y points for contour
     points = zip(list(cont[0].GetX()),list(cont[0].GetY()))
@@ -297,7 +297,7 @@ def draw_limits(
     # Now draw the main color 2d hist (xsec UL), and since it's the one with the z-axis,
     # set z-axis properties on it
     g_xsec = r.TGraph2D("g_xsec","g_xsec",len(d_vals["mglu"]),d_vals["mglu"],d_vals["mlsp"],d_vals["xsec"])
-    h_xsec = get_smoothed(g_xsec, return_hist=True)
+    h_xsec = get_smoothed(g_xsec, nsmooth=0, return_hist=True)
     h_xsec.Draw("colzsame") # FIXME NOTE. If colors don't show up, the line below fixes it but I don't know why. it also screws everything else up btw
     # h_xsec.Draw("colz")
 
@@ -478,33 +478,12 @@ if __name__ == "__main__":
     # print parse_log("v3.23_ss_fastsim_19Jan22/card_fs_t1tttt_m1750_m400_all_run2.log")
 
     # indir = "v3.23_ss_fastsim_19Jan22"
-    indir = "v3.24_fullsignals_v1/"
+    # indir = "v3.24_fullsignals_v1/"
+    indir = "v3.26_feb15_sst1t5rpv_v1/"
     outdir = "scanplots"
     os.system("mkdir -p {}".format(outdir))
 
     # FIXME can only plot one at a time because pyROOT has weird memory management
-
-    draw_limits(
-        indir = indir,
-        glob_pattern = "*fs_t6ttww_m*.log",
-        is_gluino = False,
-        outname = "{}/t6ttww_scan_xsec_run2.pdf".format(outdir),
-        minx = 300,
-        maxx = 1325,
-        miny = 75,
-        maxy = 1175,
-        diag_x1 = 300,
-        diag_y1 = 300-85,
-        diag_x2 = 960,
-        diag_y2 = 970-85,
-        lumi = 136.3,
-        label_mass = "m_{#tilde{#chi}^{0}_{1}} = 50 GeV",
-        label_diag = "m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
-        label_xaxis = "m_{#tilde{b}_{1}} (GeV)",
-        label_yaxis = "m_{#tilde{#chi}_{1}^{#pm}} (GeV)",
-        label_process = "pp #rightarrow #tilde{b}_{1}#bar{#tilde{b}}_{1}, #tilde{b}_{1}#rightarrow tW#tilde{#chi}^{0}_{1}      ",
-        blinded=False,
-        )
 
     # draw_limits(
     #     indir = indir,
@@ -527,6 +506,116 @@ if __name__ == "__main__":
     #     label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow t#bar{t}#tilde{#chi}^{0}_{1}        ",
     #     blinded=False,
     #     )
+
+    # draw_limits(
+    #     indir = indir,
+    #     glob_pattern = "*fs_t6ttww_m*.log",
+    #     is_gluino = False,
+    #     outname = "{}/t6ttww_scan_xsec_run2.pdf".format(outdir),
+    #     minx = 300,
+    #     maxx = 1325,
+    #     miny = 75,
+    #     maxy = 1175,
+    #     diag_x1 = 300,
+    #     diag_y1 = 300-85,
+    #     diag_x2 = 960,
+    #     diag_y2 = 970-85,
+    #     lumi = 136.3,
+    #     label_mass = "m_{#tilde{#chi}^{0}_{1}} = 50 GeV",
+    #     label_diag = "m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
+    #     label_xaxis = "m_{#tilde{b}_{1}} (GeV)",
+    #     label_yaxis = "m_{#tilde{#chi}_{1}^{#pm}} (GeV)",
+    #     label_process = "pp #rightarrow #tilde{b}_{1}#bar{#tilde{b}}_{1}, #tilde{b}_{1}#rightarrow tW#tilde{#chi}^{0}_{1}      ",
+    #     blinded=False,
+    #     )
+
+    # draw_limits(
+    #     indir = indir,
+    #     glob_pattern = "*fs_t5qqqqvv_m*.log",
+    #     is_gluino = True,
+    #     outname = "{}/t5qqqqvv_scan_xsec_run2.pdf".format(outdir),
+    #     minx = 600,
+    #     maxx = 2000+25,
+    #     miny = 0,
+    #     maxy = 1800+25,
+    #     diag_x1 = 600,
+    #     diag_y1 = 600,
+    #     diag_x2 = 1600,
+    #     diag_y2 = 1600,
+    #     lumi = 136.3,
+    #     label_mass = "",
+    #     label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
+    #     label_xaxis = "m_{#tilde{g}} (GeV)",
+    #     label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
+    #     label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow q#bar{q}'V#tilde{#chi}^{0}_{1}     ",
+    #     blinded=False,
+    #     )
+
+    # draw_limits(
+    #     indir = indir,
+    #     glob_pattern = "*fs_t5qqqqvvdm20_m*.log",
+    #     is_gluino = True,
+    #     outname = "{}/t5qqqqvvdm20_scan_xsec_run2.pdf".format(outdir),
+    #     minx = 600,
+    #     maxx = 2000+25,
+    #     miny = 0,
+    #     maxy = 1800+25,
+    #     diag_x1 = 600,
+    #     diag_y1 = 600,
+    #     diag_x2 = 1600,
+    #     diag_y2 = 1600,
+    #     lumi = 136.3,
+    #     label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV",
+    #     label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
+    #     label_xaxis = "m_{#tilde{g}} (GeV)",
+    #     label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
+    #     label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow q#bar{q}'V*#tilde{#chi}^{0}_{1}    ",
+    #     blinded=False,
+    #     )
+
+    # draw_limits(
+    #     indir = indir,
+    #     glob_pattern = "*fs_t5qqqqww_m*.log",
+    #     is_gluino = True,
+    #     outname = "{}/t5qqqqww_scan_xsec_run2.pdf".format(outdir),
+    #     minx = 600,
+    #     maxx = 2000+25,
+    #     miny = 0,
+    #     maxy = 1800+25,
+    #     diag_x1 = 600,
+    #     diag_y1 = 600,
+    #     diag_x2 = 1600,
+    #     diag_y2 = 1600,
+    #     lumi = 136.3,
+    #     label_mass = "",
+    #     label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
+    #     label_xaxis = "m_{#tilde{g}} (GeV)",
+    #     label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
+    #     label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow q#bar{q}'W#tilde{#chi}^{0}_{1}     ",
+    #     blinded=False,
+    #     )
+
+    draw_limits(
+        indir = indir,
+        glob_pattern = "*fs_t5qqqqwwdm20_m*.log",
+        is_gluino = True,
+        outname = "{}/t5qqqqwwdm20_scan_xsec_run2.pdf".format(outdir),
+        minx = 600,
+        maxx = 2000+25,
+        miny = 0,
+        maxy = 1800+25,
+        diag_x1 = 600,
+        diag_y1 = 600,
+        diag_x2 = 1600,
+        diag_y2 = 1600,
+        lumi = 136.3,
+        label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV",
+        label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
+        label_xaxis = "m_{#tilde{g}} (GeV)",
+        label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
+        label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow q#bar{q}'W*#tilde{#chi}^{0}_{1}    ",
+        blinded=False,
+        )
 
 #     fname = "test.pdf"
 #     # compare_two_scans("v3.09_ML_fullscan", "v3.09_prefire2017_v2", glob_pattern="*fs_t1tttt_*.log", fname=fname)
