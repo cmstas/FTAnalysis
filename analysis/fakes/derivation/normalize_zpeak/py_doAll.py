@@ -18,10 +18,15 @@ procs_to_consider = [
 
 basedirs ={
 
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2016/",
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2017/",
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2018/",
-        "rereco_2018": "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2018/",
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2016/",
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2017/",
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2018/",
+        # "rereco_2018": "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2018/",
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2016/",
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2017/",
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2018/",
+        "rereco_2018": "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2018/",
+
         }
 
 outputdir = "outputs_test"

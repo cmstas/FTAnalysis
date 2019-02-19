@@ -60,7 +60,8 @@ if __name__ == "__main__":
     if do_ss:
         # inputdir = "outputs_19Jan28/";
         # inputdir = "outputs_ssrereco_19Jan28/";
-        inputdir = "outputs_ssrereco_19Feb6//";
+        # inputdir = "outputs_ssrereco_19Feb6//"; # V2
+        inputdir = "outputs_ssjecs_19Feb19/"; # V3
     else:
         inputdir = "outputs_ft_19Feb2//";
 

@@ -150,8 +150,6 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
     if (option.Contains("Data2017")) year = 2017;
     if (option.Contains("Data2018")) year = 2018;
 
-    bool isReReco = (option.Contains("ReReco"));
-
     bool quiet = option.Contains("quiet");
 
     bool anyPt = false;
@@ -287,33 +285,18 @@ if (year == 2017) {
     sf_HLT_Mu8 = 0.7121;
     sf_HLT_Mu8_TrkIsoVVL = 0.7123;
 }
-if (year == 2018 and !isReReco) {
-// year = 2018
-    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8710;
-    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0038;
-    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0027;
-    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.0037;
-    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8481;
-    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8472;
-    sf_HLT_IsoMu27 = 1.1954;
-    sf_HLT_Mu17 = 1.1697;
-    sf_HLT_Mu17_TrkIsoVVL = 1.1699;
-    sf_HLT_Mu8 = 0.9427;
-    sf_HLT_Mu8_TrkIsoVVL = 0.9554;
-}
-if (year == 2018 and  isReReco) {
-// year = rereco_2018
-    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8650;
-    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 0.9899;
-    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9904;
-    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 0.9939;
-    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8565;
-    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8440;
-    sf_HLT_IsoMu27 = 1.1460;
-    sf_HLT_Mu17 = 1.1200;
-    sf_HLT_Mu17_TrkIsoVVL = 1.1202;
-    sf_HLT_Mu8 = 0.8925;
-    sf_HLT_Mu8_TrkIsoVVL = 0.9037;
+if (year == 2018) {
+    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9520;
+    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0939;
+    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0966;
+    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.1004;
+    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9328;
+    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.9206;
+    sf_HLT_IsoMu27 = 1.1425;
+    sf_HLT_Mu17 = 1.1158;
+    sf_HLT_Mu17_TrkIsoVVL = 1.1159;
+    sf_HLT_Mu8 = 0.8926;
+    sf_HLT_Mu8_TrkIsoVVL = 0.9040;
 }
 
     if (false) {
