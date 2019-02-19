@@ -67,7 +67,7 @@ if __name__ == "__main__":
     year_sample_map = [("2016",mc_2016),("2017",mc_2017),("2018",mc_2018)]
     # year_sample_map = [("2016",mc_2016)]
     # year_sample_map = [("2017",mc_2017)]
-    year_sample_map = [("2016",mc_2016),("2017",mc_2017)]
+    # year_sample_map = [("2016",mc_2016),("2017",mc_2017)]
     tag = "v3.24" # all 3 years. split btag unc, fastsim 2016/2017
     extra_args = ""
     tag_match = ""
