@@ -2,6 +2,7 @@ import os
 import ROOT as r
 from tqdm import tqdm
 import itertools
+from multiprocessing import Pool as ThreadPool
 
 verbose_ = True
 
@@ -374,6 +375,19 @@ def write_one_file(fname_in, fname_out, name, region, year):
 
     return True
 
+def do_one_parallel(x):
+    inputdir,year,proc,region = x
+    fname_in = "{}/output_{}_{}.root".format(inputdir,year,proc)
+    fname_out = "{}/{}_histos_{}_{}.root".format(inputdir,proc,region.lower(),year)
+    if verbose_: print "Converting {} -> {}".format(fname_in,fname_out)
+    return write_one_file(
+            fname_in = fname_in,
+            fname_out = fname_out,
+            name = proc,
+            region = region.upper(),
+            year = year,
+            )
+
 def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_tmp", regions=[],verbose=True,extra_procs=[], doss=False,years=[2016,2017,2018]):
     global verbose_
     verbose_ = verbose
@@ -401,9 +415,26 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
     # years = [2016, 2017, 2018]
     allprocs = procs+extra_procs
 
+    allprocs = list(set(allprocs))
+
+    do_parallel = True
+
+    infos = []
     for year,proc in tqdm(list(itertools.product(years,allprocs))):
         for region in regions:
-            if do_one(year,proc,region): nmade += 1
+            if do_parallel:
+                infos.append([inputdir,year,proc,region])
+            else:
+                if do_one(year,proc,region): nmade += 1
+
+
+    if do_parallel:
+        os.nice(10)
+        pool = ThreadPool(15)
+        # pool = ThreadPool(1)
+        for res in tqdm(pool.imap_unordered(do_one_parallel,infos),total=len(infos)):
+            if res: nmade += 1
+            # if res: print "Wrote {}".format(res)
 
     # for year in [2016]:
     #     for proc in ["fs_t6ttww_m875_m775"]:
