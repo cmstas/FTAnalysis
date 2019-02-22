@@ -273,7 +273,9 @@ int main(int argc, char *argv[]){
             if (filenames.Contains("_dM20_")) iSignal = 3;
         }
         else if (filenames.Contains("SMS-T6ttWW")) iSignal = 10;
+        else if (filenames.Contains("SMS-T6ttHZ")) iSignal = 11;
         else if (filenames.Contains("SMS-T1ttbb_Tune")) iSignal = 6;
+        else if (filenames.Contains("SMS-T1qqqqL")) iSignal = 7;
         else if (filenames.Contains("SMS-T5tttt_dM175_Tune")) iSignal = 5;
         else if (filenames.Contains("SMS-T5ttcc_Tune")) iSignal = 4;
         else if (filenames.Contains("SMS-T1tbs")) iSignal = -1; // set later
@@ -288,7 +290,7 @@ int main(int argc, char *argv[]){
         iSignal = 101; // fastsim higgs vs fullsim higgs
         isFastsim = true;
     }
-    if (filenames.Contains("T1qqqqL")) {
+    if (filenames.Contains("T1qqqqL") and not filenames.Contains("Fast")) {
         iSignal = 201; // RPV sample
         isFastsim = false;
     }

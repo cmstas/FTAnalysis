@@ -151,7 +151,12 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
   // BabyTree->Branch("lep1_tkIso"                                              , &lep1_tkIso                                              );
   // BabyTree->Branch("lep2_tkIso"                                              , &lep2_tkIso                                              );
   BabyTree->Branch("dilep_p4"                                                , &dilep_p4                                                );
+  BabyTree->Branch("dilep_mass"                                                , &dilep_mass                                                );
+  BabyTree->Branch("mass13"                                                , &mass13                                                );
+  BabyTree->Branch("mass23"                                                , &mass23                                                );
+  BabyTree->Branch("mass123"                                                , &mass123                                                );
   BabyTree->Branch("ncharginos"                                                , &ncharginos                                                );
+  BabyTree->Branch("nhiggs"                                                , &nhiggs                                                );
   BabyTree->Branch("higgs_mass"                                                , &higgs_mass                                                );
   BabyTree->Branch("genps_p4"                                                , &genps_p4                                                );
   BabyTree->Branch("genps_id"                                                , &genps_id                                                );
@@ -788,6 +793,7 @@ void babyMaker::InitBabyNtuple(){
     // lep1_tkIso = -1;
     // lep2_tkIso = -1;
     ncharginos = -1;
+    nhiggs = -1;
     higgs_mass = -1;
     genps_p4.clear();
     genps_id.clear();
@@ -882,6 +888,10 @@ void babyMaker::InitBabyNtuple(){
     lep1_closeJet = LorentzVector(0,0,0,0);
     lep2_closeJet = LorentzVector(0,0,0,0);
     dilep_p4 = LorentzVector(0,0,0,0);
+    dilep_mass = -1.;
+    mass13 = -1.;
+    mass23 = -1.;
+    mass123 = -1.;
     eleID_kfhits.clear();
     eleID_oldsigmaietaieta.clear();
     eleID_oldsigmaiphiiphi.clear();
@@ -1410,8 +1420,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           }
 
           // T1tttt, T5qqqqVV, T5tttt, T5ttcc
-          if (iSignal <= 6) xsec = go_xsec(sparms[0]).xsec;
-          if (iSignal <= 6) xsec_error = go_xsec(sparms[0]).percErr;
+          if (iSignal <= 7) xsec = go_xsec(sparms[0]).xsec;
+          if (iSignal <= 7) xsec_error = go_xsec(sparms[0]).percErr;
           if ((iSignal == 201) or (iSignal == 301)) {
               // RPV T1qqqqLL, T1tbs
               float mass = -1;
@@ -1439,9 +1449,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               xsec_error = go_xsec(mass).percErr;
               sparms = { mass };
           }
-          // T6ttWW
-          if (iSignal == 10) xsec = stop_xsec(sparms[0]).xsec;
-          if (iSignal == 10) xsec_error = stop_xsec(sparms[0]).percErr;
+          // T6ttWW, T6ttHZ
+          if (iSignal >= 10 and iSignal <= 20) xsec = stop_xsec(sparms[0]).xsec;
+          if (iSignal >= 10 and iSignal <= 20) xsec_error = stop_xsec(sparms[0]).percErr;
           // if (iSignal <  100) scale1fb = 1000*xsec/nPoints(iSignal, sparms[0], sparms[1]);
       }
       is_fastsim = isFastsim;
@@ -1533,6 +1543,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep1_sip = abs(lep1_id) == 11 ? fabs(els_ip3d().at(lep1_idx))/els_ip3derr().at(lep1_idx) : fabs(mus_ip3d().at(lep1_idx))/mus_ip3derr().at(lep1_idx);
   lep2_sip = abs(lep2_id) == 11 ? fabs(els_ip3d().at(lep2_idx))/els_ip3derr().at(lep2_idx) : fabs(mus_ip3d().at(lep2_idx))/mus_ip3derr().at(lep2_idx);
   dilep_p4 = lep1_p4 + lep2_p4;
+  dilep_mass = dilep_p4.M();
   lep1_passes_id = isGoodLepton(lep1_id, lep1_idx);
   lep2_passes_id = isGoodLepton(lep2_id, lep2_idx);
   lep1_MVA = abs(lep1_id) == 11 ? getMVAoutput(lep1_idx,true) : -9999;
@@ -1849,8 +1860,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   if (!is_real_data && iSignal > 0) {
       ncharginos = 0;
+      nhiggs = 0;
       for (unsigned int gp=0;gp<tas::genps_id().size();gp++) {
+          // for T5qqqqVV
           if (abs(tas::genps_id()[gp])==1000024 && tas::genps_status()[gp]==22) ncharginos++;
+          // for T6ttHZ
+          if (abs(tas::genps_id()[gp])==25 && tas::genps_status()[gp]==22) nhiggs++;
       }
   }
 
@@ -3072,6 +3087,10 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep1_pt = lep1_p4.pt();
   lep2_pt = lep2_p4.pt();
   lep3_pt = lep3_p4.pt();
+
+  mass13 = ((lep3_pt>5.) ? (lep3_p4+lep1_p4).mass() : -1.);
+  mass23 = ((lep3_pt>5.) ? (lep2_p4+lep3_p4).mass() : -1.);
+  mass123 = ((lep3_pt>5.) ? (lep1_p4+lep2_p4+lep3_p4).mass() : -1.);
 
   lep1_eta = lep1_p4.eta();
   lep2_eta = lep2_p4.eta();

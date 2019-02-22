@@ -328,6 +328,10 @@ class babyMaker {
     LorentzVector lep1_p4;
     LorentzVector lep2_p4;
     LorentzVector dilep_p4;
+    float dilep_mass;
+    float mass13;
+    float mass23;
+    float mass123;
     int lep1_id;
     int lep2_id;
     int lep1_idx;
@@ -448,6 +452,7 @@ class babyMaker {
     int higgs_mass;
     // //Gen Leptons
     int ncharginos;
+    int nhiggs;
 
     vector <LorentzVector> genps_p4;
     vector <int> genps_id;
