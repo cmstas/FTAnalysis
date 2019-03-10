@@ -13,7 +13,7 @@ namespace allpt {
 #include "lepton_sf.h"
 #include "../year_2017/trigger_sf.h"
 #include "isr_weights.h"
-float getLumi() { return 58.83; } // v3.13
+float getLumi() { return 59.71; } // v3.28
 }
 
 #endif

@@ -258,7 +258,8 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_ptrel = 6.8;
 
         // good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
-        good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
+        // good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
+        good_run_file = "goodRunList/goldenJson_2018_final_59p76ifb_snt.txt"; // 59.76ifb (rerecoABCD+promptD + recovered 50ifb + latest preapproved lumi normtag)
         // jecEra = "Fall17_17Nov2017C_V32";
         // jecEraMC = "Fall17_17Nov2017_V32";
         // jecEra = "Autumn18_V3_OldRes";

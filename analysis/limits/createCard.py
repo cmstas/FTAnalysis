@@ -507,7 +507,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     #overwrite nuisances
     if year == 2016: lumiunc = "1.025"
     if year == 2017: lumiunc = "1.023"
-    if year == 2018: lumiunc = "1.050"
+    if year == 2018: lumiunc = "1.025"
     signal.lumi  = "1"
     # signal.lephlt  = "1.04"
     signal.hlt  = "1.03"
