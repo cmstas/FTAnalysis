@@ -15,7 +15,7 @@ from scipy.optimize import minimize
 np.set_printoptions(linewidth=200, precision=2)
 
 
-def fit_and_plot(inputdir="outputs_19Jan28", outputdir="plots/"):
+def fit_and_plot(inputdir="outputs_19Jan28", outputdir="plots/",years=[2016,2017,2018]):
 
     # flav = "mu"
     # proc = "data_{}".format(flav)
@@ -23,7 +23,7 @@ def fit_and_plot(inputdir="outputs_19Jan28", outputdir="plots/"):
     for iso in [True,False]:
         d[iso] = {}
         isostr = "_IsoTrigs" if iso else ""
-        for year in [2016,2017,2018]:
+        for year in years:
         # for year in [2018]:
             d[iso][year] = {}
             for flav in ["mu","el"]:
@@ -50,7 +50,7 @@ def fit_and_plot(inputdir="outputs_19Jan28", outputdir="plots/"):
 
     for iso, year, flav, qcd_template in itertools.product(
             [True,False],
-            [2016,2017,2018],
+            years,
             ["mu","el"],
             ["qcd","qcddata"],
             # [True],

@@ -20,6 +20,7 @@ procs_to_consider = [ # FIXME
         # "fakes",
         # "flips",
         # "data",
+        # "tt",
         ]
 
 # years_to_consider = [2016]
@@ -30,7 +31,9 @@ basedirs ={
         2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/",
         2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/",
         # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/", # Autumn18V3 JECs
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/", # Autumn18V3 JECs with dummy residuals
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag//output/year_2018/", # Autumn18V3 JECs with Fall17 V32 F residuals, new btag SF
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/", # Autumn18V8 "final" jecs (with residuals)
 
         }
 
@@ -47,7 +50,14 @@ basedirs ={
 
 # outputdir = "outputs_19Jan18_v3p24_ss_2018nvtx" # FOR SS
 
-outputdir = "outputs_19Feb16_v3p26_ft" # FOR FT
+# outputdir = "outputs_19Feb16_v3p26_ft" # FOR FT
+
+# outputdir = "outputs_19Feb16_v3p26_ss" # FOR SS
+# outputdir = "outputs_19Feb27_v3p27_ss_resid" # FOR SS
+# outputdir = "outputs_19Feb16_v3p26_ss_noisrweights" # FOR SS
+# outputdir = "outputs_19Mar4_v3p27_ss" # FOR SS
+# outputdir = "outputs_19Mar4_v3p27_ft" # FOR FT
+outputdir = "outputs_19Mar4_v3p28_ft" # FOR FT
 
 options = {
 
@@ -56,9 +66,14 @@ options = {
         # 2018: "useInclusiveSFs doBDT Data2018 minPtFake18 quiet ",
 
         # # for SS
-        # 2016: " noLeptonPtCut doSS Data2016 new2016FRBins quiet ",
-        # 2017: " noLeptonPtCut doSS Data2017 quiet ",
-        # 2018: " noLeptonPtCut doSS Data2018 quiet ",
+        # 2016: " noISRWeights noLeptonPtCut doSS Data2016 new2016FRBins quiet ",
+        # 2017: " noISRWeights noLeptonPtCut doSS Data2017 quiet ",
+        # 2018: " noISRWeights noLeptonPtCut doSS Data2018 quiet ",
+        
+        # # for SS
+        # 2016: "  noLeptonPtCut doSS Data2016 new2016FRBins quiet ",
+        # 2017: "  noLeptonPtCut doSS Data2017 quiet ",
+        # 2018: "  noLeptonPtCut doSS Data2018 quiet ",
 
         # for FT
         2016: " Data2016 new2016FRBins quiet ",
@@ -229,7 +244,7 @@ chs = {
                 basedirs[2017]+"TTTTnew.root",
                 ],options=options[2017]),
             "zgamma": make_objs([
-                basedirs[2018]+"ZG.root", # TODO FIXME using 2018 Zgamma for now
+                basedirs[2017]+"ZG.root",
                 ],options=options[2017]),
             "wgamma": make_objs([
                 basedirs[2017]+"WGToLNuGext.root",
@@ -280,7 +295,7 @@ chs = {
                 basedirs[2017]+"GGHtoZZto4L.root",
                 basedirs[2017]+"VHtoNonBB.root",
                 basedirs[2017]+"WGToLNuGext.root",
-                basedirs[2018]+"ZG.root", # TODO FIXME using 2018 Zgamma for now
+                basedirs[2017]+"ZG.root",
                 ],options=options[2017]),
             "singletop": make_objs([
                 basedirs[2017]+"STtop.root",

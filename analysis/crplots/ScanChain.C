@@ -11,6 +11,7 @@
 #include "TH2.h"
 #include "TChain.h"
 #include "Math/VectorUtil.h"
+#include "TVector2.h"
 #include "TMVA/Reader.h"
 
 #include <signal.h>
@@ -217,6 +218,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     bool quiet = options.Contains("quiet");
     bool minPtFake18 = options.Contains("minPtFake18");
     bool new2016FRBins = options.Contains("new2016FRBins");
+    bool noISRWeights = options.Contains("noISRWeights");
 
     ana_t analysis = FTANA;
     if (doSS) {
@@ -237,6 +239,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         or proc.Contains("ttw_") 
         or proc.Contains("ttz_") 
         or proc.Contains("tth_");
+
+    if (noISRWeights) useIsrWeight = false;
 
     // We may have derived the fake rate map throwing away leptons with pT<18 (e.g., 2017), so
     // we need to apply this cut here to be consistent
@@ -289,13 +293,15 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         "lowmetallht",
         "tlmet",
         "osmet",
+        // "osmethigh",
+        // "osmetjet",
         "mlonz",
         // "mlonzhigh",
         // "mlonz0j",
 
         // "oshtnb3",
 
-        "tt_isr",                      // TTBar ISR Reweighting derivation region
+        // "tt_isr",                      // TTBar ISR Reweighting derivation region
 
         // "hhos", "hhosloose", "hhtl",
         // "os_noht",                          // OS tight-tight and variants
@@ -317,7 +323,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     vector<HistCol*> registry;
     vector<HistCol2D*> registry2D;
-    HistCol h_met         (regions, "met"        , 30, 0   , 300 , &registry);
+    // HistCol h_met         (regions, "met"        , 30, 0   , 300 , &registry);
+    HistCol h_met         (regions, "met"        , 60, 0   , 600 , &registry);
     HistCol h_metphi      (regions, "metphi"     , 60, -3.2, 3.2 , &registry);
     HistCol h_rawmet      (regions, "rawmet"     , 60, 0   , 150 , &registry);
     HistCol h_calomet     (regions, "calomet"    , 60, 0   , 600 , &registry);
@@ -330,6 +337,9 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_mtmin       (regions, "mtmin"      , 15, 0   , 300 , &registry);
     HistCol h_dphil1met      (regions, "dphil1met"     , 60, -3.2, 3.2 , &registry);
     HistCol h_dphil2met      (regions, "dphil2met"     , 60, -3.2, 3.2 , &registry);
+    HistCol h_dphimetj1      (regions, "dphimetj1"     , 60, -3.2, 3.2 , &registry);
+    HistCol h_metmmht      (regions, "metmmht"     , 60, 0, 2.0 , &registry);
+    HistCol h_metoverptj1      (regions, "metoverptj1"     , 50, 0.,2., &registry);
     HistCol h_nleps       (regions, "nleps"      , 5, -0.5 , 4.5 , &registry);
     HistCol h_njets       (regions, "njets"      , 8 , 0   , 8   , &registry);
     HistCol h_nisrjets    (regions, "nisrjets"   , 5 , 0   , 5   , &registry);
@@ -400,7 +410,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     HistCol h_type3l      (regions, "type3l"     , 4 , -0.5, 3.5 , &registry);
     HistCol h_nvtx        (regions, "nvtx"       , 31, -0.5, 61.5, &registry);
 
-    HistCol h_ptj1        (regions, "ptj1"       , 50, 0   , 500 , &registry);
+    // HistCol h_ptj1        (regions, "ptj1"       , 50, 0   , 500 , &registry);
+    HistCol h_ptj1        (regions, "ptj1"       , 50, 0   , 1000 , &registry);
     HistCol h_ptj2        (regions, "ptj2"       , 50, 0   , 500 , &registry);
     HistCol h_ptj3        (regions, "ptj3"       , 50, 0   , 500 , &registry);
     HistCol h_ptj4        (regions, "ptj4"       , 50, 0   , 500 , &registry);
@@ -462,6 +473,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
     int matchtype;
     int nlb40, ntb40, nisrjets, nisrmatch;
     float ptj1, ptj2, ptj3, ptj4, ptj5, ptj6, ptj7, ptj8;
+    float jet1phi;
 
     int SR;
     float weight;
@@ -628,11 +640,13 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             nisrmatch = ss::nisrMatch();
             SR = 0; // Just a dummy for now
 
+            // for SS also show 4 leading jets
+            ptj1 = (njets >= 1) ? ss::jets()[0].pt()*ss::jets_undoJEC()[0]*ss::jets_JEC()[0] : 0;
+            ptj2 = (njets >= 2) ? ss::jets()[1].pt()*ss::jets_undoJEC()[1]*ss::jets_JEC()[1] : 0;
+            ptj3 = (njets >= 3) ? ss::jets()[2].pt()*ss::jets_undoJEC()[2]*ss::jets_JEC()[2] : 0;
+            ptj4 = (njets >= 4) ? ss::jets()[3].pt()*ss::jets_undoJEC()[3]*ss::jets_JEC()[3] : 0;
+            jet1phi = (njets >= 1) ? ss::jets()[0].phi() : 0.;
             if (not doSS) {
-                ptj1 = (njets >= 1) ? ss::jets()[0].pt()*ss::jets_undoJEC()[0]*ss::jets_JEC()[0] : 0;
-                ptj2 = (njets >= 2) ? ss::jets()[1].pt()*ss::jets_undoJEC()[1]*ss::jets_JEC()[1] : 0;
-                ptj3 = (njets >= 3) ? ss::jets()[2].pt()*ss::jets_undoJEC()[2]*ss::jets_JEC()[2] : 0;
-                ptj4 = (njets >= 4) ? ss::jets()[3].pt()*ss::jets_undoJEC()[3]*ss::jets_JEC()[3] : 0;
                 ptj5 = (njets >= 5) ? ss::jets()[4].pt()*ss::jets_undoJEC()[4]*ss::jets_JEC()[4] : 0;
                 ptj6 = (njets >= 6) ? ss::jets()[5].pt()*ss::jets_undoJEC()[5]*ss::jets_JEC()[5] : 0;
                 ptj7 = (njets >= 7) ? ss::jets()[6].pt()*ss::jets_undoJEC()[6]*ss::jets_JEC()[6] : 0;
@@ -710,24 +724,29 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     bool lep2_lowpt_veto = lep2pt < (abs(lep2id) == 11 ? 15 : 10);
                     bool lep3_lowpt_veto = lep3pt < (abs(lep3id) == 11 ? 15 : 10);
 
+                    int nfakes = 0;
                     if (ss::lep3_fo() and !ss::lep3_tight() and !lep3_lowpt_veto and lep1good and lep2good && lep3pt>min_pt_fake) {  // lep3 fake
                         float fr = fakeRate(year, lep3id, lep3ccpt, lep3eta, ht, analysis, new2016FRBins, !minPtFake18);
                         class6Fake = true;
+                        nfakes++;
                         weight *= fr / (1-fr);
                     }
                     if (ss::lep2_fo() and !ss::lep2_tight() and !lep2_lowpt_veto and lep1good and lep3good && lep2pt>min_pt_fake) {  // lep2 fake
                         float fr = fakeRate(year, lep2id, lep2ccpt, lep2eta, ht, analysis, new2016FRBins, !minPtFake18);
                         class6Fake = true;
+                        nfakes++;
                         weight *= fr / (1-fr);
                     }
                     if (ss::lep1_fo() and !ss::lep1_tight() and !lep1_lowpt_veto and lep2good and lep3good && lep1pt>min_pt_fake) {  // lep1 fake
                         float fr = fakeRate(year, lep1id, lep1ccpt, lep1eta, ht, analysis, new2016FRBins, !minPtFake18);
                         class6Fake = true;
+                        nfakes++;
                         weight *= fr / (1-fr);
                     }
                     if (!class6Fake) {
                         continue; // No fakes!
                     }
+                    if (nfakes == 2) weight *= -1;
                 } else if (hyp_class == 1 or hyp_class == 2) {
                     bool foundGoodLoose = false;
                     if (ss::lep1_passes_id()==0 && lep1pt>min_pt_fake) {
@@ -754,7 +773,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
             if (doFlips) {
                 if (hyp_class == 4) hyp_class = 3; // we've flipped an OS to a SS
-                else if (hyp_class == 6) class6Fake = true;
+                // else if (hyp_class == 6) class6Fake = true;
                 else continue;
                 float flipFact = 0.;
                 if (abs(lep1id) == 11) {
@@ -795,6 +814,67 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             bool zcand23 = z_cand(lep2id, lep3id, m23);
             float mllos = fabs(m13 - 91.2) < fabs(m23 - 91.2) ? m13 : m23;
 
+            float mvavalue = -1.;
+            float mvavalueup = -1.;
+            float mvavaluedn = -1.;
+            float mvavalueJERup = -1.;
+            float mvavalueJERdn = -1.;
+            int nrealb = 0;
+            if (not doSS) {
+                for (auto flav : ss::btags_flavor()) {
+                    if (abs(flav)==5) nrealb++;
+                }
+                float f_nbtags = ss::bdt_nbtags();
+                float f_njets = ss::bdt_njets();
+                float f_met = ss::bdt_met();
+                float f_ptl2 = ss::bdt_ptl2();
+                float f_nlb40 = ss::bdt_nlb40();
+                float f_ntb40 = ss::bdt_ntb40();
+                float f_nleps = ss::bdt_nleps();
+                float f_htb = ss::bdt_htb();
+                float f_q1 = ss::bdt_q1();
+                float f_ptj1 = ss::bdt_ptj1();
+                float f_ptj6 = ss::bdt_ptj6();
+                float f_ptj7 = ss::bdt_ptj7();
+                float f_ml1j1 = ss::bdt_ml1j1();
+                float f_dphil1l2 = ss::bdt_dphil1l2();
+                float f_maxmjoverpt = ss::bdt_maxmjoverpt();
+                float f_ptl1 = ss::bdt_ptl1();
+                float f_detal1l2 = ss::bdt_detal1l2();
+                float f_ptj8 = ss::bdt_ptj8();
+                float f_ptl3 = ss::bdt_ptl3();
+
+                mvavalue = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                f_nbtags = ss::bdt_jec_up_nbtags();
+                f_njets = ss::bdt_jec_up_njets();
+                f_met = ss::bdt_jec_up_met();
+                f_htb = ss::bdt_jec_up_htb();
+                f_nlb40 = ss::bdt_jec_up_nlb40();
+                f_ntb40 = ss::bdt_jec_up_ntb40();
+                mvavalueup = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                f_nbtags = ss::bdt_jec_dn_nbtags();
+                f_njets = ss::bdt_jec_dn_njets();
+                f_met = ss::bdt_jec_dn_met();
+                f_htb = ss::bdt_jec_dn_htb();
+                f_nlb40 = ss::bdt_jec_dn_nlb40();
+                f_ntb40 = ss::bdt_jec_dn_ntb40();
+                mvavaluedn = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                f_nbtags = ss::bdt_jer_up_nbtags();
+                f_njets = ss::bdt_jer_up_njets();
+                f_met = ss::bdt_jer_up_met();
+                f_htb = ss::bdt_jer_up_htb();
+                f_nlb40 = ss::bdt_jer_up_nlb40();
+                f_ntb40 = ss::bdt_jer_up_ntb40();
+                mvavalueJERup = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+                f_nbtags = ss::bdt_jer_dn_nbtags();
+                f_njets = ss::bdt_jer_dn_njets();
+                f_met = ss::bdt_jer_dn_met();
+                f_htb = ss::bdt_jer_dn_htb();
+                f_nlb40 = ss::bdt_jer_dn_nlb40();
+                f_ntb40 = ss::bdt_jer_dn_ntb40();
+                mvavalueJERdn = get_prediction(f_nbtags,f_njets,f_met,f_ptl2,f_nlb40,f_ntb40,f_nleps,f_htb,f_q1,f_ptj1,f_ptj6,f_ptj7,f_ml1j1,f_dphil1l2,f_maxmjoverpt,f_ptl1,f_detal1l2,f_ptj8,f_ptl3);
+            }
+
             float _event_bdt = numeric_limits<float>::quiet_NaN();
             auto event_bdt = [&]() {
                 if (!evaluateBDT) return 0.0f;
@@ -829,7 +909,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(h_njets, njets);
                 do_fill(h_nisrjets, nisrjets);
                 do_fill(h_nisrmatch, nisrmatch);
-                do_fill(h_nlb40, nlb40);
+                do_fill(h_nlb40, nlb40, (ss::is_real_data() ? 1 : 1/ss::weight_btagsf())); // Test
                 do_fill(h_ntb40, ntb40);
                 do_fill(h_nbtags, nbtags);
                 do_fill(h_nbtagsheavyup, nbtags, ss::weight_btagsf_heavy_UP()/ss::weight_btagsf());
@@ -838,6 +918,24 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(h_nbtagslightdown, nbtags, ss::weight_btagsf_light_DN()/ss::weight_btagsf());
                 do_fill(h_bdisc1, bdisc1);
                 do_fill(h_maxmjoverpt, maxmjoverpt);
+                // if (ptj1>500) {
+                //     do_fill(h_dphimetj1, calcDeltaPhi(jet1phi,metphi));
+                //     do_fill(h_metoverptj1, met/ptj1);
+                //     // calculate mht
+                //     float ht_recalc = 0.;
+                //     Vec4 mht_p4(0,0,0,0);
+                //     for (int ijet = 0; ijet < ss::jets().size(); ijet++) {
+                //         auto jet = ss::jets()[ijet]*ss::jets_undoJEC()[ijet]*ss::jets_JEC()[ijet];
+                //         ht_recalc += jet.pt();
+                //         mht_p4 -= jet;
+                //     }
+                //     mht_p4 -= ss::lep1_p4();
+                //     mht_p4 -= ss::lep2_p4();
+                //     TVector2 mhtVector = TVector2(mht_p4.pt()*cos(mht_p4.phi()), mht_p4.pt()*sin(mht_p4.phi()));
+                //     TVector2 metVector = TVector2(ss::met()*cos(ss::metPhi()), ss::met()*sin(ss::metPhi()));
+                //     float diffMetMht = (mhtVector - metVector).Mod();
+                //     do_fill(h_metmmht,(diffMetMht/ss::met()));
+                // }
 
                 int nbnj = 5*min(nbtags,3)+(max(min(njets,6),2)-2);
                 do_fill(h_nbnj, nbnj);
@@ -937,11 +1035,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 }
                 do_fill(h_nvtx,   ss::nGoodVertices());
 
+                if (njets >= 1) do_fill(h_ptj1, ptj1);
+                if (njets >= 2) do_fill(h_ptj2, ptj2);
+                if (njets >= 3) do_fill(h_ptj3, ptj3);
+                if (njets >= 4) do_fill(h_ptj4, ptj4);
                 if (not doSS) {
-                    if (njets >= 1) do_fill(h_ptj1, ptj1);
-                    if (njets >= 2) do_fill(h_ptj2, ptj2);
-                    if (njets >= 3) do_fill(h_ptj3, ptj3);
-                    if (njets >= 4) do_fill(h_ptj4, ptj4);
                     if (njets >= 5) do_fill(h_ptj5, ptj5);
                     if (njets >= 6) do_fill(h_ptj6, ptj6);
                     if (njets >= 7) do_fill(h_ptj7, ptj7);
@@ -949,25 +1047,37 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
                     if (njets >= 1) do_fill(h_ml1j1, ml1j1);
 
+
+
+                    // // do_fill(h_event_bdt, event_bdt());
+                    // do_fill(h_event_bdt, ss::bdt_disc());
+                    // do_fill(h_event_bdt_scaleup, ss::bdt_disc(), doScaleUnc ? 1.0 : ss::weight_scale_UP());
+                    // do_fill(h_event_bdt_scaledn, ss::bdt_disc(), doScaleUnc ? 1.0 : ss::weight_scale_DN());
+                    // do_fill(h_event_bdt_btagheavyup, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_heavy_UP()/ss::weight_btagsf());
+                    // do_fill(h_event_bdt_btagheavydn, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_heavy_DN()/ss::weight_btagsf());
+                    // do_fill(h_event_bdt_btaglightup, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_light_UP()/ss::weight_btagsf());
+                    // do_fill(h_event_bdt_btaglightdn, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_light_DN()/ss::weight_btagsf());
+                    // do_fill(h_event_bdt_jecup, ss::bdt_disc_jec_up());
+                    // do_fill(h_event_bdt_jecdn, ss::bdt_disc_jec_dn());
+                    // do_fill(h_event_bdt_jerup, ss::bdt_disc_jer_up());
+                    // do_fill(h_event_bdt_jerdn, ss::bdt_disc_jer_dn());
+                    //
                     // do_fill(h_event_bdt, event_bdt());
-                    do_fill(h_event_bdt, ss::bdt_disc());
-                    do_fill(h_event_bdt_scaleup, ss::bdt_disc(), doScaleUnc ? 1.0 : ss::weight_scale_UP());
-                    do_fill(h_event_bdt_scaledn, ss::bdt_disc(), doScaleUnc ? 1.0 : ss::weight_scale_DN());
-                    do_fill(h_event_bdt_btagheavyup, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_heavy_UP()/ss::weight_btagsf());
-                    do_fill(h_event_bdt_btagheavydn, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_heavy_DN()/ss::weight_btagsf());
-                    do_fill(h_event_bdt_btaglightup, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_light_UP()/ss::weight_btagsf());
-                    do_fill(h_event_bdt_btaglightdn, ss::bdt_disc(), ss::is_real_data() ? 1.0 : ss::weight_btagsf_light_DN()/ss::weight_btagsf());
-                    do_fill(h_event_bdt_jecup, ss::bdt_disc_jec_up());
-                    do_fill(h_event_bdt_jecdn, ss::bdt_disc_jec_dn());
-                    do_fill(h_event_bdt_jerup, ss::bdt_disc_jer_up());
-                    do_fill(h_event_bdt_jerdn, ss::bdt_disc_jer_dn());
+                    do_fill(h_event_bdt, mvavalue);
+                    do_fill(h_event_bdt_scaleup, mvavalue, doScaleUnc ? 1.0 : ss::weight_scale_UP());
+                    do_fill(h_event_bdt_scaledn, mvavalue, doScaleUnc ? 1.0 : ss::weight_scale_DN());
+                    do_fill(h_event_bdt_btagheavyup, mvavalue, ss::is_real_data() ? 1.0 : ss::weight_btagsf_heavy_UP()/ss::weight_btagsf());
+                    do_fill(h_event_bdt_btagheavydn, mvavalue, ss::is_real_data() ? 1.0 : ss::weight_btagsf_heavy_DN()/ss::weight_btagsf());
+                    do_fill(h_event_bdt_btaglightup, mvavalue, ss::is_real_data() ? 1.0 : ss::weight_btagsf_light_UP()/ss::weight_btagsf());
+                    do_fill(h_event_bdt_btaglightdn, mvavalue, ss::is_real_data() ? 1.0 : ss::weight_btagsf_light_DN()/ss::weight_btagsf());
+                    do_fill(h_event_bdt_jecup, mvavalueup);
+                    do_fill(h_event_bdt_jecdn, mvavaluedn);
+                    do_fill(h_event_bdt_jerup, mvavalueJERup);
+                    do_fill(h_event_bdt_jerdn, mvavalueJERdn);
+
                     float adhoc = 1.;
-                    int nrealb = 0;
-                    for (auto flav : ss::btags_flavor()) {
-                        if (abs(flav)==5) nrealb++;
-                    }
                     if (nrealb >= 3) adhoc = 1.35;
-                    do_fill(h_event_bdt_bbup, ss::bdt_disc(), ss::is_real_data() ? 1 : adhoc);
+                    do_fill(h_event_bdt_bbup, mvavalue, ss::is_real_data() ? 1 : adhoc);
                 }
             };
 
@@ -1067,10 +1177,14 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             if (njets >= 2 and               hyp_class == 4 and ss::mtmin() > 150.) fill_region("osnomethighmt", weight);
             if (njets >= 2 and               hyp_class == 2) fill_region("tlnomet", weight);
             if (njets >= 2 and met > 50. and hyp_class == 4) fill_region("osmet", weight);
+            if (njets >= 2 and met > 500. and hyp_class == 4) fill_region("osmethigh", weight);
+            // if (njets >= 2 and met > 200. and hyp_class == 4 and met/ptj1>0.3 and ptj1>500) {
+            //     fill_region("osmetjet", weight);
+            // }
             if (njets >= 2 and met > 50. and hyp_class == 2) fill_region("tlmet", weight);
             if (njets >= 2 and met < 50. and hyp_class == 6 and // NOTE LT
                     lep1ccpt > 25. and
-                    lep1good and lep2good and lep3good
+                    ((lep1good and lep2good and lep3good) or class6Fake)
                     ) {
                 // if (lep2ccpt > 20. and lep3ccpt > 20.) {
                 // }

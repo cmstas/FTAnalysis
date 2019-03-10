@@ -97,7 +97,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
     if (proc == "ttvv")  tree_stype = 7;
     if (proc == "rares") tree_stype = 8;
 
-    bool useTTBB = (proc == "ttw") || (proc == "ttz") || (proc == "tth") || (proc == "fakes");
+    bool useTTBB = (proc == "ttw") || (proc == "ttz") || (proc == "tth");
 
     TFile* out_file = new TFile(Form("%s/output_%s.root",outputdir.Data(),proc.Data()), "RECREATE");
     out_file->cd();
@@ -184,6 +184,7 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs/"){
                 weight *= getTruePUw(tree_year, ss::trueNumInt()[0]);
                 if (ss::lep1_passes_id()) weight *= leptonScaleFactor(tree_year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
                 if (ss::lep2_passes_id()) weight *= leptonScaleFactor(tree_year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                if (ss::lep3_passes_id()) weight *= leptonScaleFactor(tree_year, ss::lep3_id(), ss::lep3_coneCorrPt(), ss::lep3_p4().eta(), ss::ht());
                 weight *= ss::weight_btagsf();
                 if (tree_year == 2016) weight *= ss::prefire2016_sf();
                 if (tree_year == 2017) weight *= ss::prefire2017_sf();

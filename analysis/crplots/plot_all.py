@@ -34,13 +34,19 @@ labels = {
     "nvtx": "# good vertices",
     "eta1": r"$\eta$(lep1)",
     "eta2": r"$\eta$(lep2)",
-    "dphil1l2": r"$\Delta\phi(l_1,l_2)$",
-    "dphil1met": r"$\Delta\phi(l_1,${}$)$".format(MET_LATEX),
-    "dphil2met": r"$\Delta\phi(l_2,${}$)$".format(MET_LATEX),
     "phie": r"$\phi$(e)",
     "phim": r"$\phi(\mu)$",
     "etae": r"$\eta$(e)",
     "etam": r"$\eta(\mu)$",
+
+    # "ptj1": "$p_T$ - jet 1",
+    # "ptj2": "$p_T$ - jet 2",
+    # "ptj3": "$p_T$ - jet 3",
+    # "ptj4": "$p_T$ - jet 4",
+
+    "dphil1l2": r"$\Delta\phi(l_1,l_2)$",
+    "dphil1met": r"$\Delta\phi(l_1,${}$)$".format(MET_LATEX),
+    "dphil2met": r"$\Delta\phi(l_2,${}$)$".format(MET_LATEX),
     "q1": "charge - lep 1",
     "htb": r"$H_{T}$(b-jets)",
     "nlb40": r"N-loose b-tags, $p_{T}>40$",
@@ -162,7 +168,7 @@ bginfo = {
         "osnomethighmt": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
         "osnometmtlt120": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
         "osnometmtgt120": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
-        "mlonz": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vvnowz","wz", "rares", "singletop" ] },
+        "mlonz": { k:d_label_colors[k] for k in [ "dy", "ttz", "tth", "ttw", "vvnowz","wz", "rares", "fakes" ] },
         "oshtnb3": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
         "lowmetlowht": { k:d_label_colors[k] for k in [ "fakes", "flips", "vv", "ttz","tth","ttw", "rares", ] }, # NOTE data-driven fakes
         "lowmetallht": { k:d_label_colors[k] for k in [ "fakes", "flips", "vv", "ttz","tth","ttw", "rares", ] }, # NOTE data-driven fakes
@@ -251,6 +257,7 @@ def worker(info):
         fname = "{}/run2_{}_{}_{}.pdf".format(outputdir,region,var,flav)
     else:
         fname = "{}/y{}_{}_{}_{}.pdf".format(outputdir,year,region,var,flav)
+
     plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
                cms_type = "Preliminary",
                # do_log=True,
@@ -260,6 +267,18 @@ def worker(info):
                mpl_title_params=dict(fontsize=(8 if len(str(lumi))>=5 else 9)),
                # ratio_range=[0.5,1.5],
                )
+
+    fname_log = fname.replace(".pdf","_log.pdf").replace(".png","_log.png")
+    plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname_log,
+               cms_type = "Preliminary",
+               do_log=True,
+               do_bkg_syst=do_bkg_syst,
+               lumi = lumi,
+               ratio_range=[0.0,2.0],
+               mpl_title_params=dict(fontsize=(8 if len(str(lumi))>=5 else 9)),
+               # ratio_range=[0.5,1.5],
+               )
+
     # os.system("ic {}".format(fname))
     # table_info = write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
     write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
@@ -352,23 +371,33 @@ if __name__ == "__main__":
     # regions = ["os","osloose", "tl", "htnb1", "htnb1mc"]
     # regions = ["osnomet","tlnomet","osmet","tlmet","mlonz"] #,"mlonzhigh","mlonz0j"]
 
-    ## SAME SIGN NOTE
-    regions = [
-            "osmet",
-            "osnomet",
-            "osnomethighmt",
-            "xgcr",
-            "tlmet",
-            "tlnomet",
-            "mlonz",
-            "lowmetallht",
-            "lowmetlowht",
-            ]
-    flavs = ["in"]
-    # flavs = ["ee","em","mm","in"]
+    # ## SAME SIGN NOTE
+    # regions = [
+    #         "osmet",
+    #         "osnomet",
+    #         "tlmet",
+    #         "tlnomet",
+    #         "mlonz",
+    #         "lowmetallht",
+    #         "lowmetlowht",
+    #         ]
+    # flavs = ["in"]
+    # # flavs = ["ee","em","mm","in"]
 
-    inputdir = "outputs_19Jan18_v3p24_ss"
-    outputdir = "plots_ss_3p24_19Jan18"
+    # inputdir = "outputs_19Jan18_v3p24_ss"
+    # outputdir = "plots_ss_3p24_19Jan18"
+
+    # inputdir = "outputs_19Feb16_v3p26_ss/"
+    # outputdir = "plots_ss_3p26_19Feb16"
+    # inputdir = "outputs_19Feb27_v3p27_ss_resid/"
+    # outputdir = "plots_ss_3p27_19Feb27"
+
+    # inputdir = "outputs_19Mar4_v3p27_ss/"
+    # outputdir = "plots_ss_3p27_19Mar4"
+
+
+    # inputdir = "outputs_19Feb16_v3p26_ss_noisrweights/"
+    # outputdir = "plots_ss_3p26_19Feb16_noisrweights"
 
     # inputdir = "outputs_19Jan18_v3p24_ss_promptreco"
     # outputdir = "plots_ss_3p24_19Jan18_promptreco"
@@ -376,16 +405,20 @@ if __name__ == "__main__":
     # inputdir = "outputs_19Jan18_v3p24_ss_2018nvtx"
     # outputdir = "plots_ss_3p24_19Jan18_2018nvtx"
 
-    # ## FOUR TOP NOTE
-    # regions = [
-    #         "os",
-    #         "tl",
-    #         "htnb1",
-    #         "htnb1mc",
-    #         ]
-    # flavs = ["in"]
+    ## FOUR TOP NOTE
+    regions = [
+            "os",
+            "tl",
+            "htnb1",
+            "htnb1mc",
+            ]
+    flavs = ["in"]
     # inputdir = "outputs_19Jan18_v3p24_ft"
     # outputdir = "plots_ft_3p24_19Jan18"
+    # inputdir = "outputs_19Mar4_v3p27_ft/"
+    # outputdir = "plots_ft_3p27_19Mar4"
+    inputdir = "outputs_19Mar4_v3p28_ft/"
+    outputdir = "plots_ft_3p28_19Mar4"
 
     # 2016 alone
     # outputdir = "plots_ft_jecv6_2017"

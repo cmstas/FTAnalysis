@@ -23,6 +23,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("nloose_mu" , &nloose_mu );
 
   BabyTree->Branch("sample"            , &sample); // XXX
+  BabyTree->Branch("year"            , &year); // XXX
   BabyTree->Branch("evt_corrMET"       , &evt_corrMET); // XXX
   BabyTree->Branch("evt_rawMET"       , &evt_rawMET); // XXX
   BabyTree->Branch("evt_corrMETPhi"    , &evt_corrMETPhi); // XXX
@@ -36,13 +37,21 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("scale1fb"          , &scale1fb); // XXX
   BabyTree->Branch("qscale"          , &qscale); // XXX
   BabyTree->Branch("njets"             , &njets); // XXX
+  BabyTree->Branch("nisrMatch"             , &nisrMatch); // XXX
+  BabyTree->Branch("weight_isr"             , &weight_isr); // XXX
+  BabyTree->Branch("weight_pu"             , &weight_pu); // XXX
+  BabyTree->Branch("nbtags"             , &nbtags); // XXX
   BabyTree->Branch("njets_recoil"             , &njets_recoil); // XXX
+  BabyTree->Branch("recoil_jet_pt"             , &recoil_jet_pt); // XXX
   BabyTree->Branch("ht_SS"             , &ht_SS); // XXX
   BabyTree->Branch("nFOs_SS"           , &nFOs_SS); // XXX
   BabyTree->Branch("nvtx"              , &nvtx); // XXX
   BabyTree->Branch("trueNumInt"              , &trueNumInt); // XXX
   BabyTree->Branch("puweight"              , &puweight); // XXX
 
+  BabyTree->Branch("nleptonicW"       , &nleptonicW       );
+  BabyTree->Branch("nhadronicW"       , &nhadronicW       );
+  BabyTree->Branch("nW"       , &nW       );
 
   // Lepton level
 
@@ -56,6 +65,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("tag_pt"                      , &tag_pt); // XXX
   BabyTree->Branch("p4_pt"                      , &p4_pt); // XXX
   BabyTree->Branch("p4_eta"                      , &p4_eta); // XXX
+  BabyTree->Branch("lepnum"                      , &lepnum); // XXX
 
   BabyTree->Branch("mva"                      , &mva); // XXX
   BabyTree->Branch("etaSC"                      , &etaSC); // XXX
@@ -100,6 +110,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, int isFastsim){
   BabyTree->Branch("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30"               , &HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30); // XXX
   BabyTree->Branch("HLT_Ele23_CaloIdL_TrackIdL_IsoVL"                       , &HLT_Ele23_CaloIdL_TrackIdL_IsoVL); // XXX
   BabyTree->Branch("HLT_Ele12_CaloIdL_TrackIdL_IsoVL"                       , &HLT_Ele12_CaloIdL_TrackIdL_IsoVL); // XXX
+  BabyTree->Branch("HLT_Ele32_WPTight_Gsf"                       , &HLT_Ele32_WPTight_Gsf); // XXX
 
   //MuElectron Triggers
   BabyTree->Branch("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300"            , &HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300); // XXX
@@ -168,6 +179,7 @@ void babyMaker::fillTriggerBranches(){
   setHLTBranch("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30_v",  true, HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30);
   setHLTBranch("HLT_Ele23_CaloIdL_TrackIdL_IsoVL_v",  true, HLT_Ele23_CaloIdL_TrackIdL_IsoVL);
   setHLTBranch("HLT_Ele12_CaloIdL_TrackIdL_IsoVL_v",  true, HLT_Ele12_CaloIdL_TrackIdL_IsoVL);
+  setHLTBranch("HLT_Ele32_WPTight_Gsf_v",  true, HLT_Ele32_WPTight_Gsf);
 
   //MuElectron Triggers
   setHLTBranch("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v",     true    , HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300);
@@ -200,6 +212,7 @@ void babyMaker::fillTriggerBranches(){
 void babyMaker::InitBabyNtuple(){
 
     sample = "";
+    year = -1;
     evt_corrMET = -1.;
     evt_corrMETPhi = -1.;
     evt_rawMET = -1.;
@@ -213,6 +226,11 @@ void babyMaker::InitBabyNtuple(){
     scale1fb    = -1.;
     qscale    = -1.;
     njets = -1;
+    nisrMatch = -1;
+    weight_isr = 1.;
+    weight_pu = 1.;
+    nbtags = -1;
+    recoil_jet_pt = 0.;
     njets_recoil = -1;
     ht_SS = -1.;
     nFOs_SS = -1;
@@ -225,6 +243,9 @@ void babyMaker::InitBabyNtuple(){
     nloose_mu = 0;
     ntight_mu = 0;
 
+    nleptonicW = 0;
+    nhadronicW = 0;
+    nW = 0;
 
     //Single Muon Trigger
     HLT_Mu8_TrkIsoVVL = 0;
@@ -246,6 +267,7 @@ void babyMaker::InitBabyNtuple(){
     HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0;
     HLT_Ele23_CaloIdL_TrackIdL_IsoVL = 0;
     HLT_Ele12_CaloIdL_TrackIdL_IsoVL = 0;
+    HLT_Ele32_WPTight_Gsf = 0;
 
     //MuEl Trigger
     HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300 = 0;
@@ -281,6 +303,7 @@ void babyMaker::InitLeptonBranches(){
     tag_pt = 0.;
     p4_pt = 0.;
     p4_eta = 0.;
+    lepnum = -1;
 
     mva = -999.;
     etaSC = -999.;
@@ -450,6 +473,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //Preliminary stuff
   if (verbose) std::cout << "--------------\nEVENT: " << tas::evt_run() << ":" << tas::evt_lumiBlock() << ":" << tas::evt_event() << "\n--------------" << std::endl;
 
+  // FIXME FIXME
+  bool make_isr_baby = false;
 
   //Fill Easy Variables
   evt_event = tas::evt_event();
@@ -500,26 +525,41 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // If there's not even one FO, no point
   if (leps.size() < 1) return babyErrorStruct;
 
-  // Fill trigger branches
-  fillTriggerBranches();
+  if (make_isr_baby) {
+      // require exactly one tight lepton
+      // but could still have another loose, or not
+      if (ntight_mu + ntight_el != 1) return babyErrorStruct;
+  }
 
-  passes_any_trigger = (HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 or
-          HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 or
-          HLT_Ele17_CaloIdM_TrackIdM_PFJet30 or
-          HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 or
-          HLT_Ele23_CaloIdM_TrackIdM_PFJet30 or
-          HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 or
-          HLT_Ele8_CaloIdM_TrackIdM_PFJet30 or
-          HLT_IsoMu27 or
-          HLT_Mu17 or
-          HLT_Mu17_TrkIsoVVL or
-          HLT_Mu8 or
-          HLT_Mu8_TrkIsoVVL or
-          HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30);
-  if (not passes_any_trigger) return babyErrorStruct;
+  if (!make_isr_baby) {
+      // Fill trigger branches
+      fillTriggerBranches();
+
+      passes_any_trigger = (HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+              HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+              HLT_Ele17_CaloIdM_TrackIdM_PFJet30 or
+              HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+              HLT_Ele23_CaloIdM_TrackIdM_PFJet30 or
+              HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 or
+              HLT_Ele8_CaloIdM_TrackIdM_PFJet30 or
+              HLT_IsoMu27 or
+              HLT_Mu17 or
+              HLT_Mu17_TrkIsoVVL or
+              HLT_Mu8 or
+              HLT_Mu8_TrkIsoVVL or
+              HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30);
+      if (not passes_any_trigger) return babyErrorStruct;
+  } else {
+      // FIXME need to require single lepton trigger
+      // and also switch doublemu -> single mu!
+      setHLTBranch("HLT_Ele32_WPTight_Gsf_v",  true, HLT_Ele32_WPTight_Gsf);
+      setHLTBranch("HLT_IsoMu27_v"         , true, HLT_IsoMu27         );
+      if (not HLT_Ele32_WPTight_Gsf and not HLT_IsoMu27) return babyErrorStruct;
+  }
 
   // MC stuff and filters
   scale1fb = 1;
+  year = gconf.year;
   if (!evt_isRealData) {
       trueNumInt = tas::puInfo_trueNumInteractions()[0];
       nvtx = 0;
@@ -535,10 +575,47 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   // Jets
   vector<Jet> jets = SSJetsCalculator(jetCorr, 1).first;
   njets = jets.size();
+  nbtags = 0;
   ht_SS = 0;
+  vector <LorentzVector> jets_p4;
   for (unsigned int ijet = 0; ijet < jets.size(); ijet++){
       auto jet = jets[ijet];
-      ht_SS += jet.pt()*jet.undo_jec()*jet.jec();
+      float corr = jet.undo_jec()*jet.jec();
+      jets_p4.push_back(jet.p4()*corr);
+      float pt = jet.pt()*corr;
+      ht_SS += pt;
+      float disc = jet.disc();
+      if (disc > gconf.btag_disc_wp) nbtags += 1;
+  }
+  if (make_isr_baby) {
+      // require at least one b to speed things up
+      if (nbtags == 0) return babyErrorStruct;
+  }
+  if (make_isr_baby and !evt_isRealData) {
+      nisrMatch = get_nisrMatch(jets_p4);
+      weight_isr = isrWeight(year,nisrMatch,10);
+      weight_pu = getTruePUw(year,trueNumInt);
+      nleptonicW = 0;
+      nW = 0;
+      nhadronicW = 0;
+      for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+          int id = tas::genps_id()[igen];
+          if (abs(id) != 24) continue;
+          int smid = tas::genps_id_simplemother()[igen];
+          if (abs(smid) == 24) continue;
+          int stat = tas::genps_status()[igen];
+          if (stat != 22 && stat != 52) continue;
+          nW++;
+      }
+      for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+          int id = tas::genps_id()[igen];
+          int mid = tas::genps_id_mother()[igen];
+          if (abs(id) != 12 && abs(id) != 14 && abs(id) != 16) continue;
+          if (abs(mid) != 24) continue;
+          if (!(tas::genps_isPromptFinalState()[igen])) continue;
+          nleptonicW++;
+      }
+      nhadronicW = nW - nleptonicW;
   }
 
   //MET variables
@@ -563,6 +640,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
       Lepton lep = leps[ilep];
 
+      lepnum = ilep;
       id = lep.id();
       idx = lep.idx();
       p4 = lep.p4();
@@ -571,83 +649,97 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       mt = MT(p4_pt, p4.phi(), evt_corrMET, evt_corrMETPhi);
       mt_raw = MT(p4_pt, p4.phi(), evt_rawMET, evt_rawMETPhi);
 
+      if (make_isr_baby) {
 
-      // Loop and fill branches if there actually is a tight-tight Z pair
-      // Consider jlep>ilep to avoid counting 2 separate events in the tree as having a Z
-      if (event_maybe_has_z and lep.idlevel()==2 and lep.pt()>30.) {
-          bool found_z = false;
-          Lepton zlep;
-          for (int jlep = ilep+1; jlep < leps.size(); jlep++) {
-              Lepton otherlep = leps[jlep];
-              // Require OSSF tight-tight pT>30,30
-              if (otherlep.idlevel() != 2) continue;
-              if (otherlep.pt() < 30.) continue;
-              if (lep.id()+otherlep.id() != 0) continue;
-              float mll = (lep.p4()+otherlep.p4()).M();
-              if (fabs(mll - 91.18) > 15.) continue;
-              found_z = true;
-              zlep = otherlep;
-              break;
-          }
-          if (found_z) {
-              dilep_p4 = (lep.p4()+zlep.p4());
-              dilep_mass = dilep_p4.M();
-              tag_p4 = zlep.p4();
-              have_tag = true;
-              tag_pt = zlep.pt();
-          }
-      }
-
-
-      float A = lep.is_el() ? gconf.multiiso_el_minireliso : gconf.multiiso_mu_minireliso;
-      float B = lep.is_el() ? gconf.multiiso_el_ptratio : gconf.multiiso_mu_ptratio;
-      float C = lep.is_el() ? gconf.multiiso_el_ptrel : gconf.multiiso_mu_ptrel;
-      mva = lep.is_el() ? getMVAoutput(idx, true) : -999.;
-      etaSC = lep.is_el() ? els_etaSC().at(idx) : -999.;
-      close_jet_v5 = closestJet(lep.p4(), 0.4, 3.0, 2);
-      ptrelv1 = ptRel(lep.p4(), close_jet_v5, true);
-      ptratio_v5 = close_jet_v5.pt() > 0 ? lep.pt()/close_jet_v5.pt() : 1;
-      miniiso = lep.is_el() ?  elMiniRelIsoCMS3_EA(idx,gconf.ea_version) : muMiniRelIsoCMS3_EA(idx,gconf.ea_version);
-      coneCorrPt = ((ptrelv1 > C) ? lep.pt()*(1 + std::max((float)0, miniiso - A)) : std::max(lep.pt(), close_jet_v5.pt() * B));
-      isTriggerSafe = lep.is_el() ? isTriggerSafe_v1(idx) : true;
-      isTriggerSafenoIso = lep.is_el() ? isTriggerSafenoIso_v1(idx) : true;
-
-      passes_SS_tight_v6 = lep.idlevel() == 2;
-      passes_SS_fo_v6 = lep.idlevel() >= 1;
-      passes_SS_fo_looseMVA_v6 = lep.idlevel() >= 1;
-
-      if (lep.is_el()) {
-          elID::setCache(idx,mva,miniiso,ptratio_v5,ptrelv1);
-          passes_SS_tight_noiso_v6 = isGoodLeptonNoIso(lep.id(),idx);
-          passes_SS_fo_noiso_v6 = isDenominatorLeptonNoIso(lep.id(),idx);
-          elID::unsetCache();
-
-          ip3d = els_ip3d().at(idx);
-          ip3derr = els_ip3derr().at(idx);
+          passes_SS_tight_v6 = lep.idlevel() == 2;
+          passes_SS_fo_v6 = lep.idlevel() >= 1;
+          passes_SS_fo_looseMVA_v6 = lep.idlevel() >= 1;
+          if (not passes_SS_tight_v6) continue;
 
       } else {
-          muID::setCache(idx,miniiso,ptratio_v5,ptrelv1);
-          passes_SS_tight_noiso_v6 = isGoodLeptonNoIso(lep.id(),idx);
-          passes_SS_fo_looseMVA_noiso_v6 = isDenominatorLeptonNoIso(lep.id(),idx);
-          muID::unsetCache();
 
-          ip3d = mus_ip3d().at(idx);
-          ip3derr = mus_ip3derr().at(idx);
 
-      }
-
-      njets_recoil = 0;
-      for(unsigned int ijet=0; ijet < jets.size(); ijet++)  {
-          auto jet = jets[ijet];
-          if(ROOT::Math::VectorUtil::DeltaR(jet.p4(), p4) < 1.) continue;
-          float pt = jet.pt()*jet.undo_jec()*jet.jec();
-          if(pt > 40. && fabs(jets[ijet].eta()) < 2.4) {
-              njets_recoil++;
+          // Loop and fill branches if there actually is a tight-tight Z pair
+          // Consider jlep>ilep to avoid counting 2 separate events in the tree as having a Z
+          if (event_maybe_has_z and lep.idlevel()==2 and lep.pt()>30.) {
+              bool found_z = false;
+              Lepton zlep;
+              for (int jlep = ilep+1; jlep < leps.size(); jlep++) {
+                  Lepton otherlep = leps[jlep];
+                  // Require OSSF tight-tight pT>30,30
+                  if (otherlep.idlevel() != 2) continue;
+                  if (otherlep.pt() < 30.) continue;
+                  if (lep.id()+otherlep.id() != 0) continue;
+                  float mll = (lep.p4()+otherlep.p4()).M();
+                  if (fabs(mll - 91.18) > 15.) continue;
+                  found_z = true;
+                  zlep = otherlep;
+                  break;
+              }
+              if (found_z) {
+                  dilep_p4 = (lep.p4()+zlep.p4());
+                  dilep_mass = dilep_p4.M();
+                  tag_p4 = zlep.p4();
+                  have_tag = true;
+                  tag_pt = zlep.pt();
+              }
           }
-      }
 
-      if (!evt_isRealData){
-          motherID = lepMotherID_v2(Lep(id,idx)).first;
+
+          float A = lep.is_el() ? gconf.multiiso_el_minireliso : gconf.multiiso_mu_minireliso;
+          float B = lep.is_el() ? gconf.multiiso_el_ptratio : gconf.multiiso_mu_ptratio;
+          float C = lep.is_el() ? gconf.multiiso_el_ptrel : gconf.multiiso_mu_ptrel;
+          mva = lep.is_el() ? getMVAoutput(idx, true) : -999.;
+          etaSC = lep.is_el() ? els_etaSC().at(idx) : -999.;
+          close_jet_v5 = closestJet(lep.p4(), 0.4, 3.0, 2);
+          ptrelv1 = ptRel(lep.p4(), close_jet_v5, true);
+          ptratio_v5 = close_jet_v5.pt() > 0 ? lep.pt()/close_jet_v5.pt() : 1;
+          miniiso = lep.is_el() ?  elMiniRelIsoCMS3_EA(idx,gconf.ea_version) : muMiniRelIsoCMS3_EA(idx,gconf.ea_version);
+          coneCorrPt = ((ptrelv1 > C) ? lep.pt()*(1 + std::max((float)0, miniiso - A)) : std::max(lep.pt(), close_jet_v5.pt() * B));
+          isTriggerSafe = lep.is_el() ? isTriggerSafe_v1(idx) : true;
+          isTriggerSafenoIso = lep.is_el() ? isTriggerSafenoIso_v1(idx) : true;
+
+          passes_SS_tight_v6 = lep.idlevel() == 2;
+          passes_SS_fo_v6 = lep.idlevel() >= 1;
+          passes_SS_fo_looseMVA_v6 = lep.idlevel() >= 1;
+
+          if (lep.is_el()) {
+              elID::setCache(idx,mva,miniiso,ptratio_v5,ptrelv1);
+              passes_SS_tight_noiso_v6 = isGoodLeptonNoIso(lep.id(),idx);
+              passes_SS_fo_noiso_v6 = isDenominatorLeptonNoIso(lep.id(),idx);
+              elID::unsetCache();
+
+              ip3d = els_ip3d().at(idx);
+              ip3derr = els_ip3derr().at(idx);
+
+          } else {
+              muID::setCache(idx,miniiso,ptratio_v5,ptrelv1);
+              passes_SS_tight_noiso_v6 = isGoodLeptonNoIso(lep.id(),idx);
+              passes_SS_fo_looseMVA_noiso_v6 = isDenominatorLeptonNoIso(lep.id(),idx);
+              muID::unsetCache();
+
+              ip3d = mus_ip3d().at(idx);
+              ip3derr = mus_ip3derr().at(idx);
+
+          }
+
+          njets_recoil = 0;
+          recoil_jet_pt = 0.;
+          for(unsigned int ijet=0; ijet < jets.size(); ijet++)  {
+              auto jet = jets[ijet];
+              if(ROOT::Math::VectorUtil::DeltaR(jet.p4(), p4) < 1.) continue;
+              float pt = jet.pt()*jet.undo_jec()*jet.jec();
+              if (fabs(jets[ijet].eta()) > 2.4) continue;
+              if (pt > 40.) {
+                  njets_recoil++;
+                  recoil_jet_pt = pt;
+              }
+          }
+
+          if (!evt_isRealData){
+              motherID = lepMotherID_v2(Lep(id,idx)).first;
+          }
+
       }
 
 

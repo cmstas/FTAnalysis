@@ -260,8 +260,11 @@ int main(int argc, char *argv[]){
         good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
         // jecEra = "Fall17_17Nov2017C_V32";
         // jecEraMC = "Fall17_17Nov2017_V32";
-        jecEra = "Autumn18_V3";
-        jecEraMC = "Autumn18_V3";
+        // jecEra = "Autumn18_V3";
+        // jecEra = "Autumn18_V3_OldRes";
+        // jecEraMC = "Autumn18_V3";
+        jecEra = "Autumn18_RunA_V8";
+        jecEraMC = "Autumn18_V8";
         gconf.SS_innerlayers = 0;
     }
 
@@ -462,9 +465,16 @@ int main(int argc, char *argv[]){
                 else if (tas::evt_run() <= 304797 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017DE_V32";
                 else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V32";
                 // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
-                else if (tas::evt_run() > 306462) jecEra = "Autumn18_V3"; // FIXME 2018?
+                // else if (tas::evt_run() > 306462) jecEra = "Autumn18_V3"; // FIXME 2018?
+                else if (tas::evt_run() <= 316995 && tas::evt_run() >= 315252) jecEra = "Autumn18_RunA_V8";
+                else if (tas::evt_run() <= 319312 && tas::evt_run() >= 316998) jecEra = "Autumn18_RunB_V8";
+                else if (tas::evt_run() <= 320393 && tas::evt_run() >= 319313) jecEra = "Autumn18_RunC_V8";
+                else if (tas::evt_run() <= 325273 && tas::evt_run() >= 320394) jecEra = "Autumn18_RunD_V8";
 
-                else std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;
+                else {
+                    std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;
+                    break;
+                }
 
                 jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/"+jecEra+"_DATA/"+jecEra+"_DATA_Uncertainty_AK4PFchs.txt"); 
                 jetcorr_filenames_25ns_DATA_pfL1.clear();

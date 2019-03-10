@@ -1,4 +1,4 @@
-// python train_xgb_run2.py
+// python ../bdt/train_xgb_run2.py
 // num_round = 500
 // param['eta'] = 0.07
 // param['max_depth'] = 5
@@ -12,12 +12,32 @@
 // param['min_child_weight'] = 1.0
 // param['colsample_bytree'] = 1.0
 // python plot_run2.py
-// f = uproot.open("make_inputs/output_run2.root")
-// bst = pickle.load(open("bst_run2_v3.pkl","rb"))
+// f = uproot.open("make_inputs/output_run2_2018resid17.root")
+// pklname = "bst_run2_v3_2018resid17.pkl"
+// bst = pickle.load(open("bst_run2_v3_2018resid17.pkl","rb"))
 // y_pred = bst.predict(xgb.DMatrix(x_data))
-// y_pred.dump("ypred_run2_v3.npy")
-// # NOTE NEXT TO LAST BIN CHANGED
-// bins = np.array([0.0000, 0.0262, 0.0590, 0.1001, 0.1509, 0.2124, 0.2847, 0.3664, 0.4547, 0.5839, 0.7345, 0.8453, 0.9156, 0.9562, 0.9784, 0.9903, 0.995, 1.])
+// y_pred.dump("ypred_run2_v3_2018resid17.npy")
+// y_pred = np.load("ypred_run2_v3_2018resid17.npy")
+// int getBDTBin_17(float disc, bool crz) {
+// if (crz) return 1;
+// if (disc > 0.9956) return 18;
+// if (disc > 0.9884) return 17;
+// if (disc > 0.9749) return 16;
+// if (disc > 0.9506) return 15;
+// if (disc > 0.9076) return 14;
+// if (disc > 0.8357) return 13;
+// if (disc > 0.7260) return 12;
+// if (disc > 0.6054) return 11;
+// if (disc > 0.4741) return 10;
+// if (disc > 0.3704) return 9;
+// if (disc > 0.2905) return 8;
+// if (disc > 0.2190) return 7;
+// if (disc > 0.1573) return 6;
+// if (disc > 0.1055) return 5;
+// if (disc > 0.0659) return 4;
+// if (disc > 0.0362) return 3;
+// if (disc > 0.0000) return 2;
+// }
 float get_prediction(float nbtags,float njets,float met,float ptl2,float nlb40,float ntb40,float nleps,float htb,float q1,float ptj1,float ptj6,float ptj7,float ml1j1,float dphil1l2,float maxmjoverpt,float ptl1,float detal1l2,float ptj8,float ptl3) {
   float w = 0.;
   w += (njets < 4.5 ? (nbtags < 2.5 ? (ptl3 < 10.0889 ? (nbtags < 1.5 ? (ptl2 < 27.2266 ? -0.132827 : -0.104809) : (njets < 3.5 ? -0.102548 : -0.0480965)) : (njets < 3.5 ? (nbtags < 1.5 ? -0.0847513 : -0.0163715) : (nbtags < 1.5 ? -0.0126125 : 0.0465266))) : (ptl3 < 10.9884 ? (ptl2 < 25.0836 ? (met < 110.292 ? -0.0324288 : 0.0496633) : (njets < 3.5 ? 0.0281706 : 0.0895488)) : (maxmjoverpt < 0.104199 ? -0.0 : (ptl1 < 25.3911 ? -0.0 : 0.120544)))) : (nlb40 < 2.5 ? (ptj6 < 40.0372 ? (nbtags < 1.5 ? (ptl2 < 25.0134 ? -0.10086 : -0.0153447) : (nbtags < 2.5 ? 0.0223878 : 0.116494)) : (nbtags < 1.5 ? (ptl2 < 25.0178 ? -0.0207828 : 0.0634168) : (nbtags < 2.5 ? 0.0904258 : 0.132789))) : (nbtags < 2.5 ? (ptj6 < 41.2594 ? (ptl2 < 24.0645 ? 0.00471986 : 0.0739351) : (ptj7 < 41.6159 ? 0.0999422 : 0.124236)) : (njets < 5.5 ? (ptl2 < 19.6276 ? 0.0830268 : 0.12236) : (ml1j1 < 38.279 ? -0.0 : 0.135017)))));

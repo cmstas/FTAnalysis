@@ -13,12 +13,15 @@ import matplotlib.font_manager as mfm
 import pandas as pd
 import glob
 import ast
+from matplotlib.ticker import MultipleLocator
+
 
 
 import os
 import matplotlib.pyplot as plt
 
 
+XSEC_TTTT = 11.97
 GREEN = (0.,0.8,0.)
 YELLOW = (1.,0.8,0.)
 
@@ -93,16 +96,58 @@ class OneSideHatchObjectHandler(object):
         handlebox.add_artist(patch)
         return patch
 
+def parse_yukawa_log(fname):
+    d = {}
+    tthscale = None
+    for line in open(fname,"r").readlines():
+        line = line.strip()
+        if line.startswith("Set Default Value of"):
+            tthscale = float(line.split()[-1])
+            if tthscale not in d:
+                d[tthscale] = {}
+        if line.startswith("Observed Limit:"):
+            limit = float(line.split("<")[-1].strip())
+            d[tthscale]["limit"] = XSEC_TTTT*limit
+        if line.startswith("Best fit r:"):
+            parts = line.split(":")[-1].strip()
+            central = float(parts.split()[0])
+            down,up = map(float,parts.split()[1].split("/"))
+            d[tthscale]["central"] = XSEC_TTTT*central
+            d[tthscale]["up"] = XSEC_TTTT*up
+            d[tthscale]["down"] = XSEC_TTTT*down
+    keys = sorted(d.keys())
+    ktvals = map(lambda x: x**.5, keys)
+    ul = map(lambda x: d[x].get("limit",-1), keys)
+    central = map(lambda x: d[x].get("central",-1), keys)
+    ups = map(lambda x: d[x].get("up",-1), keys)
+    downs = map(lambda x: d[x].get("down",-1), keys)
+    return ktvals, ul, central, ups, downs
+
+
 def make_yukawa_plot(scaninfo):
 
-    from parse import get_stuff
-    kts, ul, central, ups, downs = get_stuff(scaninfo)
+    kts, ul, central, ups, downs = parse_yukawa_log(scaninfo)
     kts = np.array(kts)
     uls = np.array(ul)
 
+    # print central
+    # print ups
+    # print downs
     obs_cent = np.array(central)
-    obs_up = np.array(central)+np.array(ups)
-    obs_down = np.array(central)-np.array(downs)
+    obs_up = obs_cent+np.abs(np.array(ups))
+    obs_down = obs_cent-np.abs(np.array(downs))
+
+    # good = kts<2.5
+    good = kts<3.0
+    kts = kts[good]
+    uls = uls[good]
+    obs_cent = obs_cent[good]
+    obs_up = obs_up[good]
+    obs_down = obs_down[good]
+
+    print obs_cent
+    print obs_up
+    print obs_down
 
     # A: gza
     # B: int 
@@ -130,7 +175,7 @@ def make_yukawa_plot(scaninfo):
     theory_up = calc_sigma(kts_fine,gza_13tev_up,int_13tev_up,higgs_13tev_up)
 
     fig,ax = get_fig_ax()
-    add_cms_info(ax, lumi="35.9")
+    add_cms_info(ax, lumi="136.3")
     p3 = ax.fill_between(kts, obs_down, obs_up, linewidth=0., facecolor="k", alpha=0.25)
     p4 = ax.plot(kts, obs_cent, linestyle="-", marker="",color="k",solid_capstyle="butt")
     pobsline = mlines.Line2D([0],[0],color="k",linewidth=2,linestyle="-",solid_capstyle="butt")
@@ -156,6 +201,9 @@ def make_yukawa_plot(scaninfo):
             labelspacing=0.6,
             )
 
+    ax.xaxis.set_minor_locator(MultipleLocator(0.1))
+    ax.yaxis.set_minor_locator(MultipleLocator(2))
+
     ax.set_ylim([0.,65.])
     ax.set_ylabel(r"$\sigma_{t\bar{t}t\bar{t}}$ [fb]")
     ax.set_title("")
@@ -172,7 +220,6 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
 
     logs = glob.glob("{}/{}".format(basedir,globber))
 
-    XSEC_TTTT = 11.97
     def parse_lims(lim_lines, fb=False):
         """
         return dictionary with obs, exp, sp1, sm1 cross section limits in pb
@@ -203,6 +250,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
                 "expr": d.get("exp_50.0",-1),
                 "exprp1": d.get("exp_84.0",-1),
                 "exprp2": d.get("exp_97.5",-1),
+                "obsr": d.get("obs",-1),
                 "exp84": d.get("exp_50.0",-1),
                 "obs":obs, "exp":exp,
                 "sp1":exp_sp1,"sm1":exp_sm1,
@@ -346,7 +394,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
         d["mass"] = int(tmp[1:])
         infos.append(d)
     df = pd.DataFrame(infos)
-    df["obs"] *= 0.
+    # df["obs"] *= 0.
     df = df.sort_values("mass")
 
     if do_scalar:
@@ -355,7 +403,8 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
         which = "a"
     df = df[df["which"]==which]
     df["xsec"] = df["mass"].apply(lambda x: 1000.*d_xsec["xsec"+which][x])
-    obs = (df["expr"]*df["xsec"]).values
+    # obs = (df["expr"]*df["xsec"]).values
+    obs = (df["obsr"]*df["xsec"]).values
     exp = (df["expr"]*df["xsec"]).values
     sm2 = (df["exprm2"]*df["xsec"]).values
     sm1 = (df["exprm1"]*df["xsec"]).values
@@ -369,7 +418,8 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
     pe2 = ax.fill_between(mhs, sm2, sp2, linewidth=0., facecolor=YELLOW, alpha=1.0)
     pe1 = ax.fill_between(mhs, sm1, sp1, linewidth=0., facecolor=GREEN, alpha=1.0)
     pe0 = ax.plot(mhs, exp, linestyle="--", marker="",color="k",solid_capstyle="butt")
-    pobs = ax.plot(mhs, exp*0., linestyle="-", markersize=5.,marker="o",color="k",solid_capstyle="butt")
+    # pobs = ax.plot(mhs, exp*0., linestyle="-", markersize=5.,marker="o",color="k",solid_capstyle="butt")
+    pobs = ax.plot(mhs, obs, linestyle="-", markersize=5.,marker="o",color="k",solid_capstyle="butt")
     ptheory = ax.plot(mhs, theory, linestyle="-", marker="",color="r",solid_capstyle="butt")
     legend = ax.legend(
             [
@@ -379,13 +429,17 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
                 ],
             [
                 "95% CL Observed",
-                r"95% CL Expected $\pm$ 1 and $\pm$ 2 $\sigma_\mathrm{experiment}$",
+                r"95% CL Expected $\pm$1 and $\pm$2 $\sigma_\mathrm{experiment}$",
                 r"$\sigma^\mathrm{%s}_\mathrm{theory}$" % ("pseudoscalar" if which == "a" else "scalar"),
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
             labelspacing=0.6,
             )
+    ax.yaxis.set_minor_locator(MultipleLocator(5.))
+    ax.xaxis.set_minor_locator(MultipleLocator(10.))
     ax.set_ylim([0.,120.])
+    # ax.set_ylim([1.,120.])
+    # ax.set_yscale("log")
     ax.set_title("")
     fname = "scalar.png"
     if which == "h":
@@ -403,24 +457,39 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
     os.system("ic {}".format(fname_png))
     print "Saved {}".format(fname)
 
-def make_rpv_plot(basedir,globber,do_tbs=True):
+def make_rpv_plot(basedir,globber,outdir="scanplots",do_tbs=True):
     # xsecs in pb -- https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVgluglu
     gluino_xsecs = {
             1000 : 0.385 ,
+            1050 : 0.27 ,
             1100 : 0.191 ,
+            1150 : 0.137 ,
             1200 : 0.0985 ,
+            1250 : 0.0715 ,
             1300 : 0.0522 ,
+            1350 : 0.0384 ,
             1400 : 0.0284 ,
+            1450 : 0.0211 ,
             1500 : 0.0157 ,
+            1550 : 0.0118 ,
             1600 : 0.00887 ,
+            1650 : 0.0067 ,
             1700 : 0.00507 ,
+            1750 : 0.00385 ,
             1800 : 0.00293 ,
+            1850 : 0.00224 ,
             1900 : 0.00171 ,
+            1950 : 0.00131 ,
             2000 : 0.00101 ,
+            2050 : 0.000776 ,
             2100 : 0.000598 ,
+            2150 : 0.000461 ,
             2200 : 0.000356 ,
+            2250 : 0.000275 ,
             2300 : 0.000213 ,
+            2350 : 0.000165 ,
             2400 : 0.000128 ,
+            2450 : 9.91e-05 ,
             2500 : 7.68e-05 ,
             }
 
@@ -470,7 +539,6 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
         except: pass
     df = pd.DataFrame(infos)
     df = df.sort_values("mass")
-    # print df
 
 
     obs = (df["obs"]).values
@@ -494,8 +562,11 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
 
     if do_tbs:
         procstr = "T1tbs"
+        ax.set_yscale("log")
     else:
         procstr = "T1qqqqL"
+        ax.set_yscale("log")
+        ax.set_ylim([0.07,200.])
 
     legend = ax.legend(
             [
@@ -506,14 +577,13 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
             [
                 "95% CL Observed",
                 r"95% CL Expected $\pm$ 1 and $\pm$ 2 $\sigma_\mathrm{experiment}$",
-                r"$\sigma_\mathrm{{theory}}$ ({})".format(procstr),
+                r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$)",
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
             labelspacing=0.6,
             loc="upper center",
             )
 
-    ax.set_yscale("log")
     ax.set_title("")
 
     # fpath = os.path.join("/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/limits/arial.ttf")
@@ -524,9 +594,9 @@ def make_rpv_plot(basedir,globber,do_tbs=True):
     # # ax.set_title("title")
 
     if do_tbs:
-        fname = "scanplots/rpv_t1tbs_run2.pdf"
+        fname = "{}/rpv_t1tbs_run2.pdf".format(outdir)
     else:
-        fname = "scanplots/rpv_t1qqqql_run2.pdf"
+        fname = "{}/rpv_t1qqqql_run2.pdf".format(outdir)
     ax.set_ylabel(r"$\sigma$ (fb)")
     ax.set_xlabel(r"$\mathrm{m}_\tilde{\mathrm{g}}$ (GeV)")
     fig.set_tight_layout(True)
@@ -542,10 +612,16 @@ if __name__ == "__main__":
     set_defaults()
 
     # os.system("mkdir -p plots/")
-    # make_yukawa_plot(scaninfo="scaninfo.txt")
+    make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar6unblind_v1//log_yukawa_scan.txt")
     # make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
     # make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
+    # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar6higgs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
+    # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar6higgs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
 
-    os.system("mkdir -p scanplots/")
-    make_rpv_plot(basedir="v3.26_feb15_sst1t5rpv_v1/",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
+    # os.system("mkdir -p scanplots/")
+    # make_rpv_plot(basedir="v3.26_feb15_sst1t5rpv_v1/",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
     # make_rpv_plot(basedir="v3.26_feb15_sst1t5rpv_v1/",globber="card_rpv_t1qqqql_*_all_run2.log",do_tbs=False)
+
+#     os.system("mkdir -p scanplots_test/")
+#     make_rpv_plot(basedir="v3.26_feb27_allsigs_v1",outdir="scanplots_test/",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
+#     make_rpv_plot(basedir="v3.26_feb27_allsigs_v1",outdir="scanplots_test/",globber="card_fs_t1qqqql_*_all_run2.log",do_tbs=False)

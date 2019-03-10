@@ -28,13 +28,15 @@ basedirs ={
 
         2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/",
         2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/",
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/",
 
         }
 
-outputdir = "outputs"
-# plotdir = "plots_SS_19Jan25"
-plotdir = "plots_FT_19Jan25"
+# outputdir = "outputs"
+outputdir = "outputs_v2"
+plotdir = "plots_SS_19Jan25_v2"
+# plotdir = "plots_FT_19Jan25"
 
 options = {
 
@@ -42,13 +44,13 @@ options = {
         # 2017: " doSS Data2017 quiet ",
         # 2018: " doSS Data2018 quiet ",
 
-        # 2016: " doSS Data2016 ",
-        # 2017: " doSS Data2017 ",
-        # 2018: " doSS Data2018 ",
+        2016: " doSS Data2016 ",
+        2017: " doSS Data2017 ",
+        2018: " doSS Data2018 ",
 
-        2016: " Data2016 ",
-        2017: " Data2017 ",
-        2018: " Data2018 ",
+        # 2016: " Data2016 ",
+        # 2017: " Data2017 ",
+        # 2018: " Data2018 ",
 
         }
 
@@ -103,4 +105,4 @@ map(run_chain,enumerate(to_run))
 import sys
 sys.modules["numba"] = None
 import plot
-plot.make_plots(outputdir=plotdir)
+plot.make_plots(inputdir=outputdir,outputdir=plotdir)

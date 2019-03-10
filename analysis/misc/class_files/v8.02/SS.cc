@@ -1829,6 +1829,12 @@ void SSAG::Init(TTree *tree) {
     prefire_sf_branch = tree->GetBranch("prefire_sf");
     if (prefire_sf_branch) { prefire_sf_branch->SetAddress(&prefire_sf_); }
   }
+
+  nhiggs_branch = 0;
+  if (tree->GetBranch("nhiggs") != 0) {
+    nhiggs_branch = tree->GetBranch("nhiggs");
+    if (nhiggs_branch) { nhiggs_branch->SetAddress(&nhiggs_); }
+  }
 	weight_btagsf_DN_branch = 0;
 	if (tree->GetBranch("weight_btagsf_DN") != 0) {
 		weight_btagsf_DN_branch = tree->GetBranch("weight_btagsf_DN");
@@ -2482,6 +2488,7 @@ void SSAG::GetEntry(unsigned int idx)
 		weight_btagsf_isLoaded = false;
 		weight_btagsf_UP_isLoaded = false;
 		weight_btagsf_DN_isLoaded = false;
+  nhiggs_isLoaded = false;
   prefire_sf_isLoaded = false;
   prefire_sfdown_isLoaded = false;
   prefire_sfup_isLoaded = false;
@@ -2898,6 +2905,7 @@ void SSAG::LoadAllBranches()
 	if (weight_btagsf_branch != 0) weight_btagsf();
 	if (weight_btagsf_UP_branch != 0) weight_btagsf_UP();
 	if (weight_btagsf_DN_branch != 0) weight_btagsf_DN();
+  if (nhiggs_branch != 0) nhiggs();
   if (prefire_sf_branch != 0) prefire_sf();
   if (prefire_sfdown_branch != 0) prefire_sfdown();
   if (prefire_sfup_branch != 0) prefire_sfup();
@@ -7494,6 +7502,19 @@ const float &SSAG::prefire_sf() {
   }
   return prefire_sf_;
 }
+
+const int &SSAG::nhiggs() {
+  if (not nhiggs_isLoaded) {
+    if (nhiggs_branch != 0) {
+      nhiggs_branch->GetEntry(index);
+    } else {
+      printf("branch nhiggs_branch does not exist!\n");
+      exit(1);
+    }
+    nhiggs_isLoaded = true;
+  }
+  return nhiggs_;
+}
 	const float &SSAG::weight_btagsf_DN()
 	{
 		if (not weight_btagsf_DN_isLoaded) {
@@ -8680,6 +8701,7 @@ namespace ss {
 	const float &weight_btagsf() { return samesign.weight_btagsf(); }
 	const float &weight_btagsf_UP() { return samesign.weight_btagsf_UP(); }
 	const float &weight_btagsf_DN() { return samesign.weight_btagsf_DN(); }
+  const int &nhiggs() { return samesign.nhiggs(); }
   const float &prefire_sf() { return samesign.prefire_sf(); }
   const float &prefire_sfdown() { return samesign.prefire_sfdown(); }
   const float &prefire_sfup() { return samesign.prefire_sfup(); }

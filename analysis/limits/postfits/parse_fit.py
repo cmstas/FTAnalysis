@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import uproot
+import pickle
 
 from analysis.utils.plotting_utils import write_table
 
@@ -338,6 +339,9 @@ if __name__ == "__main__":
             buff = print_table(d_yields,regions=region)
             fh.write("\n\n----- {} {} -----\n\n".format(region.upper(),x))
             fh.write(buff)
+        if x == "shapes_fit_b":
+            with open("dump.pkl","w") as fhdump:
+                pickle.dump(d,fhdump)
         buff = print_slim_table(d_hists[x])
         fh.write("\n\n----- SUMMARY SLIM TABLE for {} {} -----\n\n".format(region.upper(),x))
         fh.write(buff)

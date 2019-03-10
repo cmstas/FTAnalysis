@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import numpy as np
+
 import sys
 sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
 
@@ -8,7 +10,6 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 import os
-import numpy as np
 import argparse
 
 from scipy.interpolate import CubicSpline
@@ -35,7 +36,7 @@ def plot_one(ax,fname,poi_name="r",poi_scale=1.,fmt=".3f",unit="",label="Expecte
 
     rtext = "%%s = ${%%%s}^{+%%%s}_{-%%%s}$ %s" % (fmt,fmt,fmt,unit if unit else "")
     # rtext = "%s = ${%.3f}^{+%.3f}_{-%.3f}$" % (poi_name, r_center,r_center-r_1sigma[0],r_1sigma[1]-r_center)
-    rtext = rtext % (poi_name, r_center,r_center-r_1sigma[0],r_1sigma[1]-r_center)
+    rtext = rtext % (poi_name, r_center,r_1sigma[1]-r_center,r_center-r_1sigma[0])
     ax.text(0.99, 0.97,rtext, horizontalalignment='right', verticalalignment='top', transform = ax.transAxes, size="xx-large")
 
     ax.plot(points[:,0],points[:,1], color="black",marker="o",markersize=3,linewidth=1.5, label=label)

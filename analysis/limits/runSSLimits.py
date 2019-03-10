@@ -11,7 +11,7 @@ import subprocess
 # from makeSingleCombinedCard import do_combine
 import makeSingleCombinedCard
 
-def make_card(basedir,sig,finalcard,verbose=True):
+def make_card(basedir,sig,finalcard,verbose=True,workspace=False):
 
     # # CLEAN before rerunning. Once per SCAN, not per MASS POINT
     # os.system("rm {}/*run2*.root".format(basedir))
@@ -50,6 +50,11 @@ def make_card(basedir,sig,finalcard,verbose=True):
                         "rares",
                         "XG",
                         "TTVV",
+                        "bb",
+                "fakes_normNB0",
+                "fakes_normNB1",
+                "fakes_normNB2",
+                "fakes_normNB3",
                         ],
                 )
 
@@ -60,6 +65,8 @@ def make_card(basedir,sig,finalcard,verbose=True):
     os.system(cmd)
     fullfinalcard = "{}/{}".format(basedir,finalcard)
     if verbose: print "Wrote {}".format(fullfinalcard)
+
+
     return fullfinalcard
 
 
@@ -88,8 +95,10 @@ def print_lims(d_lims, fb=False, unblinded=False):
         print "  Obs UL: r = {:.3f}".format(d_lims["obs"])
     print "  Exp UL: r = {:.3f} (+{:.3f} -{:.3f})".format(d_lims["exp"], d_lims["sp1"]-d_lims["exp"], d_lims["exp"]-d_lims["sm1"])
 
-def get_lims(basedir, doupperlimit=True, redolimits=True,
+def get_lims(basedir, doupperlimit=True, dosig=True,redolimits=True,
         verbose=True, unblinded=False,sig="fs_t1tttt_m1600_m500",
+        cardonly=False,
+        workspace=False,
         ):
 
     params = locals()
@@ -103,18 +112,29 @@ def get_lims(basedir, doupperlimit=True, redolimits=True,
     extra_base = ""
     did_run_limits = False
     if not os.path.isfile(full_log_name) or redolimits:
-        make_card(basedir,sig,card,verbose=verbose)
+        fullfinalcard = make_card(basedir,sig,card,verbose=verbose,workspace=workspace)
+        if workspace:
+            cmd = "text2workspace.py {}".format(fullfinalcard)
+            if verbose: print cmd
+            os.system(cmd)
+        if cardonly: return {}
         extra = extra_base[:]
         if not unblinded:
             extra = extra_base + " --noFitAsimov"
-        limit_cmd = "combine -M AsymptoticLimits {0} {1}  2>&1 | tee {2}".format(full_card_name, extra, full_log_name)
+        limit_cmd = "nice -n 20 combine -M AsymptoticLimits {0} {1}  2>&1 | tee {2}".format(full_card_name, extra, full_log_name)
         if verbose: print ">>> Running combine for upper limit [{0}]".format(limit_cmd)
         out = ""
         if doupperlimit:
             stat, out = commands.getstatusoutput(limit_cmd)
             did_run_limits = True
+        sig_cmd = " nice -n 20 combine -M Significance --uncapped 1 --rMin=-3 {0} {1} 2>&1 | tee -a {2}".format(full_card_name, extra, full_log_name)
+        if verbose: print ">>> Running combine for significance [{0}]".format(sig_cmd)
+        if dosig:
+            stat, out_tmp = commands.getstatusoutput(sig_cmd)
+            out += out_tmp
+            did_run_limits = True
     else:
-        if verbose: print ">>> [!] Limits already run, so reusing. Pass the --redolimits flag to redo the limits"
+        if verbose: print ">>> [!] Limits already run ({}), so reusing. Pass the --redolimits flag to redo the limits".format(full_log_name)
         stat, out = 0, open(full_log_name,"r").read()
 
     d_lims = parse_lims(out.splitlines())
@@ -142,6 +162,9 @@ if __name__ == "__main__":
     parser.add_argument("basedir", help="basedir")
     parser.add_argument("-s", "--sig", help="signal name (default: %(default)s)", default="tttt")
     parser.add_argument(      "--clean", help="if using same directory, clean the old root files to remake them (default: %(default)s)", action="store_true")
+    parser.add_argument(      "--cardonly", help="only make card", action="store_true")
+    parser.add_argument(      "--workspace", help="also make a combine workspace", action="store_true")
+    parser.add_argument(      "--redolimits", help="redo limits (ignore log file presence)", action="store_true")
     args = parser.parse_args()
 
     basedir = args.basedir
@@ -149,7 +172,7 @@ if __name__ == "__main__":
     if args.clean:
         print "[!] Removing {}/*_run2.root files from the directory so they can get remade".format(basedir)
         os.system("rm {}/*_run2.root".format(basedir))
-    print get_lims(basedir,sig=sig,verbose=True,redolimits=True,unblinded=True)
+    print get_lims(basedir,sig=sig,verbose=True,redolimits=args.redolimits,unblinded=True,cardonly=args.cardonly,workspace=args.workspace)
 
     """
     # basedir = "v3.23_testss_v1"

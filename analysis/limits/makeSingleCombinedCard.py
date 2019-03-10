@@ -79,6 +79,8 @@ def do_combine(
         systs, files = get_info(card_basename)
         yearly_systs[year] = systs
         yearly_files[year] = files
+    # print yearly_systs
+    # print yearly_files
 
     summed_files = {}
     for proc,tfile in yearly_files[2016].items():
@@ -95,18 +97,29 @@ def do_combine(
         outhname = "{}{}".format(name,which)
         if spec_year > 0:
             outhname = "y{}_{}{}".format(spec_year,name,which)
-        for year in years:
-            if spec_year > 0 and year == spec_year:
-                hname = "{}{}".format(name,which)
-            else:
-                hname = "sr"
-            hnames_to_sum.append(hname)
         isnorm = systs[name]["kind"] == "lnN"
+        for year in years:
+            if spec_year > 0:
+                if year == spec_year: hname = "{}{}".format(name,which)
+                else: hname = "sr"
+            else:
+                if not isnorm: hname = "{}{}".format(name,which)
+                else: hname = "sr"
+            hnames_to_sum.append(hname)
         scales = [1.0 for y in years]
         procs = [p for p,v in systs[name]["procs"].items() if ((v != 0.) or (name in ["sr"]))]
         if isnorm:
-            scales = [next(v for v in yearly_systs[y][name]["procs"].values() if v != 0.)**(-1 if which == "Down" else 1.)
-                    for y in years]
+            expo = (-1 if which == "Down" else 1.)
+            scales = []
+            for y in years:
+                if name not in yearly_systs[y]:
+                    scales.append(None)
+                else:
+                    vals = yearly_systs[y][name]["procs"].values()
+                    scales.append(next(v for v in vals if v!=0.)**expo)
+            # combine apparently suppresses nuisances when parsing datacard if the signal yield is 0, so copy the other years with `max`
+            for iscale in range(len(scales)):
+                if scales[iscale] is None: scales[iscale] = max(scales)
             for i,y in enumerate(years):
                 if spec_year > 0 and y != spec_year: scales[i] = 1.
         if isnorm or (name in ["sr"]):
@@ -158,11 +171,16 @@ def do_combine(
                     output_nuisance_name, procs = make_hist(name, which=which, spec_year=y)
                 nuisance_info[output_nuisance_name] = procs
     make_hist("sr", which="")
-    if 2018 in years:
+    if "y2018_prefire" in nuisance_info:
         del nuisance_info["y2018_prefire"]
 
     # map from proc to nominal yield
-    yields = {proc:tfile.Get("sr").Integral() for proc,tfile in summed_files.items()}
+    yields = {}
+    for proc,tfile in summed_files.items():
+        sr = tfile.Get("sr")
+        if not sr:
+            print "Error with {}, {}".format(proc,tfile)
+        yields[proc] = sr.Integral()
 
     # Close all the files
     map(lambda x: x.Close(), summed_files.values())

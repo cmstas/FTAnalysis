@@ -1051,6 +1051,9 @@ protected:
 	float    weight_btagsf_DN_;
 	TBranch *weight_btagsf_DN_branch;
 	bool     weight_btagsf_DN_isLoaded;
+  int nhiggs_;
+  TBranch *nhiggs_branch;
+  bool nhiggs_isLoaded;
   float prefire_sf_;
   TBranch *prefire_sf_branch;
   bool prefire_sf_isLoaded;
@@ -1604,6 +1607,7 @@ void LoadAllBranches();
 	const float &weight_btagsf();
 	const float &weight_btagsf_UP();
 	const float &weight_btagsf_DN();
+  const int &nhiggs();
   const float &prefire_sf();
   const float &prefire_sfdown();
   const float &prefire_sfup();
@@ -2024,6 +2028,7 @@ namespace ss {
 	const float &weight_btagsf();
 	const float &weight_btagsf_UP();
 	const float &weight_btagsf_DN();
+  const int &nhiggs();
   const float &prefire_sf();
   const float &prefire_sfdown();
   const float &prefire_sfup();

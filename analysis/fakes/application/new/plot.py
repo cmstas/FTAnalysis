@@ -91,7 +91,7 @@ def plot_var(info):
         # print "Wrote {}".format(fname)
     return fname, d_info
 
-def make_plots(outputdir="plots_SS_19Jan25/"):
+def make_plots(inputdir="outputs/",outputdir="plots_SS_19Jan25/"):
     global f_tt, f_wj
     varnames = [
             "match",
@@ -110,14 +110,14 @@ def make_plots(outputdir="plots_SS_19Jan25/"):
     # outputdir = "plots_SS_19Jan25"
 
     f_tt = {
-            2016: uproot.open("outputs/histos_tt_{}.root".format(2016)),
-            2017: uproot.open("outputs/histos_tt_{}.root".format(2017)),
-            2018: uproot.open("outputs/histos_tt_{}.root".format(2018)),
+            2016: uproot.open("{}/histos_tt_{}.root".format(inputdir,2016)),
+            2017: uproot.open("{}/histos_tt_{}.root".format(inputdir,2017)),
+            2018: uproot.open("{}/histos_tt_{}.root".format(inputdir,2018)),
             }
     f_wj = {
-            2016: uproot.open("outputs/histos_wjets_{}.root".format(2016)),
-            2017: uproot.open("outputs/histos_wjets_{}.root".format(2017)),
-            2018: uproot.open("outputs/histos_wjets_{}.root".format(2018)),
+            2016: uproot.open("{}/histos_wjets_{}.root".format(inputdir,2016)),
+            2017: uproot.open("{}/histos_wjets_{}.root".format(inputdir,2017)),
+            2018: uproot.open("{}/histos_wjets_{}.root".format(inputdir,2018)),
             }
     to_run = []
     for year in [2016, 2017, 2018]:
@@ -148,6 +148,7 @@ def make_plots(outputdir="plots_SS_19Jan25/"):
 
 if __name__ == "__main__":
 
-    make_plots(outputdir="plots_SS_19Jan25")
+    # make_plots(outputdir="plots_SS_19Jan25")
+    make_plots(inputdir="outputs_v2",outputdir="plots_SS_19Jan25_v2")
 
 

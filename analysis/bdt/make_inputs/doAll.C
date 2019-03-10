@@ -1,14 +1,14 @@
 {
     // TString outputdir = "outputs/";
-    TString outputdir = "outputs_run2/";
+    TString outputdir = "outputs_run2_2018resid17/";
     gSystem->Exec(Form("mkdir -p %s", outputdir.Data()));
 
     gROOT->ProcessLine(".L ../../misc/class_files/v8.02/SS.cc+");
     gROOT->ProcessLine(".L ScanChain.C+");
 
-    TString basedir_2016 = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/";
-    TString basedir_2017 = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2017/";
-    TString basedir_2018 = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/";
+    TString basedir_2016 = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/";
+    TString basedir_2017 = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/";
+    TString basedir_2018 = "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag/output/year_2018/";
 
 
     TChain *ch_tttt = new TChain("t","tttt");
@@ -50,7 +50,7 @@
     ch_xg->Add(basedir_2017+"/TTGsinglelepbar.root");
     ch_xg->Add(basedir_2017+"/TTGsinglelep.root");
     ch_xg->Add(basedir_2017+"/WGToLNuGext.root");
-    // ch_xg->Add(basedir_2017+"/ZG.root"); // FIXME
+    ch_xg->Add(basedir_2017+"/ZG.root");
     ch_xg->Add(basedir_2018+"/TGext.root");
     ch_xg->Add(basedir_2018+"/TTGdilep.root");
     ch_xg->Add(basedir_2018+"/TTGsinglelepbar.root");

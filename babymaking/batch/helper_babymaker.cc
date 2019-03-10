@@ -581,6 +581,10 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
         calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
     }
 
+    if (gconf.year == 2018) {
+        calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_102XSF_V1.csv"); // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
+    }
+
     // Dylan's bugfix: https://github.com/cmstas/MT2Analysis/commit/04aa9a474da6bccb98abd3a33987f444e6b75e0b#diff-30908e8c1d42c24d6900916966ea4845
 
     btcr1 = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up","down"});
@@ -1319,7 +1323,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
               }
               float rms = sqrt(max(sum2_pdf/N - pow(sum_pdf/N,2),(double)0.0));
               // in 2017, variations are Hessian, so multiply by sqrt(N-1)
-              if (gconf.year == 2017) {
+              if (gconf.year == 2017 and not isFastsim) {
                   rms *= sqrt(99);
               }
               if (isFastsim) {
@@ -1960,10 +1964,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   jet_results = SSJetsCalculator(jetCorr, 1, 0, 1);
   for (int reader_id=1; reader_id<=4; reader_id++) { // Loop over each id file
     float btagprob_data = 1.;
-    // float btagprob_err_heavy_UP = 0.;
-    // float btagprob_err_heavy_DN = 0.;
-    // float btagprob_err_light_UP = 0.;
-    // float btagprob_err_light_DN = 0.;
     float btagprob_err_heavy_UP = 1.;
     float btagprob_err_heavy_DN = 1.;
     float btagprob_err_light_UP = 1.;
@@ -2018,18 +2018,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
                weight_cent    = btcr1->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
                weight_UP    = btcr1->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
                weight_DN    = btcr1->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
-           } else if (reader_id == 2) {
-               weight_cent    = btcr2->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
-               weight_UP    = btcr2->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
-               weight_DN    = btcr2->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
-           } else if (reader_id == 3) {
-               weight_cent    = btcr3->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
-               weight_UP    = btcr3->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
-               weight_DN    = btcr3->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
-           } else if (reader_id == 4) {
-               weight_cent    = btcr4->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
-               weight_UP    = btcr4->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
-               weight_DN    = btcr4->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
            }
        }
        if (isFastsim > 0) {
@@ -2040,48 +2028,35 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
        if (jet_results.first.at(i).isBtag()) {
          btagprob_data *= weight_cent * eff;
          btagprob_mc *= eff;
-         // float abserr_UP = weight_UP - weight_cent;
-         // float abserr_DN = weight_cent - weight_DN;
          if (flavor == BTagEntry::FLAV_UDSG) {
              btagprob_err_light_UP *= weight_UP * eff;
              btagprob_err_light_DN *= weight_DN * eff;
              btagprob_err_heavy_UP *= weight_cent * eff;
              btagprob_err_heavy_DN *= weight_cent * eff;
-           // btagprob_err_light_UP += abserr_UP/weight_cent;
-           // btagprob_err_light_DN += abserr_DN/weight_cent;
          }
          else {
              btagprob_err_light_UP *= weight_cent * eff;
              btagprob_err_light_DN *= weight_cent * eff;
              btagprob_err_heavy_UP *= weight_UP * eff;
              btagprob_err_heavy_DN *= weight_DN * eff;
-           // btagprob_err_heavy_UP += abserr_UP/weight_cent;
-           // btagprob_err_heavy_DN += abserr_DN/weight_cent;
          }
        }
        else {
          btagprob_data *= (1. - weight_cent * eff);
          btagprob_mc *= (1. - eff);
-         // float abserr_UP = weight_UP - weight_cent;
-         // float abserr_DN = weight_cent - weight_DN;
          if (flavor == BTagEntry::FLAV_UDSG) {
            btagprob_err_light_UP *= (1. - weight_UP * eff);
            btagprob_err_light_DN *= (1. - weight_DN * eff);
            btagprob_err_heavy_UP *= (1. - weight_cent * eff);
            btagprob_err_heavy_DN *= (1. - weight_cent * eff);
-           // btagprob_err_light_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-           // btagprob_err_light_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
          }
          else {
            btagprob_err_light_UP *= (1. - weight_cent * eff);
            btagprob_err_light_DN *= (1. - weight_cent * eff);
            btagprob_err_heavy_UP *= (1. - weight_UP * eff);
            btagprob_err_heavy_DN *= (1. - weight_DN * eff);
-           // btagprob_err_heavy_UP += (-eff * abserr_UP)/(1 - eff * weight_cent);
-           // btagprob_err_heavy_DN += (-eff * abserr_DN)/(1 - eff * weight_cent);
          }
        }
-       // std::cout <<  " i: " << i <<  " jet_results.first.at(i).isBtag(): " << jet_results.first.at(i).isBtag() <<  " weight_cent: " << weight_cent <<  " eff: " << eff <<  " weight_UP: " << weight_UP <<  " weight_DN: " << weight_DN <<  " btagprob_err_heavy_UP: " << btagprob_err_heavy_UP <<  std::endl;
 
        if (verbose) {
            cout << Form("proc jet pt, eta, isBtagged, mcFlav = %f, %f, %i, %i",jet_pt,jet_eta,jet_results.first.at(i).isBtag(),flavor) << endl;
@@ -2096,20 +2071,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             weight_btagsf1_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf1_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf1_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf1_UP = sqrt(pow(weight_btagsf1_heavy_UP,2)+pow(weight_btagsf1_light_UP,2));
-            // weight_btagsf1_DN = sqrt(pow(weight_btagsf1_heavy_DN,2)+pow(weight_btagsf1_light_DN,2));
-            // weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-            // weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
         } else if (reader_id == 2) {
             weight_btagsf2 = btagprob_data / btagprob_mc;
             weight_btagsf2_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
             weight_btagsf2_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf2_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf2_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf2_UP = sqrt(pow(weight_btagsf2_heavy_UP,2)+pow(weight_btagsf2_light_UP,2));
-            // weight_btagsf2_DN = sqrt(pow(weight_btagsf2_heavy_DN,2)+pow(weight_btagsf2_light_DN,2));
-            // weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-            // weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
         }
     } else if (gconf.year == 2017) {
         if (reader_id == 1) {
@@ -2118,40 +2085,24 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             weight_btagsf1_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf1_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf1_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf1_UP = sqrt(pow(weight_btagsf1_heavy_UP,2)+pow(weight_btagsf1_light_UP,2));
-            // weight_btagsf1_DN = sqrt(pow(weight_btagsf1_heavy_DN,2)+pow(weight_btagsf1_light_DN,2));
-            // weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-            // weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
         } else if (reader_id == 2) {
             weight_btagsf2 = btagprob_data / btagprob_mc;
             weight_btagsf2_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
             weight_btagsf2_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf2_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf2_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf2_UP = sqrt(pow(weight_btagsf2_heavy_UP,2)+pow(weight_btagsf2_light_UP,2));
-            // weight_btagsf2_DN = sqrt(pow(weight_btagsf2_heavy_DN,2)+pow(weight_btagsf2_light_DN,2));
-            // weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-            // weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
         } else if (reader_id == 3) {
             weight_btagsf3 = btagprob_data / btagprob_mc;
             weight_btagsf3_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
             weight_btagsf3_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf3_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf3_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf3_UP = sqrt(pow(weight_btagsf3_heavy_UP,2)+pow(weight_btagsf3_light_UP,2));
-            // weight_btagsf3_DN = sqrt(pow(weight_btagsf3_heavy_DN,2)+pow(weight_btagsf3_light_DN,2));
-            // weight_btagsf3_UP = weight_btagsf3 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf3);
-            // weight_btagsf3_DN = weight_btagsf3 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf3);
         } else if (reader_id == 4) {
             weight_btagsf4 = btagprob_data / btagprob_mc;
             weight_btagsf4_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
             weight_btagsf4_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf4_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf4_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf4_UP = sqrt(pow(weight_btagsf4_heavy_UP,2)+pow(weight_btagsf4_light_UP,2));
-            // weight_btagsf4_DN = sqrt(pow(weight_btagsf4_heavy_DN,2)+pow(weight_btagsf4_light_DN,2));
-            // weight_btagsf4_UP = weight_btagsf4 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf4);
-            // weight_btagsf4_DN = weight_btagsf4 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf4);
         }
     } else if (gconf.year == 2018) {
         if (reader_id == 1) {
@@ -2160,40 +2111,6 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             weight_btagsf1_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf1_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf1_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf1_UP = sqrt(pow(weight_btagsf1_heavy_UP,2)+pow(weight_btagsf1_light_UP,2));
-            // weight_btagsf1_DN = sqrt(pow(weight_btagsf1_heavy_DN,2)+pow(weight_btagsf1_light_DN,2));
-            // weight_btagsf1_UP = weight_btagsf1 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf1);
-            // weight_btagsf1_DN = weight_btagsf1 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf1);
-        } else if (reader_id == 2) {
-            weight_btagsf2 = btagprob_data / btagprob_mc;
-            weight_btagsf2_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
-            weight_btagsf2_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
-            weight_btagsf2_light_UP = btagprob_err_light_UP / btagprob_mc;
-            weight_btagsf2_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf2_UP = sqrt(pow(weight_btagsf2_heavy_UP,2)+pow(weight_btagsf2_light_UP,2));
-            // weight_btagsf2_DN = sqrt(pow(weight_btagsf2_heavy_DN,2)+pow(weight_btagsf2_light_DN,2));
-            // weight_btagsf2_UP = weight_btagsf2 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf2);
-            // weight_btagsf2_DN = weight_btagsf2 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf2);
-        } else if (reader_id == 3) {
-            weight_btagsf3 = btagprob_data / btagprob_mc;
-            weight_btagsf3_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
-            weight_btagsf3_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
-            weight_btagsf3_light_UP = btagprob_err_light_UP / btagprob_mc;
-            weight_btagsf3_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf3_UP = sqrt(pow(weight_btagsf3_heavy_UP,2)+pow(weight_btagsf3_light_UP,2));
-            // weight_btagsf3_DN = sqrt(pow(weight_btagsf3_heavy_DN,2)+pow(weight_btagsf3_light_DN,2));
-            // weight_btagsf3_UP = weight_btagsf3 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf3);
-            // weight_btagsf3_DN = weight_btagsf3 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf3);
-        } else if (reader_id == 4) {
-            weight_btagsf4 = btagprob_data / btagprob_mc;
-            weight_btagsf4_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
-            weight_btagsf4_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
-            weight_btagsf4_light_UP = btagprob_err_light_UP / btagprob_mc;
-            weight_btagsf4_light_DN = btagprob_err_light_DN / btagprob_mc;
-            // weight_btagsf4_UP = sqrt(pow(weight_btagsf4_heavy_UP,2)+pow(weight_btagsf4_light_UP,2));
-            // weight_btagsf4_DN = sqrt(pow(weight_btagsf4_heavy_DN,2)+pow(weight_btagsf4_light_DN,2));
-            // weight_btagsf4_UP = weight_btagsf4 + (sqrt(pow(btagprob_err_heavy_UP,2) + pow(btagprob_err_light_UP,2)) * weight_btagsf4);
-            // weight_btagsf4_DN = weight_btagsf4 - (sqrt(pow(btagprob_err_heavy_DN,2) + pow(btagprob_err_light_DN,2)) * weight_btagsf4);
         }
     }
   }
@@ -2208,16 +2125,12 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       if (rand < 0.55) {
           // B-F is 55% of the lumi
           weight_btagsf =    weight_btagsf1;
-          // weight_btagsf_UP = weight_btagsf1_UP;
-          // weight_btagsf_DN = weight_btagsf1_DN;
           weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
           weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
           weight_btagsf_light_UP = weight_btagsf1_light_UP;
           weight_btagsf_light_DN = weight_btagsf1_light_DN;
       } else {
           weight_btagsf =    weight_btagsf2;
-          // weight_btagsf_UP = weight_btagsf2_UP;
-          // weight_btagsf_DN = weight_btagsf2_DN;
           weight_btagsf_heavy_UP = weight_btagsf2_heavy_UP;
           weight_btagsf_heavy_DN = weight_btagsf2_heavy_DN;
           weight_btagsf_light_UP = weight_btagsf2_light_UP;
@@ -2239,24 +2152,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       // 1,2,3,4 are period1,period2,period3, or inclusive
       if (rand < 0.1154) {
           weight_btagsf =    weight_btagsf1;
-          // weight_btagsf_UP = weight_btagsf1_UP;
-          // weight_btagsf_DN = weight_btagsf1_DN;
           weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
           weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
           weight_btagsf_light_UP = weight_btagsf1_light_UP;
           weight_btagsf_light_DN = weight_btagsf1_light_DN;
       } else if (rand < 0.6385) {
           weight_btagsf =    weight_btagsf2;
-          // weight_btagsf_UP = weight_btagsf2_UP;
-          // weight_btagsf_DN = weight_btagsf2_DN;
           weight_btagsf_heavy_UP = weight_btagsf2_heavy_UP;
           weight_btagsf_heavy_DN = weight_btagsf2_heavy_DN;
           weight_btagsf_light_UP = weight_btagsf2_light_UP;
           weight_btagsf_light_DN = weight_btagsf2_light_DN;
       } else {
           weight_btagsf =    weight_btagsf3;
-          // weight_btagsf_UP = weight_btagsf3_UP;
-          // weight_btagsf_DN = weight_btagsf3_DN;
           weight_btagsf_heavy_UP = weight_btagsf3_heavy_UP;
           weight_btagsf_heavy_DN = weight_btagsf3_heavy_DN;
           weight_btagsf_light_UP = weight_btagsf3_light_UP;
@@ -2266,15 +2173,13 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
 
   if (gconf.year == 2018) {
       weight_btagsf =    weight_btagsf1;
-      // weight_btagsf_UP = weight_btagsf1_UP;
-      // weight_btagsf_DN = weight_btagsf1_DN;
       weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
       weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
       weight_btagsf_light_UP = weight_btagsf1_light_UP;
       weight_btagsf_light_DN = weight_btagsf1_light_DN;
   }
 
-  if (true) {
+  if (false) {
       weight_btagsf_iter_central = 1.;
       weight_btagsf_iter_down_cferr1 = 1.;
       weight_btagsf_iter_down_cferr2 = 1.;

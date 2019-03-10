@@ -123,7 +123,7 @@ def get_yields(card, regions="srcr",stats_only=False,blinded=True):
     d_yields["data"] = {}
     d_yields["data"]["central"] = np.array(list(fdata.Get(data_hname))[1:-1])
     if blinded:
-        d_yields["data"]["central"] *= 0
+        d_yields["data"]["central"][2:] *= 0
     d_yields["data"]["error"] = d_yields["data"]["central"]**0.5
 
     return  d_yields

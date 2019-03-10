@@ -152,6 +152,7 @@ class babyMaker {
     int ntight_mu;
 
     TString sample;
+    int year;
     float evt_corrMET;
     float evt_corrMETPhi;
     float evt_rawMET;
@@ -165,12 +166,21 @@ class babyMaker {
     float scale1fb;     
     float qscale;     
     int njets;  
+    int nisrMatch;  
+    float weight_isr;  
+    float weight_pu;  
+    int nbtags;  
     int njets_recoil;  
+    float recoil_jet_pt;  
     float ht_SS;  
     int nFOs_SS;
     int nvtx;
     float trueNumInt;
     float puweight;
+
+    int nleptonicW;
+    int nhadronicW;
+    int nW;
 
     LorentzVector p4;
     LorentzVector tag_p4;
@@ -185,6 +195,7 @@ class babyMaker {
     float tag_pt;
     float p4_pt;
     float p4_eta;
+    int lepnum;
 
     float mva;
     float etaSC;
@@ -229,6 +240,7 @@ class babyMaker {
     int HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30;
     int HLT_Ele23_CaloIdL_TrackIdL_IsoVL;
     int HLT_Ele12_CaloIdL_TrackIdL_IsoVL;
+    int HLT_Ele32_WPTight_Gsf;
 
     //MuEl Trigger
     int HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300;

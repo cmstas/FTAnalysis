@@ -6,7 +6,7 @@ branch_to_copy_type = "float"
 # and use this pattern to squeeze in the following branches (and associated types)
 branches_to_add = [
         
-        ("prefire_sf","float"),
+        ("nhiggs","int"),
         # ("prefire_sfdown","float"),
         # ("prefire_sfup","float"),
 

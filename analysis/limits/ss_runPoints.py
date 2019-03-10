@@ -18,7 +18,8 @@ if __name__ == "__main__":
     # print runSSLimits.get_lims(basedir,sig=sig,verbose=True,redolimits=False)
 
     clean = False
-    basedir = "v3.26_feb15_sst1t5rpv_v1"
+    # basedir = "v3.26_feb15_sst1t5rpv_v1"
+    basedir = "v3.26_feb19_sst5tttt_v1/"
     skip_already_done = True
 
     def run((index,info)):

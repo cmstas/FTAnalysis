@@ -286,17 +286,19 @@ if (year == 2017) {
     sf_HLT_Mu8_TrkIsoVVL = 0.7123;
 }
 if (year == 2018) {
-    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9520;
-    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0939;
-    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0966;
-    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.1004;
-    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9328;
-    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.9206;
-    sf_HLT_IsoMu27 = 1.1425;
-    sf_HLT_Mu17 = 1.1158;
-    sf_HLT_Mu17_TrkIsoVVL = 1.1159;
-    sf_HLT_Mu8 = 0.8926;
-    sf_HLT_Mu8_TrkIsoVVL = 0.9040;
+
+    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9669;
+    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.1102;
+    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.1130;
+    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.1171;
+    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9491;
+    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.9365;
+    sf_HLT_IsoMu27 = 1.1475;
+    sf_HLT_Mu17 = 1.1204;
+    sf_HLT_Mu17_TrkIsoVVL = 1.1205;
+    sf_HLT_Mu8 = 0.8958;
+    sf_HLT_Mu8_TrkIsoVVL = 0.9074;
+
 }
 
     if (false) {

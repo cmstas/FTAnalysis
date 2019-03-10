@@ -26,8 +26,11 @@ tags = [
 # "v3.21_fix2017", # Good. v32 jecs new MC, data -- 2017 stuff is bugged. so this is only good for 2018 :(
 # "v3.23", # Good. v32 jecs new MC, data -- 2017 stuff is bugged. so this is only good for 2018 :(
 
-"v3.24",
-"v3.26",
+# "v3.24",
+# "v3.26",
+
+"v3.27_resid17",
+"v3.28",
 
 ]
 

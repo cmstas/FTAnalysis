@@ -309,8 +309,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 do_fill(h_njets , (whichfake == 1 ? lep1id : lep2id) , njets);
                 do_fill(h_nbtags, (whichfake == 1 ? lep1id : lep2id) , nbtags);
                 do_fill(h_match , (whichfake == 1 ? lep1id : lep2id) , match_type);
-                do_fill(h_pt1   , (whichfake == 1 ? lep1id : lep2id) , lep1ccpt);
-                do_fill(h_pt2   , (whichfake == 1 ? lep1id : lep2id) , lep2ccpt);
+                do_fill(h_pt1   , lep1id , lep1ccpt);
+                do_fill(h_pt2   , lep2id , lep2ccpt);
                 do_fill(h_eta1  , (whichfake == 1 ? lep1id : lep2id) , lep1eta);
                 do_fill(h_eta2  , (whichfake == 1 ? lep1id : lep2id) , lep2eta);
                 do_fill(h_pttrue, (whichfake == 1 ? lep1id : lep2id) , (whichfake == 1 ? lep2ccpt : lep1ccpt));

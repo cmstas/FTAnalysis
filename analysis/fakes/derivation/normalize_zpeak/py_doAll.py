@@ -11,7 +11,7 @@ years_to_consider = [
         2016,
         2017,
         2018,
-        "rereco_2018",
+        # "rereco_2018",
         ]
 procs_to_consider = [
         ]
@@ -24,8 +24,8 @@ basedirs ={
         # "rereco_2018": "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v2.0_leptontree/output/year_2018/",
         2016: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2016/",
         2017: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2017/",
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2018/",
-        "rereco_2018": "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2018/",
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v4.0_leptontree_2018resid17/output/year_2018/",
+        # "rereco_2018": "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v3.0_leptontree/output/year_2018/",
 
         }
 
@@ -46,7 +46,7 @@ options = {
         2016: " quiet Data2016 doPUweight doLeptonSF ",
         2017: " quiet Data2017 doPUweight doLeptonSF ",
         2018: " quiet Data2018 doPUweight doLeptonSF ",
-        "rereco_2018": " quiet Data2018 doPUweight doLeptonSF ",
+        # "rereco_2018": " quiet Data2018 doPUweight doLeptonSF ",
 
         }
 
@@ -69,11 +69,6 @@ chs = {
             "data_el": make_objs(basedirs[2017]+"DataDoubleEG*.root", options=options[2017]+" onlyEl "),
             },
         2018: {
-            "dy": make_objs(basedirs[2018]+"DY*.root", options=options[2018]),
-            "data_mu": make_objs(basedirs[2018]+"DataDoubleMu*.root", options=options[2018]+" onlyMu "),
-            "data_el": make_objs(basedirs[2018]+"DataDoubleEG*.root", options=options[2018]+" onlyEl "),
-            },
-        "rereco_2018": {
             "dy": make_objs(basedirs[2018]+"DY*.root", options=options[2018]),
             "data_mu": make_objs([
                 basedirs[2018]+"ReRecoDataDoubleMu*.root",

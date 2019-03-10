@@ -95,6 +95,7 @@ labels["ft"] = {
 def remove(rs1,rs2):
     return list(set(rs1)-set(rs2))
 ssregions = ("ssbr","br","ml","mlonz","mloffz","hh","lm")
+ssregions_ll = ("ssbr","br","ml","mlonz","mloffz","hh","lm","ll")
 # ssregions = ("lm",)
 labels["ss"] = {
 
@@ -105,10 +106,10 @@ labels["ss"] = {
 
         "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "TOTAL"],
         "category"   : [("sr",), r"HH,HL,LL,MLoffZ,MLonZ,LM"],
-        "mtmin"      : [ssregions, r"$m_{T}^\mathrm{min}$"],
-        "ht"         : [ssregions, r"$H_T$"],
+        "mtmin"      : [ssregions_ll, r"$m_{T}^\mathrm{min}$"],
+        "ht"         : [ssregions_ll, r"$H_T$"],
         "njets"      : [ssregions, r"$N_\mathrm{jets}$"],
-        "met"        : [ssregions, MET_LATEX],
+        "met"        : [ssregions_ll, MET_LATEX],
         "mll"        : [ssregions, r"$m_{ll}$"],
         "mllbig"     : [ssregions, r"$m_{ll}$"],
         "mllos"      : [ssregions, r"$m_{ll}$(OS)"],
@@ -185,7 +186,7 @@ d_flat_systematics["ft"] = {
         "xg": 0.11,
         }
 d_flat_systematics["ss"] = {
-        "fakes": 0.3,
+        "fakes": 0.40, # EWK too
         "flips": 0.2,
         "rares": 0.5,
         "ww": 0.3,
@@ -285,6 +286,12 @@ def worker(info):
         title = region.upper()
         lumi_ = str(lumi)
 
+        if analysis == "ft":
+            if title in ["SRCR","SR"] and var == "TOTAL":
+                title = "Cut-based"
+            elif title == "SRDISC":
+                title = "BDT"
+
         region_for_hist = region[:]
         if region == "brpostfit":
             region_for_hist = "br"
@@ -381,7 +388,8 @@ def worker(info):
             #         ax.text(0.18, -0.6,"pulls $\mu,\sigma$ = {:.2f},{:.2f}$".format(mu_pulls,sig_pulls), color="red", ha="center", va="center", fontsize=10.0, transform = ax.transAxes)
 
         elif region.lower() in ["sr","srdisc"]:
-            if not (unblindall or year == 2016):
+            # blind all 2018 and all BDT plots since we will retrain
+            if year == 2018 or (len(files.keys()) > 1) or region.lower in ["srdisc"]:
                 data._counts *= 0.
                 data._errors *= 0.
                 data.set_attr("label", "Data (blind)")
@@ -395,7 +403,8 @@ def worker(info):
                 xticks = ["CRZ"]+range(1,25)
 
         if (region.lower() in ["srcr"]) and (var.lower() in ["total"]):
-            if not (unblindall or year == 2016):
+            # if not (unblindall or year == 2016):
+            if year == 2018:
                 data._counts[2:] *= 0.
                 data._errors[2:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
@@ -404,9 +413,10 @@ def worker(info):
                 ax.set_yscale("log", nonposy='clip'),
             xticks = ["CRZ","CRW"]+range(1,20)
         if (var.lower() in ["disc"]) and (region.lower() not in ["ttwcr","ttzcr"]):
-            if not (unblindall or year == 2016):
-                data._counts[-10:] *= 0.
-                data._errors[-10:] *= 0.
+            # # if not (unblindall or year == 2016):
+            # if year == 2018:
+            #     data._counts[-10:] *= 0.
+            #     data._errors[-10:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
 
         if len(files.keys()) > 1:
@@ -414,20 +424,27 @@ def worker(info):
         else:
             fname = "{}/y{}_{}_{}.pdf".format(outputdir,files.keys()[0],region,var)
         fnames.append(fname)
-        plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname,
-                   cms_type = "Preliminary",
-                   lumi = lumi_,
-                   ratio_range=ratio_range,
-                   sigs=sigs,
-                   xticks=xticks,
-                   mpl_sig_params={
-                       # "hist":False,
-                       },
-                   ax_main_callback=ax_main_callback,
-                   mpl_legend_params=mpl_legend_params,
-                   ax_ratio_callback=ax_ratio_callback,
-                   do_bkg_syst=True,
-                   )
+
+        for do_log in [False,True]:
+            fname_tmp = str(fname)
+            if do_log:
+                fname_tmp = fname.replace(".pdf","_log.pdf").replace(".png","_log.png")
+            plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname_tmp,
+                       cms_type = "Preliminary",
+                       lumi = lumi_,
+                       ratio_range=ratio_range,
+                       sigs=sigs,
+                       do_log=do_log,
+                       xticks=xticks,
+                       mpl_sig_params={
+                           # "hist":False,
+                           },
+                       ax_main_callback=ax_main_callback,
+                       mpl_legend_params=mpl_legend_params,
+                       ax_ratio_callback=ax_ratio_callback,
+                       do_bkg_syst=True,
+                       )
+
         # os.system("ic {}".format(fname))
 
         # print bgs
@@ -480,7 +497,8 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
 
     # map(worker,infos)
 
-    os.nice(10)
+    # Don't be nice for plots since I need them *now*
+    # os.nice(4)
     from multiprocessing import Pool as ThreadPool
     pool = ThreadPool(15)
     # print infos

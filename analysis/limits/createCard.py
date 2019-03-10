@@ -14,7 +14,8 @@ class Process(object):
     def __init__(self, mycount, myname, myrootf, myplot, thedir):
         self.count = mycount
         self.name = myname
-        self.rootf = glob.glob(thedir+"/"+myrootf)[0]
+        # self.rootf = glob.glob(thedir+"/"+myrootf)[0]
+        self.rootf = thedir+"/"+myrootf
         self.plot = myplot
         self.lumi  = "-"
         self.jes  = "-"
@@ -49,6 +50,10 @@ class Process(object):
         self.rares = "-"
         self.fakes = "-"
         self.fakes_EWK = "-"
+        self.fakesnb0 = "-"
+        self.fakesnb1 = "-"
+        self.fakesnb2 = "-"
+        self.fakesnb3 = "-"
         self.flips = "-"
         self.stat = "x"
         self.statshape = "-"
@@ -185,7 +190,7 @@ def writeStatForProcess(thedir, card, kine, process, processes, statshape=None):
 
 
 #write card regardless of number of processes (but make sure signal is first in list)
-def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=0.0, use_autostats=False, ignorefakes=False, analysis="ft"):
+def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=0.0, use_autostats=False, ignorefakes=False, analysis="ft", inject_tttt=False):
 
     line = "---------------------------------------------------------------"
     binname = "SS"
@@ -221,11 +226,11 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     #separate
     card.write(line+"\n")
 
-    #if analysis == "ft":
-    #    #nuisance TTTT
-    #    card.write("%-40s %-5s " % ("TTTT","lnN"))
-    #    for process in processes: card.write("%-15s " % (process.TTTT))
-    #    card.write("\n")
+    if inject_tttt:
+        #nuisance TTTT
+        card.write("%-40s %-5s " % ("TTTT","lnN"))
+        for process in processes: card.write("%-15s " % (process.TTTT))
+        card.write("\n")
 
     #nuisance lumi
     card.write("%-40s %-5s " % ("lumi","lnN"))
@@ -244,11 +249,11 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     card.write("%-40s %-5s " % ("isr","shape"))
     for process in processes: card.write("%-15s " % (process.isr))
     card.write("\n")
-    if analysis == "ft":
-        #nuisance bb
-        card.write("%-40s %-5s " % ("bb","shape"))
-        for process in processes: card.write("%-15s " % (process.bb))
-        card.write("\n")
+    # if analysis == "ft":
+    #nuisance bb
+    card.write("%-40s %-5s " % ("bb","shape"))
+    for process in processes: card.write("%-15s " % (process.bb))
+    card.write("\n")
     if analysis == "ss":
         # met genmet for fastsim
         card.write("%-40s %-5s " % ("met","shape"))
@@ -321,14 +326,19 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     card.write("%-40s %-5s " % ("scale","shape"))
     for process in processes: card.write("%-15s " % (process.scale))
     card.write("\n")
-    #nuisance pdf
-    card.write("%-40s %-5s " % ("pdf","shape"))
-    for process in processes: card.write("%-15s " % (process.pdf))
-    card.write("\n")
     if analysis == "ft":
+        #nuisance pdf
+        card.write("%-40s %-5s " % ("pdf","shape"))
+        for process in processes: card.write("%-15s " % (process.pdf))
+        card.write("\n")
         #nuisance alphas
         card.write("%-40s %-5s " % ("alphas","shape"))
         for process in processes: card.write("%-15s " % (process.alphas))
+        card.write("\n")
+    else:
+        #nuisance pdf
+        card.write("%-40s %-5s " % ("pdf","lnN"))
+        for process in processes: card.write("%-15s " % (process.pdf))
         card.write("\n")
 
     #nuisance pu
@@ -380,14 +390,36 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
     for process in processes: card.write("%-15s " % (process.rares))
     card.write("\n")
 
-    #nuisance fakes
-    card.write("%-40s %-5s " % ("fakes","lnN"))
-    for process in processes: card.write("%-15s " % (process.fakes))
-    card.write("\n")
+    add_fakes_total = True
+    add_fakes_nb = False
+    if analysis == "ss":
+        # FIXME
+        add_fakes_total = False
+        add_fakes_nb = True
+
     #nuisance fakes EWK
     card.write("%-40s %-5s " % ("fakes_EWK","shape"))
     for process in processes: card.write("%-15s " % (process.fakes_EWK))
     card.write("\n")
+    if add_fakes_total:
+        #nuisance fakes
+        card.write("%-40s %-5s " % ("fakes","lnN"))
+        for process in processes: card.write("%-15s " % (process.fakes))
+        card.write("\n")
+    if add_fakes_nb:
+        #nuisance fakes
+        card.write("%-40s %-5s " % ("fakes_normNB0","shape"))
+        for process in processes: card.write("%-15s " % (process.fakesnb0))
+        card.write("\n")
+        card.write("%-40s %-5s " % ("fakes_normNB1","shape"))
+        for process in processes: card.write("%-15s " % (process.fakesnb1))
+        card.write("\n")
+        card.write("%-40s %-5s " % ("fakes_normNB2","shape"))
+        for process in processes: card.write("%-15s " % (process.fakesnb2))
+        card.write("\n")
+        card.write("%-40s %-5s " % ("fakes_normNB3","shape"))
+        for process in processes: card.write("%-15s " % (process.fakesnb3))
+        card.write("\n")
 
     #nuisance flips
     card.write("%-40s %-5s " % ("flips","lnN"))
@@ -426,51 +458,51 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     #define processes (signal first)
     # if pseudoData:
     #     print "Using pseudo data!"
-    #     data = Process(-1,"data","pdata_histos_"+kine+"_"+"*"+"ifb.root",plot,thedir)
+    #     data = Process(-1,"data","pdata_histos_"+kine+"_"+"ifb.root",plot,thedir)
     # else:
         # print "Using real data!"
     tomatch = "ifb"
     if year > 0:
         tomatch = str(year)
     num = -1
-    data = Process(num,"data","data_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    data = Process(num,"data","data_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
-    signal = Process(num,signame,signame+"_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    signal = Process(num,signame,signame+"_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
-    TTW = Process(num,"ttw","ttw_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    TTW = Process(num,"ttw","ttw_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
-    TTZ = Process(num,"ttz","ttz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    TTZ = Process(num,"ttz","ttz_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
-    TTH = Process(num,"tth","tth_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    TTH = Process(num,"tth","tth_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
     if analysis == "ss":
-        WZ  = Process(num,"wz","wz_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        WZ  = Process(num,"wz","wz_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
-        WW  = Process(num,"ww","ww_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        WW  = Process(num,"ww","ww_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
-    XG  = Process(num,"xg","xg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    XG  = Process(num,"xg","xg_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
-    rares = Process(num,"rares","rares_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    rares = Process(num,"rares","rares_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
     if not domcfakes:
-        fakes = Process(num,"fakes","fakes_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        fakes = Process(num,"fakes","fakes_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
     else:
-        fakes = Process(num,"fakes_mc","fakes_mc_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        fakes = Process(num,"fakes_mc","fakes_mc_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
-    flips = Process(num,"flips","flips_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+    flips = Process(num,"flips","flips_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
     if analysis == "ft":
-        TTVV = Process(num,"ttvv","ttvv_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+        TTVV = Process(num,"ttvv","ttvv_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
     if inject_tttt:
         if analysis == "ss":
             os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
-            TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+            TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         else:
             # os.system("cp {} {}".format(signal.rootf,signal.rootf.replace("tttt_","tttt_bkg_")))
-            # TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
-            TTTT = Process(9,"tttt","tttt_histos_"+kine+"_"+"*"+tomatch+".root",plot,thedir)
+            # TTTT = Process(9,"tttt_bkg","tttt_bkg_histos_"+kine+"_"+tomatch+".root",plot,thedir)
+            TTTT = Process(9,"tttt","tttt_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
     #overwrite nuisances
     if year == 2016: lumiunc = "1.025"
@@ -502,6 +534,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         if kine == "srml": signal.fs_lepeff = "1.08"
         if kine == "srlm": signal.fs_lepeff = "1.20"
         signal.met = "1"
+        signal.scale = "1"
+        signal.pdf = "1.02"
     signal.isrvar = "1"
     signal.fsrvar = "1"
     if analysis == "ss":
@@ -516,7 +550,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     if analysis == "ft":
         TTW.isr         = "1"
     TTW.scale         = "1"
-    TTW.pdf         = "1"
+    if analysis == "ft":
+        TTW.pdf         = "1"
     # TTW.alphas         = "1"
     TTW.bb         = "1"
     TTW.jes  = "1"
@@ -540,7 +575,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTZ.jes  = "1"
     TTZ.jer  = "1"
     TTZ.scale  = "1"
-    TTZ.pdf  = "1"
+    if analysis == "ft":
+        TTZ.pdf  = "1"
     # TTZ.alphas  = "1"
     TTZ.lepeff  = "1"
     # TTZ.lephlt  = "1.04"
@@ -565,7 +601,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     TTH.lepeff  = "1"
     # TTH.lephlt  = "1.04"
     TTH.scale  = "1"
-    TTH.pdf  = "1"
+    if analysis == "ft":
+        TTH.pdf  = "1"
     # TTH.alphas  = "1"
     TTH.hlt  = "1.03"
     TTH.hthlt  = "1"
@@ -655,8 +692,9 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         rares.scale  = "1"
         rares.pdf  = "1"
     if inject_tttt:
-        TTTT.TTTT = "0.79/1.18" # - In 2017, latest NLO(QCD+EWK) calculation (arxiv:1711.02116).  - 11.97 +2.15 -2.51
-        TTTT.lumi  = "1"
+        # TTTT.TTTT = "0.79/1.18" # - In 2017, latest NLO(QCD+EWK) calculation (arxiv:1711.02116).  - 11.97 +2.15 -2.51
+        TTTT.TTTT = "1.2" # - In 2017, latest NLO(QCD+EWK) calculation (arxiv:1711.02116).  - 11.97 +2.15 -2.51
+        TTTT.lumi  = lumiunc
         # TTTT.lephlt  = "1.04"
         TTTT.hlt  = "1.03"
         TTTT.jes  = "1"
@@ -680,6 +718,10 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         if not do_uncorrfakes:
             fakes.fakes = "1.30"
         fakes.fakes_EWK = "1"
+        fakes.fakesnb0 = "1"
+        fakes.fakesnb1 = "1"
+        fakes.fakesnb2 = "1"
+        fakes.fakesnb3 = "1"
     else:
         fakes.fakes = "1.30"
         # fakes.fakes_EWK = "-"
@@ -720,7 +762,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         data = newdata
 
     #create it
-    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=thresh, use_autostats=use_autostats, ignorefakes=ignorefakes, analysis=analysis )
+    writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thresh=thresh, use_autostats=use_autostats, ignorefakes=ignorefakes, analysis=analysis,inject_tttt=inject_tttt )
 
     # for proc in processes:
     #     print "-->", proc.name, proc.rate()

@@ -20,7 +20,8 @@ import xgboost as xgb
 # np.set_printoptions(precision=4,linewidth=100)
 np.set_printoptions(linewidth=100)
 
-f = uproot.open("make_inputs/output_run2.root")
+# f = uproot.open("make_inputs/output_run2.root")
+f = uproot.open("make_inputs/output_run2_2018resid17.root")
 t = f["t"]
 # print t.keys()
 arrs = t.arrays([
@@ -30,6 +31,7 @@ arrs = t.arrays([
         # "classprobs",
         "weight",
         "br",
+        "class",
         "SR",
         ])
 feature_names = [
@@ -55,7 +57,7 @@ feature_names = [
         ]
 featarrs = t.arrays(t.keys())
 x_data = np.column_stack([featarrs[name] for name in feature_names])
-pass_br = arrs["br"] == 1
+pass_br = (arrs["br"] == 1) & ((arrs["stype"] != 0) | (arrs["class"] == 3))
 stype = arrs["stype"]
 disc = arrs["disc"]
 disc_tmva = 0.5*arrs["disc_tmva"]+0.5
@@ -72,10 +74,15 @@ sr = arrs["SR"]
 # # y_pred.dump("ypred_run2_v2.npy")
 # y_pred = np.load("ypred_run2_v2.npy")
 
-bst = pickle.load(open("bst_run2_v3.pkl","rb"))
+# bst = pickle.load(open("bst_run2_v3.pkl","rb"))
+# y_pred = bst.predict(xgb.DMatrix(x_data))
+# y_pred.dump("ypred_run2_v3.npy")
+# y_pred = np.load("ypred_run2_v3.npy")
+
+bst = pickle.load(open("bst_run2_v3_2018resid17.pkl","rb"))
 y_pred = bst.predict(xgb.DMatrix(x_data))
-y_pred.dump("ypred_run2_v3.npy")
-y_pred = np.load("ypred_run2_v3.npy")
+y_pred.dump("ypred_run2_v3_2018resid17.npy")
+y_pred = np.load("ypred_run2_v3_2018resid17.npy")
 
 dlc = {
         "fakes" : (r"MC fakes", [0.85, 0.85, 0.85]),
@@ -94,7 +101,8 @@ def inv_sigmoid(y,k=10,x0=5):
 def sigmoid(x,k=10,x0=0.5):
     return 1/(1+np.exp(-k*(x-x0)))
 
-comsel = (pass_br) # & (sr != 1))
+# comsel = (pass_br) # & (sr != 1))
+# comsel = (pass_br & (sr != 1))
 bins = np.linspace(0.,1.,20+1)
 var = 1.0*y_pred
 
@@ -104,7 +112,8 @@ var = 1.0*y_pred
 # print bins
 # # # print 1.0/(1.+np.exp(-10.*bins+5))
 
-comsel = (pass_br) # & (sr != 1))
+# comsel = (pass_br) # & (sr != 1))
+comsel = (pass_br & (sr != 1))
 # bins = np.linspace(0.15,1.,15)
 # bins = np.linspace(0.15,1.,20+1)
 # bins = np.linspace(0.15,1.,20+1)
@@ -162,12 +171,15 @@ pickle.dump(points,open("for_finterp.pkl","wb"))
 def sigmoid_corr(x,k=8.0):
     k = k*np.ones(len(x))
     k[x<0.5] *= 0.5
+    print k
     return 1.0/(1+np.exp(-k*(x-0.5)))+2.0*(x-0.5)/(1+np.exp(k/2))
 
 # nbins, k = 13, 8.3
-nbins, k = 20, 8.3
+# nbins, k = 20, 8.3
+nbins, k = 17, 11.0
+# nbins, k = 30, 8.8
 bins = np.linspace(0.,1.,nbins+1)
-# bins = sigmoid_corr(bins,k)
+bins = sigmoid_corr(bins,k)
 # bins = sigmoid_corr(bins,k)
 print bins
 bins[0] = 0.
@@ -175,9 +187,34 @@ bins[-1] = 1.
 print bins
 print bins.shape
 
+print bins.round(4).tolist()
+
+bins = np.array([
+0.0000,
+0.0362,
+0.0659,
+0.1055,
+0.1573,
+0.2190,
+0.2905,
+0.3704,
+0.4741,
+0.6054,
+0.7260,
+0.8357,
+0.9076,
+0.9506,
+0.9749,
+0.9884,
+0.9956,
+1.0000,
+])
+
+# bins = [0.0, 0.0397, 0.0845, 0.1349, 0.191, 0.2526, 0.3192, 0.3798, 0.473, 0.5616, 0.6781, 0.7767, 0.8531, 0.9082, 0.9462, 0.9717, 0.9887, 1.0]
+
 # NOTE NEXT TO LAST BIN CHANGED
 # bins = np.array([0.0000, 0.0262, 0.0590, 0.1001, 0.1509, 0.2124, 0.2847, 0.3664, 0.4547, 0.5839, 0.7345, 0.8453, 0.9156, 0.9562, 0.9784, 0.9903, 0.995, 1.])
-bins = np.array([0.0000, 0.0262, 0.0590, 0.1001, 0.1509, 0.2124, 0.2847, 0.3664, 0.4547, 0.5839, 0.7345, 0.8453, 0.9156, 0.9562, 0.9784, 0.9903, 0.9966, 1.])
+# bins = np.array([0.0000, 0.0262, 0.0590, 0.1001, 0.1509, 0.2124, 0.2847, 0.3664, 0.4547, 0.5839, 0.7345, 0.8453, 0.9156, 0.9562, 0.9784, 0.9903, 0.9966, 1.])
 
 # # FIXME
 # bins = np.array([0.0, 0.7680363, 0.8841157, 0.92737496, 0.95956606, 0.9679797, 0.9755356])
@@ -209,7 +246,8 @@ if use_srs:
 def get_mean(sel):
     return " ($\\mu$={:.2f})".format(np.average(var[sel],weights=weight[sel]))
 mlabel = get_mean(comsel & (stype==0))
-sig = Hist1D(var[comsel & (stype==0)]  , bins=bins ,weights=weight[comsel & (stype==0)] , label=dlc["tttt"][0]+mlabel , color=dlc["tttt"][1])
+extrasigweight = 11.97/9.1
+sig = Hist1D(var[comsel & (stype==0)]  , bins=bins ,weights=extrasigweight*weight[comsel & (stype==0)] , label=dlc["tttt"][0]+mlabel , color=dlc["tttt"][1])
 mlabel = get_mean(comsel & (stype==1))
 ttw = Hist1D(var[comsel & (stype==1)]  , bins=bins ,weights=weight[comsel & (stype==1)] , label=dlc["ttw"][0]+mlabel  , color =dlc["ttw"][1])
 mlabel = get_mean(comsel & (stype==2))

@@ -23,7 +23,8 @@ print xgb.__file__
 
 # f = uproot.open("make_inputs/output_total_Sep24.root")
 # f = uproot.open("make_inputs/output_total.root")
-f = uproot.open("make_inputs/output_run2.root")
+# f = uproot.open("make_inputs/output_run2.root")
+f = uproot.open("make_inputs/output_run2_2018resid17.root")
 # f = uproot.open("make_inputs/output_total_missm1.root")
 t = f["t"]
 arrs = t.arrays(t.keys())
@@ -166,7 +167,8 @@ sumw_neg = np.abs(dtrain.get_weight()[dtrain.get_label()==0]).sum()
 param["scale_pos_weight"] = sumw_neg/sumw_pos
 # pklname = "bst_ssos.pkl" # bdt_earlystoppingnominal.h <-- 3.3\sigma with k=11.5,17 bins
 # pklname = "bst_run2_ssos_v2.pkl"
-pklname = "bst_run2_v3.pkl"
+# pklname = "bst_run2_v3.pkl"
+pklname = "bst_run2_v3_2018resid17.pkl"
 # pklname = "bst_ssos_depth4.pkl"
 # pklname = "bst_ss.pkl"
 if not os.path.exists(pklname):

@@ -55,28 +55,35 @@ if __name__ == "__main__":
     r.gROOT.ProcessLine(".L plotEWKCorFR.C");
     r.gROOT.ProcessLine(".L plotFR.C");
 
-    do_ss = True
+    do_ss = False
 
+    years = [
+            # 2016,
+            # 2017,
+            2018,
+            ]
     if do_ss:
         # inputdir = "outputs_19Jan28/";
         # inputdir = "outputs_ssrereco_19Jan28/";
         # inputdir = "outputs_ssrereco_19Feb6//"; # V2
         inputdir = "outputs_ssjecs_19Feb19/"; # V3
     else:
-        inputdir = "outputs_ft_19Feb2//";
+        # inputdir = "outputs_ft_19Feb2//";
+        inputdir = "outputs_ftjecs2018_19Mar5/";
 
     import do_fits
-    d_infos = do_fits.fit_and_plot(inputdir=inputdir,outputdir="{}/plots_mtfits/".format(inputdir))
+    d_infos = do_fits.fit_and_plot(inputdir=inputdir,outputdir="{}/plots_mtfits/".format(inputdir),years=years)
     do_fits.print_infos(d_infos)
     print "FIXME pinning 2016 MTSFs to certain values"
-    d_infos[2016][("el",False,True)][0] = 1.28 # from http://uaf-1.t2.ucsd.edu/~namin/dump/AN-16-386_temp.pdf pg 37
-    d_infos[2016][("el",True,True)][0] = 1.28
-    d_infos[2016][("mu",False,True)][0] = 1.17
-    d_infos[2016][("mu",True,True)][0] = 1.19
-    print "FIXME pinning 2018 MTSFs to 10%"
-    d_infos[2018][("el",False,True)][0] = 1.1
-    d_infos[2018][("el",True,True)][0] = 1.1
-    years = [2016,2017,2018]
+    if 2016 in d_infos:
+        d_infos[2016][("el",False,True)][0] = 1.28 # from http://uaf-1.t2.ucsd.edu/~namin/dump/AN-16-386_temp.pdf pg 37
+        d_infos[2016][("el",True,True)][0] = 1.28
+        d_infos[2016][("mu",False,True)][0] = 1.17
+        d_infos[2016][("mu",True,True)][0] = 1.19
+    if 2018 in d_infos:
+        print "FIXME pinning 2018 MTSFs to 10%"
+        d_infos[2018][("el",False,True)][0] = 1.1
+        d_infos[2018][("el",True,True)][0] = 1.1
     for year in years:
         r.plotFR(inputdir, year)
         for iso in [True,False]:
@@ -92,15 +99,15 @@ if __name__ == "__main__":
     # os.system("ic {}/pdfs/y2016_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
     # os.system("ic {}/pdfs/y2017_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
     # os.system("ic {}/pdfs/y2017_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
-    # os.system("ic {}/pdfs/y2018_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
-    # os.system("ic {}/pdfs/y2018_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
+    os.system("ic {}/pdfs/y2018_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
+    os.system("ic {}/pdfs/y2018_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
 
     if do_ss:
-        for year in [2016,2017,2018]:
+        for year in years:
             with open("frs_{}_temp.h".format(year),"w") as fh:
                 fh.write(dump_functions(inputdir,year))
     else:
-        for year in [2017,2018]:
+        for year in years:
             with open("frs_ft_{}_temp.h".format(year),"w") as fh:
                 fh.write(dump_functions(inputdir,year))
 
