@@ -520,7 +520,7 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
     # for _ in range(10): print "Didn't copy"
     if nmade > 5000:
         print "Copying {} files with rsync...".format(nmade)
-        os.system("rsync -r --info=progress1 --include='*histos*' {}/ {}/".format(inputdir,outputdir))
+        os.system("rsync -r --info=progress1  --include='*histos*' --exclude '*output_*' {}/ {}/".format(inputdir,outputdir))
         print "Done copying"
     else:
         os.system("cp {}/*.root {}/".format(inputdir,outputdir))

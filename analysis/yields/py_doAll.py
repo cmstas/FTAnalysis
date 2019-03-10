@@ -36,7 +36,10 @@ def get_fastsim_procnames_single(fname, procbase="fs_t1tttt", range1=[], range2=
     strs = map(lambda x:"{}_m{}_m{}".format(procbase,x[0],x[1]), valid_points)
     return strs
 
-def get_fastsim_procnames(fnames, procbase="fs_t1tttt", range1=[], range2=[]):
+def get_fastsim_procnames(fnames, procbase="fs_t1tttt", range1=[], range2=[], filt=""):
+    # if user specified --proc, don't bother looking up mass points if this process won't be matched later
+    if filt and not fnmatch.fnmatch(procbase+"_",filt): 
+        return []
     # calls _single implementation and takes set union of all fnames fed in
     # if fnames is not a list (just one thing), then make it a list to keep this reverse compatible
     if type(fnames) is not list: fnames = [fnames]
@@ -356,8 +359,8 @@ if __name__ == "__main__":
                     "higgsh430": make_obj([ basedirs[2017]+"Higgs_ttH_425.root", basedirs[2017]+"Higgs_tHW_425.root", basedirs[2017]+"Higgs_tHq_425.root", ],options=options[2017]),
                     "higgsh450": make_obj([ basedirs[2017]+"Higgs_ttH_450.root", basedirs[2017]+"Higgs_tHW_450.root", basedirs[2017]+"Higgs_tHq_450.root", ],options=options[2017]),
                     "higgsh470": make_obj([ basedirs[2017]+"Higgs_ttH_475.root", basedirs[2017]+"Higgs_tHW_475.root", basedirs[2017]+"Higgs_tHq_475.root", ],options=options[2017]),
-                    "higgsh490": make_obj([ basedirs[2017]+"Higgs_ttH_475.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
-                    "higgsh510": make_obj([ basedirs[2017]+"Higgs_ttH_475.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
+                    "higgsh490": make_obj([ basedirs[2017]+"Higgs_ttH_500.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
+                    "higgsh510": make_obj([ basedirs[2017]+"Higgs_ttH_500.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
                     "higgsh530": make_obj([ basedirs[2017]+"Higgs_ttH_525.root", basedirs[2017]+"Higgs_tHW_525.root", basedirs[2017]+"Higgs_tHq_525.root", ],options=options[2017]),
                     "higgsh550": make_obj([ basedirs[2017]+"Higgs_ttH_550.root", basedirs[2017]+"Higgs_tHW_550.root", basedirs[2017]+"Higgs_tHq_550.root", ],options=options[2017]),
                     "higgsh570": make_obj([ basedirs[2017]+"Higgs_ttH_575.root", basedirs[2017]+"Higgs_tHW_575.root", basedirs[2017]+"Higgs_tHq_575.root", ],options=options[2017]),
@@ -373,8 +376,8 @@ if __name__ == "__main__":
                     "higgsa430": make_obj([ basedirs[2017]+"Higgs_ttH_425.root", basedirs[2017]+"Higgs_tHW_425.root", basedirs[2017]+"Higgs_tHq_425.root", ],options=options[2017]),
                     "higgsa450": make_obj([ basedirs[2017]+"Higgs_ttH_450.root", basedirs[2017]+"Higgs_tHW_450.root", basedirs[2017]+"Higgs_tHq_450.root", ],options=options[2017]),
                     "higgsa470": make_obj([ basedirs[2017]+"Higgs_ttH_475.root", basedirs[2017]+"Higgs_tHW_475.root", basedirs[2017]+"Higgs_tHq_475.root", ],options=options[2017]),
-                    "higgsa490": make_obj([ basedirs[2017]+"Higgs_ttH_475.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
-                    "higgsa510": make_obj([ basedirs[2017]+"Higgs_ttH_475.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
+                    "higgsa490": make_obj([ basedirs[2017]+"Higgs_ttH_500.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
+                    "higgsa510": make_obj([ basedirs[2017]+"Higgs_ttH_500.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
                     "higgsa530": make_obj([ basedirs[2017]+"Higgs_ttH_525.root", basedirs[2017]+"Higgs_tHW_525.root", basedirs[2017]+"Higgs_tHq_525.root", ],options=options[2017]),
                     "higgsa550": make_obj([ basedirs[2017]+"Higgs_ttH_550.root", basedirs[2017]+"Higgs_tHW_550.root", basedirs[2017]+"Higgs_tHq_550.root", ],options=options[2017]),
                     "higgsa570": make_obj([ basedirs[2017]+"Higgs_ttH_575.root", basedirs[2017]+"Higgs_tHW_575.root", basedirs[2017]+"Higgs_tHq_575.root", ],options=options[2017]),
@@ -778,7 +781,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T1TTTT.root",
                     basedirs[2017]+"T1TTTT.root",
                     basedirs[2017]+"T1TTTT_ext.root", # ext for 2018
-                    ], procbase="fs_t1tttt", range1=[600,2200])
+                    ], procbase="fs_t1tttt", range1=[600,2200], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "m1400_m400", # FIXME
@@ -804,7 +807,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T6TTWW.root",
                     basedirs[2017]+"T6TTWW.root",
                     basedirs[2017]+"T6TTWW_ext.root", # ext for 2018
-                    ], procbase="fs_t6ttww", range1=[300,1400])
+                    ], procbase="fs_t6ttww", range1=[300,1400], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "m1000_m600", # FIXME
@@ -827,7 +830,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T5QQQQVV_main.root",
                     basedirs[2017]+"T5QQQQVV_main.root",
                     basedirs[2017]+"T5QQQQVV_main_ext.root", # ext for 2018
-                    ], procbase="fs_t5qqqqvv", range1=[600,2000])
+                    ], procbase="fs_t5qqqqvv", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "m1450_m1", # FIXME
@@ -849,7 +852,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T5QQQQVV_dm20.root",
                     basedirs[2017]+"T5QQQQVV_dm20.root",
                     basedirs[2017]+"T5QQQQVV_dm20_ext.root", # ext for 2018
-                    ], procbase="fs_t5qqqqvvdm20", range1=[600,2000])
+                    ], procbase="fs_t5qqqqvvdm20", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "m950_m850", # FIXME
@@ -871,7 +874,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T5QQQQVV_main.root",
                     basedirs[2017]+"T5QQQQVV_main.root",
                     basedirs[2017]+"T5QQQQVV_main_ext.root", # ext for 2018
-                    ], procbase="fs_t5qqqqww", range1=[600,2000])
+                    ], procbase="fs_t5qqqqww", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 # "m1450_m1", # FIXME
@@ -893,7 +896,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T5QQQQVV_dm20.root",
                     basedirs[2017]+"T5QQQQVV_dm20.root",
                     basedirs[2017]+"T5QQQQVV_dm20_ext.root", # ext for 2018
-                    ], procbase="fs_t5qqqqwwdm20", range1=[600,2000])
+                    ], procbase="fs_t5qqqqwwdm20", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "m950_m850", # FIXME
@@ -916,7 +919,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T5TTTT.root",
                     basedirs[2017]+"T5TTTT.root",
                     basedirs[2017]+"T5TTTT_ext.root", # ext for 2018
-                    ], procbase="fs_t5tttt", range1=[600,2300])
+                    ], procbase="fs_t5tttt", range1=[600,2300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 ])]
@@ -937,7 +940,7 @@ if __name__ == "__main__":
         #            basedirs[2016]+"T5TTCC.root",
         #            # basedirs[2017]+"T5TTCC.root",
         #            # basedirs[2017]+"T5TTCC_ext.root", # ext for 2018
-        #            ], procbase="fs_t5ttcc", range1=[1000,1800])
+        #            ], procbase="fs_t5ttcc", range1=[1000,1800], filt=args.proc)
         #if do_slim:
         #    procnames = [pn for pn in procnames if any(x in pn for x in [
         #        ])]
@@ -958,7 +961,7 @@ if __name__ == "__main__":
         #            basedirs[2016]+"T1TTBB.root",
         #            # basedirs[2017]+"T1TTBB.root",
         #            # basedirs[2017]+"T1TTBB_ext.root", # ext for 2018
-        #            ], procbase="fs_t1ttbb", range1=[1000,1800])
+        #            ], procbase="fs_t1ttbb", range1=[1000,1800], filt=args.proc)
         #if do_slim:
         #    procnames = [pn for pn in procnames if any(x in pn for x in [
         #        ])]
@@ -978,7 +981,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both_ext.root", # ext for 2018
-                    ], procbase="fs_t6tthzbrh", range1=[200,1300])
+                    ], procbase="fs_t6tthzbrh", range1=[200,1300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "t6tthzbrh_m600_m375",
@@ -1000,7 +1003,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both_ext.root", # ext for 2018
-                    ], procbase="fs_t6tthzbrb", range1=[200,1300])
+                    ], procbase="fs_t6tthzbrb", range1=[200,1300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "t6tthzbrb_m600_m375",
@@ -1022,7 +1025,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both_ext.root", # ext for 2018
-                    ], procbase="fs_t6tthzbrz", range1=[200,1300])
+                    ], procbase="fs_t6tthzbrz", range1=[200,1300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "t6tthzbrz_m600_m375",
@@ -1044,7 +1047,7 @@ if __name__ == "__main__":
                     basedirs[2016]+"T1QQQQL_main.root",
                     basedirs[2017]+"T1QQQQL_main.root",
                     basedirs[2017]+"T1QQQQL_main_ext.root", # ext for 2018
-                    ], procbase="fs_t1qqqql", range1=[1600,2700])
+                    ], procbase="fs_t1qqqql", range1=[1600,2700], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
                 "m1600_m1",

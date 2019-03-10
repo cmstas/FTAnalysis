@@ -961,7 +961,7 @@ plots_t run(TChain *chain, int year, TString options){
             if (mysparms.size() > 1) std::cout << " " << mysparms[1];
             std::cout << std::endl;
         }
-        if (mysparms.size() == 1 or isRPV) {
+        if (year == 2016 and (mysparms.size() == 1 or isRPV)) {
             if (!quiet) {
                 std::cout << "Calculating normalization factors for NISR jet reweighting..." << std::endl;
             }
@@ -977,7 +977,7 @@ plots_t run(TChain *chain, int year, TString options){
             if (!quiet) {
                 std::cout << "Calculated normalization factors for (central,up,down) ISR weights to be: " << fastsim_isr_norm_central << "," << fastsim_isr_norm_up << "," << fastsim_isr_norm_down << std::endl;
             }
-        } else if (mysparms.size() == 2) {
+        } else if (year == 2016 and (mysparms.size() == 2)) {
             if (!quiet) {
                 std::cout << "Calculating normalization factors for NISR jet reweighting..." << std::endl;
             }
@@ -1630,7 +1630,7 @@ plots_t run(TChain *chain, int year, TString options){
             if (!isFastsim) {
                 if (isSS) {
                     if (year == 2017) { // FIXME FIXME need to update tag
-                        if (!ss::fired_trigger()) continue;
+                        if (!ss::fired_trigger_ss()) continue;
                     } else {
                         if (!ss::fired_trigger_ss()) continue;
                     }
