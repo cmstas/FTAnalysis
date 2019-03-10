@@ -57,7 +57,8 @@ basedirs ={
 # outputdir = "outputs_19Feb16_v3p26_ss_noisrweights" # FOR SS
 # outputdir = "outputs_19Mar4_v3p27_ss" # FOR SS
 # outputdir = "outputs_19Mar4_v3p27_ft" # FOR FT
-outputdir = "outputs_19Mar4_v3p28_ft" # FOR FT
+# outputdir = "outputs_19Mar4_v3p28_ft" # FOR FT
+outputdir = "outputs_19Mar9_v3p28_ss" # FOR FT
 
 options = {
 
@@ -70,15 +71,15 @@ options = {
         # 2017: " noISRWeights noLeptonPtCut doSS Data2017 quiet ",
         # 2018: " noISRWeights noLeptonPtCut doSS Data2018 quiet ",
         
-        # # for SS
-        # 2016: "  noLeptonPtCut doSS Data2016 new2016FRBins quiet ",
-        # 2017: "  noLeptonPtCut doSS Data2017 quiet ",
-        # 2018: "  noLeptonPtCut doSS Data2018 quiet ",
+        # for SS
+        2016: "  noLeptonPtCut doSS Data2016 new2016FRBins quiet ",
+        2017: "  noLeptonPtCut doSS Data2017 quiet ",
+        2018: "  noLeptonPtCut doSS Data2018 quiet ",
 
-        # for FT
-        2016: " Data2016 new2016FRBins quiet ",
-        2017: " Data2017 minPtFake18 quiet ",
-        2018: " Data2018 minPtFake18 quiet ",
+        # # for FT
+        # 2016: " Data2016 new2016FRBins quiet ",
+        # 2017: " Data2017 minPtFake18 quiet ",
+        # 2018: " Data2018 minPtFake18 quiet ",
 
         # 2018: "useInclusiveSFs Data2018 minPtFake18 quiet doHEMAfter ", # FIXME
         # 2018: "useInclusiveSFs Data2018 minPtFake18 quiet doHEMBefore ", # FIXME

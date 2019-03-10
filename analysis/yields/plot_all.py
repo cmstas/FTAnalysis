@@ -259,7 +259,7 @@ signames_ = []
 def worker(info):
     global files, signames_
 
-    analysis, outputdir, year, lumi, unblindall, (var, (regions, xlabel)) = info
+    analysis, outputdir, year, lumi, (var, (regions, xlabel)) = info
 
     if signames_ == ["tttt"]:
         sigstrs = [r"$t\bar{t}t\bar{t}$"]
@@ -345,11 +345,11 @@ def worker(info):
         ratio_range = [0.,3.]
         xticks = []
 
-        # FIXME FIXME FIXME
-        if analysis == "ss" and year != 2016 and not unblindall:
-            data._counts *= 0.
-            data._errors *= 0.
-            data.set_attr("label", "Data (blind)")
+        # # FIXME FIXME FIXME
+        # if analysis == "ss" and year != 2016 and not unblindall:
+        #     data._counts *= 0.
+        #     data._errors *= 0.
+        #     data.set_attr("label", "Data (blind)")
 
         if region in ["SRHH","SRHL","SRLL","SRML","SRLM"] and (var == "TOTAL"):
             ratio_range = [0.,3.]
@@ -358,7 +358,7 @@ def worker(info):
             mpl_legend_params["ncol"] = 2
             mpl_legend_params["labelspacing"] = 0.12
 
-            if region == "SRLL" and lumi == "136.3": lumi_ = "131.5"
+            if region == "SRLL" and lumi == "137.2": lumi_ = "132.4"
 
             data.poissonify()
 
@@ -367,10 +367,10 @@ def worker(info):
             # mu_pulls = pulls.mean()
             # sig_pulls = pulls.std()
 
-            if year != 2016 and not unblindall:
-                data._counts *= 0.
-                data._errors *= 0.
-                data.set_attr("label", "Data (blind)")
+            # if year != 2016 and not unblindall:
+            #     data._counts *= 0.
+            #     data._errors *= 0.
+            #     data.set_attr("label", "Data (blind)")
 
             def ax_main_callback(ax):
                 ax.set_ylim([0.05,ax.get_ylim()[1]*2.0])
@@ -389,10 +389,10 @@ def worker(info):
 
         elif region.lower() in ["sr","srdisc"]:
             # blind all 2018 and all BDT plots since we will retrain
-            if year == 2018 or (len(files.keys()) > 1) or region.lower in ["srdisc"]:
-                data._counts *= 0.
-                data._errors *= 0.
-                data.set_attr("label", "Data (blind)")
+            # if year == 2018 or (len(files.keys()) > 1) or region.lower in ["srdisc"]:
+            #     data._counts *= 0.
+            #     data._errors *= 0.
+            #     data.set_attr("label", "Data (blind)")
             data.convert_to_poisson_errors()
             if var.lower() in ["total"]:
                 xticks = range(1,20)
@@ -404,9 +404,9 @@ def worker(info):
 
         if (region.lower() in ["srcr"]) and (var.lower() in ["total"]):
             # if not (unblindall or year == 2016):
-            if year == 2018:
-                data._counts[2:] *= 0.
-                data._errors[2:] *= 0.
+            # if year == 2018:
+            #     data._counts[2:] *= 0.
+            #     data._errors[2:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
             def ax_main_callback(ax):
                 ax.set_ylim([0.1,ax.get_ylim()[1]*1.5])
@@ -456,7 +456,7 @@ def worker(info):
         #         binlabels=xticks,signame=sigstrs[0].replace(r"$\times 10$","x10").replace(","," "),csv=True)
     return ", ".join(fnames)
 
-def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[], signames="tttt", doss=False, show_mcfakes=False, unblindall=False):
+def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", other_years=[], regions=[], signames="tttt", doss=False, show_mcfakes=False):
     global files, signames_, other_files
     signames_ = signames
 
@@ -480,7 +480,7 @@ def make_plots(outputdir="plots", inputdir="outputs", year=2017, lumi="41.5", ot
             # except IOError:
             #     print("{}/output_{}_{}.root doesn't exist, but ignoring because it's probably signal".format(inputdir,y,proc))
 
-    infos = [[analysis,outputdir,year,lumi,unblindall,x] for x in labels[analysis].items()]
+    infos = [[analysis,outputdir,year,lumi,x] for x in labels[analysis].items()]
 
     # print infos
 

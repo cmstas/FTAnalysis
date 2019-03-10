@@ -120,9 +120,6 @@ if __name__ == "__main__":
 
                 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/skimfix/",
                 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/skimfix/",
-                # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/skimtest/",
-                # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/skimtest/",
-                # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag//output/year_2018/skimtest/",
                 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/skimfix/",
 
                 }
@@ -134,7 +131,6 @@ if __name__ == "__main__":
                 "2016_94x": "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/",
                 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016//",
                 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017//",
-                # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag//output/year_2018//",
                 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018//",
 
                 }
@@ -463,6 +459,8 @@ if __name__ == "__main__":
                         basedirs[2018]+"TTTW.root",
                         ],options=options[2018]),
 
+
+                    # FIXME 2018 missing THW, THQ
                     "higgsh350": make_obj([ basedirs[2017]+"Higgs_ttH_350.root", basedirs[2017]+"Higgs_tHW_350.root", basedirs[2017]+"Higgs_tHq_350.root", ],options=options[2017]+" FakeLumi2018 "),
                     "higgsh370": make_obj([ basedirs[2017]+"Higgs_ttH_375.root", basedirs[2017]+"Higgs_tHW_375.root", basedirs[2017]+"Higgs_tHq_375.root", ],options=options[2017]+" FakeLumi2018 "),
                     "higgsh390": make_obj([ basedirs[2017]+"Higgs_ttH_400.root", basedirs[2017]+"Higgs_tHW_400.root", basedirs[2017]+"Higgs_tHq_400.root", ],options=options[2017]+" FakeLumi2018 "),
@@ -513,8 +511,8 @@ if __name__ == "__main__":
                 2016: "Data2016 quiet {} new2016FRBins ".format(extra_global_options),
                 # 2017: "Data2017 quiet {} partialUnblind ".format(extra_global_options),
                 # 2018: "Data2018 quiet {} partialUnblind ".format(extra_global_options),
-                2017: "Data2017 quiet {} fullUnblind ".format(extra_global_options),
-                2018: "Data2018 quiet {} fullUnblind ".format(extra_global_options),
+                2017: "Data2017 quiet {} ".format(extra_global_options),
+                2018: "Data2018 quiet {} ".format(extra_global_options),
                 # 2017: "Data2017 quiet {} ".format(extra_global_options),
                 # 2018: "Data2018 quiet {} ".format(extra_global_options),
                 }
@@ -585,23 +583,12 @@ if __name__ == "__main__":
                         basedirs[2016]+"TTTW.root",
                         ],options=options[2016]),
 
-                    "rpv_t1qqqql_m1600": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1600.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m1700": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1700.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m1800": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1800.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m1900": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1900.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m2000": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2000.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m2100": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2100.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m2200": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2200.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m2300": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2300.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m2400": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2400.root" ],options=options[2016]),
-                    "rpv_t1qqqql_m2500": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2500.root" ],options=options[2016]),
-
                     "rpv_t1tbs_m1000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1000.root" ],options=options[2016]),
                     "rpv_t1tbs_m1100": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1100.root" ],options=options[2016]),
                     "rpv_t1tbs_m1200": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1200.root" ],options=options[2016]),
                     "rpv_t1tbs_m1300": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1300.root" ],options=options[2016]),
                     "rpv_t1tbs_m1400": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1400.root" ],options=options[2016]),
-                    # "rpv_t1tbs_m1500": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1500.root" ],options=options[2016]),
+                    "rpv_t1tbs_m1500": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1500.root" ],options=options[2016]),
                     "rpv_t1tbs_m1600": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1600.root" ],options=options[2016]),
                     "rpv_t1tbs_m1700": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1700.root" ],options=options[2016]),
                     "rpv_t1tbs_m1800": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1800.root" ],options=options[2016]),
@@ -675,54 +662,23 @@ if __name__ == "__main__":
                         basedirs[2017]+"TTTW.root",
                         ],options=options[2017]),
 
-                    "rpv_t1qqqql_m1600": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1600.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m1700": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1700.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m1800": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1800.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m1900": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1900.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m2000": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2000.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m2100": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2100.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m2200": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2200.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m2300": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2300.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m2400": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2400.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1qqqql_m2500": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2500.root" ],options=options[2016]+" FakeLumi2017 "),
-
-                    "rpv_t1tbs_m1000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1000.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1100": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1100.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1200": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1200.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1300": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1300.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1400": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1400.root" ],options=options[2016]+" FakeLumi2017 "),
-                    # "rpv_t1tbs_m1500": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1500.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1600": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1600.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1700": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1700.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1800": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1800.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m1900": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1900.root" ],options=options[2016]+" FakeLumi2017 "),
-                    "rpv_t1tbs_m2000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino2000.root" ],options=options[2016]+" FakeLumi2017 "),
+                    "rpv_t1tbs_m1000": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1000.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1100": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1100.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1200": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1200.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1300": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1300.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1400": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1400.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1500": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1500.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1600": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1600.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1700": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1700.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1800": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1800.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m1900": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1900.root" ],options=options[2017]+"  "),
+                    "rpv_t1tbs_m2000": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino2000.root" ],options=options[2017]+"  "),
 
                     # "zzcont": make_obj(basedirs[2017]+"ZZcont*.root", options=options[2017]), # NOTE in rares
                     # "zzreg": make_obj(basedirs[2017]+"ZZ.root", options=options[2017]),
 
                     },
                 2018: {
-
-                    # "fakes": make_obj([
-                    #     basedirs[2018]+"Data*.root",
-                    #     basedirs[2018]+"TTWnlo.root",
-                    #     basedirs[2018]+"TTZnlo.root",
-                    #     basedirs[2018]+"TTHtoNonBB.root",
-                    #     basedirs[2018]+"QQWW.root",
-                    #     basedirs[2018]+"WZ.root",
-                    #     ] , options=options[2018]+" doFakes doData "),
-                    # "flips": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doFlips "),
-                    # "data": make_obj(basedirs[2018]+"Data*.root", options=options[2018]+" doData "),
-
-                    # "testpromptsub": make_obj([
-                    #     basedirs[2018]+"TTBAR_PH.root",
-                    #     basedirs[2018]+"TTWnlo.root",
-                    #     basedirs[2018]+"TTZnlo.root",
-                    #     basedirs[2018]+"TTHtoNonBB.root",
-                    #     basedirs[2018]+"QQWW.root",
-                    #     basedirs[2018]+"WZ.root",
-                    #     ] , options=options[2018]+" doFakes doData "),
 
                     "fakes": make_obj([
                         basedirs[2018]+"ReRecoData*.root",
@@ -787,28 +743,17 @@ if __name__ == "__main__":
                         basedirs[2018]+"TTTW.root",
                         ],options=options[2018]),
 
-                    "rpv_t1qqqql_m1600": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1600.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m1700": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1700.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m1800": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1800.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m1900": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino1900.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m2000": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2000.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m2100": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2100.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m2200": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2200.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m2300": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2300.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m2400": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2400.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1qqqql_m2500": make_obj([ basedirs[2016]+"RPV_T1qqqqL_mGluino2500.root" ],options=options[2016]+" FakeLumi2018 "),
-
-                    "rpv_t1tbs_m1000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1000.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1100": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1100.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1200": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1200.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1300": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1300.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1400": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1400.root" ],options=options[2016]+" FakeLumi2018 "),
-                    # "rpv_t1tbs_m1500": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1500.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1600": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1600.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1700": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1700.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1800": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1800.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m1900": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1900.root" ],options=options[2016]+" FakeLumi2018 "),
-                    "rpv_t1tbs_m2000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino2000.root" ],options=options[2016]+" FakeLumi2018 "),
+                    "rpv_t1tbs_m1000": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1000.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1100": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1100.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1200": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1200.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1300": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1300.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1400": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1400.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1500": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1500.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1600": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1600.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1700": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1700.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1800": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1800.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m1900": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1900.root" ],options=options[2018]+"  "),
+                    "rpv_t1tbs_m2000": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino2000.root" ],options=options[2018]+"  "),
 
                     # "zzcont": make_obj(basedirs[2018]+"ZZcont*.root", options=options[2018]), # NOTE, i put this into rares
                     # "zzreg": make_obj(basedirs[2018]+"ZZ.root", options=options[2018]),
@@ -1235,9 +1180,6 @@ if __name__ == "__main__":
             import plot_all
 
 
-            if any(x in options[2017] for x in ["partialUnblind","fullUnblind"]):
-                plot_kwargs["unblindall"] = True
-
             signames = ["tttt"]
             if args.ss:
                 signames = ["fs_t1tttt_m1600_m100"]
@@ -1257,7 +1199,7 @@ if __name__ == "__main__":
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
                     year=2017,
-                    lumi=("41.5" if "partialUnblind" not in options[2017] else "10.0"),
+                    lumi=("41.5"),
                     other_years = [],
                     doss=args.ss,
                     signames=signames,
@@ -1268,7 +1210,7 @@ if __name__ == "__main__":
                     outputdir="{}/plots/".format(outdir_limits),
                     inputdir=args.out,
                     year=2018,
-                    lumi=("58.8" if "partialUnblind" not in options[2018] else "15.4"),
+                    lumi=("59.7"),
                     other_years = [],
                     doss=args.ss,
                     signames=signames,
@@ -1280,7 +1222,7 @@ if __name__ == "__main__":
                     inputdir=args.out,
                     year=2018,
                     # lumi="136.3", # 2016+2017+2018 --> 35.922+41.53+58.83 = 136.3
-                    lumi=("136.3" if "partialUnblind" not in options[2017] else "61.3"),
+                    lumi=("137.2"),
                     other_years = [2016,2017],
                     doss=args.ss,
                     signames=signames,

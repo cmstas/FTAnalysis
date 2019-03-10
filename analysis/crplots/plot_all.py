@@ -371,54 +371,35 @@ if __name__ == "__main__":
     # regions = ["os","osloose", "tl", "htnb1", "htnb1mc"]
     # regions = ["osnomet","tlnomet","osmet","tlmet","mlonz"] #,"mlonzhigh","mlonz0j"]
 
-    # ## SAME SIGN NOTE
-    # regions = [
-    #         "osmet",
-    #         "osnomet",
-    #         "tlmet",
-    #         "tlnomet",
-    #         "mlonz",
-    #         "lowmetallht",
-    #         "lowmetlowht",
-    #         ]
-    # flavs = ["in"]
-    # # flavs = ["ee","em","mm","in"]
-
-    # inputdir = "outputs_19Jan18_v3p24_ss"
-    # outputdir = "plots_ss_3p24_19Jan18"
-
-    # inputdir = "outputs_19Feb16_v3p26_ss/"
-    # outputdir = "plots_ss_3p26_19Feb16"
-    # inputdir = "outputs_19Feb27_v3p27_ss_resid/"
-    # outputdir = "plots_ss_3p27_19Feb27"
-
-    # inputdir = "outputs_19Mar4_v3p27_ss/"
-    # outputdir = "plots_ss_3p27_19Mar4"
-
-
-    # inputdir = "outputs_19Feb16_v3p26_ss_noisrweights/"
-    # outputdir = "plots_ss_3p26_19Feb16_noisrweights"
-
-    # inputdir = "outputs_19Jan18_v3p24_ss_promptreco"
-    # outputdir = "plots_ss_3p24_19Jan18_promptreco"
-
-    # inputdir = "outputs_19Jan18_v3p24_ss_2018nvtx"
-    # outputdir = "plots_ss_3p24_19Jan18_2018nvtx"
-
-    ## FOUR TOP NOTE
+    ## SAME SIGN NOTE
     regions = [
-            "os",
-            "tl",
-            "htnb1",
-            "htnb1mc",
+            "osmet",
+            "osnomet",
+            "tlmet",
+            "tlnomet",
+            "mlonz",
+            "lowmetallht",
+            "lowmetlowht",
             ]
     flavs = ["in"]
-    # inputdir = "outputs_19Jan18_v3p24_ft"
-    # outputdir = "plots_ft_3p24_19Jan18"
-    # inputdir = "outputs_19Mar4_v3p27_ft/"
-    # outputdir = "plots_ft_3p27_19Mar4"
-    inputdir = "outputs_19Mar4_v3p28_ft/"
-    outputdir = "plots_ft_3p28_19Mar4"
+    # flavs = ["ee","em","mm","in"]
+    inputdir = "outputs_19Mar9_v3p28_ss/"
+    outputdir = "plots_ss_3p28_19Mar9"
+
+    # ## FOUR TOP NOTE
+    # regions = [
+    #         "os",
+    #         "tl",
+    #         "htnb1",
+    #         "htnb1mc",
+    #         ]
+    # flavs = ["in"]
+    # # inputdir = "outputs_19Jan18_v3p24_ft"
+    # # outputdir = "plots_ft_3p24_19Jan18"
+    # # inputdir = "outputs_19Mar4_v3p27_ft/"
+    # # outputdir = "plots_ft_3p27_19Mar4"
+    # inputdir = "outputs_19Mar4_v3p28_ft/"
+    # outputdir = "plots_ft_3p28_19Mar4"
 
     # 2016 alone
     # outputdir = "plots_ft_jecv6_2017"
@@ -453,7 +434,7 @@ if __name__ == "__main__":
             inputdir=inputdir,
             regions = regions, flavs = flavs,
             year=2018,
-            lumi="58.8",
+            lumi="59.7",
             )
 
     # # 2016 + 2018 + 2017
@@ -464,7 +445,7 @@ if __name__ == "__main__":
             inputdir=inputdir,
             regions = regions, flavs = flavs,
             year=2018,
-            lumi="136.3",
+            lumi="137.2",
             other_years = [2016,2017],
             )
 
