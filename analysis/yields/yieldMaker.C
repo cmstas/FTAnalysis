@@ -1938,7 +1938,16 @@ plots_t run(TChain *chain, int year, TString options){
             if ((isttZ || isttW || isttH)) {
                 if (ss::extragenb() >= 2) {
                     weight *= (0.7+1);
+
                     weight_bb_up_alt = (0.6+1)*weight;
+
+                    // // test effect of increasing uncertainty for ttW
+                    // if (isttW) {
+                    //     weight_bb_up_alt = (0.85+1)*weight;
+                    // } else {
+                    //     weight_bb_up_alt = (0.6+1)*weight;
+                    // }
+
                 }
             }
 
@@ -2860,7 +2869,7 @@ plots_t run(TChain *chain, int year, TString options){
             }
 
 
-            if (SR != 1) { // non ttZ CR
+            if (SR > 1) { // non ttZ CR
                 p_result.h_disc.sr->Fill(mvavalue,weight);
                 p_result.h_njets.br->Fill(ss::njets() , weight);
                 p_result.h_nbtags.br->Fill(ss::nbtags() , weight);

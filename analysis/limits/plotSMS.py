@@ -1,8 +1,10 @@
 import itertools
+import pickle
 import array
 import os
 import numpy as np
 import re
+import fnmatch
 import glob
 import pandas as pd
 
@@ -37,6 +39,40 @@ def parse_log(fname):
             "sp1":exp_sp1,"sm1":exp_sm1,
             "sp2":exp_sp2,"sm2":exp_sm2,
             }
+
+def parse_logs(biglog):
+    logbase = biglog.replace(".txt","").replace(".pkl","")
+    if not os.path.exists("{}.pkl".format(logbase)):
+        with open("{}.txt".format(logbase)) as fh:
+            proc = None
+            d = {}
+            for line in fh:
+                if line.startswith("Start working") and ("upper limit" in line):
+                    proc = line.split("Start working on",1)[1].split()[0].strip().replace(".root",".log")
+                    d[proc] = {}
+                elif line.startswith("Observed"): d[proc]["obs"] = float(line.split("<")[-1])
+                elif line.startswith("Expected") and "<" in line: d[proc]["exp_"+line.split("%")[0].replace("Expected","").strip()] = float(line.split("<")[-1])
+                elif line.startswith("Significance"): d[proc]["sigma"] = float(line.split(":")[-1])
+            dnew = {}
+            for k,v in d.items():
+                obs = v.get("obs",-1)
+                exp = v.get("exp_50.0",-1)
+                exp_sm1 = v.get("exp_16.0",-1)
+                exp_sp1 = v.get("exp_84.0",-1)
+                exp_sm2 = v.get("exp_2.5",-1)
+                exp_sp2 = v.get("exp_97.5",-1)
+                sigma = v.get("sigma",-1)
+                dnew[k] = {
+                        "sigma":sigma,
+                        "obs":obs, "exp":exp,
+                        "sp1":exp_sp1,"sm1":exp_sm1,
+                        "sp2":exp_sp2,"sm2":exp_sm2,
+                        }
+        with open("{}.pkl".format(logbase), "w") as fh:
+            pickle.dump(dnew,fh)
+    with open("{}.pkl".format(logbase), "r") as fh:
+        d = pickle.load(fh)
+    return d
 
 def set_susy_palette():
     r.gStyle.SetOptStat(0)
@@ -127,13 +163,16 @@ def get_smoothed(graph, nsmooth=3, algo="k5b", diagonal_fudge=50, return_hist=Fa
     return gtest
 
 def get_rvals(
-        indir = "Scan_v9.06_Aug21_150-35p9_HHL_38-Full/",
+        # indir = "Scan_v9.06_Aug21_150-35p9_HHL_38-Full/",
+        biglog = "biglog_v1.txt",
         glob_pattern = "*.log",
         is_gluino = True,
         blinded = True,
         ):
 
-    lognames = glob.glob(indir + "/" + glob_pattern)
+    # lognames = glob.glob(indir + "/" + glob_pattern)
+    parsed_logs = parse_logs(biglog)
+    lognames = filter(lambda x: fnmatch.fnmatch(x,glob_pattern), parsed_logs.keys())
     fxsec = r.TFile("xsecs/xsec_susy_13tev.root")
     hxsec = fxsec.Get("h_xsec_gluino" if is_gluino else "h_xsec_stop")
 
@@ -163,7 +202,8 @@ def get_rvals(
             }
     for logname in lognames:
         mglu, mlsp = map(int,re.findall(r"_m([0-9]+)", logname))
-        lims = parse_log(logname)
+        # lims = parse_log(logname)
+        lims = parsed_logs[logname]
 
         # if any of the numbers are -1 (dummy default), skip bad point
         if any(lims[k]<0. for k in ["exp", "sm1", "sp1", "sm2", "sp2"]): continue
@@ -293,7 +333,8 @@ def draw_limits(
         outname = "test.pdf",
         ):
 
-    d_vals = get_rvals(indir=indir, glob_pattern=glob_pattern, is_gluino=is_gluino, blinded=blinded)
+    # d_vals = get_rvals(indir=indir, glob_pattern=glob_pattern, is_gluino=is_gluino, blinded=blinded)
+    d_vals = get_rvals(biglog=indir, glob_pattern=glob_pattern, is_gluino=is_gluino, blinded=blinded)
 
     set_susy_palette()
 
@@ -595,12 +636,16 @@ if __name__ == "__main__":
     # outdir = "scanplots"
 
     # indir = "v3.26_feb22_ssallsigs_v1/"
-    indir = "v3.26_feb27_allsigs_v1"
-    indir2 = "v3.27_mar4_t5tttt_v1/"
+    # indir = "v3.26_feb27_allsigs_v1"
+    # indir2 = "v3.27_mar4_t5tttt_v1/"
+    indir = "batch/biglog_v1.txt"
+    # indir2 = "v3.27_mar4_t5tttt_v1/"
     outdir = "scanplots_test"
 
     dos = args.sig or False
     modstr = args.model or "t1tttt"
+    # modstr = args.model or "t6ttww"
+    # modstr = args.model or "t6tthzbrh"
     os.system("mkdir -p {}".format(outdir))
 
     # FIXME can only plot one at a time because pyROOT has weird memory management
@@ -620,7 +665,7 @@ if __name__ == "__main__":
             diag_y1 = 600-170,
             diag_x2 = 1700,
             diag_y2 = 1700-170,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "",
             label_diag = "m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -644,7 +689,7 @@ if __name__ == "__main__":
             diag_y1 = 300-85,
             diag_x2 = 960,
             diag_y2 = 970-85,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "m_{#tilde{#chi}^{0}_{1}} = 50 GeV",
             label_diag = "m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
             label_xaxis = "m_{#tilde{b}_{1}} (GeV)",
@@ -668,7 +713,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -692,7 +737,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -716,7 +761,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -740,7 +785,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -765,7 +810,7 @@ if __name__ == "__main__":
             diag_y1 = 200,
             diag_x2 = 350+900,
             diag_y2 = 200+900,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=0%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
@@ -790,7 +835,7 @@ if __name__ == "__main__":
             diag_y1 = 200,
             diag_x2 = 350+900,
             diag_y2 = 200+900,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=50%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
@@ -815,7 +860,7 @@ if __name__ == "__main__":
             diag_y1 = 300,
             diag_x2 = 300+900,
             diag_y2 = 300+900,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=100%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
@@ -826,7 +871,7 @@ if __name__ == "__main__":
 
     if modstr == "t5tttt":
         draw_limits(
-            indir = indir2,
+            indir = indir,
             glob_pattern = "*fs_t5tttt_m*.log",
             is_gluino = True,
             outname = "{}/t5tttt_scan_xsec_run2.pdf".format(outdir),
@@ -839,7 +884,7 @@ if __name__ == "__main__":
             diag_y1 = 340,
             diag_x2 = 600+1400,
             diag_y2 = 340+1400,
-            lumi = 136.3,
+            lumi = 137.2,
             label_mass = "m_{#kern[0.5]{#tilde{t}_{1}}} = m_{#tilde{#chi}^{0}_{1}} + m_{#kern[0.3]{t}}",
             label_diag = "m_{#tilde{g}} - m_{#tilde{#chi}^{0}_{1}} = m_{t} + m_{W} + m_{b}",
             label_xaxis = "m_{#tilde{g}} (GeV)",

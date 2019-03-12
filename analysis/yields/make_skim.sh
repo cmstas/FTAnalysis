@@ -46,6 +46,7 @@ mkdir -p logs
 
 make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/" >& logs/skim_log_2016.txt &
 make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/" >& logs/skim_log_2017.txt &
+make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24_fixfsjecs/output/year_2017/" >& logs/skim_log_2017fix.txt &
 # make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/" >& logs/skim_log_2018.txt &
 # make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/" >& logs/skim_log_2018.txt &
 # make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag//output/year_2018/" >& logs/skim_log_2018.txt &

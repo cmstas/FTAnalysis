@@ -613,7 +613,11 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
     btcr_test->load(*calib4, BTagEntry::JetFlavor::FLAV_UDSG, "iterativefit");
 
     // calib_fs = new BTagCalibration("csvv2_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_csvv2_ttbar_26_1_2017.csv");
-    calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_deepcsv_ttbar_26_1_2017.csv");
+    if (gconf.year == 2016) {
+        calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_deepcsv_ttbar_26_1_2017.csv");
+    } else {
+        calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/deepcsv_13TEV_17_6_3_2019.csv");
+    }
 
     btcr_fs = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up","down"});
     btcr_fs->load(*calib_fs, BTagEntry::JetFlavor::FLAV_B, "fastsim");

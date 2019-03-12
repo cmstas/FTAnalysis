@@ -5,7 +5,7 @@ import ROOT as r
 def get_first_hist(f1):
     return f1.Get(f1.GetListOfKeys()[0].GetName())
 
-def dump_bins(h2s, name, transpose=False, nofabseta=False, fallthrough=0., do_err=False,onebinfirsthist=False):
+def dump_bins(h2s, name, transpose=False, nofabseta=False, fallthrough=0., do_err=False,onebinfirsthist=False,maxerr=1.0):
     buff = "float %s(float pt, float eta) {\n" % name
     if type(h2s) is not list:
         h2s = [h2s]
@@ -14,7 +14,7 @@ def dump_bins(h2s, name, transpose=False, nofabseta=False, fallthrough=0., do_er
             for iy in range(1,h2.GetNbinsY()+1):
                 for ix in range(1,h2.GetNbinsX()+1):
                     if do_err:
-                        val = h2.GetBinError(ix,iy)
+                        val = min(h2.GetBinError(ix,iy),maxerr)
                     else:
                         val = h2.GetBinContent(ix,iy)
                     if iy != h2.GetNbinsY() or h2.GetNbinsY() == 1:
@@ -28,7 +28,7 @@ def dump_bins(h2s, name, transpose=False, nofabseta=False, fallthrough=0., do_er
             for ix in range(1,h2.GetNbinsX()+1):
                 for iy in range(1,h2.GetNbinsY()+1):
                     if do_err:
-                        val = h2.GetBinError(ix,iy)
+                        val = min(h2.GetBinError(ix,iy),maxerr)
                     else:
                         val = h2.GetBinContent(ix,iy)
                     if ix != h2.GetNbinsX() or h2.GetNbinsX() == 1:
@@ -148,42 +148,76 @@ if __name__ == "__main__":
     # fh.write( dump_bins([h_el_reco_low,h_el_reco_high], "electronScaleFactorRecoError_RunABCD", transpose=True, nofabseta=True, do_err=True, onebinfirsthist=True) + "\n" ) # only print first pt bin for first histogram
     # fh.close()
 
-    # Muons
-    # 2017
-    # Medium MuonID from MuonPOG (https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs2017)
-    # - https://twiki.cern.ch/twiki/pub/CMS/MuonReferenceEffs2017/RunBCDEF_SF_ID.root
-    # Specific to our ID from SUS Twiki (https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Muon)
-    # Multi Iso Medium from http://jrgonzal.web.cern.ch/jrgonzal/MuonSF2017/v2/passMultiIsoM2017v2_MediumID/
-    # NOTE missing other stuff like dpt,dxy,dz, ...
-    fh = open("{}/lepton_sfs_mu_2017.h".format(outdir),"w")
-    f_mu_medium = r.TFile("rootfiles_run2/RunBCDEF_SF_ID.root")
-    f_mu_susy = r.TFile("rootfiles_run2/SF_new.root")
-    h_mu_medium = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta")
-    h_mu_multiiso = f_mu_susy.Get("SF2D")
-    x = dump_bins(h_mu_medium, "muonScaleFactor_Medium", fallthrough=1.) + "\n" 
-    xe = dump_bins(h_mu_medium, "muonScaleFactorError_Medium", fallthrough=0.02, do_err=True) + "\n" 
-    fh.write(x)
-    fh.write(xe)
-    x = dump_bins(h_mu_multiiso, "muonScaleFactor_RunBCDEF", fallthrough=1.,transpose=True) + "\n" 
-    xe = dump_bins(h_mu_multiiso, "muonScaleFactorError_RunBCDEF", fallthrough=0.02, transpose=True, do_err=True) + "\n" 
+    # # Muons
+    # # 2017
+    # # Medium MuonID from MuonPOG (https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs2017)
+    # # - https://twiki.cern.ch/twiki/pub/CMS/MuonReferenceEffs2017/RunBCDEF_SF_ID.root
+    # # Specific to our ID from SUS Twiki (https://twiki.cern.ch/twiki/bin/view/CMS/SUSLeptonSF#Muon)
+    # # Multi Iso Medium from http://jrgonzal.web.cern.ch/jrgonzal/MuonSF2017/v2/passMultiIsoM2017v2_MediumID/
+    # # NOTE missing other stuff like dpt,dxy,dz, ...
+    # fh = open("{}/lepton_sfs_mu_2017.h".format(outdir),"w")
+    # f_mu_medium = r.TFile("rootfiles_run2/RunBCDEF_SF_ID.root")
+    # f_mu_susy = r.TFile("rootfiles_run2/SF_new.root")
+    # h_mu_medium = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta")
+    # h_mu_multiiso = f_mu_susy.Get("SF2D")
+    # x = dump_bins(h_mu_medium, "muonScaleFactor_Medium", fallthrough=1.) + "\n" 
+    # xe = dump_bins(h_mu_medium, "muonScaleFactorError_Medium", fallthrough=0.02, do_err=True) + "\n" 
+    # fh.write(x)
+    # fh.write(xe)
+    # x = dump_bins(h_mu_multiiso, "muonScaleFactor_RunBCDEF", fallthrough=1.,transpose=True) + "\n" 
+    # xe = dump_bins(h_mu_multiiso, "muonScaleFactorError_RunBCDEF", fallthrough=0.02, transpose=True, do_err=True) + "\n" 
+    # fh.write(x)
+    # fh.write(xe)
+    # fh.close()
+
+#     # 2018
+#     # NOTE only have the POG ones, rest is copied from 2017
+#     # https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs2018
+#     fh = open("{}/lepton_sfs_mu_2018.h".format(outdir),"w")
+#     f_mu_medium = r.TFile("rootfiles_run2/RunABCD_SF_ID.root")
+#     f_mu_susy = r.TFile("rootfiles_run2/mu2018/SF.root")
+#     h_mu_medium = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta")
+#     h_mu_multiiso = f_mu_susy.Get("SF2D")
+#     x = dump_bins(h_mu_medium, "muonScaleFactor_Medium", fallthrough=1.) + "\n" 
+#     xe = dump_bins(h_mu_medium, "muonScaleFactorError_Medium", fallthrough=0.02, do_err=True) + "\n" 
+#     fh.write(x)
+#     fh.write(xe)
+#     x = dump_bins(h_mu_multiiso, "muonScaleFactor_RunABCD", fallthrough=1.,transpose=True) + "\n" 
+#     xe = dump_bins(h_mu_multiiso, "muonScaleFactorError_RunABCD", fallthrough=0.02, transpose=True, do_err=True) + "\n" 
+#     fh.write(x)
+#     fh.write(xe)
+#     fh.close()
+
+    # Electrons
+    # 2017 FASTSIM (https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF#Electrons_FullSim_FastSim_AN1)
+    fh = open("{}/fs_lepton_sfs_el_2017.h".format(outdir),"w")
+    f_el_susy = r.TFile("fastsim/detailed_ele_full_fast_sf_17.root")
+    h_el_mvatight = f_el_susy.Get("MVATightIP2D3DIDEmu_sf")
+    h_el_multiiso = f_el_susy.Get("MultiIsoEmuJECv32_sf")
+    h_el_convhit = f_el_susy.Get("ConvIHit0_sf")
+    h_el_3charge = f_el_susy.Get("3Qagree_sf")
+    h_el_mvatight.Multiply(h_el_multiiso)
+    h_el_mvatight.Multiply(h_el_convhit)
+    h_el_mvatight.Multiply(h_el_3charge)
+    x = dump_bins(h_el_mvatight, "fastsim_electronScaleFactor", transpose=False) + "\n" 
+    xe = dump_bins(h_el_mvatight, "fastsim_electronScaleFactorError", do_err=True, maxerr=0.5, transpose=False) + "\n" 
     fh.write(x)
     fh.write(xe)
     fh.close()
 
-    # 2018
-    # NOTE only have the POG ones, rest is copied from 2017
-    # https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs2018
-    fh = open("{}/lepton_sfs_mu_2018.h".format(outdir),"w")
-    f_mu_medium = r.TFile("rootfiles_run2/RunABCD_SF_ID.root")
-    f_mu_susy = r.TFile("rootfiles_run2/SF_new.root")
-    h_mu_medium = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta")
-    h_mu_multiiso = f_mu_susy.Get("SF2D")
-    x = dump_bins(h_mu_medium, "muonScaleFactor_Medium", fallthrough=1.) + "\n" 
-    xe = dump_bins(h_mu_medium, "muonScaleFactorError_Medium", fallthrough=0.02, do_err=True) + "\n" 
-    fh.write(x)
-    fh.write(xe)
-    x = dump_bins(h_mu_multiiso, "muonScaleFactor_RunABCD", fallthrough=1.,transpose=True) + "\n" 
-    xe = dump_bins(h_mu_multiiso, "muonScaleFactorError_RunABCD", fallthrough=0.02, transpose=True, do_err=True) + "\n" 
+    # Electrons
+    # 2018 FASTSIM (https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF#Electrons_FullSim_FastSim)
+    fh = open("{}/fs_lepton_sfs_el_2018.h".format(outdir),"w")
+    f_el_susy = r.TFile("fastsim/detailed_ele_full_fast_sf_18.root")
+    h_el_mvatight = f_el_susy.Get("MVATightIP2D3DIDEmu_sf")
+    h_el_multiiso = f_el_susy.Get("MultiIsoEmuJECv32_sf")
+    h_el_convhit = f_el_susy.Get("ConvIHit0_sf")
+    h_el_3charge = f_el_susy.Get("3Qagree_sf")
+    h_el_mvatight.Multiply(h_el_multiiso)
+    h_el_mvatight.Multiply(h_el_convhit)
+    h_el_mvatight.Multiply(h_el_3charge)
+    x = dump_bins(h_el_mvatight, "fastsim_electronScaleFactor", transpose=False) + "\n" 
+    xe = dump_bins(h_el_mvatight, "fastsim_electronScaleFactorError", do_err=True, maxerr=0.5, transpose=False) + "\n" 
     fh.write(x)
     fh.write(xe)
     fh.close()

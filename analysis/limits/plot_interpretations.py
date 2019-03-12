@@ -51,7 +51,7 @@ def set_defaults():
     # pdf.fonttype       : 3         ## Output Type 3 (Type3) or Type 42 (TrueType)
     # pdf.use14corefonts : False
 
-def add_cms_info(ax, typ="Preliminary", lumi="136.3", xtype=0.12):
+def add_cms_info(ax, typ="Preliminary", lumi="137.2", xtype=0.12):
     ax.text(0.0, 1.01,"CMS", horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, weight="bold", size="x-large")
     ax.text(xtype, 1.01,typ, horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, style="italic", size="x-large")
     ax.text(0.99, 1.01,"%s fb${}^{-1}$ (13 TeV)" % (lumi), horizontalalignment='right', verticalalignment='bottom', transform = ax.transAxes, size="x-large")
@@ -175,7 +175,7 @@ def make_yukawa_plot(scaninfo):
     theory_up = calc_sigma(kts_fine,gza_13tev_up,int_13tev_up,higgs_13tev_up)
 
     fig,ax = get_fig_ax()
-    add_cms_info(ax, lumi="136.3")
+    add_cms_info(ax, lumi="137.2")
     p3 = ax.fill_between(kts, obs_down, obs_up, linewidth=0., facecolor="k", alpha=0.25)
     p4 = ax.plot(kts, obs_cent, linestyle="-", marker="",color="k",solid_capstyle="butt")
     pobsline = mlines.Line2D([0],[0],color="k",linewidth=2,linestyle="-",solid_capstyle="butt")
@@ -414,7 +414,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
     theory = df["xsec"].values
 
     fig,ax = get_fig_ax()
-    add_cms_info(ax, lumi="136.3")
+    add_cms_info(ax, lumi="137.2")
     pe2 = ax.fill_between(mhs, sm2, sp2, linewidth=0., facecolor=YELLOW, alpha=1.0)
     pe1 = ax.fill_between(mhs, sm1, sp1, linewidth=0., facecolor=GREEN, alpha=1.0)
     pe0 = ax.plot(mhs, exp, linestyle="--", marker="",color="k",solid_capstyle="butt")
@@ -552,7 +552,7 @@ def make_rpv_plot(basedir,globber,outdir="scanplots",do_tbs=True):
 
 
     fig,ax = get_fig_ax()
-    add_cms_info(ax, lumi="136.3")
+    add_cms_info(ax, lumi="137.2")
 
     pe2 = ax.fill_between(mgs, sm2, sp2, linewidth=0., facecolor=YELLOW, alpha=1.0)
     pe1 = ax.fill_between(mgs, sm1, sp1, linewidth=0., facecolor=GREEN, alpha=1.0)
