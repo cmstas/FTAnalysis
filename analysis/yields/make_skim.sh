@@ -18,11 +18,12 @@ function make_skims() {
             continue
         }
         echo skim.py -t t -c "${cut}" "${basedir}/${sample}" -o ${outname} --flipbranches -b "${branches}"
-        skim.py -t t -c "${cut}" "${basedir}/${sample}" -o ${outname} --flipbranches -b "${branches}"
+        # skim.py -t t -c "${cut}" "${basedir}/${sample}" -o ${outname} --flipbranches -b "${branches}"
     done
     # Now combine the two separate stop mass ranges into a single sample for convenience
     if [ -e ${basedir}/${skimdir}/T6TTHZ_m1.root -a -e ${basedir}/${skimdir}/T6TTHZ_m2.root ]; then
         if [ ! -e ${basedir}/${skimdir}/T6TTHZ_both.root ]; then
+            # echo hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both.root ${basedir}/${skimdir}/T6TTHZ_m1.root ${basedir}/${skimdir}/T6TTHZ_m2.root 
             hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both.root ${basedir}/${skimdir}/T6TTHZ_m1.root ${basedir}/${skimdir}/T6TTHZ_m2.root 
         else
             echo "${basedir}/${skimdir}/T6TTHZ_both.root already exists, not combining the two subsamples"
@@ -30,6 +31,7 @@ function make_skims() {
     fi
     if [ -e ${basedir}/${skimdir}/T6TTHZ_m1_ext.root -a -e ${basedir}/${skimdir}/T6TTHZ_m2_ext.root ]; then
         if [ ! -e ${basedir}/${skimdir}/T6TTHZ_both_ext.root ]; then
+            # echo hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both_ext.root ${basedir}/${skimdir}/T6TTHZ_m1_ext.root ${basedir}/${skimdir}/T6TTHZ_m2_ext.root 
             hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both_ext.root ${basedir}/${skimdir}/T6TTHZ_m1_ext.root ${basedir}/${skimdir}/T6TTHZ_m2_ext.root 
         else
             echo "${basedir}/${skimdir}/T6TTHZ_both_ext.root already exists, not combining the two subsamples"
@@ -39,17 +41,11 @@ function make_skims() {
 
 mkdir -p logs
 
-# # make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.21_fix2017//output/year_2017/" >& logs/skim_log_2017.txt &
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2016/" >& logs/skim_log_2016.txt &
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23//output/year_2017/" >& logs/skim_log_2017.txt &
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.23/output/year_2018/" >& logs/skim_log_2018.txt &
-
 make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/" >& logs/skim_log_2016.txt &
-make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/" >& logs/skim_log_2017.txt &
-make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24_fixfsjecs/output/year_2017/" >& logs/skim_log_2017fix.txt &
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/" >& logs/skim_log_2018.txt &
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/" >& logs/skim_log_2018.txt &
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag//output/year_2018/" >& logs/skim_log_2018.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/" >& logs/skim_log_2017.txt &
+make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24_newfixfsjecs/output/year_2017/" >& logs/skim_log_2017fix.txt &
 make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/" >& logs/skim_log_2018.txt &
+
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24_newfixfsjecs/output/year_2017/" &
 
 wait

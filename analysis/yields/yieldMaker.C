@@ -477,6 +477,18 @@ struct plots_t  {
     triple_t h_trigsf;
     triple_t h_isrw;
 
+    triple_t h_dphil1l2;
+    triple_t h_htb;
+    triple_t h_nlb40;
+    triple_t h_ntb40;
+    triple_t h_detal1l2;
+    triple_t h_maxmjoverpt;
+    triple_t h_ml1j1;
+    triple_t h_ptj1;
+    triple_t h_ptj6;
+    triple_t h_ptj7;
+    triple_t h_ptj8;
+
 
 };
 
@@ -633,6 +645,17 @@ void getyields(TChain* ch, TString options="", TString outputdir="outputs/"){
     plots.h_lumiblock.Write();
     plots.h_run.Write();
     plots.h_wsf.Write();
+    plots.h_dphil1l2.Write();
+    plots.h_htb.Write();
+    plots.h_nlb40.Write();
+    plots.h_ntb40.Write();
+    plots.h_detal1l2.Write();
+    plots.h_maxmjoverpt.Write();
+    plots.h_ml1j1.Write();
+    plots.h_ptj1.Write();
+    plots.h_ptj6.Write();
+    plots.h_ptj7.Write();
+    plots.h_ptj8.Write();
     plots.p_alphas_alt_dn_SR.Write();
     plots.p_alphas_alt_up_SR.Write();
     plots.p_bb_alt_dn_SR.Write();
@@ -1105,6 +1128,18 @@ plots_t run(TChain *chain, int year, TString options){
     p_result.h_btagsf.Init("btagsf" , chainTitle , 50 , 0.7 , 1.3);
     p_result.h_lepsf.Init("lepsf"   , chainTitle , 50 , 0.7 , 1.3);
     p_result.h_trigsf.Init("trigsf" , chainTitle , 50 , 0.7 , 1.3);
+
+    p_result.h_detal1l2.Init("detal1l2"      , chainTitle, 30, -4  , 4 );
+    p_result.h_dphil1l2.Init("dphil1l2"      , chainTitle, 15, 0   , 4 );
+    p_result.h_htb.Init("htb"                , chainTitle, 16, 0   , 1600);
+    p_result.h_maxmjoverpt.Init("maxmjoverpt", chainTitle, 50, 0   , 0.35);
+    p_result.h_ml1j1.Init("ml1j1"            , chainTitle, 30, 0   , 1000 );
+    p_result.h_nlb40.Init("nlb40"            , chainTitle, 5 , 0   , 5 );
+    p_result.h_ntb40.Init("ntb40"            , chainTitle, 8 , 0   , 8 );
+    p_result.h_ptj1.Init("ptj1"              , chainTitle, 50, 0   , 1000);
+    p_result.h_ptj6.Init("ptj6"              , chainTitle, 30, 0   , 300 );
+    p_result.h_ptj7.Init("ptj7"              , chainTitle, 30, 0   , 300 );
+    p_result.h_ptj8.Init("ptj8"              , chainTitle, 30, 0   , 300 );
 
     // p_result.h_disc.br = new TH1F(Form("br_disc_%s"      , chainTitleCh) , Form("disc_%s"         , chainTitleCh) , 16      , -1.0 , 1.0);
     // p_result.h_disc.br    = new TH1F(Form("br_disc_%s"      , chainTitleCh) , Form("disc_%s"         , chainTitleCh) , 20      , 0.0  , 1.0);
@@ -1781,6 +1816,7 @@ plots_t run(TChain *chain, int year, TString options){
             }
 
             region_t categ = Undefined;
+            region_t categ_genmet = Undefined;
             region_t categ_unc_up = categ;
             region_t categ_unc_dn = categ;
             bool passbr_nom = false;
@@ -1939,14 +1975,14 @@ plots_t run(TChain *chain, int year, TString options){
                 if (ss::extragenb() >= 2) {
                     weight *= (0.7+1);
 
-                    weight_bb_up_alt = (0.6+1)*weight;
+                    // weight_bb_up_alt = (0.6+1)*weight;
 
-                    // // test effect of increasing uncertainty for ttW
-                    // if (isttW) {
-                    //     weight_bb_up_alt = (0.85+1)*weight;
-                    // } else {
-                    //     weight_bb_up_alt = (0.6+1)*weight;
-                    // }
+                    // increase uncertainty for ttW
+                    if (isttW) {
+                        weight_bb_up_alt = (0.78+1)*weight;
+                    } else {
+                        weight_bb_up_alt = (0.6+1)*weight;
+                    }
 
                 }
             }
@@ -2352,6 +2388,7 @@ plots_t run(TChain *chain, int year, TString options){
 #ifdef SSLOOP
             int SR = signal_region_ss(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), mtmin, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6, mtnonz);
             int SRgenmet = signal_region_ss(ss::njets(), ss::nbtags(), ss::gen_met(), ss::ht(), mtmin, lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6, mtnonz);
+            categ_genmet = analysis_category_ss(ss::lep1_id(), ss::lep2_id(), lep1ccpt, lep2ccpt, lep3ccpt, nleps, ss::ht(), ss::gen_met());
 #else
             int SR = (passbr_nom ? signal_region_ft(ss::njets(), ss::nbtags(), ss::met(), ss::ht(), ss::mtmin(), lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6) : -1);
             int SRgenmet = signal_region_ft(ss::njets(), ss::nbtags(), ss::gen_met(), ss::ht(), ss::mtmin(), lep1id, lep2id, lep1ccpt, lep2ccpt, lep3ccpt, nleps, isClass6);
@@ -2547,7 +2584,7 @@ plots_t run(TChain *chain, int year, TString options){
             if (isData == 0 && SR_unc_dn > 0) p_result.p_jes_alt_dn_SR.CatFill(categ_unc_dn, SR_unc_dn, weight);
             if (isData == 0 && SR_JER_up > 0) p_result.p_jer_alt_up_SR.CatFill(categ_JER_up, SR_JER_up, weight);
             if (isData == 0 && SR_JER_dn > 0) p_result.p_jer_alt_dn_SR.CatFill(categ_JER_dn, SR_JER_dn, weight);
-            if (isData == 0 && SRgenmet > 0) p_result.p_met_alt_up_SR.CatFill(categ, SRgenmet, weight);
+            if (isData == 0 && SRgenmet > 0) p_result.p_met_alt_up_SR.CatFill(categ_genmet, SRgenmet, weight);
             if (doFakes == 1 && SR >= 0) p_result.p_fake_alt_up_SR.CatFill(categ, SR, weight_alt_FR);
             if (doFakes == 1 && SR >= 0) p_result.p_fake_nb0_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 0 ? 1.3 : 1));
             if (doFakes == 1 && SR >= 0) p_result.p_fake_nb1_up_SR.CatFill(categ, SR, weight*(ss::nbtags() == 1 ? 1.3 : 1));
@@ -2869,7 +2906,39 @@ plots_t run(TChain *chain, int year, TString options){
             }
 
 
-            if (SR > 1) { // non ttZ CR
+            if ((SR > 1) or (SRdisc > 1)) { // baseline, but not ttZ
+                float f_nbtags = ss::bdt_nbtags();
+                float f_njets = ss::bdt_njets();
+                float f_met = ss::bdt_met();
+                float f_ptl2 = ss::bdt_ptl2();
+                float f_nlb40 = ss::bdt_nlb40();
+                float f_ntb40 = ss::bdt_ntb40();
+                float f_nleps = ss::bdt_nleps();
+                float f_htb = ss::bdt_htb();
+                float f_q1 = ss::bdt_q1();
+                float f_ptj1 = ss::bdt_ptj1();
+                float f_ptj6 = ss::bdt_ptj6();
+                float f_ptj7 = ss::bdt_ptj7();
+                float f_ml1j1 = ss::bdt_ml1j1();
+                float f_dphil1l2 = ss::bdt_dphil1l2();
+                float f_maxmjoverpt = ss::bdt_maxmjoverpt();
+                float f_ptl1 = ss::bdt_ptl1();
+                float f_detal1l2 = ss::bdt_detal1l2();
+                float f_ptj8 = ss::bdt_ptj8();
+                float f_ptl3 = ss::bdt_ptl3();
+
+                p_result.h_detal1l2.br->Fill(ss::bdt_detal1l2(),weight);
+                p_result.h_dphil1l2.br->Fill(ss::bdt_dphil1l2(),weight);
+                p_result.h_htb.br->Fill(ss::bdt_htb(),weight);
+                p_result.h_maxmjoverpt.br->Fill(ss::bdt_maxmjoverpt(),weight);
+                p_result.h_ml1j1.br->Fill(ss::bdt_ml1j1(),weight);
+                p_result.h_nlb40.br->Fill(ss::bdt_nlb40(),weight);
+                p_result.h_ntb40.br->Fill(ss::bdt_ntb40(),weight);
+                p_result.h_ptj1.br->Fill(ss::bdt_ptj1(),weight);
+                p_result.h_ptj6.br->Fill(ss::bdt_ptj6(),weight);
+                p_result.h_ptj7.br->Fill(ss::bdt_ptj7(),weight);
+                p_result.h_ptj8.br->Fill(ss::bdt_ptj8(),weight);
+
                 p_result.h_disc.sr->Fill(mvavalue,weight);
                 p_result.h_njets.br->Fill(ss::njets() , weight);
                 p_result.h_nbtags.br->Fill(ss::nbtags() , weight);
@@ -2884,14 +2953,17 @@ plots_t run(TChain *chain, int year, TString options){
                 // p_result.h_mtvis.br->Fill(mtvis , weight);
                 p_result.h_mll.br->Fill(mll , weight);
                 p_result.h_mtmin.br->Fill(mtmin , weight);
-                p_result.h_l1pt.br->Fill(pto1, weight);
-                p_result.h_l2pt.br->Fill(pto2, weight);
+                // p_result.h_l1pt.br->Fill(pto1, weight);
+                // p_result.h_l2pt.br->Fill(pto2, weight);
+                p_result.h_l1pt.br->Fill(lep1ccpt, weight);
+                p_result.h_l2pt.br->Fill(lep2ccpt, weight);
                 (abs(lep1id) == 11) ? p_result.h_el_l1pt.br->Fill(pto1, weight) : p_result.h_mu_l1pt.br->Fill(pto1, weight);
                 (abs(lep2id) == 11) ? p_result.h_el_l2pt.br->Fill(pto2, weight) : p_result.h_mu_l2pt.br->Fill(pto2, weight);
                 if (abs(lep1id) == 11) p_result.h_el_nmiss.br->Fill(ss::lep1_el_exp_innerlayers(), weight);
                 if (abs(lep2id) == 11) p_result.h_el_nmiss.br->Fill(ss::lep2_el_exp_innerlayers(), weight);
                 if (plotlep3) {
-                    p_result.h_l3pt.br->Fill(pto3, weight);
+                    // p_result.h_l3pt.br->Fill(pto3, weight);
+                    p_result.h_l3pt.br->Fill(lep3ccpt, weight);
                     (abs(lep3id) == 11) ? p_result.h_el_l3pt.br->Fill(pto3, weight) : p_result.h_mu_l3pt.br->Fill(pto3, weight);
                 }
                 // for (unsigned int ijet = 0; ijet < ss::btags().size(); ijet++) {

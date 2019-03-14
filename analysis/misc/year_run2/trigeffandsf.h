@@ -175,8 +175,11 @@ double TriggerWeight(int pdgid1, double pt1, double eta1, int pdgid2, double pt2
         else if(nmus==2)leptonlegs = LegEffcyorSF("mu_elemuht",ptlead,etalead,year,issf,systfluc) * LegEffcyorSF("mu_elemuht",pttrail,etatrail,year,issf,systfluc); 
     }
     else{
+
         if(nmus==0)leptonlegs = LegEffcyorSF("ele23_diele",ptlead,etalead,year,issf,systfluc) * LegEffcyorSF("ele12_diele",pttrail,etatrail,year,issf,systfluc); 
         else if(nmus==1 && fabs(pdgidlead)==13)leptonlegs = LegEffcyorSF("mu23_elemu",ptlead,etalead,year,issf,systfluc) * LegEffcyorSF("ele12_elemu",pttrail,etatrail,year,issf,systfluc); 
+        // below line added to fix bug with 2017BtoF map
+        else if(nmus==1 && fabs(pdgidlead)==11&& year == "2017BtoF"){year = "2017CtoF"; leptonlegs = LegEffcyorSF("ele23_elemu",ptlead,etalead,year,issf,systfluc) * LegEffcyorSF("mu8_elemu",pttrail,etatrail,year,issf,systfluc); }
         else if(nmus==1 && fabs(pdgidlead)==11)leptonlegs = LegEffcyorSF("ele23_elemu",ptlead,etalead,year,issf,systfluc) * LegEffcyorSF("mu8_elemu",pttrail,etatrail,year,issf,systfluc); 
         else if(nmus==2)leptonlegs = LegEffcyorSF("mu17_dimu",ptlead,etalead,year,issf,systfluc) * LegEffcyorSF("mu8_dimu",pttrail,etatrail,year,issf,systfluc); 
     }

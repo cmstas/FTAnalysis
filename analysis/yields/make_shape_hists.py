@@ -479,10 +479,10 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
 
     procs = []
     if doss:
-        procs.extend(["ttw","ww","wz", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg"])
+        procs.extend(["ttw","ww","wz", "tth", "ttz", "fakes", "fakes_mchybrid", "data", "flips", "rares", "xg"])
         regions = ["SRHH","SRHL","SRLL","SRML","SRLM"]
     else:
-        procs.extend(["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mc", "data", "flips", "rares", "xg", "ttvv"])
+        procs.extend(["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mchybrid", "data", "flips", "rares", "xg", "ttvv"])
         regions = ["SRCR","SRDISC"]
     nmade = 0
     # years = [2016, 2017, 2018]

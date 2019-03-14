@@ -94,7 +94,7 @@ def set_susy_palette():
     r.gStyle.SetPalette(NCont,mypalette)
     r.gStyle.SetNumberContours(NCont)
 
-def get_smoothed(graph, nsmooth=3, algo="k5b", diagonal_fudge=50, return_hist=False, cval=1.0, persist=[]):
+def get_smoothed(graph, nsmooth=0, algo="k5b", diagonal_fudge=0, return_hist=False, cval=1.0, persist=[],set_high_above_diag=True):
     graph_ = graph.Clone()
     # Turn TGraph into TH2F
     h2 = graph_.GetHistogram()
@@ -107,15 +107,34 @@ def get_smoothed(graph, nsmooth=3, algo="k5b", diagonal_fudge=50, return_hist=Fa
                 if h2.GetBinError(xbin,ybin) < 1.e-6:
                     emptybins.add((xbin,ybin))
 
-    if nsmooth:
-        # Now smooth 5x5 3 times
-        h2.Smooth(nsmooth,algo)
+    # Smear to the left and up
+    for ybin in range(2,h2.GetNbinsY()+1):
+        for xbin in range(1,h2.GetNbinsX()+1)[::-1]:
+            if h2.GetBinContent(xbin,ybin) < 1.e-6:
+                h2.SetBinContent(xbin,ybin,h2.GetBinContent(xbin+1,ybin-1))
+                # h2.SetBinContent(xbin,ybin,h2.GetBinContent(xbin+1,ybin))
+                # h2.SetBinContent(xbin,ybin,h2.GetBinContent(xbin,ybin-1))
+
+    # If nsmooth positive, make root do that many smooths
+    # if negative, make root do "1" smooth, but we call the functnion nsmooth times
+    # apparently they are different...
+    if nsmooth != 0:
+        if nsmooth > 0:
+            h2.Smooth(1,algo)
+        else:
+            for i in range(abs(nsmooth)):
+                h2.Smooth(1,algo)
+
+    hspill = h2.Clone("spill")
+    hspill.Reset()
 
     # Reset empty bins to 0, since smoothing spilled over diagonal
     for xbin in range(1,h2.GetNbinsX()+1):
         for ybin in range(1,h2.GetNbinsY()+1):
             if (xbin,ybin) in emptybins:
-                h2.SetBinContent(xbin,ybin,0)
+                if set_high_above_diag:
+                    h2.SetBinContent(xbin,ybin,(0 if return_hist else 1.1))
+                hspill.SetBinContent(xbin,ybin,1.) # keep track of bins we cleaned up
 
     # Want to be able to give a TGraph2D and get back a smoothed (and cleaned) histogram back
     if return_hist:
@@ -123,24 +142,10 @@ def get_smoothed(graph, nsmooth=3, algo="k5b", diagonal_fudge=50, return_hist=Fa
         persist.append(h2)
         return h2
 
-    # # Trick to avoid zeros above the diagonal that would affect the smoothing
-    # # Smear diagonal straight upwards so that contour will go up vertically rather than
-    # # to the top right (parallel to diagonal)
-    # for xbin in range(1,h2.GetNbinsX()+1):
-    #     for ybin in range(2,h2.GetNbinsY()+1):
-    #         if h2.GetBinContent(xbin,ybin) < 1.e-6:
-    #             h2.SetBinContent(xbin,ybin,h2.GetBinContent(xbin,ybin-1))
-
     # Now get the contour
     cont = r.TGraph2D(h2).GetContourList(cval)
     if not cont:
         return None
-
-    # # Then reset empty bins back to 0 to fix that trick from above
-    # for xbin in range(1,h2.GetNbinsX()+1):
-    #     for ybin in range(1,h2.GetNbinsY()+1):
-    #         if (xbin,ybin) in emptybins:
-    #             h2.SetBinContent(xbin,ybin,0)
 
     # Get list of x,y points for contour
     points = zip(list(cont[0].GetX()),list(cont[0].GetY()))
@@ -151,10 +156,16 @@ def get_smoothed(graph, nsmooth=3, algo="k5b", diagonal_fudge=50, return_hist=Fa
     diagonal_deletion_amount = diagonal_fudge
     for pt in points:
         xbin = h2.GetXaxis().FindBin(pt[0])
-        ybin = h2.GetYaxis().FindBin(pt[1]+diagonal_deletion_amount)
+        # ybin = h2.GetYaxis().FindBin(pt[1]+diagonal_deletion_amount)
+        ybin = h2.GetYaxis().FindBin(pt[1])
+        ybinhigher = h2.GetYaxis().FindBin(pt[1]+12.5)
         val = h2.GetBinContent(xbin,ybin)
-        if val > 1.0e-6:
+        # Delete points that are in a bin we cleaned up due to spillover
+        # or if it's up to 12.5GeV lower than a point that is within such a bin
+        if (hspill.GetBinContent(xbin,ybin) < 0.5) and (hspill.GetBinContent(xbin,ybinhigher) < 0.5):
             newpoints.append(pt)
+        # else:
+        #     print pt[0], pt[1]
 
     # Make new temporary TGraph and put in the "good" points from above
     gtest = r.TGraph(len(newpoints))
@@ -335,6 +346,10 @@ def draw_limits(
 
     # d_vals = get_rvals(indir=indir, glob_pattern=glob_pattern, is_gluino=is_gluino, blinded=blinded)
     d_vals = get_rvals(biglog=indir, glob_pattern=glob_pattern, is_gluino=is_gluino, blinded=blinded)
+    # Delete points where obs-exp is larger than 6*(2sigmaup-expected)
+    bad = (d_vals["obs"]-(d_vals["exp"]))/(d_vals["sp2"]-d_vals["exp"]) > 6.
+    for k in d_vals:
+        d_vals[k] = d_vals[k][~bad]
 
     set_susy_palette()
 
@@ -372,7 +387,7 @@ def draw_limits(
     # set z-axis properties on it
     if not do_significance:
         g_xsec = r.TGraph2D("g_xsec","g_xsec",len(d_vals["mglu"]),d_vals["mglu"],d_vals["mlsp"],d_vals["xsec"])
-        h_xsec = get_smoothed(g_xsec, nsmooth=0, return_hist=True)
+        h_xsec = get_smoothed(g_xsec, nsmooth=2, return_hist=True)
         h_xsec.Draw("colzsame") # FIXME NOTE. If colors don't show up, the line below fixes it but I don't know why. it also screws everything else up btw
         # h_xsec.Draw("colz")
 
@@ -447,7 +462,16 @@ def draw_limits(
                 ("sp2", r.kRed, 2, 3),
                 ]:
             g = r.TGraph2D("g_{}".format(name), "", len(d_vals["mglu"]), d_vals["mglu"], d_vals["mlsp"], d_vals[name])
-            c = get_smoothed(g, nsmooth=0, diagonal_fudge=0.)
+            extra = {"nsmooth":1}
+            if "dm20" in outname: extra["nsmooth"] = 4
+            if "t6tthzbrz" in outname: extra["set_high_above_diag"] = False
+            if "t6tthzbrb" in outname:
+                extra["nsmooth"] = -4
+                extra["algo"] = "k5b"
+            if "t6tthzbrh" in outname:
+                extra["nsmooth"] = -5
+                extra["algo"] = "k5b"
+            c = get_smoothed(g, **extra)
             if not c: 
                 print "Error with contour for {}".format(name)
                 continue
@@ -469,7 +493,7 @@ def draw_limits(
                     # ("sp2", r.kBlue, 2, 3),
                     ]:
                 g = r.TGraph2D("g_{}_secondary".format(name), "", len(d_vals_secondary["mglu"]), d_vals_secondary["mglu"], d_vals_secondary["mlsp"], d_vals_secondary[name])
-                c = get_smoothed(g, nsmooth=0, diagonal_fudge=0.)
+                c = get_smoothed(g, nsmooth=0)
                 c.SetLineWidth(width)
                 c.SetLineStyle(style)
                 c.SetLineColor(color)
@@ -548,7 +572,7 @@ def draw_limits(
     # l1.SetFillColorAlpha(r.kWhite, 0.5)
     l1.SetFillColorAlpha(r.kWhite, 1.0)
     if not do_significance:
-        if len(label_process) > 120:
+        if len(label_process) > 50:
             l1.SetHeader("{}    #scale[0.85]{{#splitline{{NNLO+NNLL}}{{exclusion}}}}".format(label_process))
         else:
             l1.SetHeader("{}  NNLO+NNLL exclusion".format(label_process))
@@ -604,6 +628,30 @@ def draw_limits(
     c1.SaveAs(outname)
     os.system("test ic && ic {}".format(outname))
 
+    if not do_significance:
+        outdir = outname.rsplit("/",1)[0]
+        tag = outname.rsplit("/",1)[1].split("_scan")[0]
+        fout = r.TFile("{}/SUS-19-008_{}.root".format(outdir,tag),"RECREATE")
+        hxsecwrite = h_xsec.Clone("xsec")
+        hxsecwrite.Write()
+        cobswrite = d_contours["obs"].Clone("ssobs")
+        cobswrite.Write()
+        com1write = d_contours["om1"].Clone("ssobs_m1s")
+        com1write.Write()
+        cop1write = d_contours["op1"].Clone("ssobs_p1s")
+        cop1write.Write()
+        cexpwrite = d_contours["exp"].Clone("ssexp")
+        cexpwrite.Write()
+        csm1write = d_contours["sm1"].Clone("ssexp_m1s")
+        csm1write.Write()
+        csp1write = d_contours["sp1"].Clone("ssexp_p1s")
+        csp1write.Write()
+        csm2write = d_contours["sm2"].Clone("ssexp_m2s")
+        csm2write.Write()
+        csp2write = d_contours["sp2"].Clone("ssexp_p2s")
+        csp2write.Write()
+        fout.Close()
+
     do_significance_1d = False
     if do_significance and do_significance_1d:
         sigmas = d_vals["sigma"]
@@ -638,7 +686,8 @@ if __name__ == "__main__":
     # indir = "v3.26_feb22_ssallsigs_v1/"
     # indir = "v3.26_feb27_allsigs_v1"
     # indir2 = "v3.27_mar4_t5tttt_v1/"
-    indir = "batch/biglog_v1.txt"
+    # indir = "batch/biglog_v1.txt"
+    indir = "batch/biglog_v3.txt"
     # indir2 = "v3.27_mar4_t5tttt_v1/"
     outdir = "scanplots_test"
 
@@ -647,6 +696,19 @@ if __name__ == "__main__":
     # modstr = args.model or "t6ttww"
     # modstr = args.model or "t6tthzbrh"
     os.system("mkdir -p {}".format(outdir))
+
+    # dos = False
+    # modstr = "t1tttt"
+    # modstr = "t6ttww"
+    # modstr = "t5qqqqvv"
+    # modstr = "t5qqqqww"
+    # modstr = "t5qqqqvvdm20"
+    # modstr = "t5qqqqwwdm20"
+    # modstr = "t5tttt"
+
+    # modstr = "t6tthzbrb"
+    # modstr = "t6tthzbrh"
+    # modstr = "t6tthzbrz"
 
     # FIXME can only plot one at a time because pyROOT has weird memory management
 
@@ -665,7 +727,7 @@ if __name__ == "__main__":
             diag_y1 = 600-170,
             diag_x2 = 1700,
             diag_y2 = 1700-170,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "",
             label_diag = "m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -689,7 +751,7 @@ if __name__ == "__main__":
             diag_y1 = 300-85,
             diag_x2 = 960,
             diag_y2 = 970-85,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "m_{#tilde{#chi}^{0}_{1}} = 50 GeV",
             label_diag = "m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
             label_xaxis = "m_{#tilde{b}_{1}} (GeV)",
@@ -713,7 +775,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -737,7 +799,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -761,7 +823,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -785,7 +847,7 @@ if __name__ == "__main__":
             diag_y1 = 600,
             diag_x2 = 1600,
             diag_y2 = 1600,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV",
             label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
@@ -810,7 +872,7 @@ if __name__ == "__main__":
             diag_y1 = 200,
             diag_x2 = 350+900,
             diag_y2 = 200+900,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=0%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
@@ -835,7 +897,7 @@ if __name__ == "__main__":
             diag_y1 = 200,
             diag_x2 = 350+900,
             diag_y2 = 200+900,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=50%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
@@ -860,7 +922,7 @@ if __name__ == "__main__":
             diag_y1 = 300,
             diag_x2 = 300+900,
             diag_y2 = 300+900,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=100%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
@@ -884,7 +946,7 @@ if __name__ == "__main__":
             diag_y1 = 340,
             diag_x2 = 600+1400,
             diag_y2 = 340+1400,
-            lumi = 137.2,
+            lumi = 137,
             label_mass = "m_{#kern[0.5]{#tilde{t}_{1}}} = m_{#tilde{#chi}^{0}_{1}} + m_{#kern[0.3]{t}}",
             label_diag = "m_{#tilde{g}} - m_{#tilde{#chi}^{0}_{1}} = m_{t} + m_{W} + m_{b}",
             label_xaxis = "m_{#tilde{g}} (GeV)",

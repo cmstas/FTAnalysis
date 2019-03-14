@@ -11,6 +11,8 @@ import matplotlib.lines as mlines
 import matplotlib.patheffects as meffects
 import matplotlib.font_manager as mfm
 import pandas as pd
+import pickle
+import fnmatch
 import glob
 import ast
 from matplotlib.ticker import MultipleLocator
@@ -51,7 +53,7 @@ def set_defaults():
     # pdf.fonttype       : 3         ## Output Type 3 (Type3) or Type 42 (TrueType)
     # pdf.use14corefonts : False
 
-def add_cms_info(ax, typ="Preliminary", lumi="137.2", xtype=0.12):
+def add_cms_info(ax, typ="Preliminary", lumi="137", xtype=0.12):
     ax.text(0.0, 1.01,"CMS", horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, weight="bold", size="x-large")
     ax.text(xtype, 1.01,typ, horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, style="italic", size="x-large")
     ax.text(0.99, 1.01,"%s fb${}^{-1}$ (13 TeV)" % (lumi), horizontalalignment='right', verticalalignment='bottom', transform = ax.transAxes, size="x-large")
@@ -175,7 +177,7 @@ def make_yukawa_plot(scaninfo):
     theory_up = calc_sigma(kts_fine,gza_13tev_up,int_13tev_up,higgs_13tev_up)
 
     fig,ax = get_fig_ax()
-    add_cms_info(ax, lumi="137.2")
+    add_cms_info(ax, lumi="137")
     p3 = ax.fill_between(kts, obs_down, obs_up, linewidth=0., facecolor="k", alpha=0.25)
     p4 = ax.plot(kts, obs_cent, linestyle="-", marker="",color="k",solid_capstyle="butt")
     pobsline = mlines.Line2D([0],[0],color="k",linewidth=2,linestyle="-",solid_capstyle="butt")
@@ -204,7 +206,7 @@ def make_yukawa_plot(scaninfo):
     ax.xaxis.set_minor_locator(MultipleLocator(0.1))
     ax.yaxis.set_minor_locator(MultipleLocator(2))
 
-    ax.set_ylim([0.,65.])
+    ax.set_ylim([0.,55.])
     ax.set_ylabel(r"$\sigma_{t\bar{t}t\bar{t}}$ [fb]")
     ax.set_title("")
     ax.set_xlabel(r"$|y_\mathrm{t}/y_\mathrm{t}^\mathrm{SM}|$")
@@ -385,6 +387,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
         }
     d_xsec["xsech"] = { mass:sum([d_xsec[proc].get(mass,0) for proc in ["tth","thq","thw"]]) for mass in set(sum([d_xsec[proc].keys() for proc in ["tth","thq","thw"]],[])) }
     d_xsec["xseca"] = { mass:sum([d_xsec[proc].get(mass,0) for proc in ["tta","taq","taw"]]) for mass in set(sum([d_xsec[proc].keys() for proc in ["tta","taq","taw"]],[])) }
+    # print d_xsec["xsech"]
 
     infos = []
     for log in logs:
@@ -413,14 +416,19 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
     mhs = df["mass"].values
     theory = df["xsec"].values
 
+    # smooth the theory curve.
+    from scipy.signal import savgol_filter
+    theory = savgol_filter(theory,5,2)
+
     fig,ax = get_fig_ax()
-    add_cms_info(ax, lumi="137.2")
+    add_cms_info(ax, lumi="137")
     pe2 = ax.fill_between(mhs, sm2, sp2, linewidth=0., facecolor=YELLOW, alpha=1.0)
     pe1 = ax.fill_between(mhs, sm1, sp1, linewidth=0., facecolor=GREEN, alpha=1.0)
     pe0 = ax.plot(mhs, exp, linestyle="--", marker="",color="k",solid_capstyle="butt")
     # pobs = ax.plot(mhs, exp*0., linestyle="-", markersize=5.,marker="o",color="k",solid_capstyle="butt")
     pobs = ax.plot(mhs, obs, linestyle="-", markersize=5.,marker="o",color="k",solid_capstyle="butt")
     ptheory = ax.plot(mhs, theory, linestyle="-", marker="",color="r",solid_capstyle="butt")
+    # ptheorysmooth = ax.plot(mhs, savgol_filter(theory,5,2), linestyle="-", marker="",color="b",solid_capstyle="butt")
     legend = ax.legend(
             [
                 (pobs[0],),
@@ -437,7 +445,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
             )
     ax.yaxis.set_minor_locator(MultipleLocator(5.))
     ax.xaxis.set_minor_locator(MultipleLocator(10.))
-    ax.set_ylim([0.,120.])
+    ax.set_ylim([0.,100.])
     # ax.set_ylim([1.,120.])
     # ax.set_yscale("log")
     ax.set_title("")
@@ -457,7 +465,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
     os.system("ic {}".format(fname_png))
     print "Saved {}".format(fname)
 
-def make_rpv_plot(basedir,globber,outdir="scanplots",do_tbs=True):
+def make_rpv_plot(biglog,globber,outdir="scanplots",do_tbs=True):
     # xsecs in pb -- https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVgluglu
     gluino_xsecs = {
             1000 : 0.385 ,
@@ -529,14 +537,36 @@ def make_rpv_plot(basedir,globber,outdir="scanplots",do_tbs=True):
                 "obsr":d.get("obs",-1),
                 }
 
-    fnames = glob.glob("{}/{}".format(basedir,globber))
-    # print fnames
+    def augment_lims(name,d):
+        mass = int(name.split("_m")[1].split("_",1)[0])
+        mult = 1.e3
+        xsec = gluino_xsecs[mass]*mult
+        obs = d.get("obs",-1)*xsec
+        exp = d.get("exp",-1)*xsec
+        exp_sm1 = d.get("sm1",-1)*xsec
+        exp_sp1 = d.get("sp1",-1)*xsec
+        exp_sm2 = d.get("sm2",-1)*xsec
+        exp_sp2 = d.get("sp2",-1)*xsec
+        return {
+                "mass": mass,
+                "xsec": xsec,
+                "obs":obs, "exp":exp,
+                "sp1":exp_sp1,"sm1":exp_sm1,
+                "sp2":exp_sp2,"sm2":exp_sm2,
+                "expr":d.get("exp",-1),
+                "obsr":d.get("obs",-1),
+                }
+
+
+    with open(biglog, "r") as fh:
+        parsed_logs = pickle.load(fh)
+    keys = filter(lambda x: fnmatch.fnmatch(x,globber), parsed_logs.keys())
     infos = []
-    for fname in fnames:
-        try:
-            d = parse_lims(open(fname,"r").readlines())
-            infos.append(d)
-        except: pass
+    for key in keys:
+        d = parsed_logs[key]
+        d = augment_lims(key,parsed_logs[key])
+        print d
+        infos.append(d)
     df = pd.DataFrame(infos)
     df = df.sort_values("mass")
 
@@ -552,7 +582,7 @@ def make_rpv_plot(basedir,globber,outdir="scanplots",do_tbs=True):
 
 
     fig,ax = get_fig_ax()
-    add_cms_info(ax, lumi="137.2")
+    add_cms_info(ax, lumi="137")
 
     pe2 = ax.fill_between(mgs, sm2, sp2, linewidth=0., facecolor=YELLOW, alpha=1.0)
     pe1 = ax.fill_between(mgs, sm1, sp1, linewidth=0., facecolor=GREEN, alpha=1.0)
@@ -612,11 +642,15 @@ if __name__ == "__main__":
     set_defaults()
 
     # os.system("mkdir -p plots/")
-    make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar6unblind_v1//log_yukawa_scan.txt")
+    # make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar6unblind_v1//log_yukawa_scan.txt")
     # make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
     # make_higgs_plot(basedir="v3.24_fthiggs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
     # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar6higgs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
     # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar6higgs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
+
+    # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbbhiggs_v1//",globber="card_higgs*_run2.log",do_scalar=True)
+    # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbbhiggs_v1//",globber="card_higgs*_run2.log",do_scalar=False)
+    # make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbb_v1/log_yukawa_scan.txt")
 
     # os.system("mkdir -p scanplots/")
     # make_rpv_plot(basedir="v3.26_feb15_sst1t5rpv_v1/",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
@@ -625,3 +659,11 @@ if __name__ == "__main__":
 #     os.system("mkdir -p scanplots_test/")
 #     make_rpv_plot(basedir="v3.26_feb27_allsigs_v1",outdir="scanplots_test/",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
 #     make_rpv_plot(basedir="v3.26_feb27_allsigs_v1",outdir="scanplots_test/",globber="card_fs_t1qqqql_*_all_run2.log",do_tbs=False)
+
+    # # Mar 13, latest
+    # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbbhiggs_v1//",globber="card_higgs*_run2.log",do_scalar=True)
+    # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbbhiggs_v1//",globber="card_higgs*_run2.log",do_scalar=False)
+    # make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbb_v1/log_yukawa_scan.txt")
+
+    # make_rpv_plot(biglog="batch/biglog_v3.pkl",outdir="scanplots_test/",globber="*rpv_t1tbs_*",do_tbs=True)
+    make_rpv_plot(biglog="batch/biglog_v3.pkl",outdir="scanplots_test/",globber="*fs_t1qqqql_*",do_tbs=False)

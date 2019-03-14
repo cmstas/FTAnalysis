@@ -488,7 +488,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         fakes = Process(num,"fakes","fakes_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
     else:
-        fakes = Process(num,"fakes_mc","fakes_mc_histos_"+kine+"_"+tomatch+".root",plot,thedir)
+        fakes = Process(num,"fakes_mchybrid","fakes_mchybrid_histos_"+kine+"_"+tomatch+".root",plot,thedir)
         num += 1
     flips = Process(num,"flips","flips_histos_"+kine+"_"+tomatch+".root",plot,thedir)
     num += 1
@@ -724,7 +724,7 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
         fakes.fakesnb3 = "1"
     else:
         fakes.fakes = "1.30"
-        # fakes.fakes_EWK = "-"
+        fakes.fakes_EWK = "-"
     flips.flips = "1.20"
 
     #fill list of processes

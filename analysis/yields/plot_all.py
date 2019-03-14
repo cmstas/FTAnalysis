@@ -18,18 +18,17 @@ labels = {}
 
 labels["ft"] = {
 
-
-        "TOTAL"        : [("SRCR","SR","SRDISC"), "TOTAL"],
-        "ht"              : [("ttzcr","ttwcr","sr","br","brpostfit"), "$H_{T}$"],
-        "met"             : [("ttzcr","ttwcr","sr","br","brpostfit"), MET_LATEX],
-        "mtmin"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "mtmin"],
-        "mll"             : [("ttzcr","ttwcr","sr","br","brpostfit"), "mll"],
-        "njets"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "Njets"],
-        "nbtags"          : [("ttzcr","ttwcr","sr","br","brpostfit"), "Nbtags"],
+        "TOTAL"        : [("SRCR","SR","SRDISC"), "Region"],
+        "ht"              : [("ttzcr","ttwcr","sr","br","brpostfit"),r"$H_\mathrm{T}$ (GeV)"],
+        "met"             : [("ttzcr","ttwcr","sr","br","brpostfit"), r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
+        "mtmin"           : [("ttzcr","ttwcr","sr","br","brpostfit"), r"$m_\mathrm{T}^{\mathrm{min}}$"],
+        "mll"             : [("ttzcr","ttwcr","sr","br","brpostfit"), r"$m_{ll}$"],
+        "njets"           : [("ttzcr","ttwcr","sr","br","brpostfit"), r"$N_\mathrm{jets}$"],
+        "nbtags"          : [("ttzcr","ttwcr","sr","br","brpostfit"),r"$N_\mathrm{b}$"],
         "type"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "type (mm, em, ee)"],
         "type3"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "type3 (mmm, mme, mee, eee)"],
         "charge"          : [("ttzcr","ttwcr","sr","br","brpostfit"), "charge"],
-        "nleps"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "nleps"],
+        "nleps"           : [("ttzcr","ttwcr","sr","br","brpostfit"), "Nlep"],
         "l1pt"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "l1pt"],
         "l2pt"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "l2pt"],
         "l3pt"            : [("ttzcr","ttwcr","sr","br","brpostfit"), "l3pt"],
@@ -37,19 +36,32 @@ labels["ft"] = {
         "l3pt"            : [("ttzcr","sr","br","brpostfit"), "l3pt"],
         "mllos"           : [("ttzcr",), "mllos"],
 
-        "el_l1pt"         : [("sr","br"), "el_l1pt"],
-        "el_l2pt"         : [("sr","br"), "el_l2pt"],
-        "el_l1eta"        : [("sr","br"), "el_l1eta"],
-        "el_l2eta"        : [("sr","br"), "el_l2eta"],
-        "el_l1phi"        : [("sr","br"), "el_l1phi"],
-        "el_l2phi"        : [("sr","br"), "el_l2phi"],
+        "dphil1l2": [("br","brpostfit"), r"$\Delta\phi(l_1,l_2)$"],
+        "htb": [("br","brpostfit"), r"$H_{T}$(b-jets)"],
+        "nlb40": [("br","brpostfit"), r"N-loose b-tags, $p_{T}>40$"],
+        "ntb40": [("br","brpostfit"), r"N-tight b-tags, $p_{T}>40$"],
+        "detal1l2": [("br","brpostfit"), r"$\Delta\eta(l_1,l_2)$"],
+        "maxmjoverpt": [("br","brpostfit"), r"max($m_j/p_T$)"],
+        "ml1j1": [("br","brpostfit"), r"m$(l_1,j_2)$"],
+        "ptj1": [("br","brpostfit"), "$p_T$ - jet 1"],
+        "ptj6": [("br","brpostfit"), "$p_T$ - jet 6"],
+        "ptj7": [("br","brpostfit"), "$p_T$ - jet 7"],
+        "ptj8": [("br","brpostfit"), "$p_T$ - jet 8"],
 
-        "mu_l1pt"         : [("sr","br"), "mu_l1pt"],
-        "mu_l2pt"         : [("sr","br"), "mu_l2pt"],
-        "mu_l1eta"        : [("sr","br"), "mu_l1eta"],
-        "mu_l2eta"        : [("sr","br"), "mu_l2eta"],
-        "mu_l1phi"        : [("sr","br"), "mu_l1phi"],
-        "mu_l2phi"        : [("sr","br"), "mu_l2phi"],
+
+        # "el_l1pt"         : [("sr","br"), "el_l1pt"],
+        # "el_l2pt"         : [("sr","br"), "el_l2pt"],
+        # "el_l1eta"        : [("sr","br"), "el_l1eta"],
+        # "el_l2eta"        : [("sr","br"), "el_l2eta"],
+        # "el_l1phi"        : [("sr","br"), "el_l1phi"],
+        # "el_l2phi"        : [("sr","br"), "el_l2phi"],
+
+        # "mu_l1pt"         : [("sr","br"), "mu_l1pt"],
+        # "mu_l2pt"         : [("sr","br"), "mu_l2pt"],
+        # "mu_l1eta"        : [("sr","br"), "mu_l1eta"],
+        # "mu_l2eta"        : [("sr","br"), "mu_l2eta"],
+        # "mu_l1phi"        : [("sr","br"), "mu_l1phi"],
+        # "mu_l2phi"        : [("sr","br"), "mu_l2phi"],
 
 
         # "lepsf"            : [("br",), "lepsf"],
@@ -100,20 +112,16 @@ ssregions_ll = ("ssbr","br","ml","mlonz","mloffz","hh","lm","ll")
 labels["ss"] = {
 
 
-        # "mu_l2pt"    : [ssregions, r"unsorted $p_{T}$(lep2, $\mu$)"],
-        # "mu_l2eta"   : [ssregions, r"unsorted $\eta $(lep2, $\mu$)"],
-        # "mu_l2phi"   : [ssregions, "mu_l2phi"],
-
-        "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "TOTAL"],
+        "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "Region"],
         "category"   : [("sr",), r"HH,HL,LL,MLoffZ,MLonZ,LM"],
-        "mtmin"      : [ssregions_ll, r"$m_{T}^\mathrm{min}$"],
-        "ht"         : [ssregions_ll, r"$H_T$"],
+        "mtmin"      : [ssregions_ll, r"$m_\mathrm{T}^\mathrm{min}$"],
+        "ht"         : [ssregions_ll, r"$H_\mathrm{T}$ (GeV)"],
         "njets"      : [ssregions, r"$N_\mathrm{jets}$"],
-        "met"        : [ssregions_ll, MET_LATEX],
+        "met"        : [ssregions_ll, r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
         "mll"        : [ssregions, r"$m_{ll}$"],
         "mllbig"     : [ssregions, r"$m_{ll}$"],
         "mllos"      : [ssregions, r"$m_{ll}$(OS)"],
-        "nbtags"     : [ssregions, r"$N_\mathrm{btags}$"],
+        "nbtags"     : [ssregions, r"$N_\mathrm{b}$"],
         "type"       : [ssregions, r"$\mu\mu,\mu e,e\mu,ee$"],
         "charge"     : [ssregions, r"SS charge"],
         "el_charge"  : [ssregions, r"SS el charge"],
@@ -227,18 +235,18 @@ d_flat_systematics["ss"] = {
 #         'ttz': 0.2800949349793666,
 #         'xg': 0.3090238224979612}
 
-d_crpostfitsf = {'fakes': 1.1887430404510724,
- 'flips': 1.034058340048447,
- 'rares': 1.0520979051157986,
+d_crpostfitsf = {'fakes': 1.133,
+ 'flips': 1.001,
+ 'rares': 1.02,
  'total': 1.2039836025074864,
  'total_background': 1.2254378772947825,
- 'total_signal': 0.0,
- 'tth': 1.067226056010255,
- 'tttt': 0.0,
- 'ttvv': 1.0331088148013614,
- 'ttw': 1.3331521252844587,
- 'ttz': 1.3291216173351943,
- 'xg': 1.0394166879436677}
+ 'total_signal': 1.076,
+ 'tth': 1.094,
+ 'tttt': 1.076,
+ 'ttvv': 1.014,
+ 'ttw': 1.31,
+ 'ttz': 1.266,
+ 'xg': 1.017}
 d_crpostfitsf_errs = {'fakes': 0.6836929317614069,
  'flips': 0.5375067661493199,
  'rares': 0.2513117714751323,
@@ -291,6 +299,10 @@ def worker(info):
                 title = "Cut-based"
             elif title == "SRDISC":
                 title = "BDT"
+            elif title == "TTZCR":
+                title = "CRZ"
+            elif title == "TTWCR":
+                title = "CRW"
 
         region_for_hist = region[:]
         if region == "brpostfit":
@@ -313,16 +325,31 @@ def worker(info):
                     ]
 
         data = sum([Hist1D(files[y]["data"]["{}_{}_data".format(region_for_hist,var)]) for y in files.keys()])
-        sigcolors = ["red","#5863F8","#FCCA46","#04A777","#944BBB","#233D4D"]
+        # sigcolors = ["red","#5863F8","#FCCA46","#04A777","#944BBB","#233D4D"]
+        sigcolors = [[0.75,0.15,0.22],"#5863F8","#FCCA46","#04A777","#944BBB","#233D4D"]
         # print sigcolors
-        sigs = [
-                sum([Hist1D(files[y][signame]["{}_{}_{}".format(region_for_hist,var,signame)],color=sigcolors[isig]) for y in files.keys()])
-                for isig,signame in enumerate(signames_)
-                ]
-        for isig,sigstr in enumerate(sigstrs):
-            sigs[isig].set_attr("label", sigstr)
-            if signames_[isig] != "tttt":
-                sigs[isig] *= 10.
+        if region == "brpostfit":
+            region_for_hist = "br"
+            def get_sf(proc):
+                return d_crpostfitsf.get(proc,1.0)
+            sigs = [
+                    sum(
+                        get_sf(signame)*Hist1D(files[y][signame]["{}_{}_{}".format(region_for_hist,var,signame)],
+                            label="{} ($\\times${:.2f})".format(sigstr,get_sf(signame)),
+                            color=sigcolors[isig],
+                            dummy=signame,
+                            ) for y in files.keys())
+                        for isig,(signame,sigstr) in enumerate(zip(signames_,sigstrs))
+                        ]
+        else:
+            sigs = [
+                    sum([Hist1D(files[y][signame]["{}_{}_{}".format(region_for_hist,var,signame)],color=sigcolors[isig]) for y in files.keys()])
+                    for isig,signame in enumerate(signames_)
+                    ]
+            for isig,sigstr in enumerate(sigstrs):
+                sigs[isig].set_attr("label", sigstr)
+                if signames_[isig] != "tttt":
+                    sigs[isig] *= 10.
 
         bgs = sorted(bgs, key=lambda bg: bg.get_integral())
         for bg in bgs:
@@ -344,6 +371,7 @@ def worker(info):
         mpl_legend_params = {}
         ratio_range = [0.,3.]
         xticks = []
+        mpl_xtick_params = {}
 
         # # FIXME FIXME FIXME
         # if analysis == "ss" and year != 2016 and not unblindall:
@@ -419,6 +447,10 @@ def worker(info):
             #     data._errors[-10:] *= 0.
             data.set_attr("label", "Data [{}]".format(int(data.get_integral())))
 
+        if (var.lower() in ["charge","el_charge","mu_charge","q3"]):
+            xticks = ["$(-)$","$(+)$",""]
+            mpl_xtick_params = dict(rotation=0, fontsize=14)
+
         if len(files.keys()) > 1:
             fname = "{}/run2_{}_{}.pdf".format(outputdir,region,var)
         else:
@@ -435,6 +467,32 @@ def worker(info):
                        ratio_range=ratio_range,
                        sigs=sigs,
                        do_log=do_log,
+                       mpl_xtick_params=mpl_xtick_params,
+                       mpl_ratio_params={
+                           "label":"Data/Pred.",
+                           },
+                       xticks=xticks,
+                       mpl_sig_params={
+                           # "hist":False,
+                           },
+                       ax_main_callback=ax_main_callback,
+                       mpl_legend_params=mpl_legend_params,
+                       ax_ratio_callback=ax_ratio_callback,
+                       do_bkg_syst=True,
+                       )
+
+        if (region in ["sr","brpostfit"]):
+            fname_tmp = fname.replace(".pdf","_stacked.pdf").replace(".png","_stacked.png")
+            plot_stack(bgs=bgs+sigs, data=data, title=title, xlabel=xlabel, filename=fname_tmp,
+                       cms_type = "Preliminary",
+                       lumi = lumi_,
+                       ratio_range=ratio_range,
+                       # sigs=sigs,
+                       do_log=False,
+                       mpl_xtick_params=mpl_xtick_params,
+                       mpl_ratio_params={
+                           "label":"Data/Pred.",
+                           },
                        xticks=xticks,
                        mpl_sig_params={
                            # "hist":False,

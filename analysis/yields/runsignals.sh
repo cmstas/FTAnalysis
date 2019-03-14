@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-dir="v3.28_ss_mar9_allsignals_v1"
+# dir="v3.28_ss_mar9_allsignals_v1"
+# dir="v3.28_ss_mar12allsigs_v1"
+dir="v3.28_ss_mar13allsigs_v1"
 python py_doAll.py --tag ${dir}  --ss --fastsim --ncpu 30 --slim 
 python py_doAll.py --tag ${dir}  --ss --fastsim --ncpu 30 --proc "fs_t1tttt*" --year 2016
 python py_doAll.py --tag ${dir}  --ss --fastsim --ncpu 30 --proc "fs_t1tttt*" --year 2017

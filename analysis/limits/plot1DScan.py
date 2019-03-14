@@ -16,7 +16,7 @@ from scipy.interpolate import CubicSpline
 
 from matplottery.plotter import set_defaults, add_cms_info
 
-def plot_one(ax,fname,poi_name="r",poi_scale=1.,fmt=".3f",unit="",label="Expected"):
+def plot_one(ax,fname,poi_name="r",poi_scale=1.,fmt=".3f",unit="",label="Expected",color="black",showlines=True,lowerlabel=False):
     f1 = r.TFile(fname)
     t = f1.Get("limit")
 
@@ -37,16 +37,17 @@ def plot_one(ax,fname,poi_name="r",poi_scale=1.,fmt=".3f",unit="",label="Expecte
     rtext = "%%s = ${%%%s}^{+%%%s}_{-%%%s}$ %s" % (fmt,fmt,fmt,unit if unit else "")
     # rtext = "%s = ${%.3f}^{+%.3f}_{-%.3f}$" % (poi_name, r_center,r_center-r_1sigma[0],r_1sigma[1]-r_center)
     rtext = rtext % (poi_name, r_center,r_1sigma[1]-r_center,r_center-r_1sigma[0])
-    ax.text(0.99, 0.97,rtext, horizontalalignment='right', verticalalignment='top', transform = ax.transAxes, size="xx-large")
+    ax.text(0.99, 0.97-(0.1 if lowerlabel else 0.0),rtext, horizontalalignment='right', verticalalignment='top', transform = ax.transAxes, size="xx-large",color=color)
 
-    ax.plot(points[:,0],points[:,1], color="black",marker="o",markersize=3,linewidth=1.5, label=label)
+    ax.plot(points[:,0],points[:,1], color=color,marker="o",markersize=3,linewidth=1.5, label=label)
     line_opts = {"color":"gray","linewidth":0.5,"linestyle":"-"}
-    ax.axhline(y_1sigma,**line_opts)
-    ax.axhline(y_2sigma,**line_opts)
-    ax.plot([r_1sigma[0],r_1sigma[0]],[0.,y_1sigma],**line_opts)
-    ax.plot([r_1sigma[1],r_1sigma[1]],[0.,y_1sigma],**line_opts)
-    ax.plot([r_2sigma[0],r_2sigma[0]],[0.,y_2sigma],**line_opts)
-    ax.plot([r_2sigma[1],r_2sigma[1]],[0.,y_2sigma],**line_opts)
+    if showlines:
+        ax.axhline(y_1sigma,**line_opts)
+        ax.axhline(y_2sigma,**line_opts)
+        ax.plot([r_1sigma[0],r_1sigma[0]],[0.,y_1sigma],**line_opts)
+        ax.plot([r_1sigma[1],r_1sigma[1]],[0.,y_1sigma],**line_opts)
+        ax.plot([r_2sigma[0],r_2sigma[0]],[0.,y_2sigma],**line_opts)
+        ax.plot([r_2sigma[1],r_2sigma[1]],[0.,y_2sigma],**line_opts)
     xmin,xmax = ax.get_xlim()
     ax.set_ylim([0., points[:,1].max()*1.3])
     ax.set_xlim([0., xmax])
@@ -59,8 +60,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("scandata", help="scandata.root file name")
     parser.add_argument("-l", "--label", help="label", default="Expected",type=str)
-    parser.add_argument("-L", "--lumi", help="label", default="136.3",type=str)
+    parser.add_argument("-L", "--lumi", help="label", default="137",type=str)
     parser.add_argument("-x", "--xsec", help="scale and rename POI for xsec", action="store_true")
+    parser.add_argument("-e", "--expected", help="scandata.root file name for expected")
     args = parser.parse_args()
 
     import ROOT as r
@@ -73,7 +75,7 @@ if __name__ == "__main__":
         poi_name = r"$\sigma$"
         poi_scale = 11.97
         unit = "fb"
-        fmt = ".2f"
+        fmt = ".1f"
 
     set_defaults()
 
@@ -82,6 +84,9 @@ if __name__ == "__main__":
 
     # plot_one(ax,fname="original_cards_2017_94X_mcfakes_75ifb/scandata.root", poi_name=poi_name, poi_scale=poi_scale,fmt=".3f",unit="",label="Expected")
     plot_one(ax,fname=args.scandata, poi_name=poi_name, poi_scale=poi_scale,fmt=fmt,unit=unit,label=args.label)
+
+    if args.expected:
+        plot_one(ax,fname=args.expected, poi_name=poi_name, poi_scale=poi_scale,fmt=".1f",unit=unit,label="Expected",color="blue",showlines=False,lowerlabel=True)
 
     add_cms_info(ax, typ="Preliminary", lumi=args.lumi)
 

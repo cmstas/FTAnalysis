@@ -145,6 +145,8 @@ mc_2016 = [
             ["/SMS-T1tbs_RPV_mGluino1900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "RPV_T1tbs_mGluino1900"],
             ["/SMS-T1tbs_RPV_mGluino2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "RPV_T1tbs_mGluino2000"],
 
+            # ["/TT_FCNC-TtoHJ_aTleptonic_HToWWZZtautau_eta_hut-MadGraph5-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "FCNC_hut_top"],
+            # ["/TT_FCNC-aTtoHJ_Tleptonic_HToWWZZtautau_eta_hut-MadGraph5-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "FCNC_hut_antitop"],
 
         ]
 
@@ -490,19 +492,34 @@ mc_2018 = [
         ["/ttH_HToTT_1J_mH-625_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "Higgs_ttH_625"],
         ["/ttH_HToTT_1J_mH-650_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "Higgs_ttH_650"],
 
+        ["/tHW_HToTT_350/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_350"],
         ["/tHW_HToTT_375/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_375"],
-        ["/tHW_HToTT_425/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_425"],
+        ["/tHW_HToTT_400/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_400"],
+        ["/tHW_HToTT_450/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_450"],
         ["/tHW_HToTT_475/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_475"],
+        ["/tHW_HToTT_500/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_500"],
         ["/tHW_HToTT_525/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_525"],
+        ["/tHW_HToTT_550/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_550"],
         ["/tHW_HToTT_575/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_575"],
+        ["/tHW_HToTT_600/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_600"],
         ["/tHW_HToTT_625/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_625"],
+        ["/tHW_HToTT_650/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHW_650"],
 
+        ["/tHq_HToTT_350/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_350"],
         ["/tHq_HToTT_375/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_375"],
+        ["/tHq_HToTT_400/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_400"],
         ["/tHq_HToTT_425/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_425"],
+        ["/tHq_HToTT_450/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_450"],
         ["/tHq_HToTT_475/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_475"],
+        ["/tHq_HToTT_500/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_500"],
         ["/tHq_HToTT_525/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_525"],
+        ["/tHq_HToTT_550/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_550"],
         ["/tHq_HToTT_575/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_575"],
+        ["/tHq_HToTT_600/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_600"],
         ["/tHq_HToTT_625/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_625"],
+        ["/tHq_HToTT_650/RunIIAutumn18MiniAOD-privateMC_102X_v2/CMS4", "Higgs_tHq_650"],
+
+
 
         ]
 

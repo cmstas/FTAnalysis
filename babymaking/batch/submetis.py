@@ -83,18 +83,18 @@ if __name__ == "__main__":
     ##     ])]
     ## extra_ags = "--ignorebadfiles"
 
-    year_sample_map = [("2018",mc_2018)]
-    # year_sample_map = [("2018",data_2018)]
-    # year_sample_map = [("2018",data_2018)]
-    # tag = "v3.25" # 2018 only, preliminary jecs without residuals, before they were announced (so they could be wrong) -- bugged Autumn18_V1 JECs (but identical to V2 actually)
-    # tag = "v3.26" # 2018 only, preliminary jecs without residuals -- bugfixed Autumn18_V3 JECs
-    # tag = "v3.27" # 2018 only, same as v3.26 with new 102x btag SFs
-    # tag = "v3.27_resid17" # same as v3.27 (but DATA ONLY, so need to copy MC over) but fall17F V32 residuals (Autumn18_V3_OldRes data payload)
-    tag = "v3.28" # new V8 resids split into ABCD
-    extra_args = ""
-    tag_match = ""
-    # extra_args = "--xrootd" # cabinet nodes have messed up hadoop mapping
-    # extra_args = "--ignorebadfiles" # FIXME
+    # year_sample_map = [("2018",mc_2018)]
+    # # year_sample_map = [("2018",data_2018)]
+    # # year_sample_map = [("2018",data_2018)]
+    # # tag = "v3.25" # 2018 only, preliminary jecs without residuals, before they were announced (so they could be wrong) -- bugged Autumn18_V1 JECs (but identical to V2 actually)
+    # # tag = "v3.26" # 2018 only, preliminary jecs without residuals -- bugfixed Autumn18_V3 JECs
+    # # tag = "v3.27" # 2018 only, same as v3.26 with new 102x btag SFs
+    # # tag = "v3.27_resid17" # same as v3.27 (but DATA ONLY, so need to copy MC over) but fall17F V32 residuals (Autumn18_V3_OldRes data payload)
+    # tag = "v3.28" # new V8 resids split into ABCD
+    # extra_args = ""
+    # tag_match = ""
+    # # extra_args = "--xrootd" # cabinet nodes have messed up hadoop mapping
+    # # extra_args = "--ignorebadfiles" # FIXME
 
     year_sample_map = [
             ("2017",mc_2017),
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         ["/SMS-T6ttHZ_BR-H_0p6_mStop300to1000_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTHZ_m1_ext"],
         ["/SMS-T6ttHZ_BR-H_0p6_mStop1050to1600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTHZ_m2_ext"], # Doesn't overlap with 2016 sample
         ])]
-    extra_ags = "--ignorebadfiles"
+    extra_args = "--ignorebadfiles"
 
     # year_sample_map = [("2017",[
     #     ["/WZTo3LNu_0Jets_MLL-4to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "test_WZmll4_0j"],
