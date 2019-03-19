@@ -2,14 +2,17 @@
 
 #### Run upper limits
 
-Assuming you've run `py_doAll.py` and ended up with a folder here,
+* Assuming you've run `py_doAll.py` and ended up with a folder here,
 edit `make_commands.sh` to point to the relevant directory and make sure
-the glob string for `procs` includes what you want. Then run `./make_commands.sh > commands.txt`
+the glob string for `procs` includes what you want. 
+
+* Then run `./make_commands.sh > commands.txt`
 to populate a text file with some commands which will make ROOT workspaces from the cards.
 You can run a few of them interactively, or use GNU parallel (`./parallel --jobs 30 --bar < commands.txt`)
-to speed up the process. Now you will end up with `${basedir}/card_*_run2.root` files.
-Now you can run limits with HiggsCombine via `combine -M AsymptoticLimits basedir/card_blah.root`.
-For batch submission, see `batch/`.
+to speed up the process. Then you will end up with `${basedir}/card_*_run2.root` files.
+  * NOTE: If running parallel, you need to run one of the commands serially first (there is a race condition otherwise :( ). I need to fix it eventually.
+
+* Now you can run limits with HiggsCombine via `combine -M AsymptoticLimits basedir/card_blah.root`.  For batch submission, see `batch/`.
 
 ### Four top (TOP)
 
