@@ -26,6 +26,9 @@ export LANG=en_US.UTF-8
 
 [[ -d ${FTBASE}/common/matplottery/ ]] || {
     git clone git@github.com:aminnj/matplottery.git ${FTBASE}/common/matplottery/;
+    pip install --user matplotlib
+    pip install --user uproot
+    export PATH=/home/users/${USER}/.local/bin:$PATH
 }
 # [[ -d babymaking/batch/NtupleTools/ ]] || git clone git@github.com:cmstas/NtupleTools.git babymaking/batch/NtupleTools/
 if [ ! -d ${FTBASE}/babymaking/batch/ProjectMetis/ ]; then

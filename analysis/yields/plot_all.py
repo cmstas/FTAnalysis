@@ -9,7 +9,7 @@ import re
 from analysis.utils.plotting_utils import write_table
 
 import sys
-sys.path.insert(0,'/home/users/namin/.local/lib/python2.7/site-packages/')
+sys.path.insert(0,'/home/users/{}/.local/lib/python2.7/site-packages/'.format(os.getenv("USER"))
 from matplottery.plotter import plot_stack
 from matplottery.utils import Hist1D, MET_LATEX, binomial_obs_z
 
