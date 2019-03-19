@@ -1973,16 +1973,19 @@ plots_t run(TChain *chain, int year, TString options){
             float weight_bb_up_alt = weight;
             if ((isttZ || isttW || isttH)) {
                 if (ss::extragenb() >= 2) {
+
                     weight *= (0.7+1);
+                    weight_bb_up_alt = (0.6+1)*weight;
 
-                    // weight_bb_up_alt = (0.6+1)*weight;
+                    // weight *= (0.3+1);
+                    // weight_bb_up_alt = (0.2+1)*weight;
 
-                    // increase uncertainty for ttW
-                    if (isttW) {
-                        weight_bb_up_alt = (0.78+1)*weight;
-                    } else {
-                        weight_bb_up_alt = (0.6+1)*weight;
-                    }
+                    // // increase uncertainty for ttW
+                    // if (isttW) {
+                    //     weight_bb_up_alt = (0.78+1)*weight;
+                    // } else {
+                    //     weight_bb_up_alt = (0.6+1)*weight;
+                    // }
 
                 }
             }

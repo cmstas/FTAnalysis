@@ -455,6 +455,7 @@ class babyMaker {
     int nhiggs;
 
     vector <LorentzVector> genps_p4;
+    vector <LorentzVector> genjets_p4;
     vector <int> genps_id;
     vector <int> genps_id_mother;
     vector <int> genps_idx_mother;

@@ -195,8 +195,8 @@ def make_yukawa_plot(scaninfo):
                 (p1,p2[0]),
                 ],
             [
-                "Obs. upper limit",
-                "Obs. cross section",
+                "Observed upper limit",
+                "Observed cross section",
                 "Predicted cross section,\nPhys. Rev. D 95 (2017) 053004",
                 ],
             handler_map={OneSideHatchObject: OneSideHatchObjectHandler()},
@@ -419,6 +419,10 @@ def make_higgs_plot(basedir,globber,do_scalar=True):
     # smooth the theory curve.
     from scipy.signal import savgol_filter
     theory = savgol_filter(theory,5,2)
+    # sp2 = savgol_filter(sp2,5,2)
+    # sp1 = savgol_filter(sp1,5,2)
+    # sm2 = savgol_filter(sm2,5,2)
+    # sm1 = savgol_filter(sm1,5,2)
 
     fig,ax = get_fig_ax()
     add_cms_info(ax, lumi="137")
@@ -570,6 +574,14 @@ def make_rpv_plot(biglog,globber,outdir="scanplots",do_tbs=True):
     df = pd.DataFrame(infos)
     df = df.sort_values("mass")
 
+    df["eodiff"] = ((df["obsr"]-df["expr"])/df["expr"])
+
+    # print df["eodiff"].mean()
+    # print df
+    if "t1qqqql" in globber:
+        print("EXCLUDING 1900 and 2300 points for t1qqqql")
+        df = df[(df.mass != 1900)&(df.mass != 2300)]
+
 
     obs = (df["obs"]).values
     exp = (df["exp"]).values
@@ -660,10 +672,15 @@ if __name__ == "__main__":
 #     make_rpv_plot(basedir="v3.26_feb27_allsigs_v1",outdir="scanplots_test/",globber="card_rpv_t1tbs_*_all_run2.log",do_tbs=True)
 #     make_rpv_plot(basedir="v3.26_feb27_allsigs_v1",outdir="scanplots_test/",globber="card_fs_t1qqqql_*_all_run2.log",do_tbs=False)
 
-    # # Mar 13, latest
+    # # Mar 13, latest -- had 1.7pm0.85 ttbb/ttjj (extra 30% on ttw+bb)
     # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbbhiggs_v1//",globber="card_higgs*_run2.log",do_scalar=True)
     # make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbbhiggs_v1//",globber="card_higgs*_run2.log",do_scalar=False)
     # make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar13ttwbb_v1/log_yukawa_scan.txt")
 
+    # Mar 18, latest -- back to nominal 1.7pm0.6 ttbb/ttjj
+    make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar18higgs_v2/",globber="card_higgs*_run2.log",do_scalar=True)
+    make_higgs_plot(basedir="ft_updated2018_run2_19Mar5/v3.28_ft_mar18higgs_v2/",globber="card_higgs*_run2.log",do_scalar=False)
+    make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar18nominal_v1/log_yukawa_scan.txt")
+
     # make_rpv_plot(biglog="batch/biglog_v3.pkl",outdir="scanplots_test/",globber="*rpv_t1tbs_*",do_tbs=True)
-    make_rpv_plot(biglog="batch/biglog_v3.pkl",outdir="scanplots_test/",globber="*fs_t1qqqql_*",do_tbs=False)
+    # make_rpv_plot(biglog="batch/biglog_v3.pkl",outdir="scanplots_test/",globber="*fs_t1qqqql_*",do_tbs=False)

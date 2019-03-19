@@ -18,12 +18,12 @@ function make_skims() {
             continue
         }
         echo skim.py -t t -c "${cut}" "${basedir}/${sample}" -o ${outname} --flipbranches -b "${branches}"
-        # skim.py -t t -c "${cut}" "${basedir}/${sample}" -o ${outname} --flipbranches -b "${branches}"
+        skim.py -t t -c "${cut}" "${basedir}/${sample}" -o ${outname} --flipbranches -b "${branches}"
     done
     # Now combine the two separate stop mass ranges into a single sample for convenience
     if [ -e ${basedir}/${skimdir}/T6TTHZ_m1.root -a -e ${basedir}/${skimdir}/T6TTHZ_m2.root ]; then
         if [ ! -e ${basedir}/${skimdir}/T6TTHZ_both.root ]; then
-            # echo hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both.root ${basedir}/${skimdir}/T6TTHZ_m1.root ${basedir}/${skimdir}/T6TTHZ_m2.root 
+            echo hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both.root ${basedir}/${skimdir}/T6TTHZ_m1.root ${basedir}/${skimdir}/T6TTHZ_m2.root 
             hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both.root ${basedir}/${skimdir}/T6TTHZ_m1.root ${basedir}/${skimdir}/T6TTHZ_m2.root 
         else
             echo "${basedir}/${skimdir}/T6TTHZ_both.root already exists, not combining the two subsamples"
@@ -31,7 +31,7 @@ function make_skims() {
     fi
     if [ -e ${basedir}/${skimdir}/T6TTHZ_m1_ext.root -a -e ${basedir}/${skimdir}/T6TTHZ_m2_ext.root ]; then
         if [ ! -e ${basedir}/${skimdir}/T6TTHZ_both_ext.root ]; then
-            # echo hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both_ext.root ${basedir}/${skimdir}/T6TTHZ_m1_ext.root ${basedir}/${skimdir}/T6TTHZ_m2_ext.root 
+            echo hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both_ext.root ${basedir}/${skimdir}/T6TTHZ_m1_ext.root ${basedir}/${skimdir}/T6TTHZ_m2_ext.root 
             hadd -k -f ${basedir}/${skimdir}/T6TTHZ_both_ext.root ${basedir}/${skimdir}/T6TTHZ_m1_ext.root ${basedir}/${skimdir}/T6TTHZ_m2_ext.root 
         else
             echo "${basedir}/${skimdir}/T6TTHZ_both_ext.root already exists, not combining the two subsamples"

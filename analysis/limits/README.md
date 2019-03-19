@@ -1,4 +1,17 @@
-### So you want to show you're the best?
+### Same sign (SUS)
+
+#### Run upper limits
+
+Assuming you've run `py_doAll.py` and ended up with a folder here,
+edit `make_commands.sh` to point to the relevant directory and make sure
+the glob string for `procs` includes what you want. Then run `./make_commands.sh > commands.txt`
+to populate a text file with some commands which will make ROOT workspaces from the cards.
+You can run a few of them interactively, or use GNU parallel (`./parallel --jobs 30 --bar < commands.txt`)
+to speed up the process. Now you will end up with `${basedir}/card_*_run2.root` files.
+Now you can run limits with HiggsCombine via `combine -M AsymptoticLimits basedir/card_blah.root`.
+For batch submission, see `batch/`.
+
+### Four top (TOP)
 
 The combine documentation lives in [here](https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideHiggsAnalysisCombinedLimit#How_to_run_the_tool)
 

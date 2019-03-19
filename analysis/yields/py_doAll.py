@@ -132,7 +132,6 @@ if __name__ == "__main__":
                 }
 
     else:
-        # don't yet have skim for four top
         basedirs = {
 
                 # "2016_94x": "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/",
@@ -544,7 +543,8 @@ if __name__ == "__main__":
                     "higgsh470": make_obj([ basedirs[2018]+"Higgs_ttH_475.root", basedirs[2018]+"Higgs_tHW_475.root", basedirs[2018]+"Higgs_tHq_475.root", ],options=options[2018]+"  "),
                     "higgsh490": make_obj([ basedirs[2018]+"Higgs_ttH_500.root", basedirs[2018]+"Higgs_tHW_500.root", basedirs[2018]+"Higgs_tHq_500.root", ],options=options[2018]+"  "),
                     "higgsh510": make_obj([ basedirs[2018]+"Higgs_ttH_500.root", basedirs[2018]+"Higgs_tHW_500.root", basedirs[2018]+"Higgs_tHq_500.root", ],options=options[2018]+"  "),
-                    "higgsh530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_525.root", ],options=options[2018]+"  "),
+                    # "higgsh530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_525.root", ],options=options[2018]+"  "),
+                    "higgsh530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_526.root", ],options=options[2018]+"  "),
                     "higgsh550": make_obj([ basedirs[2018]+"Higgs_ttH_550.root", basedirs[2018]+"Higgs_tHW_550.root", basedirs[2018]+"Higgs_tHq_550.root", ],options=options[2018]+"  "),
                     "higgsh570": make_obj([ basedirs[2018]+"Higgs_ttH_575.root", basedirs[2018]+"Higgs_tHW_575.root", basedirs[2018]+"Higgs_tHq_575.root", ],options=options[2018]+"  "),
                     "higgsh590": make_obj([ basedirs[2018]+"Higgs_ttH_575.root", basedirs[2018]+"Higgs_tHW_600.root", basedirs[2018]+"Higgs_tHq_600.root", ],options=options[2018]+"  "),
@@ -561,7 +561,8 @@ if __name__ == "__main__":
                     "higgsa470": make_obj([ basedirs[2018]+"Higgs_ttH_475.root", basedirs[2018]+"Higgs_tHW_475.root", basedirs[2018]+"Higgs_tHq_475.root", ],options=options[2018]+"  "),
                     "higgsa490": make_obj([ basedirs[2018]+"Higgs_ttH_500.root", basedirs[2018]+"Higgs_tHW_500.root", basedirs[2018]+"Higgs_tHq_500.root", ],options=options[2018]+"  "),
                     "higgsa510": make_obj([ basedirs[2018]+"Higgs_ttH_500.root", basedirs[2018]+"Higgs_tHW_500.root", basedirs[2018]+"Higgs_tHq_500.root", ],options=options[2018]+"  "),
-                    "higgsa530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_525.root", ],options=options[2018]+"  "),
+                    # "higgsa530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_525.root", ],options=options[2018]+"  "),
+                    "higgsa530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_526.root", ],options=options[2018]+"  "),
                     "higgsa550": make_obj([ basedirs[2018]+"Higgs_ttH_550.root", basedirs[2018]+"Higgs_tHW_550.root", basedirs[2018]+"Higgs_tHq_550.root", ],options=options[2018]+"  "),
                     "higgsa570": make_obj([ basedirs[2018]+"Higgs_ttH_575.root", basedirs[2018]+"Higgs_tHW_575.root", basedirs[2018]+"Higgs_tHq_575.root", ],options=options[2018]+"  "),
                     "higgsa590": make_obj([ basedirs[2018]+"Higgs_ttH_575.root", basedirs[2018]+"Higgs_tHW_600.root", basedirs[2018]+"Higgs_tHq_600.root", ],options=options[2018]+"  "),

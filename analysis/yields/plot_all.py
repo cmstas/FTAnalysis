@@ -111,6 +111,13 @@ ssregions_ll = ("ssbr","br","ml","mlonz","mloffz","hh","lm","ll")
 # ssregions = ("lm",)
 labels["ss"] = {
 
+        # "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "Region"],
+        # "ht"         : [("br",), r"$H_\mathrm{T}$ (GeV)"],
+        # "met"        : [("br",), r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
+        # "mtmin"      : [("br",), r"$m_\mathrm{T}^\mathrm{min}$"],
+        # "njets"      : [("br",), r"$N_\mathrm{jets}$"],
+        # "nbtags"     : [("br",), r"$N_\mathrm{b}$"],
+        # "charge"     : [("br",), r"SS charge"],
 
         "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "Region"],
         "category"   : [("sr",), r"HH,HL,LL,MLoffZ,MLonZ,LM"],
@@ -304,6 +311,12 @@ def worker(info):
             elif title == "TTWCR":
                 title = "CRW"
 
+        if analysis == "ss":
+            if title in ["BR"]:
+                title = "Baseline"
+            if title in ["SRHH","SRHL","SRLL","SRML","SRLM"] and (var == "TOTAL"):
+                title = title.replace("SR","")
+
         region_for_hist = region[:]
         if region == "brpostfit":
             region_for_hist = "br"
@@ -386,7 +399,7 @@ def worker(info):
             mpl_legend_params["ncol"] = 2
             mpl_legend_params["labelspacing"] = 0.12
 
-            if region == "SRLL" and lumi == "137.2": lumi_ = "132.4"
+            if region == "SRLL" and lumi == "137": lumi_ = "132"
 
             data.poissonify()
 
@@ -451,6 +464,32 @@ def worker(info):
             xticks = ["$(-)$","$(+)$",""]
             mpl_xtick_params = dict(rotation=0, fontsize=14)
 
+        # specific plots tuned by hand
+        if analysis == "ss":
+            if region.lower() == "br":
+                if var.lower() == "charge":
+                    def ax_main_callback(ax):
+                        ax.set_xlim([-1,2.6])
+                    def ax_ratio_callback(ax):
+                        ax.set_xlim([-1,2.6])
+            if var == "TOTAL":
+                if region == "SRLL":
+                    def ax_main_callback(ax):
+                        ax.set_ylim([0.05,ax.get_ylim()[1]*5.5])
+                        ax.set_yscale("log", nonposy='clip'),
+                if region == "SRML":
+                    # mpl_legend_params["fontsize"] = 8
+                    # mpl_legend_params["framealpha"] = 0.4
+                    mpl_legend_params["ncol"] = 3
+                    # mpl_legend_params["labelspacing"] = 0.12
+                    def ax_main_callback(ax):
+                        ax.set_ylim([0.05,ax.get_ylim()[1]*7.5])
+                        ax.set_yscale("log", nonposy='clip'),
+                if region == "SRLM":
+                    def ax_main_callback(ax):
+                        ax.set_ylim([0.05,ax.get_ylim()[1]*4.0])
+                        ax.set_yscale("log", nonposy='clip'),
+
         if len(files.keys()) > 1:
             fname = "{}/run2_{}_{}.pdf".format(outputdir,region,var)
         else:
@@ -461,7 +500,7 @@ def worker(info):
             fname_tmp = str(fname)
             if do_log:
                 fname_tmp = fname.replace(".pdf","_log.pdf").replace(".png","_log.png")
-            plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, filename=fname_tmp,
+            plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, ylabel="Events", filename=fname_tmp,
                        cms_type = "Preliminary",
                        lumi = lumi_,
                        ratio_range=ratio_range,
@@ -483,7 +522,7 @@ def worker(info):
 
         if (region in ["sr","brpostfit"]):
             fname_tmp = fname.replace(".pdf","_stacked.pdf").replace(".png","_stacked.png")
-            plot_stack(bgs=bgs+sigs, data=data, title=title, xlabel=xlabel, filename=fname_tmp,
+            plot_stack(bgs=bgs+sigs, data=data, title=title, xlabel=xlabel, ylabel="Events", filename=fname_tmp,
                        cms_type = "Preliminary",
                        lumi = lumi_,
                        ratio_range=ratio_range,

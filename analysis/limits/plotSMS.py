@@ -697,8 +697,8 @@ if __name__ == "__main__":
     # modstr = args.model or "t6tthzbrh"
     os.system("mkdir -p {}".format(outdir))
 
-    # dos = False
-    # modstr = "t1tttt"
+    # dos = True
+    # modstr = "t5tttt"
     # modstr = "t6ttww"
     # modstr = "t5qqqqvv"
     # modstr = "t5qqqqww"
@@ -873,7 +873,7 @@ if __name__ == "__main__":
             diag_x2 = 350+900,
             diag_y2 = 200+900,
             lumi = 137,
-            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=0%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
+            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=0%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
             label_yaxis = "m_{#tilde{t}_{1}} (GeV)",
@@ -898,7 +898,7 @@ if __name__ == "__main__":
             diag_x2 = 350+900,
             diag_y2 = 200+900,
             lumi = 137,
-            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=50%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
+            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=50%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
             label_yaxis = "m_{#tilde{t}_{1}} (GeV)",
@@ -923,7 +923,7 @@ if __name__ == "__main__":
             diag_x2 = 300+900,
             diag_y2 = 300+900,
             lumi = 137,
-            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=100%}{m_{#tilde{t}_{2}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
+            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=100%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
             label_yaxis = "m_{#tilde{t}_{1}} (GeV)",
@@ -938,14 +938,14 @@ if __name__ == "__main__":
             is_gluino = True,
             outname = "{}/t5tttt_scan_xsec_run2.pdf".format(outdir),
             do_significance = dos,
-            minx = 600,
+            minx = 800,
             maxx = 2300,
             miny = 0,
             maxy = 1900,
-            diag_x1 = 600,
-            diag_y1 = 340,
-            diag_x2 = 600+1400,
-            diag_y2 = 340+1400,
+            diag_x1 = 800,
+            diag_y1 = 540,
+            diag_x2 = 800+1400,
+            diag_y2 = 540+1400,
             lumi = 137,
             label_mass = "m_{#kern[0.5]{#tilde{t}_{1}}} = m_{#tilde{#chi}^{0}_{1}} + m_{#kern[0.3]{t}}",
             label_diag = "m_{#tilde{g}} - m_{#tilde{#chi}^{0}_{1}} = m_{t} + m_{W} + m_{b}",

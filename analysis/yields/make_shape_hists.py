@@ -125,6 +125,19 @@ def modify_central(h, fname_in, name, region, year, f_nominal=None, doss=False,o
                         if verbose_: print "[!] Bin {} of {} has yield {}+-{} and no yields in MC either, so setting value to 0 and error to avg tf of {}".format(ix,h,v,ve,avgtf)
                         ve = h.GetBinError(ix)
                         h.SetBinError(ix,avgtf)
+            # else:
+            #     app16 = nom16unw.GetBinContent(ix)
+            #     app17 = nom17unw.GetBinContent(ix)
+            #     app18 = nom18unw.GetBinContent(ix)
+            #     apptot = app16+app17+app18
+            #     if apptot < 5:
+            #         avgtf = 0.1
+            #         # err on avg tf is .35 from err of ~.3 on fr; add that in quadrature
+            #         val = max(avgtf*apptot,1e-6)
+            #         err = avgtf*(apptot**0.5)
+            #         err = (err**2.+(0.35*val)**2.)**0.5
+            #         h.SetBinContent(ix,val/3.)
+            #         h.SetBinError(ix,err/(3**.5))
 
 def write_one_file(fname_in, fname_out, name, region, year, doss):
     if not os.path.exists(fname_in):

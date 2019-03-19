@@ -159,6 +159,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
   BabyTree->Branch("nhiggs"                                                , &nhiggs                                                );
   BabyTree->Branch("higgs_mass"                                                , &higgs_mass                                                );
   BabyTree->Branch("genps_p4"                                                , &genps_p4                                                );
+  BabyTree->Branch("genjets_p4"                                                , &genjets_p4                                                );
   BabyTree->Branch("genps_id"                                                , &genps_id                                                );
   BabyTree->Branch("genps_id_mother"                                         , &genps_id_mother                                         );
   BabyTree->Branch("genps_idx_mother"                                        , &genps_idx_mother                                        );
@@ -804,6 +805,7 @@ void babyMaker::InitBabyNtuple(){
     nhiggs = -1;
     higgs_mass = -1;
     genps_p4.clear();
+    genjets_p4.clear();
     genps_id.clear();
     genps_id_mother.clear();
     genps_idx_mother.clear();
@@ -2794,6 +2796,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       nleptonic = std::accumulate(genwleptonic.begin(),genwleptonic.end(),0);
       ntau = std::accumulate(genwtau.begin(),genwtau.end(),0);
       if (gengood) {
+
+          // genjets_p4 = genjets_p4NoMuNoNu();
 
           // Make vector of [12-2*nleptonic] quarks to be matched
           std::vector<int> qidxtomatch;

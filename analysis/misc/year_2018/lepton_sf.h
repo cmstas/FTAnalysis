@@ -14,6 +14,7 @@ float leptonScaleFactor_err(int pdgId, float pt, float eta, float ht, float rand
     if (abs(pdgId)==13) {
         float e1=muonScaleFactorError_RunABCD(pt,eta);
         float e2=muonScaleFactorError_Medium(pt,eta);
+        // float e2=0.02;
         return pow(e1*e1+e2*e2,0.5);
     } else if (abs(pdgId)==11){
         float e1=electronScaleFactorError_RunABCD(pt,eta);
