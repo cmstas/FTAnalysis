@@ -64,6 +64,10 @@ def do_combine(
         ):
     if len(extra_procs) > 0: signal = extra_procs[0]
 
+    # if "hhat" in signal:
+    #     procs.remove("tttt")
+
+
     if correlate_none:
         to_correlate = []
 

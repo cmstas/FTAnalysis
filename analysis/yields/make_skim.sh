@@ -41,11 +41,22 @@ function make_skims() {
 
 mkdir -p logs
 
-make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/" >& logs/skim_log_2016.txt &
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/" >& logs/skim_log_2017.txt &
-make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24_newfixfsjecs/output/year_2017/" >& logs/skim_log_2017fix.txt &
-make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/" >& logs/skim_log_2018.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/" >& logs/skim_log_2016.txt &
+# # make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/" >& logs/skim_log_2017.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24_newfixfsjecs/output/year_2017/" >& logs/skim_log_2017fix.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/" >& logs/skim_log_2018.txt &
 
-# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24_newfixfsjecs/output/year_2017/" &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.30//output/year_2016/" >& logs/skim_log_2016.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.30//output/year_2017/" >& logs/skim_log_2017.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.30//output/year_2018/" >& logs/skim_log_2018.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.29//output/year_2016_94x//" >& logs/skim_log_2016_94x.txt &
+
+# # make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.30_hhat/output/year_2016/" >& logs/skim_log_2016.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.30_hhat/output/year_2017/" >& logs/skim_log_2017.txt &
+# make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.30_hhat/output/year_2018/" >& logs/skim_log_2018.txt &
+
+make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31//output/year_2016_94x//" >& logs/skim_log_2016_94x.txt &
+make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31//output/year_2017/" >& logs/skim_log_2017.txt &
+make_skims "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31//output/year_2018/" >& logs/skim_log_2018.txt &
 
 wait

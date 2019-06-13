@@ -204,6 +204,7 @@ def write_one_file(fname_in, fname_out, name, region, year, doss):
         return
 
     is_higgs = "higgs" in name
+    is_oblique = "hhat" in name
     is_fastsim = "fs_" in name
 
     # stat
@@ -222,7 +223,7 @@ def write_one_file(fname_in, fname_out, name, region, year, doss):
                 if is_fastsim or (syst not in ["scale","pdf"]):
                     h_syst.Scale(h_nominal.Integral()/divz(h_syst.Integral()))
                 h_syst.Write()
-    elif (name in ["ttw","ttz","tth","rares","xg","ttvv","wz","ww"]) or is_higgs or is_fastsim:
+    elif (name in ["ttw","ttz","tth","rares","xg","ttvv","wz","ww"]) or is_higgs or is_fastsim or is_oblique:
         for syst in ["scale","pdf"]:
             if is_fastsim:
                 h_alt = fin.Get("{}_{}_UP_TOTAL_{}".format(region,syst.upper(),name))
@@ -331,7 +332,7 @@ def write_one_file(fname_in, fname_out, name, region, year, doss):
         h_syst_up.Write()
         h_syst_down.Write()
 
-        if all(x not in name for x in ["fs_","rpv_"]):
+        if all(x not in name for x in ["fs_","rpv_","fcnc_"]):
 
             # ISR - take half the deviation
             h_alt = fin.Get("{}_ISR_UP_TOTAL_{}".format(region,name))

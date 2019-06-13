@@ -76,6 +76,9 @@ fs_t5qqqqvvdm20_m1400_m1
 fs_t5qqqqvvdm20_m900_m600
 fs_t5qqqqwwdm20_m1400_m1
 fs_t5qqqqwwdm20_m900_m600
+fs_t6tthzbrz_m850_m625
+fs_t6tthzbrb_m850_m625
+fs_t6tthzbrh_m850_m625
     """.strip().splitlines()
 
     bg_yields = sum_dicts(map(get_yields_for_proc,bg_procs))
@@ -95,6 +98,7 @@ fs_t5qqqqwwdm20_m900_m600
         x = x.replace("t6","T6")
         x = x.replace("ww","WW")
         x = x.replace("vv","VV")
+        x = x.replace("hz","HZ")
         x = x.replace("dm20"," (dM20)")
         return x
 

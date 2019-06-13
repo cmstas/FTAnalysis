@@ -227,6 +227,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
   BabyTree->Branch("lep2_trigMatch_noIsoReq"                                 , &lep2_trigMatch_noIsoReq                                 );
   BabyTree->Branch("lep2_trigMatch_isoReq"                                   , &lep2_trigMatch_isoReq                                   );
   BabyTree->Branch("passes_met_filters"                                      , &passes_met_filters                                      );
+  BabyTree->Branch("passes_chargedcand_filter"                                      , &passes_chargedcand_filter                                      );
   BabyTree->Branch("evt_egclean_pfmet"                                      , &evt_egclean_pfmet                                      );
   BabyTree->Branch("evt_muegclean_pfmet"                                      , &evt_muegclean_pfmet                                      );
   BabyTree->Branch("evt_muegcleanfix_pfmet"                                      , &evt_muegcleanfix_pfmet                                      );
@@ -495,6 +496,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
   BabyTree->Branch("nleptonic"       , &nleptonic       );
   BabyTree->Branch("ntau"       , &ntau       );
   BabyTree->Branch("nleptonicW"       , &nleptonicW       );
+  BabyTree->Branch("mfourtop"       , &mfourtop       );
   BabyTree->Branch("nhadronicW"       , &nhadronicW       );
   BabyTree->Branch("nW"       , &nW       );
   BabyTree->Branch("leptonicWSF"       , &leptonicWSF       );
@@ -557,6 +559,7 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
   BabyTree->Branch("bdt_disc_jec_dn",&bdt_disc_jec_dn);
   BabyTree->Branch("bdt_disc_jer_dn",&bdt_disc_jer_dn);
   BabyTree->Branch("bdt_run2_disc",&bdt_run2_disc);
+  BabyTree->Branch("bdt_run2_SRDISC",&bdt_run2_SRDISC);
   BabyTree->Branch("bdt_run2_disc_jec_up",&bdt_run2_disc_jec_up);
   BabyTree->Branch("bdt_run2_disc_jer_up",&bdt_run2_disc_jer_up);
   BabyTree->Branch("bdt_run2_disc_jec_dn",&bdt_run2_disc_jec_dn);
@@ -578,8 +581,12 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
     // calib4 = new BTagCalibration("deepflavour", "CORE/Tools/btagsf/data/run2_25ns/DeepFlavour_94XSF_V1_B_F.csv");
 
     if (gconf.year == 2016) {
-        calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
-        calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
+        if (gconf.cmssw_ver == 80) {
+            calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_B_F.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
+            calib2 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_Moriond17_G_H.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation80XReReco
+        } else {
+            calib1 = new BTagCalibration("deepcsv", "CORE/Tools/btagsf/data/run2_25ns/DeepCSV_2016LegacySF_V1.csv"); // https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation2016Legacy
+        }
     }
 
     if (gconf.year == 2018) {
@@ -613,11 +620,16 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
     btcr_test->load(*calib4, BTagEntry::JetFlavor::FLAV_C, "iterativefit");
     btcr_test->load(*calib4, BTagEntry::JetFlavor::FLAV_UDSG, "iterativefit");
 
-    // calib_fs = new BTagCalibration("csvv2_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_csvv2_ttbar_26_1_2017.csv");
     if (gconf.year == 2016) {
-        calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_deepcsv_ttbar_26_1_2017.csv");
-    } else {
-        calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/deepcsv_13TEV_17_6_3_2019.csv");
+        if (gconf.cmssw_ver == 80) {
+            calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/fastsim_deepcsv_ttbar_26_1_2017.csv");
+        } else {
+            calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/deepcsv_13TEV_16SL_18_3_2019.csv");
+        }
+    } else if (gconf.year == 2017) {
+        calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/deepcsv_13TEV_17SL_18_3_2019.csv");
+    } else if (gconf.year == 2018) {
+        calib_fs = new BTagCalibration("deepcsv_fs", "CORE/Tools/btagsf/data/run2_fastsim/deepcsv_13TEV_18SL_7_5_2019.csv");
     }
 
     btcr_fs = new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central", {"up","down"});
@@ -651,6 +663,8 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
             f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1tttt_2016_80X_deepCSV.root");
         } else if (gconf.year == 2017) {
             f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__SMS-T1tttt_2017_94X_deepCSV.root");
+        } else if (gconf.year == 2018) {
+            f_btag_eff = new TFile("CORE/Tools/btagsf/data/run2_fastsim/btageff__DeepCSV_SMS_T2tt_fastsim_Autumn18.root");
         }
         TH2D* h_btag_eff_b_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_b");
         TH2D* h_btag_eff_c_temp    = (TH2D*) f_btag_eff->Get("h2_BTaggingEff_csv_med_Eff_c");
@@ -952,6 +966,7 @@ void babyMaker::InitBabyNtuple(){
     fired_trigger_ss = 0;
     triggers = 0;
     passes_met_filters = 0;
+    passes_chargedcand_filter = 0;
     evt_egclean_pfmet = -1.0;
     evt_muegclean_pfmet = -1.0;
     evt_muegcleanfix_pfmet = -1.0;
@@ -1136,6 +1151,7 @@ void babyMaker::InitBabyNtuple(){
     nleptonic = 0;
     ntau = 0;
     nleptonicW = 0;
+    mfourtop = 0;
     nhadronicW = 0;
     nW = 0;
     leptonicWSF = 0.;
@@ -1206,6 +1222,7 @@ void babyMaker::InitBabyNtuple(){
     bdt_disc_jec_dn = 0.;
     bdt_disc_jer_dn = 0.;
     bdt_run2_disc = 0.;
+    bdt_run2_SRDISC = -1;
     bdt_run2_disc_jec_up = 0.;
     bdt_run2_disc_jer_up = 0.;
     bdt_run2_disc_jec_dn = 0.;
@@ -1430,9 +1447,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           }
 
           // T1tttt, T5qqqqVV, T5tttt, T5ttcc
-          if (iSignal <= 7) xsec = go_xsec(sparms[0]).xsec;
-          if (iSignal <= 7) xsec_error = go_xsec(sparms[0]).percErr;
-          if ((iSignal == 201) or (iSignal == 301)) {
+          if (iSignal <= 7 or (iSignal==301 and isFastsim)) xsec = go_xsec(sparms[0]).xsec;
+          if (iSignal <= 7 or (iSignal==301 and isFastsim)) xsec_error = go_xsec(sparms[0]).percErr;
+          if (!isFastsim and ((iSignal == 201) or (iSignal == 301))) {
               // RPV T1qqqqLL, T1tbs
               float mass = -1;
               if (filename.find("mGluino1000") != std::string::npos) mass = 1000;
@@ -1992,14 +2009,22 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
        // float pt_cutoff = std::max(30.,std::min(669.,double(jet_pt)));
        float weight_cent(1.), weight_UP(1.), weight_DN(1.);
        if (gconf.year == 2016) {
-           if (reader_id == 1) {
-               weight_cent    = btcr1->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
-               weight_UP    = btcr1->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
-               weight_DN    = btcr1->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
-           } else if (reader_id == 2) {
-               weight_cent    = btcr2->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
-               weight_UP    = btcr2->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
-               weight_DN    = btcr2->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
+           if (gconf.cmssw_ver == 80) {
+               if (reader_id == 1) {
+                   weight_cent    = btcr1->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
+                   weight_UP    = btcr1->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
+                   weight_DN    = btcr1->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
+               } else if (reader_id == 2) {
+                   weight_cent    = btcr2->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
+                   weight_UP    = btcr2->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
+                   weight_DN    = btcr2->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
+               }
+           } else {
+               if (reader_id == 1) {
+                   weight_cent    = btcr1->eval_auto_bounds("central", flavor, jet_eta, jet_pt);
+                   weight_UP    = btcr1->eval_auto_bounds("up", flavor, jet_eta, jet_pt);
+                   weight_DN    = btcr1->eval_auto_bounds("down", flavor, jet_eta, jet_pt);
+               }
            }
        } else if (gconf.year == 2017) {
            if (reader_id == 1) {
@@ -2071,6 +2096,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
        }
     }
     if (gconf.year == 2016) {
+        if (gconf.cmssw_ver == 80) {
         if (reader_id == 1) {
             weight_btagsf1 = btagprob_data / btagprob_mc;
             weight_btagsf1_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
@@ -2083,6 +2109,15 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
             weight_btagsf2_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
             weight_btagsf2_light_UP = btagprob_err_light_UP / btagprob_mc;
             weight_btagsf2_light_DN = btagprob_err_light_DN / btagprob_mc;
+        }
+        } else {
+            if (reader_id == 1) {
+                weight_btagsf1 = btagprob_data / btagprob_mc;
+                weight_btagsf1_heavy_UP = btagprob_err_heavy_UP / btagprob_mc;
+                weight_btagsf1_heavy_DN = btagprob_err_heavy_DN / btagprob_mc;
+                weight_btagsf1_light_UP = btagprob_err_light_UP / btagprob_mc;
+                weight_btagsf1_light_DN = btagprob_err_light_DN / btagprob_mc;
+            }
         }
     } else if (gconf.year == 2017) {
         if (reader_id == 1) {
@@ -2128,19 +2163,27 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   float rand = tr1->Rndm();
 
   if (gconf.year == 2016) {
-      if (rand < 0.55) {
-          // B-F is 55% of the lumi
+      if (gconf.cmssw_ver == 80) {
+          if (rand < 0.55) {
+              // B-F is 55% of the lumi
+              weight_btagsf =    weight_btagsf1;
+              weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
+              weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
+              weight_btagsf_light_UP = weight_btagsf1_light_UP;
+              weight_btagsf_light_DN = weight_btagsf1_light_DN;
+          } else {
+              weight_btagsf =    weight_btagsf2;
+              weight_btagsf_heavy_UP = weight_btagsf2_heavy_UP;
+              weight_btagsf_heavy_DN = weight_btagsf2_heavy_DN;
+              weight_btagsf_light_UP = weight_btagsf2_light_UP;
+              weight_btagsf_light_DN = weight_btagsf2_light_DN;
+          }
+      } else {
           weight_btagsf =    weight_btagsf1;
           weight_btagsf_heavy_UP = weight_btagsf1_heavy_UP;
           weight_btagsf_heavy_DN = weight_btagsf1_heavy_DN;
           weight_btagsf_light_UP = weight_btagsf1_light_UP;
           weight_btagsf_light_DN = weight_btagsf1_light_DN;
-      } else {
-          weight_btagsf =    weight_btagsf2;
-          weight_btagsf_heavy_UP = weight_btagsf2_heavy_UP;
-          weight_btagsf_heavy_DN = weight_btagsf2_heavy_DN;
-          weight_btagsf_light_UP = weight_btagsf2_light_UP;
-          weight_btagsf_light_DN = weight_btagsf2_light_DN;
       }
   }
 
@@ -2629,14 +2672,16 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
           fired_trigger = true;
       }
   } else if (gconf.year == 2018) {
-      if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
-              passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
-      if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v")))              (triggers |= 1<<3);
-      if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")))        (triggers |= 1<<6);
+      if (isFastsim == 0) {
+          if (passHLTTrigger(triggerName("HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"))  ||
+                  passHLTTrigger(triggerName("HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v")))   (triggers |= 1<<2);
+          if (passHLTTrigger(triggerName("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v")))              (triggers |= 1<<3);
+          if (passHLTTrigger(triggerName("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v")))        (triggers |= 1<<6);
 
-      if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
-      if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v")))    (triggers |= 1<<5);
-      if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass3p8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
+          if (passHLTTrigger(triggerName("HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT350_DZ_v")))      (triggers |= 1<<0);
+          if (passHLTTrigger(triggerName("HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_DZ_PFHT350_v")))    (triggers |= 1<<5);
+          if (passHLTTrigger(triggerName("HLT_DoubleMu4_Mass3p8_DZ_PFHT350_v")))                      (triggers |= 1<<7);
+      }
       fired_trigger = false;
       if (triggers != 0) {
           // Pure dilepton triggers for all HT
@@ -2700,8 +2745,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
   }
 
-  // FIXME update with FastSim MET recommendations eventually
-  passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfiltersRun2(is_real_data);
+  // Doesn't include 
+  // passes_met_filters = (isFastsim > 0) ? !failsFastSimJetFilter : passesMETfiltersRun2(is_real_data);
+  passes_met_filters = passesMETfiltersRun2(is_real_data, (isFastsim > 0));
+  if (isFastsim > 0 and failsFastSimJetFilter) {
+      passes_met_filters = false;
+  }
+  passes_chargedcand_filter = true;
+  if (gconf.cmssw_ver == 80) {
+      if (!badChargedCandidateFilterV2()) passes_chargedcand_filter = false;
+  } else {
+      if (!filt_BadChargedCandidateFilter()) passes_chargedcand_filter = false;
+  }
 
   // if (gconf.year == 2016) {
   //     if (gconf.cmssw_ver == 94) {
@@ -2725,6 +2780,18 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   //     filt_duplicateMuons = tas::filt_duplicateMuons();
   //     filt_badMuons = tas::filt_badMuons();
   // }
+
+  if (!is_real_data and (filename.find("TTTT") != std::string::npos)) {
+      auto totp4 = LorentzVector(0,0,0,0);
+      for (unsigned int igen = 0; igen < tas::genps_id().size(); igen++){
+          int id = tas::genps_id()[igen];
+          if (abs(id) != 6) continue;
+          int stat = tas::genps_status()[igen];
+          if (stat != 22) continue;
+          totp4 += tas::genps_p4()[igen];
+      }
+      mfourtop = totp4.mass();
+  }
 
   if (!is_real_data) {
 
@@ -2994,6 +3061,8 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   bdt_run2_disc_jer_up = bdtrun2::get_prediction( bdt_jer_up_nbtags, bdt_jer_up_njets, bdt_jer_up_met, bdt_ptl2, bdt_jer_up_nlb40, bdt_jer_up_ntb40, bdt_nleps, bdt_jer_up_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
   bdt_run2_disc_jec_dn = bdtrun2::get_prediction( bdt_jec_dn_nbtags, bdt_jec_dn_njets, bdt_jec_dn_met, bdt_ptl2, bdt_jec_dn_nlb40, bdt_jec_dn_ntb40, bdt_nleps, bdt_jec_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
   bdt_run2_disc_jer_dn = bdtrun2::get_prediction( bdt_jer_dn_nbtags, bdt_jer_dn_njets, bdt_jer_dn_met, bdt_ptl2, bdt_jer_dn_nlb40, bdt_jer_dn_ntb40, bdt_nleps, bdt_jer_dn_htb, bdt_q1, bdt_ptj1, bdt_ptj6, bdt_ptj7, bdt_ml1j1, bdt_dphil1l2, bdt_maxmjoverpt, bdt_ptl1, bdt_detal1l2, bdt_ptj8, bdt_ptl3);
+
+  bdt_run2_SRDISC = getBDTBin_17(bdt_run2_disc, hyp_class==6);
 
   yearlumi = getLumi(year);
 

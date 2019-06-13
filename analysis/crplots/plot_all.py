@@ -60,6 +60,11 @@ labels = {
     "ptj8": "$p_T$ - jet 8",
     "eventbdt": "raw BDT discriminant",
 
+    "zbb_mbbmin": "ZBB mbbmin",
+    "zbb_disc_both": "ZBB disc both",
+    "zbb_disc_ttbb": "ZBB disc ttbb",
+    "zbb_disc_ttjets": "ZBB disc ttjets",
+
     # "nbnj": r"bin%5=Nj, bin//5=Nb",
     # "nisrjets": "Njets (ISR/FSR)",
     # "nisrmatch": "Njets (ISR/FSR - Truth Matched)",
@@ -125,6 +130,7 @@ d_label_colors = {
             "tth":                     (r"$t\bar{t}H$",    [0.4, 0.4, 0.6]),
             "ttw":                     (r"$t\bar{t}W$",    [0.0, 0.4, 0.0]),
             "ttz":                     (r"$t\bar{t}Z$",    [0.4, 0.8, 0.4]),
+            "zbb":                     (r"$t\bar{t}Z$(bb)",    [0.3, 0.6, 0.4]),
             "wz":                      (r"WZ" ,             [1.0,0.8,0.0]),
             "vv":                      (r"VV",             [0.0, 0.4, 0.8]),
             "vvnowz":                   (r"VV",             [0.0, 0.4, 0.8]),
@@ -157,6 +163,7 @@ bginfo = {
         "tt_isr_reweight_check": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
         "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
+        "zbb": { k:d_label_colors[k] for k in [ "dy", "ttz", "zbb", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
         # "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
         # "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
         "tlmet": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
@@ -370,6 +377,16 @@ if __name__ == "__main__":
     # regions = ["os","osnbrw"]
     # regions = ["os","osloose", "tl", "htnb1", "htnb1mc"]
     # regions = ["osnomet","tlnomet","osmet","tlmet","mlonz"] #,"mlonzhigh","mlonz0j"]
+
+    # # 2018 alone
+    # make_plots(
+    #         outputdir="plots_zbb_2018_19Mar31",
+    #         inputdir="outputs_19Mar31_v3p28_2018_zbb",
+    #         regions = ["zbb"], flavs = ["in"],
+    #         year=2018,
+    #         lumi="59.7",
+    #         )
+    # sys.exit()
 
     ## SAME SIGN NOTE
     regions = [

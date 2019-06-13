@@ -229,6 +229,7 @@ class babyMaker {
     int nleptonic;
     int ntau;
     int nleptonicW;
+    float mfourtop;
     int nhadronicW;
     int nW;
     float leptonicWSF;
@@ -597,6 +598,7 @@ class babyMaker {
 
     //MET Filters
     bool passes_met_filters;
+    bool passes_chargedcand_filter;
     bool failsRA2Filter;
 
     // For reminiaod
@@ -830,6 +832,7 @@ class babyMaker {
     float bdt_disc_jec_dn;
     float bdt_disc_jer_dn;
 
+    int bdt_run2_SRDISC;
     float bdt_run2_disc;
     float bdt_run2_disc_jec_up;
     float bdt_run2_disc_jer_up;

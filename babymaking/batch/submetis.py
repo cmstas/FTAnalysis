@@ -37,6 +37,8 @@ def split_func(dsname):
         return 7
     elif "/SMS-" in dsname:
         return 2
+    elif "LOoblique" in dsname:
+        return 30
     else:
         return 3
 
@@ -96,31 +98,31 @@ if __name__ == "__main__":
     # # extra_args = "--xrootd" # cabinet nodes have messed up hadoop mapping
     # # extra_args = "--ignorebadfiles" # FIXME
 
-    year_sample_map = [
-            ("2017",mc_2017),
-            ]
-    tag = "v3.24_newfixfsjecs" # 2017 fastsim jecs
-    tag_match = ""
-    year_sample_map = [("2017",[
-        ["/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3/MINIAODSIM", "T1TTTT"],
-        ["/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T1TTTT_ext"],
-        ["/SMS-T6ttWW_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T6TTWW"],
-        ["/SMS-T6ttWW_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTWW_ext"],
-        ["/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T5QQQQVV_dm20"],
-        ["/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T5QQQQVV_dm20_ext"],
-        ["/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T5QQQQVV_main"],
-        ["/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T5QQQQVV_main_ext"],
-        ["/SMS-T1ttbb_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T1TTBB"],
-        ["/SMS-T5tttt_dM175_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T5TTTT"],
-        ["/SMS-T5tttt_dM175_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T5TTTT_ext"],
-        ["/SMS-T1qqqqL_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T1QQQQL_main"],
-        ["/SMS-T1qqqqL_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T1QQQQL_main_ext"],
-        ["/SMS-T6ttHZ_BR-H_0p6_mStop300to1000_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T6TTHZ_m1"],
-        ["/SMS-T6ttHZ_BR-H_0p6_mStop1050to1600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T6TTHZ_m2"], # Doesn't overlap with 2016 sample
-        ["/SMS-T6ttHZ_BR-H_0p6_mStop300to1000_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTHZ_m1_ext"],
-        ["/SMS-T6ttHZ_BR-H_0p6_mStop1050to1600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTHZ_m2_ext"], # Doesn't overlap with 2016 sample
-        ])]
-    extra_args = "--ignorebadfiles"
+    # year_sample_map = [
+    #         ("2017",mc_2017),
+    #         ]
+    # tag = "v3.24_newfixfsjecs" # 2017 fastsim jecs
+    # tag_match = ""
+    # year_sample_map = [("2017",[
+    #     ["/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15-v3/MINIAODSIM", "T1TTTT"],
+    #     ["/SMS-T1tttt_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_pilot_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T1TTTT_ext"],
+    #     ["/SMS-T6ttWW_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T6TTWW"],
+    #     ["/SMS-T6ttWW_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTWW_ext"],
+    #     ["/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T5QQQQVV_dm20"],
+    #     ["/SMS-T5qqqqVV_dM20_mGlu-600to2300_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T5QQQQVV_dm20_ext"],
+    #     ["/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T5QQQQVV_main"],
+    #     ["/SMS-T5qqqqVV_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T5QQQQVV_main_ext"],
+    #     ["/SMS-T1ttbb_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T1TTBB"],
+    #     ["/SMS-T5tttt_dM175_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T5TTTT"],
+    #     ["/SMS-T5tttt_dM175_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T5TTTT_ext"],
+    #     ["/SMS-T1qqqqL_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T1QQQQL_main"],
+    #     ["/SMS-T1qqqqL_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T1QQQQL_main_ext"],
+    #     ["/SMS-T6ttHZ_BR-H_0p6_mStop300to1000_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T6TTHZ_m1"],
+    #     ["/SMS-T6ttHZ_BR-H_0p6_mStop1050to1600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15-v1/MINIAODSIM", "T6TTHZ_m2"], # Doesn't overlap with 2016 sample
+    #     ["/SMS-T6ttHZ_BR-H_0p6_mStop300to1000_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTHZ_m1_ext"],
+    #     ["/SMS-T6ttHZ_BR-H_0p6_mStop1050to1600_TuneCP2_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PUFall17Fast_94X_mc2017_realistic_v15_ext1-v1/MINIAODSIM", "T6TTHZ_m2_ext"], # Doesn't overlap with 2016 sample
+    #     ])]
+    # extra_args = "--ignorebadfiles"
 
     # year_sample_map = [("2017",[
     #     ["/WZTo3LNu_0Jets_MLL-4to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "test_WZmll4_0j"],
@@ -139,6 +141,50 @@ if __name__ == "__main__":
     #     ["/ST_tW_antitop_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "ST2"],
     #     ["/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "ST1"],
     #     ])]
+
+    # extra_args = ""
+    # tag = "v3.29" # 94x 2016
+    # tag_match = ""
+    # year_sample_map = [("2016_94x",data_2016_94x+mc_2016_94x)]
+
+    extra_args = ""
+    # tag = "v3.30" # 2018 recovered EGammaDv2
+    # tag = "v3.30_hhat"
+    tag = "v3.31"
+    tag_match = ""
+    year_sample_map = [("2016_94x",data_2016_94x+mc_2016_94x)] + [("2017",data_2017+mc_2017)] + [("2018",data_2018+mc_2018)]
+    # year_sample_map = [("2018",[
+    #     ["/EGamma/Run2018D-22Jan2019-v2/MINIAOD", "DataDoubleEGDv2"],
+    #     ])]
+
+    # year_sample_map = [
+    #         ("2016",[
+    #         # ["/TTTT_hhat_0p0_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p0"],
+    #         # ["/TTTT_hhat_0p08_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p08"],
+    #         # ["/TTTT_hhat_0p12_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p12"],
+    #         # ["/TTTT_hhat_0p16_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p16"],
+    #         ["/tttt-LOoblique/year_2016_0p0/MINIAOD" , "HHAT_0p0"],
+    #         ["/tttt-LOoblique/year_2016_0p08/MINIAOD", "HHAT_0p08"],
+    #         ["/tttt-LOoblique/year_2016_0p12/MINIAOD", "HHAT_0p12"],
+    #         ["/tttt-LOoblique/year_2016_0p16/MINIAOD", "HHAT_0p16"],
+    #             ]),
+    #         ("2017",[
+    #         ["/TTTT_hhat_0p0_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p0"],
+    #         ["/TTTT_hhat_0p08_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p08"],
+    #         ["/TTTT_hhat_0p12_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p12"],
+    #         ["/TTTT_hhat_0p16_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p16"],
+    #             ]),
+    #         ("2018",[
+    #         ["/TTTT_hhat_0p0_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p0"],
+    #         ["/TTTT_hhat_0p08_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p08"],
+    #         ["/TTTT_hhat_0p12_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p12"],
+    #         ["/TTTT_hhat_0p16_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p16"],
+    #             ]),
+    #         ]
+
+
+
+
 
     # # FIXME FIXME
     # year_sample_map = [(y,sm[-1:]) for y,sm in year_sample_map]

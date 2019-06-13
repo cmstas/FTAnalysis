@@ -18,6 +18,7 @@ labels = {}
 
 labels["ft"] = {
 
+
         "TOTAL"        : [("SRCR","SR","SRDISC"), "Region"],
         "ht"              : [("ttzcr","ttwcr","sr","br","brpostfit"),r"$H_\mathrm{T}$ (GeV)"],
         "met"             : [("ttzcr","ttwcr","sr","br","brpostfit"), r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
@@ -35,7 +36,6 @@ labels["ft"] = {
         "disc"            : [("br","brpostfit","ttwcr","ttzcr"), "disc"],
         "l3pt"            : [("ttzcr","sr","br","brpostfit"), "l3pt"],
         "mllos"           : [("ttzcr",), "mllos"],
-
         "dphil1l2": [("br","brpostfit"), r"$\Delta\phi(l_1,l_2)$"],
         "htb": [("br","brpostfit"), r"$H_{T}$(b-jets)"],
         "nlb40": [("br","brpostfit"), r"N-loose b-tags, $p_{T}>40$"],
@@ -103,6 +103,15 @@ labels["ft"] = {
         # "bjetpt"          : [("sr","br"), "bjetpt"],
         # "jetpt"           : [("sr","br"), "jetpt"],
 }
+
+do_paper_plots_only = True
+if do_paper_plots_only:
+    labels["ft"] = {
+            "ht"              : [("ttzcr","ttwcr","sr"),r"$H_\mathrm{T}$ (GeV)"],
+            "met"             : [("ttzcr","ttwcr","sr"), r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
+            "njets"           : [("ttzcr","ttwcr","sr"), r"$N_\mathrm{jets}$"],
+            "nbtags"          : [("ttzcr","ttwcr","sr"),r"$N_\mathrm{b}$"],
+            }
 
 def remove(rs1,rs2):
     return list(set(rs1)-set(rs2))
@@ -392,6 +401,11 @@ def worker(info):
         #     data._errors *= 0.
         #     data.set_attr("label", "Data (blind)")
 
+        # # FIXME FIXME FIXME
+        # data._counts *= 0.
+        # data._errors *= 0.
+        # data.set_attr("label", "Data")
+
         if region in ["SRHH","SRHL","SRLL","SRML","SRLM"] and (var == "TOTAL"):
             ratio_range = [0.,3.]
             mpl_legend_params["fontsize"] = 8
@@ -496,12 +510,23 @@ def worker(info):
             fname = "{}/y{}_{}_{}.pdf".format(outputdir,files.keys()[0],region,var)
         fnames.append(fname)
 
+        ylabel="Events"
+        binwidth = data.get_bin_widths()[0]
+        if var in ["ht","met","njets","nbtags"]:
+            if var in ["ht","met"]:
+                ylabel = "Events / {} GeV".format(int(binwidth))
+            mpl_legend_params["fontsize"] = 12
+            # mpl_legend_params["framealpha"] = 0.4
+            # mpl_legend_params["ncol"] = 1
+            # mpl_legend_params["labelspacing"] = 0.10
+
         for do_log in [False,True]:
             fname_tmp = str(fname)
             if do_log:
                 fname_tmp = fname.replace(".pdf","_log.pdf").replace(".png","_log.png")
-            plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, ylabel="Events", filename=fname_tmp,
-                       cms_type = "Preliminary",
+            plot_stack(bgs=bgs, data=data, title=title, xlabel=xlabel, ylabel=ylabel, filename=fname_tmp,
+                       # cms_type = "Preliminary",
+                       cms_type = "",
                        lumi = lumi_,
                        ratio_range=ratio_range,
                        sigs=sigs,
@@ -522,8 +547,9 @@ def worker(info):
 
         if (region in ["sr","brpostfit"]):
             fname_tmp = fname.replace(".pdf","_stacked.pdf").replace(".png","_stacked.png")
-            plot_stack(bgs=bgs+sigs, data=data, title=title, xlabel=xlabel, ylabel="Events", filename=fname_tmp,
-                       cms_type = "Preliminary",
+            plot_stack(bgs=bgs+sigs, data=data, title=title, xlabel=xlabel, ylabel=ylabel, filename=fname_tmp,
+                       # cms_type = "Preliminary",
+                       cms_type = "",
                        lumi = lumi_,
                        ratio_range=ratio_range,
                        # sigs=sigs,

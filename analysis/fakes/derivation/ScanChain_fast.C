@@ -257,19 +257,35 @@ int ScanChain( TChain* chain, TString option="", TString outfile="test.root", in
     // From normalize_zpeak/
 
     if (year == 2016) {
-// year = 2016
-    sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 170.1279;
-    sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 = 172.6997;
-    sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 173.0246;
-    sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 172.9588;
-    sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 173.0231;
-    sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 4241.8406;
-    sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 4231.5585;
-    sf_HLT_IsoMu27 = 1.0268;
-    sf_HLT_Mu17 = 89.5843;
-    sf_HLT_Mu17_TrkIsoVVL = 89.5883;
-    sf_HLT_Mu8 = 56.0419;
-    sf_HLT_Mu8_TrkIsoVVL = 57.4986;
+
+// // year = 2016
+//     sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 170.1279;
+//     sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 = 172.6997;
+//     sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 173.0246;
+//     sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 172.9588;
+//     sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 173.0231;
+//     sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 4241.8406;
+//     sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 4231.5585;
+//     sf_HLT_IsoMu27 = 1.0268;
+//     sf_HLT_Mu17 = 89.5843;
+//     sf_HLT_Mu17_TrkIsoVVL = 89.5883;
+//     sf_HLT_Mu8 = 56.0419;
+//     sf_HLT_Mu8_TrkIsoVVL = 57.4986;
+
+    // rereco
+     sf_HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.9158;
+     sf_HLT_Ele17_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0171;
+     sf_HLT_Ele17_CaloIdM_TrackIdM_PFJet30 = 1.0113;
+     sf_HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30 = 1.0125;
+     sf_HLT_Ele23_CaloIdM_TrackIdM_PFJet30 = 1.0113;
+     sf_HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30 = 0.8670;
+     sf_HLT_Ele8_CaloIdM_TrackIdM_PFJet30 = 0.8649;
+     sf_HLT_IsoMu27 = 1.0094;
+     sf_HLT_Mu17 = 0.9768;
+     sf_HLT_Mu17_TrkIsoVVL = 0.9768;
+     sf_HLT_Mu8 = 0.6884;
+     sf_HLT_Mu8_TrkIsoVVL = 0.7023;
+
 }
 if (year == 2017) {
 // year = 2017

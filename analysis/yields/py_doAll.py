@@ -141,11 +141,17 @@ if __name__ == "__main__":
 
                 "2016_94x": "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016_94x/",
                 2016: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016//",
+                # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.29//output/year_2016_94x/skimfix/", # FIXME
                 2017: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2017//",
                 2018: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2018//",
 
                 }
 
+    print "FIXME revert 2016"
+    print "uncomment HHAT for 2016"
+    print "uncomment HIGGS for 2016"
+    # print "uncomment ISRFSR for 2016"
+    # print "uncomment TTSLht500 TTDLht500 (two places)"
 
 
     outputdir = args.out
@@ -269,39 +275,61 @@ if __name__ == "__main__":
                         basedirs[2016]+"TTTW.root",
                         ],options=options[2016]),
 
-                    "higgsh350": make_obj([ basedirs[2016]+"Higgs_ttH_350.root", basedirs[2016]+"Higgs_tHW_350.root", basedirs[2016]+"Higgs_tHq_350.root", ],options=options[2016]),
-                    "higgsh370": make_obj([ basedirs[2016]+"Higgs_ttH_370.root", basedirs[2016]+"Higgs_tHW_370.root", basedirs[2016]+"Higgs_tHq_370.root", ],options=options[2016]),
-                    "higgsh390": make_obj([ basedirs[2016]+"Higgs_ttH_390.root", basedirs[2016]+"Higgs_tHW_390.root", basedirs[2016]+"Higgs_tHq_390.root", ],options=options[2016]),
-                    "higgsh410": make_obj([ basedirs[2016]+"Higgs_ttH_410.root", basedirs[2016]+"Higgs_tHW_410.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
-                    "higgsh430": make_obj([ basedirs[2016]+"Higgs_ttH_430.root", basedirs[2016]+"Higgs_tHW_430.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
-                    "higgsh450": make_obj([ basedirs[2016]+"Higgs_ttH_450.root", basedirs[2016]+"Higgs_tHW_450.root", basedirs[2016]+"Higgs_tHq_450.root", ],options=options[2016]),
-                    "higgsh470": make_obj([ basedirs[2016]+"Higgs_ttH_470.root", basedirs[2016]+"Higgs_tHW_470.root", basedirs[2016]+"Higgs_tHq_470.root", ],options=options[2016]),
-                    "higgsh490": make_obj([ basedirs[2016]+"Higgs_ttH_490.root", basedirs[2016]+"Higgs_tHW_490.root", basedirs[2016]+"Higgs_tHq_490.root", ],options=options[2016]),
-                    "higgsh510": make_obj([ basedirs[2016]+"Higgs_ttH_510.root", basedirs[2016]+"Higgs_tHW_510.root", basedirs[2016]+"Higgs_tHq_510.root", ],options=options[2016]),
-                    "higgsh530": make_obj([ basedirs[2016]+"Higgs_ttH_530.root", basedirs[2016]+"Higgs_tHW_530.root", basedirs[2016]+"Higgs_tHq_530.root", ],options=options[2016]),
-                    "higgsh550": make_obj([ basedirs[2016]+"Higgs_ttH_550.root", basedirs[2016]+"Higgs_tHW_550.root", basedirs[2016]+"Higgs_tHq_550.root", ],options=options[2016]),
-                    "higgsh570": make_obj([ basedirs[2016]+"Higgs_ttH_570.root", basedirs[2016]+"Higgs_tHW_570.root", basedirs[2016]+"Higgs_tHq_570.root", ],options=options[2016]),
-                    "higgsh590": make_obj([ basedirs[2016]+"Higgs_ttH_590.root", basedirs[2016]+"Higgs_tHW_590.root", basedirs[2016]+"Higgs_tHq_590.root", ],options=options[2016]),
-                    "higgsh610": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
-                    "higgsh630": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
-                    "higgsh650": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsh350": make_obj([ basedirs[2016]+"Higgs_ttH_350.root", basedirs[2016]+"Higgs_tHW_350.root", basedirs[2016]+"Higgs_tHq_350.root", ],options=options[2016]),
+                    # "higgsh370": make_obj([ basedirs[2016]+"Higgs_ttH_370.root", basedirs[2016]+"Higgs_tHW_370.root", basedirs[2016]+"Higgs_tHq_370.root", ],options=options[2016]),
+                    # "higgsh390": make_obj([ basedirs[2016]+"Higgs_ttH_390.root", basedirs[2016]+"Higgs_tHW_390.root", basedirs[2016]+"Higgs_tHq_390.root", ],options=options[2016]),
+                    # "higgsh410": make_obj([ basedirs[2016]+"Higgs_ttH_410.root", basedirs[2016]+"Higgs_tHW_410.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
+                    # "higgsh430": make_obj([ basedirs[2016]+"Higgs_ttH_430.root", basedirs[2016]+"Higgs_tHW_430.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
+                    # "higgsh450": make_obj([ basedirs[2016]+"Higgs_ttH_450.root", basedirs[2016]+"Higgs_tHW_450.root", basedirs[2016]+"Higgs_tHq_450.root", ],options=options[2016]),
+                    # "higgsh470": make_obj([ basedirs[2016]+"Higgs_ttH_470.root", basedirs[2016]+"Higgs_tHW_470.root", basedirs[2016]+"Higgs_tHq_470.root", ],options=options[2016]),
+                    # "higgsh490": make_obj([ basedirs[2016]+"Higgs_ttH_490.root", basedirs[2016]+"Higgs_tHW_490.root", basedirs[2016]+"Higgs_tHq_490.root", ],options=options[2016]),
+                    # "higgsh510": make_obj([ basedirs[2016]+"Higgs_ttH_510.root", basedirs[2016]+"Higgs_tHW_510.root", basedirs[2016]+"Higgs_tHq_510.root", ],options=options[2016]),
+                    # "higgsh530": make_obj([ basedirs[2016]+"Higgs_ttH_530.root", basedirs[2016]+"Higgs_tHW_530.root", basedirs[2016]+"Higgs_tHq_530.root", ],options=options[2016]),
+                    # "higgsh550": make_obj([ basedirs[2016]+"Higgs_ttH_550.root", basedirs[2016]+"Higgs_tHW_550.root", basedirs[2016]+"Higgs_tHq_550.root", ],options=options[2016]),
+                    # "higgsh570": make_obj([ basedirs[2016]+"Higgs_ttH_570.root", basedirs[2016]+"Higgs_tHW_570.root", basedirs[2016]+"Higgs_tHq_570.root", ],options=options[2016]),
+                    # "higgsh590": make_obj([ basedirs[2016]+"Higgs_ttH_590.root", basedirs[2016]+"Higgs_tHW_590.root", basedirs[2016]+"Higgs_tHq_590.root", ],options=options[2016]),
+                    # "higgsh610": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsh630": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsh650": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
 
-                    "higgsa350": make_obj([ basedirs[2016]+"Higgs_ttH_350.root", basedirs[2016]+"Higgs_tHW_350.root", basedirs[2016]+"Higgs_tHq_350.root", ],options=options[2016]),
-                    "higgsa370": make_obj([ basedirs[2016]+"Higgs_ttH_370.root", basedirs[2016]+"Higgs_tHW_370.root", basedirs[2016]+"Higgs_tHq_370.root", ],options=options[2016]),
-                    "higgsa390": make_obj([ basedirs[2016]+"Higgs_ttH_390.root", basedirs[2016]+"Higgs_tHW_390.root", basedirs[2016]+"Higgs_tHq_390.root", ],options=options[2016]),
-                    "higgsa410": make_obj([ basedirs[2016]+"Higgs_ttH_410.root", basedirs[2016]+"Higgs_tHW_410.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
-                    "higgsa430": make_obj([ basedirs[2016]+"Higgs_ttH_430.root", basedirs[2016]+"Higgs_tHW_430.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
-                    "higgsa450": make_obj([ basedirs[2016]+"Higgs_ttH_450.root", basedirs[2016]+"Higgs_tHW_450.root", basedirs[2016]+"Higgs_tHq_450.root", ],options=options[2016]),
-                    "higgsa470": make_obj([ basedirs[2016]+"Higgs_ttH_470.root", basedirs[2016]+"Higgs_tHW_470.root", basedirs[2016]+"Higgs_tHq_470.root", ],options=options[2016]),
-                    "higgsa490": make_obj([ basedirs[2016]+"Higgs_ttH_490.root", basedirs[2016]+"Higgs_tHW_490.root", basedirs[2016]+"Higgs_tHq_490.root", ],options=options[2016]),
-                    "higgsa510": make_obj([ basedirs[2016]+"Higgs_ttH_510.root", basedirs[2016]+"Higgs_tHW_510.root", basedirs[2016]+"Higgs_tHq_510.root", ],options=options[2016]),
-                    "higgsa530": make_obj([ basedirs[2016]+"Higgs_ttH_530.root", basedirs[2016]+"Higgs_tHW_530.root", basedirs[2016]+"Higgs_tHq_530.root", ],options=options[2016]),
-                    "higgsa550": make_obj([ basedirs[2016]+"Higgs_ttH_550.root", basedirs[2016]+"Higgs_tHW_550.root", basedirs[2016]+"Higgs_tHq_550.root", ],options=options[2016]),
-                    "higgsa570": make_obj([ basedirs[2016]+"Higgs_ttH_570.root", basedirs[2016]+"Higgs_tHW_570.root", basedirs[2016]+"Higgs_tHq_570.root", ],options=options[2016]),
-                    "higgsa590": make_obj([ basedirs[2016]+"Higgs_ttH_590.root", basedirs[2016]+"Higgs_tHW_590.root", basedirs[2016]+"Higgs_tHq_590.root", ],options=options[2016]),
-                    "higgsa610": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
-                    "higgsa630": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
-                    "higgsa650": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsa350": make_obj([ basedirs[2016]+"Higgs_ttH_350.root", basedirs[2016]+"Higgs_tHW_350.root", basedirs[2016]+"Higgs_tHq_350.root", ],options=options[2016]),
+                    # "higgsa370": make_obj([ basedirs[2016]+"Higgs_ttH_370.root", basedirs[2016]+"Higgs_tHW_370.root", basedirs[2016]+"Higgs_tHq_370.root", ],options=options[2016]),
+                    # "higgsa390": make_obj([ basedirs[2016]+"Higgs_ttH_390.root", basedirs[2016]+"Higgs_tHW_390.root", basedirs[2016]+"Higgs_tHq_390.root", ],options=options[2016]),
+                    # "higgsa410": make_obj([ basedirs[2016]+"Higgs_ttH_410.root", basedirs[2016]+"Higgs_tHW_410.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
+                    # "higgsa430": make_obj([ basedirs[2016]+"Higgs_ttH_430.root", basedirs[2016]+"Higgs_tHW_430.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
+                    # "higgsa450": make_obj([ basedirs[2016]+"Higgs_ttH_450.root", basedirs[2016]+"Higgs_tHW_450.root", basedirs[2016]+"Higgs_tHq_450.root", ],options=options[2016]),
+                    # "higgsa470": make_obj([ basedirs[2016]+"Higgs_ttH_470.root", basedirs[2016]+"Higgs_tHW_470.root", basedirs[2016]+"Higgs_tHq_470.root", ],options=options[2016]),
+                    # "higgsa490": make_obj([ basedirs[2016]+"Higgs_ttH_490.root", basedirs[2016]+"Higgs_tHW_490.root", basedirs[2016]+"Higgs_tHq_490.root", ],options=options[2016]),
+                    # "higgsa510": make_obj([ basedirs[2016]+"Higgs_ttH_510.root", basedirs[2016]+"Higgs_tHW_510.root", basedirs[2016]+"Higgs_tHq_510.root", ],options=options[2016]),
+                    # "higgsa530": make_obj([ basedirs[2016]+"Higgs_ttH_530.root", basedirs[2016]+"Higgs_tHW_530.root", basedirs[2016]+"Higgs_tHq_530.root", ],options=options[2016]),
+                    # "higgsa550": make_obj([ basedirs[2016]+"Higgs_ttH_550.root", basedirs[2016]+"Higgs_tHW_550.root", basedirs[2016]+"Higgs_tHq_550.root", ],options=options[2016]),
+                    # "higgsa570": make_obj([ basedirs[2016]+"Higgs_ttH_570.root", basedirs[2016]+"Higgs_tHW_570.root", basedirs[2016]+"Higgs_tHq_570.root", ],options=options[2016]),
+                    # "higgsa590": make_obj([ basedirs[2016]+"Higgs_ttH_590.root", basedirs[2016]+"Higgs_tHW_590.root", basedirs[2016]+"Higgs_tHq_590.root", ],options=options[2016]),
+                    # "higgsa610": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsa630": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsa650": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+
+                    # "higgsb350": make_obj([ basedirs[2016]+"Higgs_ttH_350.root", basedirs[2016]+"Higgs_tHW_350.root", basedirs[2016]+"Higgs_tHq_350.root", ],options=options[2016]),
+                    # "higgsb370": make_obj([ basedirs[2016]+"Higgs_ttH_370.root", basedirs[2016]+"Higgs_tHW_370.root", basedirs[2016]+"Higgs_tHq_370.root", ],options=options[2016]),
+                    # "higgsb390": make_obj([ basedirs[2016]+"Higgs_ttH_390.root", basedirs[2016]+"Higgs_tHW_390.root", basedirs[2016]+"Higgs_tHq_390.root", ],options=options[2016]),
+                    # "higgsb410": make_obj([ basedirs[2016]+"Higgs_ttH_410.root", basedirs[2016]+"Higgs_tHW_410.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
+                    # "higgsb430": make_obj([ basedirs[2016]+"Higgs_ttH_430.root", basedirs[2016]+"Higgs_tHW_430.root", basedirs[2016]+"Higgs_tHq_410.root", ],options=options[2016]),
+                    # "higgsb450": make_obj([ basedirs[2016]+"Higgs_ttH_450.root", basedirs[2016]+"Higgs_tHW_450.root", basedirs[2016]+"Higgs_tHq_450.root", ],options=options[2016]),
+                    # "higgsb470": make_obj([ basedirs[2016]+"Higgs_ttH_470.root", basedirs[2016]+"Higgs_tHW_470.root", basedirs[2016]+"Higgs_tHq_470.root", ],options=options[2016]),
+                    # "higgsb490": make_obj([ basedirs[2016]+"Higgs_ttH_490.root", basedirs[2016]+"Higgs_tHW_490.root", basedirs[2016]+"Higgs_tHq_490.root", ],options=options[2016]),
+                    # "higgsb510": make_obj([ basedirs[2016]+"Higgs_ttH_510.root", basedirs[2016]+"Higgs_tHW_510.root", basedirs[2016]+"Higgs_tHq_510.root", ],options=options[2016]),
+                    # "higgsb530": make_obj([ basedirs[2016]+"Higgs_ttH_530.root", basedirs[2016]+"Higgs_tHW_530.root", basedirs[2016]+"Higgs_tHq_530.root", ],options=options[2016]),
+                    # "higgsb550": make_obj([ basedirs[2016]+"Higgs_ttH_550.root", basedirs[2016]+"Higgs_tHW_550.root", basedirs[2016]+"Higgs_tHq_550.root", ],options=options[2016]),
+                    # "higgsb570": make_obj([ basedirs[2016]+"Higgs_ttH_570.root", basedirs[2016]+"Higgs_tHW_570.root", basedirs[2016]+"Higgs_tHq_570.root", ],options=options[2016]),
+                    # "higgsb590": make_obj([ basedirs[2016]+"Higgs_ttH_590.root", basedirs[2016]+"Higgs_tHW_590.root", basedirs[2016]+"Higgs_tHq_590.root", ],options=options[2016]),
+                    # "higgsb610": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsb630": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+                    # "higgsb650": make_obj([ basedirs[2016]+"Higgs_ttH_610.root", basedirs[2016]+"Higgs_tHW_610.root", basedirs[2016]+"Higgs_tHq_610.root", ],options=options[2016]),
+
+                    "hhat0p0": make_obj([ basedirs[2016]+"newhhat/HHAT_0p0.root" ],options=options[2016]),
+                    "hhat0p08": make_obj([ basedirs[2016]+"newhhat/HHAT_0p08.root" ],options=options[2016]),
+                    "hhat0p12": make_obj([ basedirs[2016]+"newhhat/HHAT_0p12.root" ],options=options[2016]),
+                    "hhat0p16": make_obj([ basedirs[2016]+"newhhat/HHAT_0p16.root" ],options=options[2016]),
 
                     },
                 2017: {
@@ -438,6 +466,28 @@ if __name__ == "__main__":
                     "higgsa630": make_obj([ basedirs[2017]+"Higgs_ttH_625.root", basedirs[2017]+"Higgs_tHW_625.root", basedirs[2017]+"Higgs_tHq_625.root", ],options=options[2017]),
                     "higgsa650": make_obj([ basedirs[2017]+"Higgs_ttH_650.root", basedirs[2017]+"Higgs_tHW_650.root", basedirs[2017]+"Higgs_tHq_650.root", ],options=options[2017]),
 
+                    "higgsb350": make_obj([ basedirs[2017]+"Higgs_ttH_350.root", basedirs[2017]+"Higgs_tHW_350.root", basedirs[2017]+"Higgs_tHq_350.root", ],options=options[2017]),
+                    "higgsb370": make_obj([ basedirs[2017]+"Higgs_ttH_375.root", basedirs[2017]+"Higgs_tHW_375.root", basedirs[2017]+"Higgs_tHq_375.root", ],options=options[2017]),
+                    "higgsb390": make_obj([ basedirs[2017]+"Higgs_ttH_400.root", basedirs[2017]+"Higgs_tHW_400.root", basedirs[2017]+"Higgs_tHq_400.root", ],options=options[2017]),
+                    "higgsb410": make_obj([ basedirs[2017]+"Higgs_ttH_400.root", basedirs[2017]+"Higgs_tHW_400.root", basedirs[2017]+"Higgs_tHq_400.root", ],options=options[2017]),
+                    "higgsb430": make_obj([ basedirs[2017]+"Higgs_ttH_425.root", basedirs[2017]+"Higgs_tHW_425.root", basedirs[2017]+"Higgs_tHq_425.root", ],options=options[2017]),
+                    "higgsb450": make_obj([ basedirs[2017]+"Higgs_ttH_450.root", basedirs[2017]+"Higgs_tHW_450.root", basedirs[2017]+"Higgs_tHq_450.root", ],options=options[2017]),
+                    "higgsb470": make_obj([ basedirs[2017]+"Higgs_ttH_475.root", basedirs[2017]+"Higgs_tHW_475.root", basedirs[2017]+"Higgs_tHq_475.root", ],options=options[2017]),
+                    "higgsb490": make_obj([ basedirs[2017]+"Higgs_ttH_500.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
+                    "higgsb510": make_obj([ basedirs[2017]+"Higgs_ttH_500.root", basedirs[2017]+"Higgs_tHW_500.root", basedirs[2017]+"Higgs_tHq_500.root", ],options=options[2017]),
+                    "higgsb530": make_obj([ basedirs[2017]+"Higgs_ttH_525.root", basedirs[2017]+"Higgs_tHW_525.root", basedirs[2017]+"Higgs_tHq_525.root", ],options=options[2017]),
+                    "higgsb550": make_obj([ basedirs[2017]+"Higgs_ttH_550.root", basedirs[2017]+"Higgs_tHW_550.root", basedirs[2017]+"Higgs_tHq_550.root", ],options=options[2017]),
+                    "higgsb570": make_obj([ basedirs[2017]+"Higgs_ttH_575.root", basedirs[2017]+"Higgs_tHW_575.root", basedirs[2017]+"Higgs_tHq_575.root", ],options=options[2017]),
+                    "higgsb590": make_obj([ basedirs[2017]+"Higgs_ttH_600.root", basedirs[2017]+"Higgs_tHW_600.root", basedirs[2017]+"Higgs_tHq_600.root", ],options=options[2017]),
+                    "higgsb610": make_obj([ basedirs[2017]+"Higgs_ttH_600.root", basedirs[2017]+"Higgs_tHW_600.root", basedirs[2017]+"Higgs_tHq_600.root", ],options=options[2017]),
+                    "higgsb630": make_obj([ basedirs[2017]+"Higgs_ttH_625.root", basedirs[2017]+"Higgs_tHW_625.root", basedirs[2017]+"Higgs_tHq_625.root", ],options=options[2017]),
+                    "higgsb650": make_obj([ basedirs[2017]+"Higgs_ttH_650.root", basedirs[2017]+"Higgs_tHW_650.root", basedirs[2017]+"Higgs_tHq_650.root", ],options=options[2017]),
+
+                    "hhat0p0": make_obj([ basedirs[2017]+"newhhat/HHAT_0p0.root" ],options=options[2017]),
+                    "hhat0p08": make_obj([ basedirs[2017]+"newhhat/HHAT_0p08.root" ],options=options[2017]),
+                    "hhat0p12": make_obj([ basedirs[2017]+"newhhat/HHAT_0p12.root" ],options=options[2017]),
+                    "hhat0p16": make_obj([ basedirs[2017]+"newhhat/HHAT_0p16.root" ],options=options[2017]),
+
                     },
                 2018: {
 
@@ -570,6 +620,28 @@ if __name__ == "__main__":
                     "higgsa630": make_obj([ basedirs[2018]+"Higgs_ttH_625.root", basedirs[2018]+"Higgs_tHW_625.root", basedirs[2018]+"Higgs_tHq_625.root", ],options=options[2018]+"  "),
                     "higgsa650": make_obj([ basedirs[2018]+"Higgs_ttH_650.root", basedirs[2018]+"Higgs_tHW_650.root", basedirs[2018]+"Higgs_tHq_650.root", ],options=options[2018]+"  "),
 
+                    "higgsb350": make_obj([ basedirs[2018]+"Higgs_ttH_375.root", basedirs[2018]+"Higgs_tHW_375.root", basedirs[2018]+"Higgs_tHq_375.root", ],options=options[2018]+"  "),
+                    "higgsb370": make_obj([ basedirs[2018]+"Higgs_ttH_375.root", basedirs[2018]+"Higgs_tHW_375.root", basedirs[2018]+"Higgs_tHq_375.root", ],options=options[2018]+"  "),
+                    "higgsb390": make_obj([ basedirs[2018]+"Higgs_ttH_400.root", basedirs[2018]+"Higgs_tHW_400.root", basedirs[2018]+"Higgs_tHq_400.root", ],options=options[2018]+"  "),
+                    "higgsb410": make_obj([ basedirs[2018]+"Higgs_ttH_400.root", basedirs[2018]+"Higgs_tHW_400.root", basedirs[2018]+"Higgs_tHq_400.root", ],options=options[2018]+"  "),
+                    "higgsb430": make_obj([ basedirs[2018]+"Higgs_ttH_425.root", basedirs[2018]+"Higgs_tHW_425.root", basedirs[2018]+"Higgs_tHq_425.root", ],options=options[2018]+"  "),
+                    "higgsb450": make_obj([ basedirs[2018]+"Higgs_ttH_425.root", basedirs[2018]+"Higgs_tHW_450.root", basedirs[2018]+"Higgs_tHq_450.root", ],options=options[2018]+"  "),
+                    "higgsb470": make_obj([ basedirs[2018]+"Higgs_ttH_475.root", basedirs[2018]+"Higgs_tHW_475.root", basedirs[2018]+"Higgs_tHq_475.root", ],options=options[2018]+"  "),
+                    "higgsb490": make_obj([ basedirs[2018]+"Higgs_ttH_500.root", basedirs[2018]+"Higgs_tHW_500.root", basedirs[2018]+"Higgs_tHq_500.root", ],options=options[2018]+"  "),
+                    "higgsb510": make_obj([ basedirs[2018]+"Higgs_ttH_500.root", basedirs[2018]+"Higgs_tHW_500.root", basedirs[2018]+"Higgs_tHq_500.root", ],options=options[2018]+"  "),
+                    # "higgsb530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_525.root", ],options=options[2018]+"  "),
+                    "higgsb530": make_obj([ basedirs[2018]+"Higgs_ttH_525.root", basedirs[2018]+"Higgs_tHW_525.root", basedirs[2018]+"Higgs_tHq_526.root", ],options=options[2018]+"  "),
+                    "higgsb550": make_obj([ basedirs[2018]+"Higgs_ttH_550.root", basedirs[2018]+"Higgs_tHW_550.root", basedirs[2018]+"Higgs_tHq_550.root", ],options=options[2018]+"  "),
+                    "higgsb570": make_obj([ basedirs[2018]+"Higgs_ttH_575.root", basedirs[2018]+"Higgs_tHW_575.root", basedirs[2018]+"Higgs_tHq_575.root", ],options=options[2018]+"  "),
+                    "higgsb590": make_obj([ basedirs[2018]+"Higgs_ttH_575.root", basedirs[2018]+"Higgs_tHW_600.root", basedirs[2018]+"Higgs_tHq_600.root", ],options=options[2018]+"  "),
+                    "higgsb610": make_obj([ basedirs[2018]+"Higgs_ttH_625.root", basedirs[2018]+"Higgs_tHW_600.root", basedirs[2018]+"Higgs_tHq_600.root", ],options=options[2018]+"  "),
+                    "higgsb630": make_obj([ basedirs[2018]+"Higgs_ttH_625.root", basedirs[2018]+"Higgs_tHW_625.root", basedirs[2018]+"Higgs_tHq_625.root", ],options=options[2018]+"  "),
+                    "higgsb650": make_obj([ basedirs[2018]+"Higgs_ttH_650.root", basedirs[2018]+"Higgs_tHW_650.root", basedirs[2018]+"Higgs_tHq_650.root", ],options=options[2018]+"  "),
+
+                    "hhat0p0": make_obj([ basedirs[2018]+"newhhat/HHAT_0p0.root" ],options=options[2018]),
+                    "hhat0p08": make_obj([ basedirs[2018]+"newhhat/HHAT_0p08.root" ],options=options[2018]),
+                    "hhat0p12": make_obj([ basedirs[2018]+"newhhat/HHAT_0p12.root" ],options=options[2018]),
+                    "hhat0p16": make_obj([ basedirs[2018]+"newhhat/HHAT_0p16.root" ],options=options[2018]),
 
                     }
                 }
@@ -671,6 +743,8 @@ if __name__ == "__main__":
                     "rpv_t1tbs_m1900": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1900.root" ],options=options[2016]),
                     "rpv_t1tbs_m2000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino2000.root" ],options=options[2016]),
 
+                    "fcnc_tthut": make_obj([ basedirs[2016]+"FCNC_hut_top.root",  basedirs[2016]+"FCNC_hut_antitop.root"  ],options=options[2016]),
+
                     # "zzcont": make_obj(basedirs[2016]+"ZZcont*.root", options=options[2016]), # NOTE in rares
                     # "zzreg": make_obj(basedirs[2016]+"ZZ.root", options=options[2016]),
                     # "test_wwdps": make_obj(basedirs[2016]+"WWDPS.root", options=options[2016]),
@@ -749,6 +823,8 @@ if __name__ == "__main__":
                     "rpv_t1tbs_m1800": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1800.root" ],options=options[2017]+"  "),
                     "rpv_t1tbs_m1900": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1900.root" ],options=options[2017]+"  "),
                     "rpv_t1tbs_m2000": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino2000.root" ],options=options[2017]+"  "),
+
+                    "fcnc_tthut": make_obj([ basedirs[2017]+"FCNC_hut_top.root",  basedirs[2017]+"FCNC_hut_antitop.root"  ],options=options[2017]),
 
                     # "zzcont": make_obj(basedirs[2017]+"ZZcont*.root", options=options[2017]), # NOTE in rares
                     # "zzreg": make_obj(basedirs[2017]+"ZZ.root", options=options[2017]),
@@ -830,6 +906,8 @@ if __name__ == "__main__":
                     "rpv_t1tbs_m1800": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1800.root" ],options=options[2018]+"  "),
                     "rpv_t1tbs_m1900": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1900.root" ],options=options[2018]+"  "),
                     "rpv_t1tbs_m2000": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino2000.root" ],options=options[2018]+"  "),
+
+                    "fcnc_tthut": make_obj([ basedirs[2017]+"FCNC_hut_top.root",  basedirs[2017]+"FCNC_hut_antitop.root"  ],options=(options[2017]+" FakeLumi2018")),
 
                     # "zzcont": make_obj(basedirs[2018]+"ZZcont*.root", options=options[2018]), # NOTE, i put this into rares
                     # "zzreg": make_obj(basedirs[2018]+"ZZ.root", options=options[2018]),
@@ -1196,7 +1274,9 @@ if __name__ == "__main__":
     procnames = list(set([x[0].GetTitle() for x in to_run]))
     fastsim_procnames = [pn for pn in procnames if "fs_" in pn]
     higgs_procnames = [pn for pn in procnames if "higgs" in pn]
+    oblique_procnames = [pn for pn in procnames if "hhat" in pn]
     rpv_procnames = [pn for pn in procnames if "rpv" in pn]
+    fcnc_procnames = [pn for pn in procnames if "fcnc" in pn]
     # print higgs_procnames
 
     if not args.noloop:
@@ -1238,7 +1318,7 @@ if __name__ == "__main__":
             make_shape_hists.make_root_files(
                     outputdir=outdir_limits,
                     inputdir=args.out,
-                    extra_procs=fastsim_procnames+higgs_procnames+rpv_procnames,
+                    extra_procs=fastsim_procnames+higgs_procnames+oblique_procnames+rpv_procnames+fcnc_procnames,
                     regions=regions,
                     verbose=(args.verbosity >= 2),
                     doss=args.ss,

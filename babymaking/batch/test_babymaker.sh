@@ -40,13 +40,13 @@ rm ${outputdir}/log*.txt
 # return
 
 # run mc_2016       "/TTWJets"    ${outputdir}/test_2016_ttw.root        ${outputdir}/log_2016_ttw.txt        &
-run mc_2016       "/TTTT"       ${outputdir}/test_2016_tttt.root       ${outputdir}/log_2016_tttt.txt       &
-run mc_2016       "T1tttt"       ${outputdir}/test_2016_smst1tttt.root       ${outputdir}/log_2016_smst1tttt.txt       &
-# run mc_2016_94x   "/TTTT"       ${outputdir}/test_2016_94x_tttt.root   ${outputdir}/log_2016_94x_tttt.txt   &
-run data_2016     "/DoubleEG"   ${outputdir}/test_2016_dataee.root     ${outputdir}/log_2016_dataee.txt     &
-run data_2016     "/DoubleMuon" ${outputdir}/test_2016_datamm.root     ${outputdir}/log_2016_datamm.txt     &
-# run data_2016_94x "/DoubleEG"   ${outputdir}/test_2016_94x_dataee.root ${outputdir}/log_2016_94x_dataee.txt &
-# run data_2016_94x "/DoubleMuon" ${outputdir}/test_2016_94x_datamm.root ${outputdir}/log_2016_94x_datamm.txt &
+# run mc_2016       "/TTTT"       ${outputdir}/test_2016_tttt.root       ${outputdir}/log_2016_tttt.txt       &
+run mc_2016_94x       "T1tttt"       ${outputdir}/test_2016_94x_smst1tttt.root       ${outputdir}/log_2016_94x_smst1tttt.txt       &
+run mc_2016_94x   "/TTTT"       ${outputdir}/test_2016_94x_tttt.root   ${outputdir}/log_2016_94x_tttt.txt   &
+# run data_2016     "/DoubleEG"   ${outputdir}/test_2016_dataee.root     ${outputdir}/log_2016_dataee.txt     &
+# run data_2016     "/DoubleMuon" ${outputdir}/test_2016_datamm.root     ${outputdir}/log_2016_datamm.txt     &
+run data_2016_94x "/DoubleEG"   ${outputdir}/test_2016_94x_dataee.root ${outputdir}/log_2016_94x_dataee.txt &
+run data_2016_94x "/DoubleMuon" ${outputdir}/test_2016_94x_datamm.root ${outputdir}/log_2016_94x_datamm.txt &
 run mc_2017       "/TTWJets"    ${outputdir}/test_2017_ttw.root        ${outputdir}/log_2017_ttw.txt        &
 run mc_2017       "T1tttt"       ${outputdir}/test_2017_smst1tttt.root       ${outputdir}/log_2017_smst1tttt.txt       &
 # run mc_2017       "/ttHToNonbb" ${outputdir}/test_2017_tth.root        ${outputdir}/log_2017_tth.txt        &
@@ -56,6 +56,7 @@ run data_2017     "/DoubleMuon" ${outputdir}/test_2017_datamm.root     ${outputd
 run data_2018     "/EGamma"     ${outputdir}/test_2018_dataee.root     ${outputdir}/log_2018_dataee.txt     &
 run data_2018     "/DoubleMuon" ${outputdir}/test_2018_datamm.root     ${outputdir}/log_2018_datamm.txt     &
 run mc_2018       "/TTTT"       ${outputdir}/test_2018_tttt.root       ${outputdir}/log_2018_tttt.txt       &
+run mc_2018       "T1tttt"       ${outputdir}/test_2018_smst1tttt.root       ${outputdir}/log_2018_smst1tttt.txt       &
 # run data_2018     "17Sep2018-v1" ${outputdir}/test_2018_datarereco.root     ${outputdir}/log_2018_datarereco.txt     &
 
 wait

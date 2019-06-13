@@ -312,7 +312,8 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
         for process in processes: card.write("%-15s " % (process.btag))
         card.write("\n")
 
-    if analysis == "ft":
+    hastttt = "tttt" in [p.name for p in processes]
+    if analysis == "ft" and hastttt:
         #nuisance isrvar
         card.write("%-40s %-5s " % ("isrvar","shape"))
         for process in processes: card.write("%-15s " % (process.isrvar))
@@ -330,11 +331,12 @@ def writeOneCardFromProcesses(thedir, kine, plot, output, data, processes, thres
         #nuisance pdf
         card.write("%-40s %-5s " % ("pdf","shape"))
         for process in processes: card.write("%-15s " % (process.pdf))
-        card.write("\n")
-        #nuisance alphas
-        card.write("%-40s %-5s " % ("alphas","shape"))
-        for process in processes: card.write("%-15s " % (process.alphas))
-        card.write("\n")
+        if hastttt:
+            card.write("\n")
+            #nuisance alphas
+            card.write("%-40s %-5s " % ("alphas","shape"))
+            for process in processes: card.write("%-15s " % (process.alphas))
+            card.write("\n")
     else:
         #nuisance pdf
         card.write("%-40s %-5s " % ("pdf","lnN"))
@@ -454,6 +456,8 @@ def writeOneCard(thedir, output, signal="tttt", kine="srcr", plot="sr", domcfake
     if analysis == "ft":
         # if we're not using tttt as the signal, then want to include tttt as a bg (--> do_tttt = True) 
         inject_tttt = (signal != "tttt") or inject_tttt
+        # except oblique hhat interpretation IS tttt, so don't inject it
+        if "hhat" in signal: inject_tttt = False
     # do_tttt = True
     #define processes (signal first)
     # if pseudoData:

@@ -55,34 +55,39 @@ if __name__ == "__main__":
     # # tag = "v2.0_leptontree"
     # tag = "v4.0_leptontree_2018resid17"
 
-    year_sample_map = [("2018",
-        [
-        ["/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "DY_high"],
-        ["/WW_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM", "WW"],
-        ["/WZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM", "WZ"],
-        ["/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM", "WJets_incl"],
-        ["/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT100To200"],
-        ["/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT200To400"],
-        ["/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT400To600"],
-        ["/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT600To800"],
-        ["/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT800To1200"],
-        ["/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTBAR_PH"],
-        ["/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v3/MINIAODSIM","STantitop"],
-        ["/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v3/MINIAODSIM", "STtop"],
-        ["/EGamma/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleEGDv2"],
-        ["/SingleMuon/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleMuonDv2"],
-        ["/EGamma/Run2018A-17Sep2018-v2/MINIAOD", "ReRecoDataDoubleEGAv2"],
-        ["/EGamma/Run2018B-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleEGBv1"],
-        ["/EGamma/Run2018C-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleEGCv1"],
-        ["/SingleMuon/Run2018A-17Sep2018-v2/MINIAOD", "ReRecoDataDoubleMuonAv2"],
-        ["/SingleMuon/Run2018B-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleMuonBv1"],
-        ["/SingleMuon/Run2018C-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleMuonCv1"],
-        ["/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTWnlo"],
-        ["/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTZnlo"],
-            ]
-        )]
-    tag = "v3.0_isrbabies"
-    extra_args = "--ignorebadfiles"
+    # year_sample_map = [("2018",
+    #     [
+    #     ["/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "DY_high"],
+    #     ["/WW_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM", "WW"],
+    #     ["/WZ_TuneCP5_13TeV-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM", "WZ"],
+    #     ["/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM", "WJets_incl"],
+    #     ["/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT100To200"],
+    #     ["/WJetsToLNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT200To400"],
+    #     ["/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT400To600"],
+    #     ["/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT600To800"],
+    #     ["/WJetsToLNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "WJets_HT800To1200"],
+    #     ["/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTBAR_PH"],
+    #     ["/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v3/MINIAODSIM","STantitop"],
+    #     ["/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v3/MINIAODSIM", "STtop"],
+    #     ["/EGamma/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleEGDv2"],
+    #     ["/SingleMuon/Run2018D-PromptReco-v2/MINIAOD", "DataDoubleMuonDv2"],
+    #     ["/EGamma/Run2018A-17Sep2018-v2/MINIAOD", "ReRecoDataDoubleEGAv2"],
+    #     ["/EGamma/Run2018B-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleEGBv1"],
+    #     ["/EGamma/Run2018C-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleEGCv1"],
+    #     ["/SingleMuon/Run2018A-17Sep2018-v2/MINIAOD", "ReRecoDataDoubleMuonAv2"],
+    #     ["/SingleMuon/Run2018B-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleMuonBv1"],
+    #     ["/SingleMuon/Run2018C-17Sep2018-v1/MINIAOD", "ReRecoDataDoubleMuonCv1"],
+    #     ["/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTWnlo"],
+    #     ["/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTZnlo"],
+    #         ]
+    #     )]
+    # tag = "v3.0_isrbabies"
+    # extra_args = "--ignorebadfiles"
+    # tag_match = ""
+
+    year_sample_map = [("2016",data_2016+mc_2016)] + [("2016_94x",data_2016_94x+mc_2016_94x)]
+    tag = "v4.0_new2016"
+    extra_args = ""
     tag_match = ""
 
     # extra_args = "--ignorebadfiles" # FIXME
@@ -110,6 +115,7 @@ if __name__ == "__main__":
                         # tag="CMS4_V09-04-13", # if not specified, get latest tag
                         )
                 skip_tail = "/SMS" in dsname
+                # skip_tail = "QCD_MuEnriched_50to80" in shortname
                 # skip_tail = True
                 task = CondorTask(
                         sample = sample,

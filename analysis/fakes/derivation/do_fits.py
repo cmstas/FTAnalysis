@@ -71,7 +71,8 @@ def fit_and_plot(inputdir="outputs_19Jan28", outputdir="plots/",years=[2016,2017
         hdy = Hist1D(d[iso][year]["dy"][flav],label=r"DY",color=(0.3,0.8,0.8))
         hwjets = Hist1D(d[iso][year]["wjets"][flav],label=r"W+jets",color=(1.,0.6,0.2))
         httjets = Hist1D(d[iso][year]["ttjets"][flav],label=r"$t\bar{t}$",color=(1.,0.4,0.4))
-        hewk = Hist1D(hdy+hwjets+httjets,label=r"EWK (W+DY+$t\bar{t}$)",color=(1.,0.6,0.2))
+        # hewk = Hist1D(hdy+hwjets+httjets,label=r"EWK (W+DY+$t\bar{t}$)",color=(1.,0.6,0.2))
+        hewk = Hist1D(hdy+hwjets,label=r"EWK (W+DY)",color=(1.,0.6,0.2))
         # hists = [hqcd,hewk]
 
         def do_fit(hdata,hqcd,hewk):

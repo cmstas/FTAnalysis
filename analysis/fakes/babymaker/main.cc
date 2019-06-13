@@ -166,10 +166,13 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_minireliso = 0.16;
         gconf.multiiso_mu_ptratio = 0.76;
         gconf.multiiso_mu_ptrel = 7.2;
+        jecEra = "Summer16_23Sep2016BCDV4";
+        jecEraMC = "Summer16_23Sep2016V4";
         if (
                 filenames.Contains("17Jul2018") ||
                 filenames.Contains("RunIISummer16MiniAODv3-PUMoriond17_94X") ||
-                filenames.Contains("94X")
+                filenames.Contains("94X") ||
+                filenames.Contains("MiniAODv3")
                 ) {
             gconf.cmssw_ver = 94;
             // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
@@ -177,10 +180,10 @@ int main(int argc, char *argv[]){
             gconf.WP_DEEPCSV_TIGHT  = 0.8953;
             gconf.WP_DEEPCSV_MEDIUM = 0.6321;
             gconf.WP_DEEPCSV_LOOSE  = 0.2217;
+            jecEra = "Summer16_07Aug2017BCD_V11";
+            jecEraMC = "Summer16_07Aug2017_V11";
         }
         good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
-        jecEra = "Summer16_23Sep2016BCDV4";
-        jecEraMC = "Summer16_23Sep2016V4";
     }
     if (year == 2017) {
         gconf.year = year;
@@ -257,14 +260,16 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_ptrel = 6.8;
 
         // good_run_file = "goodRunList/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 50.98
-        good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
+        // good_run_file = "goodRunList/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON_snt.txt"; // 58.83
+        good_run_file = "goodRunList/goldenJson_2018_final_59p76ifb_snt.txt"; // 59.76ifb (rerecoABCD+promptD + recovered 50ifb + latest preapproved lumi normtag)
         // jecEra = "Fall17_17Nov2017C_V32";
         // jecEraMC = "Fall17_17Nov2017_V32";
-        // jecEra = "Autumn18_V3";
         // jecEra = "Autumn18_V3_OldRes";
         // jecEraMC = "Autumn18_V3";
         jecEra = "Autumn18_RunA_V8";
         jecEraMC = "Autumn18_V8";
+        // jecEra = "Autumn18_RunA_V5";
+        // jecEraMC = "Autumn18_V5";
         gconf.SS_innerlayers = 0;
     }
 
@@ -455,17 +460,16 @@ int main(int argc, char *argv[]){
             // HAVE TO MAKE DATA JEC HERE SINCE WE NEED RUN NUMBER BECAUSE SO MANY JECS
             // Only need to check first event because a merged file can't span eras
             if (isData && evt == 0) {
-                if (     tas::evt_run() <= 276811) jecEra = "Summer16_23Sep2016BCDV4";
-                else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = "Summer16_23Sep2016EFV4";
-                else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = "Summer16_23Sep2016GV4";
-                else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV4";
+                if (     tas::evt_run() <= 276811) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016BCDV4" : "Summer16_07Aug2017BCD_V11");
+                else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016EFV4" : "Summer16_07Aug2017EF_V11");
+                else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016GV4" : "Summer16_07Aug2017GH_V11");
+                else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016HV4" : "Summer16_07Aug2017GH_V11");
 
                 else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V32";
                 else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V32";
                 else if (tas::evt_run() <= 304797 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017DE_V32";
                 else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V32";
-                // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
-                // else if (tas::evt_run() > 306462) jecEra = "Autumn18_V3"; // FIXME 2018?
+
                 else if (tas::evt_run() <= 316995 && tas::evt_run() >= 315252) jecEra = "Autumn18_RunA_V8";
                 else if (tas::evt_run() <= 319312 && tas::evt_run() >= 316998) jecEra = "Autumn18_RunB_V8";
                 else if (tas::evt_run() <= 320393 && tas::evt_run() >= 319313) jecEra = "Autumn18_RunC_V8";

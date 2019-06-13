@@ -7,7 +7,7 @@
 ./copy_files.sh
 # Edit the babymaker source files or whatever
 # Compile with optimized flags
-./make opt -j10
+make opt -j10
 # Test? Or don't, actually. We don't make mistakes.
 ./test_babymaker.sh
 # Make a tar file to ship to the worker nodes

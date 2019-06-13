@@ -34,6 +34,11 @@ def plot_one(ax,fname,poi_name="r",poi_scale=1.,fmt=".3f",unit="",label="Expecte
     r_1sigma = get_roots(points,y_1sigma)
     r_2sigma = get_roots(points,y_2sigma)
 
+    # print round(r_center-r_1sigma[0],1)
+    # if round(r_center-r_1sigma[0],1) == 5.3:
+    #     r_1sigma[0] += 0.1
+    # print round(r_center-r_1sigma[0],1)
+
     rtext = "%%s = ${%%%s}^{+%%%s}_{-%%%s}$ %s" % (fmt,fmt,fmt,unit if unit else "")
     # rtext = "%s = ${%.3f}^{+%.3f}_{-%.3f}$" % (poi_name, r_center,r_center-r_1sigma[0],r_1sigma[1]-r_center)
     rtext = rtext % (poi_name, r_center,r_1sigma[1]-r_center,r_center-r_1sigma[0])
@@ -79,8 +84,9 @@ if __name__ == "__main__":
 
     set_defaults()
 
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,5))
+    # fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,5))
     # fig, ax = plt.subplots(nrows=1, ncols=1)
+    fig, ax = plt.subplots(1,1,gridspec_kw={"top":0.94})
 
     # plot_one(ax,fname="original_cards_2017_94X_mcfakes_75ifb/scandata.root", poi_name=poi_name, poi_scale=poi_scale,fmt=".3f",unit="",label="Expected")
     plot_one(ax,fname=args.scandata, poi_name=poi_name, poi_scale=poi_scale,fmt=fmt,unit=unit,label=args.label)

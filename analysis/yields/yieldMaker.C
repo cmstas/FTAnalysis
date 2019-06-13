@@ -41,6 +41,7 @@ bool STOP_REQUESTED = false;
 
 float XSEC_TTTT = 11.97;
 float scaleLumi = 1; // 75/35.87
+// float scaleLumi = 400.0/137.2; // 75/35.87
 TH2D *h_counts = 0;
 TH1D *h_weights = 0;
 
@@ -949,6 +950,7 @@ plots_t run(TChain *chain, int year, TString options){
 
     bool isHiggsScan = false;
     bool isHiggsPseudoscalar = false;
+    bool isHiggsBoth = false;
     int higgs_mass = -1;
     float fastsim_isr_norm_central = 1.;
     float fastsim_isr_norm_up = 1.;
@@ -962,6 +964,11 @@ plots_t run(TChain *chain, int year, TString options){
         isHiggsScan = true;
         isHiggsPseudoscalar = true;
         higgs_mass = chainTitle.Copy().ReplaceAll("higgsa","").Atoi();
+        mysparms.push_back((float)higgs_mass);
+    } else if (chainTitle.Contains("higgsb")) {
+        isHiggsScan = true;
+        isHiggsBoth = true;
+        higgs_mass = chainTitle.Copy().ReplaceAll("higgsb","").Atoi();
         mysparms.push_back((float)higgs_mass);
     }
     if (isFastsim) {
@@ -984,7 +991,8 @@ plots_t run(TChain *chain, int year, TString options){
             if (mysparms.size() > 1) std::cout << " " << mysparms[1];
             std::cout << std::endl;
         }
-        if (year == 2016 and (mysparms.size() == 1 or isRPV)) {
+        // if (year == 2016 and (mysparms.size() == 1 or isRPV)) {
+        if (mysparms.size() == 1 or isRPV) {
             if (!quiet) {
                 std::cout << "Calculating normalization factors for NISR jet reweighting..." << std::endl;
             }
@@ -1624,6 +1632,11 @@ plots_t run(TChain *chain, int year, TString options){
             else if (filename.Contains("tHq")) higgs_type = 3;
             if (isHiggsPseudoscalar) higgs_type += 3;
             float xsec = xsec_higgs(higgs_type, higgs_mass);
+            if (isHiggsBoth) {
+                if (filename.Contains("ttH")) xsec += xsec_higgs(higgs_type+3, higgs_mass);
+                else if (filename.Contains("tHW")) xsec += xsec_higgs(higgs_type+3, higgs_mass);
+                else if (filename.Contains("tHq")) xsec += xsec_higgs(higgs_type+3, higgs_mass);
+            }
             if (h_counts) {
                 higgs_weight = 1000. * xsec / h_counts->GetEntries();
             } else {
@@ -1896,7 +1909,8 @@ plots_t run(TChain *chain, int year, TString options){
                 if (isSS) {
                     if (categ == Multilepton) weight *= fastsim_leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
                     else weight *= fastsim_triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
-                    if (year == 2016) weight *= ss::weight_isr()*fastsim_isr_norm_central;
+                    // if (year == 2016) weight *= ss::weight_isr()*fastsim_isr_norm_central;
+                    weight *= ss::weight_isr()*fastsim_isr_norm_central;
                 } else {
                     if (lep3good && lep3ccpt>20) weight *= fastsim_leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ss::ht());
                     else weight *= fastsim_triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ss::ht());
@@ -1914,7 +1928,8 @@ plots_t run(TChain *chain, int year, TString options){
 #ifdef SSLOOP
             float weight_isr_up_alt = weight;
             float weight_isr_dn_alt = weight;
-            if (isFastsim and year == 2016) {
+            // if (isFastsim and year == 2016)
+            if (isFastsim) {
               weight_isr_up_alt *= ss::weight_isr_UP()*fastsim_isr_norm_up;
               weight_isr_dn_alt *= ss::weight_isr_DN()*fastsim_isr_norm_down;
             }

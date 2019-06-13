@@ -15,6 +15,7 @@ mc_2016 = [
             ["/QCD_Pt-300to470_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/MINIAODSIM",  "QCD_MuEnriched_300to470"],
             ["/QCD_Pt-470to600_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM",  "QCD_MuEnriched_470to600"],
             ["/QCD_Pt-600to800_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",       "QCD_MuEnriched_600to800"],
+            ["/QCD_Pt-1000toInf_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",       "QCD_MuEnriched_1000toInf"],
 
             ["/QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",            "QCD_EMEnriched_20to30"],
             ["/QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",            "QCD_EMEnriched_30to50"],
@@ -35,10 +36,35 @@ mc_2016 = [
 
 mc_2016_94x = [
 
-        # # NOTE Bugged? See https://github.com/cmstas/NtupleMaker/issues/30
-        # ["/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext2-v2/MINIAODSIM","DY_high"],
-        # ["/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM","TTBAR_PH"],
-        # ["/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext2-v2/MINIAODSIM","WJets"],
+            ["/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext2-v1/MINIAODSIM", "DY_high"],
+
+            ["/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "TTBAR_PH"],
+            ["/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext2-v2/MINIAODSIM", "WJets"],
+
+            ["/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",       "QCD_MuEnriched_20toInf"],
+            ["/QCD_Pt-20to30_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",         "QCD_MuEnriched_20to30"],
+            ["/QCD_Pt-30to50_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",         "QCD_MuEnriched_30to50"],
+            ["/QCD_Pt-50to80_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",         "QCD_MuEnriched_50to80"],
+            ["/QCD_Pt-80to120_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM",   "QCD_MuEnriched_80to120"],
+            ["/QCD_Pt-120to170_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",       "QCD_MuEnriched_120to170"],
+            ["/QCD_Pt-300to470_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v1/MINIAODSIM",  "QCD_MuEnriched_300to470"],
+            ["/QCD_Pt-470to600_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM",  "QCD_MuEnriched_470to600"],
+            ["/QCD_Pt-600to800_MuEnrichedPt5_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM",       "QCD_MuEnriched_600to800"],
+
+            ["/QCD_Pt-20to30_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",            "QCD_EMEnriched_20to30"],
+            ["/QCD_Pt-30to50_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM",            "QCD_EMEnriched_30to50"],
+            ["/QCD_Pt-50to80_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM",       "QCD_EMEnriched_50to80"],
+            ["/QCD_Pt-80to120_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM",      "QCD_EMEnriched_80to120"],
+            ["/QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM",     "QCD_EMEnriched_120to170"],
+            ["/QCD_Pt-170to300_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",          "QCD_EMEnriched_170to300"],
+            ["/QCD_Pt-300toInf_EMEnriched_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",          "QCD_EMEnriched_300toInf"],
+
+            ["/QCD_Pt_15to20_bcToE_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",                 "QCD_bcToE_15to20"],
+            ["/QCD_Pt_20to30_bcToE_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",                 "QCD_bcToE_20to30"],
+            ["/QCD_Pt_30to80_bcToE_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",                 "QCD_bcToE_30to80"],
+            ["/QCD_Pt_80to170_bcToE_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_backup_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",         "QCD_bcToE_80to170"],
+            ["/QCD_Pt_170to250_bcToE_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",               "QCD_bcToE_170to250"],
+            ["/QCD_Pt_250toInf_bcToE_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v2/MINIAODSIM",               "QCD_bcToE_250toInf"],
 
         ]
 
@@ -137,24 +163,24 @@ data_2016 = [
 
 data_2016_94x = [
 
-        # # NOTE Bugged? See https://github.com/cmstas/NtupleMaker/issues/30
-        # # Bugged? See https://github.com/cmstas/NtupleMaker/issues/30
-        # ["/DoubleEG/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleEGBv1"],
-        # ["/DoubleEG/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleEGBv2"],
-        # ["/DoubleEG/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleEGC"],
-        # ["/DoubleEG/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleEGD"],
-        # ["/DoubleEG/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleEGE"],
-        # ["/DoubleEG/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleEGF"],
-        # ["/DoubleEG/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleEGG"],
-        # ["/DoubleEG/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleEGH"],
-        # ["/DoubleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleMuonBv1"],
-        # ["/DoubleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleMuonBv2"],
-        # ["/DoubleMuon/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleMuonC"],
-        # ["/DoubleMuon/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleMuonD"],
-        # ["/DoubleMuon/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleMuonE"],
-        # ["/DoubleMuon/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleMuonF"],
-        # ["/DoubleMuon/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleMuonG"],
-        # ["/DoubleMuon/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleMuonH"],
+        # NOTE Bugged? See https://github.com/cmstas/NtupleMaker/issues/30
+        # Bugged? See https://github.com/cmstas/NtupleMaker/issues/30
+        ["/DoubleEG/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleEGBv1"],
+        ["/DoubleEG/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleEGBv2"],
+        ["/DoubleEG/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleEGC"],
+        ["/DoubleEG/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleEGD"],
+        ["/DoubleEG/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleEGE"],
+        ["/DoubleEG/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleEGF"],
+        ["/DoubleEG/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleEGG"],
+        ["/DoubleEG/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleEGH"],
+        ["/DoubleMuon/Run2016B-17Jul2018_ver1-v1/MINIAOD", "DataDoubleMuonBv1"],
+        ["/DoubleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD", "DataDoubleMuonBv2"],
+        ["/DoubleMuon/Run2016C-17Jul2018-v1/MINIAOD", "DataDoubleMuonC"],
+        ["/DoubleMuon/Run2016D-17Jul2018-v1/MINIAOD", "DataDoubleMuonD"],
+        ["/DoubleMuon/Run2016E-17Jul2018-v1/MINIAOD", "DataDoubleMuonE"],
+        ["/DoubleMuon/Run2016F-17Jul2018-v1/MINIAOD", "DataDoubleMuonF"],
+        ["/DoubleMuon/Run2016G-17Jul2018-v1/MINIAOD", "DataDoubleMuonG"],
+        ["/DoubleMuon/Run2016H-17Jul2018-v1/MINIAOD", "DataDoubleMuonH"],
 
         ]
 

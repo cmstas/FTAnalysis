@@ -29,6 +29,7 @@ int main(int argc, char *argv[]){
     auto arg_files = std::vector<std::string>();
     std::string arg_output = "output.root";
     int arg_nevents = -1;
+    int arg_year = -1;
     int arg_eventsel = 0;
     std::vector<TString> vfilenames;
 
@@ -47,6 +48,7 @@ int main(int argc, char *argv[]){
             ("xrootd", "Use xrootd by force", cxxopts::value<bool>(arg_xrootd))
             ("o,output", "Output name", cxxopts::value<std::string>(arg_output)->default_value(arg_output))
             ("n,nevents", "Number of events", cxxopts::value<int>(arg_nevents)->default_value(std::to_string(arg_nevents)))
+            ("y,year", "Processing year", cxxopts::value<int>(arg_year)->default_value(std::to_string(arg_year)))
             ("eventsel", "Select particular event by number", cxxopts::value<int>(arg_eventsel)->default_value(std::to_string(arg_eventsel)))
             ("f,files", "Files or file patterns", cxxopts::value<std::vector<std::string>>(arg_files))
             ;
@@ -125,6 +127,7 @@ int main(int argc, char *argv[]){
             || filenames.Contains("run2_data2016")
             || filenames.Contains("run2_moriond17")
             || filenames.Contains("2016_mc_rpv")
+            || filenames.Contains("run2_mc2016")
        ) year = 2016;
     if (
             filenames.Contains("Run2017")
@@ -139,6 +142,11 @@ int main(int argc, char *argv[]){
             || filenames.Contains("Autumn18")
             || filenames.Contains("run2_mc2018")
        ) year = 2018;
+
+    if (arg_year >= 2016) {
+        year = arg_year;
+        std::cout << ">>> [!] You manually overrode the year to " << year << std::endl;
+    }
 
     if (year < 0) {
         std::cout << ">>> [!] Couldn't figure out year, so setting it to 2017. Make sure this is what you want!" << std::endl;
@@ -167,10 +175,14 @@ int main(int argc, char *argv[]){
         gconf.multiiso_mu_minireliso = 0.16;
         gconf.multiiso_mu_ptratio = 0.76;
         gconf.multiiso_mu_ptrel = 7.2;
+        jecEra = "Summer16_23Sep2016BCDV4";
+        jecEraMC = "Summer16_23Sep2016V4";
         if (
                 filenames.Contains("17Jul2018") ||
                 filenames.Contains("RunIISummer16MiniAODv3-PUMoriond17_94X") ||
-                filenames.Contains("94X")
+                filenames.Contains("94X") ||
+                filenames.Contains("MiniAODv3") ||
+                filenames.Contains("run2_mc2016_94x")
                 ) {
             gconf.cmssw_ver = 94;
             // https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
@@ -178,10 +190,10 @@ int main(int argc, char *argv[]){
             gconf.WP_DEEPCSV_TIGHT  = 0.8953;
             gconf.WP_DEEPCSV_MEDIUM = 0.6321;
             gconf.WP_DEEPCSV_LOOSE  = 0.2217;
+            jecEra = "Summer16_07Aug2017BCD_V11";
+            jecEraMC = "Summer16_07Aug2017_V11";
         }
         good_run_file = "goodRunList/goldenJson_2016rereco_36p46ifb.txt";
-        jecEra = "Summer16_23Sep2016BCDV4";
-        jecEraMC = "Summer16_23Sep2016V4";
     }
     if (year == 2017) {
         gconf.year = year;
@@ -225,29 +237,10 @@ int main(int argc, char *argv[]){
         gconf.ea_version = 4;
         gconf.cmssw_ver = 102;
 
-        // // XXX Copied from 2017
-        // gconf.btag_disc_wp = 0.4941;
-        // gconf.WP_DEEPCSV_TIGHT  = 0.8001;
-        // gconf.WP_DEEPCSV_MEDIUM = 0.4941;
-        // gconf.WP_DEEPCSV_LOOSE  = 0.1522;
-
-        // XXX New recommendation
         gconf.btag_disc_wp = 0.4184;
         gconf.WP_DEEPCSV_TIGHT  = 0.7527;
         gconf.WP_DEEPCSV_MEDIUM = 0.4184;
         gconf.WP_DEEPCSV_LOOSE  = 0.1241;
-
-        // gconf.btag_disc_wp = 0.3033;
-        // gconf.WP_DEEPCSV_TIGHT  = 0.7489;
-        // gconf.WP_DEEPCSV_MEDIUM = 0.3033;
-        // gconf.WP_DEEPCSV_LOOSE  = 0.0521;
-
-        // gconf.multiiso_el_minireliso = 0.09;
-        // gconf.multiiso_el_ptratio = 0.85;
-        // gconf.multiiso_el_ptrel = 9.2;
-        // gconf.multiiso_mu_minireliso = 0.12;
-        // gconf.multiiso_mu_ptratio = 0.80;
-        // gconf.multiiso_mu_ptrel = 7.5;
 
         // From FT_jecprefire_18Dec6.pdf
         gconf.multiiso_el_minireliso = 0.07;
@@ -332,7 +325,8 @@ int main(int argc, char *argv[]){
         std::cout << ">>> [!] Only processing single event with evt_event==" << arg_eventsel << std::endl;
     }
 
-    if (filenames.Contains("/TTTT") && filenames.Contains("PSweights")) {
+    // 2018 sample has PSweights but doesn't have the string in the dataset name :(
+    if (filenames.Contains("/TTTT") && (filenames.Contains("PSweights") || year == 2018)) {
         mylooper->read_psweights = true;
         std::cout << ">>> [!] This is a TTTT sample and PSweights exist, so reading them" << std::endl;
     }
@@ -365,6 +359,14 @@ int main(int argc, char *argv[]){
         }
     }
 
+    if (mylooper->has_lhe_branches) {
+        if (filenames.Contains("LOoblique")) {
+            mylooper->has_lhe_branches = false;
+            std::cout << ">>> [!] This sample is private and new gen_LHE_* branches are 0, so falling back to the old method" << std::endl;
+        }
+
+    }
+
     //Add good run list
     set_goodrun_file(good_run_file.c_str());
 
@@ -373,7 +375,8 @@ int main(int argc, char *argv[]){
     JetCorrectionUncertainty *jecUnc = 0;
     if (!isData)      jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/"+jecEraMC+"_MC/"+jecEraMC+"_MC_Uncertainty_AK4PFchs.txt"); 
     if (iSignal > 0 and year == 2016) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_Uncertainty_AK4PFchs.txt"); 
-    if (iSignal > 0 and year != 2016) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastsimV1/Fall17_FastsimV1_Uncertainty_AK4PFchs.txt"); 
+    if (iSignal > 0 and year == 2017) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastSimV1_MC/Fall17_FastSimV1_MC_Uncertainty_AK4PFchs.txt"); 
+    if (iSignal > 0 and year == 2018) jecUnc = new JetCorrectionUncertainty("CORE/Tools/jetcorr/data/run2_25ns/Autumn18_FastSimV1_MC/Autumn18_FastSimV1_MC_Uncertainty_AK4PFchs.txt"); 
 
     //Init MVA
     createAndInitMVA("./CORE", true, true, 80);
@@ -405,13 +408,20 @@ int main(int argc, char *argv[]){
         jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L2Relative_AK4PFchs.txt"); 
         jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L3Absolute_AK4PFchs.txt"); 
         jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Spring16_FastSimV1/Spring16_FastSimV1_L1FastJet_AK4PFchs.txt");
-    } else {
-        jetcorr_filenames_25ns_FASTSIM_pfL1.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastsimV1/Fall17_FastsimV1_L1FastJet_AK4PFchs.txt");
-        jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastsimV1/Fall17_FastsimV1_L2Relative_AK4PFchs.txt"); 
-        jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastsimV1/Fall17_FastsimV1_L3Absolute_AK4PFchs.txt"); 
-        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastsimV1/Fall17_FastsimV1_L2Relative_AK4PFchs.txt"); 
-        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastsimV1/Fall17_FastsimV1_L3Absolute_AK4PFchs.txt"); 
-        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastsimV1/Fall17_FastsimV1_L1FastJet_AK4PFchs.txt");
+    } else if (year == 2017) {
+        jetcorr_filenames_25ns_FASTSIM_pfL1.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastSimV1_MC/Fall17_FastSimV1_MC_L1FastJet_AK4PFchs.txt");
+        jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastSimV1_MC/Fall17_FastSimV1_MC_L2Relative_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastSimV1_MC/Fall17_FastSimV1_MC_L3Absolute_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastSimV1_MC/Fall17_FastSimV1_MC_L2Relative_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastSimV1_MC/Fall17_FastSimV1_MC_L3Absolute_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Fall17_FastSimV1_MC/Fall17_FastSimV1_MC_L1FastJet_AK4PFchs.txt");
+    } else if (year == 2018) {
+        jetcorr_filenames_25ns_FASTSIM_pfL1.push_back("CORE/Tools/jetcorr/data/run2_25ns/Autumn18_FastSimV1_MC/Autumn18_FastSimV1_MC_L1FastJet_AK4PFchs.txt");
+        jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Autumn18_FastSimV1_MC/Autumn18_FastSimV1_MC_L2Relative_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Autumn18_FastSimV1_MC/Autumn18_FastSimV1_MC_L3Absolute_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Autumn18_FastSimV1_MC/Autumn18_FastSimV1_MC_L2Relative_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Autumn18_FastSimV1_MC/Autumn18_FastSimV1_MC_L3Absolute_AK4PFchs.txt"); 
+        jetcorr_filenames_25ns_FASTSIM_pfL1L2L3.push_back("CORE/Tools/jetcorr/data/run2_25ns/Autumn18_FastSimV1_MC/Autumn18_FastSimV1_MC_L1FastJet_AK4PFchs.txt");
     }
 
     //JECs
@@ -434,7 +444,7 @@ int main(int argc, char *argv[]){
         gconf.jet_corrector_L2L3 = jetCorrAG_L2L3;
     }
 
-    TH2D* count_hist = new TH2D("counts","",500,0,2500,500,0,2500);
+    TH2D* count_hist = new TH2D("counts","",560,0,2800,500,0,2500);
     TH1D* weight_hist = new TH1D("weight","",1200,0,1200);
 
     auto t0 = std::chrono::steady_clock::now();
@@ -486,17 +496,15 @@ int main(int argc, char *argv[]){
             // HAVE TO MAKE DATA JEC HERE SINCE WE NEED RUN NUMBER BECAUSE SO MANY JECS
             // Only need to check first event because a merged file can't span eras
             if (isData && evt == 0) {
-                if (     tas::evt_run() <= 276811) jecEra = "Summer16_23Sep2016BCDV4";
-                else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = "Summer16_23Sep2016EFV4";
-                else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = "Summer16_23Sep2016GV4";
-                else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = "Summer16_23Sep2016HV4";
+                if (     tas::evt_run() <= 276811) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016BCDV4" : "Summer16_07Aug2017BCD_V11");
+                else if (tas::evt_run() <= 278801 && tas::evt_run() >= 276831) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016EFV4" : "Summer16_07Aug2017EF_V11");
+                else if (tas::evt_run() <= 280385 && tas::evt_run() >= 278802) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016GV4" : "Summer16_07Aug2017GH_V11");
+                else if (tas::evt_run() <  294645 && tas::evt_run() >= 280919) jecEra = (gconf.cmssw_ver == 80 ? "Summer16_23Sep2016HV4" : "Summer16_07Aug2017GH_V11");
 
                 else if (tas::evt_run() <= 299329 && tas::evt_run() >= 297046) jecEra = "Fall17_17Nov2017B_V32";
                 else if (tas::evt_run() <= 302029 && tas::evt_run() >= 299368) jecEra = "Fall17_17Nov2017C_V32";
                 else if (tas::evt_run() <= 304797 && tas::evt_run() >= 302030) jecEra = "Fall17_17Nov2017DE_V32";
                 else if (tas::evt_run() <= 306462 && tas::evt_run() >= 305040) jecEra = "Fall17_17Nov2017F_V32";
-                // else if (tas::evt_run() > 306462) jecEra = "Fall17_17Nov2017C_V32"; // FIXME 2018?
-                // else if (tas::evt_run() > 306462) jecEra = "Autumn18_V3_OldRes"; // FIXME 2018?
 
                 else if (tas::evt_run() <= 316995 && tas::evt_run() >= 315252) jecEra = "Autumn18_RunA_V8";
                 else if (tas::evt_run() <= 319312 && tas::evt_run() >= 316998) jecEra = "Autumn18_RunB_V8";
@@ -617,7 +625,14 @@ int main(int argc, char *argv[]){
                         weight_hist->Fill(2.5, scale_down_raw);
                         weight_hist->Fill(3.5, pdf_up_raw);
                         weight_hist->Fill(4.5, pdf_down_raw);
-                    } 
+                    } else {
+                        // Fallback, but should be checked always
+                        weight_hist->Fill(0.5, 1.);
+                        weight_hist->Fill(1.5, 1.);
+                        weight_hist->Fill(2.5, 1.);
+                        weight_hist->Fill(3.5, 1.);
+                        weight_hist->Fill(4.5, 1.);
+                    }
 
                 } else {
 

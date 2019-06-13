@@ -9,8 +9,8 @@ r.gROOT.ProcessLine(".L ScanChain.C+")
 
 years_to_consider = [
         2016,
-        2017,
-        2018,
+        # 2017,
+        # 2018,
         # "rereco_2018",
         ]
 procs_to_consider = [
@@ -30,6 +30,9 @@ basedirs ={
         }
 
 outputdir = "outputs_test"
+
+outputdir = "outputs_ss2016_19Jun11" # v4 -- /nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v4.0_new2016/output/year_2016{,_94x}/
+basedirs[2016] = "/nfs-7/userdata/namin/tupler_babies/merged/LeptonTree/v4.0_new2016/output/year_2016_94x//"
 
 options = {
 

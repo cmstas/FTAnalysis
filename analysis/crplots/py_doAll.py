@@ -60,6 +60,8 @@ basedirs ={
 # outputdir = "outputs_19Mar4_v3p28_ft" # FOR FT
 outputdir = "outputs_19Mar9_v3p28_ss" # FOR FT
 
+# outputdir = "outputs_19Mar31_v3p28_2018_zbb" # FOR ZBB
+
 options = {
 
         # 2016: "useInclusiveSFs doBDT Data2016 quiet ",
@@ -413,7 +415,10 @@ chs = {
             "singletop": make_objs([
                 basedirs[2018]+"STtop.root",
                 basedirs[2018]+"STantitop.root",
-                ],options=options[2018])
+                ],options=options[2018]),
+            # "zbb": make_objs([
+            #     "/home/users/namin/2018/fourtop/all/FTAnalysis/babymaking/batch/output_TTZBB_2018.root",
+            #     ],options=options[2018])
 
             }
         }
