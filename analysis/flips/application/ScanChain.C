@@ -389,8 +389,8 @@ void closure(TChain *ch, TString flipfname, TString outname="outputs/histos.root
                 if (minrun == 305040) rand = 5;
                 // if (rand > 0) weight *= getNvtxWeight(ss::nGoodVertices(), rand);
                 weight *= getTruePUw(year, ss::trueNumInt()[0]);
-                weight *= leptonScaleFactor(year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
-                weight *= leptonScaleFactor(year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                weight *= leptonScaleFactor(year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht(), SSANA);
+                weight *= leptonScaleFactor(year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht(), SSANA);
                 weight *= ss::weight_btagsf();
                 if (year == 2016) weight *= ss::prefire2016_sf();
                 if (year == 2017) weight *= ss::prefire2017_sf();

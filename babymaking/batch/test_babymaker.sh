@@ -27,8 +27,8 @@ function check() {
 }
 
 function run() {
-    echo Running ./main.exe $(get_file $1 $2) -o $3 -n 5000 '>&' $4
-    ./main.exe $(get_file $1 $2) -o $3 -n 5000 >& $4
+    echo Running ./main.exe $(get_file $1 $2) -o $3 -n 50000 '>&' $4
+    ./main.exe $(get_file $1 $2) -o $3 -n 50000 >& $4
     check $4
 }
 

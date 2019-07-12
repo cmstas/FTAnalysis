@@ -94,7 +94,7 @@ def set_susy_palette():
     r.gStyle.SetPalette(NCont,mypalette)
     r.gStyle.SetNumberContours(NCont)
 
-def get_smoothed(graph, nsmooth=0, algo="k5b", diagonal_fudge=0, return_hist=False, cval=1.0, persist=[],set_high_above_diag=True):
+def get_smoothed(graph, nsmooth=0, algo="k5b", diagonal_fudge=0, return_hist=False, cval=1.0, persist=[],set_high_above_diag=True,shift_by_one=False):
     graph_ = graph.Clone()
     # Turn TGraph into TH2F
     h2 = graph_.GetHistogram()
@@ -142,10 +142,38 @@ def get_smoothed(graph, nsmooth=0, algo="k5b", diagonal_fudge=0, return_hist=Fal
         persist.append(h2)
         return h2
 
+    # Before getting contour, make a new histogram with one extra bin below 0
+    # so that the smoothed limit curve extends to 0
+    xmin, xmax = h2.GetXaxis().GetXmin(), h2.GetXaxis().GetXmax()
+    ymin, ymax = h2.GetYaxis().GetXmin(), h2.GetYaxis().GetXmax()
+    nx, ny = h2.GetNbinsX(), h2.GetNbinsY()
+    xbinwidth, ybinwidth = (xmax-xmin)/nx, (ymax-ymin)/ny
+    h3 = r.TH2F("h3"+h2.GetName(),"",nx,xmin,xmax,ny+1,ymin-ybinwidth,ymax)
+    for xbin in range(1,h3.GetNbinsX()+1):
+        for ybin in range(1,h3.GetNbinsY()+1):
+            # old ybin goes into ybin+1
+            val = h2.GetBinContent(xbin,ybin)
+            h3.SetBinContent(xbin,ybin+1,val)
+            # and if old ybin==1 (lowest mLSP), then also fill ybin+0
+            if ybin==1:
+                # For t5qqqqvv this method would cause the 45degree limit curve to go straight down in the lowest bin
+                # So we fill this dummy row with xbin shifted by one so that we preserve the 45 degree contour
+                if shift_by_one:
+                    h3.SetBinContent(xbin+1,ybin+0,val)
+                else:
+                    h3.SetBinContent(xbin,ybin+0,val)
+
     # Now get the contour
-    cont = r.TGraph2D(h2).GetContourList(cval)
+    cont = r.TGraph2D(h3).GetContourList(cval)
     if not cont:
         return None
+
+    # x = r.gPad
+    # cnew = r.TCanvas("cnew")
+    # h2.Draw("colz")
+    # cnew.SaveAs("test.pdf")
+    # del cnew
+    # r.gPad = x
 
     # Get list of x,y points for contour
     points = zip(list(cont[0].GetX()),list(cont[0].GetY()))
@@ -408,8 +436,11 @@ def draw_limits(
                 dists = np.hypot(lut[:,0]-x,lut[:,1]-y)
                 return lut[np.argmin(dists)][-1]
             for ix in range(1,hnew.GetNbinsX()+1):
+                x = hnew.GetXaxis().GetBinCenter(ix)
+                # if x > maxx: 
+                #     continue
                 for iy in range(1,hnew.GetNbinsY()+1):
-                    x,y = hnew.GetXaxis().GetBinCenter(ix), hnew.GetYaxis().GetBinCenter(iy)
+                    y = hnew.GetYaxis().GetBinCenter(iy)
                     if h_xsec.GetBinContent(h_xsec.FindBin(x,y)) < 1e-6: continue
                     v = find_nearest(x,y)
                     hnew.SetBinContent(ix,iy,v)
@@ -432,8 +463,11 @@ def draw_limits(
             yhigh = h_xsec.GetYaxis().GetBinUpEdge(nx)
             hnew = r.TH2F("hnew","hnew",nx//4,xlow+25.,xhigh-25.,ny//4,ylow+25.,yhigh-25.)
             for ix in range(1,hnew.GetNbinsX()+1):
+                x = hnew.GetXaxis().GetBinCenter(ix)
+                if x > maxx: 
+                    continue
                 for iy in range(1,hnew.GetNbinsY()+1):
-                    x,y = hnew.GetXaxis().GetBinCenter(ix), hnew.GetYaxis().GetBinCenter(iy)
+                    y = hnew.GetYaxis().GetBinCenter(iy)
                     hnew.SetBinContent(ix,iy,h_xsec.GetBinContent(h_xsec.FindBin(x,y)))
             r.gStyle.SetPaintTextFormat("0.2f")
             hnew.Draw("sametext")
@@ -463,7 +497,9 @@ def draw_limits(
                 ]:
             g = r.TGraph2D("g_{}".format(name), "", len(d_vals["mglu"]), d_vals["mglu"], d_vals["mlsp"], d_vals[name])
             extra = {"nsmooth":1}
-            if "dm20" in outname: extra["nsmooth"] = 4
+            if "dm20" in outname: 
+                extra["nsmooth"] = 4
+                extra["shift_by_one"] = True
             if "t6tthzbrz" in outname: extra["set_high_above_diag"] = False
             if "t6tthzbrb" in outname:
                 extra["nsmooth"] = -4
@@ -541,14 +577,14 @@ def draw_limits(
     cmstexbold.SetTextSize(0.05)
     cmstexbold.SetLineWidth(2)
     cmstexbold.SetTextFont(61)
-    cmstexprel = r.TLatex(0.28,0.91, "Preliminary" )
-    cmstexprel.SetNDC()
-    cmstexprel.SetTextSize(0.04)
-    cmstexprel.SetLineWidth(2)
-    cmstexprel.SetTextFont(52)
+    # cmstexprel = r.TLatex(0.28,0.91, "Preliminary" )
+    # cmstexprel.SetNDC()
+    # cmstexprel.SetTextSize(0.04)
+    # cmstexprel.SetLineWidth(2)
+    # cmstexprel.SetTextFont(52)
     cmstex.Draw("same")
     cmstexbold.Draw("same")
-    cmstexprel.Draw("same")
+    # cmstexprel.Draw("same")
 
     yshift = 0.
     if indir_secondary:
@@ -687,12 +723,17 @@ if __name__ == "__main__":
     # indir = "v3.26_feb27_allsigs_v1"
     # indir2 = "v3.27_mar4_t5tttt_v1/"
     # indir = "batch/biglog_v1.txt"
-    indir = "batch/biglog_v3.txt"
+    # indir = "batch/biglog_v3.txt"
+    indir = "batch/biglog_v6.txt"
     # indir2 = "v3.27_mar4_t5tttt_v1/"
-    outdir = "scanplots_test"
+    outdir = "scanplots_Jun28"
 
     dos = args.sig or False
-    modstr = args.model or "t1tttt"
+    # modstr = args.model or "t1tttt"
+    # modstr = args.model or "t5tttt"
+    # modstr = args.model or "t5ttcc"
+    modstr = args.model or "t5qqqqvvdm20"
+    # modstr = args.model or "t1ttbb"
     # modstr = args.model or "t6ttww"
     # modstr = args.model or "t6tthzbrh"
     os.system("mkdir -p {}".format(outdir))
@@ -954,6 +995,55 @@ if __name__ == "__main__":
             label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow #tilde{t}_{1}#kern[0.3]{t}, #tilde{t}_{1}#rightarrow t#tilde{#chi}^{0}_{1} ",
             blinded=False,
             )
+
+    if modstr == "t5ttcc":
+        draw_limits(
+            indir = indir,
+            glob_pattern = "*fs_t5ttcc_m*.log",
+            is_gluino = True,
+            outname = "{}/t5ttcc_scan_xsec_run2.pdf".format(outdir),
+            do_significance = dos,
+            minx = 800,
+            maxx = 2300,
+            miny = 0,
+            maxy = 2050,
+            diag_x1 = 800,
+            diag_y1 = 540+173,
+            diag_x2 = 800+1400-100,
+            diag_y2 = 540+173+1400-100,
+            lumi = 137,
+            label_mass = "m_{#kern[0.5]{#tilde{t}_{1}}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV",
+            label_diag = "m_{#tilde{g}} - m_{#tilde{#chi}^{0}_{1}} = m_{W} + m_{b}",
+            label_xaxis = "m_{#tilde{g}} (GeV)",
+            label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
+            label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow #tilde{t}_{1}#kern[0.3]{t}, #tilde{t}_{1}#rightarrow c#tilde{#chi}^{0}_{1} ",
+            blinded=False,
+            )
+
+    if modstr == "t1ttbb":
+        draw_limits(
+            indir = indir,
+            glob_pattern = "*fs_t1ttbb_m*.log",
+            is_gluino = True,
+            outname = "{}/t1ttbb_scan_xsec_run2.pdf".format(outdir),
+            do_significance = dos,
+            minx = 800,
+            maxx = 2300,
+            miny = 0,
+            maxy = 1950,
+            diag_x1 = 800,
+            diag_y1 = 800-170,
+            diag_x2 = 1700+300,
+            diag_y2 = 1700+300-170,
+            lumi = 137,
+            label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 5 GeV",
+            label_diag = "m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
+            label_xaxis = "m_{#tilde{g}} (GeV)",
+            label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
+            label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow tb#tilde{#chi}^{#pm}_{1}        ",
+            blinded=False,
+            )
+
 
 #     fname = "test.pdf"
 #     # compare_two_scans("v3.09_ML_fullscan", "v3.09_prefire2017_v2", glob_pattern="*fs_t1tttt_*.log", fname=fname)

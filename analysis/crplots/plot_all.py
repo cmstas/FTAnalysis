@@ -60,10 +60,10 @@ labels = {
     "ptj8": "$p_T$ - jet 8",
     "eventbdt": "raw BDT discriminant",
 
-    "zbb_mbbmin": "ZBB mbbmin",
-    "zbb_disc_both": "ZBB disc both",
-    "zbb_disc_ttbb": "ZBB disc ttbb",
-    "zbb_disc_ttjets": "ZBB disc ttjets",
+    # "zbb_mbbmin": "ZBB mbbmin",
+    # "zbb_disc_both": "ZBB disc both",
+    # "zbb_disc_ttbb": "ZBB disc ttbb",
+    # "zbb_disc_ttjets": "ZBB disc ttjets",
 
     # "nbnj": r"bin%5=Nj, bin//5=Nb",
     # "nisrjets": "Njets (ISR/FSR)",
@@ -130,7 +130,7 @@ d_label_colors = {
             "tth":                     (r"$t\bar{t}H$",    [0.4, 0.4, 0.6]),
             "ttw":                     (r"$t\bar{t}W$",    [0.0, 0.4, 0.0]),
             "ttz":                     (r"$t\bar{t}Z$",    [0.4, 0.8, 0.4]),
-            "zbb":                     (r"$t\bar{t}Z$(bb)",    [0.3, 0.6, 0.4]),
+            # "zbb":                     (r"$t\bar{t}Z$(bb)",    [0.3, 0.6, 0.4]),
             "wz":                      (r"WZ" ,             [1.0,0.8,0.0]),
             "vv":                      (r"VV",             [0.0, 0.4, 0.8]),
             "vvnowz":                   (r"VV",             [0.0, 0.4, 0.8]),
@@ -163,7 +163,7 @@ bginfo = {
         "tt_isr_reweight_check": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop", ] },
         "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
         "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
-        "zbb": { k:d_label_colors[k] for k in [ "dy", "ttz", "zbb", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
+        # "zbb": { k:d_label_colors[k] for k in [ "dy", "ttz", "zbb", "tt", "tth", "ttw", "vv", "rares", "singletop","tttt" ] },
         # "tl": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
         # "os": { k:d_label_colors[k] for k in [ "dy", "ttz", "tt", "tth", "ttw", "vv", "rares", "singletop" ] },
         "tlmet": { k:d_label_colors[k] for k in [ "dy", "tt", "vv", "wjets", "rares", "singletop", ] },
@@ -400,8 +400,10 @@ if __name__ == "__main__":
             ]
     flavs = ["in"]
     # flavs = ["ee","em","mm","in"]
-    inputdir = "outputs_19Mar9_v3p28_ss/"
-    outputdir = "plots_ss_3p28_19Mar9"
+    # inputdir = "outputs_19Mar9_v3p28_ss/"
+    # outputdir = "plots_ss_3p28_19Mar9"
+    inputdir = "outputs_19Jun26_v3p31_ss/"
+    outputdir = "plots_ss_3p31_19Jun26"
 
     # ## FOUR TOP NOTE
     # regions = [

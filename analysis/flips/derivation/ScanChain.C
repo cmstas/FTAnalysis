@@ -100,8 +100,8 @@ void flip(TChain *ch, int year, int which=11) {
 
             if (!ss::is_real_data()) {
                 weight *= getTruePUw(year, ss::trueNumInt()[0]);
-                if (abs(ss::lep1_id())==11) weight *= leptonScaleFactor(year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht());
-                if (abs(ss::lep2_id())==11) weight *= leptonScaleFactor(year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht());
+                if (abs(ss::lep1_id())==11) weight *= leptonScaleFactor(year, ss::lep1_id(), ss::lep1_coneCorrPt(), ss::lep1_p4().eta(), ss::ht(), SSANA);
+                if (abs(ss::lep2_id())==11) weight *= leptonScaleFactor(year, ss::lep2_id(), ss::lep2_coneCorrPt(), ss::lep2_p4().eta(), ss::ht(), SSANA);
                 weight *= ss::weight_btagsf();
             }
 

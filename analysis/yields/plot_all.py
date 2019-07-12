@@ -210,7 +210,7 @@ d_flat_systematics["ft"] = {
         "xg": 0.11,
         }
 d_flat_systematics["ss"] = {
-        "fakes": 0.40, # EWK too
+        "fakes": 0.40,
         "flips": 0.2,
         "rares": 0.5,
         "ww": 0.3,
@@ -311,14 +311,17 @@ def worker(info):
         lumi_ = str(lumi)
 
         if analysis == "ft":
-            if title in ["SRCR","SR"] and var == "TOTAL":
-                title = "Cut-based"
+            if title in ["SRCR","SR"]:
+                if var == "TOTAL":
+                    title = "Cut-based"
+                else:
+                    title = "SR (pre-fit)"
             elif title == "SRDISC":
                 title = "BDT"
             elif title == "TTZCR":
-                title = "CRZ"
+                title = "CRZ (pre-fit)"
             elif title == "TTWCR":
-                title = "CRW"
+                title = "CRW (pre-fit)"
 
         if analysis == "ss":
             if title in ["BR"]:
@@ -516,6 +519,14 @@ def worker(info):
             if var in ["ht","met"]:
                 ylabel = "Events / {} GeV".format(int(binwidth))
             mpl_legend_params["fontsize"] = 12
+
+            if var in ["njets","nbtags"] and region in ["ttwcr","ttzcr"]:
+                data.poissonify()
+                ratio_range = [0.,2.]
+
+            if var in ["njets","nbtags"] and region in ["sr"]:
+                ratio_range = [0.,2.]
+
             # mpl_legend_params["framealpha"] = 0.4
             # mpl_legend_params["ncol"] = 1
             # mpl_legend_params["labelspacing"] = 0.10
@@ -545,7 +556,7 @@ def worker(info):
                        do_bkg_syst=True,
                        )
 
-        if (region in ["sr","brpostfit"]):
+        if (region in ["sr","brpostfit","ttwcr","ttzcr"]):
             fname_tmp = fname.replace(".pdf","_stacked.pdf").replace(".png","_stacked.png")
             plot_stack(bgs=bgs+sigs, data=data, title=title, xlabel=xlabel, ylabel=ylabel, filename=fname_tmp,
                        # cms_type = "Preliminary",

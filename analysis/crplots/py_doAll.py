@@ -28,12 +28,16 @@ procs_to_consider = [ # FIXME
 
 basedirs ={
 
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/",
-        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/",
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/", # Autumn18V3 JECs with dummy residuals
-        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag//output/year_2018/", # Autumn18V3 JECs with Fall17 V32 F residuals, new btag SF
-        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/", # Autumn18V8 "final" jecs (with residuals)
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/",
+        # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/",
+        # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
+        # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/", # Autumn18V3 JECs with dummy residuals
+        # # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.27_fixbtag//output/year_2018/", # Autumn18V3 JECs with Fall17 V32 F residuals, new btag SF
+        # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/", # Autumn18V8 "final" jecs (with residuals)
+
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31/output/year_2016_94x/",
+        2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31/output/year_2017/",
+        2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31//output/year_2018/",
 
         }
 
@@ -58,7 +62,9 @@ basedirs ={
 # outputdir = "outputs_19Mar4_v3p27_ss" # FOR SS
 # outputdir = "outputs_19Mar4_v3p27_ft" # FOR FT
 # outputdir = "outputs_19Mar4_v3p28_ft" # FOR FT
-outputdir = "outputs_19Mar9_v3p28_ss" # FOR FT
+# outputdir = "outputs_19Mar9_v3p28_ss" # FOR FT
+
+outputdir = "outputs_19Jun26_v3p31_ss" # FOR SS
 
 # outputdir = "outputs_19Mar31_v3p28_2018_zbb" # FOR ZBB
 

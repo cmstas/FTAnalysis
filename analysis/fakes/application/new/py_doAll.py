@@ -9,8 +9,8 @@ r.gROOT.ProcessLine(".L ScanChain.C+")
 
 years_to_consider = [ # FIXME
         2016,
-        2017,
-        2018,
+        # 2017,
+        # 2018,
         ]
 # procs_to_consider = []
 procs_to_consider = [ # FIXME
@@ -26,17 +26,21 @@ procs_to_consider = [ # FIXME
 
 basedirs ={
 
-        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/",
+        # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/",
+        2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31/output/year_2016_94x/",
         2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/",
         # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2018/",
         2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.26/output/year_2018/",
 
         }
 
-# outputdir = "outputs"
-outputdir = "outputs_v2"
-plotdir = "plots_SS_19Jan25_v2"
-# plotdir = "plots_FT_19Jan25"
+# # outputdir = "outputs"
+# # plotdir = "plots_FT_19Jan25"
+# outputdir = "outputs_v2"
+# plotdir = "plots_SS_19Jan25_v2"
+
+outputdir = "outputs_Jun17"
+plotdir = "plots_SS_19Jun17_new2016"
 
 options = {
 
@@ -105,4 +109,4 @@ map(run_chain,enumerate(to_run))
 import sys
 sys.modules["numba"] = None
 import plot
-plot.make_plots(inputdir=outputdir,outputdir=plotdir)
+plot.make_plots(inputdir=outputdir,outputdir=plotdir,years=years_to_consider)

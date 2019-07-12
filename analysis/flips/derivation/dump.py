@@ -48,13 +48,22 @@ if __name__ == "__main__":
     # print_flip_rate(ratio, do_errors=False, scale=predscale)
     # print_flip_rate(ratio, do_errors=True, scale=predscale)
 
-    year = 2018
+    # year = 2018
+    # f = r.TFile("outputs//histos_{}.root".format(year))
+    # ratio = f.Get("ratio")
+    # predscale = dict(
+    #         y2016 = 1.01, # 2016
+    #         y2017 = 1.44, # 2017
+    #         y2018 = 1.41, # 2018
+    #         )["y"+str(year)]
+    # print_flip_rate(ratio, do_errors=False, scale=predscale)
+    # print_flip_rate(ratio, do_errors=True, scale=predscale)
+
+    year = 2016
     f = r.TFile("outputs//histos_{}.root".format(year))
     ratio = f.Get("ratio")
     predscale = dict(
-            y2016 = 1.01, # 2016
-            y2017 = 1.44, # 2017
-            y2018 = 1.41, # 2018
+            y2016 = 1.09, # 2016
             )["y"+str(year)]
     print_flip_rate(ratio, do_errors=False, scale=predscale)
     print_flip_rate(ratio, do_errors=True, scale=predscale)

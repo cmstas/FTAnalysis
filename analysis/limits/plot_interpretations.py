@@ -208,7 +208,7 @@ def make_yukawa_plot(scaninfo):
     ax.yaxis.set_minor_locator(MultipleLocator(2))
 
     ax.set_ylim([0.,55.])
-    ax.set_ylabel(r"$\sigma_{t\bar{t}t\bar{t}}$ [fb]")
+    ax.set_ylabel(r"$\sigma_{t\bar{t}t\bar{t}}$ (fb)")
     ax.set_title("")
     ax.set_xlabel(r"$|y_\mathrm{t}/y_\mathrm{t}^\mathrm{SM}|$")
     fig.set_tight_layout(True)
@@ -369,15 +369,18 @@ def make_higgs_plot(basedir,globber,do_scalar=True,do_sum=False):
                 (ptheory_dm[0],),
                 ],
             [
-                "95% CL Observed",
-                r"95% CL Expected $\pm$1 and $\pm$2 $\sigma_\mathrm{experiment}$",
+                "Observed",
+                r"Median expected, $\pm$1 and $\pm$2 $\sigma_\mathrm{experiment}$",
                 # r"$\sigma^\mathrm{%s}_\mathrm{theory}$" % ("pseudoscalar" if which == "a" else "scalar"),
                 r"$\sigma^\mathrm{%s}_\mathrm{theory}$ (2HDM, $\tan\beta$=1)" % ("pseudoscalar" if which == "a" else "scalar"),
                 r"$\sigma^\mathrm{%s}_\mathrm{theory}$ (DM, $m_\chi$=600 GeV, $g_\mathrm{SM}$=$g_\mathrm{DM}$=1)" % ("pseudoscalar" if which == "a" else "scalar"),
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
-            labelspacing=0.6,
+            labelspacing=0.4,
+            title="95% CL upper limits",
+            fontsize=12,
             )
+    legend.get_title().set_fontsize(legend.get_texts()[0].get_fontsize())
     ax.yaxis.set_minor_locator(MultipleLocator(5.))
     ax.xaxis.set_minor_locator(MultipleLocator(10.))
     ax.set_ylim([0.,100.])
@@ -626,8 +629,13 @@ if __name__ == "__main__":
     # make_rpv_plot(biglog="batch/biglog_v4.pkl",outdir="scanplots_test/",globber="*rpv_t1tbs_*",do_tbs=True)
     # make_rpv_plot(biglog="batch/biglog_v4.pkl",outdir="scanplots_test/",globber="*fs_t1qqqql_*",do_tbs=False)
 
-    # new Higgs xsecs (May6)
-    make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
-    make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
-    make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_sum=True)
-    make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar18nominal_v1/log_yukawa_scan.txt")
+    # # new Higgs xsecs (May6) -- CWR/paper for four top
+    # make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
+    # make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
+    # make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_sum=True)
+    # make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar18nominal_v1/log_yukawa_scan.txt")
+
+    # from plotSMS import parse_logs
+    # parse_logs("batch/biglog_v6.txt")
+    make_rpv_plot(biglog="batch/biglog_v6.pkl",outdir="scanplots_Jun28/",globber="*rpv_t1tbs_*",do_tbs=True)
+    make_rpv_plot(biglog="batch/biglog_v6.pkl",outdir="scanplots_Jun28/",globber="*fs_t1qqqql_*",do_tbs=False)

@@ -190,7 +190,7 @@ if __name__ == "__main__":
 #     fh.close()
 
     # # Electrons
-    # # 2017 FASTSIM (https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF#Electrons_FullSim_FastSim_AN1)
+    # # 2017 FASTSIM (https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF#Electrons_FullSim_FastSim)
     # fh = open("{}/fs_lepton_sfs_el_2017.h".format(outdir),"w")
     # f_el_susy = r.TFile("fastsim/detailed_ele_full_fast_sf_17.root")
     # h_el_mvatight = f_el_susy.Get("MVATightIP2D3DIDEmu_sf")
@@ -200,8 +200,8 @@ if __name__ == "__main__":
     # h_el_mvatight.Multiply(h_el_multiiso)
     # h_el_mvatight.Multiply(h_el_convhit)
     # h_el_mvatight.Multiply(h_el_3charge)
-    # x = dump_bins(h_el_mvatight, "fastsim_electronScaleFactor", transpose=False) + "\n" 
-    # xe = dump_bins(h_el_mvatight, "fastsim_electronScaleFactorError", do_err=True, maxerr=0.5, transpose=False) + "\n" 
+    # x = dump_bins(h_el_mvatight, "fastsim_electronScaleFactor", transpose=True, nofabseta=True) + "\n" 
+    # xe = dump_bins(h_el_mvatight, "fastsim_electronScaleFactorError", do_err=True, maxerr=0.5, transpose=True, nofabseta=True) + "\n" 
     # fh.write(x)
     # fh.write(xe)
     # fh.close()
@@ -217,22 +217,66 @@ if __name__ == "__main__":
     # h_el_mvatight.Multiply(h_el_multiiso)
     # h_el_mvatight.Multiply(h_el_convhit)
     # h_el_mvatight.Multiply(h_el_3charge)
-    # x = dump_bins(h_el_mvatight, "fastsim_electronScaleFactor", transpose=False) + "\n" 
-    # xe = dump_bins(h_el_mvatight, "fastsim_electronScaleFactorError", do_err=True, maxerr=0.5, transpose=False) + "\n" 
+    # x = dump_bins(h_el_mvatight, "fastsim_electronScaleFactor", transpose=True, nofabseta=True) + "\n" 
+    # xe = dump_bins(h_el_mvatight, "fastsim_electronScaleFactorError", do_err=True, maxerr=0.5, transpose=True, nofabseta=True) + "\n" 
     # fh.write(x)
     # fh.write(xe)
     # fh.close()
 
-    # Muons syst for 2017, 2018
-    # https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs2017
-    fh = open("{}/lepton_sfs_mu_syst.h".format(outdir),"w")
-    # NOTE NOTE NOTE
-    print "// If we get the one without _syst or _stat, then it's both, so use it IN PLACE OF THE REGULAR MEDIUM ERROR, not in quadrature"
-    f_mu_medium = r.TFile("rootfiles_run2/RunBCDEF_SF_ID_syst.root")
-    h_mu_medium = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta")
-    # h_mu_medium_syst = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta_syst")
-    # h_mu_medium_stat = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta_stat")
-    xe = dump_bins(h_mu_medium, "muonScaleFactorError_Medium", fallthrough=0.00, do_err=True) + "\n" 
-    print xe
-    fh.write(xe)
-    fh.close()
+    # # Muons
+    # # 2017 FASTSIM (https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF)
+    # fh = open("{}/fs_lepton_sfs_mu_2017.h".format(outdir),"w")
+    # f_mu_susy = r.TFile("fastsim/detailed_mu_full_fast_sf_17.root")
+    # h_mu_iso = f_mu_susy.Get("MultiIsoM_17data_V32JEC_MediumId_sf")
+    # x = dump_bins(h_mu_iso, "fastsim_muonScaleFactor", transpose=False) + "\n" 
+    # xe = dump_bins(h_mu_iso, "fastsim_muonScaleFactorError", do_err=True, maxerr=0.5, transpose=False) + "\n" 
+    # fh.write(x)
+    # fh.write(xe)
+    # fh.close()
+
+    # # Muons
+    # # 2018 FASTSIM (https://twiki.cern.ch/twiki/bin/viewauth/CMS/SUSLeptonSF)
+    # fh = open("{}/fs_lepton_sfs_mu_2018.h".format(outdir),"w")
+    # f_mu_susy = r.TFile("fastsim/detailed_mu_full_fast_sf_18.root")
+    # h_mu_iso = f_mu_susy.Get("MultiIsoM_17data_V32JEC_MediumId_sf")
+    # x = dump_bins(h_mu_iso, "fastsim_muonScaleFactor", transpose=False) + "\n" 
+    # xe = dump_bins(h_mu_iso, "fastsim_muonScaleFactorError", do_err=True, maxerr=0.5, transpose=False) + "\n" 
+    # fh.write(x)
+    # fh.write(xe)
+    # fh.close()
+
+#     # Muons syst for 2017, 2018
+#     # https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceEffs2017
+#     fh = open("{}/lepton_sfs_mu_syst.h".format(outdir),"w")
+#     # NOTE NOTE NOTE
+#     print "// If we get the one without _syst or _stat, then it's both, so use it IN PLACE OF THE REGULAR MEDIUM ERROR, not in quadrature"
+#     f_mu_medium = r.TFile("rootfiles_run2/RunBCDEF_SF_ID_syst.root")
+#     h_mu_medium = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta")
+#     # h_mu_medium_syst = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta_syst")
+#     # h_mu_medium_stat = f_mu_medium.Get("NUM_MediumID_DEN_genTracks_pt_abseta_stat")
+#     xe = dump_bins(h_mu_medium, "muonScaleFactorError_Medium", fallthrough=0.00, do_err=True) + "\n" 
+#     print xe
+#     fh.write(xe)
+#     fh.close()
+
+    # # Electrons
+    # # 2016 legacy
+    # fh = open("{}/lepton_sfs_el_2016.h".format(outdir),"w")
+    # f_el_reco_high = r.TFile("rootfiles_legacy2016/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root")
+    # f_el_reco_low = r.TFile("rootfiles_legacy2016/EGM2D_BtoH_low_RecoSF_Legacy2016.root")
+    # f_el_susy = r.TFile("rootfiles_legacy2016/ElectronScaleFactors_Run2016.root")
+    # h_el_reco_high = f_el_reco_high.Get("EGamma_SF2D")
+    # h_el_reco_low = f_el_reco_low.Get("EGamma_SF2D")
+    # h_el_mvatight = f_el_susy.Get("Run2016_MVATightIP2D3DIDEmu")
+    # h_el_multiiso = f_el_susy.Get("Run2016_MultiIsoEmu")
+    # h_el_convhit = f_el_susy.Get("Run2016_ConvIHit0")
+    # h_el_3charge = f_el_susy.Get("Run2016_3Qagree")
+    # h_el_mvatight.Multiply(h_el_multiiso)
+    # h_el_mvatight.Multiply(h_el_convhit)
+    # h_el_mvatight.Multiply(h_el_3charge)
+    # fh.write( dump_bins(h_el_mvatight, "electronScaleFactor", transpose=True, nofabseta=True) + "\n" )
+    # fh.write( dump_bins(h_el_mvatight, "electronScaleFactorError", transpose=True, nofabseta=True, do_err=True) + "\n" )
+    # fh.write( dump_bins([h_el_reco_low,h_el_reco_high], "electronScaleFactorReco", transpose=True, nofabseta=True) + "\n" )
+    # fh.write( dump_bins([h_el_reco_low,h_el_reco_high], "electronScaleFactorRecoError", transpose=True, nofabseta=True, do_err=True) + "\n" )
+    # fh.close()
+

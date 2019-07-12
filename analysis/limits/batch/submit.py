@@ -237,10 +237,31 @@ if __name__ == "__main__":
     #         logdir="logs/{}".format(tag),
     #         )
 
-    tag="v3"
+#     tag="v3"
+#     outputdir = "/hadoop/cms/store/user/namin/batch_limits/{tag}/".format(tag=tag)
+#     s = DirectorySample(dataset="/SS/batchlimits/LIM",location="../v3.28_ss_mar13allsigs_v1/",globber="card_*_all_run2.root")
+#     chunks,_ = file_chunker(sorted(s.get_files()), files_per_output=10, flush=True)
+#     arguments = []
+#     inputfiles = []
+#     done_indices = set(map(lambda x:int(x.rsplit("_",1)[-1].split(".",1)[0]),glob.glob(outputdir+"/*.txt")))
+#     for i,chunk in enumerate(chunks):
+#         idx = i+1
+#         if idx in done_indices: continue
+#         arguments.append([outputdir, tag, idx])
+#         inputfiles.append(["package.tar.xz"]+[x.get_name() for x in chunk])
+#     print "Submitting {} jobs".format(len(arguments))
+#     condor_submit(
+#             multiple=True,
+#             executable="executable.sh",
+#             arguments=arguments,
+#             inputfiles=inputfiles,
+#             logdir="logs/{}".format(tag),
+#             )
+
+    tag="v6c"
     outputdir = "/hadoop/cms/store/user/namin/batch_limits/{tag}/".format(tag=tag)
-    s = DirectorySample(dataset="/SS/batchlimits/LIM",location="../v3.28_ss_mar13allsigs_v1/",globber="card_*_all_run2.root")
-    chunks,_ = file_chunker(sorted(s.get_files()), files_per_output=10, flush=True)
+    s = DirectorySample(dataset="/SS/batchlimits/LIM",location="../v3.31_ss_Jun26_v1c/",globber="card_*_all_run2.root")
+    chunks,_ = file_chunker(sorted(s.get_files()), files_per_output=6, flush=True)
     arguments = []
     inputfiles = []
     done_indices = set(map(lambda x:int(x.rsplit("_",1)[-1].split(".",1)[0]),glob.glob(outputdir+"/*.txt")))

@@ -284,8 +284,8 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
             float weight = ss::is_real_data() ? 1 : ss::scale1fb()*lumiAG;
             if (!ss::is_real_data()) {
                 weight *= getTruePUw(year, ss::trueNumInt()[0]);
-                weight *= leptonScaleFactor(year, lep1id, lep1pt, lep1eta, ht);
-                weight *= leptonScaleFactor(year, lep2id, lep2pt, lep2eta, ht);
+                weight *= leptonScaleFactor(year, lep1id, lep1pt, lep1eta, ht, analysis);
+                weight *= leptonScaleFactor(year, lep2id, lep2pt, lep2eta, ht, analysis);
                 weight *= ss::weight_btagsf();
             }
             

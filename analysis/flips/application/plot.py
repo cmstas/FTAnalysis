@@ -108,9 +108,12 @@ def make_plots(outputdir="plots", inputfile="outputs/histos.root", prefix="", lu
         print "Wrote {}".format(fname)
 
 if __name__ == "__main__":
-    make_plots("plots", "outputs/histos_2016.root", year=2016,  prefix="y2016_", lumi="35.9")
-    make_plots("plots", "outputs/histos_2017.root", year=2017,  prefix="y2017_", lumi="41.5")
-    make_plots("plots", "outputs/histos_2018.root", year=2018,  prefix="y2018_", lumi="58.8")
+
+    # make_plots("plots", "outputs/histos_2016.root", year=2016,  prefix="y2016_", lumi="35.9")
+    # make_plots("plots", "outputs/histos_2017.root", year=2017,  prefix="y2017_", lumi="41.5")
+    # make_plots("plots", "outputs/histos_2018.root", year=2018,  prefix="y2018_", lumi="58.8")
+
+    make_plots("plots", "outputs/histos_2016.root", year=2016,  prefix="y201694x_", lumi="35.9")
 
     # make_plots("plots", "outputs/histos_2016_mu.root", year=2016,  prefix="mu_y2016_", lumi="35.9")
     # make_plots("plots", "outputs/histos_2017_mu.root", year=2017,  prefix="mu_y2017_", lumi="41.5")

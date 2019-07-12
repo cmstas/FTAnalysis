@@ -1,3 +1,4 @@
+import math
 import os
 import numpy as np
 import uproot
@@ -128,7 +129,7 @@ def make_plots(
                 ]
         bgs[:-1] = sorted(bgs[:-1], key=lambda bg: bg.get_integral())
 
-        which = "prefit" if "prefit" in typ else "postfit"
+        which = "pre-fit" if "pre-fit" in typ else "post-fit"
         title = region.upper()
         if region.upper() == "SRCR":
             title = "Cut-based ({})".format(which)
@@ -170,7 +171,7 @@ def make_plots(
             ystr = "y{}".format(year)
         else:
             ystr = "run2"
-        fname = "{}/{}_{}_TOTAL_{}.pdf".format(outputdir,ystr,region.upper(),which)
+        fname = "{}/{}_{}_TOTAL_{}.pdf".format(outputdir,ystr,region.upper(),which.replace("-",""))
         plot_stack(bgs=bgs, data=data, title=title, xlabel="", ylabel="Events", filename=fname,
                    # cms_type = "Preliminary",
                    cms_type = "",
@@ -193,7 +194,7 @@ def make_plots(
         # os.system("ic {}".format(fname))
         table_info = write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
 
-        fname = "{}/{}_{}_TOTAL_{}_pulls.pdf".format(outputdir,ystr,region.upper(),which)
+        fname = "{}/{}_{}_TOTAL_{}_pulls.pdf".format(outputdir,ystr,region.upper(),which.replace("-",""))
 
         # hpulls = Hist1D(data)
         hpulls = Hist1D()
@@ -305,6 +306,17 @@ def pdgRound(value, error) :
     return (formatValue(value, expVal, nDigitsValue(expVal, expErr, nD), extraRound),
             formatValue(error,expErr, nD, extraRound))
 
+# from https://github.com/cmstas/MT2Analysis/blob/master/scripts/makeSRYieldsTable.py#L119-L131
+def GetRoundedValues(rate, unc, unc_sig_fig=2, prec_cap=-2):
+    if unc == 0:
+        prec = 0
+    else:
+        prec = int(math.floor(math.log10(unc))) - (unc_sig_fig - 1)
+    prec = max(prec, prec_cap)
+    ndec = max(0,-prec)
+    rnd = lambda x: "{{0:.{0}f}}".format(ndec).format(int(round(float(x)/10**prec)) * 10**prec)
+
+    return rnd(rate), rnd(unc)
 
 def print_table(d_yields, regions="srcr",precision=2,blinded=False,paper=False):
     nbins = len(d_yields["ttz"]["central"])
@@ -347,7 +359,8 @@ def print_table(d_yields, regions="srcr",precision=2,blinded=False,paper=False):
                 #     tojoin.append("-".format(cent))
             else:
                 if paper:
-                    tojoin.append("{}$\\pm${}".format(*pdgRound(cent,err)))
+                    # tojoin.append("{}$\\pm${}".format(*pdgRound(cent,err)))
+                    tojoin.append("{}$\\pm${}".format(*GetRoundedValues(cent,err)))
                 else:
                     tojoin.append("{0:5.2f}$\\pm${1:5.2f}".format(cent,err))
         # print " & ".join(tojoin),

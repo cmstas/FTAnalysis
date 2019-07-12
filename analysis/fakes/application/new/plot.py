@@ -77,7 +77,7 @@ def plot_var(info):
                 ylabel="Entries",
                 filename=fname,
                 cms_type = "Preliminary",
-                lumi = {"2016":"35.9","2017":"41.5","2018":"58.8"}[str(year)],
+                lumi = {"2016":"35.9","2017":"41.5","2018":"59.7"}[str(year)],
                 # ratio_range=[0.,2.],
                 ratio_range=[0.5,1.5],
                 mpl_hist_params = {
@@ -91,7 +91,7 @@ def plot_var(info):
         # print "Wrote {}".format(fname)
     return fname, d_info
 
-def make_plots(inputdir="outputs/",outputdir="plots_SS_19Jan25/"):
+def make_plots(inputdir="outputs/",outputdir="plots_SS_19Jan25/",years=[2016,2017,2018]):
     global f_tt, f_wj
     varnames = [
             "match",
@@ -109,18 +109,13 @@ def make_plots(inputdir="outputs/",outputdir="plots_SS_19Jan25/"):
             ]
     # outputdir = "plots_SS_19Jan25"
 
-    f_tt = {
-            2016: uproot.open("{}/histos_tt_{}.root".format(inputdir,2016)),
-            2017: uproot.open("{}/histos_tt_{}.root".format(inputdir,2017)),
-            2018: uproot.open("{}/histos_tt_{}.root".format(inputdir,2018)),
-            }
-    f_wj = {
-            2016: uproot.open("{}/histos_wjets_{}.root".format(inputdir,2016)),
-            2017: uproot.open("{}/histos_wjets_{}.root".format(inputdir,2017)),
-            2018: uproot.open("{}/histos_wjets_{}.root".format(inputdir,2018)),
-            }
+    f_tt = {}
+    f_wj = {}
+    for year in years:
+        f_tt[year] = uproot.open("{}/histos_tt_{}.root".format(inputdir,year))
+        f_wj[year] = uproot.open("{}/histos_wjets_{}.root".format(inputdir,year))
     to_run = []
-    for year in [2016, 2017, 2018]:
+    for year in years:
         for var in varnames:
             to_run.append([year, var, outputdir])
 

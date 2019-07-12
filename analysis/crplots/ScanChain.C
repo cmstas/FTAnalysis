@@ -26,16 +26,6 @@
 
 #include "../misc/tqdm.h"
 
-// namespace zbbbdtboth {
-// #include "../bdt/make_inputs/ttbb/bdt_vs_both.h"
-// }
-// namespace zbbbdtttbb {
-// #include "../bdt/make_inputs/ttbb/bdt_vs_ttbb.h"
-// }
-// namespace zbbbdtttjets {
-// #include "../bdt/make_inputs/ttbb/bdt_vs_ttjets.h"
-// }
-
 using namespace std;
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float>> Vec4;
 // using namespace tas;
@@ -295,7 +285,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
         // // "osnbrw",                          // OS tight-tight and variants
 
         // for SS
-        // "zbb",
         // "xgcr",
         "tlnomet",
         "osnomet",
@@ -442,11 +431,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
     HistCol h_ml1j1       (regions, "ml1j1"      , 30, 0   , 300 , &registry);
     HistCol h_matchtype   (regions, "matchtype"  , 4 , -0.5, 3.5 , &registry);
-
-    HistCol h_zbb_mbbmin       (regions, "zbb_mbbmin"      , 50, 0   , 400 , &registry);
-    HistCol h_zbb_disc_both       (regions, "zbb_disc_both"      , 50, 0   , 1. , &registry);
-    HistCol h_zbb_disc_ttbb       (regions, "zbb_disc_ttbb"      , 50, 0   , 1. , &registry);
-    HistCol h_zbb_disc_ttjets       (regions, "zbb_disc_ttjets"      , 50, 0   , 1. , &registry);
 
     HistCol2D h_ptabsetae       (regions, "ptetae"      , 40,0,400,30,0.,3., &registry2D);
     HistCol2D h_ptabsetam       (regions, "ptetam"      , 40,0,400,30,0.,3., &registry2D);
@@ -705,10 +689,10 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
 
             if (!ss::is_real_data()) {
                 weight *= getTruePUw(year, ss::trueNumInt()[0]);
-                if (lep1good) weight *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ht);
-                if (lep2good) weight *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ht);
+                if (lep1good) weight *= leptonScaleFactor(year, lep1id, lep1ccpt, lep1eta, ht, analysis);
+                if (lep2good) weight *= leptonScaleFactor(year, lep2id, lep2ccpt, lep2eta, ht, analysis);
                 if (not doSS) {
-                    if (lep3good) weight *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ht);
+                    if (lep3good) weight *= leptonScaleFactor(year, lep3id, lep3ccpt, lep3eta, ht, analysis);
                 }
                 if (doSS or !lep3good) {
                     weight *= triggerScaleFactor(year, lep1id, lep2id, lep1pt, lep2pt, lep1eta, lep2eta, ht, analysis, 0);
@@ -793,11 +777,11 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 else continue;
                 float flipFact = 0.;
                 if (abs(lep1id) == 11) {
-                    float flr = flipRate(year, lep1pt, lep1eta);
+                    float flr = flipRate(year, lep1pt, lep1eta, analysis);
                     flipFact += (flr/(1-flr));
                 }
                 if (abs(lep2id) == 11) {
-                    float flr = flipRate(year, lep2pt, lep2eta);
+                    float flr = flipRate(year, lep2pt, lep2eta, analysis);
                     flipFact += (flr/(1-flr));
                 }
                 weight *= flipFact;
@@ -1057,124 +1041,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                 if (njets >= 4) do_fill(h_ptj4, ptj4);
 
 
-                if (false and nbtags >= 3 and njets >= 2) {
-                    // take 5 leading jets
-                    // take 4 leading btagged jets
-                    auto jet1 = (njets >= 1) ? ss::jets()[0]*ss::jets_undoJEC()[0]*ss::jets_JEC()[0] : LorentzVector(0,0,0,0);
-                    auto jet2 = (njets >= 2) ? ss::jets()[1]*ss::jets_undoJEC()[1]*ss::jets_JEC()[1] : LorentzVector(0,0,0,0);
-                    auto jet3 = (njets >= 3) ? ss::jets()[2]*ss::jets_undoJEC()[2]*ss::jets_JEC()[2] : LorentzVector(0,0,0,0);
-                    auto jet4 = (njets >= 4) ? ss::jets()[3]*ss::jets_undoJEC()[3]*ss::jets_JEC()[3] : LorentzVector(0,0,0,0);
-                    auto jet5 = (njets >= 5) ? ss::jets()[4]*ss::jets_undoJEC()[4]*ss::jets_JEC()[4] : LorentzVector(0,0,0,0);
-                    auto bjet1 = (nbtags >= 1) ? ss::btags()[0]*ss::btags_undoJEC()[0]*ss::btags_JEC()[0] : LorentzVector(0,0,0,0);
-                    auto bjet2 = (nbtags >= 2) ? ss::btags()[1]*ss::btags_undoJEC()[1]*ss::btags_JEC()[1] : LorentzVector(0,0,0,0);
-                    auto bjet3 = (nbtags >= 3) ? ss::btags()[2]*ss::btags_undoJEC()[2]*ss::btags_JEC()[2] : LorentzVector(0,0,0,0);
-                    auto bjet4 = (nbtags >= 4) ? ss::btags()[3]*ss::btags_undoJEC()[3]*ss::btags_JEC()[3] : LorentzVector(0,0,0,0);
-                    float zbb_drl1b1 = (nbtags >= 1) ? ROOT::Math::VectorUtil::DeltaR(ss::lep1_p4(),bjet1) : -1;
-                    float zbb_drl1b2 = (nbtags >= 2) ? ROOT::Math::VectorUtil::DeltaR(ss::lep1_p4(),bjet2) : -1;
-                    float zbb_drl1j1 = (njets >= 1) ? ROOT::Math::VectorUtil::DeltaR(ss::lep1_p4(),jet1) : -1;
-                    float zbb_drl1j2 = (njets >= 2) ? ROOT::Math::VectorUtil::DeltaR(ss::lep1_p4(),jet2) : -1;
-                    float zbb_mbblead = (nbtags >= 2) ? (bjet1+bjet2).M() : -1;
-                    float zbb_mbbmin = zbb_mbblead;
-                    if (nbtags >= 3) {
-                        zbb_mbbmin = min(zbb_mbbmin,(bjet1+bjet3).M());
-                        zbb_mbbmin = min(zbb_mbbmin,(bjet2+bjet3).M());
-                    }
-                    if (nbtags >= 4) {
-                        zbb_mbbmin = min(zbb_mbbmin,(bjet1+bjet4).M());
-                        zbb_mbbmin = min(zbb_mbbmin,(bjet2+bjet4).M());
-                        zbb_mbbmin = min(zbb_mbbmin,(bjet3+bjet4).M());
-                    }
-                    float zbb_mjjlead = (njets >= 2) ? (jet1+jet2).M() : -1;
-                    float zbb_mjjmin = zbb_mjjlead;
-                    if (njets >= 3) {
-                        zbb_mjjmin = min(zbb_mjjmin,(jet1+jet3).M());
-                        zbb_mjjmin = min(zbb_mjjmin,(jet2+jet3).M());
-                    }
-                    if (njets >= 4) {
-                        zbb_mjjmin = min(zbb_mjjmin,(jet1+jet4).M());
-                        zbb_mjjmin = min(zbb_mjjmin,(jet2+jet4).M());
-                        zbb_mjjmin = min(zbb_mjjmin,(jet3+jet4).M());
-                    }
-                    if (njets >= 5) {
-                        zbb_mjjmin = min(zbb_mjjmin,(jet1+jet5).M());
-                        zbb_mjjmin = min(zbb_mjjmin,(jet2+jet5).M());
-                        zbb_mjjmin = min(zbb_mjjmin,(jet3+jet5).M());
-                        zbb_mjjmin = min(zbb_mjjmin,(jet4+jet5).M());
-                    }
-                    float zbb_b1pt = bjet1.pt();
-                    float zbb_b1eta = bjet1.eta();
-                    float zbb_b2pt = bjet2.pt();
-                    float zbb_b2eta = bjet2.eta();
-                    float zbb_htratio = ss::bdt_htb()/ss::ht();
-                    float zbb_j1pt = jet1.pt();
-                    float zbb_j2pt = jet2.pt();
-                    float zbb_l1eta = ss::lep1_p4().eta();
-                    float zbb_l2eta = ss::lep2_p4().eta();
-                    float zbb_disc_both = zbbbdtboth::get_prediction(
-                            zbb_b1eta,
-                            zbb_b1pt,
-                            zbb_b2eta,
-                            zbb_b2pt,
-                            zbb_drl1b1,
-                            zbb_drl1b2,
-                            zbb_drl1j1,
-                            zbb_drl1j2,
-                            zbb_htratio,
-                            zbb_j1pt,
-                            zbb_j2pt,
-                            zbb_l1eta,
-                            zbb_l2eta,
-                            zbb_mbblead,
-                            zbb_mbbmin,
-                            zbb_mjjlead,
-                            zbb_mjjmin
-                            );
-                    float zbb_disc_ttbb = zbbbdtttbb::get_prediction(
-                            zbb_b1eta,
-                            zbb_b1pt,
-                            zbb_b2eta,
-                            zbb_b2pt,
-                            zbb_drl1b1,
-                            zbb_drl1b2,
-                            zbb_drl1j1,
-                            zbb_drl1j2,
-                            zbb_htratio,
-                            zbb_j1pt,
-                            zbb_j2pt,
-                            zbb_l1eta,
-                            zbb_l2eta,
-                            zbb_mbblead,
-                            zbb_mbbmin,
-                            zbb_mjjlead,
-                            zbb_mjjmin
-                            );
-                    float zbb_disc_ttjets = zbbbdtttjets::get_prediction(
-                            zbb_b1eta,
-                            zbb_b1pt,
-                            zbb_b2eta,
-                            zbb_b2pt,
-                            zbb_drl1b1,
-                            zbb_drl1b2,
-                            zbb_drl1j1,
-                            zbb_drl1j2,
-                            zbb_htratio,
-                            zbb_j1pt,
-                            zbb_j2pt,
-                            zbb_l1eta,
-                            zbb_l2eta,
-                            zbb_mbblead,
-                            zbb_mbbmin,
-                            zbb_mjjlead,
-                            zbb_mjjmin
-                            );
-                    do_fill(h_zbb_mbbmin,zbb_mbbmin);
-                    if (zbb_mbbmin < 130.) {
-                        do_fill(h_zbb_disc_both,zbb_disc_both);
-                        do_fill(h_zbb_disc_ttbb,zbb_disc_ttbb);
-                        do_fill(h_zbb_disc_ttjets,zbb_disc_ttjets);
-                    }
-                }
-
                 if (not doSS) {
                     if (njets >= 5) do_fill(h_ptj5, ptj5);
                     if (njets >= 6) do_fill(h_ptj6, ptj6);
@@ -1301,11 +1167,6 @@ int ScanChain(TChain *ch, TString options="", TString outputdir="outputs"){
                     fill_region("xgcr", weight);
                 }
             }
-
-            // if (hyp_class == 4 and njets >= 2 and nbtags >= 3 and nleps == 2
-            //         and !zcand12 and ht>150 and met>30 and lep1ccpt>15 and lep2ccpt>15 ) {
-            //     fill_region("zbb", weight);
-            // }
 
             // for SS
             if (lep1ccpt > 25. and lep2ccpt > 25.) {

@@ -159,7 +159,7 @@ for which,title,xlabel in [
     title += " data/MC={:.2f} (scaled)".format(sf)
 
     for do_log in [False,True]:
-        fname = "plots/{}{}.pdf".format(which,"_log" if do_log else "")
+        fname = "plots_v2/{}{}.pdf".format(which,"_log" if do_log else "")
         plot_stack(
                 bgs=bgs,
                 data=data,

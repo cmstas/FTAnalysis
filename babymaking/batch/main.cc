@@ -100,7 +100,8 @@ int main(int argc, char *argv[]){
     int res = gethostname(hostnamestupid, 100);
     TString hostname(hostnamestupid);
     std::cout << ">>> Hostname is " << hostname << std::endl;  
-    bool useXrootd = !(hostname.Contains("t2.ucsd.edu")) or arg_xrootd;
+    // bool useXrootd = !(hostname.Contains("t2.ucsd.edu")) or arg_xrootd;
+    bool useXrootd = true; // NOTE this is only ~5-10% slower locally, but not a burden on fuse mount!!
     bool goodRunsOnly = true;
     // bool useXrootd = false;
     if (hostname.Contains("uafino")) {
@@ -258,6 +259,7 @@ int main(int argc, char *argv[]){
         // jecEra = "Autumn18_V3_OldRes";
         // jecEraMC = "Autumn18_V3";
         jecEra = "Autumn18_RunA_V8";
+        // jecEra = "Autumn18_RunA_V15"; // Test to compare against V8. Results still use V8
         jecEraMC = "Autumn18_V8";
         // jecEra = "Autumn18_RunA_V5";
         // jecEraMC = "Autumn18_V5";
@@ -275,7 +277,7 @@ int main(int argc, char *argv[]){
         else if (filenames.Contains("SMS-T1ttbb_Tune")) iSignal = 6;
         else if (filenames.Contains("SMS-T1qqqqL")) iSignal = 7;
         else if (filenames.Contains("SMS-T5tttt_dM175_Tune")) iSignal = 5;
-        else if (filenames.Contains("SMS-T5ttcc_Tune")) iSignal = 4;
+        else if (filenames.Contains("SMS-T5ttcc")) iSignal = 4;
         else if (filenames.Contains("SMS-T1tbs")) iSignal = -1; // set later
         else {
             std::cout << ">>> [!] Can't figure out which signal sample this is!" << std::endl;
@@ -341,7 +343,8 @@ int main(int argc, char *argv[]){
 
     for (auto fname : vfilenames) {
         if (useXrootd) {
-            fname.ReplaceAll("/hadoop/cms", "root://cmsxrootd.fnal.gov/");
+            // fname.ReplaceAll("/hadoop/cms", "root://cmsxrootd.fnal.gov/");
+            fname.ReplaceAll("/hadoop/cms", "root://redirector.t2.ucsd.edu/");
         }
         auto nfiles = chain->Add(fname);
         std::cout << ">>> Adding " << nfiles << " file(s): " << fname << std::endl;  
@@ -510,6 +513,10 @@ int main(int argc, char *argv[]){
                 else if (tas::evt_run() <= 319312 && tas::evt_run() >= 316998) jecEra = "Autumn18_RunB_V8";
                 else if (tas::evt_run() <= 320393 && tas::evt_run() >= 319313) jecEra = "Autumn18_RunC_V8";
                 else if (tas::evt_run() <= 325273 && tas::evt_run() >= 320394) jecEra = "Autumn18_RunD_V8";
+                // else if (tas::evt_run() <= 316995 && tas::evt_run() >= 315252) jecEra = "Autumn18_RunA_V15"; // See note earlier about V15 vs V8
+                // else if (tas::evt_run() <= 319312 && tas::evt_run() >= 316998) jecEra = "Autumn18_RunB_V15";
+                // else if (tas::evt_run() <= 320393 && tas::evt_run() >= 319313) jecEra = "Autumn18_RunC_V15";
+                // else if (tas::evt_run() <= 325273 && tas::evt_run() >= 320394) jecEra = "Autumn18_RunD_V15";
 
                 else {
                     std::cout << ">>> [!] Shouldn't get here! Can't figure out JEC. isData,run = " << isData << "," << tas::evt_run() << std::endl;

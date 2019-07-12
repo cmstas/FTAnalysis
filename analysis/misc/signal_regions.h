@@ -309,6 +309,92 @@ int signal_region_ss(int njets, int nbtags, float met, float ht, float mt_min, i
 }
 
 
+int getNsrsMI1() { return 10; } // Scan over MET
+int signal_region_mi1(float met, float ht) {
+    if (ht < 300) return -1;
+    if (met > 1200) return 10;
+    else if (met > 1100) return 9;
+    else if (met > 1000) return 8;
+    else if (met > 900) return 7;
+    else if (met > 800) return 6;
+    else if (met > 700) return 5;
+    else if (met > 600) return 4;
+    else if (met > 500) return 3;
+    else if (met > 400) return 2;
+    else if (met > 300) return 1;
+    return -1;
+}
+
+int getNsrsMI2() { return 11; } // Scan over HT
+int signal_region_mi2(float met, float ht) {
+    if (met > 300) return -1;
+    if      (ht > 2400) return 11;
+    else if (ht > 2300) return 10;
+    else if (ht > 2200) return 9;
+    else if (ht > 2100) return 8;
+    else if (ht > 2000) return 7;
+    else if (ht > 1900) return 6;
+    else if (ht > 1800) return 5;
+    else if (ht > 1700) return 4;
+    else if (ht > 1600) return 3;
+    else if (ht > 1500) return 2;
+    else if (ht > 1400) return 1;
+    return -1;
+}
+
+int getNsrsINCL() { return 17; }
+std::vector<int> signal_region_incl(region_t categ, int njets, int nbtags, float met, float ht, float mt_min) {
+
+  std::vector<int> srs;
+  srs.clear();
+
+  if (categ == Undefined) return srs;
+
+  //High-high
+  if (categ == HighHigh){
+      if (nbtags == 0 && ht > 1000 && met>250)                              srs.push_back(1);
+      if (nbtags >= 2 && ht > 1100)                              srs.push_back(2);
+      if (nbtags == 0              && met > 500)                 srs.push_back(3);
+      if (nbtags >= 2              && met > 300)                 srs.push_back(4);
+      if (nbtags == 0              && met > 250 && mt_min > 120) srs.push_back(5);
+      if (nbtags >= 2              && met > 200 && mt_min > 120) srs.push_back(6);
+      if (njets >= 8)                                            srs.push_back(7);
+      if (njets >= 6                            && mt_min > 120) srs.push_back(8);
+      if (nbtags >= 3 && ht>800)                                 srs.push_back(9);
+  }
+
+  //High-Low
+  if (categ == HighLow){
+      // do nothing with HL
+  }
+
+  //Low-Low
+  if (categ == LowLow){
+      if (ht > 700) srs.push_back(10);
+      if (met > 200) srs.push_back(11);
+      if (njets >= 6) srs.push_back(12);
+      if (nbtags >= 3) srs.push_back(13);
+  }
+  
+  //LowMet
+  if (categ == LowMet){
+      if (nbtags == 0 && ht > 1200) srs.push_back(14);
+      if (nbtags >= 2 && ht > 1000) srs.push_back(15);
+  }
+  
+  //Multilepton
+  if (categ == Multilepton){
+      if (nbtags == 0 && ht > 1000 && met>300) srs.push_back(16);
+      if (nbtags >= 2 && ht > 1000) srs.push_back(17);
+  }
+
+
+
+  return srs;
+}
+
+
+
 bool passes_baseline_ft(int njets, int nbtags, float met, float ht, int id1, int id2, float lep1_pt, float lep2_pt) {
     if (lep1_pt < 25.) return 0;
     else if (lep2_pt < 20.) return 0;

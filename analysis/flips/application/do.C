@@ -6,7 +6,15 @@
     gROOT->ProcessLine(".L ../../misc/class_files/v8.02/SS.cc+"); 
     gROOT->ProcessLine(".L ScanChain.C+");
 
-    TString basedir("/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/");
+    TString basedir("/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31/output/");
+    TChain *ch_2016 = new TChain("t","2016");
+    ch_2016->Add(basedir+"/year_2016_94x/DY_high.root");
+    ch_2016->Add(basedir+"/year_2016_94x/DY_low.root");
+    ch_2016->Add(basedir+"/year_2016_94x/TTBAR*.root");
+    ch_2016->Add(basedir+"/year_2016_94x/DataDoubleEG*.root");
+    closure(ch_2016, "../derivation/outputs/histos_2016.root", "outputs/histos_2016.root", 2016);
+
+    // TString basedir("/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/");
 
     // TChain *ch_2016 = new TChain("t","2016");
     // ch_2016->Add(basedir+"/year_2016/DY_high.root");
@@ -15,12 +23,12 @@
     // ch_2016->Add(basedir+"/year_2016/DataDoubleEG*.root");
     // closure(ch_2016, "../derivation/outputs/histos_2016.root", "outputs/histos_2016.root", 2016);
 
-    TChain *ch_2017 = new TChain("t","2017");
-    ch_2017->Add(basedir+"/year_2017/DY_high.root");
-    ch_2017->Add(basedir+"/year_2017/DY_low.root");
-    ch_2017->Add(basedir+"/year_2017/TTBAR*.root");
-    ch_2017->Add(basedir+"/year_2017/DataDoubleEG*.root");
-    closure(ch_2017, "../derivation/outputs/histos_2017.root", "outputs/histos_2017.root", 2017);
+    // TChain *ch_2017 = new TChain("t","2017");
+    // ch_2017->Add(basedir+"/year_2017/DY_high.root");
+    // ch_2017->Add(basedir+"/year_2017/DY_low.root");
+    // ch_2017->Add(basedir+"/year_2017/TTBAR*.root");
+    // ch_2017->Add(basedir+"/year_2017/DataDoubleEG*.root");
+    // closure(ch_2017, "../derivation/outputs/histos_2017.root", "outputs/histos_2017.root", 2017);
 
     // TChain *ch_2018 = new TChain("t","2018");
     // ch_2018->Add(basedir+"/year_2018/DY_high.root");

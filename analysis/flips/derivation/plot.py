@@ -57,7 +57,9 @@ def plot(fname_in, fname_out, year):
     print("Made plots for {}".format(year))
 
 if __name__ == "__main__":
-    for year in [2016,2017,2018]:
-        plot("outputs/histos_{}.root".format(year), "plots/fliprate_{}.pdf".format(year), year)
-    for year in ["2016_mu","2017_mu","2018_mu"]:
-        plot("outputs/histos_{}.root".format(year), "plots/fliprate_{}.pdf".format(year), year)
+    # for year in [2016,2017,2018]:
+    #     plot("outputs/histos_{}.root".format(year), "plots/fliprate_{}.pdf".format(year), year)
+    # for year in ["2016_mu","2017_mu","2018_mu"]:
+    #     plot("outputs/histos_{}.root".format(year), "plots/fliprate_{}.pdf".format(year), year)
+    for year in [2016]:
+        plot("outputs/histos_{}.root".format(year), "plots/fliprate_{}_94x.pdf".format(year), year)

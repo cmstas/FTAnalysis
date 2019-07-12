@@ -72,13 +72,14 @@ def fit_and_plot(inputdir="outputs_19Jan28", outputdir="plots/",years=[2016,2017
         hwjets = Hist1D(d[iso][year]["wjets"][flav],label=r"W+jets",color=(1.,0.6,0.2))
         httjets = Hist1D(d[iso][year]["ttjets"][flav],label=r"$t\bar{t}$",color=(1.,0.4,0.4))
         # hewk = Hist1D(hdy+hwjets+httjets,label=r"EWK (W+DY+$t\bar{t}$)",color=(1.,0.6,0.2))
-        hewk = Hist1D(hdy+hwjets,label=r"EWK (W+DY)",color=(1.,0.6,0.2))
+        hewk = Hist1D(hdy+hwjets,label=r"EWK (W+DY+$t\bar{t}$)",color=(1.,0.6,0.2))
         # hists = [hqcd,hewk]
 
         def do_fit(hdata,hqcd,hewk):
             def calc_chi2(args):
                 sf_qcd,sf_ewk = args
                 nbinlow,nbinhigh = None,None
+                # nbinlow,nbinhigh = 5,-7
                 # nbinlow,nbinhigh = 5,None
                 bgerrs = (sf_qcd*hqcd.errors)**2. + (sf_ewk*hewk.errors)**2.
                 bgcounts = (sf_qcd*hqcd.counts+sf_ewk*hewk.counts)

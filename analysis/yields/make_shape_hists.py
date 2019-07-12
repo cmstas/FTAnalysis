@@ -494,7 +494,7 @@ def make_root_files(inputdir = "outputs", outputdir = "../limits/v3.08_allyears_
     procs = []
     if doss:
         procs.extend(["ttw","ww","wz", "tth", "ttz", "fakes", "fakes_mchybrid", "data", "flips", "rares", "xg"])
-        regions = ["SRHH","SRHL","SRLL","SRML","SRLM"]
+        regions = ["SRHH","SRHL","SRLL","SRML","SRLM","SRMI1","SRMI2","SRINCL"]
     else:
         procs.extend(["tttt", "ttw", "tth", "ttz", "fakes", "fakes_mchybrid", "data", "flips", "rares", "xg", "ttvv"])
         regions = ["SRCR","SRDISC"]

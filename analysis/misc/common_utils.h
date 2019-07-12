@@ -38,10 +38,8 @@ float isrWeight(int year, int nisrmatch, int sample) {
 }
 
 
-float leptonScaleFactor(int year, int id, float pt, float eta, float ht) { 
-    // FIXME Note: muon SFs do not go below pT of 20 - this is fine for four top, but
-    // modify for SS!
-    // Fix it and then remove protection lines in lepton_sf.h
+float leptonScaleFactor(int year, int id, float pt, float eta, float ht, ana_t ana) { 
+    if (ana == SSANA and year == 2016) return y2016::leptonScaleFactor_legacy(id, pt, eta, ht);
     if (year == 2016) return y2016::leptonScaleFactor(id, pt, eta, ht);
     else if (year == 2017) return y2017::leptonScaleFactor(id, pt, eta, ht);
     else if (year == 2018) return y2018::leptonScaleFactor(id, pt, eta, ht);
@@ -58,7 +56,8 @@ float fastsim_leptonScaleFactor(int year, int id, float pt, float eta, float ht)
     return 1.0;
 }
 
-float leptonScaleFactorError(int year, int id, float pt, float eta, float ht) { 
+float leptonScaleFactorError(int year, int id, float pt, float eta, float ht, ana_t ana) { 
+    if (ana == SSANA and year == 2016) return y2016::leptonScaleFactor_err_legacy(id, pt, eta, ht);
     if (year == 2016) return y2016::leptonScaleFactor_err(id, pt, eta, ht);
     else if (year == 2017) return y2017::leptonScaleFactor_err(id, pt, eta, ht);
     else if (year == 2018) return y2018::leptonScaleFactor_err(id, pt, eta, ht);
@@ -82,14 +81,16 @@ float fastsim_triggerScaleFactor(int year, int pdgId1, int pdgId2, float pt1, fl
     // return 1.0;
 }
 
-float flipRate(int year, float pt, float eta) { 
+float flipRate(int year, float pt, float eta, ana_t ana) { 
+    if (ana == SSANA and year == 2016) return y2016::flipRate_legacy(pt, eta);
     if (year == 2016) return y2016::flipRate(pt, eta);
     else if (year == 2017) return y2017::flipRate(pt, eta);
     else if (year == 2018) return y2018::flipRate(pt, eta);
     else return 0.;
 }
 
-float flipRateError(int year, float pt, float eta) { 
+float flipRateError(int year, float pt, float eta, ana_t ana) { 
+    if (ana == SSANA and year == 2016) return y2016::flipRateError_legacy(pt, eta);
     if (year == 2016) return y2016::flipRateError(pt, eta);
     else if (year == 2017) return y2017::flipRateError(pt, eta);
     else if (year == 2018) return y2018::flipRateError(pt, eta);
@@ -97,12 +98,14 @@ float flipRateError(int year, float pt, float eta) {
 }
 
 float fakeRate(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (ana == SSANA and year == 2016) return y2016::fakeRate(id, pt, eta, ht, ana, isLL);
     if (year == 2016) return (newbins ? y2016::newbins::fakeRate(id, pt, eta, ht, ana, isLL) : y2016::fakeRate(id, pt, eta, ht, ana, isLL));
     else if (year == 2017) return (allpt ? y2017::allpt::fakeRate(id, pt, eta, ht, isLL) : y2017::fakeRate(id, pt, eta, ht, isLL));
     else if (year == 2018) return (allpt ? y2018::allpt::fakeRate(id, pt, eta, ht, isLL) : y2018::fakeRate(id, pt, eta, ht, isLL));
     else return 0.;
 }
 float fakeRateError(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (ana == SSANA and year == 2016) return y2016::fakeRateError(id, pt, eta, ht, ana, isLL);
     if (year == 2016) return (newbins ? y2016::newbins::fakeRateError(id, pt, eta, ht, ana, isLL) : y2016::fakeRateError(id, pt, eta, ht, ana, isLL));
     else if (year == 2017) return (allpt ? y2017::allpt::fakeRateError(id, pt, eta, ht, isLL) : y2017::fakeRateError(id, pt, eta, ht, isLL));
     else if (year == 2018) return (allpt ? y2018::allpt::fakeRateError(id, pt, eta, ht, isLL) : y2018::fakeRateError(id, pt, eta, ht, isLL));
@@ -110,6 +113,7 @@ float fakeRateError(int year, int id, float pt, float eta, float ht, ana_t ana, 
 }
 
 float alternativeFakeRate(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (ana == SSANA and year == 2016) return y2016::alternativeFakeRate(id, pt, eta, ht, ana, isLL);
     if (year == 2016) return (newbins ? y2016::newbins::alternativeFakeRate(id, pt, eta, ht, ana, isLL) : y2016::alternativeFakeRate(id, pt, eta, ht, ana, isLL));
     else if (year == 2017) return (allpt ? y2017::allpt::alternativeFakeRate(id, pt, eta, ht, isLL) : y2017::alternativeFakeRate(id, pt, eta, ht, isLL));
     else if (year == 2018) return (allpt ? y2018::allpt::alternativeFakeRate(id, pt, eta, ht, isLL) : y2018::alternativeFakeRate(id, pt, eta, ht, isLL));
@@ -117,6 +121,7 @@ float alternativeFakeRate(int year, int id, float pt, float eta, float ht, ana_t
 }
 
 float qcdMCFakeRate(int year, int id, float pt, float eta, float ht, ana_t ana, bool newbins=false, bool allpt=false, bool isLL=false) { 
+    if (ana == SSANA and year == 2016) return y2016::qcdMCFakeRate(id, pt, eta, ht, ana, isLL);
     if (year == 2016) return (newbins ? y2016::newbins::qcdMCFakeRate(id, pt, eta, ht, ana, isLL) : y2016::qcdMCFakeRate(id, pt, eta, ht, ana, isLL));
     else if (year == 2017) return (allpt ? y2017::allpt::qcdMCFakeRate(id, pt, eta, ht, isLL) : y2017::qcdMCFakeRate(id, pt, eta, ht, isLL));
     else if (year == 2018) return (allpt ? y2018::allpt::qcdMCFakeRate(id, pt, eta, ht, isLL) : y2018::qcdMCFakeRate(id, pt, eta, ht, isLL));

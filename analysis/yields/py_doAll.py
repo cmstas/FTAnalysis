@@ -120,14 +120,15 @@ if __name__ == "__main__":
         basedirs = {
 
                 # "2016_94x": "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.09_all/output/year_2016_94x/",
-                # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2016/skimfix/",
-                # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017/skimfix/",
-                # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/skimfix/",
+                2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31/output/year_2016_94x/skimfix/",
+                2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31/output/year_2017/skimfix/",
+                2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31//output/year_2018/skimfix/",
+                # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.31_jec15///output/year_2018/skimfix/",
 
-                "2016_94x": "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016_94x/",
-                2016: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016//",
-                2017: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2017//",
-                2018: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2018//",
+                # "2016_94x": "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016_94x/",
+                # 2016: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016//",
+                # 2017: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2017//",
+                # 2018: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2018//",
 
                 }
 
@@ -139,7 +140,7 @@ if __name__ == "__main__":
                 # 2017: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.24/output/year_2017//skimfix/",
                 # 2018: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.28//output/year_2018/skimfix//",
 
-                "2016_94x": "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016_94x/",
+                # "2016_94x": "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016_94x/",
                 2016: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2016//",
                 # 2016: "/nfs-7/userdata/namin/tupler_babies/merged/FT/v3.29//output/year_2016_94x/skimfix/", # FIXME
                 2017: "/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/yields/local/year_2017//",
@@ -147,17 +148,17 @@ if __name__ == "__main__":
 
                 }
 
-    print "FIXME revert 2016"
-    print "uncomment HHAT for 2016"
-    print "uncomment HIGGS for 2016"
-    # print "uncomment ISRFSR for 2016"
-    # print "uncomment TTSLht500 TTDLht500 (two places)"
+    # print "FIXME revert 2016"
+    # print "uncomment HHAT for 2016"
+    # print "uncomment HIGGS for 2016"
+    # # print "uncomment ISRFSR for 2016"
+    # # print "uncomment TTSLht500 TTDLht500 (two places)"
 
 
     outputdir = args.out
     extra_global_options = args.extra_options
     options = {
-            "2016_94x": "Data2016 94x quiet {} evaluateBDT ".format(extra_global_options),
+            # "2016_94x": "Data2016 94x quiet {} evaluateBDT ".format(extra_global_options),
 
             # 2016: "Data2016 quiet {} evaluateBDT ".format(extra_global_options),
             # 2017: "Data2017 quiet {} evaluateBDT minPtFake18 ".format(extra_global_options),
@@ -178,16 +179,16 @@ if __name__ == "__main__":
 
         chs = {
 
-                "2016_94x": {
+                # "2016_94x": {
 
-                    # "fakes": make_obj([
-                    #     basedirs["2016_94x"]+"Data*.root",
-                    #     ] , options=options["2016_94x"]+" doFakes doData "),
-                    # "flips": make_obj(basedirs["2016_94x"]+"Data*.root", options=options["2016_94x"]+" doFlips doData "),
-                    # "data": make_obj(basedirs["2016_94x"]+"Data*.root", options=options["2016_94x"] + " doData "),
-                    # "tttt": make_obj(basedirs["2016_94x"]+"TTTTnew.root", options=options["2016_94x"]),
+                #     # "fakes": make_obj([
+                #     #     basedirs["2016_94x"]+"Data*.root",
+                #     #     ] , options=options["2016_94x"]+" doFakes doData "),
+                #     # "flips": make_obj(basedirs["2016_94x"]+"Data*.root", options=options["2016_94x"]+" doFlips doData "),
+                #     # "data": make_obj(basedirs["2016_94x"]+"Data*.root", options=options["2016_94x"] + " doData "),
+                #     # "tttt": make_obj(basedirs["2016_94x"]+"TTTTnew.root", options=options["2016_94x"]),
 
-                    },
+                #     },
                 2016: {
 
                     "fakes": make_obj([
@@ -743,7 +744,7 @@ if __name__ == "__main__":
                     "rpv_t1tbs_m1900": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino1900.root" ],options=options[2016]),
                     "rpv_t1tbs_m2000": make_obj([ basedirs[2016]+"RPV_T1tbs_mGluino2000.root" ],options=options[2016]),
 
-                    "fcnc_tthut": make_obj([ basedirs[2016]+"FCNC_hut_top.root",  basedirs[2016]+"FCNC_hut_antitop.root"  ],options=options[2016]),
+                    # "fcnc_tthut": make_obj([ basedirs[2016]+"FCNC_hut_top.root",  basedirs[2016]+"FCNC_hut_antitop.root"  ],options=options[2016]),
 
                     # "zzcont": make_obj(basedirs[2016]+"ZZcont*.root", options=options[2016]), # NOTE in rares
                     # "zzreg": make_obj(basedirs[2016]+"ZZ.root", options=options[2016]),
@@ -824,7 +825,7 @@ if __name__ == "__main__":
                     "rpv_t1tbs_m1900": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino1900.root" ],options=options[2017]+"  "),
                     "rpv_t1tbs_m2000": make_obj([ basedirs[2017]+"RPV_T1tbs_mGluino2000.root" ],options=options[2017]+"  "),
 
-                    "fcnc_tthut": make_obj([ basedirs[2017]+"FCNC_hut_top.root",  basedirs[2017]+"FCNC_hut_antitop.root"  ],options=options[2017]),
+                    # "fcnc_tthut": make_obj([ basedirs[2017]+"FCNC_hut_top.root",  basedirs[2017]+"FCNC_hut_antitop.root"  ],options=options[2017]),
 
                     # "zzcont": make_obj(basedirs[2017]+"ZZcont*.root", options=options[2017]), # NOTE in rares
                     # "zzreg": make_obj(basedirs[2017]+"ZZ.root", options=options[2017]),
@@ -907,7 +908,7 @@ if __name__ == "__main__":
                     "rpv_t1tbs_m1900": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino1900.root" ],options=options[2018]+"  "),
                     "rpv_t1tbs_m2000": make_obj([ basedirs[2018]+"RPV_T1tbs_mGluino2000.root" ],options=options[2018]+"  "),
 
-                    "fcnc_tthut": make_obj([ basedirs[2017]+"FCNC_hut_top.root",  basedirs[2017]+"FCNC_hut_antitop.root"  ],options=(options[2017]+" FakeLumi2018")),
+                    # "fcnc_tthut": make_obj([ basedirs[2017]+"FCNC_hut_top.root",  basedirs[2017]+"FCNC_hut_antitop.root"  ],options=(options[2017]+" FakeLumi2018")),
 
                     # "zzcont": make_obj(basedirs[2018]+"ZZcont*.root", options=options[2018]), # NOTE, i put this into rares
                     # "zzreg": make_obj(basedirs[2018]+"ZZ.root", options=options[2018]),
@@ -931,25 +932,17 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T1TTTT.root",
                     basedirs[2017]+"T1TTTT.root",
-                    basedirs[2017]+"T1TTTT_ext.root", # ext for 2018
+                    basedirs[2018]+"T1TTTT.root",
                     ], procbase="fs_t1tttt", range1=[600,2200], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                "m1400_m400", # FIXME
-                "m1600_m100", # FIXME
-                "m1600_m600", # FIXME
-                "m1800_m100", # FIXME
-                "m1800_m1000", # FIXME
-                "m2000_m100", # FIXME
+                "m1600_m600",
+                "m1800_m100",
+                "m1800_m1000",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T1TTTT_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T1TTTT.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T1TTTT.root", options=options[y])
 
         ####################################
         ############ T6TTWW ################
@@ -957,22 +950,15 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T6TTWW.root",
                     basedirs[2017]+"T6TTWW.root",
-                    basedirs[2017]+"T6TTWW_ext.root", # ext for 2018
+                    basedirs[2018]+"T6TTWW.root",
                     ], procbase="fs_t6ttww", range1=[250,1400], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                "m1000_m600", # FIXME
-                "m900_m400", # FIXME
-                "m800_m400", # FIXME
+                "m1000_m600",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T6TTWW_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T6TTWW.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T6TTWW.root", options=options[y])
 
         ####################################
         ############ T5QQQQVV ##############
@@ -980,21 +966,15 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T5QQQQVV_main.root",
                     basedirs[2017]+"T5QQQQVV_main.root",
-                    basedirs[2017]+"T5QQQQVV_main_ext.root", # ext for 2018
+                    basedirs[2018]+"T5QQQQVV_main.root",
                     ], procbase="fs_t5qqqqvv", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                "m1450_m1", # FIXME
                 "m1250_m1050",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T5QQQQVV_main_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_main.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_main.root", options=options[y])
 
         ####################################
         ############ T5QQQQVV DM20 #########
@@ -1002,21 +982,15 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T5QQQQVV_dm20.root",
                     basedirs[2017]+"T5QQQQVV_dm20.root",
-                    basedirs[2017]+"T5QQQQVV_dm20_ext.root", # ext for 2018
+                    basedirs[2018]+"T5QQQQVV_dm20.root",
                     ], procbase="fs_t5qqqqvvdm20", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                "m950_m850", # FIXME
-                "m1450_m1",
+                "m1450_m150",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T5QQQQVV_dm20_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_dm20.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_dm20.root", options=options[y])
 
         ####################################
         ############ T5QQQQWW ##############
@@ -1024,21 +998,15 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T5QQQQVV_main.root",
                     basedirs[2017]+"T5QQQQVV_main.root",
-                    basedirs[2017]+"T5QQQQVV_main_ext.root", # ext for 2018
+                    basedirs[2018]+"T5QQQQVV_main.root",
                     ], procbase="fs_t5qqqqww", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                # "m1450_m1", # FIXME
-                # "m1250_m1050",
+                "m1250_m1050",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T5QQQQVV_main_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_main.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_main.root", options=options[y])
 
         ####################################
         ############ T5QQQQWW DM20 #########
@@ -1046,22 +1014,17 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T5QQQQVV_dm20.root",
                     basedirs[2017]+"T5QQQQVV_dm20.root",
-                    basedirs[2017]+"T5QQQQVV_dm20_ext.root", # ext for 2018
+                    basedirs[2018]+"T5QQQQVV_dm20.root",
                     ], procbase="fs_t5qqqqwwdm20", range1=[600,2000], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                "m950_m850", # FIXME
-                "m900_m600", # FIXME
-                "m1400_m1", # FIXME
+                "m950_m850",
+                "m900_m600",
+                "m1400_m150",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T5QQQQVV_dm20_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_dm20.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T5QQQQVV_dm20.root", options=options[y])
 
         ####################################
         ############ T5TTTT ################
@@ -1069,61 +1032,47 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T5TTTT.root",
                     basedirs[2017]+"T5TTTT.root",
-                    basedirs[2017]+"T5TTTT_ext.root", # ext for 2018
+                    basedirs[2018]+"T5TTTT.root",
                     ], procbase="fs_t5tttt", range1=[600,2300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
+                "m1800_m100",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T5TTTT_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T5TTTT.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T5TTTT.root", options=options[y])
 
-        ## FIXME This needs to be updated to 2016+2017+2017ext
-        #####################################
-        ############# T5TTCC ################
-        #####################################
-        #procnames = get_fastsim_procnames([
-        #            basedirs[2016]+"T5TTCC.root",
-        #            # basedirs[2017]+"T5TTCC.root",
-        #            # basedirs[2017]+"T5TTCC_ext.root", # ext for 2018
-        #            ], procbase="fs_t5ttcc", range1=[1000,1800], filt=args.proc)
-        #if do_slim:
-        #    procnames = [pn for pn in procnames if any(x in pn for x in [
-        #        ])]
-        #for pn in procnames: 
-        #    for y in [2016,2017,2018]:
-        #        # for 2018, use 2017 but fake lumi to be for 2018
-        #        if y in [2017,2018]:
-        #            opts = " {} FakeLumi{} ".format(options[2016],y)
-        #            chs[y][pn] = make_obj(basedirs[2016]+"T5TTCC.root", options=opts)
-        #        else:
-        #            chs[y][pn] = make_obj(basedirs[y]+"T5TTCC.root", options=options[y])
+        ####################################
+        ############ T5TTCC ################
+        ####################################
+        procnames = get_fastsim_procnames([
+                    basedirs[2016]+"T5TTCC_both.root",
+                    basedirs[2017]+"T5TTCC_both.root",
+                    basedirs[2018]+"T5TTCC_both.root",
+                    ], procbase="fs_t5ttcc", range1=[800,2300], filt=args.proc)
+        if do_slim:
+            procnames = [pn for pn in procnames if any(x in pn for x in [
+                "m1400_m150", # FIXME
+                ])]
+        for pn in procnames: 
+            for y in [2016,2017,2018]:
+                chs[y][pn] = make_obj(basedirs[y]+"T5TTCC_both.root", options=options[y])
 
-        ## FIXME This needs to be updated to 2016+2017+2017ext
-        #####################################
-        ############# T1TTBB ################
-        #####################################
-        #procnames = get_fastsim_procnames([
-        #            basedirs[2016]+"T1TTBB.root",
-        #            # basedirs[2017]+"T1TTBB.root",
-        #            # basedirs[2017]+"T1TTBB_ext.root", # ext for 2018
-        #            ], procbase="fs_t1ttbb", range1=[1000,1800], filt=args.proc)
-        #if do_slim:
-        #    procnames = [pn for pn in procnames if any(x in pn for x in [
-        #        ])]
-        #for pn in procnames: 
-        #    for y in [2016,2017,2018]:
-        #        # for 2018, use 2017 but fake lumi to be for 2018
-        #        if y in [2017,2018]:
-        #            opts = " {} FakeLumi{} ".format(options[2016],y)
-        #            chs[y][pn] = make_obj(basedirs[2016]+"T1TTBB.root", options=opts)
-        #        else:
-        #            chs[y][pn] = make_obj(basedirs[y]+"T1TTBB.root", options=options[y])
+        ####################################
+        ############ T1TTBB ################
+        ####################################
+        procnames = get_fastsim_procnames([
+                    basedirs[2016]+"T1TTBB.root",
+                    basedirs[2017]+"T1TTBB.root",
+                    basedirs[2018]+"T1TTBB.root",
+                    ], procbase="fs_t1ttbb", range1=[800,2300], filt=args.proc)
+        if do_slim:
+            procnames = [pn for pn in procnames if any(x in pn for x in [
+                "m1400_m150",
+                ])]
+        for pn in procnames: 
+            for y in [2016,2017,2018]:
+                chs[y][pn] = make_obj(basedirs[y]+"T1TTBB.root", options=options[y])
 
         ####################################
         ############ T6TTHZ (0% Z) ########
@@ -1131,21 +1080,16 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both.root",
-                    basedirs[2017]+"T6TTHZ_both_ext.root", # ext for 2018
+                    basedirs[2018]+"T6TTHZ_both.root",
                     ], procbase="fs_t6tthzbrh", range1=[200,1300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                # "t6tthzbrh_m600_m375",
-                # "t6tthzbrh_m600_m575",
+                "t6tthzbrh_m600_m375",
+                "t6tthzbrh_m600_m575",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T6TTHZ_both_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T6TTHZ_both.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T6TTHZ_both.root", options=options[y])
 
         ####################################
         ############ T6TTHZ (50% Z) ########
@@ -1153,21 +1097,16 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both.root",
-                    basedirs[2017]+"T6TTHZ_both_ext.root", # ext for 2018
+                    basedirs[2018]+"T6TTHZ_both.root",
                     ], procbase="fs_t6tthzbrb", range1=[200,1300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                # "t6tthzbrb_m600_m375",
-                # "t6tthzbrb_m600_m575",
+                "t6tthzbrb_m600_m375",
+                "t6tthzbrb_m600_m575",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T6TTHZ_both_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T6TTHZ_both.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T6TTHZ_both.root", options=options[y])
 
         ####################################
         ############ T6TTHZ (100% Z) ########
@@ -1175,21 +1114,16 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T6TTHZ_both.root",
                     basedirs[2017]+"T6TTHZ_both.root",
-                    basedirs[2017]+"T6TTHZ_both_ext.root", # ext for 2018
+                    basedirs[2018]+"T6TTHZ_both.root",
                     ], procbase="fs_t6tthzbrz", range1=[200,1300], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
-                # "t6tthzbrz_m600_m375",
-                # "t6tthzbrz_m600_m575",
+                "t6tthzbrz_m600_m375",
+                "t6tthzbrz_m600_m575",
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T6TTHZ_both_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T6TTHZ_both.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T6TTHZ_both.root", options=options[y])
 
         ####################################
         ############ T1QQQQL (RPV) #########
@@ -1197,7 +1131,7 @@ if __name__ == "__main__":
         procnames = get_fastsim_procnames([
                     basedirs[2016]+"T1QQQQL_main.root",
                     basedirs[2017]+"T1QQQQL_main.root",
-                    basedirs[2017]+"T1QQQQL_main_ext.root", # ext for 2018
+                    basedirs[2018]+"T1QQQQL_main.root",
                     ], procbase="fs_t1qqqql", range1=[1600,2700], filt=args.proc)
         if do_slim:
             procnames = [pn for pn in procnames if any(x in pn for x in [
@@ -1206,12 +1140,7 @@ if __name__ == "__main__":
                 ])]
         for pn in procnames: 
             for y in [2016,2017,2018]:
-                # for 2018, use 2017 but fake lumi to be for 2018
-                if y in [2018]:
-                    opts = " {} FakeLumi{} ".format(options[2017],y)
-                    chs[y][pn] = make_obj(basedirs[2017]+"T1QQQQL_main_ext.root", options=opts)
-                else:
-                    chs[y][pn] = make_obj(basedirs[y]+"T1QQQQL_main.root", options=options[y])
+                chs[y][pn] = make_obj(basedirs[y]+"T1QQQQL_main.root", options=options[y])
 
     def run_chain((index,info)):
         ch, options, outputdir = info
@@ -1336,7 +1265,7 @@ if __name__ == "__main__":
 
             signames = ["tttt"]
             if args.ss:
-                signames = ["fs_t1tttt_m1600_m100"]
+                signames = ["fs_t1tttt_m1600_m600"]
                 # signames = fastsim_procnames[:1]
             plot_all.make_plots(
                     outputdir="{}/plots/".format(outdir_limits),

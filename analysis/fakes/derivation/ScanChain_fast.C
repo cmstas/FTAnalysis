@@ -1167,7 +1167,7 @@ if (year == 2018) {
             if (passId) {
                 //mt control region
                 if (evt_met > 30. && p4().pt()>30) {
-                    float myweight = (isDataFromFileName ? weight : weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), ht));
+                    float myweight = (isDataFromFileName ? weight : weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), ht, SSANA));
                     // float myweight = weight;
                     histo_mt_all->Fill( std::min(evt_mt,float(200.)), myweight );
                     if (abs(id())==11) histo_mt_all_el->Fill( std::min(evt_mt,float(200.)), myweight );
@@ -1183,7 +1183,7 @@ if (year == 2018) {
                     histo_mt_cr_pt->Fill( p4().pt(), weight );
                     histo_mt_cr_met->Fill( evt_met, weight );
                     histo_mt_cr_dphi->Fill( DeltaPhi(p4().phi(),evt_metPhi), weight );
-                    float myweight = (isDataFromFileName ? weight : weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), ht));
+                    float myweight = (isDataFromFileName ? weight : weight*leptonScaleFactor(year, abs(id()), p4().pt(), p4().eta(), ht, SSANA));
                     // float myweight = weight;
                     if (abs(id())==11) {
                         histo_mt_cr_el->Fill( std::min(evt_mt,float(200.)), myweight );

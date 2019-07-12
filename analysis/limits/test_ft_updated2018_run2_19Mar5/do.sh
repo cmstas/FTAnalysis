@@ -11,11 +11,11 @@ extra="--redolimits"
 # basedir="v3.28_ft_mar13ttwbb_v1/"
 # basedir="v3.28_ft_mar18musyst_v1"
 
-# basedir="v3.28_ft_test_Apr20_v1/"
+basedir="v3.28_ft_test_Apr30_v1/"
 # basedir="v3.28_ft_May3_94x_v1/"
 # basedir="v3.28_ft_test_May13_lumi137_v1/"
 # basedir="v3.28_ft_test_May13_lumi300_v1/"
-basedir="v3.28_ft_test_May13_lumi400_v1/"
+# basedir="v3.28_ft_test_May13_lumi400_v1/"
 
 # basedir="v3.28_ft_mar12ttwbb_v1/"
 # basedir="v3.28_ft_mar12mcfakeshybrid_v1//"
@@ -36,8 +36,8 @@ python make_cards.py ${basedir}
 # ../runLimits.py ${basedir}/card_tttt_srdisc_2018.txt -r srdisc ${extra}  --tagfit y2018_srdisc_exp | tee y2018_lims_srdisc_exp.txt
 ../runLimits.py ${basedir}/card_tttt_srdisc_run2.txt -r srdisc ${extra}  --tagfit run2_srdisc_exp | tee lims_srdisc_exp.txt
 ../runLimits.py ${basedir}/card_tttt_srdisc_run2.txt -r srdisc ${extra}  --unblinded --tagfit run2_srdisc_obs | tee lims_srdisc_obs.txt
-../runLimits.py ${basedir}/card_tttt_srcr_run2.txt -r srcr ${extra}  --tagfit run2_srcr_exp | tee lims_srcr_exp.txt
-../runLimits.py ${basedir}/card_tttt_srcr_run2.txt -r srcr ${extra}  --unblinded --tagfit run2_srcr_obs | tee lims_srcr_obs.txt
+# ../runLimits.py ${basedir}/card_tttt_srcr_run2.txt -r srcr ${extra}  --tagfit run2_srcr_exp | tee lims_srcr_exp.txt
+# ../runLimits.py ${basedir}/card_tttt_srcr_run2.txt -r srcr ${extra}  --unblinded --tagfit run2_srcr_obs | tee lims_srcr_obs.txt
 outname=nuisance_output.root
 
 # python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py -a -g ${outname} -f latex fitDiagnosticsrun2_srcr_exp.root | grep -v 'with the following' > nuisances_run2_srcr_exp.tex

@@ -98,7 +98,8 @@ if __name__ == "__main__":
 
     os.system("ic {}/pdfs/y2016_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
     os.system("ic {}/pdfs/y2016_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
-    os.system("ic {}/plots_mtfits/y2016_mu_noniso_mt_lin_postfit_mctemp.pdf".format(inputdir))
+    os.system("ic {}/plots_mtfits/y2016_el_iso_mt_lin_postfit_mctemp.pdf".format(inputdir))
+    os.system("ic {}/plots_mtfits/y2016_mu_iso_mt_lin_postfit_mctemp.pdf".format(inputdir))
     # os.system("ic {}/pdfs/y2017_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
     # os.system("ic {}/pdfs/y2017_mu_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))
     # os.system("ic {}/pdfs/y2018_el_1dfr_cone_LooseEMVA_IsoTrigs.pdf".format(inputdir))

@@ -157,6 +157,11 @@ if __name__ == "__main__":
     #     ["/EGamma/Run2018D-22Jan2019-v2/MINIAOD", "DataDoubleEGDv2"],
     #     ])]
 
+    extra_args = ""
+    tag = "v3.31_jec15"
+    tag_match = ""
+    year_sample_map = [("2018",data_2018)]
+
     # year_sample_map = [
     #         ("2016",[
     #         # ["/TTTT_hhat_0p0_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p0"],
@@ -216,7 +221,7 @@ if __name__ == "__main__":
                         files_per_output = split_func(dsname),
                         output_name = "output.root",
                         tag = tag,
-                        min_completion_fraction = 0.95 if skip_tail else 1.0,
+                        min_completion_fraction = 0.90 if skip_tail else 1.0,
                         condor_submit_params = {
                             # "sites":"T2_US_UCSD,UCSB",  # I/O is hella faster
                             "sites":"T2_US_UCSD",  # I/O is hella faster
