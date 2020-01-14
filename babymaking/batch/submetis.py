@@ -142,6 +142,7 @@ if __name__ == "__main__":
     #     ["/ST_tW_top_5f_NoFullyHadronicDecays_13TeV-powheg_TuneCUETP8M1/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "ST1"],
     #     ])]
 
+
     # extra_args = ""
     # tag = "v3.29" # 94x 2016
     # tag_match = ""
@@ -156,43 +157,40 @@ if __name__ == "__main__":
     # year_sample_map = [("2018",[
     #     ["/EGamma/Run2018D-22Jan2019-v2/MINIAOD", "DataDoubleEGDv2"],
     #     ])]
-
     extra_args = ""
     tag = "v3.31_jec15"
     tag_match = ""
     year_sample_map = [("2018",data_2018)]
 
-    # year_sample_map = [
-    #         ("2016",[
-    #         # ["/TTTT_hhat_0p0_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p0"],
-    #         # ["/TTTT_hhat_0p08_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p08"],
-    #         # ["/TTTT_hhat_0p12_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p12"],
-    #         # ["/TTTT_hhat_0p16_TuneCUETP8M2T4_PSweights_13TeV-madgraph-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3-v1/MINIAODSIM", "HHAT_0p16"],
-    #         ["/tttt-LOoblique/year_2016_0p0/MINIAOD" , "HHAT_0p0"],
-    #         ["/tttt-LOoblique/year_2016_0p08/MINIAOD", "HHAT_0p08"],
-    #         ["/tttt-LOoblique/year_2016_0p12/MINIAOD", "HHAT_0p12"],
-    #         ["/tttt-LOoblique/year_2016_0p16/MINIAOD", "HHAT_0p16"],
-    #             ]),
-    #         ("2017",[
-    #         ["/TTTT_hhat_0p0_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p0"],
-    #         ["/TTTT_hhat_0p08_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p08"],
-    #         ["/TTTT_hhat_0p12_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p12"],
-    #         ["/TTTT_hhat_0p16_TuneCP5_PSweights_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "HHAT_0p16"],
-    #             ]),
-    #         ("2018",[
-    #         ["/TTTT_hhat_0p0_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p0"],
-    #         ["/TTTT_hhat_0p08_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p08"],
-    #         ["/TTTT_hhat_0p12_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p12"],
-    #         ["/TTTT_hhat_0p16_TuneCP5_13TeV-madgraph-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "HHAT_0p16"],
-    #             ]),
-    #         ]
+    # extra_args = ""
+    # tag = "v3.31_testc"
+    # tag_match = ""
+    # year_sample_map = [("2018",[
+    #     ["/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v2/MINIAODSIM", "TTHtoNonBB"],
+    #     ["/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTWnlo"],
+    #     ["/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTZnlo"],
+    #     ])]
+
+    extra_args = "--skipos --ignorebadfiles"
+    tag = "v3.31_ttslv2"
+    tag_match = ""
+    year_sample_map = [
+            # ("2016",[
+            #     ["/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM", "TTSLtop"],
+            #     ["/TTJets_SingleLeptFromTbar_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv3-PUMoriond17_94X_mcRun2_asymptotic_v3_ext1-v2/MINIAODSIM", "TTSLtopbar"],
+            #     ]),
+            # ("2017",[
+            #     ["/TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTSLtop"],
+            #     ["/TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM", "TTSLtopbar"],
+            #     ]),
+            ("2018",[
+                ["/TTJets_SingleLeptFromT_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "TTSLtop"],
+                ["/TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM", "TTSLtopbar"],
+                ["/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM", "TTinclusive"],
+                ]),
+            ]
 
 
-
-
-
-    # # FIXME FIXME
-    # year_sample_map = [(y,sm[-1:]) for y,sm in year_sample_map]
 
     # Loop 'til we get dizzy
     for i in range(1000):
@@ -237,7 +235,7 @@ if __name__ == "__main__":
                         input_executable = "inputs/condor_executable_metis.sh",
                         tarfile = "inputs/package.tar.xz",
                         special_dir = "FTbabies/{}/".format(tag),
-                        recopy_inputs = True,
+                        recopy_inputs = False,
                 )
                 merge_task = LocalMergeTask(
                         input_filenames=task.get_outputs(),

@@ -405,6 +405,7 @@ def draw_limits(
     h_frame.GetXaxis().SetLabelSize(0.035)
     h_frame.GetXaxis().SetTitle(label_xaxis)
     h_frame.GetXaxis().SetTitleOffset(1.0)
+    h_frame.GetXaxis().SetLabelOffset(0.015)
     h_frame.GetXaxis().SetTitleSize(0.045)
     h_frame.GetYaxis().SetLabelSize(0.04)
     h_frame.GetYaxis().SetTitle(label_yaxis)
@@ -558,7 +559,7 @@ def draw_limits(
     x,y = xy_to_ndc(k*diag_x1+(1-k)*diag_x2,k*diag_y1+(1-k)*diag_y2)
     diagtex = r.TLatex(x,y,label_diag)
     diagtex.SetNDC()
-    diagtex.SetTextSize(0.03)
+    diagtex.SetTextSize(0.033)
     diagtex.SetTextAngle(angle)
     diagtex.SetTextAlign(20)
     diagtex.SetLineWidth(2)
@@ -595,7 +596,7 @@ def draw_limits(
         if "splitline" in label_mass: y_mass -= 0.04
         masstex = r.TLatex(0.18,y_mass-yshift, label_mass)
         masstex.SetNDC()
-        masstex.SetTextSize(0.03)
+        masstex.SetTextSize(0.033)
         masstex.SetLineWidth(2)
         masstex.SetTextFont(42)
         masstex.Draw("same")
@@ -612,8 +613,8 @@ def draw_limits(
             l1.SetHeader("{}    #scale[0.85]{{#splitline{{NNLO+NNLL}}{{exclusion}}}}".format(label_process))
         else:
             l1.SetHeader("{}  NNLO+NNLL exclusion".format(label_process))
-        l1.AddEntry(d_contours["obs"] , "Observed #pm 1 #sigma_{theory}", "l")
-        l1.AddEntry(d_contours["exp"] , "Expected #pm 1 and 2 #sigma_{experiment}", "l")
+        l1.AddEntry(d_contours["obs"] , "Observed #pm 1 s.d._{theory}", "l")
+        l1.AddEntry(d_contours["exp"] , "Expected #pm 1 and 2 s.d._{experiment}", "l")
     else:
         l1.SetHeader("{}  significance".format(label_process))
     l1.Draw("same")
@@ -729,13 +730,14 @@ if __name__ == "__main__":
     outdir = "scanplots_Jun28"
 
     dos = args.sig or False
-    # modstr = args.model or "t1tttt"
+    modstr = args.model or "t1tttt"
     # modstr = args.model or "t5tttt"
     # modstr = args.model or "t5ttcc"
-    modstr = args.model or "t5qqqqvvdm20"
+    # modstr = args.model or "t5qqqqvvdm20"
     # modstr = args.model or "t1ttbb"
     # modstr = args.model or "t6ttww"
     # modstr = args.model or "t6tthzbrh"
+    # modstr = args.model or "t5qqqqvv"
     os.system("mkdir -p {}".format(outdir))
 
     # dos = True
@@ -770,7 +772,7 @@ if __name__ == "__main__":
             diag_y2 = 1700-170,
             lumi = 137,
             label_mass = "",
-            label_diag = "m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
+            label_diag = "            m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
             label_xaxis = "m_{#tilde{g}} (GeV)",
             label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
             label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow t#bar{t}#tilde{#chi}^{0}_{1}        ",
@@ -794,7 +796,7 @@ if __name__ == "__main__":
             diag_y2 = 970-85,
             lumi = 137,
             label_mass = "m_{#tilde{#chi}^{0}_{1}} = 50 GeV",
-            label_diag = "m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
+            label_diag = "                 m_{#tilde{b}_{1}} - m_{#tilde{#chi}_{1}^{#pm}} = m_{W} + m_{b}",
             label_xaxis = "m_{#tilde{b}_{1}} (GeV)",
             label_yaxis = "m_{#tilde{#chi}_{1}^{#pm}} (GeV)",
             label_process = "pp #rightarrow #tilde{b}_{1}#bar{#tilde{b}}_{1}, #tilde{b}_{1}#rightarrow tW#tilde{#chi}^{0}_{1}      ",
@@ -817,8 +819,8 @@ if __name__ == "__main__":
             diag_x2 = 1600,
             diag_y2 = 1600,
             lumi = 137,
-            label_mass = "",
-            label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
+            label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = 0.5(m_{#tilde{g}} + m_{#tilde{#chi}^{0}_{1}})",
+            label_diag = "    m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
             label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
             label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow q#bar{q}'V#tilde{#chi}^{0}_{1}     ",
@@ -865,8 +867,8 @@ if __name__ == "__main__":
             diag_x2 = 1600,
             diag_y2 = 1600,
             lumi = 137,
-            label_mass = "",
-            label_diag = "m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
+            label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = 0.5(m_{#tilde{g}} + m_{#tilde{#chi}^{0}_{1}})",
+            label_diag = "    m_{#tilde{g}} = m_{#tilde{#chi}_{1}^{0}}",
             label_xaxis = "m_{#tilde{g}} (GeV)",
             label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
             label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow q#bar{q}'W#tilde{#chi}^{0}_{1}     ",
@@ -914,7 +916,7 @@ if __name__ == "__main__":
             diag_x2 = 350+900,
             diag_y2 = 200+900,
             lumi = 137,
-            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=0%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
+            label_mass = "#splitline{#bf{#it{#Beta}}(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=0%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
             label_yaxis = "m_{#tilde{t}_{1}} (GeV)",
@@ -939,7 +941,7 @@ if __name__ == "__main__":
             diag_x2 = 350+900,
             diag_y2 = 200+900,
             lumi = 137,
-            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=50%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
+            label_mass = "#splitline{#bf{#it{#Beta}}(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=50%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
             label_yaxis = "m_{#tilde{t}_{1}} (GeV)",
@@ -964,7 +966,7 @@ if __name__ == "__main__":
             diag_x2 = 300+900,
             diag_y2 = 300+900,
             lumi = 137,
-            label_mass = "#splitline{BR(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=100%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
+            label_mass = "#splitline{#bf{#it{#Beta}}(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=100%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
             label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
             label_yaxis = "m_{#tilde{t}_{1}} (GeV)",
@@ -1037,7 +1039,7 @@ if __name__ == "__main__":
             diag_y2 = 1700+300-170,
             lumi = 137,
             label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 5 GeV",
-            label_diag = "m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
+            label_diag = "    m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
             label_xaxis = "m_{#tilde{g}} (GeV)",
             label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
             label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow tb#tilde{#chi}^{#pm}_{1}        ",

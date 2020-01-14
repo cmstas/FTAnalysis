@@ -214,12 +214,20 @@ class babyMaker {
     int ss_sr;
 
     int extragenb;
+    int extragenc;
     int ngenjets;
     float genht;
     int ngenjets30;
     float genht30;
     bool passfilter;
     vector <int> extragenbmoms;
+    vector <int> extragencmoms;
+
+    bool hasgammatoll;
+    bool gammatollmomemu;
+    float gammatolldr;
+    LorentzVector gammatoll1;
+    LorentzVector gammatoll2;
 
     // for TTTT
     vector <int> bjet_type;

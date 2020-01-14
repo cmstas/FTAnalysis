@@ -104,14 +104,6 @@ labels["ft"] = {
         # "jetpt"           : [("sr","br"), "jetpt"],
 }
 
-do_paper_plots_only = True
-if do_paper_plots_only:
-    labels["ft"] = {
-            "ht"              : [("ttzcr","ttwcr","sr"),r"$H_\mathrm{T}$ (GeV)"],
-            "met"             : [("ttzcr","ttwcr","sr"), r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
-            "njets"           : [("ttzcr","ttwcr","sr"), r"$N_\mathrm{jets}$"],
-            "nbtags"          : [("ttzcr","ttwcr","sr"),r"$N_\mathrm{b}$"],
-            }
 
 def remove(rs1,rs2):
     return list(set(rs1)-set(rs2))
@@ -130,7 +122,7 @@ labels["ss"] = {
 
         "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "Region"],
         "category"   : [("sr",), r"HH,HL,LL,MLoffZ,MLonZ,LM"],
-        "mtmin"      : [ssregions_ll, r"$m_\mathrm{T}^\mathrm{min}$"],
+        "mtmin"      : [ssregions_ll, r"$m_\mathrm{T}^\mathrm{min}$ (GeV)"],
         "ht"         : [ssregions_ll, r"$H_\mathrm{T}$ (GeV)"],
         "njets"      : [ssregions, r"$N_\mathrm{jets}$"],
         "met"        : [ssregions_ll, r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
@@ -172,6 +164,24 @@ labels["ss"] = {
         "mu_l3eta"   : [remove(ssregions,("lm",)), r"unsorted $\eta $(lep3, $\mu$)"],
 
 }
+
+do_paper_plots_only = False
+if do_paper_plots_only:
+    labels["ft"] = {
+            "ht"              : [("ttzcr","ttwcr","sr"),r"$H_\mathrm{T}$ (GeV)"],
+            "met"             : [("ttzcr","ttwcr","sr"), r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
+            "njets"           : [("ttzcr","ttwcr","sr"), r"$N_\mathrm{jets}$"],
+            "nbtags"          : [("ttzcr","ttwcr","sr"),r"$N_\mathrm{b}$"],
+            }
+    labels["ss"] = {
+            # "TOTAL"      : [("SRHH","SRHL","SRLL","SRML","SRLM"), "Region"],
+            "ht"         : [("br",), r"$H_\mathrm{T}$ (GeV)"],
+            "met"        : [("br",), r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)"],
+            "mtmin"      : [("br",), r"$m_\mathrm{T}^\mathrm{min}$ (GeV)"],
+            "njets"      : [("br",), r"$N_\mathrm{jets}$"],
+            "nbtags"     : [("br",), r"$N_\mathrm{b}$"],
+            "charge"     : [("br",), r"SS charge"],
+        }
 
 d_label_colors = {}
 d_label_colors["ft"] = {
@@ -530,6 +540,25 @@ def worker(info):
             # mpl_legend_params["framealpha"] = 0.4
             # mpl_legend_params["ncol"] = 1
             # mpl_legend_params["labelspacing"] = 0.10
+
+        if analysis == "ss":
+
+                if var in ["ht","met","mtmin"] and region in ["br"]:
+                    data.poissonify()
+                    mpl_legend_params["fontsize"] = 12
+                    ratio_range = [0.,2.]
+                    ylabel = "Events / {} GeV".format(int(binwidth))
+
+                if var in ["njets","nbtags"] and region in ["br"]:
+                    data.poissonify()
+                    mpl_legend_params["fontsize"] = 12
+                    ratio_range = [0.,3.]
+
+                if var in ["charge"] and region in ["br"]:
+                    data.poissonify()
+                    mpl_legend_params["fontsize"] = 12
+                    ratio_range = [0.,2.]
+
 
         for do_log in [False,True]:
             fname_tmp = str(fname)

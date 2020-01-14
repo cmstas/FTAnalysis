@@ -197,7 +197,8 @@ def make_yukawa_plot(scaninfo):
             [
                 "Observed upper limit",
                 "Observed cross section",
-                "Predicted cross section,\nPhys. Rev. D 95 (2017) 053004",
+                # "Predicted cross section,\nPhys. Rev. D 95 (2017) 053004",
+                "Predicted cross section",
                 ],
             handler_map={OneSideHatchObject: OneSideHatchObjectHandler()},
             labelspacing=0.6,
@@ -210,7 +211,7 @@ def make_yukawa_plot(scaninfo):
     ax.set_ylim([0.,55.])
     ax.set_ylabel(r"$\sigma_{t\bar{t}t\bar{t}}$ (fb)")
     ax.set_title("")
-    ax.set_xlabel(r"$|y_\mathrm{t}/y_\mathrm{t}^\mathrm{SM}|$")
+    ax.set_xlabel(r"$|y_\mathrm{t}\ /\ y_\mathrm{t}^\mathrm{SM}|$")
     fig.set_tight_layout(True)
     fname = "plots/yukawa_run2.pdf"
     fname_png = fname.replace(".pdf",".png")
@@ -359,7 +360,7 @@ def make_higgs_plot(basedir,globber,do_scalar=True,do_sum=False):
     # pobs = ax.plot(mhs, exp*0., linestyle="-", markersize=5.,marker="o",color="k",solid_capstyle="butt")
     pobs = ax.plot(mhs, obs, linestyle="-", markersize=5.,marker="o",color="k",solid_capstyle="butt")
     ptheory_2hdm = ax.plot(mhs, theory, linestyle="-", marker="",color="r",solid_capstyle="butt")
-    ptheory_dm = ax.plot(theory_dm.massmed, theory_dm.xsec_totsm*1e3, linestyle="-", marker="",color="b",solid_capstyle="butt")
+    ptheory_dm = ax.plot(theory_dm.massmed, theory_dm.xsec_totsm*1e3, linestyle="-.", marker="",color="b",solid_capstyle="butt")
     # ptheorysmooth = ax.plot(mhs, savgol_filter(theory,5,2), linestyle="-", marker="",color="b",solid_capstyle="butt")
     legend = ax.legend(
             [
@@ -372,13 +373,17 @@ def make_higgs_plot(basedir,globber,do_scalar=True,do_sum=False):
                 "Observed",
                 r"Median expected, $\pm$1 and $\pm$2 $\sigma_\mathrm{experiment}$",
                 # r"$\sigma^\mathrm{%s}_\mathrm{theory}$" % ("pseudoscalar" if which == "a" else "scalar"),
-                r"$\sigma^\mathrm{%s}_\mathrm{theory}$ (2HDM, $\tan\beta$=1)" % ("pseudoscalar" if which == "a" else "scalar"),
-                r"$\sigma^\mathrm{%s}_\mathrm{theory}$ (DM, $m_\chi$=600 GeV, $g_\mathrm{SM}$=$g_\mathrm{DM}$=1)" % ("pseudoscalar" if which == "a" else "scalar"),
+                r"$\sigma^\mathrm{%s}_\mathrm{theory}$ (2HDM, $\tan\beta=$1)" % ("pseudoscalar" if which == "a" else "scalar"),
+                r"$\sigma^\mathrm{%s}_\mathrm{theory}$ (DM, $m_\chi=$600 GeV, $g_\mathrm{SM}=g_\mathrm{DM}=$1)" % ("pseudoscalar" if which == "a" else "scalar"),
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
             labelspacing=0.4,
             title="95% CL upper limits",
             fontsize=12,
+            handletextpad=0.7,
+            borderpad=0.35,
+            loc="upper center",
+            mode="expand",
             )
     legend.get_title().set_fontsize(legend.get_texts()[0].get_fontsize())
     ax.yaxis.set_minor_locator(MultipleLocator(5.))
@@ -390,15 +395,15 @@ def make_higgs_plot(basedir,globber,do_scalar=True,do_sum=False):
     fname = "scalar.png"
     if which == "h":
         fname = "plots/ft_higgs_scan_limit_run2.pdf"
-        ax.set_ylabel(r"$\sigma$(pp$\rightarrow$ (t$\bar{\mathrm{t}}$,tW,tq)+H) $\times$ BR(H$\rightarrow$ t$\bar{\mathrm{t}}$) (fb)")
+        ax.set_ylabel(r"$\sigma$(pp$\rightarrow$ (t$\bar{\mathregular{t}}$,tW,tq) + H) $\times$ BR(H$\rightarrow$ t$\bar{\mathregular{t}}$) (fb)")
         ax.set_xlabel(r"$m_\mathrm{H}$ (GeV)")
     elif which == "a":
         fname = "plots/ft_higgs_ps_scan_limit_run2.pdf"
-        ax.set_ylabel(r"$\sigma$(pp$\rightarrow$ (t$\bar{\mathrm{t}}$,tW,tq)+A) $\times$ BR(A$\rightarrow$ t$\bar{\mathrm{t}}$) (fb)")
+        ax.set_ylabel(r"$\sigma$(pp$\rightarrow$ (t$\bar{\mathregular{t}}$,tW,tq) + A) $\times$ BR(A$\rightarrow$ t$\bar{\mathregular{t}}$) (fb)")
         ax.set_xlabel(r"$m_\mathrm{A}$ (GeV)")
     elif which == "b":
         fname = "plots/ft_higgs_both_scan_limit_run2.pdf"
-        ax.set_ylabel(r"$\sigma$(pp$\rightarrow$ (t$\bar{\mathrm{t}}$,tW,tq)+H/A) $\times$ BR(H/A$\rightarrow$ t$\bar{\mathrm{t}}$) (fb)")
+        ax.set_ylabel(r"$\sigma$(pp$\rightarrow$ (t$\bar{\mathregular{t}}$,tW,tq) + H/A) $\times$ BR(H/A$\rightarrow$ t$\bar{\mathregular{t}}$) (fb)")
         ax.set_xlabel(r"$m_\mathrm{H/A}$ (GeV)")
     fig.set_tight_layout(True)
     fname_png = fname.replace(".pdf",".png")
@@ -555,16 +560,40 @@ def make_rpv_plot(biglog,globber,outdir="scanplots",do_tbs=True):
                 (ptheory[0],),
                 ],
             [
-                "95% CL Observed",
-                r"95% CL Expected $\pm$ 1 and $\pm$ 2 $\sigma_\mathrm{experiment}$",
-                r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$)",
+                "Observed",
+                r"Median expected, $\pm$1 and 2 s.d.${}_\mathrm{experiment}$",
+                # r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$)",
+                (r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$, $\tilde{\mathrm{g}}\rightarrow \mathrm{q}\mathrm{q}\bar{\mathrm{q}}\bar{\mathrm{q}}+\mathrm{e}/\mu/\tau$), NNLO+NNLL"
+                    if do_tbs else
+                    r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$, $\tilde{\mathrm{g}}\rightarrow\mathrm{t}\mathrm{b}\mathrm{s}$), NNLO+NNLL"
+                    ),
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
-            labelspacing=0.6,
+            labelspacing=0.5,
+            title="95% CL upper limits",
             loc="upper center",
+            # mode="expand",
+            fontsize=12,
+            handlelength=1.6,
+            # framealpha=0.95,
             )
+    legend.get_title().set_fontsize(legend.get_texts()[0].get_fontsize())
 
     ax.set_title("")
+
+    if do_tbs:
+        ax.set_ylim([0.,4e3])
+    else:
+        ax.set_ylim([0.,100])
+        pass
+
+            # handler_map={DoubleBandObject: DoubleBandObjectHandler()},
+            # labelspacing=0.4,
+            # title="95% CL upper limits",
+            # fontsize=12,
+            # handletextpad=0.7,
+            # borderpad=0.35,
+            # loc="upper center",
 
     # fpath = os.path.join("/home/users/namin/2018/fourtop/all/FTAnalysis/analysis/limits/arial.ttf")
     # prop = mfm.FontProperties(fname=fpath)
@@ -577,7 +606,8 @@ def make_rpv_plot(biglog,globber,outdir="scanplots",do_tbs=True):
         fname = "{}/rpv_t1tbs_run2.pdf".format(outdir)
     else:
         fname = "{}/rpv_t1qqqql_run2.pdf".format(outdir)
-    ax.set_ylabel(r"$\sigma$ (fb)")
+    # ax.set_ylabel(r"$\sigma$ (fb)")
+    ax.set_ylabel(r"cross section (fb)")
     ax.set_xlabel(r"$\mathrm{m}_\tilde{\mathrm{g}}$ (GeV)")
     fig.set_tight_layout(True)
     fname_png = fname.replace(".pdf",".png")
@@ -632,7 +662,7 @@ if __name__ == "__main__":
     # # new Higgs xsecs (May6) -- CWR/paper for four top
     # make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_scalar=True)
     # make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_scalar=False)
-    # make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_sum=True)
+    # # # make_higgs_plot(basedir="test_ft_updated2018_run2_19Mar5/v3.28_ft_test_Apr30_higgs_v1/",globber="card_higgs*_run2.log",do_sum=True)
     # make_yukawa_plot(scaninfo="ft_updated2018_run2_19Mar5/v3.28_ft_mar18nominal_v1/log_yukawa_scan.txt")
 
     # from plotSMS import parse_logs

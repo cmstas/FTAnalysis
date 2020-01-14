@@ -482,11 +482,19 @@ void babyMaker::MakeBabyNtuple(const char* output_name, bool isFastsim, int iSig
 
   BabyTree->Branch("extragenb"       , &extragenb       );
   BabyTree->Branch("extragenbmoms"       , &extragenbmoms       );
+  BabyTree->Branch("extragenc"       , &extragenc       );
+  BabyTree->Branch("extragencmoms"       , &extragencmoms       );
   BabyTree->Branch("ngenjets"       , &ngenjets       );
   BabyTree->Branch("genht"       , &genht       );
   BabyTree->Branch("ngenjets30"       , &ngenjets30       );
   BabyTree->Branch("genht30"       , &genht30       );
   BabyTree->Branch("passfilter"       , &passfilter       );
+
+  BabyTree->Branch("hasgammatoll"       , &hasgammatoll       );
+  BabyTree->Branch("gammatollmomemu"       , &gammatollmomemu       );
+  BabyTree->Branch("gammatolldr"       , &gammatolldr       );
+  BabyTree->Branch("gammatoll1"       , &gammatoll1       );
+  BabyTree->Branch("gammatoll2"       , &gammatoll2       );
 
   // for tttt
   BabyTree->Branch("bjet_type"       , &bjet_type       );
@@ -1139,6 +1147,13 @@ void babyMaker::InitBabyNtuple(){
     lep4_isTrigSafev1 = 0;
     extragenb = 0;
     extragenbmoms.clear();
+    hasgammatoll = false;
+    gammatollmomemu = false;
+    gammatoll1 = LorentzVector(0,0,0,0);
+    gammatoll2 = LorentzVector(0,0,0,0);
+    gammatolldr = -1.;
+    extragenc = 0;
+    extragencmoms.clear();
     ngenjets = 0;
     genht = 0;
     ngenjets30 = 0;
@@ -1750,7 +1765,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep1_mc_motherid                                              = (lep1_mc3idx < 0) ? 0 : tas::genps_id_mother().at(lep1_mc3idx);
     lep2_mc_motherid                                              = (lep2_mc3idx < 0) ? 0 : tas::genps_id_mother().at(lep2_mc3idx);
     lep1_isPrompt                                           = (lep1_mc3idx < 0) ? 0 : tas::genps_isPromptFinalState().at(lep1_mc3idx);
-    lep1_isStat3                                            = (lep1_mc3idx < 0) ? 0 : tas::genps_isMostlyLikePythia6Status3().at(lep1_mc3idx);
+    // lep1_isStat3                                            = (lep1_mc3idx < 0) ? 0 : tas::genps_isMostlyLikePythia6Status3().at(lep1_mc3idx);
     lep1_isDirectPrompt                                     = (lep1_mc3idx < 0) ? 0 : tas::genps_isDirectPromptTauDecayProductFinalState().at(lep1_mc3idx);
     lep1_genps_isHardProcess                                = (lep1_mc3idx < 0) ? 0 : tas::genps_isHardProcess().at(lep1_mc3idx);
     lep1_genps_fromHardProcessFinalState                    = (lep1_mc3idx < 0) ? 0 : tas::genps_fromHardProcessFinalState().at(lep1_mc3idx);
@@ -1763,7 +1778,7 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
     lep2_motherID                                           = lep2_parentage.first;
     lep2_isPrompt                                           = (lep2_mc3idx < 0) ? 0 : tas::genps_isPromptFinalState().at(lep2_mc3idx);
     lep2_isDirectPrompt                                     = (lep2_mc3idx < 0) ? 0 : tas::genps_isDirectPromptTauDecayProductFinalState().at(lep2_mc3idx);
-    lep2_isStat3                                            = (lep2_mc3idx < 0) ? 0 : tas::genps_isMostlyLikePythia6Status3().at(lep2_mc3idx);
+    // lep2_isStat3                                            = (lep2_mc3idx < 0) ? 0 : tas::genps_isMostlyLikePythia6Status3().at(lep2_mc3idx);
     lep2_genps_isHardProcess                                = (lep2_mc3idx < 0) ? 0 : tas::genps_isHardProcess().at(lep2_mc3idx);
     lep2_genps_fromHardProcessFinalState                    = (lep2_mc3idx < 0) ? 0 : tas::genps_fromHardProcessFinalState().at(lep2_mc3idx);
     lep2_genps_fromHardProcessDecayed                       = (lep2_mc3idx < 0) ? 0 : tas::genps_fromHardProcessDecayed().at(lep2_mc3idx);
@@ -1881,7 +1896,48 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
   }
 
+  if (!is_real_data) {
+      // compute how many gen c-jets there are other than from top
+      // (i.e., match status 1 gen c-quarks to genjets and count)
+      extragenc = 0;
+      std::vector<int> cidxs; // check for duplicates so we don't double count/match
+      extragencmoms.clear();
+      for (unsigned int ij = 0; ij < tas::genjets_p4NoMuNoNu().size(); ij++){
+          auto jet = tas::genjets_p4NoMuNoNu()[ij];
+          auto pt = jet.pt();
+          bool foundC = false;
+          float mindR = 0.25;
+          int bestidx = -1;
 
+          for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++){
+              auto genp4 = tas::genps_p4()[igen];
+              int stat = tas::genps_status()[igen];
+              int id = tas::genps_id()[igen];
+              int mid = tas::genps_id_mother()[igen];
+              if (stat == 1111) continue;
+              // if (stat != 1) continue; // <-- literally nothing useful is status 1, so ignoring
+              if (abs(id) != 4) continue;
+              if (!idIsCharm(abs(id))) continue;
+              if (abs(mid) == 6) continue;
+              if (abs(mid) == 22) continue;
+              if (abs(mid) == 23) continue;
+              if (abs(mid) == 24) continue;
+              if (abs(mid) == 25) continue;
+
+              if (std::find(cidxs.begin(), cidxs.end(), igen) != cidxs.end()) continue;
+              float dR = ROOT::Math::VectorUtil::DeltaR(genp4,jet);
+              if (dR < mindR) {
+                  foundC = true;
+                  bestidx = igen;
+              }
+          }
+          if (foundC) {
+              extragenc += 1;
+              cidxs.push_back(bestidx);
+              extragencmoms.push_back(tas::genps_id_mother()[bestidx]);
+          }
+      }
+  }
 
 
 
@@ -2965,6 +3021,46 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
       }
   }
 
+  // FIXME
+  hasgammatoll = false;
+  if (!is_real_data && (filename.find("TTJets_") != std::string::npos)) {
+      // /hadoop/cms/store/group/snt/run2_mc2018//TTJets_SingleLeptFromTbar_TuneCP5_13TeV-madgraphMLM-pythia8_RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1_MINIAODSIM_CMS4_V10-02-04/merged_ntuple_31.root
+      vector<LorentzVector> cands_p4;
+      vector<int> cands_id;
+      int mtype = -1;
+      for (unsigned int igen = 0; igen < tas::genps_p4().size(); igen++) {
+          auto genp4 = tas::genps_p4()[igen];
+          int id = tas::genps_id()[igen];
+          int mid = tas::genps_id_mother()[igen];
+          int gmid = tas::genps_id_simplegrandma()[igen];
+          bool lep_is_emu = (abs(id) == 11) or (abs(id) == 13);
+          bool mom_is_emu = (abs(mid) == 11) or (abs(mid) == 13);
+          bool mom_is_pho = (abs(mid) == 22);
+          bool gma_is_emu = (abs(gmid) == 11) or (abs(gmid) == 13);
+          if (not lep_is_emu) continue;
+          if (mom_is_emu or (mom_is_pho and gma_is_emu)) {
+              if (mom_is_emu) mtype = 1;
+              cands_p4.push_back(genp4);
+              cands_id.push_back(id);
+          }
+      }
+      if (cands_id.size() == 2) {
+          if (cands_id[0] == -cands_id[1]) {
+              hasgammatoll = true;
+              if (mtype == 1) gammatollmomemu = true;
+              gammatoll1 = cands_p4[0];
+              gammatoll2 = cands_p4[1];
+              gammatolldr = ROOT::Math::VectorUtil::DeltaR(gammatoll1,gammatoll2);
+              std::cout << std::endl;
+              std::cout <<  " hasgammatoll: " << hasgammatoll <<  " gammatolldr: " << gammatolldr <<  std::endl;
+              std::cout << std::endl;
+          }
+      }
+  }
+
+
+
+
 
   // Compute some variables to make it easier for draw statements and skimming
   skim = (njets_unc_dn>=2 or njets_JER_dn>=2 or njets>=2 or njets_unc_up>=2 or njets_JER_up>=2) and \
@@ -3083,9 +3179,9 @@ csErr_t babyMaker::ProcessBaby(string filename_in, FactorizedJetCorrector* jetCo
   lep3_phi = lep3_p4.phi();
 
   if (!is_real_data) {
-      weight_lepsf1 = leptonScaleFactor(year, lep1_id, lep1_coneCorrPt, lep1_eta, ht);
-      weight_lepsf2 = leptonScaleFactor(year, lep2_id, lep2_coneCorrPt, lep2_eta, ht);
-      weight_lepsf3 = ((lep3_passes_id && lep3_coneCorrPt > 20.) ? leptonScaleFactor(year, lep3_id, lep3_pt, lep3_eta, ht) : 1);
+      weight_lepsf1 = leptonScaleFactor(year, lep1_id, lep1_coneCorrPt, lep1_eta, ht, FTANA);
+      weight_lepsf2 = leptonScaleFactor(year, lep2_id, lep2_coneCorrPt, lep2_eta, ht, FTANA);
+      weight_lepsf3 = ((lep3_passes_id && lep3_coneCorrPt > 20.) ? leptonScaleFactor(year, lep3_id, lep3_pt, lep3_eta, ht, FTANA) : 1);
       weight_lepsf = weight_lepsf1 * weight_lepsf2 * weight_lepsf3;
       weight_triggersf = 1.; // FIXME
       // weight_triggersf = triggerScaleFactor(year, lep1_id, lep2_id, lep1_pt, lep2_pt, lep1_eta, lep2_eta, ht);

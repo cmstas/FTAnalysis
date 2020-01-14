@@ -196,12 +196,13 @@ def make_miplot(globber,outdir="plots",do_met=True):
                 ],
             [
                 "Observed",
-                r"Expected $\pm$ 1 and $\pm$ 2 $\sigma_\mathrm{experiment}$",
+                r"Median expected, $\pm$1 and 2 s.d.${}_\mathrm{experiment}$",
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
             labelspacing=0.6,
             loc="upper center",
-            title="Model-independent 95% CL upper limits",
+            title="95% CL upper limits",
+            # mode="expand",
             )
     legend.get_title().set_fontsize(legend.get_texts()[0].get_fontsize())
 
