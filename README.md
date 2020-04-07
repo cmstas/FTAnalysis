@@ -8,10 +8,11 @@ Standard disclaimer
 > places, buildings, and products is intended or should be inferred.
 
 ## How to take over the country
-### Prepare the campaign
+### Prepare the campaign ("installation")
 ```bash
 # winners use git
 git clone https://github.com/cmstas/FTAnalysis
+cd FTAnalysis
 # winners use bash (but mainly python)
 # execute from this directory and only this directory,
 # every time you want to work in this repository
@@ -23,12 +24,12 @@ source setup.sh
 cd babymaking/batch/
 ```
 
-### [Count the votes](analysis/yields/)
+### [Count the votes](analysis/yields/) ("yields")
 ```bash
 cd analysis/yields/
 ```
 
-### [Show we are the best](analysis/limits/)
+### [Show we are the best](analysis/limits/) ("limits")
 ```bash
 cd analysis/limits/
 ```
