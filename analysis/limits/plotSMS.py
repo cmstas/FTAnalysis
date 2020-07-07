@@ -385,8 +385,8 @@ def draw_limits(
     c1 = r.TCanvas("c1", "", 800, 800)
     c1.cd()
     padt = r.TPad("p_tex", "p_tex", 0.0, 0.0, 1.0, 1.0);
-    padt.SetTopMargin(0.1)
-    padt.SetBottomMargin(0.1)
+    padt.SetTopMargin(0.09)
+    padt.SetBottomMargin(0.11)
     padt.SetRightMargin(0.17)
     padt.SetLeftMargin(0.15)
     padt.Draw()
@@ -402,15 +402,27 @@ def draw_limits(
     h_frame.Draw()
 
     # Since h_frame is the one with the x and y axes, set these properties here
-    h_frame.GetXaxis().SetLabelSize(0.035)
-    h_frame.GetXaxis().SetTitle(label_xaxis)
-    h_frame.GetXaxis().SetTitleOffset(1.0)
+
+    # h_frame.GetXaxis().SetLabelSize(0.035)
+    # h_frame.GetXaxis().SetTitleSize(0.045)
+    # h_frame.GetXaxis().SetLabelOffset(0.015)
+    # h_frame.GetXaxis().SetTitleOffset(1.0)
+
+    h_frame.GetXaxis().SetLabelSize(0.039)
+    h_frame.GetXaxis().SetTitleSize(0.040)
     h_frame.GetXaxis().SetLabelOffset(0.015)
-    h_frame.GetXaxis().SetTitleSize(0.045)
+    h_frame.GetXaxis().SetTitleOffset(1.25)
+
+    h_frame.GetXaxis().SetTitle(label_xaxis)
+
     h_frame.GetYaxis().SetLabelSize(0.04)
     h_frame.GetYaxis().SetTitle(label_yaxis)
     h_frame.GetYaxis().SetTitleOffset(1.6)
     h_frame.GetYaxis().SetTitleSize(0.045)
+
+    if "t6tthz" in outname:
+        h_frame.GetXaxis().SetLabelOffset(0.015)
+        h_frame.GetXaxis().SetNdivisions(505)
 
     # Now draw the main color 2d hist (xsec UL), and since it's the one with the z-axis,
     # set z-axis properties on it
@@ -568,14 +580,14 @@ def draw_limits(
     diagtex.Draw("same")
 
     # CMS text, energy/lumi
-    cmstex = r.TLatex(0.575,0.91, "{} fb^{{-1}} (13 TeV)".format(lumi) )
+    cmstex = r.TLatex(0.575,1.0-padt.GetTopMargin()+0.01, "{} fb^{{-1}} (13 TeV)".format(lumi) )
     cmstex.SetNDC()
     cmstex.SetTextSize(0.04)
     cmstex.SetLineWidth(2)
     cmstex.SetTextFont(42)
-    cmstexbold = r.TLatex(0.16,0.91, "CMS" )
+    cmstexbold = r.TLatex(0.155,1.0-padt.GetTopMargin()+0.01, "CMS" )
     cmstexbold.SetNDC()
-    cmstexbold.SetTextSize(0.05)
+    cmstexbold.SetTextSize(0.055)
     cmstexbold.SetLineWidth(2)
     cmstexbold.SetTextFont(61)
     # cmstexprel = r.TLatex(0.28,0.91, "Preliminary" )
@@ -602,7 +614,7 @@ def draw_limits(
         masstex.Draw("same")
 
     # Draw legend at top
-    l1 = r.TLegend(0.15, 0.70-yshift, 0.83, 0.90)
+    l1 = r.TLegend(0.15, 0.70-yshift, 0.83, 1.0-padt.GetTopMargin())
     l1.SetTextFont(42)
     l1.SetTextSize(0.036)
     l1.SetShadowColor(r.kWhite)
@@ -613,8 +625,10 @@ def draw_limits(
             l1.SetHeader("{}    #scale[0.85]{{#splitline{{NNLO+NNLL}}{{exclusion}}}}".format(label_process))
         else:
             l1.SetHeader("{}  NNLO+NNLL exclusion".format(label_process))
-        l1.AddEntry(d_contours["obs"] , "Observed #pm 1 s.d._{theory}", "l")
-        l1.AddEntry(d_contours["exp"] , "Expected #pm 1 and 2 s.d._{experiment}", "l")
+        # l1.AddEntry(d_contours["obs"] , "Observed #pm 1 s.d._{theory}", "l")
+        # l1.AddEntry(d_contours["exp"] , "Expected #pm 1 and 2 s.d._{experiment}", "l")
+        l1.AddEntry(d_contours["obs"] , "Observed #pm 1 s.d._{#kern[0.4]{t}heory}", "l")
+        l1.AddEntry(d_contours["exp"] , "Expected #pm 1 and 2 s.d._{#lower[-0.13]{#kern[0.3]{e}xperiment}}", "l")
     else:
         l1.SetHeader("{}  significance".format(label_process))
     l1.Draw("same")
@@ -730,12 +744,13 @@ if __name__ == "__main__":
     outdir = "scanplots_Jun28"
 
     dos = args.sig or False
-    modstr = args.model or "t1tttt"
+    # modstr = args.model or "t1tttt"
+    # modstr = args.model or "t6tthzbrz"
     # modstr = args.model or "t5tttt"
     # modstr = args.model or "t5ttcc"
     # modstr = args.model or "t5qqqqvvdm20"
     # modstr = args.model or "t1ttbb"
-    # modstr = args.model or "t6ttww"
+    modstr = args.model or "t6ttww"
     # modstr = args.model or "t6tthzbrh"
     # modstr = args.model or "t5qqqqvv"
     os.system("mkdir -p {}".format(outdir))
@@ -772,7 +787,7 @@ if __name__ == "__main__":
             diag_y2 = 1700-170,
             lumi = 137,
             label_mass = "",
-            label_diag = "            m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
+            label_diag = "            m_{#tilde{g}} - m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
             label_xaxis = "m_{#tilde{g}} (GeV)",
             label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
             label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow t#bar{t}#tilde{#chi}^{0}_{1}        ",
@@ -968,7 +983,7 @@ if __name__ == "__main__":
             lumi = 137,
             label_mass = "#splitline{#bf{#it{#Beta}}(#tilde{t}_{2}#rightarrow#tilde{t}_{1} Z)=100%}{m_{#tilde{t}_{1}}-m_{#tilde{#chi}_{1}^{0}}=175 GeV}",
             label_diag = "",
-            label_xaxis = "m_{#tilde{t}_{2}} (GeV)",
+            label_xaxis = "#lower[-0.08]{m_{#tilde{t}_{2}}} (GeV)",
             label_yaxis = "m_{#tilde{t}_{1}} (GeV)",
             label_process = "pp #rightarrow #tilde{t}_{2}#bar{#tilde{t}}_{2}, #tilde{t}_{2}#rightarrow #tilde{t}_{1}Z(H), #tilde{t}_{1}#rightarrow t#tilde{#chi}_{1}^{0} ",
             blinded=False,
@@ -1039,7 +1054,7 @@ if __name__ == "__main__":
             diag_y2 = 1700+300-170,
             lumi = 137,
             label_mass = "m_{#tilde{#chi}^{#pm}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 5 GeV",
-            label_diag = "    m_{#tilde{g}}-m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
+            label_diag = "    m_{#tilde{g}} - m_{#tilde{#chi}_{1}^{0}} = 2 #upoint (m_{W} + m_{b})",
             label_xaxis = "m_{#tilde{g}} (GeV)",
             label_yaxis = "m_{#tilde{#chi}_{1}^{0}} (GeV)",
             label_process = "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g}#rightarrow tb#tilde{#chi}^{#pm}_{1}        ",

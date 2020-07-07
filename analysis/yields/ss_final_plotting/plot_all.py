@@ -14,6 +14,9 @@ from matplottery.plotter import plot_stack
 from matplottery.utils import Hist1D, MET_LATEX, binomial_obs_z
 import matplotlib
 
+# SIGH
+matplotlib.rcParams['xtick.direction'] = 'in'
+matplotlib.rcParams['ytick.direction'] = 'in'
 
 labels = {}
 
@@ -205,12 +208,12 @@ d_label_colors["ss"] = {
         # "fakes_mc" : (r"MC fakes", [0.85, 0.85, 0.85]),
         "flips" : (r"Charge misid.", [0.4, 0.4, 0.4]),
         "rares" : (r"Rare", [1.0, 0.4, 1.0]),
-        "tth"   : (r"$t\bar{t}H$", [0.4, 0.4, 0.6]),
+        "tth"   : (r"$\mathregular{t\bar{t}H}}$", [0.4, 0.4, 0.6]),
         "wz"  : (r"WZ" , [1.0,0.8,0.0]),
         "ww"  : (r"WW" , [1.0,0.6,0.0]),
-        "ttw"   : (r"$t\bar{t}W$", [0.0, 0.4, 0.0]),
-        "ttz"   : (r"$t\bar{t}Z$", [0.4, 0.8, 0.4]),
-        "xg"    : (r"$X\gamma$" , [0.4, 0.0, 0.8]),
+        "ttw"   : (r"$\mathregular{t\bar{t}W}$", [0.0, 0.4, 0.0]),
+        "ttz"   : (r"$\mathregular{t\bar{t}Z}$", [0.4, 0.8, 0.4]),
+        "xg"    : (r"$\mathregular{X\gamma}$" , [0.4, 0.0, 0.8]),
         }
 
 d_flat_systematics = { }
@@ -451,7 +454,8 @@ def worker(info):
 
         if var in ["charge"] and region in ["br"]:
             data.poissonify()
-            mpl_legend_params["fontsize"] = 12
+            mpl_legend_params["fontsize"] = 13
+            mpl_legend_params["framealpha"] = 0.0
             ratio_range = [0.,2.]
 
             def extend(x):

@@ -22,6 +22,11 @@ import os
 import matplotlib.pyplot as plt
 
 
+# SIGH
+import matplotlib
+matplotlib.rcParams['xtick.direction'] = 'in'
+matplotlib.rcParams['ytick.direction'] = 'in'
+
 XSEC_TTTT = 11.97
 GREEN = (0.,0.8,0.)
 YELLOW = (1.,0.8,0.)
@@ -53,7 +58,7 @@ def set_defaults():
     # pdf.use14corefonts : False
 
 def add_cms_info(ax, typ="", lumi="137", xtype=0.12):
-    ax.text(0.0, 1.01,"CMS", horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, weight="bold", size="x-large")
+    ax.text(0.0, 1.01,"CMS", horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, weight="bold", size=20)
     ax.text(xtype, 1.01,typ, horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, style="italic", size="x-large")
     ax.text(0.99, 1.01,"%s fb${}^\mathregular{-1}$ (13 TeV)" % (lumi), horizontalalignment='right', verticalalignment='bottom', transform = ax.transAxes, size="x-large")
 
@@ -201,7 +206,8 @@ def make_miplot(globber,outdir="plots",do_met=True):
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
             labelspacing=0.6,
             loc="upper center",
-            title="95% CL upper limits",
+            framealpha=0.0,
+            # title="95% CL upper limits",
             # mode="expand",
             )
     legend.get_title().set_fontsize(legend.get_texts()[0].get_fontsize())
@@ -211,17 +217,18 @@ def make_miplot(globber,outdir="plots",do_met=True):
     xtext = np.array(ax.get_xlim()).mean()
     ytext = np.array(ax.get_ylim())[-1]*0.65
 
-    ax.set_ylabel(r"$\sigma A \epsilon$ limit at 95% CL (fb)")
+    ax.set_ylabel(r"95% CL upper limit on $\sigma A \epsilon$ (fb)", horizontalalignment="right", y=1.)
     if do_met:
         fname = "{}/milimits_met.pdf".format(outdir)
-        ax.set_xlabel(r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)")
+        ax.set_xlabel(r"$p_\mathrm{T}^{\mathrm{miss}}$ (GeV)", horizontalalignment="right", x=1.)
         ax.text(xtext,ytext,"$H_\mathrm{T}$ > 300 GeV",fontsize=13,horizontalalignment="center",verticalalignment="center",color="k")
     else:
         fname = "{}/milimits_ht.pdf".format(outdir)
-        ax.set_xlabel(r"$H_\mathrm{T}$ (GeV)")
+        ax.set_xlabel(r"$H_\mathrm{T}$ (GeV)", horizontalalignment="right", x=1.)
         ax.text(xtext,ytext,"$p_\mathrm{T}^{\mathrm{miss}}$ < 300 GeV",fontsize=13,horizontalalignment="center",verticalalignment="center",color="k")
     ax.yaxis.set_minor_locator(MultipleLocator(0.02))
     ax.xaxis.set_minor_locator(MultipleLocator(100))
+    ax.tick_params(axis="x",pad=8.0)
 
     # ax.xaxis.set_major_formatter(FuncFormatter(lambda x,y:">"+str(int(x))))
 

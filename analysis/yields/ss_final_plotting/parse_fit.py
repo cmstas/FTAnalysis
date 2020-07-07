@@ -15,6 +15,10 @@ import matplotlib
 # ../../../common/matplottery/matplottery/utils.py
 import pandas as pd
 
+# SIGH
+matplotlib.rcParams['xtick.direction'] = 'in'
+matplotlib.rcParams['ytick.direction'] = 'in'
+
 np.set_printoptions(linewidth=180)
 
 ch_name_map = {
@@ -77,18 +81,32 @@ for proc in d_hists["shapes_prefit"].values()[0].keys():
 d_label_colors = {}
 d_label_colors["ss"] = {
         "fakes" : (r"Nonprompt lep.", [0.85, 0.85, 0.85]),
-        "ttw"   : (r"$t\bar{t}W$", [0.0, 0.4, 0.0]),
+        "ttw"   : (r"$\mathregular{t\bar{t}W}$", [0.0, 0.4, 0.0]),
         "wz"  : (r"WZ" , [1.0,0.8,0.0]),
-        "xg"    : (r"$X\gamma$" , [0.4, 0.0, 0.8]),
+        "xg"    : (r"$\mathregular{X\gamma}$" , [0.4, 0.0, 0.8]),
         "ww"  : (r"WW" , [1.0,0.6,0.0]),
         "flips" : (r"Charge misid.", [0.4, 0.4, 0.4]),
         "rares" : (r"Rare", [1.0, 0.4, 1.0]),
-        "tth"   : (r"$t\bar{t}H$", [0.4, 0.4, 0.6]),
-        "ttz"   : (r"$t\bar{t}Z$", [0.4, 0.8, 0.4]),
+        "tth"   : (r"$\mathregular{t\bar{t}H}}$", [0.4, 0.4, 0.6]),
+        "ttz"   : (r"$\mathregular{t\bar{t}Z}$", [0.4, 0.8, 0.4]),
         }
 
+def cull_bins(h, first=None,last=None):
+    h = Hist1D(h)
+    h._counts = h._counts[first:last]
+    h._errors = h._errors[first:last]
+    if h._errors_up is not None:
+        h._errors_up = h._errors_up[first:last]
+        h._errors_down = h._errors_down[first:last]
+    if last:
+        last += 1
+    if first:
+        first -= 1
+    h._edges = h._edges[first:last]
+    return h
+
 def make_plots(
-        regions=["srhh","srhl","srll","srml","srlm"],
+        regions=["srhh","srhl","srll","srmlonz","srmloffz","srlm"],
         outputdir="plots/",
         lumi="137",
         typ="shapes_fit_b",
@@ -96,6 +114,7 @@ def make_plots(
         procs=['fakes', 'ttw', 'wz', 'xg', 'ww', 'flips', 'rares', 'tth', 'ttz'][::-1],
         year="run2",
         ):
+
 
     if year == 2016:
         lumi = "35.9"
@@ -108,6 +127,13 @@ def make_plots(
     # lumi = "61.3"
 
     for region in regions:
+        rawregion = region[:]
+
+        onz = False
+        if region.startswith("srml"):
+            if region.endswith("onz"): onz = True
+            region = "srml"
+
         hists = d_hists[typ][region]
         data = hists["data"]
         totbg = hists["total_background"]
@@ -167,13 +193,19 @@ def make_plots(
         mpl_legend_params = {}
 
         ratio_range = [0.,3.]
+
         mpl_legend_params["fontsize"] = 10
         mpl_legend_params["framealpha"] = 0.0
         mpl_legend_params["ncol"] = 3
         mpl_legend_params["labelspacing"] = 0.10
         mpl_legend_params["columnspacing"] = 1.05
-        mpl_legend_params["bbox_to_anchor"] = (1.0,0.93)
+        mpl_legend_params["bbox_to_anchor"] = (1.0,0.97)
         mpl_legend_params["loc"] = "upper right"
+
+        if region == "srml":
+            mpl_legend_params["columnspacing"] = 1.15
+            mpl_legend_params["bbox_to_anchor"] = (0.97,0.95)
+
         xticks = range(1,70)
 
         mpl_xtick_params = dict()
@@ -187,7 +219,15 @@ def make_plots(
         def ax_main_callback(ax,title=title):
             ax.set_ylim([0.05,ax.get_ylim()[1]*50.0])
             ax.set_yscale("log", nonposy='clip')
-            ax.text(0.5,0.97,title,fontsize=13,horizontalalignment="center",verticalalignment="top", transform=ax.transAxes)
+            # ax.text(0.5,0.97,title,fontsize=13,horizontalalignment="center",verticalalignment="top", transform=ax.transAxes)
+            xshift = 0.
+            if region == "srml":
+                xshift = 0.035
+                if onz:
+                    title = "on-Z ML"
+                else:
+                    title = "off-Z ML"
+            ax.text(0.05+xshift,0.85,title,fontsize=14,horizontalalignment="center",verticalalignment="top", transform=ax.transAxes)
         title = ""
 
         # # specific plots tuned by hand
@@ -209,12 +249,30 @@ def make_plots(
         #             ax.set_ylim([0.05,ax.get_ylim()[1]*4.0])
         #             ax.set_yscale("log", nonposy='clip'),
 
+        if region == "srml":
+
+            if onz:
+                bgs = [cull_bins(bg, first=-23) for bg in bgs]
+                data = cull_bins(data, first=-23)
+                sig = cull_bins(sig, first=-23)
+                totbg = cull_bins(totbg, first=-23)
+            else:
+                for bg in bgs: cull_bins(bg, last=21)
+                bgs = [cull_bins(bg, last=21) for bg in bgs]
+                data = cull_bins(data, last=21)
+                sig = cull_bins(sig, last=21)
+                totbg = cull_bins(totbg, last=21)
+
+            print len(sig._counts)
+            print len(sig._errors)
+            print len(sig._edges)
+
 
         if year in [2016,2017,2018]:
             ystr = "y{}".format(year)
         else:
             ystr = "run2"
-        fname = "{}/{}_{}_TOTAL_{}.pdf".format(outputdir,ystr,region.upper(),which)
+        fname = "{}/{}_{}_TOTAL_{}.pdf".format(outputdir,ystr,rawregion.upper(),which)
         plot_stack(bgs=bgs, data=data, title=title.replace("fit","-fit"), xlabel="SR", ylabel="Events", filename=fname,
                    # cms_type = "Preliminary",
                    cms_type = "",
@@ -242,11 +300,15 @@ def make_plots(
         os.system("ic {}".format(fname))
         table_info = write_table(data,bgs,outname=fname.replace(".pdf",".txt"))
 
-def parse_yields(d_in):
+def parse_yields(d_in, extra=""):
     d_yields = {}
     for key in d_in:
         if key in ["pulls"]: continue
         h1 = d_in[key]
+        if extra == "onz":
+            h1 = cull_bins(h1, first=-23)
+        if extra == "offz":
+            h1 = cull_bins(h1, last=21)
         vals,errs = h1.counts, h1.errors
         d_yields[key] = {}
         d_yields[key]["central"] = vals
@@ -264,26 +326,32 @@ def print_table(d_yields, regions="srcr",precision=2,blinded=False):
         procs = ["ttw","ttz","tth","wz","ww","xg","rares","flips","fakes","total_background","data"]
     srnames = ["SR{}".format(i) for i in range(1,100)]
 
-    # print
     buff = ""
-    for ibin in range(nbins):
+    for ibin in range(nbins+1):
         if ibin == 0:
-            # print "&".join(map(lambda x: "{0:12s}".format(x),colnames)),
             buff += "&".join(map(lambda x: "{0:12s}".format(x),colnames))
             buff += " "
-            # print r"\\"
             buff += "\\\\ \n"
-            # print r"\hline\hline"
             buff += "\\hline \\hline \n"
-            # print
             buff += "\n"
-        tojoin = [srnames[ibin]]
+        # if ibin == nbins:
+        #     continue
+        if ibin == nbins:
+            tojoin = ["Total"]
+        else:
+            tojoin = [srnames[ibin]]
         for proc in procs:
-            # cent = d_yields[proc]["central"][ibin]
-            cent = max(d_yields[proc]["central"][ibin],0.)
-            err = d_yields[proc]["error"][ibin]
+
+            if ibin == nbins:
+                cent = max(sum(d_yields[proc]["central"]), 0.)
+                err = sum([x**2. for x in d_yields[proc]["error"]])**0.5
+            else:
+                cent = max(d_yields[proc]["central"][ibin],0.)
+                err = d_yields[proc]["error"][ibin]
+
+
             if "data" in proc:
-                if ibin in [0,1] or not blinded:
+                if not blinded:
                     tojoin.append("{0:.0f}".format(cent))
                 else:
                     tojoin.append("-".format(cent))
@@ -292,15 +360,12 @@ def print_table(d_yields, regions="srcr",precision=2,blinded=False):
                     tojoin.append("-")
                 else:
                     tojoin.append("{}$\\pm${}".format(*GetRoundedValues(cent,min(err,cent))))
-                    # tojoin.append("{0:5.2f}$\\pm${1:5.2f}".format(cent,err))
-        # print " & ".join(tojoin),
         buff += " & ".join(tojoin) + " "
-        # print r"\\"
+        if ibin == nbins-1:
+            buff += "\\hline "
         buff += "\\\\ \n"
-    # print
     buff += "\n"
     return buff
-    # print buff
 
 # from https://github.com/cmstas/MT2Analysis/blob/master/scripts/makeSRYieldsTable.py#L119-L131
 def GetRoundedValues(rate, unc, unc_sig_fig=2, prec_cap=-2):
@@ -379,6 +444,17 @@ if __name__ == "__main__":
     #     fh.write(buff)
     # fh.close()
 
+    # make_plots(typ="shapes_prefit", regions=["srmloffz","srmlonz"])
+    # sys.exit()
+
+    # d_yields = parse_yields(d_hists["shapes_prefit"]["srml"], extra="onz")
+    # buff = print_table(d_yields,regions="srml")
+    # print(
+    #         buff
+    # )
+    # # print_table(d_yields,regions="srmloffz")
+
+    """
     fh = open("table_dump.txt","w")
     for x in ["shapes_prefit"]:
         make_plots(typ=x)
@@ -387,4 +463,33 @@ if __name__ == "__main__":
             buff = print_table(d_yields,regions=region)
             fh.write("\n\n----- {} {} -----\n\n".format(region.upper(),x))
             fh.write(buff)
+
+    fh.write("\n\n----- {} {} -----\n\n".format("SRMLONZ","shapes_prefit"))
+    d_yields = parse_yields(d_hists["shapes_prefit"]["srml"], extra="onz")
+    fh.write(print_table(d_yields,regions="srml"))
+
+    fh.write("\n\n----- {} {} -----\n\n".format("SRMLOFFZ","shapes_prefit"))
+    d_yields = parse_yields(d_hists["shapes_prefit"]["srml"], extra="offz")
+    fh.write(print_table(d_yields,regions="srml"))
+
+    fh.close()
+    """
+
+    from totalregions import get_total_yields
+    fh = open("table_dump_total.txt","w")
+    for x in ["shapes_prefit"]:
+        for region in ch_name_map.values():
+            d_yields = get_total_yields(region)
+            buff = print_table(d_yields,regions=region)
+            fh.write("\n\n----- {} {} -----\n\n".format(region.upper(),x))
+            fh.write(buff)
+
+    fh.write("\n\n----- {} {} -----\n\n".format("SRMLONZ","shapes_prefit"))
+    d_yields = get_total_yields("srml",extra="onz")
+    fh.write(print_table(d_yields,regions="srml"))
+
+    fh.write("\n\n----- {} {} -----\n\n".format("SRMLOFFZ","shapes_prefit"))
+    d_yields = get_total_yields("srml",extra="offz")
+    fh.write(print_table(d_yields,regions="srml"))
+
     fh.close()

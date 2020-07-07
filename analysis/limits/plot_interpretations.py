@@ -23,6 +23,11 @@ import os
 import matplotlib.pyplot as plt
 
 
+# SIGH
+import matplotlib
+matplotlib.rcParams['xtick.direction'] = 'in'
+matplotlib.rcParams['ytick.direction'] = 'in'
+
 XSEC_TTTT = 11.97
 GREEN = (0.,0.8,0.)
 YELLOW = (1.,0.8,0.)
@@ -54,7 +59,7 @@ def set_defaults():
     # pdf.use14corefonts : False
 
 def add_cms_info(ax, typ="", lumi="137", xtype=0.12):
-    ax.text(0.0, 1.01,"CMS", horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, weight="bold", size="x-large")
+    ax.text(0.0, 1.01,"CMS", horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, weight="bold", size=20)
     ax.text(xtype, 1.01,typ, horizontalalignment='left', verticalalignment='bottom', transform = ax.transAxes, style="italic", size="x-large")
     ax.text(0.99, 1.01,"%s fb${}^\mathregular{-1}$ (13 TeV)" % (lumi), horizontalalignment='right', verticalalignment='bottom', transform = ax.transAxes, size="x-large")
 
@@ -564,17 +569,18 @@ def make_rpv_plot(biglog,globber,outdir="scanplots",do_tbs=True):
                 r"Median expected, $\pm$1 and 2 s.d.${}_\mathrm{experiment}$",
                 # r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$)",
                 (r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$, $\tilde{\mathrm{g}}\rightarrow \mathrm{q}\mathrm{q}\bar{\mathrm{q}}\bar{\mathrm{q}}+\mathrm{e}/\mu/\tau$), NNLO+NNLL"
-                    if do_tbs else
+                    if not do_tbs else
                     r"$\sigma_\mathrm{{theory}}$ (pp$\rightarrow\tilde{\mathrm{g}}\tilde{\mathrm{g}}$, $\tilde{\mathrm{g}}\rightarrow\mathrm{t}\mathrm{b}\mathrm{s}$), NNLO+NNLL"
                     ),
                 ],
             handler_map={DoubleBandObject: DoubleBandObjectHandler()},
             labelspacing=0.5,
-            title="95% CL upper limits",
+            # title="95% CL upper limits",
             loc="upper center",
             # mode="expand",
             fontsize=12,
             handlelength=1.6,
+            framealpha=0.0,
             # framealpha=0.95,
             )
     legend.get_title().set_fontsize(legend.get_texts()[0].get_fontsize())
@@ -607,8 +613,9 @@ def make_rpv_plot(biglog,globber,outdir="scanplots",do_tbs=True):
     else:
         fname = "{}/rpv_t1qqqql_run2.pdf".format(outdir)
     # ax.set_ylabel(r"$\sigma$ (fb)")
-    ax.set_ylabel(r"cross section (fb)")
-    ax.set_xlabel(r"$\mathrm{m}_\tilde{\mathrm{g}}$ (GeV)")
+    ax.set_ylabel(r"95% CL upper limit on cross section (fb)", horizontalalignment="right", y=1.)
+    ax.set_xlabel(r"$\mathrm{m}_\tilde{\mathrm{g}}$ (GeV)", horizontalalignment="right", x=1.)
+    ax.tick_params(axis="x",pad=8.0)
     fig.set_tight_layout(True)
     fname_png = fname.replace(".pdf",".png")
     fig.savefig(fname)
